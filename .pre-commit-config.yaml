@@ -1,0 +1,20 @@
+repos:
+- repo: https://github.com/gruntwork-io/pre-commit
+  rev: v0.1.30
+  hooks:
+    - id: tofu-fmt
+    - id: tofu-validate
+      require_serial: true
+      args:
+        - --hook-config=--retry-once-with-cleanup=true
+        - --tf-init-args=-backend=false
+        - --tf-init-args=-lockfile=readonly
+        - --args=-json
+        - --args=-no-color
+      exclude: '\.terraform/|\.terragrunt-cache/'
+
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v6.0.0  # Use the ref you want to point at
+  hooks:
+    -   id: trailing-whitespace
+    -   id: detect-private-key
