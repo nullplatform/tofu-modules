@@ -1,0 +1,24 @@
+hostedZoneName: "${hosted_zone_name}"
+
+nullPlatform:
+  accountSlug: "${account_slug}"
+
+gcp:
+  enabled: ${gcp_enabled}
+  serviceAccountKey: |-
+    ${gcp_service_account_key}
+
+azure:
+  enabled: ${azure_enabled}
+  subscriptionID: "${azure_subscription_id}"
+  resourceGroupName: "${azure_resource_group_name}"
+  clientID: "${azure_client_id}"
+  secretKey: "${azure_secret_key}"   # ej: "client-secret"
+  clientSecret: "${azure_client_secret}"
+  tenantID: "${azure_tenant_id}"
+  hostedZoneName: "${azure_hosted_zone_name}"
+
+cloudflare:
+  enabled: ${cloudflare_enabled}
+  secretName: "${cloudflare_secret_name}"
+  apiToken: "${cloudflare_token}"

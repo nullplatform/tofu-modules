@@ -1,0 +1,25 @@
+alertmanager:
+  persistence:
+    enabled: false
+server:
+  persistentVolume:
+    enabled: false
+extraScrapeConfigs: |
+  # Métricas de Null Platform desde nodos K8s
+  - job_name: null-platform-metrics
+    kubernetes_sd_configs:
+      - role: node
+    metrics_path: /metrics
+    scheme: http
+    relabel_configs:
+      #  Change kubelet port (10250) to null-platform  (2021)
+      - source_labels: [ __address__ ]
+        regex: '(.*):10250'
+        target_label: __address__
+        replacement: '$1:${nullplatform_port}'
+      # Mapear labels de nodos K8s
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      # Añadir nombre del nodo
+      - source_labels: [ __meta_kubernetes_node_name ]
+        target_label: node
