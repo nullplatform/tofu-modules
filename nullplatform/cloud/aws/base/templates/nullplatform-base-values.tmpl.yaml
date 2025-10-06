@@ -1,0 +1,14 @@
+global:
+  provider: "eks"
+  installGatewayV2Crd: false
+logging:
+  enabled: true
+  prometheus:
+    enabled: true
+    exporterPort: 2021
+metricsServer:
+  enabled: true
+controlPlane:
+  enabled: true
+nullplatform:
+  apiKey: "${api_key}"
