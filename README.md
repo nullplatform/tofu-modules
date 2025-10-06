@@ -4,13 +4,13 @@
     </a>
     <br>
     <br>
-    # Nullplatform Main Terraform Modules
+    # Nullplatform Tofu Modules
     <br>
 </h2>
 
 
 
-This repository contains the **shared Terraform modules** used by Nullplatform to standardize and reuse infrastructure across all projects.
+This repository contains the **shared Tofu modules** used by Nullplatform to standardize and reuse infrastructure across all projects.
 
 ---
 
@@ -70,7 +70,7 @@ curl https://cli.nullplatform.com/install.sh | sh
 
 ## 🚀 How to use the modules
 
-1. In your Tofu/Terraform project, add the dependency to the desired module:
+1. In your Tofu project, add the dependency to the desired module:
 
    ```hcl
    module "my_module" {
@@ -98,7 +98,7 @@ curl https://cli.nullplatform.com/install.sh | sh
 
 ## 📄 Module documentation
 
-Each module inside `modules/` should include its own `README.md` describing:
+Each module folder  should include its own `README.md` describing:
 
 - Purpose of the module.
 - Variables (`variables.tf`) with descriptions, types, and default values.
