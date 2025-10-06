@@ -18,7 +18,7 @@ This repository contains the **shared Tofu modules** used by Nullplatform to sta
 
 ```
 .
-├── infrastructue/                  # All reusable Terraform modules
+├── infrastructue/                  # All reusable Tofu modules
 │   ├── aws/
 │   │   |──acm/
 │   │   |
