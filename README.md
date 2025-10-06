@@ -18,14 +18,34 @@ This repository contains the **shared Terraform modules** used by Nullplatform t
 
 ```
 .
-├── modules/                  # All reusable Terraform modules
-│   ├── moduleA/
-│   │   ├── main.tf
-│   │   ├── variables.tf
-│   │   ├── outputs.tf
-│   │   └── README.md
-│   ├── moduleB/
-│   └── ...
+├── infrastructue/                  # All reusable Terraform modules
+│   ├── aws/
+│   │   |──acm/
+│   │   |
+|   |   |── alb-controller/
+│   │
+│   ├── azure/
+|   |    |──vpc/
+│   |── gcp/
+|   |    |──cont
+|   |──commons
+         |── cert-manager/
+|        |── external-dns/
+|        |── istio/
+|
+| ──nullplatform/
+|   ├── aws/
+│   │   |──cloud
+│   │
+│   ├── azure/
+|   |    |──cloud/
+│   |── gcp/
+|   |    |──cloud/
+|   |──commons/
+|         |── cert-manager/
+|         |── external-dns/
+|         |── istio/
+|
 ├── .github/
 │   └── workflows/            # CI/CD workflows, validations, etc.
 ├── .gitignore
@@ -42,7 +62,7 @@ This repository contains the **shared Terraform modules** used by Nullplatform t
    module "my_module" {
      source = "git@github.com:nullplatform/main-terraform-modules.git//modules/moduleA"
      # or: source = "github.com/nullplatform/main-terraform-modules//modules/moduleA?ref=vX.Y.Z"
-  
+
      # Module parameters:
      var1 = "value1"
      var2 = "value2"
@@ -118,6 +138,6 @@ If you want to add or modify a module:
 
 ## 🔗 Useful resources
 
-- [Terraform Docs](https://www.terraform.io/docs)  
-- [terraform-docs](https://github.com/terraform-docs/terraform-docs)  
+- [Terraform Docs](https://www.terraform.io/docs)
+- [terraform-docs](https://github.com/terraform-docs/terraform-docs)
 - Nullplatform internal manuals (if available)
