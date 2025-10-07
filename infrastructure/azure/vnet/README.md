@@ -1,3 +1,22 @@
+# Modules: Vnet
+
+This module creates a Virtual network and subnets in Azure.
+
+Usage:
+
+
+```
+module "vnet" {
+  source              = "git@github.com:nullplatform/tofu-modules.git//infrastructure/azure/vnet?ref=v0.0.1"
+  address_space       = var.address_space
+  name                = var.vnet_name
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  subnets             = var.subnets_definition
+}
+```
+
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
