@@ -1,7 +1,3 @@
-data "aws_vpc" "vpc" {
-  id = var.vpc_id
-}
-
 resource "random_id" "bucket_suffix" {
   byte_length = 8
 }
