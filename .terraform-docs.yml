@@ -1,0 +1,34 @@
+# .terraform-docs.yml
+formatter: "markdown table"
+output:
+  file: README.md
+  mode: inject
+
+# Secciones a mostrar (en orden). Quitá/añadí según prefieras.
+sections:
+  show:
+    - header
+    - requirements
+    - providers
+    - modules
+    - resources
+    - inputs
+    - outputs
+
+# Orden de tablas (inputs/outputs) por nombre ascendente
+sort:
+  enabled: true
+  by: name
+  order: asc
+
+# Ajustes de render
+settings:
+  anchor: true         # anclas en títulos de tablas
+  default: true        # mostrar valores por defecto
+  required: true       # marcar si un input es requerido
+  sensitive: true      # marcar sensibles
+  type: true           # mostrar tipo de variable
+  escape: true         # escapar caracteres especiales
+  indent: 2
+  html: true
+  hide-empty: true     # oculta secciones vacías

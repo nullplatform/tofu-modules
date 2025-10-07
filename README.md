@@ -152,3 +152,7 @@ If you want to add or modify a module:
 
 
 
+
+<!-- BEGIN_TF_DOCS -->
+
+<!-- END_TF_DOCS -->
