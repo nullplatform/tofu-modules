@@ -1,4 +1,4 @@
-# Módulo: VPC
+# Modules: VPC
 
 This module creates a VPC with public and private subnets and a NAT gateway.
 
