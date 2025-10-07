@@ -8,5 +8,7 @@ variable "nullplatform_accounts" {
 }
 
 variable "np_api_key" {
+  type        = string
+  description = "The API token must be at the organization level"
 
 }
