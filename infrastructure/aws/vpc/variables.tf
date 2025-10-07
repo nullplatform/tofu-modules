@@ -1,5 +1,5 @@
 variable "vpc" {
-  description = "Configuración de la VPC"
+  description = "VPC configuration settings"
   type = object({
     cidr_block      = string
     azs             = list(string)

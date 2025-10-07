@@ -34,13 +34,13 @@ module "vpc" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_account"></a> [account](#input\_account) | The account name | `string` | n/a | yes |
 | <a name="input_organization"></a> [organization](#input\_organization) | A organization name | `string` | n/a | yes |
-| <a name="input_vpc"></a> [vpc](#input\_vpc) | Configuración de la VPC | <pre>object({<br/>    cidr_block      = string<br/>    azs             = list(string)<br/>    private_subnets = list(string)<br/>    public_subnets  = list(string)<br/>  })</pre> | n/a | yes |
+| <a name="input_vpc"></a> [vpc](#input\_vpc) | VPC configuration settings | <pre>object({<br/>    cidr_block      = string<br/>    azs             = list(string)<br/>    private_subnets = list(string)<br/>    public_subnets  = list(string)<br/>  })</pre> | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_private_subnets"></a> [private\_subnets](#output\_private\_subnets) | Subnets privadas |
-| <a name="output_public_subnets"></a> [public\_subnets](#output\_public\_subnets) | Subnets públicas |
-| <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | ID de la VPC |
+| <a name="output_private_subnets"></a> [private\_subnets](#output\_private\_subnets) | Private subnets |
+| <a name="output_public_subnets"></a> [public\_subnets](#output\_public\_subnets) | Public Subnets |
+| <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | VPC ID |
 <!-- END_TF_DOCS -->
