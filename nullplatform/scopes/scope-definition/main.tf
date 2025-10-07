@@ -1,17 +1,38 @@
 ################################################################################
+# Step 1: Fetch Templates
+################################################################################
+
+locals {
+ git_login = var.git_user != null && var.git_password !=null ? "${var.git_user}:${var.git_password}@" : var.git_user != null ? "${var.git_user}@" : ""
+ full_git_repo_url = var.git_provider == "github" ? "https://${local.git_login}raw.githubusercontent.com/${var.git_repo}/refs/heads/${var.git_ref}" : null
+}
+
+# Fetch service specification template
+data "http" "service_spec_template" {
+  url = "${local.full_git_repo_url}/${var.git_scope_path}/specs/service-spec.json${var.use_tpl_files ? ".tpl" : ""}"
+}
+# Fetch action specification templates
+data "http" "action_templates" {
+  for_each = toset(local.available_actions)
+  url      = "${local.full_git_repo_url}/${var.git_scope_path}/specs/actions/${each.key}.json${var.use_tpl_files ? ".tpl" : ""}"
+}
+
+
+
+################################################################################
 # Step 2: Process and Create Service Specification
 ################################################################################
 
 locals {
-  # Process the template by replacing the template variables
-  # replace is done because some old templates contain gomplate placeholders
-  service_spec_rendered = var.use_tpl_files ? replace(
-    data.http.service_spec_template.response_body,
-    "/\"{{\\s+env.Getenv\\s+\".*\"\\s+}}\"/",
-    "\"\""
-  ) : data.http.service_spec_template.response_body
-  service_spec_parsed = jsondecode(local.service_spec_rendered)
-  available_actions = local.service_spec_parsed.available_actions
+    # Process the template by replacing the template variables
+    # replace is done because some old templates contain gomplate placeholders
+    service_spec_rendered = var.use_tpl_files ? replace(
+        data.http.service_spec_template.response_body,
+        "/\"{{\\s+env.Getenv\\s+\".*\"\\s+}}\"/",
+        "\"\""
+    ) : data.http.service_spec_template.response_body
+    service_spec_parsed = jsondecode(local.service_spec_rendered)
+    available_actions = local.service_spec_parsed.available_actions
 }
 
 # Create service specification
@@ -68,9 +89,9 @@ locals {
   action_specs_parsed = {
     for name in local.available_actions :
     name => jsondecode(var.use_tpl_files ? replace(
-      data.http.action_templates[name].response_body,
-      "/\"{{\\s+env.Getenv\\s+\".*\"\\s+}}\"/",
-      "\"\""
+        data.http.action_templates[name].response_body,
+        "/\"{{\\s+env.Getenv\\s+\".*\"\\s+}}\"/",
+        "\"\""
     ) : data.http.action_templates[name].response_body)
   }
 }

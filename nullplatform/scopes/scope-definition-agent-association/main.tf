@@ -2,7 +2,7 @@ resource "nullplatform_notification_channel" "channel_from_template" {
   nrn    = local.merged_config.nrn
   type   = "agent"
   source = local.merged_config.channel_sources
-
+  
 
   configuration {
     dynamic "agent" {
@@ -14,13 +14,13 @@ resource "nullplatform_notification_channel" "channel_from_template" {
           data = {
             cmdline = join(" ", compact([
               local.merged_config.specification.agent_command.data.cmdline,
-                local.merged_config.workflow_override_path != null ? "--overrides-path=${local.merged_config.workflow_override_path}" : ""
+              local.merged_config.workflow_override_path != null ? "--overrides-path=${local.merged_config.workflow_override_path}" : ""
             ]))
             arguments = jsonencode(try(local.merged_config.specification.agent_command.data.arguments, []))
             environment = jsonencode(try(local.merged_config.specification.agent_command.data.environment, {}))
           }
         }
-
+      
         selector = local.merged_config.agent_tags
       }
     }

@@ -1,5 +1,5 @@
 resource "nullplatform_api_key" "nullplatform-agent-api-key" {
-  name = "NULLPLATFORM-BASE-API-KEY"
+  name = "NULLPLATFORM-${upper(var.destination)}-API-KEY"
 
   grants {
     nrn       = replace(var.nrn, ":namespace=.*$", "")
