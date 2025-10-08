@@ -1,35 +1,56 @@
-resource "nullplatform_notification_channel" "channel_from_template" {
-  nrn    = local.merged_config.nrn
-  type   = "agent"
-  source = local.merged_config.channel_sources
+################################################################################
+# Notification Channel Resource
+################################################################################
 
+# Create notification channel with agent configuration and optional overrides
+resource "nullplatform_notification_channel" "from_template" {
+  nrn    = var.nrn
+  type   = local.notification_channel_def.type
+  source = local.notification_channel_def.source
 
   configuration {
+    # Only configure agent block when notification channel type is "agent"
     dynamic "agent" {
-      for_each = [1]
+      for_each = local.notification_channel_def.type == "agent" ? [local.notification_channel_def.configuration] : []
       content {
-        api_key = local.merged_config.agent_api_key
+        api_key = agent.value.api_key
+
         command {
-          type = local.merged_config.specification.agent_command.type
-          data = {
-            cmdline = join(" ", compact([
-              local.merged_config.specification.agent_command.data.cmdline,
-                local.merged_config.workflow_override_path != null ? "--overrides-path=${local.merged_config.workflow_override_path}" : ""
-            ]))
-            arguments = jsonencode(try(local.merged_config.specification.agent_command.data.arguments, []))
-            environment = jsonencode(try(local.merged_config.specification.agent_command.data.environment, {}))
-          }
+          type = agent.value.command.type
+
+          # Merge command data with conditional cmdline override flag injection
+          data = merge(
+            {
+              for k, v in agent.value.command.data :
+              k => (
+              k == "environment"
+              ? jsonencode({
+              NP_ACTION_CONTEXT = "'$${NOTIFICATION_CONTEXT}'"
+            })
+              : (k == "cmdline" && var.enabled_override
+              ? "${tostring(v)} ${local.overrides_flag}"
+              : (can(tostring(v)) ? tostring(v) : jsonencode(v))
+            )
+            )
+              if k != "args"
+            },
+            # Normalize args field to ensure consistent string format
+            {
+              args = trimspace(
+                try(
+                  join(" ", [for a in lookup(agent.value.command.data, "args", []) : tostring(a)]),
+                  try(tostring(lookup(agent.value.command.data, "args", "")), "")
+                )
+              )
+            }
+          )
         }
 
-        selector = local.merged_config.agent_tags
+        selector = var.tags_selectors
       }
     }
   }
 
-  filters = jsonencode({
-    "$or" = [
-      {"service.specification.slug" = {"$eq": local.merged_config.slug }},
-      {"arguments.scope_provider" = {"$eq": local.merged_config.scope_provider_id }}
-    ]
-  })
+  # Preserve existing filters if defined in template
+  filters = can(local.notification_channel_def.filters) ? jsonencode(local.notification_channel_def.filters) : null
 }

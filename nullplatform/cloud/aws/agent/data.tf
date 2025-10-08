@@ -1,9 +1,28 @@
-# Fetch service specification template
-data "http" "service_spec_template" {
-  url = "${local.full_git_repo_url}/${var.git_scope_path}/specs/service-spec.json${var.use_tpl_files ? ".tpl" : ""}"
+################################################################################
+# Notification Channel Template Fetching
+################################################################################
+
+# Fetch notification channel template from GitHub repository
+data "http" "notification_channel_template" {
+  url = "${var.github_repo_url}/raw/${var.github_ref}/${var.service_path}/specs/notification-channel.json.tpl"
 }
-# Fetch action specification templates
-data "http" "action_templates" {
-  for_each = toset(local.available_actions)
-  url      = "${local.full_git_repo_url}/${var.git_scope_path}/specs/actions/${each.key}.json${var.use_tpl_files ? ".tpl" : ""}"
+
+################################################################################
+# Notification Channel Processing
+################################################################################
+
+# Process notification channel template with service and API context
+data "external" "notification_channel" {
+  program = ["sh", "-c", <<-EOT
+    processed_json=$(echo '${data.http.notification_channel_template.response_body}' | \
+    NRN='${var.nrn}' \
+    NP_API_KEY='${nullplatform_api_key.nullplatform-agent-api-key.api_key}' \
+    REPO_PATH='${var.repo_path}' \
+    SERVICE_PATH='${var.service_path}' \
+    SERVICE_SLUG='${nullplatform_service_specification.from_template.slug}' \
+    SERVICE_SPECIFICATION_ID='${nullplatform_service_specification.from_template.id}' \
+    gomplate)
+    echo "{\"json\":\"$(echo "$processed_json" | sed 's/"/\\"/g' | tr -d '\n')\"}"
+  EOT
+  ]
 }

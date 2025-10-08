@@ -1,60 +1,102 @@
+################################################################################
+# Required Variables
+################################################################################
+
+variable "cluster_name" {
+  description = "Name of the EKS cluster where the Nullplatform agent will be deployed"
+  type        = string
+}
+
+variable "nrn" {
+  description = "Nullplatform Resource Name - Unique identifier for Nullplatform resources"
+  type        = string
+}
+
+variable "np_api_key" {
+  description = "API key for authenticating with the Nullplatform API"
+  type        = string
+  sensitive   = true
+}
+
+variable "aws_iam_openid_connect_provider_arn" {
+  description = "ARN of the AWS IAM OIDC provider for EKS service account authentication"
+  type        = string
+}
+
+variable "tags_selectors" {
+  description = "Map of tags used to select and filter channels and agents"
+  type        = map(string)
+}
+
+################################################################################
+# Agent Configuration
+################################################################################
+
 variable "nullplatform-agent-helm-version" {
-  description = "Helm chart version for the Nullplatform agent"
+  description = "Version of the Nullplatform agent Helm chart to deploy"
   type        = string
   default     = "2.11.0"
 }
 
+variable "namespace" {
+  description = "Kubernetes namespace where the Nullplatform agent will run"
+  type        = string
+  default     = "nullplatform-tools"
+}
+
 variable "agent_repos_scope" {
-  description = "Git repository URL for agent scopes configuration"
+  description = "Git repository URL containing agent scope configurations (format: repo#branch)"
   type        = string
   default     = "https://github.com/nullplatform/scopes.git#main"
 }
 
 variable "agent_repos_extra" {
-  description = "Additional repositories for the agent configuration"
+  description = "List of additional Git repositories for extended agent configuration"
   type        = list(string)
   default     = []
-}
-
-variable "cluster_name" {
-  description = "Name of the EKS cluster"
-  type        = string
-}
-
-variable "tags" {
-  description = "Tags to apply to identifier agent"
-  type        = string
 }
 
 variable "init_scripts" {
-  description = "List of initialization scripts to run"
+  description = "List of initialization scripts to execute during agent startup"
   type        = list(string)
   default     = []
 }
 
-variable "namespace" {
-  description = "Kubernetes namespace to agent run"
+################################################################################
+# Template and Repository Configuration
+################################################################################
+
+variable "service_path" {
+  description = "Path to the service directory within the repository structure"
   type        = string
-  default     = "nullplatform-tools"
+  default     = "k8s"
 }
 
-variable "nrn" {
-  description = "Identifier Nullplatform Resources Name"
+variable "repo_path" {
+  description = "Local filesystem path where the scope repository will be cloned"
   type        = string
+  default     = "/root/.np/nullplatform/scopes"
 }
 
-variable "use_tpl_files" {
-  type        = bool
-  default     = true
-  description = "Whether to use .tpl files (true) or .json files (false) for templates"
+variable "github_repo_url" {
+  description = "GitHub repository URL containing scope and action templates"
+  type        = string
+  default     = "https://github.com/nullplatform/scopes"
+}
+
+variable "github_ref" {
+  description = "Git reference to use (branch name, tag, or commit SHA)"
+  type        = string
+  default     = "beta"
 }
 
 ################################################################################
-# Scope Definition Module Variables
+# Action Specifications
 ################################################################################
 
 variable "action_spec_names" {
-  type = list(string)
+  description = "List of action specification template names to fetch and create for scope operations"
+  type        = list(string)
   default = [
     "create-scope",
     "delete-scope",
@@ -70,157 +112,42 @@ variable "action_spec_names" {
     "restart-pods",
     "kill-instances"
   ]
-  description = "List of action specification template names to fetch and create"
 }
 
-variable "logs_provider" {
-  type        = string
-  default     = "external"
-  description = "The logs provider to be used"
-}
+################################################################################
+# External Providers Configuration
+################################################################################
 
-variable "metrics_provider" {
+variable "external_metrics_provider" {
+  description = "Name of the external metrics provider for monitoring integration"
   type        = string
   default     = "externalmetrics"
-  description = "The metrics provider to be used"
-
 }
 
-# NRN Patch Configuration
-variable "np_api_key" {
+variable "external_logging_provider" {
+  description = "Name of the external logging provider for log aggregation"
   type        = string
-  sensitive   = true
-  description = "Nullplatform API key for authentication"
-}
-
-variable "aws_iam_openid_connect_provider_arn" {}
-
-variable "git_provider" {
-  type        = string
-  default     = "github"
-  description = "Git provider (e.g., github, gitlab)"
-}
-variable "git_user" {
-  type        = string
-  default     = null
-  description = "Git username for authentication"
-}
-variable "git_password" {
-  type        = string
-  default     = null
-  sensitive = true
-  description = "Git password or token for authentication"
-}
-variable "git_repo" {
-  type        = string
-  default     = "nullplatform/scopes"
-  description = "GitHub repository containing templates"
-}
-
-variable "workflow_override_path" {
-  type = string
-  default = null
-  description = "Path to a custom workflow file to override the default one"
-}
-
-variable "workflow_override_values" {
-  type = string
-  default = null
-  description = "Values to override in the workflow file"
-
-}
-
-variable "git_ref" {
-  type        = string
-  default     = "main"
-  description = "Git reference (branch, tag, or commit)"
-}
-
-variable "git_scope_path" {
-  type        = string
-  default     = "k8s"
-  description = "Path within the repository for the specific scope (e.g., k8s, ecs)"
-}
-
-variable "scope_name" {
-  type        = string
-  description = "Name of the scope type to be created"
-}
-variable "scope_description" {
-  type        = string
-  description = "Description of the scope type to be created"
+  default     = "external"
 }
 
 ################################################################################
-# Scope Definition Module Variables
+# Override Configuration
 ################################################################################
-variable "agent_tags" {
-  type        = map(string)
-  description = "Agent tags"
 
+variable "enabled_override" {
+  description = "Enable custom overrides for scope configurations via command line"
+  type        = bool
+  default     = false
 }
 
-variable "channel_sources" {
-  type        = list(string)
-  description = "List of sources for the notification channel (e.g., ['monitoring', 'alerts'])"
-  default = [ "telemetry", "service" ]
-}
-
-variable "channel_type" {
+variable "overrides_service_path" {
+  description = "Local filesystem path to the directory containing override configurations"
   type        = string
-  description = "Type of the notification channel (e.g., 'agent')"
-  default     = "agent"
-
-}
-
-variable "agent_api_key" {
-  type        = string
-  description = "API key with permsissions to run commands on agents (usually ops permisions)"
-  sensitive   = true
-}
-
-variable "scope_slug" {
-  type        = string
-  description = "The slug of the scope definition"
-  default = null
-}
-
-variable "agent_command" {
-  type = object({
-    type = string
-    data = object({
-      cmdline     = string
-      arguments   = optional(list(string), [])
-      environment = optional(map(string), {})
-    })
-  })
-  default = null
-
-}
-
-variable "scope_provider_id" {
-  type        = string
-  description = "The ID of the scope provider associated with the scope definition"
   default     = null
-
 }
 
-variable "scope_definition" {
-  type = object({
-    slug = string,
-    nrn = string,
-    workflow_override_path = string,
-    workflow_override_values = string,
-    scope_provider_id = string,
-    specification = object({
-      agent_command = object({
-        type = string
-        data = object({
-          cmdline     = string
-          arguments   = optional(list(string), [])
-          environment = optional(map(string), {})
-        })
-      })
-    })
-  })
+variable "override_repo_path" {
+  description = "Local filesystem path where the scope repository will be cloned"
+  type        = string
+  default     = null
 }
