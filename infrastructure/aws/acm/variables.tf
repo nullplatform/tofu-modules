@@ -4,7 +4,8 @@ variable "zone_id" {
 }
 
 variable "domain_name" {
-  type = string
+  description = "The domain name for which to request the SSL certificate"
+  type        = string
 }
 
 variable "subject_alternative_names" {

@@ -1,30 +1,32 @@
 variable "group_path" {
-  type = string
-
+  description = "GitLab group path where repositories will be created"
+  type        = string
 }
 
 variable "access_token" {
-  type      = string
-  sensitive = true
-
+  description = "Access token for authenticating with the Git provider API"
+  type        = string
+  sensitive   = true
 }
 
 variable "installation_url" {
-  type = string
-
+  description = "Installation URL for the Git provider integration"
+  type        = string
 }
 
 variable "np_api_key" {
-  type      = string
-  sensitive = true
-
+  description = "Nullplatform API key for authentication"
+  type        = string
+  sensitive   = true
 }
-variable "nrn" {
-  type = string
 
+variable "nrn" {
+  description = "Nullplatform Resource Name - unique identifier for resources"
+  type        = string
 }
 
 variable "collaborators_config" {
+  description = "Configuration for repository collaborators with their roles and permissions"
   type = object({
     collaborators = list(object({
       id   = string
@@ -35,21 +37,23 @@ variable "collaborators_config" {
 }
 
 variable "gitlab_repository_prefix" {
-  type = string
-
+  description = "Prefix to use for GitLab repository names"
+  type        = string
 }
-variable "gitlab_name" {
-  type = string
 
+variable "gitlab_name" {
+  description = "Name of the GitLab instance or organization"
+  type        = string
 }
 
 variable "repository_provider" {
-  type = string
-
+  description = "Git repository provider (gitlab or github)"
+  type        = string
 }
-variable "gitlab_slug" {
-  type = string
 
+variable "gitlab_slug" {
+  description = "GitLab project slug identifier"
+  type        = string
 }
 
 variable "git_provider" {
@@ -57,12 +61,13 @@ variable "git_provider" {
   description = "gitlab or github"
 }
 variable "organization" {
-  type    = string
-  default = ""
-
+  description = "GitHub organization name for repository creation"
+  type        = string
+  default     = ""
 }
-variable "organization_installation_id" {
-  type    = string
-  default = ""
 
+variable "organization_installation_id" {
+  description = "GitHub App installation ID for the organization"
+  type        = string
+  default     = ""
 }

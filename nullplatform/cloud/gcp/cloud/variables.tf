@@ -32,32 +32,36 @@ variable "environments" {
 }
 
 variable "location" {
-  type = string
-
+  description = "GCP location/region where resources will be deployed"
+  type        = string
 }
 
-
 variable "project_id" {
-  type = string
-
+  description = "GCP project ID where resources will be created"
+  type        = string
 }
 
 variable "np_api_key" {
-  type = string
-
+  description = "Nullplatform API key for authentication"
+  type        = string
+  sensitive   = true
 }
 
 variable "private_dns_zone_name" {
-  type    = string
-  default = ""
-
+  description = "Name of the private DNS zone in GCP Cloud DNS"
+  type        = string
+  default     = ""
 }
+
 variable "public_dns_zone_name" {
-  type    = string
-  default = ""
+  description = "Name of the public DNS zone in GCP Cloud DNS"
+  type        = string
+  default     = ""
 }
-variable "service_account_key" {
-  type    = string
-  default = ""
 
+variable "service_account_key" {
+  description = "GCP service account key in JSON format for authentication"
+  type        = string
+  sensitive   = true
+  default     = ""
 }

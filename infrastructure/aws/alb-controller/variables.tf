@@ -15,5 +15,6 @@ variable "aws-load-balancer-controller-version" {
 }
 
 variable "aws_iam_openid_connect_provider" {
-
+  description = "AWS IAM OpenID Connect Provider for EKS cluster authentication"
+  type        = string
 }

@@ -1,7 +1,6 @@
+# Module: Code Repository
 
-# Modules: code repository
-
-This module allows you to create accounts in your nullplatform organization.
+Sets up Nullplatform Git provider integrations for GitLab or GitHub, including collaborator access and installation metadata.
 
 Usage for github:
 
@@ -32,8 +31,6 @@ module "code_repository" {
 }
 ```
 
-
-
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -45,7 +42,7 @@ module "code_repository" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.68 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | >= 0.0.67 |
 
 ## Resources
 
@@ -58,17 +55,17 @@ module "code_repository" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_access_token"></a> [access\_token](#input\_access\_token) | n/a | `string` | n/a | yes |
-| <a name="input_collaborators_config"></a> [collaborators\_config](#input\_collaborators\_config) | n/a | <pre>object({<br/>    collaborators = list(object({<br/>      id   = string<br/>      role = string<br/>      type = string<br/>    }))<br/>  })</pre> | n/a | yes |
+| <a name="input_access_token"></a> [access\_token](#input\_access\_token) | Access token for authenticating with the Git provider API | `string` | n/a | yes |
+| <a name="input_collaborators_config"></a> [collaborators\_config](#input\_collaborators\_config) | Configuration for repository collaborators with their roles and permissions | <pre>object({<br/>    collaborators = list(object({<br/>      id   = string<br/>      role = string<br/>      type = string<br/>    }))<br/>  })</pre> | n/a | yes |
 | <a name="input_git_provider"></a> [git\_provider](#input\_git\_provider) | gitlab or github | `string` | n/a | yes |
-| <a name="input_gitlab_name"></a> [gitlab\_name](#input\_gitlab\_name) | n/a | `string` | n/a | yes |
-| <a name="input_gitlab_repository_prefix"></a> [gitlab\_repository\_prefix](#input\_gitlab\_repository\_prefix) | n/a | `string` | n/a | yes |
-| <a name="input_gitlab_slug"></a> [gitlab\_slug](#input\_gitlab\_slug) | n/a | `string` | n/a | yes |
-| <a name="input_group_path"></a> [group\_path](#input\_group\_path) | n/a | `string` | n/a | yes |
-| <a name="input_installation_url"></a> [installation\_url](#input\_installation\_url) | n/a | `string` | n/a | yes |
-| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | n/a | `string` | n/a | yes |
-| <a name="input_nrn"></a> [nrn](#input\_nrn) | n/a | `string` | n/a | yes |
-| <a name="input_organization"></a> [organization](#input\_organization) | n/a | `string` | `""` | no |
-| <a name="input_organization_installation_id"></a> [organization\_installation\_id](#input\_organization\_installation\_id) | n/a | `string` | `""` | no |
-| <a name="input_repository_provider"></a> [repository\_provider](#input\_repository\_provider) | n/a | `string` | n/a | yes |
+| <a name="input_gitlab_name"></a> [gitlab\_name](#input\_gitlab\_name) | Name of the GitLab instance or organization | `string` | n/a | yes |
+| <a name="input_gitlab_repository_prefix"></a> [gitlab\_repository\_prefix](#input\_gitlab\_repository\_prefix) | Prefix to use for GitLab repository names | `string` | n/a | yes |
+| <a name="input_gitlab_slug"></a> [gitlab\_slug](#input\_gitlab\_slug) | GitLab project slug identifier | `string` | n/a | yes |
+| <a name="input_group_path"></a> [group\_path](#input\_group\_path) | GitLab group path where repositories will be created | `string` | n/a | yes |
+| <a name="input_installation_url"></a> [installation\_url](#input\_installation\_url) | Installation URL for the Git provider integration | `string` | n/a | yes |
+| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication | `string` | n/a | yes |
+| <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name - unique identifier for resources | `string` | n/a | yes |
+| <a name="input_organization"></a> [organization](#input\_organization) | GitHub organization name for repository creation | `string` | `""` | no |
+| <a name="input_organization_installation_id"></a> [organization\_installation\_id](#input\_organization\_installation\_id) | GitHub App installation ID for the organization | `string` | `""` | no |
+| <a name="input_repository_provider"></a> [repository\_provider](#input\_repository\_provider) | Git repository provider (gitlab or github) | `string` | n/a | yes |
 <!-- END_TF_DOCS -->

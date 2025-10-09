@@ -1,19 +1,6 @@
-# Modules: VPC
+# Module: VPC
 
-This module creates a VPC with public and private subnets and a NAT gateway.
-
-Usage:
-
-
-```
-module "vpc" {
-  source = "git@github.com:nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v0.0.1"
-  organization = var.organization
-  account = var.organization
-  vpc = var.vpc
-}
-```
-
+This module creates a Virtual Private Cloud (VPC) with public and private subnets across multiple availability zones. It includes NAT gateway configuration for internet access from private subnets and appropriate tags for Kubernetes integration.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

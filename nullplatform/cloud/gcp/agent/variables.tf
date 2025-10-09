@@ -116,14 +116,18 @@ variable "external_logging_provider" {
 
 
 variable "environment_tag" {
-
+  description = "Environment tag to identify and filter agent resources"
+  type        = string
 }
 
 variable "kubeconfig_path" {
-  type    = string
-  default = "~/.kube/config"
+  description = "Path to the kubeconfig file for Kubernetes cluster access"
+  type        = string
+  default     = "~/.kube/config"
 }
+
 variable "kube_context" {
-  type    = string
-  default = null # o el nombre de tu context
+  description = "Kubernetes context name to use from the kubeconfig file"
+  type        = string
+  default     = null
 }
