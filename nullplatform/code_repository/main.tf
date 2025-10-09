@@ -15,15 +15,7 @@ resource "nullplatform_provider_config" "gitlab" {
   )
 
 }
-/* If the git_provider variable is set to gitlab, create this resource.
-resource "nullplatform_account" "gitlab_account" {
-  count      = local.is_gitlab ? 1 : 0
-  name                = var.gitlab_name
-  repository_prefix   = var.gitlab_repository_prefix
-  repository_provider = var.repository_provider
-  slug                = var.gitlab_slug
-}
-*/
+
 /* If the git_provider variable has the value github, create this resource */
 resource "nullplatform_provider_config" "github" {
   count      = local.is_github ? 1 : 0

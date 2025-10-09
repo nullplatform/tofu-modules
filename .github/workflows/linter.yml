@@ -1,0 +1,18 @@
+name: pipeline tofu
+on:
+  push:
+    branches:
+      - '**'
+    paths-ignore:
+      - 'README.md'
+    tags:
+      - '*'
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+    branches:
+    - '**'
+jobs:
+  quality:
+    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/tofu-lint.yml@main
+    if: startsWith(github.ref_name, 'feature/') || startsWith(github.ref_name, 'hotfix/') || startsWith(github.ref_name, 'bugfix/')

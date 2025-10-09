@@ -22,5 +22,5 @@ variable "kubeconfig_path" {
 }
 variable "kube_context" {
   type    = string
-  default = null # o el nombre de tu context
+  default = null
 }

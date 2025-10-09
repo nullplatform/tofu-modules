@@ -1,3 +1,21 @@
+# Modules: ACR
+
+This module creates an Azure Container Registry.
+
+Usage:
+
+
+```
+module "acr" {
+  source = "git@github.com:nullplatform/tofu-modules.git//infrastructure/azure/acr?ref=v0.0.1"
+  name                = var.containerregistry_name
+  resource_group_name = var.resource_group_name
+  location            = var.location
+}
+```
+
+
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

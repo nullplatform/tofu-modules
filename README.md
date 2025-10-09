@@ -20,31 +20,42 @@ This repository contains the **shared Tofu modules** used by Nullplatform to sta
 .
 ├── infrastructue/                  # All reusable Tofu modules
 │   ├── aws/
-│   │   |──acm/
-│   │   |
-|   |   |── alb-controller/
+│   |   |──acm/
+│   |   |──alb-controller/
+|   |   |──backend/
+|   |   |──eks/
+|   |   |──ingress/
+|   |   |──route53/
+|   |   |──vpc/
 │   │
 │   ├── azure/
-|   |    |──vpc/
+|   |     |──vnet/
+|   |     |──acr/
+|   |     |──dns/
+|   |     |──resource_group/
+|   |
+|   |
 │   |── gcp/
-|   |    |──cont
+|   |
 |   |──commons
 |        |── cert-manager/
 |        |── external-dns/
 |        |── istio/
 |
 |──nullplatform/
-|   ├── aws/
-│   │   |──cloud
-│   │
-│   ├── azure/
-|   |    |──cloud/
-│   |── gcp/
-|   |    |──cloud/
-|   |──commons/
-|         |── account/
-|         |── asset/
-|         |── code_/
+|   |──cloud
+│   │   ├──azure/
+|   |   |──aws/
+|   |   |──gcp/
+|   |
+|   |
+│   |──account/
+│   |──asset/
+|   |──code_repository/
+|   |──dimensions/
+|   |──prometheus/
+|   |──users/
+|
 |
 ├── .github/
 │      |── workflows/            # CI/CD workflows, validations, etc.
@@ -116,7 +127,7 @@ In `.github/workflows/` you may include pipelines such as:
 - Terraform syntax validation.
 - `tofu fmt` for automatic formatting.
 - `tofu validate` for logical checks.
-- Automatic documentation generation for modules.
+
 
 ---
 
@@ -152,3 +163,7 @@ If you want to add or modify a module:
 
 
 
+
+<!-- BEGIN_TF_DOCS -->
+
+<!-- END_TF_DOCS -->
