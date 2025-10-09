@@ -25,7 +25,11 @@ data "http" "action_templates" {
 # Process service specification template using gomplate with NRN variable
 data "external" "service_spec" {
   program = ["sh", "-c", <<-EOT
-    processed_json=$(echo '${data.http.service_spec_template.response_body}' | NRN='${var.nrn}' gomplate)
+    processed_json=$(echo '${data.http.service_spec_template.response_body}' | \
+    NRN='${var.nrn}' \
+    DESCRIPTION='${var.service_spec_description}' \
+    NAME='${var.service_spec_name}' \
+    gomplate)
     echo "{\"json\":\"$(echo "$processed_json" | sed 's/"/\\"/g' | tr -d '\n')\"}"
   EOT
   ]
