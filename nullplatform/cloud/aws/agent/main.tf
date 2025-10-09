@@ -8,7 +8,7 @@ resource "helm_release" "agent" {
   chart            = "nullplatform-agent"
   repository       = "https://nullplatform.github.io/helm-charts"
   namespace        = var.namespace
-  version          = var.nullplatform-agent-helm-version
+  version          = var.nullplatform_agent_helm_version
   create_namespace = true
 
   # Deployment behavior configuration

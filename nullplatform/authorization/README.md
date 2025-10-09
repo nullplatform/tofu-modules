@@ -33,7 +33,7 @@ module "authorization" {
 
 | Name | Type |
 |------|------|
-| [nullplatform_api_key.nullplatform-agent-api-key](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/api_key) | resource |
+| [nullplatform_api_key.nullplatform_agent_api_key](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/api_key) | resource |
 
 ## Inputs
 

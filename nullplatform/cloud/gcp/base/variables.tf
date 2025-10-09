@@ -1,4 +1,4 @@
-variable "nullplatform-base-helm-version" {
+variable "nullplatform_base_helm_version" {
   description = "Helm chart version for the Nullplatform agent"
   type        = string
   default     = "2.12.0"

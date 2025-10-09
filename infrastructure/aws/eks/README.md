@@ -2,6 +2,21 @@
 
 This module provisions an Amazon Elastic Kubernetes Service (EKS) cluster with managed node groups. It includes essential addons like CoreDNS, kube-proxy, and VPC-CNI, along with configurable managed node groups for workload execution.
 
+Usage:
+
+```hcl
+module "eks" {
+  source                  = "git@github.com:nullplatform/tofu-modules.git//infrastructure/aws/eks?ref=v0.0.1"
+  name                    = var.name
+  kubernetes_version      = var.kubernetes_version
+  aws_vpc_vpc_id          = var.aws_vpc_vpc_id
+  aws_subnets_private_ids = var.aws_subnets_private_ids
+
+  ami_type       = var.ami_type
+  instance_types = var.instance_types
+}
+```
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

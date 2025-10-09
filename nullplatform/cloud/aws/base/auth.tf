@@ -1,4 +1,4 @@
-resource "nullplatform_api_key" "nullplatform-agent-api-key" {
+resource "nullplatform_api_key" "nullplatform_agent_api_key" {
   name = "NULLPLATFORM-BASE-API-KEY"
 
   grants {

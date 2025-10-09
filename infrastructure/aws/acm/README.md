@@ -2,6 +2,17 @@
 
 This module creates and validates SSL/TLS certificates using AWS Certificate Manager (ACM) with DNS validation through Route 53. It provisions wildcard certificates for specified domains and automatically handles the DNS validation process.
 
+Usage:
+
+```hcl
+module "acm" {
+  source                    = "git@github.com:nullplatform/tofu-modules.git//infrastructure/aws/acm?ref=v0.0.1"
+  zone_id                   = var.zone_id
+  domain_name               = var.domain_name
+  subject_alternative_names = var.subject_alternative_names
+}
+```
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

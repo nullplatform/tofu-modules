@@ -2,6 +2,14 @@
 
 This module creates a secure S3 backend for storing Terraform state files. It provisions an S3 bucket with versioning, server-side encryption, and object lock configuration for state file protection and compliance.
 
+Usage:
+
+```hcl
+module "backend" {
+  source = "git@github.com:nullplatform/tofu-modules.git//infrastructure/aws/backend?ref=v0.0.1"
+}
+```
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

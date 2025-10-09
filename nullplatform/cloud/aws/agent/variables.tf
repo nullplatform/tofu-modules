@@ -32,7 +32,7 @@ variable "tags_selectors" {
 # Agent Configuration
 ################################################################################
 
-variable "nullplatform-agent-helm-version" {
+variable "nullplatform_agent_helm_version" {
   description = "Version of the Nullplatform agent Helm chart to deploy"
   type        = string
   default     = "2.11.0"

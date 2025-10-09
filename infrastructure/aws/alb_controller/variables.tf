@@ -8,7 +8,7 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "aws-load-balancer-controller-version" {
+variable "aws_load_balancer_controller_version" {
   description = "Version of the AWS Load Balancer Controller Helm chart"
   type        = string
   default     = "1.13.4"

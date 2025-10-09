@@ -29,7 +29,7 @@ module "vnet" {
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_avm-res-network-virtualnetwork"></a> [avm-res-network-virtualnetwork](#module\_avm-res-network-virtualnetwork) | azure/avm-res-network-virtualnetwork/azurerm | v0.10.0 |
+| <a name="module_avm_res_network_virtualnetwork"></a> [avm_res_network_virtualnetwork](#module\_avm_res_network_virtualnetwork) | azure/avm-res-network-virtualnetwork/azurerm | v0.10.0 |
 
 ## Inputs
 

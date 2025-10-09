@@ -33,7 +33,7 @@ module "cloud_aws_base" {
 | Name | Type |
 |------|------|
 | [helm_release.base](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
-| [nullplatform_api_key.nullplatform-agent-api-key](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/api_key) | resource |
+| [nullplatform_api_key.nullplatform_agent_api_key](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/api_key) | resource |
 
 ## Inputs
 
@@ -41,5 +41,5 @@ module "cloud_aws_base" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Kubernetes namespace to agent run | `string` | `"nullplatform-tools"` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Identifier Nullplatform Resources Name | `string` | n/a | yes |
-| <a name="input_nullplatform-base-helm-version"></a> [nullplatform-base-helm-version](#input\_nullplatform-base-helm-version) | Helm chart version for the Nullplatform agent | `string` | `"2.12.0"` | no |
+| <a name="input_nullplatform_base_helm_version"></a> [nullplatform_base_helm_version](#input\_nullplatform_base_helm_version) | Helm chart version for the Nullplatform agent | `string` | `"2.12.0"` | no |
 <!-- END_TF_DOCS -->
