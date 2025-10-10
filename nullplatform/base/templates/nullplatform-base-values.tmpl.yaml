@@ -1,0 +1,90 @@
+global:
+  provider: "${cloud_provider}"
+  installGatewayV2Crd: "${installGatewayV2Crd}"
+  awsRegion: "${awsRegion}"
+namespaces:
+  # Namespace for Null platform resources
+  nullplatformApplications: "nullplatform"
+  nullplatformTools: "nullplatform-tools"
+  gateway: "gateways"
+tls:
+  required: ${tls_required} #true or false
+  # Name of the TLS secret
+  secretName: "wildcard-tls"
+  # Gateway configurations
+gateway:
+  http:
+    enabled: ${gateway_enabled}
+  internal:
+    enabled: ${gateway_internal_enabled}
+    name: "gateway-private"
+    addresses: {}
+  public:
+    name: "gateway-public"
+    addresses: {}
+nullplatform:
+  apiKey: "${np_api_key}"
+  secretName: "" #If provided will mount it from an existing secret
+
+controlPlane: #
+  enabled: ${controlPlane_enabled} #true or false
+
+logging:
+  enabled: ${logging_enabled}
+
+  prometheus:
+    enabled: ${prometheus_enabled}
+    exporterPort: 2021
+  gelf:
+    enabled: ${gelf_enabled}
+    host: "${gelf_host}"
+    port: "${gelf_port}"
+  loki:
+    enabled: ${loki_enabled}
+    host: "${loki_host}"
+    port: "${loki_port}"
+    user:  "${loki_user}"
+    password: "${loki_password}"
+    bearerToken: "${loki_bearerToken}"
+    matchRegex: "container.*.application"
+  dynatrace:
+    enabled: ${dynatrace_enabled}
+    apiKey: "${dynatrace_apiKey}"
+    environmentId: "${dynatrace_environmentid}"
+  datadog:
+    enabled: ${datadog_enabled}
+    apiKey: "${datadog_apiKey}"
+    region: "${datadog_region}"
+  newrelic:
+    enabled: ${newrelic_enabled}
+    licenseKey: "${newrelic_licenseKey}"
+    region: "${newrelic_region}"
+# CloudWatch configuration
+cloudwatch:
+  enabled: ${cloudwatch_enabled}
+  region: "${awsRegion}"
+  retentionDays: 7
+  logs:
+    enabled: ${cloudwatch_logs_enabled}
+  performanceMetrics:
+    enabled: ${cloudwatch_performancemetrics_enabled}
+  customMetrics:
+    enabled: ${cloudwatch_custommetrics_enabled}
+  accessLogs:
+    enabled:  ${cloudwatch_accesslogs_enabled}
+metricsServer:
+  enabled: ${metricsserver_enabled}
+# Gateway API configuration
+gateways:
+  enabled: "${gateways_enabled}"
+gatewayAPI:
+  enabled: ${gatewayapi_enabled}
+  crds:
+    install: ${gatewayapi_crds_install}
+# Image pull secret configuration
+imagePullSecrets:
+  enabled: ${imagePullSecrets_enabled}
+  name: image-pull-secret-nullplatform
+  registry: "${imagePullSecrets_registry}"
+  username: "${imagePullSecrets_username}"
+  password: "${imagePullSecrets_password}"
