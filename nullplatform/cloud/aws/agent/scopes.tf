@@ -27,8 +27,6 @@ data "external" "service_spec" {
   program = ["sh", "-c", <<-EOT
     processed_json=$(echo '${data.http.service_spec_template.response_body}' | \
     NRN='${var.nrn}' \
-    DESCRIPTION='${var.service_spec_description}' \
-    NAME='${var.service_spec_name}' \
     gomplate)
     echo "{\"json\":\"$(echo "$processed_json" | sed 's/"/\\"/g' | tr -d '\n')\"}"
   EOT
@@ -41,7 +39,7 @@ locals {
 
 # Create service specification resource from processed template
 resource "nullplatform_service_specification" "from_template" {
-  name                = local.service_spec_parsed.name
+  name                = var.service_spec_name
   visible_to          = local.service_spec_parsed.visible_to
   assignable_to       = local.service_spec_parsed.assignable_to
   type                = local.service_spec_parsed.type
@@ -102,8 +100,8 @@ resource "nullplatform_scope_type" "from_template" {
   depends_on = [nullplatform_service_specification.from_template]
 
   nrn         = var.nrn
-  name        = local.scope_type_def.name
-  description = local.scope_type_def.description
+  name        = var.service_spec_name
+  description = var.service_spec_description
   provider_id = local.service_specification_id
 }
 
