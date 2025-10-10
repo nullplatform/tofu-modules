@@ -117,12 +117,3 @@ variable "nrn" {
   description = "Nullplatform Resource Name - unique identifier for resources"
   type        = string
 }
-
-variable "repository_provider" {
-  description = "Git repository provider (gitlab or github)"
-  type        = string
-  validation {
-    condition     = contains(["github", "gitlab"], var.repository_provider)
-    error_message = "repository_provider must be either 'github' or 'gitlab'."
-  }
-}
