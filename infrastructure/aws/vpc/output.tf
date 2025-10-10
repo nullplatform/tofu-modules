@@ -12,3 +12,8 @@ output "public_subnets" {
   value       = module.vpc.public_subnets
   description = "Public Subnets"
 }
+
+output "vpc_cidr" {
+  value = module.vpc.cidr
+  description = "The cidr to vpc"
+}
