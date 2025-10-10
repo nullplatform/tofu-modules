@@ -7,12 +7,8 @@ data "aws_vpc" "this" {
 data "aws_subnets" "private" {
 
   filter {
-    name   = "vpc-id"
-    values = [var.vpc_id]
-  }
-
-  tags = {
-    Type = "private"
+    name   = "tag:Name"
+    values = ["*-private-*"]  # Busca subnets con "private" en el nombre
   }
 }
 
@@ -20,11 +16,7 @@ data "aws_subnets" "private" {
 data "aws_subnets" "public" {
 
   filter {
-    name   = "vpc-id"
-    values = [var.vpc_id]
-  }
-
-  tags = {
-    Type = "public"
+    name   = "tag:Name"
+    values = ["*-public-*"]  # Busca subnets con "private" en el nombre
   }
 }

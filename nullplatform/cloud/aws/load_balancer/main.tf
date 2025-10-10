@@ -59,12 +59,13 @@ resource "aws_lb_target_group" "internal_default" {
   target_type = "ip"
 
   health_check {
-    enabled             = false
+    enabled             = true
     path                = "/"
     healthy_threshold   = 2
     unhealthy_threshold = 2
     timeout             = 5
     interval            = 30
+    matcher             = "200-499"
   }
 
   deregistration_delay = 10
@@ -193,12 +194,13 @@ resource "aws_lb_target_group" "public_default" {
   target_type = "ip"
 
   health_check {
-    enabled             = false
+    enabled             = true
     path                = "/"
     healthy_threshold   = 2
     unhealthy_threshold = 2
     timeout             = 5
     interval            = 30
+    matcher             = "200-499"
   }
 
   deregistration_delay = 10
