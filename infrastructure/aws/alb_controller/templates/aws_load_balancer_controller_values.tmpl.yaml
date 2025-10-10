@@ -3,3 +3,4 @@ serviceAccount:
   create: false
   name: "${service_account_name}"
 vpcId: "${vpc_id}"
+syncPeriod: "40s"
