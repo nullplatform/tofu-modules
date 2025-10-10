@@ -46,6 +46,18 @@ resource "kubernetes_ingress_v1" "internal" {
   }
 }
 
+resource "null_resource" "remove_finalizer_internal" {
+  triggers = {
+    ingress_name = kubernetes_ingress_v1.internal.metadata[0].name
+    namespace    = kubernetes_ingress_v1.internal.metadata[0].namespace
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "kubectl patch ingress ${self.triggers.ingress_name} -n ${self.triggers.namespace} -p '{\"metadata\":{\"finalizers\":[]}}' --type=merge || true"
+  }
+}
+
 resource "kubernetes_ingress_v1" "public" {
   metadata {
     name      = "initial-ingress-setup-public"
@@ -91,5 +103,17 @@ resource "kubernetes_ingress_v1" "public" {
         }
       }
     }
+  }
+}
+
+resource "null_resource" "remove_finalizer_public" {
+  triggers = {
+    ingress_name = kubernetes_ingress_v1.public.metadata[0].name
+    namespace    = kubernetes_ingress_v1.public.metadata[0].namespace
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "kubectl patch ingress ${self.triggers.ingress_name} -n ${self.triggers.namespace} -p '{\"metadata\":{\"finalizers\":[]}}' --type=merge || true"
   }
 }
