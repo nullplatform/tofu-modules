@@ -65,16 +65,6 @@ variable "gitlab_repository_prefix" {
   }
 }
 
-variable "gitlab_name" {
-  description = "Name of the GitLab instance or organization"
-  type        = string
-  default     = null
-  validation {
-    condition     = var.git_provider != "gitlab" || var.gitlab_name != null
-    error_message = "gitlab_name is required when git_provider is 'gitlab'."
-  }
-}
-
 variable "gitlab_slug" {
   description = "GitLab project slug identifier"
   type        = string
