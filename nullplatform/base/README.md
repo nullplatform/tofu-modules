@@ -1,3 +1,22 @@
+# Module: Base
+
+This module installs the base helm chart from nullplatform, for more information https://docs.nullplatform.com/docs/providers/helm-charts#base-chart
+
+Usage:
+
+```
+module "base" {
+    source = ""
+    np_api_key = var.np_api_key
+    nrn = var.nrn
+    cloud_provider = "gke"
+    nullplatform-base-helm-version = "2.16.0"
+}
+```
+
+
+
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

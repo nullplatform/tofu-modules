@@ -23,21 +23,14 @@ variable "np_api_key" {
 }
 
 
-variable "kubeconfig_path" {
-  type    = string
-  default = "~/.kube/config"
-}
-variable "kube_context" {
-  type    = string
-  default = null #
-}
+
 
 variable "cloud_provider" {
   type        = string
-  description = "Cloud provider (aws, gcp, azure, oke)."
+  description = "Cloud provider (eks, gke, aks, oke)."
   validation {
-    condition     = contains(["aws", "gcp", "azure", "oke"], var.cloud_provider)
-    error_message = "cloud_provider must be one of: aws, gcp, azure, onprem."
+    condition     = contains(["eks", "gke", "aks", "oke"], var.cloud_provider)
+    error_message = "cloud_provider must be one of: eks, gke, aks, oke."
   }
 }
 
@@ -121,13 +114,13 @@ variable "gelf_enabled" {
 variable "gelf_host" {
   type        = string
   description = "GELF host."
-  default     = null
+  default     = ""
 }
 
 variable "gelf_port" {
   type        = number
   description = "GELF port."
-  default     = null
+  default     = 12201
 }
 
 ############################################
@@ -143,33 +136,33 @@ variable "loki_enabled" {
 variable "loki_host" {
   type        = string
   description = "Loki host."
-  default     = null
+  default     = ""
 }
 
 variable "loki_port" {
   type        = number
   description = "Loki port."
-  default     = null
+  default     = 3100
 }
 
 variable "loki_user" {
   type        = string
   description = "Loki username (if applicable)."
-  default     = null
+  default     = ""
 }
 
 variable "loki_password" {
   type        = string
   description = "Loki password (if applicable)."
   sensitive   = true
-  default     = null
+  default     = ""
 }
 
 variable "loki_bearer_token" {
   type        = string
   description = "Loki bearer token (if applicable)."
   sensitive   = true
-  default     = null
+  default     = ""
 }
 
 ############################################
@@ -186,13 +179,13 @@ variable "dynatrace_api_key" {
   type        = string
   description = "Dynatrace API key."
   sensitive   = true
-  default     = null
+  default     = ""
 }
 
 variable "dynatrace_environment_id" {
   type        = string
   description = "Dynatrace environment ID."
-  default     = null
+  default     = ""
 }
 
 ############################################
@@ -209,13 +202,13 @@ variable "datadog_api_key" {
   type        = string
   description = "Datadog API key."
   sensitive   = true
-  default     = null
+  default     = ""
 }
 
 variable "datadog_region" {
   type        = string
   description = "Datadog region (e.g., us, eu)."
-  default     = null
+  default     = ""
 }
 
 ############################################
@@ -232,13 +225,13 @@ variable "newrelic_license_key" {
   type        = string
   description = "New Relic license key."
   sensitive   = true
-  default     = null
+  default     = ""
 }
 
 variable "newrelic_region" {
   type        = string
   description = "New Relic region (e.g., US, EU)."
-  default     = null
+  default     = ""
 }
 ############################################
 # CloudWatch
@@ -319,18 +312,18 @@ variable "image_pull_secrets_enabled" {
 variable "image_pull_secrets_registry" {
   type        = string
   description = "Registry URL for the imagePullSecret."
-  default     = null
+  default     = ""
 }
 
 variable "image_pull_secrets_username" {
   type        = string
   description = "Registry username."
-  default     = null
+  default     = ""
 }
 
 variable "image_pull_secrets_password" {
   type        = string
   description = "Registry password/token."
   sensitive   = true
-  default     = null
+  default     = ""
 }
