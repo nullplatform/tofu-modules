@@ -1,4 +1,4 @@
-
+/*
 resource "nullplatform_api_key" "nullplatform-base-api-key" {
   name = "NULLPLATFORM-BASE-API-KEY"
 
@@ -28,3 +28,4 @@ resource "nullplatform_api_key" "nullplatform-base-api-key" {
     value = "IaC"
   }
 }
+*/
