@@ -82,12 +82,12 @@ resource "aws_iam_access_key" "nullplatform_build_workflow_user_key" {
 }
 
 
-resource "aws_iam_role_policy_attachment" "ecr-manager-policy" {
+resource "aws_iam_role_policy_attachment" "ecr_manager_policy" {
   role       = aws_iam_role.nullplatform_application_role.name
   policy_arn = aws_iam_policy.nullplatform_ecr_manager_policy.arn
 }
 
-resource "aws_iam_user_policy_attachment" "ecr-manager-policy-user" {
+resource "aws_iam_user_policy_attachment" "ecr_manager_policy_user" {
   user       = aws_iam_user.nullplatform_build_workflow_user.name
   policy_arn = aws_iam_policy.nullplatform_ecr_manager_policy.arn
 }

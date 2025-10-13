@@ -1,9 +1,26 @@
+# Module: Prometheus
+
+Deploys Prometheus via Helm and registers the server endpoint with Nullplatform for metrics collection.
+
+Usage:
+
+```
+module "prometheus" {
+  source               = "git@github.com:nullplatform/tofu-modules.git//nullplatform/prometheus?ref=v0.0.1"
+  nrn                  = var.nrn
+  np_api_key           = var.np_api_key
+  prometheus_namespace = var.prometheus_namespace
+  nullplatform_port    = var.nullplatform_port
+  kubeconfig_path      = var.kubeconfig_path
+  kube_context         = var.kube_context
+}
+```
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.0 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 3.0 |
 | <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.63 |
 
@@ -11,7 +28,6 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 6.0 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | ~> 3.0 |
 | <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | ~> 0.0.63 |
 
@@ -26,7 +42,10 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | n/a | `any` | n/a | yes |
-| <a name="input_namespace"></a> [namespace](#input\_namespace) | n/a | `string` | `"prometheus"` | no |
-| <a name="input_nrn"></a> [nrn](#input\_nrn) | n/a | `any` | n/a | yes |
+| <a name="input_kube_context"></a> [kube\_context](#input\_kube\_context) | Kubernetes context name to use from the kubeconfig file | `string` | `null` | no |
+| <a name="input_kubeconfig_path"></a> [kubeconfig\_path](#input\_kubeconfig\_path) | Path to the kubeconfig file for Kubernetes cluster access | `string` | `"~/.kube/config"` | no |
+| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication | `string` | n/a | yes |
+| <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name - unique identifier for resources | `string` | n/a | yes |
+| <a name="input_nullplatform_port"></a> [nullplatform\_port](#input\_nullplatform\_port) | Port number for Nullplatform service communication | `number` | `2021` | no |
+| <a name="input_prometheus_namespace"></a> [prometheus\_namespace](#input\_prometheus\_namespace) | Kubernetes namespace where Prometheus will be deployed | `string` | `"prometheus"` | no |
 <!-- END_TF_DOCS -->

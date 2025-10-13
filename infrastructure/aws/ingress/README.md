@@ -1,16 +1,15 @@
-# Modules: Ingress
+# Module: Ingress
 
-This module creates two Ingress V1, one public  Ingress and one private Ingress.
+This module creates Kubernetes ingress resources for both internal and internet-facing Application Load Balancers. It sets up initial ingress configurations with SSL termination and custom 404 responses for the nullplatform environment.
 
 Usage:
 
-
-```
+```hcl
 module "ingress" {
   source          = "git@github.com:nullplatform/tofu-modules.git//infrastructure/aws/ingress?ref=v0.0.1"
   certificate_arn = var.certificate_arn
+}
 ```
-
 
 <!-- BEGIN_TF_DOCS -->
 

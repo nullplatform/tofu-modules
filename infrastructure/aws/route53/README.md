@@ -1,18 +1,16 @@
-# Modules: Route53
+# Module: Route53
 
-This module creates a public and private route53 zone.
+This module creates both public and private Route 53 hosted zones for DNS management. It also integrates with the ACM module to automatically provision SSL certificates with DNS validation for the specified domain.
 
 Usage:
 
-
-```
+```hcl
 module "route53" {
   source      = "git@github.com:nullplatform/tofu-modules.git//infrastructure/aws/route53?ref=v0.0.1"
   domain_name = var.domain_name
   vpc_id      = var.vpc_id
+}
 ```
-
-
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -25,7 +23,7 @@ module "route53" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.15.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 6.0 |
 
 ## Modules
 

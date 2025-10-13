@@ -1,8 +1,8 @@
-resource "helm_release" "aws-load-balancer-controller" {
+resource "helm_release" "aws_load_balancer_controller" {
   name       = "aws-load-balancer-controller"
   repository = "https://aws.github.io/eks-charts"
   chart      = "aws-load-balancer-controller"
-  version    = var.aws-load-balancer-controller-version
+  version    = var.aws_load_balancer_controller_version
   namespace  = "kube-system"
 
   disable_webhooks  = true
@@ -20,5 +20,5 @@ resource "helm_release" "aws-load-balancer-controller" {
   max_history       = 10
 
 
-  values = [local.aws-load-balancer-controller-values]
+  values = [local.aws_load_balancer_controller_values]
 }

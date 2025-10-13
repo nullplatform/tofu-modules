@@ -1,31 +1,33 @@
 ################################################################################
-# Step 1: Fetch Templates
+# Template Fetching
 ################################################################################
 
-# Fetch service specification template
+# Fetch service specification template from GitHub repository
 data "http" "service_spec_template" {
   url = "${var.github_repo_url}/raw/${var.github_ref}/${var.service_path}/specs/service-spec.json.tpl"
 }
 
-# Fetch scope type template
+# Fetch scope type definition template from GitHub repository
 data "http" "scope_type_template" {
   url = "${var.github_repo_url}/raw/${var.github_ref}/${var.service_path}/specs/scope-type-definition.json.tpl"
 }
 
-# Fetch action specification templates
+# Fetch all action specification templates from GitHub repository
 data "http" "action_templates" {
   for_each = toset(var.action_spec_names)
   url      = "${var.github_repo_url}/raw/${var.github_ref}/${var.service_path}/specs/actions/${each.key}.json.tpl"
 }
 
 ################################################################################
-# Step 2: Process and Create Service Specification
+# Service Specification
 ################################################################################
 
-# Process service spec template
+# Process service specification template using gomplate with NRN variable
 data "external" "service_spec" {
   program = ["sh", "-c", <<-EOT
-    processed_json=$(echo '${data.http.service_spec_template.response_body}' | NRN='${var.nrn}' gomplate)
+    processed_json=$(echo '${data.http.service_spec_template.response_body}' | \
+    NRN='${var.nrn}' \
+    gomplate)
     echo "{\"json\":\"$(echo "$processed_json" | sed 's/"/\\"/g' | tr -d '\n')\"}"
   EOT
   ]
@@ -35,9 +37,9 @@ locals {
   service_spec_parsed = jsondecode(data.external.service_spec.result.json)
 }
 
-# Create service specification
+# Create service specification resource from processed template
 resource "nullplatform_service_specification" "from_template" {
-  name                = local.service_spec_parsed.name
+  name                = var.service_spec_name
   visible_to          = local.service_spec_parsed.visible_to
   assignable_to       = local.service_spec_parsed.assignable_to
   type                = local.service_spec_parsed.type
@@ -56,11 +58,12 @@ resource "nullplatform_service_specification" "from_template" {
   }
 }
 
+# Extract service specification details for use in dependent resources
 locals {
-  # Variables that depend on created service specification
   service_specification_id = nullplatform_service_specification.from_template.id
   service_slug             = nullplatform_service_specification.from_template.slug
 
+  # Environment variables for template processing in dependent resources
   dependent_env_vars = {
     NRN                      = var.nrn
     SERVICE_SPECIFICATION_ID = local.service_specification_id
@@ -71,10 +74,10 @@ locals {
 }
 
 ################################################################################
-# Step 3: Process and Create Scope Type
+# Scope Type
 ################################################################################
 
-# Process scope type template
+# Process scope type template with service specification context
 data "external" "scope_type" {
   depends_on = [nullplatform_service_specification.from_template]
 
@@ -92,21 +95,21 @@ locals {
   scope_type_def = jsondecode(data.external.scope_type.result.json)
 }
 
-# Create scope type
+# Create scope type resource linked to service specification
 resource "nullplatform_scope_type" "from_template" {
   depends_on = [nullplatform_service_specification.from_template]
 
   nrn         = var.nrn
-  name        = local.scope_type_def.name
-  description = local.scope_type_def.description
+  name        = var.service_spec_name
+  description = var.service_spec_description
   provider_id = local.service_specification_id
 }
 
 ################################################################################
-# Step 4: Create Action Specifications
+# Action Specifications
 ################################################################################
 
-# Process action templates
+# Process all action specification templates with full service context
 data "external" "action_specs" {
   for_each   = toset(var.action_spec_names)
   depends_on = [nullplatform_service_specification.from_template]
@@ -124,12 +127,12 @@ data "external" "action_specs" {
   ]
 }
 
+# Static set to prevent for_each dependency issues during terraform plan/apply
 locals {
-  # Static list of action specifications to avoid for_each dependency issues
   static_action_specs = toset(var.action_spec_names)
 }
 
-# Create action specifications
+# Create action specification resources for each action type
 resource "nullplatform_action_specification" "from_templates" {
   for_each   = local.static_action_specs
   depends_on = [nullplatform_service_specification.from_template]
@@ -144,14 +147,13 @@ resource "nullplatform_action_specification" "from_templates" {
   lifecycle {
     ignore_changes = [annotations]
   }
-
 }
 
 ################################################################################
-# Step 5: Configure NRN with External Providers (Patch)
+# NRN Configuration Patch
 ################################################################################
 
-# This replicates: np nrn patch --nrn "$NRN" --body "{\"global.${SERVICE_SLUG}_metric_provider\": \"externalmetrics\", \"global.${SERVICE_SLUG}_log_provider\": \"external\"}"
+# Patch NRN with external provider configuration for metrics and logging
 resource "null_resource" "nrn_patch" {
   depends_on = [nullplatform_service_specification.from_template]
 

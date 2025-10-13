@@ -21,5 +21,12 @@ variable "kubernetes_version" {
   default     = "1.32"
 }
 
-variable "aws_vpc_vpc_id" {}
-variable "aws_subnets_private_ids" {}
+variable "aws_vpc_vpc_id" {
+  description = "VPC ID where the EKS cluster will be deployed"
+  type        = string
+}
+
+variable "aws_subnets_private_ids" {
+  description = "List of private subnet IDs for EKS cluster and node groups"
+  type        = list(string)
+}

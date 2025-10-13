@@ -1,15 +1,13 @@
+# Module: Asset Docker Server
 
-
-# Modules: docker-server
-
-This module allows configure to docker registry in your nullplatform organization.
+Registers a generic Docker registry with Nullplatform by creating the provider configuration from the supplied server endpoint and credentials.
 
 Usage:
 
 
 ```
-module "docker-server" {
-  source                = "git@github.com:nullplatform/tofu-modules.git//nullplatform/asset/docker-server?ref=v0.0.1"
+module "docker_server" {
+  source                = "git@github.com:nullplatform/tofu-modules.git//nullplatform/asset/docker_server?ref=v0.0.1"
   nrn                   = var.nrn
   login_server          = var.login_server
   path                  = var.path
@@ -17,6 +15,7 @@ module "docker-server" {
   password              = var.password
 }
 ```
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -28,7 +27,7 @@ module "docker-server" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.68 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | >= 0.0.67 |
 
 ## Resources
 
@@ -41,7 +40,7 @@ module "docker-server" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_login_server"></a> [login\_server](#input\_login\_server) | Docker Login server name | `string` | n/a | yes |
-| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | n/a | `string` | n/a | yes |
+| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | The null platform nrn | `string` | n/a | yes |
 | <a name="input_password"></a> [password](#input\_password) | Docker password | `string` | n/a | yes |
 | <a name="input_path"></a> [path](#input\_path) | Path to the registry created | `string` | n/a | yes |

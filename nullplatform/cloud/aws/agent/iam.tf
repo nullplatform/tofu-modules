@@ -1,4 +1,9 @@
-module "nullplatform-agent-role" {
+################################################################################
+# IAM Role for Nullplatform Agent Service Account
+################################################################################
+
+# Create IAM role with OIDC provider trust for Kubernetes service account
+module "nullplatform_agent_role" {
   source          = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
   name            = "nullplatform-agent-role"
   use_name_prefix = false
@@ -11,14 +16,19 @@ module "nullplatform-agent-role" {
   }
 
   policies = {
-    "nullplatform-route53-policy" = aws_iam_policy.nullplatform-route53-policy.arn,
-    "nullplatform-eks-policy"     = aws_iam_policy.nullplatform-eks-policy.arn,
-    "nullplatform-elb-policy"     = aws_iam_policy.nullplatform-elb-policy.arn
+    "nullplatform_route53_policy" = aws_iam_policy.nullplatform_route53_policy.arn,
+    "nullplatform_eks_policy"     = aws_iam_policy.nullplatform_eks_policy.arn,
+    "nullplatform_elb_policy"     = aws_iam_policy.nullplatform_elb_policy.arn
   }
 }
 
-resource "aws_iam_policy" "nullplatform-route53-policy" {
-  name        = "nullplatform-route53-policy"
+################################################################################
+# Route53 IAM Policy
+################################################################################
+
+# Grant permissions to manage Route53 DNS records for service discovery
+resource "aws_iam_policy" "nullplatform_route53_policy" {
+  name        = "nullplatform_route53_policy"
   description = "Policy for managing Route53 DNS records"
   policy = jsonencode({
     "Version" : "2012-10-17",
@@ -49,9 +59,14 @@ resource "aws_iam_policy" "nullplatform-route53-policy" {
   })
 }
 
-resource "aws_iam_policy" "nullplatform-elb-policy" {
-  name        = "nullplatform-elb-policy"
-  description = "Policy for managing Elastic Load Balancer"
+################################################################################
+# Elastic Load Balancer IAM Policy
+################################################################################
+
+# Grant permissions to describe and monitor load balancers and target groups
+resource "aws_iam_policy" "nullplatform_elb_policy" {
+  name        = "nullplatform_elb_policy"
+  description = "Policy for managing Elastic Load Balancer resources"
   policy = jsonencode(
     {
       "Version" : "2012-10-17",
@@ -99,9 +114,14 @@ resource "aws_iam_policy" "nullplatform-elb-policy" {
   )
 }
 
-resource "aws_iam_policy" "nullplatform-eks-policy" {
-  name        = "nullplatform-eks-policy"
-  description = "Policy for managing EKS clusters"
+################################################################################
+# EKS IAM Policy
+################################################################################
+
+# Grant permissions to describe and list EKS cluster resources
+resource "aws_iam_policy" "nullplatform_eks_policy" {
+  name        = "nullplatform_eks_policy"
+  description = "Policy for managing EKS cluster resources"
   policy = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : [
@@ -131,6 +151,5 @@ resource "aws_iam_policy" "nullplatform-eks-policy" {
         }
       }
     ]
-
   })
 }
