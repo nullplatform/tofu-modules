@@ -7,7 +7,7 @@ Usage:
 
 ```
 module "docker_server" {
-  source                = "git@github.com:nullplatform/tofu-modules.git//nullplatform/asset/docker_server?ref=v0.0.1"
+  source                = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/asset/docker_server?ref=v1.0.0"
   nrn                   = var.nrn
   login_server          = var.login_server
   path                  = var.path

@@ -6,7 +6,7 @@ Usage:
 
 ```hcl
 module "ingress" {
-  source          = "git@github.com:nullplatform/tofu-modules.git//infrastructure/aws/ingress?ref=v0.0.1"
+  source          = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/aws/ingress?ref=v1.0.0"
   certificate_arn = var.certificate_arn
 }
 ```

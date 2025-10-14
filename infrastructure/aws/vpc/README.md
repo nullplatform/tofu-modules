@@ -6,7 +6,7 @@ Usage:
 
 ```hcl
 module "vpc" {
-  source       = "git@github.com:nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v0.0.1"
+  source       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/aws/vpc?ref=v1.0.0"
   organization = var.organization
   account      = var.account
 

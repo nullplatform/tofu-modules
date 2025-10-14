@@ -6,7 +6,7 @@ Usage:
 
 ```hcl
 module "eks" {
-  source                  = "git@github.com:nullplatform/tofu-modules.git//infrastructure/aws/eks?ref=v0.0.1"
+  source                  = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/aws/eks?ref=v1.0.0"
   name                    = var.name
   kubernetes_version      = var.kubernetes_version
   aws_vpc_vpc_id          = var.aws_vpc_vpc_id

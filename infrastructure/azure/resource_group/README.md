@@ -7,7 +7,7 @@ Usage:
 
 ```
 module "resource_group" {
-  source              = "git@github.com:nullplatform/tofu-modules.git//infrastructure/azure/resource_group?ref=v0.0.1"
+  source              = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/resource_group?ref=v1.0.0"
   name                = var.domain_name
   resource_group_name = var.resource_group
 }

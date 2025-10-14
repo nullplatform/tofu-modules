@@ -6,7 +6,7 @@ Usage:
 
 ```hcl
 module "alb_controller" {
-  source                             = "git@github.com:nullplatform/tofu-modules.git//infrastructure/aws/alb_controller?ref=v0.0.1"
+  source                             = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/aws/alb_controller?ref=v1.0.0"
   cluster_name                       = var.cluster_name
   vpc_id                             = var.vpc_id
   aws_iam_openid_connect_provider    = var.aws_iam_openid_connect_provider

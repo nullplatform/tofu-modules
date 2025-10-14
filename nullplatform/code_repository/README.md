@@ -7,7 +7,7 @@ Usage for github:
 
 ```
 module "code_repository" {
-  source                       = "git@github.com:nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v0.0.1"
+  source                       = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/code_repository?ref=v1.0.0"
   git_provider                 = "github"
   np_api_key                   = var.np_api_key
   nrn                          = var.nrn
@@ -20,7 +20,7 @@ Usage for gitlab:
 
 ```
 module "code_repository" {
-  source                       = "git@github.com:nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v0.0.1"
+  source                       = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/code_repository?ref=v1.0.0"
   git_provider                 = "gitlab"
   np_api_key                   = var.np_api_key
   nrn                          = var.nrn

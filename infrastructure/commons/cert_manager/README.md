@@ -8,7 +8,7 @@ Usage:
 
 ```
 module "cert_manager" {
-  source                       = "git@github.com:nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v0.0.1"
+  source                       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/cert_manager?ref=v1.0.0"
   namespace                    = var.cert_manager_namespace
   cert_manager_version         = var.cert_manager_version
   cert_manager_config_version  = var.cert_manager_config_version
