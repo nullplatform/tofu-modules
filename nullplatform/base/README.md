@@ -1,10 +1,24 @@
+<<<<<<< HEAD:nullplatform/base/README.md
+<<<<<<<< HEAD:nullplatform/base/README.md
 # Module: Base
 
 This module installs the base helm chart from nullplatform, for more information https://docs.nullplatform.com/docs/providers/helm-charts#base-chart
+========
+# Module: GCP Base
+
+Deploys the Nullplatform base Helm chart to the target cluster and issues the platform API key for the specified NRN.
+>>>>>>>> origin/main:nullplatform/cloud/gcp/base/README.md
+=======
+# Module: AWS Base
+
+Installs the Nullplatform base Helm release on the cluster namespace and generates the agent API key tied to the provided NRN.
+>>>>>>> origin/main:nullplatform/cloud/aws/base/README.md
 
 Usage:
 
 ```
+<<<<<<< HEAD:nullplatform/base/README.md
+<<<<<<<< HEAD:nullplatform/base/README.md
 module "base" {
     source = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/base?ref=v1.0.0"
     np_api_key = var.np_api_key
@@ -17,23 +31,50 @@ module "base" {
 
 
 
+========
+module "cloud_gcp_base" {
+  source          = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/cloud/gcp/base?ref=v1.0.0"
+  nrn             = var.nrn
+  np_api_key      = var.np_api_key
+  namespace       = var.namespace
+  kubeconfig_path = var.kubeconfig_path
+  kube_context    = var.kube_context
+}
+```
+
+>>>>>>>> origin/main:nullplatform/cloud/gcp/base/README.md
+=======
+module "cloud_aws_base" {
+  source    = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/cloud/aws/base?ref=v1.0.0"
+  nrn       = var.nrn
+  namespace = var.namespace
+}
+```
+
+>>>>>>> origin/main:nullplatform/cloud/aws/base/README.md
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_google"></a> [google](#requirement\_google) | ~> 5.0 |
+<<<<<<< HEAD:nullplatform/base/README.md
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 3.0 |
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | ~> 2.25 |
+=======
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.0 |
+| <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 3.0 |
+>>>>>>> origin/main:nullplatform/cloud/aws/base/README.md
 | <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.63 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_google"></a> [google](#provider\_google) | ~> 5.0 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | ~> 3.0 |
+<<<<<<< HEAD:nullplatform/base/README.md
 | <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | ~> 2.25 |
+=======
+>>>>>>> origin/main:nullplatform/cloud/aws/base/README.md
 | <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | ~> 0.0.63 |
 
 ## Resources
@@ -41,18 +82,25 @@ module "base" {
 | Name | Type |
 |------|------|
 | [helm_release.base](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
+<<<<<<< HEAD:nullplatform/base/README.md
 | [kubernetes_namespace.gateways](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace) | resource |
-| [nullplatform_api_key.nullplatform-base-api-key](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/api_key) | resource |
+| [nullplatform_api_key.nullplatform_base_api_key](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/api_key) | resource |
+=======
+| [nullplatform_api_key.nullplatform_agent_api_key](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/api_key) | resource |
+>>>>>>> origin/main:nullplatform/cloud/aws/base/README.md
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | n/a | `string` | n/a | yes |
-| <a name="input_location"></a> [location](#input\_location) | n/a | `string` | n/a | yes |
+<<<<<<< HEAD:nullplatform/base/README.md
+| <a name="input_kube_context"></a> [kube\_context](#input\_kube\_context) | Kubernetes context name to use from the kubeconfig file | `string` | `null` | no |
+| <a name="input_kubeconfig_path"></a> [kubeconfig\_path](#input\_kubeconfig\_path) | Path to the kubeconfig file for Kubernetes cluster access | `string` | `"~/.kube/config"` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Kubernetes namespace to agent run | `string` | `"nullplatform-tools"` | no |
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication | `string` | n/a | yes |
+=======
+| <a name="input_namespace"></a> [namespace](#input\_namespace) | Kubernetes namespace to agent run | `string` | `"nullplatform-tools"` | no |
+>>>>>>> origin/main:nullplatform/cloud/aws/base/README.md
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Identifier Nullplatform Resources Name | `string` | n/a | yes |
-| <a name="input_nullplatform-base-helm-version"></a> [nullplatform-base-helm-version](#input\_nullplatform-base-helm-version) | Helm chart version for the Nullplatform agent | `string` | `"2.12.0"` | no |
-| <a name="input_project_id"></a> [project\_id](#input\_project\_id) | n/a | `string` | n/a | yes |
+| <a name="input_nullplatform_base_helm_version"></a> [nullplatform_base_helm_version](#input\_nullplatform_base_helm_version) | Helm chart version for the Nullplatform agent | `string` | `"2.12.0"` | no |
 <!-- END_TF_DOCS -->

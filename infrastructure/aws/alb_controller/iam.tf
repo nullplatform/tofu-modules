@@ -1,4 +1,4 @@
-module "aws-load-balancer-controller-role" {
+module "aws_load_balancer_controller_role" {
   source                                 = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
   version                                = "~> 6.0"
   name                                   = "AWSLoadBalancerControllerIAMRole"
@@ -12,7 +12,7 @@ module "aws-load-balancer-controller-role" {
   }
 }
 
-resource "kubernetes_service_account" "aws-load-balancer-controller-sa" {
+resource "kubernetes_service_account" "aws_load_balancer_controller_sa" {
   metadata {
     name      = "aws-load-balancer-controller"
     namespace = "kube-system"
@@ -21,7 +21,7 @@ resource "kubernetes_service_account" "aws-load-balancer-controller-sa" {
       "app.kubernetes.io/component" = "controller"
     }
     annotations = {
-      "eks.amazonaws.com/role-arn"               = module.aws-load-balancer-controller-role.arn
+      "eks.amazonaws.com/role-arn"               = module.aws_load_balancer_controller_role.arn
       "eks.amazonaws.com/sts-regional-endpoints" = "true"
     }
   }

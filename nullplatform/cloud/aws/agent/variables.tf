@@ -1,81 +1,102 @@
-variable "nullplatform-agent-helm-version" {
-  description = "Helm chart version for the Nullplatform agent"
+################################################################################
+# Required Variables
+################################################################################
+
+variable "cluster_name" {
+  description = "Name of the EKS cluster where the Nullplatform agent will be deployed"
+  type        = string
+}
+
+variable "nrn" {
+  description = "Nullplatform Resource Name - Unique identifier for Nullplatform resources"
+  type        = string
+}
+
+variable "np_api_key" {
+  description = "API key for authenticating with the Nullplatform API"
+  type        = string
+  sensitive   = true
+}
+
+variable "aws_iam_openid_connect_provider_arn" {
+  description = "ARN of the AWS IAM OIDC provider for EKS service account authentication"
+  type        = string
+}
+
+variable "tags_selectors" {
+  description = "Map of tags used to select and filter channels and agents"
+  type        = map(string)
+}
+
+################################################################################
+# Agent Configuration
+################################################################################
+
+variable "nullplatform_agent_helm_version" {
+  description = "Version of the Nullplatform agent Helm chart to deploy"
   type        = string
   default     = "2.11.0"
 }
 
+variable "namespace" {
+  description = "Kubernetes namespace where the Nullplatform agent will run"
+  type        = string
+  default     = "nullplatform-tools"
+}
+
 variable "agent_repos_scope" {
-  description = "Git repository URL for agent scopes configuration"
+  description = "Git repository URL containing agent scope configurations (format: repo#branch)"
   type        = string
   default     = "https://github.com/nullplatform/scopes.git#main"
 }
 
 variable "agent_repos_extra" {
-  description = "Additional repositories for the agent configuration"
+  description = "List of additional Git repositories for extended agent configuration"
   type        = list(string)
   default     = []
-}
-
-variable "cluster_name" {
-  description = "Name of the EKS cluster"
-  type        = string
-}
-
-variable "tags" {
-  description = "Tags to apply to identifier agent"
-  type        = string
 }
 
 variable "init_scripts" {
-  description = "List of initialization scripts to run"
+  description = "List of initialization scripts to execute during agent startup"
   type        = list(string)
   default     = []
 }
 
-variable "nrn" {
-  description = "Identifier Nullplatform Resources Name"
-  type        = string
-}
+################################################################################
+# Template and Repository Configuration
+################################################################################
 
-variable "namespace" {
-  description = "Kubernetes namespace to agent run"
-  type        = string
-  default     = "nullplatform-tools"
-}
-
-# Template Configuration
 variable "service_path" {
+  description = "Path to the service directory within the repository structure"
   type        = string
   default     = "k8s"
-  description = "Service path within the repository"
 }
 
 variable "repo_path" {
+  description = "Local filesystem path where the scope repository will be cloned"
   type        = string
   default     = "/root/.np/nullplatform/scopes"
-  description = "Local path to the repository containing templates"
 }
 
 variable "github_repo_url" {
+  description = "GitHub repository URL containing scope and action templates"
   type        = string
   default     = "https://github.com/nullplatform/scopes"
-  description = "GitHub repository URL containing templates"
 }
 
 variable "github_ref" {
+  description = "Git reference to use (branch name, tag, or commit SHA)"
   type        = string
   default     = "beta"
-  description = "Git reference (branch, tag, or commit)"
 }
 
-variable "environment_tag" {}
-
 ################################################################################
-# Scope Definition Module Variables
+# Action Specifications
 ################################################################################
 
 variable "action_spec_names" {
-  type = list(string)
+  description = "List of action specification template names to fetch and create for scope operations"
+  type        = list(string)
   default = [
     "create-scope",
     "delete-scope",
@@ -91,26 +112,54 @@ variable "action_spec_names" {
     "restart-pods",
     "kill-instances"
   ]
-  description = "List of action specification template names to fetch and create"
 }
 
-# NRN Patch Configuration
-variable "np_api_key" {
-  type        = string
-  sensitive   = true
-  description = "Nullplatform API key for authentication"
+variable "service_spec_description" {
+  description = "Description to specification service"
+  type = string
+  default = "Docker containers on pods"
 }
+
+variable "service_spec_name" {
+  description = "Name to scope type"
+  type = string
+  default = "Containers"
+}
+
+################################################################################
+# External Providers Configuration
+################################################################################
 
 variable "external_metrics_provider" {
+  description = "Name of the external metrics provider for monitoring integration"
   type        = string
   default     = "externalmetrics"
-  description = "External metrics provider name"
 }
 
 variable "external_logging_provider" {
+  description = "Name of the external logging provider for log aggregation"
   type        = string
   default     = "external"
-  description = "External logging provider name"
 }
 
-variable "aws_iam_openid_connect_provider_arn" {}
+################################################################################
+# Override Configuration
+################################################################################
+
+variable "enabled_override" {
+  description = "Enable custom overrides for scope configurations via command line"
+  type        = bool
+  default     = false
+}
+
+variable "overrides_service_path" {
+  description = "Local filesystem path to the directory containing override configurations"
+  type        = string
+  default     = null
+}
+
+variable "override_repo_path" {
+  description = "Local filesystem path where the scope repository will be cloned"
+  type        = string
+  default     = null
+}

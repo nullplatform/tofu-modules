@@ -15,7 +15,7 @@ data "external" "notification_channel" {
   program = ["sh", "-c", <<-EOT
     processed_json=$(echo '${data.http.notification_channel_template.response_body}' | \
     NRN='${var.nrn}' \
-    NP_API_KEY='${nullplatform_api_key.nullplatform-agent-api-key.api_key}' \
+    NP_API_KEY='${nullplatform_api_key.nullplatform_agent_api_key.api_key}' \
     REPO_PATH='${var.repo_path}' \
     SERVICE_PATH='${var.service_path}' \
     ENVIRONMENT='${var.environment_tag}' \

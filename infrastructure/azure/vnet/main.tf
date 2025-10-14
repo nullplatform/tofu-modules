@@ -1,5 +1,5 @@
 
-module "avm-res-network-virtualnetwork" {
+module "avm_res_network_virtualnetwork" {
   source              = "azure/avm-res-network-virtualnetwork/azurerm"
   version             = "v0.10.0"
   address_space       = var.address_space

@@ -7,7 +7,7 @@ Usage:
 
 ```
 module "dns" {
-  source              = "git@github.com:nullplatform/tofu-modules.git//infrastructure/azure/dns?ref=v0.0.1"
+  source              = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/dns?ref=v1.0.0"
   name                = var.domain_name
   resource_group_name = var.resource_group
 

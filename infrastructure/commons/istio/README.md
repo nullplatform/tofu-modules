@@ -8,7 +8,7 @@ Usage:
 
 ```
 module "istio" {
-  source                       = "git@github.com:nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v0.0.1"
+  source                       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/istio?ref=v1.0.0"
   istio_base_version           = var.istio_base_version
   istiod_version               = var.istiod_version
   istio_ingressgateway_version = var.istio_ingressgateway_version

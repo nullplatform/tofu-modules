@@ -21,7 +21,7 @@ This repository contains the **shared Tofu modules** used by Nullplatform to sta
 ├── infrastructue/                  # All reusable Tofu modules
 │   ├── aws/
 │   |   |──acm/
-│   |   |──alb-controller/
+│   |   |──alb_controller/
 |   |   |──backend/
 |   |   |──eks/
 |   |   |──ingress/
@@ -38,8 +38,8 @@ This repository contains the **shared Tofu modules** used by Nullplatform to sta
 │   |── gcp/
 |   |
 |   |──commons
-|        |── cert-manager/
-|        |── external-dns/
+|        |── cert_manager/
+|        |── external_dns/
 |        |── istio/
 |
 |──nullplatform/

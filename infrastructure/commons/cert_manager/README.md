@@ -1,5 +1,5 @@
 
-# Modules: cert-manager
+# Modules: cert_manager
 
 This module installs cert manager and nullplatform configuration using helm chart.
 
@@ -7,8 +7,8 @@ Usage:
 
 
 ```
-module "cert-manager" {
-  source                       = "git@github.com:nullplatform/tofu-modules.git//infrastructure/commons/cert-manager?ref=v0.0.1"
+module "cert_manager" {
+  source                       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/cert_manager?ref=v1.0.0"
   namespace                    = var.cert_manager_namespace
   cert_manager_version         = var.cert_manager_version
   cert_manager_config_version  = var.cert_manager_config_version

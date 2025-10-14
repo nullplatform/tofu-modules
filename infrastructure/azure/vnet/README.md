@@ -7,7 +7,7 @@ Usage:
 
 ```
 module "vnet" {
-  source              = "git@github.com:nullplatform/tofu-modules.git//infrastructure/azure/vnet?ref=v0.0.1"
+  source              = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/vnet?ref=v1.0.0"
   address_space       = var.address_space
   name                = var.vnet_name
   location            = var.location
@@ -29,7 +29,7 @@ module "vnet" {
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_avm-res-network-virtualnetwork"></a> [avm-res-network-virtualnetwork](#module\_avm-res-network-virtualnetwork) | azure/avm-res-network-virtualnetwork/azurerm | v0.10.0 |
+| <a name="module_avm_res_network_virtualnetwork"></a> [avm_res_network_virtualnetwork](#module\_avm_res_network_virtualnetwork) | azure/avm-res-network-virtualnetwork/azurerm | v0.10.0 |
 
 ## Inputs
 

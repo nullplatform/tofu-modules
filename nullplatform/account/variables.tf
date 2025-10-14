@@ -1,4 +1,5 @@
 variable "nullplatform_accounts" {
+  description = "Map of Nullplatform accounts to create with their configuration settings"
   type = map(object({
     name                = string
     repository_prefix   = optional(string, "poc-account")

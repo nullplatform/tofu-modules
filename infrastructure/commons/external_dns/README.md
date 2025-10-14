@@ -1,5 +1,5 @@
 
-# Modules: external-dns
+# Modules: external_dns
 
 This module installs external dns using helm chart.
 
@@ -7,8 +7,8 @@ Usage:
 
 
 ```
-module "external-dns" {
-  source                       = "git@github.com:nullplatform/tofu-modules.git//infrastructure/commons/external-dns?ref=v0.0.1"
+module "external_dns" {
+  source                       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/external_dns?ref=v1.0.0"
    namespace                    = var.externa_dns_namespace
   create_namespace              = true
   version                       = var.external_dns_version

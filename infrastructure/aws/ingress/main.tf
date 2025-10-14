@@ -19,6 +19,8 @@ resource "kubernetes_ingress_v1" "internal" {
       "alb.ingress.kubernetes.io/ssl-redirect"       = "443"
       "alb.ingress.kubernetes.io/target-type"        = "ip"
       "alb.ingress.kubernetes.io/certificate-arn"    = var.certificate_arn
+      "alb.ingress.kubernetes.io/load-balancer-attributes" = "deletion_protection.enabled=false"
+      "alb.ingress.kubernetes.io/target-group-attributes"  = "deregistration_delay.timeout_seconds=10"
     })
   }
 
@@ -67,6 +69,8 @@ resource "kubernetes_ingress_v1" "public" {
       "alb.ingress.kubernetes.io/ssl-redirect"       = "443"
       "alb.ingress.kubernetes.io/target-type"        = "ip"
       "alb.ingress.kubernetes.io/certificate-arn"    = var.certificate_arn
+      "alb.ingress.kubernetes.io/load-balancer-attributes" = "deletion_protection.enabled=false"
+      "alb.ingress.kubernetes.io/target-group-attributes"  = "deregistration_delay.timeout_seconds=10"
     })
   }
 
