@@ -7,7 +7,7 @@ Usage:
 
 ```
 module "vnet" {
-  source              = "git@github.com:nullplatform/tofu-modules.git//infrastructure/azure/vnet?ref=v0.0.1"
+  source              = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/vnet?ref=v1.0.0"
   address_space       = var.address_space
   name                = var.vnet_name
   location            = var.location

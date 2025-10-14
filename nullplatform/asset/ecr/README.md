@@ -7,7 +7,7 @@ Usage:
 
 ```
 module "ecr" {
-  source                          = "git@github.com:nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v0.0.1"
+  source                          = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/asset/ecr?ref=v1.0.0"
   nrn                             = var.nrn
   application_manager_assume_role = var.application_manager_assume_role
   np_api_key                      = var.np_api_key

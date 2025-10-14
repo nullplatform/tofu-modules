@@ -7,7 +7,7 @@ Usage:
 
 ```
 module "acr" {
-  source = "git@github.com:nullplatform/tofu-modules.git//infrastructure/azure/acr?ref=v0.0.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/acr?ref=v1.0.0"
   name                = var.containerregistry_name
   resource_group_name = var.resource_group_name
   location            = var.location

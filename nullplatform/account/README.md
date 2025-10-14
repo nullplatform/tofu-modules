@@ -7,7 +7,7 @@ Usage:
 
 ```
 module "account" {
-  source                = "git@github.com:nullplatform/tofu-modules.git//nullplatform/account?ref=v0.0.1"
+  source                = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/account?ref=v1.0.0"
   nullplatform_accounts = var.nullplatform_accounts
   np_api_key            = var.np_api_key
 }

@@ -6,7 +6,7 @@ Usage:
 
 ```hcl
 module "route53" {
-  source      = "git@github.com:nullplatform/tofu-modules.git//infrastructure/aws/route53?ref=v0.0.1"
+  source      = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/aws/route53?ref=v1.0.0"
   domain_name = var.domain_name
   vpc_id      = var.vpc_id
 }
