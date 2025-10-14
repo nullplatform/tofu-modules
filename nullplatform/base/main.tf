@@ -1,7 +1,3 @@
-resource "kubernetes_namespace" "gateways" {
-  metadata { name = "gateways" }
-}
-
 resource "helm_release" "base" {
   name              = "nullplatform-base"
   chart             = "nullplatform-base"
@@ -9,15 +5,15 @@ resource "helm_release" "base" {
   namespace         = var.namespace
   version           = var.nullplatform_base_helm_version
   create_namespace  = true
-  disable_webhooks  = true
+  disable_webhooks  = false
   force_update      = true
   wait              = true
   wait_for_jobs     = true
   timeout           = 600
   atomic            = true
   cleanup_on_fail   = true
-  replace           = false
-  recreate_pods     = false
+  replace           = true
+  recreate_pods     = true
   reset_values      = false
   reuse_values      = false
   dependency_update = true
