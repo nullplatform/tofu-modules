@@ -37,6 +37,7 @@ variable "cloud_provider" {
 variable "aws_region" {
   type        = string
   description = "AWS region where resources will be deployed."
+  default     = "us-east-1"
 }
 
 variable "install_gateway_v2_crd" {
@@ -62,7 +63,7 @@ variable "tls_required" {
 variable "gateway_enabled" {
   type        = bool
   description = "Enable the HTTP Gateway."
-  default     = true
+  default     = false
 }
 
 variable "gateway_internal_enabled" {
@@ -78,7 +79,7 @@ variable "gateway_internal_enabled" {
 variable "control_plane_enabled" {
   type        = bool
   description = "Enable the Control Plane."
-  default     = true
+  default     = false
 }
 
 ############################################
@@ -290,13 +291,13 @@ variable "gateways_enabled" {
 variable "gateway_api_enabled" {
   type        = bool
   description = "Enable Gateway API."
-  default     = true
+  default     = false
 }
 
 variable "gateway_api_crds_install" {
   type        = bool
   description = "Install Gateway API CRDs."
-  default     = true
+  default     = false
 }
 
 ############################################
