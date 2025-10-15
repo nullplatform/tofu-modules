@@ -1,0 +1,15 @@
+service:
+  type: ${service_type}
+  ports:
+    - name: status-port
+      port: ${status_port}
+      targetPort: ${status_port}
+       %{ if enable_http2 }
+    - name: http2
+      port: ${http2_port}
+      protocol: TCP
+      targetPort: ${http2_target_port}
+       %{ endif }
+    - name: https
+      port: ${https_port}
+      targetPort: ${https_target_port}
