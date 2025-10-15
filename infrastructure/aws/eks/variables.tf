@@ -30,3 +30,19 @@ variable "aws_subnets_private_ids" {
   description = "List of private subnet IDs for EKS cluster and node groups"
   type        = list(string)
 }
+
+variable "access_entries_user_name" {
+  description = "String of users with access to the cluster"
+  type = string
+  default = null
+}
+variable "access_entries_principal_arn" {
+  description = "arn of the role with access to the cluster"
+  type = string
+  default = null
+}
+variable "policy_associations_default_policy_arn" {
+  description = "arn og the cluster access policy"
+  type = string
+  default = null
+}

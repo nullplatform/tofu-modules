@@ -18,7 +18,22 @@ module "eks" {
     }
   }
 
-  # Optional
+  access_entries = {
+    default = {
+      user_name         = var.access_entries_user_name
+      principal_arn = var.access_entries_principal_arn
+
+      policy_associations = {
+        default = {
+          policy_arn = var.policy_associations_default_policy_arn
+          access_scope = {}
+        }
+      }
+    }
+  }
+}
+
+# Optional
   endpoint_public_access = true
 
   # Optional: Adds the current caller identity as an administrator via cluster access entry

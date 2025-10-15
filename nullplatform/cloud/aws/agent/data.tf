@@ -26,3 +26,6 @@ data "external" "notification_channel" {
   EOT
   ]
 }
+
+data "aws_region" "current" {
+}
