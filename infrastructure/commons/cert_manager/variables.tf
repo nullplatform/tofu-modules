@@ -1,12 +1,4 @@
 
-variable "kubeconfig_path" {
-  type    = string
-  default = "~/.kube/config"
-}
-variable "kube_context" {
-  type    = string
-  default = null
-}
 variable "cert_manager_version" {
   type    = string
   default = "1.18.2"

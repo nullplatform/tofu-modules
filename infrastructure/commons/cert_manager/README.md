@@ -59,6 +59,4 @@ module "cert_manager" {
 | <a name="input_gcp_enabled"></a> [gcp\_enabled](#input\_gcp\_enabled) | Enable GCP (Cloud DNS) solver in cert-manager. | `bool` | `false` | no |
 | <a name="input_gcp_service_account_key"></a> [gcp\_service\_account\_key](#input\_gcp\_service\_account\_key) | Contents of the Service Account JSON for Cloud DNS (use file() if reading from disk). | `string` | `""` | no |
 | <a name="input_hosted_zone_name"></a> [hosted\_zone\_name](#input\_hosted\_zone\_name) | Hosted zone name (if applicable). | `string` | `""` | no |
-| <a name="input_kube_context"></a> [kube\_context](#input\_kube\_context) | n/a | `string` | `null` | no |
-| <a name="input_kubeconfig_path"></a> [kubeconfig\_path](#input\_kubeconfig\_path) | n/a | `string` | `"~/.kube/config"` | no |
 <!-- END_TF_DOCS -->
