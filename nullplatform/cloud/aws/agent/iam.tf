@@ -139,9 +139,7 @@ resource "aws_iam_policy" "nullplatform_eks_policy" {
         "Condition" : {
           "StringEquals" : {
             "aws:RequestedRegion" : [
-              "us-east-1",
-              "us-west-2",
-              "eu-west-1"
+              data.aws_region.current.region
             ]
           }
         }
