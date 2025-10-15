@@ -26,7 +26,9 @@ module "eks" {
       policy_associations = {
         default = {
           policy_arn = var.policy_associations_default_policy_arn
-          access_scope = {}
+          access_scope = {
+            type = "cluster"
+          }
         }
       }
     }
