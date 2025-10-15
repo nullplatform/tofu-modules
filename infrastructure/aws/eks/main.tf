@@ -18,21 +18,7 @@ module "eks" {
     }
   }
 
-  access_entries = {
-    default = {
-      user_name         = var.access_entries_user_name
-      principal_arn = var.access_entries_principal_arn
-
-      policy_associations = {
-        default = {
-          policy_arn = var.policy_associations_default_policy_arn
-          access_scope = {
-            type = "cluster"
-          }
-        }
-      }
-    }
-  }
+  access_entries = var.access_entries
 
 # Optional
   endpoint_public_access = true
