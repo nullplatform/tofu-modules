@@ -1,9 +1,9 @@
 
 resource "helm_release" "istio_base" {
   name             = "istio-base"
-  repository       = local.repository
+  repository       = var.repository
   chart            = "base"
-  namespace        = local.namespace
+  namespace        = var.namespace
   create_namespace = true
   version          = var.istio_base_version
 }
@@ -11,9 +11,9 @@ resource "helm_release" "istio_base" {
 resource "helm_release" "istiod" {
   name       = "istiod"
   depends_on = [helm_release.istio_base]
-  repository = local.repository
+  repository = var.repository
   chart      = "istiod"
-  namespace  = local.namespace
+  namespace  = var.namespace
   version    = var.istiod_version
 }
 
@@ -21,9 +21,9 @@ resource "helm_release" "istiod" {
 resource "helm_release" "istio_ingressgateway" {
   name       = "istio-ingressgateway"
   depends_on = [helm_release.istiod]
-  repository = local.repository
+  repository = var.repository
   chart      = "gateway"
-  namespace  = local.namespace
+  namespace  = var.namespace
   version    = var.istio_ingressgateway_version
-
+  values     = [local.helm_values]
 }
