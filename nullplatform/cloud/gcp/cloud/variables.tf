@@ -16,21 +16,6 @@ variable "domain_name" {
 }
 
 
-
-
-variable "dimensions" {
-  description = "Map of dimension values to configure Nullplatform"
-  type        = map(string)
-  default     = {}
-}
-
-
-variable "environments" {
-  type        = list(string)
-  description = "The list of environments"
-  default     = ["development", "staging", "production"]
-}
-
 variable "location" {
   description = "GCP location/region where resources will be deployed"
   type        = string
