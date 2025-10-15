@@ -31,7 +31,6 @@ module "eks" {
       }
     }
   }
-}
 
 # Optional
   endpoint_public_access = true
