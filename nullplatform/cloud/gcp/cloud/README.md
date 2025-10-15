@@ -1,6 +1,6 @@
 # Module: GCP Cloud
 
-Configures Nullplatform for Google Cloud by registering the project, location, networking domain, and optional environment dimensions.
+Configures Nullplatform for Google Cloud by registering the project, location, networking domain.
 
 Usage:
 
@@ -12,8 +12,6 @@ module "cloud_gcp" {
   domain_name           = var.domain_name
   location              = var.location
   project_id            = var.project_id
-  environments          = var.environments
-  dimensions            = var.dimensions
   include_environment   = var.include_environment
   private_dns_zone_name = var.private_dns_zone_name
   public_dns_zone_name  = var.public_dns_zone_name
