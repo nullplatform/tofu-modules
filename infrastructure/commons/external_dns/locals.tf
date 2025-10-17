@@ -5,8 +5,10 @@ locals {
     provider     = var.dns_provider_name
     extra_args   = var.extra_args
     ksa_name     = var.ksa_name
-    gsa_email    = google_service_account.external_dns.email
+    gsa_email    = try(google_service_account.external_dns["on"].email, null)
 
   })
   create_cf_secret = lower(var.dns_provider_name) == "cloudflare"
+  use_google_dns   = lower(var.dns_provider_name) == "google"
+  google_toggle    = local.use_google_dns ? toset(["on"]) : toset([])
 }
