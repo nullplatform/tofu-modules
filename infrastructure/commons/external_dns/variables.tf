@@ -4,7 +4,7 @@ variable "external_dns_version" {
 
 }
 
-variable "externa_dns_namespace" {
+variable "external_dns_namespace" {
   type = string
 }
 variable "domain" {
@@ -13,13 +13,15 @@ variable "domain" {
 }
 
 variable "txt_owner_id" {
-  type = string
+  type    = string
+  default = "external_dns"
 
 }
 
 variable "cloudflare_token" {
   type      = string
   sensitive = true
+  default   = " "
 
 }
 
@@ -34,11 +36,23 @@ variable "extra_args" {
   default = [""]
 }
 
-variable "kubeconfig_path" {
+variable "project_id" {
   type    = string
-  default = "~/.kube/config"
+  default = " "
+
 }
-variable "kube_context" {
+
+variable "ksa_name" {
   type    = string
-  default = null # o el nombre de tu context
+  default = "external-dns"
+}
+
+variable "gsa_name" {
+  type    = string
+  default = "external-dns"
+}
+variable "zone_name" {
+  type    = string
+  default = " "
+
 }
