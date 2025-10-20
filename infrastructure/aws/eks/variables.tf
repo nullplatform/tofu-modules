@@ -34,7 +34,7 @@ variable "aws_subnets_private_ids" {
 variable "access_entries" {
   description = "Map de access entries para el cluster EKS"
   type = map(object({
-    principal_arn     = optional(string)
+    principal_arn     = string
     user_name         = optional(string)
     kubernetes_groups = optional(list(string))
     type              = optional(string)
