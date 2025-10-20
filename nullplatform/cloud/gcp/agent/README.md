@@ -72,7 +72,7 @@ module "cloud_gcp_agent" {
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Kubernetes namespace to agent run | `string` | `"nullplatform-tools"` | no |
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Identifier Nullplatform Resources Name | `string` | n/a | yes |
-| <a name="input_nullplatform_agent_helm_version"></a> [nullplatform_agent_helm_version](#input\_nullplatform_agent_helm_version) | Helm chart version for the Nullplatform agent | `string` | `"2.14.0"` | no |
+| <a name="input_nullplatform_agent_helm_version"></a> [nullplatform\_agent\_helm\_version](#input\_nullplatform\_agent\_helm\_version) | Helm chart version for the Nullplatform agent | `string` | `"2.14.0"` | no |
 | <a name="input_repo_path"></a> [repo\_path](#input\_repo\_path) | Local path to the repository containing templates | `string` | `"/root/.np/nullplatform/scopes"` | no |
 | <a name="input_service_path"></a> [service\_path](#input\_service\_path) | Service path within the repository | `string` | `"k8s"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to identifier agent | `string` | n/a | yes |
