@@ -1,0 +1,9 @@
+name: pipeline tofu
+on:
+  push:
+    branches:
+      - '**'
+jobs:
+  quality:
+    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/tf-docs.yml@main
+    if: startsWith(github.ref_name, 'feature/') || startsWith(github.ref_name, 'hotfix/') || startsWith(github.ref_name, 'bugfix/')
