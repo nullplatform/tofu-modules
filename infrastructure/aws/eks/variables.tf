@@ -36,15 +36,16 @@ variable "access_entries" {
   type = map(object({
     principal_arn     = optional(string)
     user_name         = optional(string)
-    kubernetes_groups = optional(list(string), [])
+    kubernetes_groups = optional(list(string))
     type              = optional(string)
+
     policy_associations = optional(map(object({
       policy_arn = string
       access_scope = optional(object({
-        type       = optional(string, "cluster")
-        namespaces = optional(list(string), [])
+        type       = optional(string)
+        namespaces = optional(list(string))
       }))
-    })), {})
+    })))
   }))
   default = {}
 }
