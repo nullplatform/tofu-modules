@@ -49,6 +49,7 @@ module "route53" {
 
 | Name | Description |
 |------|-------------|
+| <a name="output_acm_certificate_arn"></a> [acm\_certificate\_arn](#output\_acm\_certificate\_arn) | The arn to Certificate of the Route 53 Hosted Zone |
 | <a name="output_private_zone_id"></a> [private\_zone\_id](#output\_private\_zone\_id) | The ID of the Private Route 53 Hosted Zone |
 | <a name="output_private_zone_name"></a> [private\_zone\_name](#output\_private\_zone\_name) | The domain name of the Private Route 53 Hosted Zone |
 | <a name="output_public_zone_id"></a> [public\_zone\_id](#output\_public\_zone\_id) | The ID of the Public Route 53 Hosted Zone |
