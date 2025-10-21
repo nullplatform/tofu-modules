@@ -3,7 +3,7 @@ resource "kubernetes_secret_v1" "external_dns_cloudflare" {
 
   metadata {
     name      = "external-dns-cloudflare"
-    namespace = var.externa_dns_namespace
+    namespace = var.external_dns_namespace
   }
 
   type = "Opaque"
