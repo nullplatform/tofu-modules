@@ -35,7 +35,7 @@ module "eks" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_access_entries"></a> [access\_entries](#input\_access\_entries) | Map de access entries para el cluster EKS | <pre>map(object({<br/>    user_name     = string<br/>    principal_arn = string<br/><br/>    policy_associations = map(object({<br/>      policy_arn = string<br/>      access_scope = object({<br/>        type       = string<br/>        namespaces = optional(list(string))<br/>      })<br/>    }))<br/>    kubernetes_groups = optional(list(string))<br/>    type             = optional(string)<br/>  }))</pre> | `{}` | no |
+| <a name="input_access_entries"></a> [access\_entries](#input\_access\_entries) | Map de access entries para el cluster EKS | <pre>map(object({<br/>    principal_arn     = string<br/>    user_name         = optional(string)<br/>    kubernetes_groups = optional(list(string))<br/>    type              = optional(string)<br/><br/>    policy_associations = optional(map(object({<br/>      policy_arn = string<br/>      access_scope = optional(object({<br/>        type       = optional(string)<br/>        namespaces = optional(list(string))<br/>      }))<br/>    })))<br/>  }))</pre> | `{}` | no |
 | <a name="input_ami_type"></a> [ami\_type](#input\_ami\_type) | The ami type to use with node | `string` | `"AL2023_x86_64_STANDARD"` | no |
 | <a name="input_aws_subnets_private_ids"></a> [aws\_subnets\_private\_ids](#input\_aws\_subnets\_private\_ids) | List of private subnet IDs for EKS cluster and node groups | `list(string)` | n/a | yes |
 | <a name="input_aws_vpc_vpc_id"></a> [aws\_vpc\_vpc\_id](#input\_aws\_vpc\_vpc\_id) | VPC ID where the EKS cluster will be deployed | `string` | n/a | yes |
