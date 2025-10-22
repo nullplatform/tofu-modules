@@ -20,8 +20,8 @@ resource "nullplatform_notification_channel" "from_template" {
             k => (
               k == "environment"
               ? jsonencode({
-                  NP_ACTION_CONTEXT = "'$${NOTIFICATION_CONTEXT}'"
-                })
+                NP_ACTION_CONTEXT = "'$${NOTIFICATION_CONTEXT}'"
+              })
               : (k == "cmdline" && var.enabled_override
                 ? "${tostring(v)} ${local.overrides_flag}"
                 : (can(tostring(v)) ? tostring(v) : jsonencode(v))

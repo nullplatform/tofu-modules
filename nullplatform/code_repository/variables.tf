@@ -8,38 +8,38 @@ variable "git_provider" {
 }
 
 # Variables específicas de GitLab
-variable "group_path" {
+variable "gitlab_group_path" {
   description = "GitLab group path where repositories will be created"
   type        = string
   default     = null
   validation {
-    condition     = var.git_provider != "gitlab" || var.group_path != null
+    condition     = var.git_provider != "gitlab" || var.gitlab_group_path != null
     error_message = "group_path is required when git_provider is 'gitlab'."
   }
 }
 
-variable "access_token" {
+variable "gitlab_access_token" {
   description = "Access token for authenticating with the Git provider API"
   type        = string
   sensitive   = true
   default     = null
   validation {
-    condition     = var.git_provider != "gitlab" || var.access_token != null
+    condition     = var.git_provider != "gitlab" || var.gitlab_access_token != null
     error_message = "access_token is required when git_provider is 'gitlab'."
   }
 }
 
-variable "installation_url" {
+variable "gitlab_installation_url" {
   description = "Installation URL for the Git provider integration"
   type        = string
   default     = null
   validation {
-    condition     = var.git_provider != "gitlab" || var.installation_url != null
+    condition     = var.git_provider != "gitlab" || var.gitlab_installation_url != null
     error_message = "installation_url is required when git_provider is 'gitlab'."
   }
 }
 
-variable "collaborators_config" {
+variable "gitlab_collaborators_config" {
   description = "Configuration for repository collaborators with their roles and permissions"
   type = object({
     collaborators = list(object({
@@ -50,7 +50,7 @@ variable "collaborators_config" {
   })
   default = null
   validation {
-    condition     = var.git_provider != "gitlab" || var.collaborators_config != null
+    condition     = var.git_provider != "gitlab" || var.gitlab_collaborators_config != null
     error_message = "collaborators_config is required when git_provider is 'gitlab'."
   }
 }
@@ -76,22 +76,22 @@ variable "gitlab_slug" {
 }
 
 # Variables específicas de GitHub
-variable "organization" {
+variable "github_organization" {
   description = "GitHub organization name for repository creation"
   type        = string
   default     = null
   validation {
-    condition     = var.git_provider != "github" || var.organization != null
+    condition     = var.git_provider != "github" || var.github_organization != null
     error_message = "organization is required when git_provider is 'github'."
   }
 }
 
-variable "organization_installation_id" {
+variable "github_installation_id" {
   description = "GitHub App installation ID for the organization"
   type        = string
   default     = null
   validation {
-    condition     = var.git_provider != "github" || var.organization_installation_id != null
+    condition     = var.git_provider != "github" || var.github_installation_id != null
     error_message = "organization_installation_id is required when git_provider is 'github'."
   }
 }
