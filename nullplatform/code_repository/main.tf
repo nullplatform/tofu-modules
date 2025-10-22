@@ -6,11 +6,11 @@ resource "nullplatform_provider_config" "gitlab" {
   dimensions = {}
   attributes = jsonencode({
     "setup" : {
-      "group_path" : var.group_path,
-      "access_token" : var.access_token,
-      "installation_url" : var.installation_url
+      "group_path" : var.gitlab_group_path,
+      "access_token" : var.gitlab_access_token,
+      "installation_url" : var.gitlab_installation_url
     },
-    "access" : var.collaborators_config
+    "access" : var.gitlab_collaborators_config
     }
   )
 
@@ -24,8 +24,8 @@ resource "nullplatform_provider_config" "github" {
   dimensions = {}
   attributes = jsonencode({
     "setup" : {
-      "organization" : var.organization,
-      "installation_id" : var.organization_installation_id
+      "organization" : var.github_organization,
+      "installation_id" : var.github_installation_id
     },
     }
   )
