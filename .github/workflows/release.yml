@@ -1,0 +1,12 @@
+name: pipeline tofu
+on:
+  push:
+    branches:
+      - '**'
+jobs:
+  docs:
+    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/release.yml@main
+    if: github.ref_name == 'main'
+    permissions:
+      contents: write
+      pull-requests: write
