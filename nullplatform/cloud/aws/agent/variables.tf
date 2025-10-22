@@ -116,14 +116,14 @@ variable "action_spec_names" {
 
 variable "service_spec_description" {
   description = "Description to specification service"
-  type = string
-  default = "Docker containers on pods"
+  type        = string
+  default     = "Docker containers on pods"
 }
 
 variable "service_spec_name" {
   description = "Name to scope type"
-  type = string
-  default = "Containers"
+  type        = string
+  default     = "Containers"
 }
 
 ################################################################################

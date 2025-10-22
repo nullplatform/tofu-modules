@@ -20,5 +20,5 @@ output "private_zone_name" {
 
 output "acm_certificate_arn" {
   description = "The arn to Certificate of the Route 53 Hosted Zone"
-  value = module.aws_route53_acm.acm_certificate_arn
+  value       = module.aws_route53_acm.acm_certificate_arn
 }

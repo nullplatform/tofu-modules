@@ -11,8 +11,8 @@ module "code_repository" {
   git_provider                 = "github"
   np_api_key                   = var.np_api_key
   nrn                          = var.nrn
-  organization                 = var.organization
-  organization_installation_id = var.organization_installation_id
+  github_organization          = var.github_organization
+  github_installation_id       = var.github_installation_id
 
 }
 ```
@@ -24,9 +24,9 @@ module "code_repository" {
   git_provider                 = "gitlab"
   np_api_key                   = var.np_api_key
   nrn                          = var.nrn
-  group_path                   = var.group_path
-  access_token                 = var.access_token
-  installation_url             = var.installation_url
+  gitlab_group_path            = var.gitlab_group_path
+  gitlab_access_token          = var.gitlab_access_token
+  gitlab_installation_url      = var.gitlab_installation_url
 
 }
 ```

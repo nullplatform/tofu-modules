@@ -17,7 +17,7 @@ resource "helm_release" "agent" {
   wait              = true
   wait_for_jobs     = true
   timeout           = 600
-  atomic            = true  # Rollback on failure
+  atomic            = true # Rollback on failure
   cleanup_on_fail   = true
   replace           = false
   recreate_pods     = false

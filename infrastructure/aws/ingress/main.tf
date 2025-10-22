@@ -12,13 +12,13 @@ resource "kubernetes_ingress_v1" "internal" {
           messageBody = "404 scope not found or has not been deployed yet"
         }
       })
-      "alb.ingress.kubernetes.io/group.name"         = "k8s-nullplatform-internal"
-      "alb.ingress.kubernetes.io/listen-ports"       = "[{\"HTTP\":80},{\"HTTPS\":443}]"
-      "alb.ingress.kubernetes.io/load-balancer-name" = "k8s-nullplatform-internal"
-      "alb.ingress.kubernetes.io/scheme"             = "internal"
-      "alb.ingress.kubernetes.io/ssl-redirect"       = "443"
-      "alb.ingress.kubernetes.io/target-type"        = "ip"
-      "alb.ingress.kubernetes.io/certificate-arn"    = var.certificate_arn
+      "alb.ingress.kubernetes.io/group.name"               = "k8s-nullplatform-internal"
+      "alb.ingress.kubernetes.io/listen-ports"             = "[{\"HTTP\":80},{\"HTTPS\":443}]"
+      "alb.ingress.kubernetes.io/load-balancer-name"       = "k8s-nullplatform-internal"
+      "alb.ingress.kubernetes.io/scheme"                   = "internal"
+      "alb.ingress.kubernetes.io/ssl-redirect"             = "443"
+      "alb.ingress.kubernetes.io/target-type"              = "ip"
+      "alb.ingress.kubernetes.io/certificate-arn"          = var.certificate_arn
       "alb.ingress.kubernetes.io/load-balancer-attributes" = "deletion_protection.enabled=false"
       "alb.ingress.kubernetes.io/target-group-attributes"  = "deregistration_delay.timeout_seconds=10"
     })
@@ -62,13 +62,13 @@ resource "kubernetes_ingress_v1" "public" {
           messageBody = "404 scope not found or has not been deployed yet"
         }
       })
-      "alb.ingress.kubernetes.io/group.name"         = "k8s-nullplatform-internet-facing"
-      "alb.ingress.kubernetes.io/listen-ports"       = "[{\"HTTP\":80},{\"HTTPS\":443}]"
-      "alb.ingress.kubernetes.io/load-balancer-name" = "k8s-nullplatform-internet-facing"
-      "alb.ingress.kubernetes.io/scheme"             = "internet-facing"
-      "alb.ingress.kubernetes.io/ssl-redirect"       = "443"
-      "alb.ingress.kubernetes.io/target-type"        = "ip"
-      "alb.ingress.kubernetes.io/certificate-arn"    = var.certificate_arn
+      "alb.ingress.kubernetes.io/group.name"               = "k8s-nullplatform-internet-facing"
+      "alb.ingress.kubernetes.io/listen-ports"             = "[{\"HTTP\":80},{\"HTTPS\":443}]"
+      "alb.ingress.kubernetes.io/load-balancer-name"       = "k8s-nullplatform-internet-facing"
+      "alb.ingress.kubernetes.io/scheme"                   = "internet-facing"
+      "alb.ingress.kubernetes.io/ssl-redirect"             = "443"
+      "alb.ingress.kubernetes.io/target-type"              = "ip"
+      "alb.ingress.kubernetes.io/certificate-arn"          = var.certificate_arn
       "alb.ingress.kubernetes.io/load-balancer-attributes" = "deletion_protection.enabled=false"
       "alb.ingress.kubernetes.io/target-group-attributes"  = "deregistration_delay.timeout_seconds=10"
     })
