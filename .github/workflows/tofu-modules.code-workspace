@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../example/buid"
+		},
+		{
+			"path": "../../../example/external_dns"
+		},
+		{
+			"path": "../../../example/azure"
+		}
+	],
+	"settings": {}
+}
