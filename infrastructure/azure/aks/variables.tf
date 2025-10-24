@@ -50,9 +50,7 @@ variable "environment" {
   default = "nullplatform"
 
 }
-variable "service_dns_ip" {
 
-}
 variable "system_pool_vm_size" {
   type    = string
   default = "Standard_D4s_v5"
