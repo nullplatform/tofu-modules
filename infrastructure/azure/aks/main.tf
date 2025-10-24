@@ -1,3 +1,6 @@
+
+data "azurerm_client_config" "current" {}
+
 module "aks" {
   # ✅ Pin the module version to avoid breaking changes on upgrades
   source  = "Azure/aks/azurerm"
@@ -28,7 +31,7 @@ module "aks" {
   ############################################
   role_based_access_control_enabled = true
   rbac_aad_azure_rbac_enabled       = false
-  #rbac_aad_tenant_id                = data.azurerm_client_config.current.tenant_id
+  rbac_aad_tenant_id                = data.azurerm_client_config.current.tenant_id
 
 
   workload_identity_enabled = true
