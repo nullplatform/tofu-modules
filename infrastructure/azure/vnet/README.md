@@ -47,4 +47,5 @@ module "vnet" {
 | Name | Description |
 |------|-------------|
 | <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id) | The resource ID of the virtual network. |
+| <a name="output_subnet_ids_by_name"></a> [subnet\_ids\_by\_name](#output\_subnet\_ids\_by\_name) | n/a |
 <!-- END_TF_DOCS -->
