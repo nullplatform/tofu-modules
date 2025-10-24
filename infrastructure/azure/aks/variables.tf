@@ -48,6 +48,3 @@ variable "system_pool_vm_size" {
   default = "Standard_D4s_v5"
 
 }
-variable "service_cidr" {
-
-}
