@@ -67,3 +67,9 @@ variable "prefix" {
   default = "test"
 
 }
+
+variable "oidc_issuer_enabled" {
+  type    = bool
+  default = true
+
+}

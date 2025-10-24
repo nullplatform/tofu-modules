@@ -13,8 +13,8 @@ module "aks" {
   # Kubernetes version & upgrades
   ############################################
 
-  kubernetes_version        = var.kubernetes_version
-  automatic_channel_upgrade = "stable"
+  kubernetes_version = var.kubernetes_version
+
 
   ############################################
   # API Server & Control Plane
@@ -32,6 +32,7 @@ module "aks" {
 
 
   workload_identity_enabled = true
+  oidc_issuer_enabled       = var.oidc_issuer_enabled
 
 
 
