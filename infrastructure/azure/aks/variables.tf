@@ -21,6 +21,8 @@ variable "kubernetes_version" {
 }
 
 variable "authorized_ip_ranges" {
+  type    = set(string)
+  default = null
 
 }
 variable "private_cluster_enabled" {
