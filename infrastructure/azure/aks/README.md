@@ -23,7 +23,6 @@
 | <a name="input_location"></a> [location](#input\_location) | n/a | `any` | n/a | yes |
 | <a name="input_private_cluster_enabled"></a> [private\_cluster\_enabled](#input\_private\_cluster\_enabled) | n/a | `any` | n/a | yes |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | n/a | `any` | n/a | yes |
-| <a name="input_service_cidr"></a> [service\_cidr](#input\_service\_cidr) | n/a | `any` | n/a | yes |
 | <a name="input_service_dns_ip"></a> [service\_dns\_ip](#input\_service\_dns\_ip) | n/a | `any` | n/a | yes |
 | <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | n/a | `string` | n/a | yes |
 | <a name="input_system_pool_vm_size"></a> [system\_pool\_vm\_size](#input\_system\_pool\_vm\_size) | n/a | `string` | `"Standard_D4s_v5"` | no |
