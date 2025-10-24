@@ -2,23 +2,29 @@ variable "subscription_id" {
   type = string
 }
 variable "tags" {
+  type    = map(string)
+  default = {}
 
 }
-variable "workspace" {
 
-}
 variable "resource_group_name" {
+  type = string
 
 }
 variable "location" {
+  type = string
+
 
 }
 variable "cluster_name" {
 
 }
 variable "kubernetes_version" {
+  type    = string
+  default = "1.32.7"
 
 }
+
 
 variable "authorized_ip_ranges" {
   type    = set(string)
@@ -26,6 +32,8 @@ variable "authorized_ip_ranges" {
 
 }
 variable "private_cluster_enabled" {
+  type    = bool
+  default = false
 
 }
 variable "user_pool_vm_size" {

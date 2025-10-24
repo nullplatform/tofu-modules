@@ -7,7 +7,6 @@ module "aks" {
   ############################################
   resource_group_name = var.resource_group_name
   location            = var.location
-  prefix              = var.workspace
   cluster_name        = var.cluster_name
 
   ############################################
@@ -101,14 +100,8 @@ module "aks" {
   ############################################
   # Tags
   ############################################
-  tags = merge(
-    {
-      workspace   = var.workspace
-      environment = var.environment
-      managed_by  = "terraform"
-    },
-    var.tags # permite agregar/overrides desde tfvars
-  )
+  tags = var.tags # permite agregar/overrides desde tfvars
+
 
   ############################################
   # Add-ons / Integraciones (activar si tu módulo los soporta)
