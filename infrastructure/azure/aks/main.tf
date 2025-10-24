@@ -34,19 +34,9 @@ module "aks" {
   # ✅ Seguridad moderna: habilita OIDC y Workload Identity (si el módulo lo soporta)
   # oidc_issuer_enabled      = true
   workload_identity_enabled = true
-  # rbac_aad_admin_group_object_ids = var.aad_admin_group_object_ids # grupos AAD con admin RBAC
 
-  ############################################
-  # Networking
-  ############################################
-  # Asegúrate de que estos CIDR NO se solapan con tu VNet/Subnets
-  net_profile_service_cidr   = var.service_cidr   # e.g., "10.1.0.0/16"
-  net_profile_dns_service_ip = var.service_dns_ip # e.g., "10.1.0.10" (debe caer dentro de service_cidr)
 
-  # Si tu módulo expone estos flags, puedes activar Cilium data plane (recomendado):
-  # network_plugin    = "azure"   # Azure CNI
-  # network_dataplane = "cilium"  # Cilium dataplane con eBPF
-  # network_policy    = "cilium"  # NetworkPolicy en Cilium
+
 
   # Subnet para el control plane / kubelets
   vnet_subnet = {
