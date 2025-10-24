@@ -31,8 +31,7 @@ module "aks" {
   rbac_aad_azure_rbac_enabled       = false
   #rbac_aad_tenant_id                = data.azurerm_client_config.current.tenant_id
 
-  # ✅ Seguridad moderna: habilita OIDC y Workload Identity (si el módulo lo soporta)
-  # oidc_issuer_enabled      = true
+
   workload_identity_enabled = true
 
 

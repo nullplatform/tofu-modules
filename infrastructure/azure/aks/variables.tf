@@ -36,6 +36,8 @@ variable "vnet_subnet_id" {
 
 }
 variable "environment" {
+  type    = string
+  default = "nullplatform"
 
 }
 variable "service_dns_ip" {
