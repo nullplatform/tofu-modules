@@ -8,7 +8,7 @@ module "aks" {
   resource_group_name = var.resource_group_name
   location            = var.location
   cluster_name        = var.cluster_name
-
+  prefix              = var.prefix
   ############################################
   # Kubernetes version & upgrades
   ############################################

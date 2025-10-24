@@ -56,3 +56,14 @@ variable "system_pool_vm_size" {
   default = "Standard_D4s_v5"
 
 }
+
+variable "cluster_log_analytics_workspace_name" {
+  type    = string
+  default = null
+
+}
+variable "prefix" {
+  type    = string
+  default = "test"
+
+}
