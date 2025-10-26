@@ -50,7 +50,7 @@ module "aks" {
   ############################################
   agents_size                 = var.system_pool_vm_size # e.g., "Standard_D4s_v5"
   temporary_name_for_rotation = "tmpnodepool"
-  agents_pool_max_surge       = "%10"
+  agents_pool_max_surge       = "10%"
 
   ############################################
   # Node pools (user workloads)
