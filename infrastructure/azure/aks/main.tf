@@ -61,7 +61,7 @@ module "aks" {
       vm_size              = var.user_pool_vm_size # e.g., "Standard_D4s_v5"
       auto_scaling_enabled = true
       min_count            = 1
-      max_count            = 10
+      max_count            = 5
       node_count           = 2
       availability_zones   = ["1", "2", "3"]
       vnet_subnet_id       = var.vnet_subnet_id
