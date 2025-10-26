@@ -38,7 +38,7 @@ variable "private_cluster_enabled" {
 }
 variable "user_pool_vm_size" {
   type    = string
-  default = "Standard_D4s_v5"
+  default = "Standard_A4_v2"
 
 }
 
@@ -53,7 +53,7 @@ variable "environment" {
 
 variable "system_pool_vm_size" {
   type    = string
-  default = "Standard_D4s_v5"
+  default = "Standard_A4_v2"
 
 }
 

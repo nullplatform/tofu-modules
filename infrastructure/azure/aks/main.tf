@@ -66,10 +66,10 @@ module "aks" {
       vnet_subnet_id       = var.vnet_subnet_id
 
       # ✅ Mejora de upgrades (si el módulo expone upgrade_settings)
-      # upgrade_settings = {
-      #   max_surge = "33%"  # acelera los upgrades de nodepool
+      #upgrade_settings = {
+      #  max_unavailable = 1 # acelera los upgrades de nodepool
       # }
-
+      #
       # ✅ Etiquetas y taints/labels para scheduling avanzado
       # node_labels = {
       #   "workload" = "general"
