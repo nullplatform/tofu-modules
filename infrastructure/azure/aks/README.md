@@ -1,3 +1,24 @@
+# Modules: AKS
+
+This module creates an Azure Kubernetes Services.
+
+Usage:
+
+
+```
+module "aks" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/aks?ref=v1.0.0"
+  resource_group_name = module.resource_group.resource_group_name
+  location            = module.resource_group.resource_group_location
+  cluster_name        = var.cluster_name
+  subscription_id     = var.subscription_id
+  vnet_subnet_id      = module.vnet.subnet_ids_by_name["subnet1"]
+  system_pool_vm_size = "Standard_D2s_v5"
+  user_pool_vm_size   = "Standard_D2s_v5"
+}
+```
+
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
