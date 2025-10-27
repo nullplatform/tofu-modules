@@ -73,3 +73,13 @@ variable "oidc_issuer_enabled" {
   default = true
 
 }
+variable "rbac_aad_azure_rbac_enabled" {
+  type    = bool
+  default = false
+
+}
+variable "role_based_access_control_enabled" {
+  type    = bool
+  default = false
+
+}
