@@ -48,7 +48,7 @@ module "acr" {
 | <a name="input_containerregistry_name"></a> [containerregistry\_name](#input\_containerregistry\_name) | The name of your ACR | `string` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | The location/region where the resource group should be created | `string` | n/a | yes |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | The name of the resource group | `string` | n/a | yes |
-| <a name="input_sku"></a> [sku](#input\_sku) | n/a | `string` | `"Standard"` | no |
+| <a name="input_sku"></a> [sku](#input\_sku) | n/a | `string` | `"Premium"` | no |
 | <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | The ID of your Azure Suscription | `string` | n/a | yes |
 | <a name="input_zone_redundancy_enabled"></a> [zone\_redundancy\_enabled](#input\_zone\_redundancy\_enabled) | n/a | `bool` | `false` | no |
 
