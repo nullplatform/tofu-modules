@@ -20,3 +20,13 @@ variable "subscription_id" {
 
 }
 
+variable "sku" {
+  type    = string
+  default = "Standard"
+
+}
+variable "zone_redundancy_enabled" {
+  type    = bool
+  default = false
+
+}
