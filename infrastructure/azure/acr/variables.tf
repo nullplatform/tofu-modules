@@ -19,3 +19,14 @@ variable "subscription_id" {
   description = "The ID of your Azure Suscription"
 
 }
+
+variable "sku" {
+  type    = string
+  default = "Premium"
+
+}
+variable "zone_redundancy_enabled" {
+  type    = bool
+  default = false
+
+}
