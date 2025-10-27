@@ -24,18 +24,8 @@ variable "georeplications" {
   type = list(object({
     location                  = string
     regional_endpoint_enabled = optional(bool, true)
-    zone_redundancy_enabled   = optional(bool, true)
+    zone_redundancy_enabled   = optional(bool, false)
     tags                      = optional(map(any), null)
   }))
   default = []
-}
-locals {
-  georeplications_normalized = [
-    for g in var.georeplications : {
-      location                  = coalesce(g.location, var.location)
-      regional_endpoint_enabled = try(g.regional_endpoint_enabled, true)
-      zone_redundancy_enabled   = try(g.zone_redundancy_enabled, false)
-      tags                      = try(g.tags, null)
-    }
-  ]
 }
