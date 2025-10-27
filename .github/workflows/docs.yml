@@ -6,4 +6,4 @@ on:
 jobs:
   docs:
     uses: nullplatform/actions-nullplatform-terraform/.github/workflows/tf-docs.yml@main
-    if: startsWith(github.ref_name, 'feature/') || startsWith(github.ref_name, 'hotfix/') || startsWith(github.ref_name, 'bugfix/' || startsWith(github.head_ref, 'release-please--' )
+    if: startsWith(github.ref_name, 'feature/') || startsWith(github.ref_name, 'hotfix/') || startsWith(github.ref_name, 'bugfix/' ) || startsWith(github.head_ref, 'release-please--' )
