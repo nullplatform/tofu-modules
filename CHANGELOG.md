@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.1](https://github.com/nullplatform/tofu-modules/compare/v1.3.0...v1.3.1) (2025-10-27)
+
+
+### Bug Fixes
+
+* **workflows:** add condition branch release ([cc4b976](https://github.com/nullplatform/tofu-modules/commit/cc4b976b70fc72025ecd50e384c8c9a714f57cef))
+* **workflows:** add condition branch release ([855d6f6](https://github.com/nullplatform/tofu-modules/commit/855d6f6d99a7847704b3a461e096a741d739e252))
+
 ## [1.3.0](https://github.com/nullplatform/tofu-modules/compare/v1.2.0...v1.3.0) (2025-10-27)
 
 
