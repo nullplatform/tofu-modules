@@ -46,6 +46,7 @@ module "acr" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_containerregistry_name"></a> [containerregistry\_name](#input\_containerregistry\_name) | The name of your ACR | `string` | n/a | yes |
+| <a name="input_georeplications"></a> [georeplications](#input\_georeplications) | Lista de configuraciones de geo-replicación para el ACR. | <pre>list(object({<br/>    location                  = string<br/>    regional_endpoint_enabled = optional(bool, true)<br/>    zone_redundancy_enabled   = optional(bool, true)<br/>    tags                      = optional(map(any), null)<br/>  }))</pre> | `[]` | no |
 | <a name="input_location"></a> [location](#input\_location) | The location/region where the resource group should be created | `string` | n/a | yes |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | The name of the resource group | `string` | n/a | yes |
 | <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | The ID of your Azure Suscription | `string` | n/a | yes |
