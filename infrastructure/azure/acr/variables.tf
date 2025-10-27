@@ -19,13 +19,4 @@ variable "subscription_id" {
   description = "The ID of your Azure Suscription"
 
 }
-variable "georeplications" {
-  description = "Lista de configuraciones de geo-replicación para el ACR."
-  type = list(object({
-    location                  = string
-    regional_endpoint_enabled = optional(bool, true)
-    zone_redundancy_enabled   = optional(bool, false)
-    tags                      = optional(map(any), null)
-  }))
-  default = []
-}
+
