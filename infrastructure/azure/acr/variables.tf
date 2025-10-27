@@ -22,7 +22,7 @@ variable "subscription_id" {
 
 variable "sku" {
   type    = string
-  default = "Standard"
+  default = "Premium"
 
 }
 variable "zone_redundancy_enabled" {
