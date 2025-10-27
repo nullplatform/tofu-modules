@@ -32,7 +32,7 @@ variable "georeplications" {
 locals {
   georeplications_normalized = [
     for g in var.georeplications : {
-      location                  = coalesce(g.location, var.location) # <- fallback
+      location                  = coalesce(g.location, var.location)
       regional_endpoint_enabled = try(g.regional_endpoint_enabled, true)
       zone_redundancy_enabled   = try(g.zone_redundancy_enabled, false)
       tags                      = try(g.tags, null)
