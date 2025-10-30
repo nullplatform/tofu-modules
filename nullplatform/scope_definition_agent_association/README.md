@@ -1,7 +1,3 @@
-
-
-
-
 # Module: Scope Definition agent association
 
 This Terraform code creates a notification channel in nullplatform that links to a specific NRN and can dynamically configure an agent-based channel when needed.
