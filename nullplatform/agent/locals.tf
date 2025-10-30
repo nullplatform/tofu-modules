@@ -20,6 +20,7 @@ locals {
     init_scripts = var.init_scripts
     api_key      = nullplatform_api_key.nullplatform_agent_api_key.api_key
     namespace    = var.namespace
+
   })
 
 }
