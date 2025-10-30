@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.4.0](https://github.com/nullplatform/tofu-modules/compare/v1.3.1...v1.4.0) (2025-10-30)
+
+
+### Features
+
+* add agent, scope and scope association ([f508cca](https://github.com/nullplatform/tofu-modules/commit/f508ccaf263835b7fc53263bbce4d142976d1cb4))
+* add agnostic agent ([1d1d5e3](https://github.com/nullplatform/tofu-modules/commit/1d1d5e35720864e035f3995237365392b453f83e))
+* add scope definion agent association ([416526d](https://github.com/nullplatform/tofu-modules/commit/416526d72150a2a1adba90263c1d67955e623ce3))
+* add scope definition modules ([eba0ba3](https://github.com/nullplatform/tofu-modules/commit/eba0ba36e80fdd8245523e78fc376e24930039f3))
+* pipeline ([25c0a28](https://github.com/nullplatform/tofu-modules/commit/25c0a288cdfe4384d888935159ce7d1de126706b))
+
 ## [1.3.1](https://github.com/nullplatform/tofu-modules/compare/v1.3.0...v1.3.1) (2025-10-27)
 
 
