@@ -22,7 +22,7 @@ module "scope_definition_agent_association" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.63 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) |  >= 0.0.67 |
 
 ## Providers
 
@@ -31,7 +31,7 @@ module "scope_definition_agent_association" {
 | <a name="provider_external"></a> [external](#provider\_external) | n/a |
 | <a name="provider_local"></a> [local](#provider\_local) | n/a |
 | <a name="provider_null"></a> [null](#provider\_null) | n/a |
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | ~> 0.0.63 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) |  >= 0.0.67 |
 
 ## Resources
 
