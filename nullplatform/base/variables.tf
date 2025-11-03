@@ -328,3 +328,42 @@ variable "image_pull_secrets_password" {
   sensitive   = true
   default     = ""
 }
+############################################
+# Ingress Controller
+############################################
+# ============================================================
+# IngressControllers configuration
+# ============================================================
+
+variable "ingressControllers" {
+  description = "Configuración de los IngressControllers públicos y privados"
+  type = object({
+    public = object({
+      name    = string
+      enabled = bool
+      scope   = string
+      domain  = string
+    })
+    private = object({
+      name    = string
+      enabled = bool
+      scope   = string
+      domain  = string
+    })
+  })
+
+  default = {
+    public = {
+      name    = "internet-facing"
+      enabled = false
+      scope   = "External"
+      domain  = ""
+    }
+    private = {
+      name    = "internal"
+      enabled = false
+      scope   = "Internal"
+      domain  = ""
+    }
+  }
+}

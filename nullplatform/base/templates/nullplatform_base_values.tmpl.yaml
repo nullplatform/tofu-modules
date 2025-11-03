@@ -1,7 +1,7 @@
 # Global settings
 global:
   installGatewayV2Crd: ${installGatewayV2Crd}
-  # Kubernetes provider (options: "oks", "gke", "eks", "aks")
+  # Kubernetes provider (options: "oks", "gke", "eks", "aks", "aro")
   provider: "${cloud_provider}"
   # AWS region (applicable for EKS provider)
   awsRegion: "${awsRegion}"
@@ -11,6 +11,17 @@ namespaces:
   nullplatformApplications: "nullplatform"
   nullplatformTools: "nullplatform-tools"
   gateway: "gateways"
+ingressControllers:
+  public:
+    name: "internet-facing"
+    enabled: false
+    scope: External
+    domain: ""
+  private:
+    name: "internal"
+    enabled: false
+    scope: Internal
+    domain: ""
 # TLS configuration
 tls:
   required: ${tls_required}
