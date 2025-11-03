@@ -59,4 +59,5 @@ module "cert_manager" {
 | <a name="input_gcp_enabled"></a> [gcp\_enabled](#input\_gcp\_enabled) | Enable GCP (Cloud DNS) solver in cert-manager. | `bool` | `false` | no |
 | <a name="input_gcp_service_account_key"></a> [gcp\_service\_account\_key](#input\_gcp\_service\_account\_key) | Contents of the Service Account JSON for Cloud DNS (use file() if reading from disk). | `string` | `""` | no |
 | <a name="input_hosted_zone_name"></a> [hosted\_zone\_name](#input\_hosted\_zone\_name) | Hosted zone name (if applicable). | `string` | `""` | no |
+| <a name="input_namespacecontroller_name"></a> [namespacecontroller\_name](#input\_namespacecontroller\_name) | name of the namespace where the certificate will be installed | `string` | `" "` | no |
 <!-- END_TF_DOCS -->
