@@ -13,7 +13,7 @@ locals {
   final_list = distinct(concat(local.scope_list, local.repos_extra))
 
   # Render Helm values template with agent configuration
-  nullplatform_agent_values_default = templatefile("${path.module}/nullplatform_agent_values_default.tmpl.yaml", {
+  nullplatform_agent_values_default = templatefile("${path.module}/templates/nullplatform_agent_values_default.tmpl.yaml", {
     agent_repos = join(",", local.final_list)
     cluster_name = var.cluster_name
     tags = join(",", [for k in sort(keys(var.tags_selectors)) : "${k}:${var.tags_selectors[k]}"])
