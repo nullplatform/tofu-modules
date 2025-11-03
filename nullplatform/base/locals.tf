@@ -37,6 +37,7 @@ locals {
       logging_enabled = var.logging_enabled ? "true" : "false"
 
       prometheus_enabled = var.prometheus_enabled ? "true" : "false"
+      exporter_prometheus_port = var.exporter_prometheus_port
 
       gelf_enabled = var.gelf_enabled ? "true" : "false"
       gelf_host    = var.gelf_host

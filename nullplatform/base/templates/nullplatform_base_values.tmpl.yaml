@@ -75,7 +75,7 @@ logging:
         memory: 300Mi
   prometheus:
     enabled: ${prometheus_enabled}
-    exporterPort: 2021
+    exporterPort: ${exporter_prometheus_port}
   gelf:
     enabled: ${gelf_enabled}
     host: "${gelf_host}"

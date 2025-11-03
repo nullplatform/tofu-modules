@@ -102,6 +102,12 @@ variable "prometheus_enabled" {
   default     = true
 }
 
+variable "exporter_prometheus_port" {
+  type        = string
+  description = "Port Number to Prometheus exporter."
+  default     = "2021"
+}
+
 ############################################
 # GELF
 ############################################
@@ -367,3 +373,5 @@ variable "ingressControllers" {
     }
   }
 }
+
+
