@@ -27,10 +27,10 @@ variable "np_api_key" {
 
 variable "cloud_provider" {
   type        = string
-  description = "Cloud provider (eks, gke, aks, oke)."
+  description = "Cloud provider (eks, gke, aks, oke and aro)."
   validation {
-    condition     = contains(["eks", "gke", "aks", "oke"], var.cloud_provider)
-    error_message = "cloud_provider must be one of: eks, gke, aks, oke."
+    condition     = contains(["eks", "gke", "aks", "oke", "aro"], var.cloud_provider)
+    error_message = "cloud_provider must be one of: eks, gke, aks, oke and aro"
   }
 }
 
