@@ -117,3 +117,9 @@ variable "cloudflare_token" {
 
 
 
+variable "namespacecontroller_name" {
+  type        = string
+  description = "name of the namespace where the certificate will be installed"
+  default     = " "
+
+}

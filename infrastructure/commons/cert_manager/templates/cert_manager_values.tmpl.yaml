@@ -1,4 +1,6 @@
 hostedZoneName: "${hosted_zone_name}"
+namespacecontroller:
+  name: "${namespacecontroller_name}"
 
 nullPlatform:
   accountSlug: "${account_slug}"
