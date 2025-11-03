@@ -4,7 +4,7 @@ locals {
   final_list            = distinct(concat(local.scope_list, local.repos_extra))
   nrn_without_namespace = join(":", slice(split(":", var.nrn), 0, 2))
 
-  nullplatform_agent_values = templatefile("${path.module}/templates/nullplatform_agent_values.tmpl.yaml", {
+  nullplatform_agent_values = templatefile("nullplatform_agent_values_default.tmpl.yaml", {
     agent_repos  = join(",", local.final_list)
     cluster_name = var.cluster_name
     tags         = var.tags

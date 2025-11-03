@@ -16,6 +16,5 @@ configuration:
     CLUSTER_NAME: "${cluster_name}"
     NAMESPACE: "${namespace}"
 
-
 image:
-  tag: latest
+  tag: "{image_tag}"
