@@ -57,6 +57,7 @@ module "base" {
 | <a name="input_dynatrace_api_key"></a> [dynatrace\_api\_key](#input\_dynatrace\_api\_key) | Dynatrace API key. | `string` | `""` | no |
 | <a name="input_dynatrace_enabled"></a> [dynatrace\_enabled](#input\_dynatrace\_enabled) | Enable Dynatrace integration. | `bool` | `false` | no |
 | <a name="input_dynatrace_environment_id"></a> [dynatrace\_environment\_id](#input\_dynatrace\_environment\_id) | Dynatrace environment ID. | `string` | `""` | no |
+| <a name="input_exporter_prometheus_port"></a> [exporter\_prometheus\_port](#input\_exporter\_prometheus\_port) | Port Number to Prometheus exporter. | `string` | `"2021"` | no |
 | <a name="input_gateway_api_crds_install"></a> [gateway\_api\_crds\_install](#input\_gateway\_api\_crds\_install) | Install Gateway API CRDs. | `bool` | `false` | no |
 | <a name="input_gateway_api_enabled"></a> [gateway\_api\_enabled](#input\_gateway\_api\_enabled) | Enable Gateway API. | `bool` | `false` | no |
 | <a name="input_gateway_enabled"></a> [gateway\_enabled](#input\_gateway\_enabled) | Enable the HTTP Gateway. | `bool` | `false` | no |
