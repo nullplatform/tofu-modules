@@ -15,6 +15,3 @@ configuration:
     AGENT_REPOS: "${agent_repos}"
     CLUSTER_NAME: "${cluster_name}"
     NAMESPACE: "${namespace}"
-
-image:
-  tag: "{image_tag}"
