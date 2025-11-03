@@ -60,12 +60,12 @@ variable "init_scripts" {
 
 variable "image_tag" {
   description = "Image tag to agent"
-  type = string
+  type        = string
 }
 
 variable "aws_iam_role_arn" {
   description = "The ARN role to aws agent"
-  type = string
+  type        = string
   default     = null
   validation {
     condition     = var.cloud_provider != "aws" || var.aws_iam_role_arn != null
@@ -77,7 +77,7 @@ variable "cloud_provider" {
   description = "Cloud provider to use (aws, gcp or azure)"
   type        = string
   validation {
-    condition = contains(["aws", "gcp", "azure"], var.cloud_provider)
+    condition     = contains(["aws", "gcp", "azure"], var.cloud_provider)
     error_message = "cloud_provider must be either 'aws' , 'gcp' or 'azure'."
   }
 }
