@@ -6,7 +6,7 @@ Usage:
 
 ```
 module "cloud_aws_agent" {
-  source                              = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/cloud/aws/agent?ref=v1.0.0"
+  source                              = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.0.0"
   cluster_name                        = var.cluster_name
   nrn                                 = var.nrn
   np_api_key                          = var.np_api_key

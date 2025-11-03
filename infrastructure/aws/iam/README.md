@@ -6,7 +6,7 @@ Usage:
 
 ```hcl
 module "agent-iam" {
-  source          = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/aws/iam?ref=v1.0.0"
+  source          = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam?ref=v1.0.0"
   aws_iam_openid_connect_provider_arn = var.aws_iam_openid_connect_provider_arn
 }
 ```

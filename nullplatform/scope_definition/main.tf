@@ -132,6 +132,7 @@ resource "nullplatform_scope_type" "from_template" {
   name        = var.service_spec_name
   description = var.service_spec_description
   provider_id = local.service_specification_id
+  provider_type = local.scope_type_def.provider_type
 }
 
 ################################################################################
