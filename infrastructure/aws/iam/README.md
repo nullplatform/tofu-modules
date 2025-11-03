@@ -40,4 +40,10 @@ module "agent-iam" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_agent_namespace"></a> [agent\_namespace](#input\_agent\_namespace) | The namespace where run to agent | `string` | n/a | yes |
 | <a name="input_aws_iam_openid_connect_provider_arn"></a> [aws\_iam\_openid\_connect\_provider\_arn](#input\_aws\_iam\_openid\_connect\_provider\_arn) | ARN of the AWS IAM OIDC provider for EKS service account authentication | `string` | n/a | yes |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_nullplatform_agent_role_arn"></a> [nullplatform\_agent\_role\_arn](#output\_nullplatform\_agent\_role\_arn) | The arn of the agent rol |
 <!-- END_TF_DOCS -->
