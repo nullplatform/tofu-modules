@@ -27,7 +27,7 @@ resource "helm_release" "agent" {
   max_history       = 10
 
   values = concat(
-    [file(local.nullplatform_agent_values_default)],
+    [local.nullplatform_agent_values_default],
       var.cloud_provider == "aws" ? [local.nullplatform_agent_values_aws] : [],
       var.cloud_provider == "gcp" ? [local.nullplatform_agent_values_gcp] : [],
       var.cloud_provider == "azure" ? [local.nullplatform_agent_values_azure] : []
