@@ -20,17 +20,28 @@ variable "nrn" {
   description = "The nrn of your nullplatform account"
 
 }
+
 variable "domain_name" {
   description = "The domain name to be used"
   type        = string
   default     = ""
+}
 
+variable "private_domain_name" {
+  description = "The domain name for the private DNS"
+  type        = string
+  default     = ""
 }
 
 variable "azure_resource_group_name" {
   type        = string
-  description = "Your azure reource group name"
+  description = "Your azure resource group name"
 
+}
+
+variable "private_dns_resource_group_name" {
+  type        = string
+  description = "Azure reource group name for the DNS private"
 }
 
 variable "dimensions" {
