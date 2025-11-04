@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.5.0](https://github.com/nullplatform/tofu-modules/compare/v1.4.0...v1.5.0) (2025-11-04)
+
+
+### Features
+
+* **agent:** add multi cloud ([adbaa97](https://github.com/nullplatform/tofu-modules/commit/adbaa976964f8531cdf372985378e82ff225375a))
+* **agent:** fix image tag variable ([667da65](https://github.com/nullplatform/tofu-modules/commit/667da65400dc18b5758679dd724c0de6b3586ab5))
+* **agent:** fix readme ([96faf72](https://github.com/nullplatform/tofu-modules/commit/96faf7202f3d61b276a80744db80f538f4fa2369))
+* **agent:** fix template default ([dc225b5](https://github.com/nullplatform/tofu-modules/commit/dc225b5a1c16a7f6fc1e29537ad4dc74df76dca1))
+* **agent:** fix template default ([9ac324c](https://github.com/nullplatform/tofu-modules/commit/9ac324c114baa4be482d06779f067b9c10dff051))
+* **agent:** move image-tag variable ([f9ac77b](https://github.com/nullplatform/tofu-modules/commit/f9ac77b09422040b97b25609032afc56373b572d))
+* **agent:** move image-tag variable ([8c0c483](https://github.com/nullplatform/tofu-modules/commit/8c0c483592acd44ada02c81ea4346f2716c8696f))
+* **agent:** tofu fmt ([e5aa787](https://github.com/nullplatform/tofu-modules/commit/e5aa787583afb204ce32e4b22873bcfa1297d997))
+* **aws-iam:** add aws iam module ([8f53196](https://github.com/nullplatform/tofu-modules/commit/8f53196411950664824cd1a4baece7fa8c986df4))
+* **aws-iam:** add aws iam module ([f728ef3](https://github.com/nullplatform/tofu-modules/commit/f728ef3aed084baffb5e639768041a821601b52a))
+* **aws-iam:** add output to rol arn ([ac7676d](https://github.com/nullplatform/tofu-modules/commit/ac7676d9ce5f652ed3c9b46450bcae2149fffcc8))
+
 ## [1.4.0](https://github.com/nullplatform/tofu-modules/compare/v1.3.1...v1.4.0) (2025-10-30)
 
 
