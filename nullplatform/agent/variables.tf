@@ -131,3 +131,9 @@ variable "git_repo" {
   default     = "nullplatform/scopes"
   description = "GitHub repository containing templates"
 }
+
+variable "image_tag" {
+  type    = string
+  default = "latest"
+
+}
