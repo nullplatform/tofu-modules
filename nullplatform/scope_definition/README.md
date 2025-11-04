@@ -7,7 +7,7 @@ Usage:
 
 ```
 module "scope_definition" {
-  source               = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/scope_definition?ref=v1.0.0"
+  source               = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v1.0.0"
   nrn                  = local.nrn_without_namespace
   np_api_key           = var.np_api_key
 ```

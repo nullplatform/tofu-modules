@@ -7,7 +7,7 @@ Usage:
 
 ```
 module "scope_definition_agent_association" {
-    source                     = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/
+    source                     = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_association?ref=v1.0.0"
     nrn                        = var.nrn
     np_api_key                 = var.np_api_key
     service_specification_id   = module.scope_definition.service_specification_id

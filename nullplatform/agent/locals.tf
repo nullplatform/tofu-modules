@@ -13,7 +13,7 @@ locals {
   final_list = distinct(concat(local.scope_list, local.repos_extra))
 
   # Render Helm values template with agent configuration
-  nullplatform_agent_values = templatefile("${path.module}/templates/nullplatform_agent_values.tmpl.yaml", {
+  nullplatform_agent_values_default = templatefile("${path.module}/templates/nullplatform_agent_values_default.tmpl.yaml", {
     agent_repos  = join(",", local.final_list)
     cluster_name = var.cluster_name
     tags         = join(",", [for k in sort(keys(var.tags_selectors)) : "${k}:${var.tags_selectors[k]}"])
@@ -21,5 +21,14 @@ locals {
     api_key      = nullplatform_api_key.nullplatform_agent_api_key.api_key
     namespace    = var.namespace
   })
+
+  nullplatform_agent_values_aws = templatefile("${path.module}/templates/nullplatform_agent_values_aws.tmpl.yaml", {
+    image_tag        = var.image_tag
+    aws_iam_role_arn = var.aws_iam_role_arn
+  })
+
+  nullplatform_agent_values_gcp = templatefile("${path.module}/templates/nullplatform_agent_values_gcp.tmpl.yaml", {})
+
+  nullplatform_agent_values_azure = templatefile("${path.module}/templates/nullplatform_agent_values_azure.tmpl.yaml", {})
 
 }

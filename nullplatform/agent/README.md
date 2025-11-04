@@ -6,7 +6,7 @@ Usage:
 
 ```
 module "cloud_aws_agent" {
-  source                              = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/cloud/aws/agent?ref=v1.0.0"
+  source                              = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.0.0"
   cluster_name                        = var.cluster_name
   nrn                                 = var.nrn
   np_api_key                          = var.np_api_key
@@ -43,6 +43,8 @@ module "cloud_aws_agent" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_agent_repos_extra"></a> [agent\_repos\_extra](#input\_agent\_repos\_extra) | List of additional Git repositories for extended agent configuration | `list(string)` | `[]` | no |
 | <a name="input_agent_repos_scope"></a> [agent\_repos\_scope](#input\_agent\_repos\_scope) | Git repository URL containing agent scope configurations (format: repo#branch) | `string` | `"https://github.com/nullplatform/scopes.git#main"` | no |
+| <a name="input_aws_iam_role_arn"></a> [aws\_iam\_role\_arn](#input\_aws\_iam\_role\_arn) | The ARN role to aws agent | `string` | `null` | no |
+| <a name="input_cloud_provider"></a> [cloud\_provider](#input\_cloud\_provider) | Cloud provider to use (aws, gcp or azure) | `string` | n/a | yes |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the EKS cluster where the Nullplatform agent will be deployed | `string` | n/a | yes |
 | <a name="input_enabled_override"></a> [enabled\_override](#input\_enabled\_override) | Enable custom overrides for scope configurations via command line | `bool` | `false` | no |
 | <a name="input_git_ref"></a> [git\_ref](#input\_git\_ref) | Git reference (branch, tag, or commit) | `string` | `"main"` | no |
@@ -50,6 +52,7 @@ module "cloud_aws_agent" {
 | <a name="input_git_scope_path"></a> [git\_scope\_path](#input\_git\_scope\_path) | Path within the repository for the specific scope (e.g., k8s, ecs) | `string` | `"k8s"` | no |
 | <a name="input_github_ref"></a> [github\_ref](#input\_github\_ref) | Git reference to use (branch name, tag, or commit SHA) | `string` | `"beta"` | no |
 | <a name="input_github_repo_url"></a> [github\_repo\_url](#input\_github\_repo\_url) | GitHub repository URL containing scope and action templates | `string` | `"https://github.com/nullplatform/scopes"` | no |
+| <a name="input_image_tag"></a> [image\_tag](#input\_image\_tag) | Image tag to agent | `string` | n/a | yes |
 | <a name="input_init_scripts"></a> [init\_scripts](#input\_init\_scripts) | List of initialization scripts to execute during agent startup | `list(string)` | `[]` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Kubernetes namespace where the Nullplatform agent will run | `string` | `"nullplatform-tools"` | no |
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | API key for authenticating with the Nullplatform API | `string` | n/a | yes |

@@ -26,5 +26,10 @@ resource "helm_release" "agent" {
   dependency_update = true
   max_history       = 10
 
-  values = [local.nullplatform_agent_values]
+  values = concat(
+    [local.nullplatform_agent_values_default],
+    var.cloud_provider == "aws" ? [local.nullplatform_agent_values_aws] : [],
+    var.cloud_provider == "gcp" ? [local.nullplatform_agent_values_gcp] : [],
+    var.cloud_provider == "azure" ? [local.nullplatform_agent_values_azure] : []
+  )
 }
