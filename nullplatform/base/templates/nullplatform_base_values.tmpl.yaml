@@ -13,15 +13,15 @@ namespaces:
   gateway: "gateways"
 ingressControllers:
   public:
-    name: "internet-facing"
-    enabled: false
-    scope: External
-    domain: ""
+    name: "${ingress_public_name}"
+    enabled: ${ingress_public_enabled}
+    scope: ${ingress_public_scope}
+    domain: "${ingress_public_domain}"
   private:
-    name: "internal"
-    enabled: false
-    scope: Internal
-    domain: ""
+    name: "${ingress_private_name}"
+    enabled: ${ingress_private_enabled}
+    scope: ${ingress_private_scope}
+    domain: "${ingress_private_domain}"
 # TLS configuration
 tls:
   required: ${tls_required}
