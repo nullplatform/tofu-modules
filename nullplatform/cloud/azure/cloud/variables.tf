@@ -41,7 +41,7 @@ variable "azure_resource_group_name" {
 
 variable "private_dns_resource_group_name" {
   type        = string
-  description = "Azure reource group name for the DNS private"
+  description = "Azure resource group name for the DNS private"
 }
 
 variable "dimensions" {
