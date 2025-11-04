@@ -50,6 +50,7 @@ module "cloud_aws_agent" {
 | <a name="input_git_scope_path"></a> [git\_scope\_path](#input\_git\_scope\_path) | Path within the repository for the specific scope (e.g., k8s, ecs) | `string` | `"k8s"` | no |
 | <a name="input_github_ref"></a> [github\_ref](#input\_github\_ref) | Git reference to use (branch name, tag, or commit SHA) | `string` | `"beta"` | no |
 | <a name="input_github_repo_url"></a> [github\_repo\_url](#input\_github\_repo\_url) | GitHub repository URL containing scope and action templates | `string` | `"https://github.com/nullplatform/scopes"` | no |
+| <a name="input_image_tag"></a> [image\_tag](#input\_image\_tag) | n/a | `string` | `"latest"` | no |
 | <a name="input_init_scripts"></a> [init\_scripts](#input\_init\_scripts) | List of initialization scripts to execute during agent startup | `list(string)` | `[]` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Kubernetes namespace where the Nullplatform agent will run | `string` | `"nullplatform-tools"` | no |
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | API key for authenticating with the Nullplatform API | `string` | n/a | yes |
