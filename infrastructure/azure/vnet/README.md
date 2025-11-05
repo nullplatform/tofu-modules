@@ -128,7 +128,7 @@ module "aks" {
 | <a name="input_address_space"></a> [address\_space](#input\_address\_space) | The address space (CIDR blocks) for the Virtual Network (e.g., ["10.0.0.0/16"]) | `set(string)` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | The Azure region where the VNet should be created (e.g., eastus, westus2) | `string` | n/a | yes |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | The name of the resource group where the VNet will be created | `string` | n/a | yes |
-| <a name="input_subnets_definition"></a> [subnets\_definition](#input\_subnets\_definition) | Map of subnets to create within the VNet. Each subnet requires a name and address_prefixes. | <pre>map(object({<br/>    name             = string<br/>    address_prefixes = list(string)<br/>  }))</pre> | n/a | yes |
+| <a name="input_subnets_definition"></a> [subnets\_definition](#input\_subnets\_definition) | Map of subnets to create within the VNet. Each subnet requires a name and address\_prefixes. | <pre>map(object({<br/>    name             = string<br/>    address_prefixes = list(string)<br/>  }))</pre> | n/a | yes |
 | <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | The ID of your Azure Subscription | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to the VNet and subnets | `map(string)` | `{}` | no |
 | <a name="input_vnet_name"></a> [vnet\_name](#input\_vnet\_name) | The name of the Virtual Network | `string` | n/a | yes |

@@ -90,7 +90,7 @@ module "dns" {
 |------|-------------|
 | <a name="output_dns_zone_id"></a> [dns\_zone\_id](#output\_dns\_zone\_id) | The ID of the DNS Zone |
 | <a name="output_dns_zone_name"></a> [dns\_zone\_name](#output\_dns\_zone\_name) | The name of the created DNS Zone |
-| <a name="output_name_servers"></a> [name\_servers](#output\_name\_servers) | A list of name servers for the DNS zone |
+| <a name="output_name_servers"></a> [name\_servers](#output\_name\_servers) | A list of name servers |
 | <a name="output_private_dns_zone_id"></a> [private\_dns\_zone\_id](#output\_private\_dns\_zone\_id) | The ID of the private DNS Zone |
 | <a name="output_private_dns_zone_name"></a> [private\_dns\_zone\_name](#output\_private\_dns\_zone\_name) | The name of the private created DNS Zone |
 <!-- END_TF_DOCS -->
