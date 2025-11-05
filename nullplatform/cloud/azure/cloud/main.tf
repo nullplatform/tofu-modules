@@ -8,7 +8,7 @@ resource "nullplatform_provider_config" "azure" {
   attributes = jsonencode({
     authentication = {},
     networking = {
-      application_domain                    = true,
+      application_domain                    = var.application_domain,
       domain_name                           = var.domain_name,
       public_dns_zone_name                  = var.domain_name,
       private_dns_zone_name                 = var.private_domain_name
