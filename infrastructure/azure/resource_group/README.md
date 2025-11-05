@@ -1,17 +1,31 @@
-# Modules: Resource Groups
+# Azure Resource Group Module
 
-This module creates a DNS zone in Azure.
+This module creates an Azure Resource Group.
 
-Usage:
+## Features
 
+- Creates Azure Resource Group in the specified location
+- Configurable tags for resource management
+- Outputs resource group name and location for use in other modules
 
-```
+## Usage
+
+### Basic Example
+
+```hcl
 module "resource_group" {
-  source              = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/resource_group?ref=v1.0.0"
-  name                = var.domain_name
-  resource_group_name = var.resource_group
+  source              = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/resource_group?ref=v1.5.0"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  subscription_id     = var.subscription_id
 }
 ```
+
+## Important Notes
+
+- **Resource Group Name**: Must be unique within your Azure subscription
+- **Location**: Cannot be changed after creation; requires recreation of the resource group
+- **Dependencies**: This module is typically created first and referenced by other Azure resources
 
 
 <!-- BEGIN_TF_DOCS -->
@@ -38,10 +52,10 @@ module "resource_group" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_location"></a> [location](#input\_location) | n/a | `string` | n/a | yes |
-| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | n/a | `string` | n/a | yes |
-| <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | n/a | `string` | n/a | yes |
-| <a name="input_tags"></a> [tags](#input\_tags) | n/a | `map(string)` | n/a | yes |
+| <a name="input_location"></a> [location](#input\_location) | The Azure region where the resource group should be created (e.g., eastus, westus2) | `string` | n/a | yes |
+| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | The name of the resource group to create | `string` | n/a | yes |
+| <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | The ID of your Azure Subscription | `string` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to the resource group | `map(string)` | `{}` | no |
 
 ## Outputs
 

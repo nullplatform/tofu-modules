@@ -1,21 +1,25 @@
-variable "location" {
+###############################################################################
+# REQUIRED VARIABLES
+###############################################################################
+
+variable "vnet_name" {
   type        = string
-  description = "The location/region where the resource group should be created"
+  description = "The name of the Virtual Network"
 }
 
 variable "resource_group_name" {
   type        = string
-  description = "The name of the resource group"
+  description = "The name of the resource group where the VNet will be created"
 }
 
-variable "vnet_name" {
+variable "location" {
   type        = string
-  description = "The name of your vnet"
+  description = "The Azure region where the VNet should be created (e.g., eastus, westus2)"
 }
 
 variable "address_space" {
   type        = set(string)
-  description = "The cidr of your vnet"
+  description = "The address space (CIDR blocks) for the Virtual Network (e.g., [\"10.0.0.0/16\"])"
 }
 
 variable "subnets_definition" {
@@ -23,24 +27,31 @@ variable "subnets_definition" {
     name             = string
     address_prefixes = list(string)
   }))
-  description = "The subnet definition for the vnet"
+  description = "Map of subnets to create within the VNet. Each subnet requires a name and address_prefixes."
 }
-/*
-   for example
-   {
-    "subnet1" = {
-      name             = "subnet1"
-      address_prefixes = ["10.0.0.0/24"]
-    }
-    "subnet2" = {
-      name             = "subnet2"
-      address_prefixes = ["10.0.1.0/24"]
-    }
-  }
-  */
+# Example:
+# subnets_definition = {
+#   subnet1 = {
+#     name             = "subnet-aks"
+#     address_prefixes = ["10.0.0.0/24"]
+#   }
+#   subnet2 = {
+#     name             = "subnet-services"
+#     address_prefixes = ["10.0.1.0/24"]
+#   }
+# }
 
 variable "subscription_id" {
   type        = string
-  description = "The id of your azure suscription"
+  description = "The ID of your Azure Subscription"
+}
 
+###############################################################################
+# OPTIONAL VARIABLES - TAGS
+###############################################################################
+
+variable "tags" {
+  type        = map(string)
+  description = "A mapping of tags to assign to the VNet and subnets"
+  default     = {}
 }

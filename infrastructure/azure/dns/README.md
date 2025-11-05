@@ -1,18 +1,30 @@
-# Modules: DNS
+# Azure DNS Zone Module
 
-This module creates a DNS zone in Azure.
+This module creates a public DNS zone in Azure.
 
-Usage:
+## Features
 
+- Creates Azure Public DNS Zone
+- Configurable tags for resource management
+- Outputs name servers for domain delegation
 
-```
+## Usage
+
+### Basic Example
+
+```hcl
 module "dns" {
-  source              = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/dns?ref=v1.0.0"
-  name                = var.domain_name
-  resource_group_name = var.resource_group
-
+  source          = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/dns?ref=v1.5.0"
+  domain_name     = var.domain_name
+  resource_group  = var.resource_group
+  subscription_id = var.subscription_id
 }
 ```
+
+## Important Notes
+
+- **Domain Name**: Must be a valid DNS domain name (e.g., example.com, subdomain.example.com)
+- **Name Servers**: After creation, use the `name_servers` output to configure delegation at your domain registrar
 
 
 <!-- BEGIN_TF_DOCS -->
@@ -39,9 +51,10 @@ module "dns" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | The domain name to use for the DNS zone | `string` | n/a | yes |
-| <a name="input_resource_group"></a> [resource\_group](#input\_resource\_group) | The name of the resource group | `string` | n/a | yes |
-| <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | The Azure subscription Id. | `string` | n/a | yes |
+| <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | The domain name to use for the DNS zone (e.g., example.com) | `string` | n/a | yes |
+| <a name="input_resource_group"></a> [resource\_group](#input\_resource\_group) | The name of the resource group where the DNS zone will be created | `string` | n/a | yes |
+| <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | The ID of your Azure Subscription | `string` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to the DNS zone | `map(string)` | `{}` | no |
 
 ## Outputs
 
