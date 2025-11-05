@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.5.1](https://github.com/nullplatform/tofu-modules/compare/v1.5.0...v1.5.1) (2025-11-05)
+
+
+### Bug Fixes
+
+* remove unnecessary information from the readme ([ead4e24](https://github.com/nullplatform/tofu-modules/commit/ead4e242ffd4032e75311ea02bced16037006abe))
+* standardize module variables and documentation ([9740af8](https://github.com/nullplatform/tofu-modules/commit/9740af81941c4add31dd1dfde3a000fe2ac44e5f))
+* standardize module variables and documentation ([df30a24](https://github.com/nullplatform/tofu-modules/commit/df30a245c73b8a777d85c94200cdceefd1dcb521))
+
 ## [1.5.0](https://github.com/nullplatform/tofu-modules/compare/v1.4.0...v1.5.0) (2025-11-04)
 
 
