@@ -44,6 +44,12 @@ variable "private_dns_resource_group_name" {
   description = "Azure resource group name for the DNS private"
 }
 
+variable "application_domain" {
+  type        = bool
+  description = "Apply application domain or not"
+}
+
+
 variable "dimensions" {
   type        = map(any)
   description = "Define to dimensions, for more information https://docs.nullplatform.com/docs/dimensions"
