@@ -154,3 +154,29 @@ variable "git_repo" {
   default     = "nullplatform/scopes"
   description = "GitHub repository containing templates"
 }
+#########Azure
+variable "azure_client_id" {
+
+}
+variable "azure_client_secret" {
+
+}
+variable "azure_subscription_id" {
+
+}
+
+variable "azure_resource_group" {
+
+}
+variable "private_gateway_name" {
+
+}
+variable "private_hosted_zone_rg" {
+
+}
+variable "public_gateway_name" {
+
+}
+variable "azure_tenant_id" {
+
+}
