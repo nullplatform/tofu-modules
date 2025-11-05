@@ -17,22 +17,8 @@ This module creates an Azure Kubernetes Service (AKS) cluster using the official
 
 ## Usage
 
-### Basic Example
 
-```hcl
-module "aks" {
-  source              = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/aks?ref=v1.5.0"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  cluster_name        = var.cluster_name
-  subscription_id     = var.subscription_id
-  vnet_subnet_id      = var.vnet_subnet_id
-  system_pool_vm_size = "Standard_D2s_v5"
-  user_pool_vm_size   = "Standard_D2s_v5"
-}
-```
-
-### With Resource Dependencies
+### Example With Resource Dependencies
 
 ```hcl
 module "aks" {
@@ -41,44 +27,11 @@ module "aks" {
   location            = module.resource_group.resource_group_location
   cluster_name        = var.cluster_name
   subscription_id     = var.subscription_id
-  vnet_subnet_id      = module.vnet.subnet_ids_by_name["subnet-aks"]
+  vnet_subnet_id      = module.vnet.subnet_ids_by_name["subnet-1"]
   system_pool_vm_size = "Standard_D2s_v5"
   user_pool_vm_size   = "Standard_D2s_v5"
 
   depends_on = [module.resource_group, module.vnet]
-}
-```
-
-### With Custom Configuration
-
-```hcl
-module "aks" {
-  source              = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/aks?ref=v1.5.0"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  cluster_name        = var.cluster_name
-  subscription_id     = var.subscription_id
-  vnet_subnet_id      = var.vnet_subnet_id
-
-  # Node pool configuration
-  system_pool_vm_size = "Standard_D4s_v5"
-  user_pool_vm_size   = "Standard_D4s_v5"
-
-  # Kubernetes version
-  kubernetes_version = "1.32.7"
-
-  # Security
-  authorized_ip_ranges = ["203.0.113.0/24"]
-  private_cluster_enabled = false
-
-  # Identity
-  oidc_issuer_enabled = true
-
-  tags = {
-    Environment = "production"
-    ManagedBy   = "terraform"
-    Project     = "myproject"
-  }
 }
 ```
 

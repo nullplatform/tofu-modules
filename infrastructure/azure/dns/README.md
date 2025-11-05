@@ -21,34 +21,6 @@ module "dns" {
 }
 ```
 
-### With Resource Dependencies
-
-```hcl
-module "dns" {
-  source          = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/dns?ref=v1.5.0"
-  domain_name     = var.domain_name
-  resource_group  = module.resource_group.resource_group_name
-  subscription_id = var.subscription_id
-}
-```
-
-### With Tags
-
-```hcl
-module "dns" {
-  source          = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/dns?ref=v1.5.0"
-  domain_name     = var.domain_name
-  resource_group  = var.resource_group
-  subscription_id = var.subscription_id
-
-  tags = {
-    Environment = "production"
-    ManagedBy   = "terraform"
-    Project     = "myproject"
-  }
-}
-```
-
 ## Important Notes
 
 - **Domain Name**: Must be a valid DNS domain name (e.g., example.com, subdomain.example.com)

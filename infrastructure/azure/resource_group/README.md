@@ -21,24 +21,6 @@ module "resource_group" {
 }
 ```
 
-### With Tags
-
-```hcl
-module "resource_group" {
-  source              = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/resource_group?ref=v1.5.0"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  subscription_id     = var.subscription_id
-
-  tags = {
-    Environment = "production"
-    ManagedBy   = "terraform"
-    Project     = "myproject"
-  }
-}
-```
-
-#
 ## Important Notes
 
 - **Resource Group Name**: Must be unique within your Azure subscription

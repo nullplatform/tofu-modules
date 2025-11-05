@@ -25,68 +25,7 @@ module "vnet" {
 }
 ```
 
-### With Resource Dependencies
 
-```hcl
-module "vnet" {
-  source              = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/vnet?ref=v1.5.0"
-  vnet_name           = var.vnet_name
-  resource_group_name = module.resource_group.resource_group_name
-  location            = var.location
-  address_space       = ["10.3.0.0/16"]
-  subscription_id     = var.subscription_id
-
-  subnets_definition = {
-    subnet1 = {
-      name             = "subnet-aks"
-      address_prefixes = ["10.3.0.0/18"]
-    }
-    subnet2 = {
-      name             = "subnet-services"
-      address_prefixes = ["10.3.64.0/18"]
-    }
-  }
-}
-```
-
-### With Tags
-
-```hcl
-module "vnet" {
-  source              = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/vnet?ref=v1.5.0"
-  vnet_name           = var.vnet_name
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  address_space       = var.address_space
-  subnets_definition  = var.subnets_definition
-  subscription_id     = var.subscription_id
-
-  tags = {
-    Environment = "production"
-    ManagedBy   = "terraform"
-    Project     = "myproject"
-  }
-}
-```
-
-## Subnet Definition Example
-
-```hcl
-subnets_definition = {
-  subnet1 = {
-    name             = "subnet-aks"
-    address_prefixes = ["10.3.0.0/18"]    # 10.3.0.0 - 10.3.63.255
-  }
-  subnet2 = {
-    name             = "subnet-services"
-    address_prefixes = ["10.3.64.0/18"]   # 10.3.64.0 - 10.3.127.255
-  }
-  subnet3 = {
-    name             = "subnet-ingress"
-    address_prefixes = ["10.3.128.0/18"]  # 10.3.128.0 - 10.3.191.255
-  }
-}
-```
 
 ## Using Subnet Outputs
 
