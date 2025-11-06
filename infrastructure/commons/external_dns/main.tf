@@ -8,4 +8,7 @@ resource "helm_release" "external_dns" {
 
   values = [local.external_dns_values]
 
+
+  depends_on = [kubernetes_secret_v1.external_dns_cloudflare]
+
 }

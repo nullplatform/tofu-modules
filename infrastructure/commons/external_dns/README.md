@@ -10,10 +10,12 @@ Cloudflare example:
 
 ```
 module "external_dns" {
-  source                       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/external_dns?ref=v1.0.0"
-  namespace                    = var.externa_dns_namespace
-  version                      = var.external_dns_version
+  source                       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/external_dns?ref=fix/change-version-name"
+  dns_provider_name            = "cloudflare"
+  domain                       = "implementations.nullaps.io"
+  external_dns_namespace       = "external-dns"
   extra_args                   = ["--cloudflare-proxied"]
+  cloudflare_token             = "mi-token-magico"
 }
 ```
 
@@ -27,7 +29,7 @@ module "external_dns" {
   dns_provider_name      = "google"
   domain                 = "myprivate.zone"
   external_dns_namespace = var.externa_dns_namespace
-  version                = var.external_dns_version
+  external_dns_version   = var.external_dns_version
   extra_args             = ["--google-zone-visibility=private"]
 
 }
