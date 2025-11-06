@@ -20,22 +20,27 @@ env:
       secretKeyRef:
         name: "external-dns-cloudflare"
         key: "api-token"
-%{ endif ~}
-extraArgs:
-%{ for arg in extra_args ~}
-  - "${arg}"
-%{ endfor ~}
-
+%{ else ~}
 env: []
+%{ endif ~}
+
+extraArgs:
+%{ if length(extra_args) > 0 ~}
+%{ for arg in extra_args ~}
+- "${arg}"
+%{ endfor ~}
+%{ else ~}
+  []
+%{ endif ~}
 
 serviceAccount:
   create: true
 %{ if provider == "google" ~}
-  name: ${ksa_name}
-  annotations:
-    iam.gke.io/gcp-service-account: "${gsa_email}"
+name: ${ksa_name}
+annotations:
+  iam.gke.io/gcp-service-account: "${gsa_email}"
 %{ else ~}
-  name: "external-dns"
+name: "external-dns"
 %{ endif ~}
 
 rbac:
@@ -47,7 +52,6 @@ resources:
     memory: "128Mi"
   limits:
     memory: "256Mi"
-
 
 securityContext:
   runAsNonRoot: true
