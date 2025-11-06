@@ -6,10 +6,9 @@ resource "helm_release" "cert_manager" {
   create_namespace = true
   version          = var.cert_manager_version
 
-  set = [
-    {
-      name  = "crds.enabled"
-      value = "true"
+  set = [{
+    name  = "crds.enabled"
+    value = "true"
     }
   ]
 }
@@ -24,7 +23,5 @@ resource "helm_release" "cert_manager_config" {
   namespace        = var.cert_manager_namespace
 
   values = [local.helm_values]
-
-  depends_on = [helm_release.cert_manager]
 }
 
