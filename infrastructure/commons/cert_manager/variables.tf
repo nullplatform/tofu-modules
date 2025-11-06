@@ -28,7 +28,7 @@ variable "account_slug" {
 }
 
 # --- GCP ---
-/* variable "gcp_enabled" {
+variable "gcp_enabled" {
   description = "Enable GCP (Cloud DNS) solver in cert-manager."
   type        = bool
   default     = false
@@ -39,7 +39,7 @@ variable "gcp_service_account_key" {
   type        = string
   sensitive   = true
   default     = ""
-} */
+} 
 
 # --- Azure ---
 variable "azure_enabled" {
@@ -109,10 +109,6 @@ variable "cloudflare_token" {
   type        = string
   sensitive   = true
   default     = ""
-  validation {
-    condition     = !var.cloudflare_enabled || length(var.cloudflare_token) > 0
-    error_message = "When cloudflare_enabled is true, cloudflare_api_token must not be empty."
-  }
 }
 
 

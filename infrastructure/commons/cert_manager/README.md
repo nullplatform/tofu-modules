@@ -8,11 +8,24 @@ Usage:
 
 ```
 module "cert_manager" {
-  source                       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/cert_manager?ref=v1.0.0"
-  namespace                    = var.cert_manager_namespace
+  source                       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/cert_manager?ref=v1.0.0"  
   cert_manager_version         = var.cert_manager_version
   cert_manager_config_version  = var.cert_manager_config_version
-  namespace                    = var.cert_manager_namespace
+  cert_manager_namespace       = var.cert_manager_namespace
+  # Configuración básica
+  hosted_zone_name             = var.azure_hosted_zone_name
+  account_slug                 = "nic1"
+  # Azure DNS Configuration
+  azure_enabled                = true
+  azure_subscription_id        = var.subscription_id
+  azure_resource_group_name    = var.resource_group_name
+  azure_client_id              = var.azure_client_id
+  azure_client_secret          = var.azure_client_secret
+  azure_tenant_id              = var.azure_tenant_id
+  azure_hosted_zone_name       = var.azure_hosted_zone_name
+  # Deshabilitar otros providers
+  gcp_enabled                  = false
+  cloudflare_enabled           = false
 }
 ```
 
