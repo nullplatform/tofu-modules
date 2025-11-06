@@ -13,35 +13,35 @@ txtOwnerId: "${txt_owner_id}"
 interval: "1m"
 logLevel: "info"
 
-  %{ if provider == "cloudflare" ~}
+%{ if provider == "cloudflare" ~}
 env:
   - name: CF_API_TOKEN
     valueFrom:
       secretKeyRef:
         name: "external-dns-cloudflare"
         key: "api-token"
-  %{ else ~}
+%{ else ~}
 env: []
-  %{ endif ~}
+%{ endif ~}
 
 extraArgs:
-  %{ if length(extra_args) > 0 ~}
-  %{ for arg in extra_args ~}
+%{ if length(extra_args) > 0 ~}
+%{ for arg in extra_args ~}
 - "${arg}"
-  %{ endfor ~}
-  %{ else ~}
+%{ endfor ~}
+%{ else ~}
   []
-  %{ endif ~}
+%{ endif ~}
 
 serviceAccount:
   create: true
-  %{ if provider == "google" ~}
+%{ if provider == "google" ~}
 name: ${ksa_name}
 annotations:
   iam.gke.io/gcp-service-account: "${gsa_email}"
-  %{ else ~}
+%{ else ~}
 name: "external-dns"
-  %{ endif ~}
+%{ endif ~}
 
 rbac:
   create: true
