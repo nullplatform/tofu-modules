@@ -25,9 +25,13 @@ env: []
   %{ endif ~}
 
 extraArgs:
+  %{ if length(extra_args) > 0 ~}
   %{ for arg in extra_args ~}
 - "${arg}"
   %{ endfor ~}
+  %{ else ~}
+  []
+  %{ endif ~}
 
 serviceAccount:
   create: true

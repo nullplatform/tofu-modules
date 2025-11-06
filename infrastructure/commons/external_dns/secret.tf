@@ -12,5 +12,6 @@ resource "kubernetes_secret_v1" "external_dns_cloudflare" {
   data = {
     "api-token" = var.cloudflare_token
   }
+  depends_on = [helm_release.external_dns]
 }
 
