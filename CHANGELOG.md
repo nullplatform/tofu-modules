@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.2](https://github.com/nullplatform/tofu-modules/compare/v1.5.1...v1.5.2) (2025-11-06)
+
+
+### Bug Fixes
+
+* remove version argument from git source module ([ed82438](https://github.com/nullplatform/tofu-modules/commit/ed82438851aa4188bf4d2c5b38c727d7e72f15ec))
+* remove version argument from git source module ([041f1ba](https://github.com/nullplatform/tofu-modules/commit/041f1ba9aa6e0fa2425f53a60170338d55ff6fa4))
+
 ## [1.5.1](https://github.com/nullplatform/tofu-modules/compare/v1.5.0...v1.5.1) (2025-11-05)
 
 
