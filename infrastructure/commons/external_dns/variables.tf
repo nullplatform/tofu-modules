@@ -6,6 +6,7 @@ variable "external_dns_version" {
 
 variable "external_dns_namespace" {
   type = string
+  default = "external_dns"
 }
 variable "domain" {
   type = string
@@ -27,8 +28,11 @@ variable "cloudflare_token" {
 
 variable "dns_provider_name" {
   type        = string
-  description = "dns provider"
-
+  description = "The dsn provider name to use with external dns"
+  validation {
+    condition     = contains(["cloudflare", "google"], var.dns_provider_name)
+    error_message = "dns_provider_name must be either 'cloudflare' or 'google'."
+  }
 }
 
 variable "extra_args" {
@@ -50,9 +54,4 @@ variable "ksa_name" {
 variable "gsa_name" {
   type    = string
   default = "external-dns"
-}
-variable "zone_name" {
-  type    = string
-  default = " "
-
 }
