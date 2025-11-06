@@ -9,6 +9,6 @@ resource "helm_release" "external_dns" {
   values = [local.external_dns_values]
 
 
-  depends_on = local.create_cf_secret ? [kubernetes_secret_v1.external_dns_cloudflare[0]] : []
+  depends_on = [kubernetes_secret_v1.external_dns_cloudflare]
 
 }
