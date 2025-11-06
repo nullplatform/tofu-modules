@@ -10,28 +10,42 @@ Cloudflare example:
 
 ```
 module "external_dns" {
-  source                       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/external_dns?ref=v1.0.0"
-  namespace                    = var.externa_dns_namespace  
-  external_dns_version         = var.external_dns_version
-  extra_args                    = ["--cloudflare-proxied"] 
+  source                       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/external_dns?ref=1.0.0"
+  dns_provider_name            = "cloudflare"
+  domain                       = "domain"
+  external_dns_namespace       = "external_dns_namespace"
+  extra_args                   = ["--cloudflare-proxied"]
+  cloudflare_token             = "cloudflare_token"
 }
 ```
 
-Google (CloudDNS) example:
+[//]: # (Google &#40;CloudDNS&#41; example:)
 
-```
-module "external_dns" {
-  source                 = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/external_dns?ref=v1.0.0"
-  zone_name              ="myprivate"
-  project_id             = "myproject"
-  dns_provider_name      = "google"
-  domain                 = "myprivate.zone"
-  external_dns_namespace = var.externa_dns_namespace
-  external_dns_version   = var.external_dns_version
-  extra_args             = ["--google-zone-visibility=private"]
+[//]: # ()
+[//]: # (```)
 
-}
-```
+[//]: # (module "external_dns" {)
+
+[//]: # (  source                 = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/external_dns?ref=v1.0.0")
+
+[//]: # (  zone_name              ="myprivate")
+
+[//]: # (  project_id             = "myproject")
+
+[//]: # (  dns_provider_name      = "google")
+
+[//]: # (  domain                 = "myprivate.zone")
+
+[//]: # (  external_dns_namespace = var.externa_dns_namespace)
+
+[//]: # (  version                = var.external_dns_version)
+
+[//]: # (  extra_args             = ["--google-zone-visibility=private"])
+
+[//]: # ()
+[//]: # (})
+
+[//]: # (```)
 
 
 <!-- BEGIN_TF_DOCS -->

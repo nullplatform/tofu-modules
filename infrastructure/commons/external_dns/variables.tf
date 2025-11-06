@@ -6,6 +6,7 @@ variable "external_dns_version" {
 
 variable "external_dns_namespace" {
   type = string
+  default = "external-dns"
 }
 variable "domain" {
   type = string
@@ -21,19 +22,24 @@ variable "txt_owner_id" {
 variable "cloudflare_token" {
   type      = string
   sensitive = true
-  default   = " "
-
+  default     = null
+  validation {
+    condition     = var.dns_provider_name != "cloudflare" || var.cloudflare_token != null
+    error_message = "cloudflare_token is required when dns_provider_name is 'cloudflare'."
+  }
 }
 
 variable "dns_provider_name" {
   type        = string
-  description = "dns provider"
-
+  description = "The dsn provider name to use with external dns"
+  validation {
+    condition     = contains(["cloudflare", "google"], var.dns_provider_name)
+    error_message = "dns_provider_name must be either 'cloudflare' or 'google'."
+  }
 }
 
 variable "extra_args" {
   type    = list(string)
-  default = [""]
 }
 
 variable "project_id" {
@@ -50,9 +56,4 @@ variable "ksa_name" {
 variable "gsa_name" {
   type    = string
   default = "external-dns"
-}
-variable "zone_name" {
-  type    = string
-  default = " "
-
 }
