@@ -3,6 +3,9 @@ hostedZoneName: "${hosted_zone_name}"
 nullPlatform:
   accountSlug: "${account_slug}"
 
+namespacecontroller:
+  name: "${namespace}"
+
 gcp:
   enabled: ${gcp_enabled}
   serviceAccountKey: |-
