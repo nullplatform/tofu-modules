@@ -13,9 +13,9 @@ module "cert_manager" {
   cert_manager_config_version  = var.cert_manager_config_version
   cert_manager_namespace       = var.cert_manager_namespace
 
+  # If Azure
   hosted_zone_name             = var.azure_hosted_zone_name
   account_slug                 = "nic1"
-
   azure_enabled                = true
   azure_subscription_id        = var.subscription_id
   azure_resource_group_name    = var.resource_group_name
@@ -23,6 +23,15 @@ module "cert_manager" {
   azure_client_secret          = var.azure_client_secret
   azure_tenant_id              = var.azure_tenant_id
   azure_hosted_zone_name       = var.azure_hosted_zone_name
+
+  # If GCP
+  gcp_enabled             = var.gcp_enabled
+  gcp_service_account_key = var.gcp_service_account_key
+
+  # If Cloudflare
+  cloudflare_enabled     = var.cloudflare_enabled
+  cloudflare_secret_name = var.cloudflare_secret_name
+  cloudflare_token       = var.cloudflare_token
 }
 ```
 
