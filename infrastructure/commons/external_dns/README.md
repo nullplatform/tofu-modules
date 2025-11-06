@@ -12,10 +12,10 @@ Cloudflare example:
 module "external_dns" {
   source                       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/external_dns?ref=1.0.0"
   dns_provider_name            = "cloudflare"
-  domain                       = "domain"
-  external_dns_namespace       = "external_dns_namespace"
+  domain                       = "implementations.nullaps.io"
+  external_dns_namespace       = "external-dns"
   extra_args                   = ["--cloudflare-proxied"]
-  cloudflare_token             = "cloudflare_token"
+  cloudflare_token             = "mi-token-magico"
 }
 ```
 
