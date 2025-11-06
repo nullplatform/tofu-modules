@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.5.2](https://github.com/nullplatform/tofu-modules/compare/v1.5.1...v1.5.2) (2025-11-06)
+
+
+### Bug Fixes
+
+* **cert-manager:** fix namespace error and improve configuration ([4af6c98](https://github.com/nullplatform/tofu-modules/commit/4af6c98918e309b94e5e03a499316c473ed37821))
+* commons changes readme ([3207ce2](https://github.com/nullplatform/tofu-modules/commit/3207ce234f7f0e20f02748ab7026a6b1841bdb7a))
+* external-dns secret and namespace depends ([4ee0bbd](https://github.com/nullplatform/tofu-modules/commit/4ee0bbd3b56872b85b9589c177d1e26e868506eb))
+* only azure, no gcp ([4556484](https://github.com/nullplatform/tofu-modules/commit/455648472f21d30c573cc4816d4d86526ff73e10))
+* remove version argument from git source module ([ed82438](https://github.com/nullplatform/tofu-modules/commit/ed82438851aa4188bf4d2c5b38c727d7e72f15ec))
+* remove version argument from git source module ([041f1ba](https://github.com/nullplatform/tofu-modules/commit/041f1ba9aa6e0fa2425f53a60170338d55ff6fa4))
+* secret ([5f0885c](https://github.com/nullplatform/tofu-modules/commit/5f0885cade1428a7b0bf40c71cae7db76c474395))
+
 ## [1.5.1](https://github.com/nullplatform/tofu-modules/compare/v1.5.0...v1.5.1) (2025-11-05)
 
 
