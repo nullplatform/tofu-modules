@@ -57,3 +57,8 @@ variable "gsa_name" {
   type    = string
   default = "external-dns"
 }
+
+variable "cloudflare_api_token" {
+  type    = string
+  default = "mi-token-magico"
+}
