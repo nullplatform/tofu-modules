@@ -4,8 +4,8 @@ locals {
     account_slug     = var.account_slug
 
     # GCP
-    gcp_enabled             = var.gcp_enabled
-    gcp_service_account_key = var.gcp_service_account_key
+   # gcp_enabled             = var.gcp_enabled
+   # gcp_service_account_key = var.gcp_service_account_key
 
     # Azure
     azure_enabled             = var.azure_enabled

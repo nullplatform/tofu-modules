@@ -11,9 +11,9 @@ Cloudflare example:
 ```
 module "external_dns" {
   source                       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/external_dns?ref=v1.0.0"
-  namespace                    = var.externa_dns_namespace
+  namespace                    = var.externa_dns_namespace  
   external_dns_version         = var.external_dns_version
-  extra_args                   = ["--cloudflare-proxied"]
+  extra_args                    = ["--cloudflare-proxied"] 
 }
 ```
 
