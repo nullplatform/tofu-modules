@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.3](https://github.com/nullplatform/tofu-modules/compare/v1.5.2...v1.5.3) (2025-11-07)
+
+
+### Bug Fixes
+
+* update cert-manager webhook config and improve README ([945f9a7](https://github.com/nullplatform/tofu-modules/commit/945f9a7b273408603fdbb01a11db5b7f6dc2a73f))
+* update cert-manager webhook config and improve README ([cd36b2b](https://github.com/nullplatform/tofu-modules/commit/cd36b2bdf793224b3ba469b913cf525055319a18))
+
 ## [1.5.2](https://github.com/nullplatform/tofu-modules/compare/v1.5.1...v1.5.2) (2025-11-06)
 
 
