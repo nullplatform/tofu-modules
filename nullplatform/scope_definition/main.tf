@@ -79,7 +79,7 @@ resource "nullplatform_service_specification" "from_template" {
   }
 
   lifecycle {
-    ignore_changes = [attributes]
+    ignore_changes = [attributes, type]
   }
 }
 
