@@ -13,9 +13,9 @@ module "cert_manager" {
   cert_manager_config_version  = var.cert_manager_config_version
   cert_manager_namespace       = var.cert_manager_namespace
 
-  # If Azure
   hosted_zone_name             = var.azure_hosted_zone_name
   account_slug                 = "nic1"
+
   azure_enabled                = true
   azure_subscription_id        = var.subscription_id
   azure_resource_group_name    = var.resource_group_name
