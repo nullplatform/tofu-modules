@@ -11,7 +11,7 @@ variable "cert_manager_namespace" {
 
 variable "cert_manager_config_version" {
   type    = string
-  default = "2.10.0"
+  default = "2.20.1"
 
 }
 
