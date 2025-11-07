@@ -13,12 +13,12 @@ gcp:
 
 azure:
   enabled: ${azure_enabled}
-  subscriptionId: "${azure_subscription_id}"
+  subscriptionID: "${azure_subscription_id}"
   resourceGroupName: "${azure_resource_group_name}"
-  clientId: "${azure_client_id}"
+  clientID: "${azure_client_id}"
   secretKey: "${azure_secret_key}"   # ej: "client-secret"
   clientSecret: "${azure_client_secret}"
-  tenantId: "${azure_tenant_id}"
+  tenantID: "${azure_tenant_id}"
   hostedZoneName: "${azure_hosted_zone_name}"
 
 cloudflare:
