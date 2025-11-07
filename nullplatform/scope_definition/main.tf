@@ -193,6 +193,8 @@ resource "null_resource" "nrn_patch" {
   triggers = {
     nrn          = var.nrn
     service_slug = local.service_slug
+    metrics_provider = var.metrics_provider
+    logging_provider = var.logging_provider
   }
 
   provisioner "local-exec" {
