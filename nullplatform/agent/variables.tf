@@ -12,13 +12,6 @@ variable "nrn" {
   type        = string
 }
 
-variable "np_api_key" {
-  description = "API key for authenticating with the Nullplatform API"
-  type        = string
-  sensitive   = true
-}
-
-
 variable "tags_selectors" {
   description = "Map of tags used to select and filter channels and agents"
   type        = map(string)
@@ -81,76 +74,76 @@ variable "cloud_provider" {
     error_message = "cloud_provider must be either 'aws' , 'gcp' or 'azure'."
   }
 }
-################################################################################
-# Template and Repository Configuration
-################################################################################
 
-variable "service_path" {
-  description = "Path to the service directory within the repository structure"
-  type        = string
-  default     = "k8s"
+variable "private_hosted_zone_rg" {
+  description = ""
+  type = string
+  default = null
+  validation {
+    condition = var.cloud_provider != "azure" || var.private_hosted_zone_rg != null
+    error_message = "private_hosted_zone_rg is required when cloud_provider is azure"
+  }
 }
-
-variable "repo_path" {
-  description = "Local filesystem path where the scope repository will be cloned"
-  type        = string
-  default     = "/root/.np/nullplatform/scopes"
+variable "private_gateway_name" {
+  description = ""
+  type = string
+  default = null
+  validation {
+    condition = var.cloud_provider != "azure" || var.private_gateway_name != null
+    error_message = "private_gateway_name is required when cloud_provider is azure"
+  }
 }
-
-variable "github_repo_url" {
-  description = "GitHub repository URL containing scope and action templates"
-  type        = string
-  default     = "https://github.com/nullplatform/scopes"
+variable "public_gateway_name" {
+  description = ""
+  type = string
+  default = null
+  validation {
+    condition = var.cloud_provider != "azure" || var.public_gateway_name != null
+    error_message = "public_gateway_name is required when cloud_provider is azure"
+  }
 }
-
-variable "github_ref" {
-  description = "Git reference to use (branch name, tag, or commit SHA)"
-  type        = string
-  default     = "beta"
+variable "azure_resource_group" {
+  description = ""
+  type = string
+  default = null
+  validation {
+    condition = var.cloud_provider != "azure" || var.azure_resource_group != null
+    error_message = "azure_resource_group is required when cloud_provider is azure"
+  }
 }
-
-
-
-
-
-
-
-################################################################################
-# Override Configuration
-################################################################################
-
-variable "enabled_override" {
-  description = "Enable custom overrides for scope configurations via command line"
-  type        = bool
-  default     = false
+variable "azure_subscription_id" {
+  description = ""
+  type = string
+  default = null
+  validation {
+    condition = var.cloud_provider != "azure" || var.azure_subscription_id != null
+    error_message = "azure_subscription_id is required when cloud_provider is azure"
+  }
 }
-
-variable "overrides_service_path" {
-  description = "Local filesystem path to the directory containing override configurations"
-  type        = string
-  default     = null
+variable "azure_client_secret" {
+  description = ""
+  type = string
+  default = null
+  validation {
+    condition = var.cloud_provider != "azure" || var.azure_client_secret != null
+    error_message = "azure_client_secret is required when cloud_provider is azure"
+  }
 }
-
-variable "override_repo_path" {
-  description = "Local filesystem path where the scope repository will be cloned"
-  type        = string
-  default     = null
+variable "azure_client_id" {
+  description = ""
+  type = string
+  default = null
+  validation {
+    condition = var.cloud_provider != "azure" || var.azure_client_id != null
+    error_message = "azure_client_id is required when cloud_provider is azure"
+  }
 }
-###########
-variable "git_ref" {
-  type        = string
-  default     = "main"
-  description = "Git reference (branch, tag, or commit)"
-}
-
-variable "git_scope_path" {
-  type        = string
-  default     = "k8s"
-  description = "Path within the repository for the specific scope (e.g., k8s, ecs)"
-}
-
-variable "git_repo" {
-  type        = string
-  default     = "nullplatform/scopes"
-  description = "GitHub repository containing templates"
+variable "azure_tenant_id" {
+  description = ""
+  type = string
+  default = null
+  validation {
+    condition = var.cloud_provider != "azure" || var.azure_tenant_id != null
+    error_message = "azure_tenant_id is required when cloud_provider is azure"
+  }
 }
