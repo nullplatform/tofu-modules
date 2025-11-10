@@ -23,19 +23,11 @@ variable "cloudflare_token" {
   type      = string
   sensitive = true
   default     = null
-  validation {
-    condition     = var.dns_provider_name != "cloudflare" || var.cloudflare_token != null
-    error_message = "cloudflare_token is required when dns_provider_name is 'cloudflare'."
-  }
 }
 
 variable "dns_provider_name" {
   type        = string
   description = "The dsn provider name to use with external dns"
-  validation {
-    condition     = contains(["cloudflare", "google"], var.dns_provider_name)
-    error_message = "dns_provider_name must be either 'cloudflare' or 'google'."
-  }
 }
 
 variable "extra_args" {

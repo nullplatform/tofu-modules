@@ -60,90 +60,50 @@ variable "aws_iam_role_arn" {
   description = "The ARN role to aws agent"
   type        = string
   default     = null
-  validation {
-    condition     = var.cloud_provider != "aws" || var.aws_iam_role_arn != null
-    error_message = "aws_iam_role_arn is required when cloud_provider is 'aws'."
-  }
 }
 
 variable "cloud_provider" {
   description = "Cloud provider to use (aws, gcp or azure)"
   type        = string
-  validation {
-    condition     = contains(["aws", "gcp", "azure"], var.cloud_provider)
-    error_message = "cloud_provider must be either 'aws' , 'gcp' or 'azure'."
-  }
 }
 
 variable "private_hosted_zone_rg" {
   description = ""
   type = string
   default = null
-  validation {
-    condition = var.cloud_provider != "azure" || var.private_hosted_zone_rg != null
-    error_message = "private_hosted_zone_rg is required when cloud_provider is azure"
-  }
 }
 variable "private_gateway_name" {
   description = ""
   type = string
   default = null
-  validation {
-    condition = var.cloud_provider != "azure" || var.private_gateway_name != null
-    error_message = "private_gateway_name is required when cloud_provider is azure"
-  }
 }
 variable "public_gateway_name" {
   description = ""
   type = string
   default = null
-  validation {
-    condition = var.cloud_provider != "azure" || var.public_gateway_name != null
-    error_message = "public_gateway_name is required when cloud_provider is azure"
-  }
 }
 variable "azure_resource_group" {
   description = ""
   type = string
   default = null
-  validation {
-    condition = var.cloud_provider != "azure" || var.azure_resource_group != null
-    error_message = "azure_resource_group is required when cloud_provider is azure"
-  }
 }
 variable "azure_subscription_id" {
   description = ""
   type = string
   default = null
-  validation {
-    condition = var.cloud_provider != "azure" || var.azure_subscription_id != null
-    error_message = "azure_subscription_id is required when cloud_provider is azure"
-  }
 }
 variable "azure_client_secret" {
   description = ""
   type = string
   default = null
-  validation {
-    condition = var.cloud_provider != "azure" || var.azure_client_secret != null
-    error_message = "azure_client_secret is required when cloud_provider is azure"
-  }
 }
 variable "azure_client_id" {
   description = ""
   type = string
   default = null
-  validation {
-    condition = var.cloud_provider != "azure" || var.azure_client_id != null
-    error_message = "azure_client_id is required when cloud_provider is azure"
-  }
 }
 variable "azure_tenant_id" {
   description = ""
   type = string
   default = null
-  validation {
-    condition = var.cloud_provider != "azure" || var.azure_tenant_id != null
-    error_message = "azure_tenant_id is required when cloud_provider is azure"
-  }
 }
