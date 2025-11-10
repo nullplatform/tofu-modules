@@ -5,7 +5,7 @@ This code installs and manages the nullplatform Agent in a Kubernetes cluster us
 Usage:
 
 ```
-module "cloud_aws_agent" {
+module "nullplatform_agent" {
   source                              = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.0.0"
   cluster_name                        = var.cluster_name
   nrn                                 = var.nrn

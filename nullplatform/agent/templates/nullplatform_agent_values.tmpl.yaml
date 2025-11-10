@@ -9,5 +9,8 @@ configuration:
 ${key}: "${value}"
   %{ endfor ~}
 
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: "${aws_iam_role_arn}"
 image:
   tag: "${image_tag}"

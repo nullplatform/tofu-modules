@@ -56,7 +56,6 @@ locals {
 
   cloud_config = {
     aws = {
-      IMAGE_TAG        = var.image_tag
       AWS_IAM_ROLE_ARN = var.aws_iam_role_arn
     }
 
