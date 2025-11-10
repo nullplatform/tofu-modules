@@ -53,6 +53,7 @@ variable "azure_enabled" {
 variable "azure_subscription_id" {
   description = "Azure Subscription ID."
   type        = string
+  default = null
   validation {
     condition     = !var.azure_enabled || var.azure_subscription_id != null
     error_message = "When azure_enabled is true, azure_subscription_id must not be empty."
