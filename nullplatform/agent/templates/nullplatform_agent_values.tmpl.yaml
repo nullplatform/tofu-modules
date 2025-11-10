@@ -1,16 +1,17 @@
 args:
-  %{ for arg in args ~}
-- "${arg}"
-  %{ endfor ~}
+%{ for arg in args ~}
+  - "${arg}"
+%{ endfor ~}
 
 configuration:
   values:
-  %{ for key, value in config_values ~}
-${key}: "${value}"
-  %{ endfor ~}
+%{ for key, value in config_values ~}
+    ${key}: "${value}"
+%{ endfor ~}
 
 serviceAccount:
   annotations:
     eks.amazonaws.com/role-arn: "${aws_iam_role_arn}"
+
 image:
   tag: "${image_tag}"
