@@ -24,21 +24,7 @@ resource "time_sleep" "wait_for_cert_manager" {
   create_duration = "45s"
 }
 
-# Crear el Secret de Cloudflare
-resource "kubernetes_secret" "cloudflare_api_token" {
-  count = var.cloudflare_enabled ? 1 : 0
 
-  metadata {
-    name      = var.cloudflare_secret_name
-    namespace = var.cert_manager_namespace
-  }
-
-  data = {
-    api-token = var.cloudflare_token
-  }
-
-  depends_on = [time_sleep.wait_for_cert_manager]
-}
 
 resource "helm_release" "cert_manager_config" {
   name             = "cert-manager-config"
@@ -49,5 +35,5 @@ resource "helm_release" "cert_manager_config" {
   namespace        = var.cert_manager_namespace
   values = [local.helm_values]
 
-  depends_on = [kubernetes_secret.cloudflare_api_token]
+depends_on = [time_sleep.wait_for_cert_manager]
 }
