@@ -9,8 +9,7 @@ Usage:
 ```
 module "cert_manager" {
   source                       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/cert_manager?ref=1.0.0"
-
-
+  
   #DNS in Azure Configuration
   azure_enabled                = true
   azure_subscription_id        = var.subscription_id
@@ -32,6 +31,7 @@ module "cert_manager" {
   #Optional
   hosted_zone_name             = var.hosted_zone_name
   account_slug                 = "var.account_slug"
+  
 
 }
 

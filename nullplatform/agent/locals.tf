@@ -31,16 +31,7 @@ locals {
   cloud_args = {
     aws   = []
     gcp   = []
-    azure = [
-      "--private-hosted-zone-rg=$(PRIVATE_HOSTED_ZONE_RG)",
-      "--private-gateway-name=$(PRIVATE_GATEWAY_NAME)",
-      "--public-gateway-name=$(PUBLIC_GATEWAY_NAME)",
-      "--resource-group=$(RESOURCE_GROUP)",
-      "--azure-subscription-id=$(AZURE_SUBSCRIPTION_ID)",
-      "--azure-client-secret=$(AZURE_CLIENT_SECRET)",
-      "--azure-client-id=$(AZURE_CLIENT_ID)",
-      "--azure-tenant-id=$(AZURE_TENANT_ID)"
-    ]
+    azure = []
   }
 
   all_args = concat(local.default_args, lookup(local.cloud_args, var.cloud_provider, []))
@@ -72,12 +63,6 @@ locals {
       AZURE_TENANT_ID        = var.azure_tenant_id
     }
   }
-
-
-
-
-
-
   all_config = merge(local.default_config, lookup(local.cloud_config, var.cloud_provider, {}))
 
   # Template único y simple
@@ -85,6 +70,6 @@ locals {
     args          = local.all_args
     config_values = local.all_config
     image_tag     = var.image_tag
-    aws_iam_role_arn = ""
+    aws_iam_role_arn = var.cloud_provider == "aws" ? var.aws_iam_role_arn : ""
   })
 }

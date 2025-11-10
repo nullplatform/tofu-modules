@@ -12,6 +12,19 @@ module "nullplatform_agent" {
   np_api_key                          = var.np_api_key
   tags_selectors                      = var.tags_selectors
   namespace                           = var.namespace
+  
+  #Agent in AWS cloud
+  aws_iam_role_arn = var.aws_iam_role_arn
+  
+  #Agent in Azure cloud
+  private_hosted_zone_rg = var.private_hosted_zone_rg
+  private_gateway_name = var.private_gateway_name
+  public_gateway_name = var.public_gateway_name
+  azure_resource_group = var.azure_resource_group
+  azure_subscription_id = var.azure_subscription_id
+  azure_client_secret = var.azure_client_secret
+  azure_client_id = var.azure_client_id
+  azure_tenant_id = var.azure_tenant_id
 }
 ```
 

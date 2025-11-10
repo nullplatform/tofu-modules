@@ -1,13 +1,3 @@
-resource "kubernetes_namespace" "external_dns" {
-  metadata {
-    name = var.external_dns_namespace
-    labels = {
-      name = var.external_dns_namespace
-    }
-  }
-}
-
-
 resource "helm_release" "external_dns" {
   name             = "external-dns"
   repository       = "https://kubernetes-sigs.github.io/external-dns/"
