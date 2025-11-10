@@ -6,6 +6,11 @@ nullPlatform:
 namespacecontroller:
   name: "${namespace}"
 
+cloudflare:
+  enabled: ${cloudflare_enabled}
+  secretName: "${cloudflare_secret_name}"
+  apiToken: "${cloudflare_token}"
+  
 gcp:
   enabled: ${gcp_enabled}
   serviceAccountKey: |-
@@ -20,8 +25,3 @@ azure:
   clientSecret: "${azure_client_secret}"
   tenantID: "${azure_tenant_id}"
   hostedZoneName: "${azure_hosted_zone_name}"
-
-cloudflare:
-  enabled: ${cloudflare_enabled}
-  secretName: "${cloudflare_secret_name}"
-  apiToken: "${cloudflare_token}"
