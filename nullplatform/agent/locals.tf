@@ -73,11 +73,18 @@ locals {
     }
   }
 
+
+
+
+
+
   all_config = merge(local.default_config, lookup(local.cloud_config, var.cloud_provider, {}))
 
   # Template único y simple
   nullplatform_agent_values = templatefile("${path.module}/templates/nullplatform_agent_values.tmpl.yaml", {
     args          = local.all_args
     config_values = local.all_config
+    image_tag     = var.image_tag
+    aws_iam_role_arn = ""
   })
 }
