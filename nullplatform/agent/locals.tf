@@ -24,14 +24,14 @@ locals {
     "--command-executor-debug",
     "--webserver-enabled",
     "--command-executor-git-command-repos $(AGENT_REPOS)"
+    "--cluster-name=$(CLUSTER_NAME)",
+    "--namespace=$(NAMESPACE)",
   ]
 
   cloud_args = {
     aws   = []
     gcp   = []
     azure = [
-      "--cluster-name=$(CLUSTER_NAME)",
-      "--namespace=$(NAMESPACE)",
       "--private-hosted-zone-rg=$(PRIVATE_HOSTED_ZONE_RG)",
       "--private-gateway-name=$(PRIVATE_GATEWAY_NAME)",
       "--public-gateway-name=$(PUBLIC_GATEWAY_NAME)",
