@@ -23,7 +23,7 @@ locals {
     "--command-executor-env=NP_API_KEY=$(NP_API_KEY)",
     "--command-executor-debug",
     "--webserver-enabled",
-    "--command-executor-git-command-repos $(AGENT_REPOS)"
+    "--command-executor-git-command-repos $(AGENT_REPOS)",
     "--cluster-name=$(CLUSTER_NAME)",
     "--namespace=$(NAMESPACE)",
   ]
