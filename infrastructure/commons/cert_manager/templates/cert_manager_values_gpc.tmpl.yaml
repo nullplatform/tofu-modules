@@ -1,0 +1,4 @@
+gcp:
+  enabled: ${gcp_enabled}
+  serviceAccountKey: |-
+    ${gcp_service_account_key}

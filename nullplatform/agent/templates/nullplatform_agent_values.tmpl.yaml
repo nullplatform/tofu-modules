@@ -1,0 +1,13 @@
+args:
+  %{ for arg in args ~}
+- "${arg}"
+  %{ endfor ~}
+
+configuration:
+  values:
+  %{ for key, value in config_values ~}
+${key}: "${value}"
+  %{ endfor ~}
+
+image:
+  tag: "${image_tag}"

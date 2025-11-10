@@ -22,6 +22,11 @@ resource "helm_release" "cert_manager_config" {
   version          = var.cert_manager_config_version
   namespace        = var.cert_manager_namespace
 
-  values = [local.helm_values]
+  values = concat(
+    [local.cert_manager_values_default],
+      var.cloudflare_enabled ? [local.cert_manager_values_cloudfare] : [],
+      var.gcp_enabled ? [local.cert_manager_values_gcp] : [],
+      var.azure_enabled ? [local.cert_manager_values_azure] : []
+  )
 }
 

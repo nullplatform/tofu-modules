@@ -15,12 +15,6 @@ variable "cert_manager_config_version" {
 
 }
 
-
-
-
-
-
-
 variable "hosted_zone_name" {
   description = "Hosted zone name (if applicable)."
   type        = string
