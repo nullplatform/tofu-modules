@@ -11,8 +11,9 @@ module "prometheus" {
   np_api_key           = var.np_api_key
   prometheus_namespace = var.prometheus_namespace
   nullplatform_port    = var.nullplatform_port
-  kubeconfig_path      = var.kubeconfig_path
-  kube_context         = var.kube_context
+  prometheus_url       = var.prometheus_url
+  install_prometheus   = var.install_prometheus
+
 }
 ```
 
