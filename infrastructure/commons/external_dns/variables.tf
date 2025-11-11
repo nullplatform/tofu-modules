@@ -5,7 +5,7 @@ variable "external_dns_version" {
 }
 
 variable "external_dns_namespace" {
-  type = string
+  type    = string
   default = "external-dns"
 }
 variable "domain" {
@@ -22,7 +22,7 @@ variable "txt_owner_id" {
 variable "cloudflare_token" {
   type      = string
   sensitive = true
-  default     = null
+  default   = null
 }
 
 variable "dns_provider_name" {
@@ -31,7 +31,7 @@ variable "dns_provider_name" {
 }
 
 variable "extra_args" {
-  type    = list(string)
+  type = list(string)
 }
 
 variable "project_id" {

@@ -18,5 +18,5 @@ resource "helm_release" "base" {
   reuse_values      = false
   dependency_update = true
   max_history       = 10
-  values = [local.nullplatform_base_values]
+  values            = [local.nullplatform_base_values]
 }

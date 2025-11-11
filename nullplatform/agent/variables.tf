@@ -69,41 +69,63 @@ variable "cloud_provider" {
 
 variable "private_hosted_zone_rg" {
   description = ""
-  type = string
-  default = null
+  type        = string
+  default     = null
 }
 variable "private_gateway_name" {
   description = ""
-  type = string
-  default = null
+  type        = string
+  default     = null
 }
 variable "public_gateway_name" {
   description = ""
-  type = string
-  default = null
+  type        = string
+  default     = null
 }
 variable "azure_resource_group" {
   description = ""
-  type = string
-  default = null
+  type        = string
+  default     = null
 }
 variable "azure_subscription_id" {
   description = ""
-  type = string
-  default = null
+  type        = string
+  default     = null
 }
 variable "azure_client_secret" {
   description = ""
-  type = string
-  default = null
+  type        = string
+  default     = null
 }
 variable "azure_client_id" {
   description = ""
-  type = string
-  default = null
+  type        = string
+  default     = null
 }
 variable "azure_tenant_id" {
   description = ""
-  type = string
-  default = null
+  type        = string
+  default     = null
+}
+
+variable "dns_type" {
+  description = ""
+}
+variable "use_account_slug" {
+  description = ""
+}
+variable "image_pull_secrets" {
+  description = ""
+}
+variable "domain" {
+  description = ""
+}
+variable "service_template" {
+  description = ""
+}
+variable "initial_ingress_path" {
+  description = ""
+}
+variable "blue_green_ingress_path" {
+  description = ""
 }

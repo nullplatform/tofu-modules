@@ -12,9 +12,9 @@ locals {
   # Merge scope and extra repositories, removing duplicates
   final_repo_list = distinct(concat(local.scope_list, local.repos_extra))
 
-  agent_repos  = join(",", local.final_repo_list)
-  tags         = join(",", [for k in sort(keys(var.tags_selectors)) : "${k}:${var.tags_selectors[k]}"])
-  api_key      = nullplatform_api_key.nullplatform_agent_api_key.api_key
+  agent_repos = join(",", local.final_repo_list)
+  tags        = join(",", [for k in sort(keys(var.tags_selectors)) : "${k}:${var.tags_selectors[k]}"])
+  api_key     = nullplatform_api_key.nullplatform_agent_api_key.api_key
 
   default_args = [
     "--tags=$(TAGS)",
@@ -51,24 +51,31 @@ locals {
     gcp = {}
 
     azure = {
-      PRIVATE_HOSTED_ZONE_RG = var.private_hosted_zone_rg
-      PRIVATE_GATEWAY_NAME   = var.private_gateway_name
-      PUBLIC_GATEWAY_NAME    = var.public_gateway_name
-      RESOURCE_GROUP         = var.azure_resource_group
-      AZURE_SUBSCRIPTION_ID  = var.azure_subscription_id
-      AZURE_CLIENT_SECRET    = var.azure_client_secret
-      AZURE_CLIENT_ID        = var.azure_client_id
-      AZURE_TENANT_ID        = var.azure_tenant_id
+      PRIVATE_HOSTED_ZONE_RG  = var.private_hosted_zone_rg
+      PRIVATE_GATEWAY_NAME    = var.private_gateway_name
+      PUBLIC_GATEWAY_NAME     = var.public_gateway_name
+      RESOURCE_GROUP          = var.azure_resource_group
+      AZURE_SUBSCRIPTION_ID   = var.azure_subscription_id
+      AZURE_CLIENT_SECRET     = var.azure_client_secret
+      AZURE_CLIENT_ID         = var.azure_client_id
+      AZURE_TENANT_ID         = var.azure_tenant_id
+      DNS_TYPE                = var.dns_type
+      USE_ACCOUNT_SLUG        = var.use_account_slug
+      IMAGE_PULL_SECRETS      = var.image_pull_secrets
+      DOMAIN                  = var.domain
+      SERVICE_TEMPLATE        = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/service.yaml.tpl"
+      INITIAL_INGRESS_PATH    = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
+      BLUE_GREEN_INGRESS_PATH = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
     }
   }
   all_config = merge(local.default_config, lookup(local.cloud_config, var.cloud_provider, {}))
 
   # Template único y simple
   nullplatform_agent_values = templatefile("${path.module}/templates/nullplatform_agent_values.tmpl.yaml", {
-    args          = local.all_args
-    config_values = local.all_config
-    image_tag     = var.image_tag
+    args             = local.all_args
+    config_values    = local.all_config
+    image_tag        = var.image_tag
     aws_iam_role_arn = var.cloud_provider == "aws" ? var.aws_iam_role_arn : ""
-    init_scripts      = var.init_scripts
+    init_scripts     = var.init_scripts
   })
 }

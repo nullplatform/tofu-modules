@@ -36,7 +36,7 @@ variable "gcp_service_account_key" {
   description = "Contents of the Service Account JSON for Cloud DNS (use file() if reading from disk)."
   type        = string
   sensitive   = true
-  default = null
+  default     = null
 }
 
 # --- Azure ---
@@ -49,7 +49,7 @@ variable "azure_enabled" {
 variable "azure_subscription_id" {
   description = "Azure Subscription ID."
   type        = string
-  default = null
+  default     = null
 }
 
 variable "azure_resource_group_name" {
