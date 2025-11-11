@@ -61,7 +61,7 @@ locals {
       AZURE_TENANT_ID         = var.azure_tenant_id
       DNS_TYPE                = var.dns_type
       USE_ACCOUNT_SLUG        = false
-      IMAGE_PULL_SECRETS      = "{ENABLED: false}"
+      image_pull_secrets      = "{\"ENABLED\": false}"
       DOMAIN                  = var.domain
       SERVICE_TEMPLATE        = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/service.yaml.tpl"
       INITIAL_INGRESS_PATH    = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
