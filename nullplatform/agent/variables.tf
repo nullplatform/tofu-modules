@@ -111,21 +111,7 @@ variable "azure_tenant_id" {
 variable "dns_type" {
   description = ""
 }
-variable "use_account_slug" {
-  description = ""
-}
-variable "image_pull_secrets" {
-  description = ""
-}
+
 variable "domain" {
-  description = ""
-}
-variable "service_template" {
-  description = ""
-}
-variable "initial_ingress_path" {
-  description = ""
-}
-variable "blue_green_ingress_path" {
   description = ""
 }
