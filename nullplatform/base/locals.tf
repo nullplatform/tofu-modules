@@ -1,5 +1,5 @@
 locals {
-  # (opcional) si lo seguís usando en otro lado
+  # (optional) if you’re still using it elsewhere
   nrn_without_namespace = join(":", slice(split(":", var.nrn), 0, 2))
 
   nullplatform_base_values = templatefile(
@@ -19,7 +19,7 @@ locals {
 
       # ---- nullplatform ----
       np_api_key = var.np_api_key
-      # secretName lo dejaste vacío en el template; si lo querés parametrizar, agregá var.nullplatform_secret_name
+      # You left secretName empty in the template; if you want to make it configurable, add var.nullplatform_secret_name
 
       # ---- controlPlane ----
       controlPlane_enabled = var.control_plane_enabled ? "true" : "false"

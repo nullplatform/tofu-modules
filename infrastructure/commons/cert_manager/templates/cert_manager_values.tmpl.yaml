@@ -16,7 +16,7 @@ azure:
   subscriptionId: "${azure_subscription_id}"
   resourceGroupName: "${azure_resource_group_name}"
   clientId: "${azure_client_id}"
-  secretKey: "${azure_secret_key}"   # ej: "client-secret"
+  secretKey: "${azure_secret_key}"   # e.g. "client-secret"
   clientSecret: "${azure_client_secret}"
   tenantId: "${azure_tenant_id}"
   hostedZoneName: "${azure_hosted_zone_name}"

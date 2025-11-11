@@ -4,7 +4,7 @@ output:
   file: README.md
   mode: inject
 
-# Secciones a mostrar (en orden). Quitá/añadí según prefieras.
+# Sections to display (in order). Remove/add as you prefer.
 sections:
   show:
     - header
@@ -15,20 +15,20 @@ sections:
     - inputs
     - outputs
 
-# Orden de tablas (inputs/outputs) por nombre ascendente
+# Order tables (inputs/outputs) by ascending name
 sort:
   enabled: true
   by: name
   order: asc
 
-# Ajustes de render
+# Rendering settings
 settings:
-  anchor: true         # anclas en títulos de tablas
-  default: true        # mostrar valores por defecto
-  required: true       # marcar si un input es requerido
-  sensitive: true      # marcar sensibles
-  type: true           # mostrar tipo de variable
-  escape: true         # escapar caracteres especiales
+  anchor: true         # anchors in table titles
+  default: true        # show default values
+  required: true       # mark if an input is required
+  sensitive: true      # mark sensitive ones
+  type: true           # show variable type
+  escape: true         # escape special characters
   indent: 2
   html: true
-  hide-empty: true     # oculta secciones vacías
+  hide-empty: true     # hide empty sections

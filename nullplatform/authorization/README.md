@@ -8,8 +8,6 @@ Usage:
 
 ### Basic example
 
-
-
 ```hcl
 module "authorization" {
   source       = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/authorization?ref=v1.0.0"

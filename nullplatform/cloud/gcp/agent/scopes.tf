@@ -147,13 +147,13 @@ TPL
     REPO_PATH='${local.dependent_env_vars.REPO_PATH}' \
     processed_json="$(printf '%s' "$body" | gomplate)"
 
-    # Validar JSON (opcional pero útil)
+    # Validate JSON (optional but useful)
     printf '%s' "$processed_json" | jq . >/dev/null
 
-    # Base64 sin saltos y sin CR
+    # Base64 encode without line breaks or CR
     b64="$(printf '%s' "$processed_json" | base64 | tr -d '\r\n')"
 
-    # ENTREGAR map[string]string en UNA línea por stdout
+    # Return a map[string]string in one line per stdout
     printf '{"json_b64":"%s"}\n' "$b64"
   EOT
   ]

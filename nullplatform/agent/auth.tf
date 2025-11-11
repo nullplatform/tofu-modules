@@ -1,5 +1,5 @@
 ################################################################################
-# Nullplatform Agent API Key
+# Nullplatform agent API key
 ################################################################################
 
 # Create API key for agent authentication with required role grants
