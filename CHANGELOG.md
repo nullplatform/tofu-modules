@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.6.0](https://github.com/nullplatform/tofu-modules/compare/v1.5.3...v1.6.0) (2025-11-11)
+
+
+### Features
+
+* add support to prometheus operator ([5e85aa1](https://github.com/nullplatform/tofu-modules/commit/5e85aa1bc1c49c926d1747ddd670d046b4d7e5d6))
+* I'm adding support for Prometheus Operator ([f1c6e08](https://github.com/nullplatform/tofu-modules/commit/f1c6e080b1be49f575e625202c72a6aa03011ea9))
+* I'm adding support for Prometheus Operator ([9e1db19](https://github.com/nullplatform/tofu-modules/commit/9e1db198732650b24e06e76592765c647b0d35b5))
+* I'm adding support for Prometheus Operator ([11557ea](https://github.com/nullplatform/tofu-modules/commit/11557eabc0950e07b216e7c4eb7fb78a8b48dd8c))
+
 ## [1.5.3](https://github.com/nullplatform/tofu-modules/compare/v1.5.2...v1.5.3) (2025-11-07)
 
 
