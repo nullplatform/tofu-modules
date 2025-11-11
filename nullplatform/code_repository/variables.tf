@@ -1,5 +1,5 @@
 variable "git_provider" {
-  description = "Git provider to use (github or gitlab)"
+  description = "Git provider to use (GitHub or GitLab)."
   type        = string
   validation {
     condition     = contains(["github", "gitlab"], var.git_provider)
@@ -7,9 +7,9 @@ variable "git_provider" {
   }
 }
 
-# Variables específicas de GitLab
+# GitLab-specific variables
 variable "gitlab_group_path" {
-  description = "GitLab group path where repositories will be created"
+  description = "GitLab group path where repositories will be created."
   type        = string
   default     = null
   validation {
@@ -19,7 +19,7 @@ variable "gitlab_group_path" {
 }
 
 variable "gitlab_access_token" {
-  description = "Access token for authenticating with the Git provider API"
+  description = "Access token for authenticating with the Git provider API."
   type        = string
   sensitive   = true
   default     = null
@@ -30,7 +30,7 @@ variable "gitlab_access_token" {
 }
 
 variable "gitlab_installation_url" {
-  description = "Installation URL for the Git provider integration"
+  description = "Installation URL for the Git provider integration."
   type        = string
   default     = null
   validation {
@@ -40,7 +40,7 @@ variable "gitlab_installation_url" {
 }
 
 variable "gitlab_collaborators_config" {
-  description = "Configuration for repository collaborators with their roles and permissions"
+  description = "Configuration for repository collaborators, including their roles and permissions."
   type = object({
     collaborators = list(object({
       id   = string
@@ -56,7 +56,7 @@ variable "gitlab_collaborators_config" {
 }
 
 variable "gitlab_repository_prefix" {
-  description = "Prefix to use for GitLab repository names"
+  description = "Prefix to use for GitLab repository names."
   type        = string
   default     = null
   validation {
@@ -66,7 +66,7 @@ variable "gitlab_repository_prefix" {
 }
 
 variable "gitlab_slug" {
-  description = "GitLab project slug identifier"
+  description = "GitLab project slug identifier."
   type        = string
   default     = null
   validation {
@@ -75,9 +75,9 @@ variable "gitlab_slug" {
   }
 }
 
-# Variables específicas de GitHub
+# GitHub-specific variables
 variable "github_organization" {
-  description = "GitHub organization name for repository creation"
+  description = "GitHub organization name for repository creation."
   type        = string
   default     = null
   validation {
@@ -87,7 +87,7 @@ variable "github_organization" {
 }
 
 variable "github_installation_id" {
-  description = "GitHub App installation ID for the organization"
+  description = "GitHub App installation ID for the organization."
   type        = string
   default     = null
   validation {
@@ -96,14 +96,14 @@ variable "github_installation_id" {
   }
 }
 
-# Variables comunes (siempre requeridas)
+# Common variables (always required)
 variable "np_api_key" {
-  description = "Nullplatform API key for authentication"
+  description = "Nullplatform API key for authentication."
   type        = string
   sensitive   = true
 }
 
 variable "nrn" {
-  description = "Nullplatform Resource Name - unique identifier for resources"
+  description = "Nullplatform Resource Name (NRN) — unique identifier for resources."
   type        = string
 }

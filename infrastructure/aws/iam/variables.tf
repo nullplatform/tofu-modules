@@ -4,6 +4,6 @@ variable "aws_iam_openid_connect_provider_arn" {
 }
 
 variable "agent_namespace" {
-  description = "The namespace where run to agent"
+  description = "Namespace where the agent runs"
   type        = string
 }

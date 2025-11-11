@@ -3,17 +3,17 @@
 ################################################################################
 
 variable "cluster_name" {
-  description = "Name of the EKS cluster where the Nullplatform agent will be deployed"
+  description = "Name of the EKS cluster where the nullplatform agent will be deployed"
   type        = string
 }
 
 variable "nrn" {
-  description = "Nullplatform Resource Name - Unique identifier for Nullplatform resources"
+  description = "The Nullplatform Resource Name (NRN) —unique identifier for nullplatform resources"
   type        = string
 }
 
 variable "np_api_key" {
-  description = "API key for authenticating with the Nullplatform API"
+  description = "API key used to authenticate with the nullplatform API"
   type        = string
   sensitive   = true
 }
@@ -33,13 +33,13 @@ variable "tags_selectors" {
 ################################################################################
 
 variable "nullplatform_agent_helm_version" {
-  description = "Version of the Nullplatform agent Helm chart to deploy"
+  description = "Version of the nullplatform agent Helm chart to deploy"
   type        = string
   default     = "2.11.0"
 }
 
 variable "namespace" {
-  description = "Kubernetes namespace where the Nullplatform agent will run"
+  description = "Kubernetes namespace where the nullplatform agent will run"
   type        = string
   default     = "nullplatform-tools"
 }
@@ -115,13 +115,13 @@ variable "action_spec_names" {
 }
 
 variable "service_spec_description" {
-  description = "Description to specification service"
+  description = "Description of the service specification"
   type        = string
   default     = "Docker containers on pods"
 }
 
 variable "service_spec_name" {
-  description = "Name to scope type"
+  description = "Name of the scope type"
   type        = string
   default     = "Containers"
 }

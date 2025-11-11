@@ -3,17 +3,17 @@
 ################################################################################
 
 variable "cluster_name" {
-  description = "Name of the EKS cluster where the Nullplatform agent will be deployed"
+  description = "Name of the EKS cluster where the nullplatform agent will be deployed"
   type        = string
 }
 
 variable "nrn" {
-  description = "Nullplatform Resource Name - Unique identifier for Nullplatform resources"
+  description = "Nullplatform Resource Name - unique identifier for nullplatform resources"
   type        = string
 }
 
 variable "np_api_key" {
-  description = "API key for authenticating with the Nullplatform API"
+  description = "API key used to authenticate with the nullplatform API"
   type        = string
   sensitive   = true
 }
@@ -25,17 +25,17 @@ variable "tags_selectors" {
 }
 
 ################################################################################
-# Agent Configuration
+# Agent configuration
 ################################################################################
 
 variable "nullplatform_agent_helm_version" {
-  description = "Version of the Nullplatform agent Helm chart to deploy"
+  description = "Version of the nullplatform agent Helm chart to deploy"
   type        = string
   default     = "2.11.0"
 }
 
 variable "namespace" {
-  description = "Kubernetes namespace where the Nullplatform agent will run"
+  description = "Kubernetes namespace where the nullplatform agent will run"
   type        = string
   default     = "nullplatform-tools"
 }
@@ -47,7 +47,7 @@ variable "agent_repos_scope" {
 }
 
 variable "agent_repos_extra" {
-  description = "List of additional Git repositories for extended agent configuration"
+  description = "List of additional Git repositories used for extended agent configuration"
   type        = list(string)
   default     = []
 }
@@ -59,12 +59,12 @@ variable "init_scripts" {
 }
 
 variable "image_tag" {
-  description = "Image tag to agent"
+  description = "Image tag for the agent container image"
   type        = string
 }
 
 variable "aws_iam_role_arn" {
-  description = "The ARN role to aws agent"
+  description = "ARN of the AWS IAM role assigned to the agent"
   type        = string
   default     = null
   validation {
@@ -74,15 +74,15 @@ variable "aws_iam_role_arn" {
 }
 
 variable "cloud_provider" {
-  description = "Cloud provider to use (aws, gcp or azure)"
+  description = "Cloud provider to use (aws, gcp, or azure)"
   type        = string
   validation {
     condition     = contains(["aws", "gcp", "azure"], var.cloud_provider)
-    error_message = "cloud_provider must be either 'aws' , 'gcp' or 'azure'."
+    error_message = "cloud_provider must be either 'aws' , 'gcp', or 'azure'."
   }
 }
 ################################################################################
-# Template and Repository Configuration
+# Template and repository configuration
 ################################################################################
 
 variable "service_path" {
@@ -109,12 +109,6 @@ variable "github_ref" {
   default     = "beta"
 }
 
-
-
-
-
-
-
 ################################################################################
 # Override Configuration
 ################################################################################
@@ -140,7 +134,7 @@ variable "override_repo_path" {
 variable "git_ref" {
   type        = string
   default     = "main"
-  description = "Git reference (branch, tag, or commit)"
+  description = "Git reference to use (branch, tag, or commit)"
 }
 
 variable "git_scope_path" {

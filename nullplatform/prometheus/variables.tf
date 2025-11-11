@@ -5,7 +5,7 @@ variable "prometheus_namespace" {
 }
 
 variable "nrn" {
-  description = "Nullplatform Resource Name - unique identifier for resources"
+  description = "Nullplatform Resource Name — unique identifier for resources"
   type        = string
 }
 
@@ -16,7 +16,7 @@ variable "np_api_key" {
 }
 
 variable "nullplatform_port" {
-  description = "Port number for Nullplatform service communication"
+  description = "Port number for nullplatform service communication"
   type        = number
   default     = 2021
 }
@@ -32,4 +32,3 @@ variable "kube_context" {
   type        = string
   default     = null
 }
-

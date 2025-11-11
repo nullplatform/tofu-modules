@@ -4,7 +4,7 @@ variable "environments" {
   default     = ["development", "staging", "production"]
 }
 variable "nrn" {
-  description = "Identifier Nullplatform Resources Name"
+  description = "Identifier Nullplatform Resources Name (NRN)"
   type        = string
 }
 
