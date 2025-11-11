@@ -10,23 +10,33 @@ variable "resource_group_name" {
 
 variable "containerregistry_name" {
   type        = string
-  description = "The name of your ACR"
+  description = "The name of your ACR (must be globally unique, lowercase alphanumeric only, 5-50 characters)"
 
+  validation {
+    condition     = can(regex("^[a-z0-9]{5,50}$", var.containerregistry_name))
+    error_message = "ACR name must be 5-50 characters long and contain only lowercase letters and numbers."
+  }
 }
 
 variable "subscription_id" {
   type        = string
-  description = "The ID of your Azure Suscription"
-
+  description = "The ID of your Azure Subscription"
 }
 
 variable "sku" {
-  type    = string
-  default = "Premium"
-
+  type        = string
+  description = "The SKU name of the container registry. Possible values: Basic, Standard, Premium"
+  default     = "Basic"
 }
-variable "zone_redundancy_enabled" {
-  type    = bool
-  default = false
 
+variable "zone_redundancy_enabled" {
+  type        = bool
+  description = "Enable zone redundancy for the container registry (requires Premium SKU)"
+  default     = false
+}
+
+variable "tags" {
+  type        = map(string)
+  description = "A mapping of tags to assign to the ACR resource"
+  default     = {}
 }
