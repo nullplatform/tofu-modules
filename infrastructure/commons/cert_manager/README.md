@@ -30,7 +30,8 @@ module "cert_manager" {
 
   #Optional
   hosted_zone_name             = var.hosted_zone_name
-  account_slug                 = "var.account_slug"
+  account_slug                 = var.account_slug
+  namespacecontroller          = var.namespacecontroller
   
 
 }
