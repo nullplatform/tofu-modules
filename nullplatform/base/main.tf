@@ -5,7 +5,7 @@ resource "helm_release" "base" {
   namespace         = var.namespace
   version           = var.nullplatform_base_helm_version
   create_namespace  = true
-  disable_webhooks  = false
+  disable_webhooks  = true
   force_update      = true
   wait              = true
   wait_for_jobs     = true
@@ -18,6 +18,5 @@ resource "helm_release" "base" {
   reuse_values      = false
   dependency_update = true
   max_history       = 10
-
   values = [local.nullplatform_base_values]
 }

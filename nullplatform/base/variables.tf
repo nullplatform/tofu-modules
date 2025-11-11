@@ -334,6 +334,7 @@ variable "image_pull_secrets_password" {
   sensitive   = true
   default     = ""
 }
+
 ############################################
 # Ingress Controller
 ############################################
@@ -373,5 +374,3 @@ variable "ingressControllers" {
     }
   }
 }
-
-

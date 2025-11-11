@@ -1,5 +1,52 @@
 # Changelog
 
+## [1.5.3](https://github.com/nullplatform/tofu-modules/compare/v1.5.2...v1.5.3) (2025-11-07)
+
+
+### Bug Fixes
+
+* update cert-manager webhook config and improve README ([945f9a7](https://github.com/nullplatform/tofu-modules/commit/945f9a7b273408603fdbb01a11db5b7f6dc2a73f))
+* update cert-manager webhook config and improve README ([cd36b2b](https://github.com/nullplatform/tofu-modules/commit/cd36b2bdf793224b3ba469b913cf525055319a18))
+
+## [1.5.2](https://github.com/nullplatform/tofu-modules/compare/v1.5.1...v1.5.2) (2025-11-06)
+
+
+### Bug Fixes
+
+* **cert-manager:** fix namespace error and improve configuration ([4af6c98](https://github.com/nullplatform/tofu-modules/commit/4af6c98918e309b94e5e03a499316c473ed37821))
+* commons changes readme ([3207ce2](https://github.com/nullplatform/tofu-modules/commit/3207ce234f7f0e20f02748ab7026a6b1841bdb7a))
+* external-dns secret and namespace depends ([4ee0bbd](https://github.com/nullplatform/tofu-modules/commit/4ee0bbd3b56872b85b9589c177d1e26e868506eb))
+* only azure, no gcp ([4556484](https://github.com/nullplatform/tofu-modules/commit/455648472f21d30c573cc4816d4d86526ff73e10))
+* remove version argument from git source module ([ed82438](https://github.com/nullplatform/tofu-modules/commit/ed82438851aa4188bf4d2c5b38c727d7e72f15ec))
+* remove version argument from git source module ([041f1ba](https://github.com/nullplatform/tofu-modules/commit/041f1ba9aa6e0fa2425f53a60170338d55ff6fa4))
+* secret ([5f0885c](https://github.com/nullplatform/tofu-modules/commit/5f0885cade1428a7b0bf40c71cae7db76c474395))
+
+## [1.5.1](https://github.com/nullplatform/tofu-modules/compare/v1.5.0...v1.5.1) (2025-11-05)
+
+
+### Bug Fixes
+
+* remove unnecessary information from the readme ([ead4e24](https://github.com/nullplatform/tofu-modules/commit/ead4e242ffd4032e75311ea02bced16037006abe))
+* standardize module variables and documentation ([9740af8](https://github.com/nullplatform/tofu-modules/commit/9740af81941c4add31dd1dfde3a000fe2ac44e5f))
+* standardize module variables and documentation ([df30a24](https://github.com/nullplatform/tofu-modules/commit/df30a245c73b8a777d85c94200cdceefd1dcb521))
+
+## [1.5.0](https://github.com/nullplatform/tofu-modules/compare/v1.4.0...v1.5.0) (2025-11-04)
+
+
+### Features
+
+* **agent:** add multi cloud ([adbaa97](https://github.com/nullplatform/tofu-modules/commit/adbaa976964f8531cdf372985378e82ff225375a))
+* **agent:** fix image tag variable ([667da65](https://github.com/nullplatform/tofu-modules/commit/667da65400dc18b5758679dd724c0de6b3586ab5))
+* **agent:** fix readme ([96faf72](https://github.com/nullplatform/tofu-modules/commit/96faf7202f3d61b276a80744db80f538f4fa2369))
+* **agent:** fix template default ([dc225b5](https://github.com/nullplatform/tofu-modules/commit/dc225b5a1c16a7f6fc1e29537ad4dc74df76dca1))
+* **agent:** fix template default ([9ac324c](https://github.com/nullplatform/tofu-modules/commit/9ac324c114baa4be482d06779f067b9c10dff051))
+* **agent:** move image-tag variable ([f9ac77b](https://github.com/nullplatform/tofu-modules/commit/f9ac77b09422040b97b25609032afc56373b572d))
+* **agent:** move image-tag variable ([8c0c483](https://github.com/nullplatform/tofu-modules/commit/8c0c483592acd44ada02c81ea4346f2716c8696f))
+* **agent:** tofu fmt ([e5aa787](https://github.com/nullplatform/tofu-modules/commit/e5aa787583afb204ce32e4b22873bcfa1297d997))
+* **aws-iam:** add aws iam module ([8f53196](https://github.com/nullplatform/tofu-modules/commit/8f53196411950664824cd1a4baece7fa8c986df4))
+* **aws-iam:** add aws iam module ([f728ef3](https://github.com/nullplatform/tofu-modules/commit/f728ef3aed084baffb5e639768041a821601b52a))
+* **aws-iam:** add output to rol arn ([ac7676d](https://github.com/nullplatform/tofu-modules/commit/ac7676d9ce5f652ed3c9b46450bcae2149fffcc8))
+
 ## [1.4.0](https://github.com/nullplatform/tofu-modules/compare/v1.3.1...v1.4.0) (2025-10-30)
 
 

@@ -2,14 +2,14 @@
 # REQUIRED VARIABLES
 ###############################################################################
 
-variable "resource_group" {
+variable "resource_group_name" {
   type        = string
-  description = "The name of the resource group where the DNS zone will be created"
+  description = "The name of the resource group to create"
 }
 
-variable "domain_name" {
+variable "location" {
   type        = string
-  description = "The domain name to use for the DNS zone (e.g., example.com)"
+  description = "The Azure region where the resource group should be created (e.g., eastus, westus2)"
 }
 
 variable "subscription_id" {
@@ -23,6 +23,6 @@ variable "subscription_id" {
 
 variable "tags" {
   type        = map(string)
-  description = "A mapping of tags to assign to the DNS zone"
+  description = "A mapping of tags to assign to the resource group"
   default     = {}
 }

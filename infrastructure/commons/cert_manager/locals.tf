@@ -1,8 +1,8 @@
 locals {
   helm_values = templatefile("${path.module}/templates/cert_manager_values.tmpl.yaml", {
-    hosted_zone_name         = var.hosted_zone_name
-    account_slug             = var.account_slug
-    namespacecontroller_name = var.namespacecontroller_name
+    hosted_zone_name = var.hosted_zone_name
+    account_slug     = var.account_slug
+    namespace        = var.cert_manager_namespace
 
     # GCP
     gcp_enabled             = var.gcp_enabled

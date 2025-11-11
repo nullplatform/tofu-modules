@@ -7,6 +7,7 @@ module "containerregistry" {
   admin_enabled           = true
   sku                     = var.sku
   zone_redundancy_enabled = var.zone_redundancy_enabled
+  tags                    = var.tags
 
 }
 

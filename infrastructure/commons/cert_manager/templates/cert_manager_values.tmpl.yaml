@@ -1,6 +1,6 @@
 hostedZoneName: "${hosted_zone_name}"
 namespacecontroller:
-  name: "${namespacecontroller_name}"
+  name: "${namespace}"
 
 nullPlatform:
   accountSlug: "${account_slug}"
@@ -12,12 +12,12 @@ gcp:
 
 azure:
   enabled: ${azure_enabled}
-  subscriptionID: "${azure_subscription_id}"
+  subscriptionId: "${azure_subscription_id}"
   resourceGroupName: "${azure_resource_group_name}"
-  clientID: "${azure_client_id}"
+  clientId: "${azure_client_id}"
   secretKey: "${azure_secret_key}"   # ej: "client-secret"
   clientSecret: "${azure_client_secret}"
-  tenantID: "${azure_tenant_id}"
+  tenantId: "${azure_tenant_id}"
   hostedZoneName: "${azure_hosted_zone_name}"
 
 cloudflare:
