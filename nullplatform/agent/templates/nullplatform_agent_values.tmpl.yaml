@@ -14,7 +14,7 @@ serviceAccount:
     eks.amazonaws.com/role-arn: "${aws_iam_role_arn}"
 
 %{ for scripts in init_scripts ~}
-- "${scripts}"
+  - "${scripts}"
 %{ endfor ~}
 
 image:
