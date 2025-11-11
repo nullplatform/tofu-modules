@@ -12,10 +12,10 @@ Cloudflare example:
 module "external_dns" {
   source                       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/external_dns?ref=fix/change-version-name"
   dns_provider_name            = "cloudflare"
-  domain                       = "implementations.nullaps.io"
+  domain                       = "mi-domain"
   external_dns_namespace       = "external-dns"
   extra_args                   = ["--cloudflare-proxied"]
-  cloudflare_token             = "mi-token-magico"
+  cloudflare_token             = "mi-token"
 }
 ```
 
@@ -32,33 +32,6 @@ module "external_dns" {
   external_dns_version   = var.external_dns_version
   extra_args             = ["--google-zone-visibility=private"]
   ```
-
-[//]: # (Google &#40;CloudDNS&#41; example:)
-
-
-
-[//]: # (module "external_dns" {)
-
-[//]: # (  source                 = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/external_dns?ref=v1.0.0")
-
-[//]: # (  zone_name              ="myprivate")
-
-[//]: # (  project_id             = "myproject")
-
-[//]: # (  dns_provider_name      = "google")
-
-[//]: # (  domain                 = "myprivate.zone")
-
-[//]: # (  external_dns_namespace = var.externa_dns_namespace)
-
-[//]: # (  version                = var.external_dns_version)
-
-[//]: # (  extra_args             = ["--google-zone-visibility=private"])
-
-[//]: # ()
-[//]: # (})
-
-[//]: # (```)
 
 
 <!-- BEGIN_TF_DOCS -->
