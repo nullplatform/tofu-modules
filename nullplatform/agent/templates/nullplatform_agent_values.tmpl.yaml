@@ -13,5 +13,9 @@ serviceAccount:
   annotations:
     eks.amazonaws.com/role-arn: "${aws_iam_role_arn}"
 
+%{ for scripts in init_scripts ~}
+- "${scripts}"
+%{ endfor ~}
+
 image:
   tag: "${image_tag}"

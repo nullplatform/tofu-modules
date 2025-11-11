@@ -71,5 +71,6 @@ locals {
     config_values = local.all_config
     image_tag     = var.image_tag
     aws_iam_role_arn = var.cloud_provider == "aws" ? var.aws_iam_role_arn : ""
+    init_scripts      = var.init_scripts
   })
 }
