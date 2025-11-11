@@ -1,10 +1,9 @@
 hostedZoneName: "${hosted_zone_name}"
+namespacecontroller:
+  name: "${namespace}"
 
 nullPlatform:
   accountSlug: "${account_slug}"
-
-namespacecontroller:
-  name: "${namespace}"
 
 gcp:
   enabled: ${gcp_enabled}

@@ -20,6 +20,7 @@ locals {
     init_scripts = var.init_scripts
     api_key      = nullplatform_api_key.nullplatform_agent_api_key.api_key
     namespace    = var.namespace
+    image_tag    = var.image_tag
   })
 
   nullplatform_agent_values_aws = templatefile("${path.module}/templates/nullplatform_agent_values_aws.tmpl.yaml", {
@@ -29,6 +30,19 @@ locals {
 
   nullplatform_agent_values_gcp = templatefile("${path.module}/templates/nullplatform_agent_values_gcp.tmpl.yaml", {})
 
-  nullplatform_agent_values_azure = templatefile("${path.module}/templates/nullplatform_agent_values_azure.tmpl.yaml", {})
-
+  nullplatform_agent_values_azure = templatefile("${path.module}/templates/nullplatform_agent_values_azure.tmpl.yaml", {
+    api_key                = nullplatform_api_key.nullplatform_agent_api_key.api_key
+    tags                   = join(",", [for k in sort(keys(var.tags_selectors)) : "${k}:${var.tags_selectors[k]}"])
+    agent_repos            = join(",", local.final_list)
+    cluster_name           = var.cluster_name
+    namespace              = var.namespace
+    private_hosted_zone_rg = var.private_hosted_zone_rg
+    private_gateway_name   = var.private_gateway_name
+    public_gateway_name    = var.public_gateway_name
+    azure_resource_group   = var.azure_resource_group
+    azure_subscription_id  = var.azure_subscription_id
+    azure_client_secret    = var.azure_client_secret
+    azure_client_id        = var.azure_client_id
+    azure_tenant_id        = var.azure_tenant_id
+  })
 }

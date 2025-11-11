@@ -104,15 +104,15 @@ variable "np_api_key" {
 ################################################################################
 
 # External metrics provider name for monitoring integrations.
-variable "external_metrics_provider" {
+variable "metrics_provider" {
   description = "Name of the external metrics provider for monitoring integration."
   type        = string
   default     = "externalmetrics"
 }
 
 # External log provider (e.g., 'cloudwatch', 'elastic').
-variable "external_logging_provider" {
+variable "logging_provider" {
   description = "Name of the external log provider (e.g., 'cloudwatch', 'elastic')."
   type        = string
-  default     = "cloudwatch"
+  default     = "external"
 }

@@ -1,7 +1,7 @@
 # Global settings
 global:
   installGatewayV2Crd: ${installGatewayV2Crd}
-  # Kubernetes provider (options: "oks", "gke", "eks", "aks")
+  # Kubernetes provider (options: "oks", "gke", "eks", "aks", "aro")
   provider: "${cloud_provider}"
   # AWS region (applicable for EKS provider)
   awsRegion: "${awsRegion}"
@@ -11,6 +11,17 @@ namespaces:
   nullplatformApplications: "nullplatform"
   nullplatformTools: "nullplatform-tools"
   gateway: "gateways"
+ingressControllers:
+  public:
+    name: "${ingress_public_name}"
+    enabled: ${ingress_public_enabled}
+    scope: ${ingress_public_scope}
+    domain: "${ingress_public_domain}"
+  private:
+    name: "${ingress_private_name}"
+    enabled: ${ingress_private_enabled}
+    scope: ${ingress_private_scope}
+    domain: "${ingress_private_domain}"
 # TLS configuration
 tls:
   required: ${tls_required}
@@ -64,7 +75,7 @@ logging:
         memory: 300Mi
   prometheus:
     enabled: ${prometheus_enabled}
-    exporterPort: 2021
+    exporterPort: ${exporter_prometheus_port}
   gelf:
     enabled: ${gelf_enabled}
     host: "${gelf_host}"

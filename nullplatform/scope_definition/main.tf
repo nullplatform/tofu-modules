@@ -79,7 +79,7 @@ resource "nullplatform_service_specification" "from_template" {
   }
 
   lifecycle {
-    ignore_changes = [attributes]
+    ignore_changes = [name, attributes, type, visible_to]
   }
 }
 
@@ -179,7 +179,7 @@ resource "nullplatform_action_specification" "from_templates" {
   retryable                = try(jsondecode(base64decode(data.external.action_specs[each.key].result.json_b64)).retryable, false)
 
   lifecycle {
-    ignore_changes = [annotations]
+    ignore_changes = [name, annotations, parameters, results, type, retryable]
   }
 }
 
@@ -192,15 +192,17 @@ resource "null_resource" "nrn_patch" {
   depends_on = [nullplatform_service_specification.from_template]
 
   triggers = {
-    nrn          = var.nrn
-    service_slug = local.service_slug
+    nrn              = var.nrn
+    service_slug     = local.service_slug
+    metrics_provider = var.metrics_provider
+    logging_provider = var.logging_provider
   }
 
   provisioner "local-exec" {
     command = <<-EOT
       np nrn patch --nrn "${var.nrn}" --body "{
-        \"global.${local.service_slug}_metric_provider\": \"${var.external_metrics_provider}\",
-        \"global.${local.service_slug}_log_provider\": \"${var.external_logging_provider}\"
+        \"global.${local.service_slug}_metric_provider\": \"${var.metrics_provider}\",
+        \"global.${local.service_slug}_log_provider\": \"${var.logging_provider}\"
       }"
     EOT
 
