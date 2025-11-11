@@ -167,6 +167,3 @@ variable "cloudflare_token" {
     error_message = "The 'cloudflare_token' variable is required when 'cloudflare_enabled' is true."
   }
 }
-
-
-

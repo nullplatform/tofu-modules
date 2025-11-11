@@ -1,5 +1,4 @@
 locals {
-  # (opcional) si lo seguís usando en otro lado
   nrn_without_namespace = join(":", slice(split(":", var.nrn), 0, 2))
 
   nullplatform_base_values = templatefile(
@@ -13,13 +12,23 @@ locals {
       # ---- tls ----
       tls_required = var.tls_required ? "true" : "false"
 
+      # ---- ingress controllers ----
+      ingress_public_enabled = var.ingressControllers.public.enabled ? "true" : "false"
+      ingress_public_name    = var.ingressControllers.public.name
+      ingress_public_scope   = var.ingressControllers.public.scope
+      ingress_public_domain  = var.ingressControllers.public.domain
+
+      ingress_private_enabled = var.ingressControllers.private.enabled ? "true" : "false"
+      ingress_private_name    = var.ingressControllers.private.name
+      ingress_private_scope   = var.ingressControllers.private.scope
+      ingress_private_domain  = var.ingressControllers.private.domain
+
       # ---- gateway ----
       gateway_enabled          = var.gateway_enabled ? "true" : "false"
       gateway_internal_enabled = var.gateway_internal_enabled ? "true" : "false"
 
       # ---- nullplatform ----
       np_api_key = var.np_api_key
-      # secretName lo dejaste vacío en el template; si lo querés parametrizar, agregá var.nullplatform_secret_name
 
       # ---- controlPlane ----
       controlPlane_enabled = var.control_plane_enabled ? "true" : "false"
@@ -28,6 +37,7 @@ locals {
       logging_enabled = var.logging_enabled ? "true" : "false"
 
       prometheus_enabled = var.prometheus_enabled ? "true" : "false"
+      exporter_prometheus_port = var.exporter_prometheus_port
 
       gelf_enabled = var.gelf_enabled ? "true" : "false"
       gelf_host    = var.gelf_host

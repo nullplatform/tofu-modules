@@ -18,7 +18,7 @@ This module creates an Azure Container Registry using the Azure Verified Module 
 module "acr" {
   source                 = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/acr?ref=v1.5.0"
   containerregistry_name = var.containerregistry_name
-  resource_group_name    = var.resource_group_name
+  resource_group_name    = module.resource_group.resource_group_name
   location               = var.location
   subscription_id        = var.subscription_id
 }

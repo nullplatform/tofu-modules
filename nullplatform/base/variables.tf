@@ -27,10 +27,10 @@ variable "np_api_key" {
 
 variable "cloud_provider" {
   type        = string
-  description = "Cloud provider (eks, gke, aks, oke)."
+  description = "Cloud provider (eks, gke, aks, oke and aro)."
   validation {
-    condition     = contains(["eks", "gke", "aks", "oke"], var.cloud_provider)
-    error_message = "cloud_provider must be one of: eks, gke, aks, oke."
+    condition     = contains(["eks", "gke", "aks", "oke", "aro"], var.cloud_provider)
+    error_message = "cloud_provider must be one of: eks, gke, aks, oke and aro"
   }
 }
 
@@ -100,6 +100,12 @@ variable "prometheus_enabled" {
   type        = bool
   description = "Enable Prometheus exporter."
   default     = true
+}
+
+variable "exporter_prometheus_port" {
+  type        = string
+  description = "Port Number to Prometheus exporter."
+  default     = "2021"
 }
 
 ############################################
@@ -327,4 +333,44 @@ variable "image_pull_secrets_password" {
   description = "Registry password/token."
   sensitive   = true
   default     = ""
+}
+
+############################################
+# Ingress Controller
+############################################
+# ============================================================
+# IngressControllers configuration
+# ============================================================
+
+variable "ingressControllers" {
+  description = "Configuración de los IngressControllers públicos y privados"
+  type = object({
+    public = object({
+      name    = string
+      enabled = bool
+      scope   = string
+      domain  = string
+    })
+    private = object({
+      name    = string
+      enabled = bool
+      scope   = string
+      domain  = string
+    })
+  })
+
+  default = {
+    public = {
+      name    = "internet-facing"
+      enabled = false
+      scope   = "External"
+      domain  = ""
+    }
+    private = {
+      name    = "internal"
+      enabled = false
+      scope   = "Internal"
+      domain  = ""
+    }
+  }
 }

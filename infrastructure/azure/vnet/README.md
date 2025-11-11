@@ -17,7 +17,7 @@ This module creates an Azure Virtual Network with subnets using the Azure Verifi
 module "vnet" {
   source              = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/vnet?ref=v1.5.0"
   vnet_name           = var.vnet_name
-  resource_group_name = var.resource_group_name
+  resource_group_name = module.resource_group.resource_group_name
   location            = var.location
   address_space       = var.address_space
   subnets_definition  = var.subnets_definition

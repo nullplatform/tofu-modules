@@ -8,10 +8,12 @@ configuration:
 %{ for key, value in config_values ~}
     ${key}: "${value}"
 %{ endfor ~}
-
+  
+%{ if aws_iam_role_arn != null }
 serviceAccount:
   annotations:
     eks.amazonaws.com/role-arn: "${aws_iam_role_arn}"
+%{ endif }
 
 %{ for scripts in init_scripts ~}
   - "${scripts}"
