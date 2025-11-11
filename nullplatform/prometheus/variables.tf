@@ -21,15 +21,22 @@ variable "nullplatform_port" {
   default     = 2021
 }
 
-variable "kubeconfig_path" {
-  description = "Path to the kubeconfig file for Kubernetes cluster access"
-  type        = string
-  default     = "~/.kube/config"
+variable "install_prometheus" {
+  description = "value"
+  type        = bool
+  default     = false
+
 }
 
-variable "kube_context" {
-  description = "Kubernetes context name to use from the kubeconfig file"
+variable "prometheus_url" {
   type        = string
-  default     = null
+  description = "Prometheus server URL"
+  default     = ""
 }
 
+variable "dimensions" {
+  type        = map(string)
+  description = "Value of the dimensions that you need this provider to be visible"
+  default     = {}
+
+}
