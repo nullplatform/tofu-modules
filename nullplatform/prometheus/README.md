@@ -42,10 +42,11 @@ module "prometheus" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_kube_context"></a> [kube\_context](#input\_kube\_context) | Kubernetes context name to use from the kubeconfig file | `string` | `null` | no |
-| <a name="input_kubeconfig_path"></a> [kubeconfig\_path](#input\_kubeconfig\_path) | Path to the kubeconfig file for Kubernetes cluster access | `string` | `"~/.kube/config"` | no |
+| <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Value of the dimensions that you need this provider to be visible | `map(string)` | `{}` | no |
+| <a name="input_install_prometheus"></a> [install\_prometheus](#input\_install\_prometheus) | value | `bool` | `false` | no |
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name - unique identifier for resources | `string` | n/a | yes |
 | <a name="input_nullplatform_port"></a> [nullplatform\_port](#input\_nullplatform\_port) | Port number for Nullplatform service communication | `number` | `2021` | no |
 | <a name="input_prometheus_namespace"></a> [prometheus\_namespace](#input\_prometheus\_namespace) | Kubernetes namespace where Prometheus will be deployed | `string` | `"prometheus"` | no |
+| <a name="input_prometheus_url"></a> [prometheus\_url](#input\_prometheus\_url) | Prometheus server URL | `string` | `""` | no |
 <!-- END_TF_DOCS -->
