@@ -1,5 +1,5 @@
 ################################################################################
-# nullplatform Agent Helm Release
+# Nullplatform agent Helm release
 ################################################################################
 
 # Deploy nullplatform agent to Kubernetes cluster via Helm chart
