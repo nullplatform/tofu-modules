@@ -9,6 +9,6 @@ locals {
     provider     = var.dns_provider_name
     extra_args   = var.extra_args
     ksa_name     = var.ksa_name
-    gsa_email    = ""
+    gsa_email    = var.gsa_email
   })
 }
