@@ -1,8 +1,9 @@
-# Module: AWS Agent
+# Module: AWS agent
 
-Installs the Nullplatform agent on EKS, provisions the IAM role and policies, generates the agent API key, and syncs platform templates and channels from the configured repositories.
+Installs the nullplatform agent on EKS, provisions the IAM role and policies, generates the agent API key, and syncs
+platform templates and channels from the configured repositories.
 
-Usage:
+**Usage:**
 
 ```
 module "cloud_aws_agent" {
@@ -70,17 +71,17 @@ module "cloud_aws_agent" {
 | <a name="input_agent_repos_extra"></a> [agent\_repos\_extra](#input\_agent\_repos\_extra) | List of additional Git repositories for extended agent configuration | `list(string)` | `[]` | no |
 | <a name="input_agent_repos_scope"></a> [agent\_repos\_scope](#input\_agent\_repos\_scope) | Git repository URL containing agent scope configurations (format: repo#branch) | `string` | `"https://github.com/nullplatform/scopes.git#main"` | no |
 | <a name="input_aws_iam_openid_connect_provider_arn"></a> [aws\_iam\_openid\_connect\_provider\_arn](#input\_aws\_iam\_openid\_connect\_provider\_arn) | ARN of the AWS IAM OIDC provider for EKS service account authentication | `string` | n/a | yes |
-| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the EKS cluster where the Nullplatform agent will be deployed | `string` | n/a | yes |
+| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the EKS cluster where the nullplatform agent will be deployed | `string` | n/a | yes |
 | <a name="input_enabled_override"></a> [enabled\_override](#input\_enabled\_override) | Enable custom overrides for scope configurations via command line | `bool` | `false` | no |
 | <a name="input_external_logging_provider"></a> [external\_logging\_provider](#input\_external\_logging\_provider) | Name of the external logging provider for log aggregation | `string` | `"external"` | no |
 | <a name="input_external_metrics_provider"></a> [external\_metrics\_provider](#input\_external\_metrics\_provider) | Name of the external metrics provider for monitoring integration | `string` | `"externalmetrics"` | no |
 | <a name="input_github_ref"></a> [github\_ref](#input\_github\_ref) | Git reference to use (branch name, tag, or commit SHA) | `string` | `"beta"` | no |
 | <a name="input_github_repo_url"></a> [github\_repo\_url](#input\_github\_repo\_url) | GitHub repository URL containing scope and action templates | `string` | `"https://github.com/nullplatform/scopes"` | no |
 | <a name="input_init_scripts"></a> [init\_scripts](#input\_init\_scripts) | List of initialization scripts to execute during agent startup | `list(string)` | `[]` | no |
-| <a name="input_namespace"></a> [namespace](#input\_namespace) | Kubernetes namespace where the Nullplatform agent will run | `string` | `"nullplatform-tools"` | no |
-| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | API key for authenticating with the Nullplatform API | `string` | n/a | yes |
-| <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name - Unique identifier for Nullplatform resources | `string` | n/a | yes |
-| <a name="input_nullplatform_agent_helm_version"></a> [nullplatform\_agent\_helm\_version](#input\_nullplatform\_agent\_helm\_version) | Version of the Nullplatform agent Helm chart to deploy | `string` | `"2.11.0"` | no |
+| <a name="input_namespace"></a> [namespace](#input\_namespace) | Kubernetes namespace where the nullplatform agent will run | `string` | `"nullplatform-tools"` | no |
+| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | API key for authenticating with the nullplatform API | `string` | n/a | yes |
+| <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name - Unique identifier for nullplatform resources | `string` | n/a | yes |
+| <a name="input_nullplatform_agent_helm_version"></a> [nullplatform\_agent\_helm\_version](#input\_nullplatform\_agent\_helm\_version) | Version of the nullplatform agent Helm chart to deploy | `string` | `"2.11.0"` | no |
 | <a name="input_override_repo_path"></a> [override\_repo\_path](#input\_override\_repo\_path) | Local filesystem path where the scope repository will be cloned | `string` | `null` | no |
 | <a name="input_overrides_service_path"></a> [overrides\_service\_path](#input\_overrides\_service\_path) | Local filesystem path to the directory containing override configurations | `string` | `null` | no |
 | <a name="input_repo_path"></a> [repo\_path](#input\_repo\_path) | Local filesystem path where the scope repository will be cloned | `string` | `"/root/.np/nullplatform/scopes"` | no |

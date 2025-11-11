@@ -1,8 +1,9 @@
 # Module: Ingress
 
-This module creates Kubernetes ingress resources for both internal and internet-facing Application Load Balancers. It sets up initial ingress configurations with SSL termination and custom 404 responses for the nullplatform environment.
+This module creates Kubernetes ingress resources for both internal and internet-facing Application Load Balancers.  
+It sets up initial ingress configurations with SSL termination and custom 404 responses for the nullplatform environment.
 
-Usage:
+## Usage
 
 ```hcl
 module "ingress" {

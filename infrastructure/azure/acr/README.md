@@ -1,18 +1,18 @@
-# Azure Container Registry (ACR) Module
+# Module: Azure Container Registry (ACR)
 
 This module creates an Azure Container Registry using the Azure Verified Module (AVM).
 
 ## Features
 
-- Creates Azure Container Registry with configurable SKU (Basic, Standard, Premium)
+- Creates an Azure Container Registry with configurable SKU (Basic, Standard, Premium)
 - Supports zone redundancy (Premium SKU only)
-- Admin user enabled by default for easy authentication
-- Configurable tags for resource management
-- Name validation to ensure compliance with Azure naming requirements
+- Enables the admin user by default for easy authentication
+- Allows configurable tags for resource management
+- Includes name validation to ensure compliance with Azure naming requirements
 
 ## Usage
 
-### Basic Example
+### Basic example
 
 ```hcl
 module "acr" {
@@ -24,7 +24,7 @@ module "acr" {
 }
 ```
 
-### Premium SKU with Zone Redundancy
+### Premium SKU with zone redundancy
 
 ```hcl
 module "acr" {
@@ -38,11 +38,11 @@ module "acr" {
 }
 ```
 
-## Important Notes
+## Important notes
 
-- **ACR Name Requirements**: Must be globally unique, 5-50 characters, lowercase alphanumeric only
-- **Zone Redundancy**: Only available with Premium SKU
-- **Admin User**: Enabled by default to retrieve admin credentials via outputs
+- **ACR name requirements**: Must be globally unique, 5–50 characters long, and use only lowercase alphanumeric characters
+- **Zone redundancy**: Available only with the Premium SKU
+- **Admin user**: Enabled by default to allow retrieval of admin credentials via outputs
 
 
 
@@ -75,19 +75,19 @@ module "acr" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_containerregistry_name"></a> [containerregistry\_name](#input\_containerregistry\_name) | The name of your ACR (must be globally unique, lowercase alphanumeric only, 5-50 characters) | `string` | n/a | yes |
-| <a name="input_location"></a> [location](#input\_location) | The location/region where the resource group should be created | `string` | n/a | yes |
+| <a name="input_containerregistry_name"></a> [containerregistry\_name](#input\_containerregistry\_name) | The name of the ACR (must be globally unique, lowercase alphanumeric only, 5–50 characters) | `string` | n/a | yes |
+| <a name="input_location"></a> [location](#input\_location) | The location or region where the resource group should be created | `string` | n/a | yes |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | The name of the resource group | `string` | n/a | yes |
-| <a name="input_sku"></a> [sku](#input\_sku) | The SKU name of the container registry. Possible values: Basic, Standard, Premium | `string` | `"Basic"` | no |
-| <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | The ID of your Azure Subscription | `string` | n/a | yes |
+| <a name="input_sku"></a> [sku](#input\_sku) | The SKU of the container registry. Possible values: Basic, Standard, Premium | `string` | `"Basic"` | no |
+| <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | The ID of the Azure subscription | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to the ACR resource | `map(string)` | `{}` | no |
-| <a name="input_zone_redundancy_enabled"></a> [zone\_redundancy\_enabled](#input\_zone\_redundancy\_enabled) | Enable zone redundancy for the container registry (requires Premium SKU) | `bool` | `false` | no |
+| <a name="input_zone_redundancy_enabled"></a> [zone\_redundancy\_enabled](#input\_zone\_redundancy\_enabled) | Whether to enable zone redundancy for the container registry (requires Premium SKU) | `bool` | `false` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_acr_admin_password"></a> [acr\_admin\_password](#output\_acr\_admin\_password) | Password admin del ACR. |
-| <a name="output_acr_admin_username"></a> [acr\_admin\_username](#output\_acr\_admin\_username) | Usuario admin del ACR. |
-| <a name="output_acr_login_server"></a> [acr\_login\_server](#output\_acr\_login\_server) | FQDN del login server del ACR. |
+| <a name="output_acr_admin_password"></a> [acr\_admin\_password](#output\_acr\_admin\_password) | The admin password of the ACR |
+| <a name="output_acr_admin_username"></a> [acr\_admin\_username](#output\_acr\_admin\_username) | The admin username of the ACR |
+| <a name="output_acr_login_server"></a> [acr\_login\_server](#output\_acr\_login\_server) | The FQDN of the ACR login server |
 <!-- END_TF_DOCS -->
