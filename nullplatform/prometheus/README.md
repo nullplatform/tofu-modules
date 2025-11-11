@@ -1,6 +1,6 @@
 # Module: Prometheus
 
-Deploys Prometheus via Helm and registers the server endpoint with Nullplatform for metrics collection.
+Deploys Prometheus via Helm and registers the server endpoint with nullplatform for metrics collection.
 
 Usage:
 
