@@ -13,7 +13,6 @@ module "prometheus" {
   nullplatform_port    = var.nullplatform_port
   prometheus_url       = var.prometheus_url
   install_prometheus   = var.install_prometheus
-
 }
 ```
 
