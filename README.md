@@ -3,18 +3,18 @@
     <img height="100" alt="nullplatform" src="https://nullplatform.com/favicon/android-chrome-192x192.png" />
   </a>
   <br><br>
-  # Nullplatform tofu modules
+  # Nullplatform Tofu modules
   <br>
 </h2>
 
-This repository contains **shared tofu modules** used by nullplatform to standardize and reuse infrastructure across
+This repository contains **shared Tofu modules** used by nullplatform to standardize and reuse infrastructure across
 all projects.
 
 ## 📦 Repository structure
 
 ```
 .
-├── infrastructure/                # All reusable tofu modules
+├── infrastructure/                # All reusable Tofu modules
 │   ├── aws/
 │   │   ├── acm/
 │   │   ├── alb_controller/
@@ -78,7 +78,7 @@ curl -fsSL https://cli.nullplatform.com/install.sh | sh
 
 ## 🚀 Using the modules
 
-1. **Add the module dependency** to your tofu project:
+1. **Add the module dependency** to your Tofu project:
 
    ```hcl
    module "my_module" {
@@ -93,7 +93,7 @@ curl -fsSL https://cli.nullplatform.com/install.sh | sh
    }
    ```
 
-2. **Initialize and apply your tofu project:**
+2. **Initialize and apply your Tofu project:**
 
    ```bash
    tofu init
@@ -117,7 +117,7 @@ Each module must include its own `README.md` file describing:
 
 In `.github/workflows/`, you can include workflows for:
 
-- Terraform / tofu syntax validation.  
+- Terraform / Tofu syntax validation.  
 - Auto-formatting with `tofu fmt`.  
 - Logical validation using `tofu validate`.  
 

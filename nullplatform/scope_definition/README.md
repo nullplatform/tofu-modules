@@ -1,6 +1,6 @@
 # Module: Scope definition
 
-This tofu module clones a Git repository containing service and action specification templates, processes those templates using **gomplate** to inject dynamic variables, and creates the corresponding nullplatform resources (service, scope type, and actions).  
+This Tofu module clones a Git repository containing service and action specification templates, processes those templates using **gomplate** to inject dynamic variables, and creates the corresponding nullplatform resources (service, scope type, and actions).  
 It also patches the target NRN with logging and metrics providers, then cleans up the cloned repository after execution.
 
 ## Usage
