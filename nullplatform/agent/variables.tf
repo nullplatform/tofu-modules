@@ -148,3 +148,53 @@ variable "git_repo" {
   default     = "nullplatform/scopes"
   description = "GitHub repository containing templates"
 }
+
+#########Azure
+variable "azure_client_id" {
+  description = "Azure client ID for authentication"
+  type        = string
+  default     = null
+}
+
+variable "azure_client_secret" {
+  description = "Azure client secret for authentication"
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
+variable "azure_subscription_id" {
+  description = "Azure subscription ID"
+  type        = string
+  default     = null
+}
+
+variable "azure_resource_group" {
+  description = "Azure resource group name"
+  type        = string
+  default     = null
+}
+
+variable "private_gateway_name" {
+  description = "Private gateway name for Azure networking"
+  type        = string
+  default     = null
+}
+
+variable "private_hosted_zone_rg" {
+  description = "Resource group for private hosted zone"
+  type        = string
+  default     = null
+}
+
+variable "public_gateway_name" {
+  description = "Public gateway name for Azure networking"
+  type        = string
+  default     = null
+}
+
+variable "azure_tenant_id" {
+  description = "Azure tenant ID"
+  type        = string
+  default     = null
+}

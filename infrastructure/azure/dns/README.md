@@ -16,7 +16,7 @@ This module creates a public DNS zone in Azure.
 module "dns" {
   source          = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/dns?ref=v1.5.0"
   domain_name     = var.domain_name
-  resource_group  = var.resource_group
+  resource_group  = module.resource_group.resource_group_name
   subscription_id = var.subscription_id
 }
 ```

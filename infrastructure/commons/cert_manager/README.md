@@ -20,17 +20,21 @@ module "cert_manager" {
   azure_client_secret          = var.azure_client_secret
   azure_tenant_id              = var.azure_tenant_id
   azure_hosted_zone_name       = var.azure_hosted_zone_name
+  gcp_enabled                  = false
+  cloudflare_enabled            = false
 
   #Cloudflare DNS configuration
   cloudflare_enabled           = true
   cloudflare_secret_name       = var.cloudflare_secret_name
   cloudflare_token             = var.cloudflare_token
+  azure_subscription_id        = var.azure_subscription_id
+  gcp_enabled                  = false
+  azure_enabled                = false
 
   #GCP Cloud DNS configuration
   gcp_enabled                  = var.gcp_enabled
   gcp_service_account_key      = var.gcp_service_account_key
 
-  #Optional
   hosted_zone_name             = var.hosted_zone_name
   account_slug                 = "var.account_slug"
 
@@ -43,7 +47,6 @@ module "cert_manager" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 3.0 |
 
 ## Providers
