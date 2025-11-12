@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.7.0](https://github.com/nullplatform/tofu-modules/compare/v1.6.0...v1.7.0) (2025-11-12)
+
+
+### Features
+
+* **agent:** add azure to agent ([0bde56c](https://github.com/nullplatform/tofu-modules/commit/0bde56cf16e18934d419d8185ef40007fc4cad61))
+* **agent:** fix cert-manager name templates ([a3913db](https://github.com/nullplatform/tofu-modules/commit/a3913dbe5e2737e724a1c7c561c33ab4dd558a8c))
+* **external-dns:** add validation to variables ([c4c3e36](https://github.com/nullplatform/tofu-modules/commit/c4c3e364923802d118ab7557ce545f356bb59275))
+* **external-dns:** add validation to variables ([d091739](https://github.com/nullplatform/tofu-modules/commit/d0917390351562ac3449e4f562661295f3ce58fc))
+* **external-dns:** fix init script ([a2c35fd](https://github.com/nullplatform/tofu-modules/commit/a2c35fd598cc57e212cf6e9b18e52ad6d5387224))
+* **tofu:** resolve conflicts ([61692e3](https://github.com/nullplatform/tofu-modules/commit/61692e3ec78365d96f9cec2eae419768731cf12b))
+
 ## [1.6.0](https://github.com/nullplatform/tofu-modules/compare/v1.5.3...v1.6.0) (2025-11-11)
 
 
