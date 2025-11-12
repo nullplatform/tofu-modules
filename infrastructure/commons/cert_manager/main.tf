@@ -6,16 +6,10 @@ resource "helm_release" "cert_manager" {
   create_namespace = true
   version          = var.cert_manager_version
 
-  values = [
-    yamlencode({
-      crds = {
-        enabled = true
-      }
-      extraArgs = [
-        "--dns01-recursive-nameservers=8.8.8.8:53,1.1.1.1:53",
-        "--dns01-recursive-nameservers-only"
-      ]
-    })
+  set = [{
+    name  = "crds.enabled"
+    value = "true"
+    }
   ]
 }
 
@@ -28,5 +22,14 @@ resource "helm_release" "cert_manager_config" {
   version          = var.cert_manager_config_version
   namespace        = var.cert_manager_namespace
 
-  values = [local.helm_values]
+
+  values = concat(
+    [local.cert_manager_default_values],
+      var.cloudflare_enabled ? [local.cert_manager_cloudfare_values] : [],
+      var.gcp_enabled ? [local.cert_manager_gcp_values] : [],
+      var.azure_enabled ? [local.cert_manager_azure_values] : [],
+  )
+
+  depends_on = [helm_release.cert_manager]
 }
+
