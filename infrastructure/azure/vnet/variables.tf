@@ -4,22 +4,22 @@
 
 variable "vnet_name" {
   type        = string
-  description = "The name of the Virtual Network"
+  description = "The name of the virtual network"
 }
 
 variable "resource_group_name" {
   type        = string
-  description = "The name of the resource group where the VNet will be created"
+  description = "The name of the resource group where the virtual network will be created"
 }
 
 variable "location" {
   type        = string
-  description = "The Azure region where the VNet should be created (e.g., eastus, westus2)"
+  description = "The Azure region where the virtual network will be created (e.g., eastus, westus2)"
 }
 
 variable "address_space" {
   type        = set(string)
-  description = "The address space (CIDR blocks) for the Virtual Network (e.g., [\"10.0.0.0/16\"])"
+  description = "The address space (CIDR blocks) for the virtual network (e.g., [\"10.0.0.0/16\"])"
 }
 
 variable "subnets_definition" {
@@ -27,8 +27,9 @@ variable "subnets_definition" {
     name             = string
     address_prefixes = list(string)
   }))
-  description = "Map of subnets to create within the VNet. Each subnet requires a name and address_prefixes."
+  description = "A map of subnets to create within the virtual network. Each subnet requires a name and address_prefixes."
 }
+
 # Example:
 # subnets_definition = {
 #   subnet1 = {
@@ -43,7 +44,7 @@ variable "subnets_definition" {
 
 variable "subscription_id" {
   type        = string
-  description = "The ID of your Azure Subscription"
+  description = "The ID of the Azure subscription"
 }
 
 ###############################################################################
@@ -52,6 +53,6 @@ variable "subscription_id" {
 
 variable "tags" {
   type        = map(string)
-  description = "A mapping of tags to assign to the VNet and subnets"
+  description = "A mapping of tags to assign to the virtual network and its subnets"
   default     = {}
 }

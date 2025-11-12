@@ -1,16 +1,18 @@
 
 # Modules: cert_manager
 
-This module installs cert manager and nullplatform configuration using helm chart.
+This module installs cert-manager and applies the nullplatform configuration using Helm charts.
 
-Usage:
+## Usage
 
+### Basic example
 
-```
+```hcl
 module "cert_manager" {
   source                       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/cert_manager?ref=1.0.0"
-  
-  #DNS in Azure Configuration
+
+
+  #Azure DNS configuration
   azure_enabled                = true
   azure_subscription_id        = var.subscription_id
   azure_resource_group_name    = var.resource_group_name
@@ -21,7 +23,7 @@ module "cert_manager" {
   gcp_enabled                  = false
   cloudflare_enabled            = false
 
-  #DNS in Cloudflare Configuration
+  #Cloudflare DNS configuration
   cloudflare_enabled           = true
   cloudflare_secret_name       = var.cloudflare_secret_name
   cloudflare_token             = var.cloudflare_token
@@ -29,18 +31,14 @@ module "cert_manager" {
   gcp_enabled                  = false
   azure_enabled                = false
 
-  #DNS in GCP Configuration
+  #GCP Cloud DNS configuration
   gcp_enabled                  = var.gcp_enabled
   gcp_service_account_key      = var.gcp_service_account_key
 
   hosted_zone_name             = var.hosted_zone_name
-  account_slug                 = var.account_slug
-  namespacecontroller          = var.namespacecontroller
-  
+  account_slug                 = "var.account_slug"
 
 }
-
-
 ```
 
 
@@ -66,25 +64,46 @@ module "cert_manager" {
 
 ## Inputs
 
+### General
+
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_account_slug"></a> [account\_slug](#input\_account\_slug) | NullPlatform account slug. | `string` | `""` | no |
-| <a name="input_azure_client_id"></a> [azure\_client\_id](#input\_azure\_client\_id) | Azure App (Client) ID for authentication. | `string` | `""` | no |
-| <a name="input_azure_client_secret"></a> [azure\_client\_secret](#input\_azure\_client\_secret) | Azure App Client Secret (value). | `string` | `""` | no |
-| <a name="input_azure_enabled"></a> [azure\_enabled](#input\_azure\_enabled) | Enable Azure DNS solver in cert-manager. | `bool` | `false` | no |
-| <a name="input_azure_hosted_zone_name"></a> [azure\_hosted\_zone\_name](#input\_azure\_hosted\_zone\_name) | Hosted zone name in Azure DNS. | `string` | `""` | no |
-| <a name="input_azure_resource_group_name"></a> [azure\_resource\_group\_name](#input\_azure\_resource\_group\_name) | Azure Resource Group that contains the DNS zone. | `string` | `""` | no |
-| <a name="input_azure_secret_key"></a> [azure\_secret\_key](#input\_azure\_secret\_key) | Key name inside the Azure Secret that holds the client secret (default 'client-secret'). | `string` | `"client-secret"` | no |
-| <a name="input_azure_subscription_id"></a> [azure\_subscription\_id](#input\_azure\_subscription\_id) | Azure Subscription ID. | `string` | `""` | no |
-| <a name="input_azure_tenant_id"></a> [azure\_tenant\_id](#input\_azure\_tenant\_id) | Azure Tenant ID. | `string` | `""` | no |
-| <a name="input_cert_manager_config_version"></a> [cert\_manager\_config\_version](#input\_cert\_manager\_config\_version) | n/a | `string` | `"2.10.0"` | no |
-| <a name="input_cert_manager_namespace"></a> [cert\_manager\_namespace](#input\_cert\_manager\_namespace) | n/a | `string` | `"cert-manager"` | no |
-| <a name="input_cert_manager_version"></a> [cert\_manager\_version](#input\_cert\_manager\_version) | n/a | `string` | `"1.18.2"` | no |
-| <a name="input_cloudflare_enabled"></a> [cloudflare\_enabled](#input\_cloudflare\_enabled) | Enable Cloudflare DNS-01 solver in cert-manager. | `bool` | `false` | no |
-| <a name="input_cloudflare_secret_name"></a> [cloudflare\_secret\_name](#input\_cloudflare\_secret\_name) | Kubernetes Secret name that stores the Cloudflare API Token. | `string` | `"cloudflare-api-token-secret"` | no |
-| <a name="input_cloudflare_token"></a> [cloudflare\_token](#input\_cloudflare\_token) | Cloudflare API Token (minimum permissions: Zone:DNS:Edit + Zone:Read). | `string` | `""` | no |
-| <a name="input_gcp_enabled"></a> [gcp\_enabled](#input\_gcp\_enabled) | Enable GCP (Cloud DNS) solver in cert-manager. | `bool` | `false` | no |
-| <a name="input_gcp_service_account_key"></a> [gcp\_service\_account\_key](#input\_gcp\_service\_account\_key) | Contents of the Service Account JSON for Cloud DNS (use file() if reading from disk). | `string` | `""` | no |
-| <a name="input_hosted_zone_name"></a> [hosted\_zone\_name](#input\_hosted\_zone\_name) | Hosted zone name (if applicable). | `string` | `""` | no |
-| <a name="input_namespacecontroller_name"></a> [namespacecontroller\_name](#input\_namespacecontroller\_name) | name of the namespace where the certificate will be installed | `string` | `" "` | no |
+| <a name="input_account_slug"></a> [account\_slug](#input\_account\_slug) | The nullplatform account slug | `string` | `""` | no |
+| <a name="input_cert_manager_version"></a> [cert\_manager\_version](#input\_cert\_manager\_version) | The cert-manager Helm chart version | `string` | `"1.18.2"` | no |
+| <a name="input_cert_manager_config_version"></a> [cert\_manager\_config\_version](#input\_cert\_manager\_config\_version) | The cert-manager configuration chart version | `string` | `"2.10.0"` | no |
+| <a name="input_cert_manager_namespace"></a> [cert\_manager\_namespace](#input\_cert\_manager\_namespace) | The Kubernetes namespace where cert-manager will be installed | `string` | `"cert-manager"` | no |
+| <a name="input_hosted_zone_name"></a> [hosted\_zone\_name](#input\_hosted\_zone\_name) | The hosted zone name for DNS validation | `string` | `""` | no |
+
+### Azure DNS
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_azure_enabled"></a> [azure\_enabled](#input\_azure\_enabled) | Whether to enable the Azure DNS solver | `bool` | `false` | no |
+| <a name="input_azure_subscription_id"></a> [azure\_subscription\_id](#input\_azure\_subscription\_id) | The Azure subscription ID | `string` | `""` | no |
+| <a name="input_azure_tenant_id"></a> [azure\_tenant\_id](#input\_azure\_tenant\_id) | The Azure tenant ID | `string` | `""` | no |
+| <a name="input_azure_client_id"></a> [azure\_client\_id](#input\_azure\_client\_id) | The Azure application (client) ID | `string` | `""` | no |
+| <a name="input_azure_client_secret"></a> [azure\_client\_secret](#input\_azure\_client\_secret) |The Azure client secret | `string` | `""` | no |
+| <a name="input_azure_resource_group_name"></a> [azure\_resource\_group\_name](#input\_azure\_resource\_group\_name) | The name of the Azure resource group containing the DNS zone | `string` | `""` | no |
+| <a name="input_azure_hosted_zone_name"></a> [azure\_hosted\_zone\_name](#input\_azure\_hosted\_zone\_name) | The name of the Azure DNS zone | `string` | `""` | no |
+| <a name="input_azure_secret_key"></a> [azure\_secret\_key](#input\_azure\_secret\_key) | The key name in the Azure secret that holds the client secret | `string` | `"client-secret"` | no |
+
+### Cloudflare DNS
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_cloudflare_enabled"></a> [cloudflare\_enabled](#input\_cloudflare\_enabled) | Whether to enable the Cloudflare DNS-01 solver | `bool` | `false` | no |
+| <a name="input_cloudflare_token"></a> [cloudflare\_token](#input\_cloudflare\_token) | The Cloudflare API token (required permissions: Zone:DNS:Edit and Zone:Read) | `string` | `""` | no |
+| <a name="input_cloudflare_secret_name"></a> [cloudflare\_secret\_name](#input\_cloudflare\_secret\_name) | The name of the Kubernetes secret that stores the Cloudflare token | `string` | `"cloudflare-api-token-secret"` | no |
+
+### GCP Cloud DNS
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_gcp_enabled"></a> [gcp\_enabled](#input\_gcp\_enabled) | Whether to enable the GCP Cloud DNS solver | `bool` | `false` | no |
+| <a name="input_gcp_service_account_key"></a> [gcp\_service\_account\_key](#input\_gcp\_service\_account\_key) | The contents of the GCP service account JSON key | `string` | `""` | no |
+
+## Outputs
+
+No outputs.
+
 <!-- END_TF_DOCS -->

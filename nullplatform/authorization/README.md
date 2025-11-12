@@ -1,11 +1,14 @@
 # Module: Authorization
 
-Provisions a Nullplatform API key for the specified destination and pre-grants the agent, developer, ops, secops, and secrets-reader roles.
-
+This module provisions a nullplatform API key for the specified destination and automatically assigns the following roles:
+**agent**, **developer**, **ops**, **secops**, and **secrets-reader**.
 Usage:
 
+## Usage
 
-```
+### Basic example
+
+```hcl
 module "authorization" {
   source       = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/authorization?ref=v1.0.0"
   nrn          = var.nrn
@@ -39,7 +42,7 @@ module "authorization" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_destination"></a> [destination](#input\_destination) | Name of resource to use | `string` | n/a | yes |
+| <a name="input_destination"></a> [destination](#input\_destination) | The name of the destination resource | `string` | n/a | yes |
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication | `string` | n/a | yes |
-| <a name="input_nrn"></a> [nrn](#input\_nrn) | Identifier Nullplatform Resources Name | `string` | n/a | yes |
+| <a name="input_nrn"></a> [nrn](#input\_nrn) | The nullplatform resource name (NRN) | `string` | n/a | yes |
 <!-- END_TF_DOCS -->

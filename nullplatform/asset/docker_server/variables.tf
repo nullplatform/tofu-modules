@@ -1,15 +1,15 @@
 variable "nrn" {
   type        = string
-  description = "The null platform nrn"
+  description = "The nullplatform resource name (NRN)"
 }
 
 variable "login_server" {
-  description = "Docker Login server name"
+  description = "Docker login server name"
   type        = string
 }
 
 variable "path" {
-  description = "Path to the registry created"
+  description = "Path to the created registry"
   type        = string
 }
 

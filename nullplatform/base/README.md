@@ -1,13 +1,15 @@
 # Module: Base
 
-This module installs the base helm chart from nullplatform, for more information https://docs.nullplatform.com/docs/providers/helm-charts#base-chart
+This module installs the **base Helm chart** from **nullplatform**.  
+For more information, see the [our documentation](https://docs.nullplatform.com/docs/providers/helm-charts#base-chart)
 
 
 
-Usage:
+## Usage
 
-```
+### Basic example
 
+```hcl
 module "base" {
     source = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/base?ref=v1.0.0"
     np_api_key = var.np_api_key
@@ -86,7 +88,7 @@ module "base" {
 | <a name="input_newrelic_region"></a> [newrelic\_region](#input\_newrelic\_region) | New Relic region (e.g., US, EU). | `string` | `""` | no |
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication, account level | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Identifier Nullplatform Resources Name | `string` | n/a | yes |
-| <a name="input_nullplatform_base_helm_version"></a> [nullplatform\_base\_helm\_version](#input\_nullplatform\_base\_helm\_version) | Helm chart version for the Nullplatform agent | `string` | `"2.12.0"` | no |
+| <a name="input_nullplatform_base_helm_version"></a> [nullplatform\_base\_helm\_version](#input\_nullplatform\_base\_helm\_version) | Helm chart version for the nullplatform agent | `string` | `"2.12.0"` | no |
 | <a name="input_prometheus_enabled"></a> [prometheus\_enabled](#input\_prometheus\_enabled) | Enable Prometheus exporter. | `bool` | `true` | no |
 | <a name="input_tls_required"></a> [tls\_required](#input\_tls\_required) | Whether TLS is required. | `bool` | `true` | no |
 <!-- END_TF_DOCS -->

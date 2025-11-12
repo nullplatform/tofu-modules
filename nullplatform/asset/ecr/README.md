@@ -1,11 +1,13 @@
 # Module: Asset ECR
 
-Registers an Amazon ECR registry with Nullplatform by creating the provider configuration and provisioning IAM credentials for build workflows.
+This module registers an **Amazon ECR registry** with nullplatform by creating the required provider configuration and
+provisioning IAM credentials for build workflows.
 
-Usage:
+## Usage
 
+### Basic example
 
-```
+```hcl
 module "ecr" {
   source                          = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/asset/ecr?ref=v1.0.0"
   nrn                             = var.nrn
@@ -44,7 +46,7 @@ module "ecr" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_application_manager_assume_role"></a> [application\_manager\_assume\_role](#input\_application\_manager\_assume\_role) | ARN of the IAM role for application manager | `string` | `"arn:aws:iam::283477532906:role/application_manager"` | no |
+| <a name="input_application_manager_assume_role"></a> [application\_manager\_assume\_role](#input\_application\_manager\_assume\_role) | ARN of the IAM role assumed by the application manager | `string` | `"arn:aws:iam::283477532906:role/application_manager"` | no |
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication | `string` | n/a | yes |
-| <a name="input_nrn"></a> [nrn](#input\_nrn) | Identifier Nullplatform Resources Name | `string` | n/a | yes |
+| <a name="input_nrn"></a> [nrn](#input\_nrn) | The nullplatform resource name (NRN) | `string` | n/a | yes |
 <!-- END_TF_DOCS -->

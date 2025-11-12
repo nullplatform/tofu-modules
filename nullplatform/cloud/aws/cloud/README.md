@@ -1,10 +1,12 @@
 # Module: AWS Cloud
 
-Creates the Nullplatform AWS cloud configuration with account metadata and DNS settings sourced from the provided hosted zones and domain.
+Creates the nullplatform AWS cloud configuration with account metadata and DNS settings sourced from the provided hosted zones and domain.
 
-Usage:
+## Usage
 
-```
+### Basic example
+
+```hcl
 module "cloud_aws" {
   source                    = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/cloud/aws/cloud?ref=v1.0.0"
   nrn                       = var.nrn
@@ -42,7 +44,7 @@ module "cloud_aws" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Map of dimension values to configure Nullplatform | `map(string)` | `{}` | no |
+| <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Map of dimension values to configure nullplatform | `map(string)` | `{}` | no |
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | Domain name for the configuration | `string` | n/a | yes |
 | <a name="input_hosted_private_zone_id"></a> [hosted\_private\_zone\_id](#input\_hosted\_private\_zone\_id) | Hosted zone ID for private DNS | `string` | n/a | yes |
 | <a name="input_hosted_public_zone_id"></a> [hosted\_public\_zone\_id](#input\_hosted\_public\_zone\_id) | Hosted zone ID for public DNS | `string` | n/a | yes |

@@ -12,14 +12,14 @@ module "aks" {
   cluster_name        = var.cluster_name
   prefix              = var.prefix
   ############################################
-  # Kubernetes version & upgrades
+  # Kubernetes version and upgrades
   ############################################
 
   kubernetes_version = var.kubernetes_version
 
 
   ############################################
-  # API Server & Control Plane
+  # API server and control plane
   ############################################
 
   api_server_authorized_ip_ranges = var.authorized_ip_ranges
@@ -33,8 +33,9 @@ module "aks" {
   rbac_aad_tenant_id                = data.azurerm_client_config.current.tenant_id
   workload_identity_enabled         = true
   oidc_issuer_enabled               = var.oidc_issuer_enabled
+  
   ############################################
-  # VNET
+  # Virtual network
   ############################################
   vnet_subnet = {
     id = var.vnet_subnet_id

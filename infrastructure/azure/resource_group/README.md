@@ -1,12 +1,12 @@
-# Azure Resource Group Module
+# Module: Azure Resource Group 
 
-This module creates an Azure Resource Group.
+This module creates an Azure resource group.
 
 ## Features
 
-- Creates Azure Resource Group in the specified location
-- Configurable tags for resource management
-- Outputs resource group name and location for use in other modules
+- Creates an Azure resource group in the specified location  
+- Supports configurable tags for resource management  
+- Outputs the resource group name and location for use in other modules  
 
 ## Usage
 
@@ -21,10 +21,10 @@ module "resource_group" {
 }
 ```
 
-## Important Notes
+## Important notes
 
-- **Resource Group Name**: Must be unique within your Azure subscription
-- **Location**: Cannot be changed after creation; requires recreation of the resource group
+- **Resource group name**: Must be unique within your Azure subscription
+- **Location**: Cannot be changed after creation; changing it requires recreating the resource group
 - **Dependencies**: This module is typically created first and referenced by other Azure resources
 
 
@@ -52,9 +52,9 @@ module "resource_group" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_location"></a> [location](#input\_location) | The Azure region where the resource group should be created (e.g., eastus, westus2) | `string` | n/a | yes |
+| <a name="input_location"></a> [location](#input\_location) | The Azure region where the resource group will be created (e.g., eastus, westus2) | `string` | n/a | yes |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | The name of the resource group to create | `string` | n/a | yes |
-| <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | The ID of your Azure Subscription | `string` | n/a | yes |
+| <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | The ID of your Azure subscription | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to the resource group | `map(string)` | `{}` | no |
 
 ## Outputs

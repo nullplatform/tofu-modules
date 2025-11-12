@@ -1,29 +1,25 @@
 variable "nullplatform_base_helm_version" {
-  description = "Helm chart version for the Nullplatform agent"
+  description = "Helm chart version for the nullplatform base."
   type        = string
   default     = "2.12.0"
 }
 
-
 variable "namespace" {
-  description = "Kubernetes namespace to agent run"
+  description = "Kubernetes namespace where the agent runs."
   type        = string
   default     = "nullplatform-tools"
 }
 
 variable "nrn" {
-  description = "Identifier Nullplatform Resources Name"
+  description = "The Nullplatform Resource Name (NRN)."
   type        = string
 }
 
 variable "np_api_key" {
   type        = string
   sensitive   = true
-  description = "Nullplatform API key for authentication, account level"
+  description = "Nullplatform API key for authentication (account level)."
 }
-
-
-
 
 variable "cloud_provider" {
   type        = string
@@ -42,7 +38,7 @@ variable "aws_region" {
 
 variable "install_gateway_v2_crd" {
   type        = bool
-  description = "Install Gateway API V2 CRDs."
+  description = "Install Gateway API v2 CRDs."
   default     = false
 }
 
@@ -62,13 +58,13 @@ variable "tls_required" {
 
 variable "gateway_enabled" {
   type        = bool
-  description = "Enable the HTTP Gateway."
+  description = "Enable the HTTP gateway."
   default     = false
 }
 
 variable "gateway_internal_enabled" {
   type        = bool
-  description = "Enable the internal (private) Gateway."
+  description = "Enable the internal (private) gateway."
   default     = false
 }
 
@@ -78,7 +74,7 @@ variable "gateway_internal_enabled" {
 
 variable "control_plane_enabled" {
   type        = bool
-  description = "Enable the Control Plane."
+  description = "Enable the control plane."
   default     = false
 }
 
@@ -98,7 +94,7 @@ variable "logging_enabled" {
 
 variable "prometheus_enabled" {
   type        = bool
-  description = "Enable Prometheus exporter."
+  description = "Enable the Prometheus exporter."
   default     = true
 }
 
@@ -240,6 +236,7 @@ variable "newrelic_region" {
   description = "New Relic region (e.g., US, EU)."
   default     = ""
 }
+
 ############################################
 # CloudWatch
 ############################################
@@ -252,7 +249,7 @@ variable "cloudwatch_enabled" {
 
 variable "cloudwatch_logs_enabled" {
   type        = bool
-  description = "Enable logs to CloudWatch."
+  description = "Enable log forwarding to CloudWatch."
   default     = false
 }
 
@@ -280,7 +277,7 @@ variable "cloudwatch_access_logs_enabled" {
 
 variable "metrics_server_enabled" {
   type        = bool
-  description = "Enable Metrics Server."
+  description = "Enable the metrics server."
   default     = false
 }
 
@@ -290,13 +287,13 @@ variable "metrics_server_enabled" {
 
 variable "gateways_enabled" {
   type        = bool
-  description = "Enable Gateways resources (helm chart)."
+  description = "Enable gateway resources (Helm chart)."
   default     = true
 }
 
 variable "gateway_api_enabled" {
   type        = bool
-  description = "Enable Gateway API."
+  description = "Enable the Gateway API."
   default     = false
 }
 
@@ -312,13 +309,13 @@ variable "gateway_api_crds_install" {
 
 variable "image_pull_secrets_enabled" {
   type        = bool
-  description = "Create and use an imagePullSecret."
+  description = "Create and use an image pull secret."
   default     = false
 }
 
 variable "image_pull_secrets_registry" {
   type        = string
-  description = "Registry URL for the imagePullSecret."
+  description = "Registry URL for the image pull secret."
   default     = ""
 }
 
@@ -330,7 +327,7 @@ variable "image_pull_secrets_username" {
 
 variable "image_pull_secrets_password" {
   type        = string
-  description = "Registry password/token."
+  description = "Registry password or token."
   sensitive   = true
   default     = ""
 }

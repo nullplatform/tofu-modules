@@ -1,12 +1,12 @@
-# Azure DNS Zone Module
+# Module: Azure DNS zone
 
 This module creates a public DNS zone in Azure.
 
 ## Features
 
-- Creates Azure Public DNS Zone
-- Configurable tags for resource management
-- Outputs name servers for domain delegation
+- Creates an Azure public DNS zone  
+- Supports configurable tags for resource management  
+- Outputs name servers for domain delegation  
 
 ## Usage
 
@@ -21,10 +21,10 @@ module "dns" {
 }
 ```
 
-## Important Notes
+## Important notes
 
-- **Domain Name**: Must be a valid DNS domain name (e.g., example.com, subdomain.example.com)
-- **Name Servers**: After creation, use the `name_servers` output to configure delegation at your domain registrar
+- **Domain name**: Must be a valid DNS domain (e.g., example.com or subdomain.example.com)
+- **Name servers**: After creation, use the `name_servers` output to configure delegation at your domain registry
 
 
 <!-- BEGIN_TF_DOCS -->
@@ -53,16 +53,16 @@ module "dns" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | The domain name to use for the DNS zone (e.g., example.com) | `string` | n/a | yes |
 | <a name="input_resource_group"></a> [resource\_group](#input\_resource\_group) | The name of the resource group where the DNS zone will be created | `string` | n/a | yes |
-| <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | The ID of your Azure Subscription | `string` | n/a | yes |
+| <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | The ID of the Azure subscription | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to the DNS zone | `map(string)` | `{}` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_dns_zone_id"></a> [dns\_zone\_id](#output\_dns\_zone\_id) | The ID of the DNS Zone |
-| <a name="output_dns_zone_name"></a> [dns\_zone\_name](#output\_dns\_zone\_name) | The name of the created DNS Zone |
-| <a name="output_name_servers"></a> [name\_servers](#output\_name\_servers) | A list of name servers |
-| <a name="output_private_dns_zone_id"></a> [private\_dns\_zone\_id](#output\_private\_dns\_zone\_id) | The ID of the private DNS Zone |
-| <a name="output_private_dns_zone_name"></a> [private\_dns\_zone\_name](#output\_private\_dns\_zone\_name) | The name of the private created DNS Zone |
+| <a name="output_dns_zone_id"></a> [dns\_zone\_id](#output\_dns\_zone\_id) | The ID of the created DNS zone |
+| <a name="output_dns_zone_name"></a> [dns\_zone\_name](#output\_dns\_zone\_name) | The name of the created DNS zone |
+| <a name="output_name_servers"></a> [name\_servers](#output\_name\_servers) | The list of name servers for the public DNS zone |
+| <a name="output_private_dns_zone_id"></a> [private\_dns\_zone\_id](#output\_private\_dns\_zone\_id) | The ID of the created private DNS zone |
+| <a name="output_private_dns_zone_name"></a> [private\_dns\_zone\_name](#output\_private\_dns\_zone\_name) | The name of the created private DNS zone |
 <!-- END_TF_DOCS -->

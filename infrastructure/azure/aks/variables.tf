@@ -4,17 +4,17 @@
 
 variable "subscription_id" {
   type        = string
-  description = "The ID of your Azure Subscription"
+  description = "The ID of the Azure subscription"
 }
 
 variable "resource_group_name" {
   type        = string
-  description = "The name of the resource group where AKS will be created"
+  description = "The name of the resource group where the AKS cluster will be created"
 }
 
 variable "location" {
   type        = string
-  description = "The Azure region where the AKS cluster should be created (e.g., eastus, westus2)"
+  description = "The Azure region where the AKS cluster will be deployed (e.g., eastus, westus2)"
 }
 
 variable "cluster_name" {
@@ -39,7 +39,7 @@ variable "kubernetes_version" {
 
 variable "prefix" {
   type        = string
-  description = "Prefix for resources created by the AKS module"
+  description = "The prefix for resources created by the AKS module"
   default     = "aks"
 }
 
@@ -60,28 +60,28 @@ variable "user_pool_vm_size" {
 }
 
 ###############################################################################
-# OPTIONAL VARIABLES - NETWORKING & SECURITY
+# OPTIONAL VARIABLES - NETWORKING AND SECURITY
 ###############################################################################
 
 variable "authorized_ip_ranges" {
   type        = set(string)
-  description = "Set of authorized IP ranges to access the Kubernetes API server"
+  description = "The set of authorized IP ranges allowed to access the Kubernetes API server"
   default     = null
 }
 
 variable "private_cluster_enabled" {
   type        = bool
-  description = "Enable private cluster mode (API server only accessible via private network)"
+  description = "Whether to enable private cluster mode (API server accessible only via the private network)"
   default     = false
 }
 
 ###############################################################################
-# OPTIONAL VARIABLES - IDENTITY & RBAC
+# OPTIONAL VARIABLES - IDENTITY AND RBAC
 ###############################################################################
 
 variable "oidc_issuer_enabled" {
   type        = bool
-  description = "Enable OIDC issuer for workload identity"
+  description = "Whether to enable the OIDC issuer for workload identity"
   default     = true
 }
 
@@ -91,12 +91,12 @@ variable "oidc_issuer_enabled" {
 
 variable "cluster_log_analytics_workspace_name" {
   type        = string
-  description = "The name of the Log Analytics workspace for cluster monitoring"
+  description = "The name of the Log Analytics workspace used for cluster monitoring"
   default     = null
 }
 
 ###############################################################################
-# OPTIONAL VARIABLES - TAGS & METADATA
+# OPTIONAL VARIABLES - TAGS AND METADATA
 ###############################################################################
 
 variable "tags" {
@@ -107,6 +107,6 @@ variable "tags" {
 
 variable "environment" {
   type        = string
-  description = "Environment name for tagging and naming purposes"
+  description = "The environment name used for tagging and naming purposes"
   default     = "nullplatform"
 }
