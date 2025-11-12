@@ -45,3 +45,5 @@ variable "dimensions" {
   description = "Define dimensions. For more information, see https://docs.nullplatform.com/docs/dimensions"
   default     = {}
 }
+
+variable "private_domain_name" {}
