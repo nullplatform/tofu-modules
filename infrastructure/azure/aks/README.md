@@ -1,6 +1,6 @@
 # Module: Azure Kubernetes Service (AKS)
 
-This module creates an Azure Kubernetes Service (AKS) cluster using the official Azure AKS tofu module.
+This module creates an Azure Kubernetes Service (AKS) cluster using the official Azure AKS Tofu module.
 
 ## Features
 

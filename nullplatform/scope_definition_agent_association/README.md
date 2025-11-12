@@ -1,6 +1,6 @@
 # Module: Scope definition agent association
 
-This tofu code creates a notification channel in nullplatform that links to a specific NRN and can dynamically configure an agent-based channel when needed.
+This Tofu code creates a notification channel in nullplatform that links to a specific NRN and can dynamically configure an agent-based channel when needed.
 It injects the agent’s API key, command configuration, and optional overrides, while preserving any filters defined in the original template.
 
 ## Usage
