@@ -1,4 +1,4 @@
 output "nullplatform_agent_role_arn" {
-  description = "The arn of the agent rol"
+  description = "ARN of the agent role"
   value       = module.nullplatform_agent_role.arn
 }

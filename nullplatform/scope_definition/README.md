@@ -1,17 +1,17 @@
+# Module: Scope definition
 
-# Module: Scope Definition
+This tofu module clones a Git repository containing service and action specification templates, processes those templates using **gomplate** to inject dynamic variables, and creates the corresponding nullplatform resources (service, scope type, and actions).  
+It also patches the target NRN with logging and metrics providers, then cleans up the cloned repository after execution.
 
-This Terraform module clones a Git repository containing service and action specification templates, processes those templates using gomplate to inject dynamic variables, and then creates corresponding nullplatform resources (service, scope type, and actions). It also patches the target NRN with logging and metrics providers and cleans up the cloned repository after execution
+## Usage
 
-Usage:
-
-```
+```hcl
 module "scope_definition" {
-  source               = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v1.0.0"
-  nrn                  = local.nrn_without_namespace
-  np_api_key           = var.np_api_key
+  source     = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v1.0.0"
+  nrn        = local.nrn_without_namespace
+  np_api_key = var.np_api_key
+}
 ```
-
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -53,7 +53,7 @@ module "scope_definition" {
 | <a name="input_logging_provider"></a> [logging\_provider](#input\_logging\_provider) | Name of the external log provider (e.g., 'cloudwatch', 'elastic'). | `string` | `"external"` | no |
 | <a name="input_metrics_provider"></a> [metrics\_provider](#input\_metrics\_provider) | Name of the external metrics provider for monitoring integration. | `string` | `"externalmetrics"` | no |
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key used for executing local commands (e.g., 'np nrn patch'). | `string` | n/a | yes |
-| <a name="input_nrn"></a> [nrn](#input\_nrn) | Unique NRN identifier of the environment or resource in Nullplatform. | `string` | n/a | yes |
+| <a name="input_nrn"></a> [nrn](#input\_nrn) | Unique NRN identifier of the environment or resource in nullplatform. | `string` | n/a | yes |
 | <a name="input_repo_path"></a> [repo\_path](#input\_repo\_path) | Base path to the repository used as context for gomplate template rendering. | `string` | `"/root/.np/nullplatform/scopes"` | no |
 | <a name="input_service_path"></a> [service\_path](#input\_service\_path) | Path within the repository where the service specification files are stored (e.g., 'services/api'). | `string` | `"k8s"` | no |
 | <a name="input_service_spec_description"></a> [service\_spec\_description](#input\_service\_spec\_description) | Description of the created service or associated scope type. | `string` | `"Docker containers on pods"` | no |
@@ -65,7 +65,7 @@ module "scope_definition" {
 |------|-------------|
 | <a name="output_actions_created"></a> [actions\_created](#output\_actions\_created) | Map of all action specifications created from templates. |
 | <a name="output_scope_type_id"></a> [scope\_type\_id](#output\_scope\_type\_id) | ID of the scope type created from the template. |
-| <a name="output_service_slug"></a> [service\_slug](#output\_service\_slug) | Slug (unique name) of the service specification created in Nullplatform. |
-| <a name="output_service_specification_id"></a> [service\_specification\_id](#output\_service\_specification\_id) | ID of the service specification created in Nullplatform. |
+| <a name="output_service_slug"></a> [service\_slug](#output\_service\_slug) | Slug (unique name) of the service specification created in nullplatform. |
+| <a name="output_service_specification_id"></a> [service\_specification\_id](#output\_service\_specification\_id) | ID of the service specification created in nullplatform. |
 <!-- END_TF_DOCS -->
 

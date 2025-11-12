@@ -1,28 +1,28 @@
 variable "nullplatform_agent_helm_version" {
-  description = "Helm chart version for the Nullplatform agent"
+  description = "Helm chart version for the nullplatform agent"
   type        = string
   default     = "2.14.0"
 }
 
 variable "agent_repos_scope" {
-  description = "Git repository URL for agent scopes configuration"
+  description = "Git repository URL for the agent scope configuration"
   type        = string
   default     = "https://github.com/nullplatform/scopes.git#ftc"
 }
 
 variable "agent_repos_extra" {
-  description = "Additional repositories for the agent configuration"
+  description = "List of additional repositories for the agent configuration"
   type        = list(string)
   default     = []
 }
 
 variable "cluster_name" {
-  description = "Name of the kubernetes cluster"
+  description = "Name of the Kubernetes cluster"
   type        = string
 }
 
 variable "tags" {
-  description = "Tags to apply to identifier agent"
+  description = "Tags to apply to identify the agent"
   type        = string
 }
 
@@ -33,12 +33,12 @@ variable "init_scripts" {
 }
 
 variable "nrn" {
-  description = "Identifier Nullplatform Resources Name"
+  description = "The Nullplatform Resource Name (NRN)"
   type        = string
 }
 
 variable "namespace" {
-  description = "Kubernetes namespace to agent run"
+  description = "Kubernetes namespace where the agent runs"
   type        = string
   default     = "nullplatform-tools"
 }
@@ -47,7 +47,7 @@ variable "namespace" {
 variable "service_path" {
   type        = string
   default     = "k8s"
-  description = "Service path within the repository"
+  description = "Path to the service directory within the repository"
 }
 
 variable "repo_path" {
@@ -65,10 +65,8 @@ variable "github_repo_url" {
 variable "github_ref" {
   type        = string
   default     = "ftc"
-  description = "Git reference (branch, tag, or commit)"
+  description = "Git reference to use (branch, tag, or commit)"
 }
-
-
 
 ################################################################################
 # Scope Definition Module Variables
@@ -104,24 +102,22 @@ variable "np_api_key" {
 variable "external_metrics_provider" {
   type        = string
   default     = "externalmetrics"
-  description = "External metrics provider name"
+  description = "Name of the external metrics provider"
 }
 
 variable "external_logging_provider" {
   type        = string
   default     = "external"
-  description = "External logging provider name"
+  description = "Name of the external logging provider"
 }
 
-
-
 variable "environment_tag" {
-  description = "Environment tag to identify and filter agent resources"
+  description = "Environment tag used to identify and filter agent resources"
   type        = string
 }
 
 variable "kubeconfig_path" {
-  description = "Path to the kubeconfig file for Kubernetes cluster access"
+  description = "Path to the kubeconfig file used for Kubernetes cluster access"
   type        = string
   default     = "~/.kube/config"
 }

@@ -5,7 +5,7 @@ variable "prometheus_namespace" {
 }
 
 variable "nrn" {
-  description = "nullplatform Resource Name - unique identifier for resources"
+  description = "Nullplatform Resource Name — unique identifier for resources"
   type        = string
 }
 
@@ -30,13 +30,5 @@ variable "install_prometheus" {
 
 variable "prometheus_url" {
   type        = string
-  description = "Prometheus server URL"
-  default     = ""
-}
-
-variable "dimensions" {
-  type        = map(string)
-  description = "Value of the dimensions that you need this provider to be visible"
-  default     = {}
-
+  default     = null
 }

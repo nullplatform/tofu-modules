@@ -2,7 +2,7 @@
 # Nullplatform Agent Helm Release
 ################################################################################
 
-# Deploy Nullplatform agent to Kubernetes cluster via Helm chart
+# Deploy nullplatform agent to Kubernetes cluster via Helm chart
 resource "helm_release" "agent" {
   name             = "nullplatform-agent"
   chart            = "nullplatform-agent"

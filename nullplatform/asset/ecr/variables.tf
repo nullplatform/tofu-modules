@@ -1,5 +1,5 @@
 variable "nrn" {
-  description = "Identifier Nullplatform Resources Name"
+  description = "The nullplatform resource name (NRN)"
   type        = string
 }
 
@@ -10,7 +10,7 @@ variable "np_api_key" {
 }
 
 variable "application_manager_assume_role" {
-  description = "ARN of the IAM role for application manager"
+  description = "ARN of the IAM role assumed by the application manager"
   type        = string
   default     = "arn:aws:iam::283477532906:role/application_manager"
 }

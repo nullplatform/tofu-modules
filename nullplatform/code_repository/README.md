@@ -1,11 +1,13 @@
 # Module: Code Repository
 
-Sets up Nullplatform Git provider integrations for GitLab or GitHub, including collaborator access and installation metadata.
+Sets up nullplatform Git provider integrations for GitLab or GitHub, including collaborator access and installation metadata.
 
-Usage for github:
+## Usage
 
 
-```
+**Usage for GitHub:**
+
+```hcl
 module "code_repository" {
   source                       = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/code_repository?ref=v1.0.0"
   git_provider                 = "github"
@@ -16,9 +18,10 @@ module "code_repository" {
 
 }
 ```
-Usage for gitlab:
 
-```
+**Usage for GitLab:**
+
+```hcl
 module "code_repository" {
   source                       = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/code_repository?ref=v1.0.0"
   git_provider                 = "gitlab"
