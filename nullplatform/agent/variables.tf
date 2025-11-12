@@ -203,11 +203,6 @@ variable "dns_type" {
   description = "Type of DNS Provider, ej: azure, aws, gcp, or external_dns"
   type        = string
   default     = null
-
-  validation {
-    condition     = var.dns_type == null || contains(["azure", "aws", "gcp", "external_dns"], var.dns_type)
-    error_message = "The dns_type value must be one of: azure, aws, gcp, external_dns"
-  }
 }
 
 # Base domain name used across resources (required when cloud_provider is 'azure')
@@ -215,11 +210,6 @@ variable "domain" {
   description = "Base domain name used across resources"
   type        = string
   default     = null
-
-  validation {
-    condition     = var.cloud_provider != "azure" || var.domain != null
-    error_message = "domain is required when cloud_provider is 'azure'"
-  }
 }
 
 # Flag to determine whether to use account slug in resource naming (required when cloud_provider is 'azure')
@@ -227,11 +217,6 @@ variable "use_account_slug" {
   description = "Flag to determine whether to use account slug in resource naming"
   type        = string
   default     = null
-
-  validation {
-    condition     = var.cloud_provider != "azure" || var.use_account_slug != null
-    error_message = "use_account_slug is required when cloud_provider is 'azure'"
-  }
 }
 
 ################################################################################
@@ -242,7 +227,23 @@ variable "use_account_slug" {
 variable "image_pull_secrets" {
   description = "Image pull secrets configuration"
   type        = map(bool)
-  default     = {
-    ENABLED = false
-  }
+  default = null
+}
+
+variable "service_template" {
+  description = "Specifies the name or reference of the scope service template to be used for deployment."
+  type        = string
+  default = null
+}
+
+variable "initial_ingress_path" {
+  description = "Defines the initial ingress path used when deploying the application for the first time."
+  type        = string
+  default = null
+}
+
+variable "blue_green_ingress_path" {
+  description = "Specifies the ingress path used for blue-green deployments to route traffic to the new version."
+  type        = string
+  default = null
 }

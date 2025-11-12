@@ -59,13 +59,14 @@ locals {
       AZURE_CLIENT_SECRET     = var.azure_client_secret
       AZURE_CLIENT_ID         = var.azure_client_id
       AZURE_TENANT_ID         = var.azure_tenant_id
+
       DNS_TYPE                = var.dns_type
       USE_ACCOUNT_SLUG        = var.use_account_slug
       IMAGE_PULL_SECRETS      = var.image_pull_secrets
       DOMAIN                  = var.domain
-      SERVICE_TEMPLATE        = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/service.yaml.tpl"
-      INITIAL_INGRESS_PATH    = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
-      BLUE_GREEN_INGRESS_PATH = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
+      SERVICE_TEMPLATE        = var.service_template
+      INITIAL_INGRESS_PATH    = var.initial_ingress_path
+      BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
     }
   }
   all_config = merge(local.default_config, lookup(local.cloud_config, var.cloud_provider, {}))
