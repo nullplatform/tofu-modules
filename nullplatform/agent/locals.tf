@@ -59,7 +59,6 @@ locals {
       AZURE_CLIENT_SECRET     = var.azure_client_secret
       AZURE_CLIENT_ID         = var.azure_client_id
       AZURE_TENANT_ID         = var.azure_tenant_id
-
       DNS_TYPE                = var.dns_type
       USE_ACCOUNT_SLUG        = var.use_account_slug
       IMAGE_PULL_SECRETS      = var.image_pull_secrets
