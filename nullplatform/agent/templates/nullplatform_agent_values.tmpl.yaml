@@ -16,7 +16,7 @@ initScripts:
   %{ endfor ~}
   %{ endif ~}
   
-  %{ if aws_iam_role_arn != null ~}
+  %{ if aws_iam_role_arn != "" ~}
 serviceAccount:
   annotations:
     eks.amazonaws.com/role-arn: "${aws_iam_role_arn}"

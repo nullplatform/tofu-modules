@@ -76,9 +76,9 @@ variable "image_tag" {
 variable "aws_iam_role_arn" {
   description = "ARN of the AWS IAM role assigned to the agent"
   type        = string
-  default     = null
+  default     = ""
   validation {
-    condition     = var.cloud_provider != "aws" || var.aws_iam_role_arn != null
+    condition     = var.cloud_provider != "aws" || var.aws_iam_role_arn != ""
     error_message = "aws_iam_role_arn is required when cloud_provider is 'aws'."
   }
 }
