@@ -227,7 +227,7 @@ variable "use_account_slug" {
 variable "image_pull_secrets" {
   description = "Image pull secrets configuration"
   type        = map(bool)
-  default = ""
+  default = {}
 }
 
 variable "service_template" {
