@@ -27,21 +27,21 @@ module "eks" {
   # Optional: Adds the current caller identity as an administrator via cluster access entry
   enable_cluster_creator_admin_permissions = true
 
-  vpc_id                   = var.aws_vpc_vpc_id
-  subnet_ids               = var.aws_subnets_private_ids
-  control_plane_subnet_ids = var.aws_subnets_private_ids
-
+  vpc_id                         = var.aws_vpc_vpc_id
+  subnet_ids                     = var.aws_subnets_private_ids
+  control_plane_subnet_ids       = var.aws_subnets_private_ids
+  create_auto_mode_iam_resources = true
   compute_config = {
-    enabled       = true
-    node_pools    = ["general-purpose", "system"]
-    node_role_arn = aws_iam_role.eks_auto_mode_node_role.arn
+    enabled    = true
+    node_pools = ["general-purpose", "system"]
+
   }
 
   enable_irsa = true
 
 
 }
-
+/*
 ##############
 # iam policy
 ############
@@ -87,3 +87,4 @@ resource "aws_iam_role_policy_attachment" "eks_auto_mode_ssm_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   role       = aws_iam_role.eks_auto_mode_node_role.name
 }
+*/
