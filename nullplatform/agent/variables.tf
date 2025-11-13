@@ -240,5 +240,3 @@ variable "blue_green_ingress_path" {
   type        = string
   default = ""
 }
-
-variable "new_api_key" {}
