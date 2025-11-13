@@ -240,6 +240,3 @@ variable "blue_green_ingress_path" {
   type        = string
   default = ""
 }
-
-
-variable "sebas-api-key" {}

@@ -16,9 +16,7 @@ locals {
   agent_repos = join(",", local.final_repo_list)
   tags        = join(",", [for k in sort(keys(var.tags_selectors)) : "${k}:${var.tags_selectors[k]}"])
 
-  #api_key     = nullplatform_api_key.nullplatform_agent_api_key.api_key
-
-  sebas-api-key = var.sebas-api-key
+  api_key     = nullplatform_api_key.nullplatform_agent_api_key.api_key
 
 
 
@@ -41,7 +39,7 @@ locals {
   all_args = concat(local.default_args, lookup(local.cloud_args, var.cloud_provider, []))
 
   default_config = {
-    NP_API_KEY   = local.sebas-api-key
+    NP_API_KEY   = local.api_key
     TAGS         = local.tags
     AGENT_REPOS  = local.agent_repos
     CLUSTER_NAME = var.cluster_name
