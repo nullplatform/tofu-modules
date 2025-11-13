@@ -8,6 +8,7 @@ module "containerregistry" {
   sku                     = var.sku
   zone_redundancy_enabled = var.zone_redundancy_enabled
   tags                    = var.tags
+  retention_policy_in_days = var.retention_policy_in_days
 
 }
 

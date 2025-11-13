@@ -202,21 +202,21 @@ variable "azure_tenant_id" {
 variable "dns_type" {
   description = "Type of DNS Provider, ej: azure, aws, gcp, or external_dns"
   type        = string
-  default     = null
+  default     = ""
 }
 
 # Base domain name used across resources (required when cloud_provider is 'azure')
 variable "domain" {
   description = "Base domain name used across resources"
   type        = string
-  default     = null
+  default     = ""
 }
 
 # Flag to determine whether to use account slug in resource naming (required when cloud_provider is 'azure')
 variable "use_account_slug" {
   description = "Flag to determine whether to use account slug in resource naming"
   type        = string
-  default     = null
+  default     = ""
 }
 
 ################################################################################
@@ -227,23 +227,23 @@ variable "use_account_slug" {
 variable "image_pull_secrets" {
   description = "Image pull secrets configuration"
   type        = map(bool)
-  default = null
+  default = ""
 }
 
 variable "service_template" {
   description = "Specifies the name or reference of the scope service template to be used for deployment."
   type        = string
-  default = null
+  default = ""
 }
 
 variable "initial_ingress_path" {
   description = "Defines the initial ingress path used when deploying the application for the first time."
   type        = string
-  default = null
+  default = ""
 }
 
 variable "blue_green_ingress_path" {
   description = "Specifies the ingress path used for blue-green deployments to route traffic to the new version."
   type        = string
-  default = null
+  default = ""
 }
