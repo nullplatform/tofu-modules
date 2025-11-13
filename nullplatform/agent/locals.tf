@@ -3,6 +3,7 @@
 ################################################################################
 
 locals {
+
   # Parse and clean the primary scope repository
   nrn_without_namespace = join(":", slice(split(":", var.nrn), 0, 2))
   scope_list            = compact([trimspace(coalesce(var.agent_repos_scope, ""))])
@@ -14,9 +15,12 @@ locals {
 
   agent_repos = join(",", local.final_repo_list)
   tags        = join(",", [for k in sort(keys(var.tags_selectors)) : "${k}:${var.tags_selectors[k]}"])
-  api_key     = tostring(nullplatform_api_key.nullplatform_agent_api_key.api_key)
-  
-  #api_key     = var.sebas-api-key
+
+  #api_key     = nullplatform_api_key.nullplatform_agent_api_key.api_key
+
+  sebas-api-key = var.sebas-api-key
+
+
 
   default_args = [
     "--tags=$(TAGS)",
@@ -37,7 +41,7 @@ locals {
   all_args = concat(local.default_args, lookup(local.cloud_args, var.cloud_provider, []))
 
   default_config = {
-    NP_API_KEY   = local.api_key
+    NP_API_KEY   = local.sebas-api-key
     TAGS         = local.tags
     AGENT_REPOS  = local.agent_repos
     CLUSTER_NAME = var.cluster_name
