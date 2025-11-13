@@ -47,7 +47,7 @@ module "scope_definition" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_action_spec_names"></a> [action\_spec\_names](#input\_action\_spec\_names) | List of action specification template names to fetch and create for scope operations | `list(string)` | <pre>[<br/>  "create-scope",<br/>  "delete-scope",<br/>  "start-initial",<br/>  "start-blue-green",<br/>  "finalize-blue-green",<br/>  "rollback-deployment",<br/>  "delete-deployment",<br/>  "switch-traffic",<br/>  "set-desired-instance-count",<br/>  "pause-autoscaling",<br/>  "resume-autoscaling",<br/>  "restart-pods",<br/>  "kill-instances"<br/>]</pre> | no |
-| <a name="input_external_logging_provider"></a> [external\_logging\_provider](#input\_external\_logging\_provider) | Name of the external log provider (e.g., 'cloudwatch', 'elastic') | `string` | `"cloudwatch"` | no |
+| <a name="input_external_logging_provider"></a> [external\_logging\_provider](#input\_external\_logging\_provider) | Name of the external log provider | `string` | `"external"` | no |
 | <a name="input_external_metrics_provider"></a> [external\_metrics\_provider](#input\_external\_metrics\_provider) | Name of the external metrics provider for monitoring integration | `string` | `"externalmetrics"` | no |
 | <a name="input_github_ref"></a> [github\_ref](#input\_github\_ref) | Branch, tag, or commit SHA of the Git repository to read templates from | `string` | `"beta"` | no |
 | <a name="input_github_repo_name"></a> [github\_repo\_name](#input\_github\_repo\_name) | Name of the GitHub repository in 'owner/repo' format (e.g., 'nullplatform/service-definitions') | `string` | `"nullplatform/scopes"` | no |
