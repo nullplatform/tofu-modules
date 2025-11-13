@@ -27,4 +27,6 @@ resource "helm_release" "agent" {
   max_history       = 10
 
   values = [local.nullplatform_agent_values]
+
+  depends_on = [nullplatform_api_key.nullplatform_agent_api_key]
 }
