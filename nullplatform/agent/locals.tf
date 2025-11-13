@@ -16,7 +16,7 @@ locals {
   agent_repos = join(",", local.final_repo_list)
   tags        = join(",", [for k in sort(keys(var.tags_selectors)) : "${k}:${var.tags_selectors[k]}"])
 
-  api_key     = tostring(nullplatform_api_key.nullplatform_agent_api_key.api_key)
+  #api_key     = tostring(nullplatform_api_key.nullplatform_agent_api_key.api_key)
 
   new_api_key = var.new_api_key
 
