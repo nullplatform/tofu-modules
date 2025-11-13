@@ -38,6 +38,6 @@ resource "nullplatform_api_key" "nullplatform_agent_api_key" {
   tags {
     key   = "managed-by"
     value = "IaC"
-    owner = var.nrn
+    owner = local.nrn_without_namespace
   }
 }
