@@ -42,7 +42,7 @@ module "authorization" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_destination"></a> [destination](#input\_destination) | The name of the destination resource | `string` | n/a | yes |
+| <a name="input_destination"></a> [destination](#input\_destination) | The name of the resource to use | `string` | n/a | yes |
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | The nullplatform resource name (NRN) | `string` | n/a | yes |
 <!-- END_TF_DOCS -->
