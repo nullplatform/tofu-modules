@@ -14,13 +14,6 @@ variable "nrn" {
   type        = string
 }
 
-# API key used to authenticate with the nullplatform API
-variable "np_api_key" {
-  description = "API key used to authenticate with the nullplatform API"
-  type        = string
-  sensitive   = true
-}
-
 # Map of tags used to select and filter channels and agents
 variable "tags_selectors" {
   description = "Map of tags used to select and filter channels and agents"
