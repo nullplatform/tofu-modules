@@ -127,7 +127,7 @@ data "external" "scope_type" {
   ]
 
   program = ["sh", "-c", <<-EOT
-    template_b64="${base64encode(data.http.scope_type_template.request_body)}"
+    template_b64="${base64encode(data.http.scope_type_template.response_body)}"
     processed_json=$(echo "$template_b64" | base64 -d | \
     NRN='${local.dependent_env_vars.NRN}' \
     SERVICE_SPECIFICATION_ID='${local.dependent_env_vars.SERVICE_SPECIFICATION_ID}' \
