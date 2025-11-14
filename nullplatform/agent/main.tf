@@ -19,10 +19,10 @@ resource "helm_release" "agent" {
   timeout           = 600
   atomic            = true # Rollback on failure
   cleanup_on_fail   = true
-  replace           = false
-  recreate_pods     = false
-  reset_values      = false
-  reuse_values      = false
+  replace           = true
+  recreate_pods     = true
+  reset_values      = true
+  reuse_values      = true
   dependency_update = true
   max_history       = 10
 

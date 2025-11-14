@@ -24,6 +24,7 @@ module "aks" {
 
   api_server_authorized_ip_ranges = var.authorized_ip_ranges
   private_cluster_enabled         = var.private_cluster_enabled
+  automatic_channel_upgrade       = "stable"
 
   ############################################
   # RBAC / AAD / OIDC / Workload Identity
