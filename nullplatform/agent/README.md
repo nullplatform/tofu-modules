@@ -53,6 +53,8 @@ module "cloud_aws_agent" {
 | <a name="input_azure_tenant_id"></a> [azure\_tenant\_id](#input\_azure\_tenant\_id) | Azure tenant ID | `string` | `null` | no |
 | <a name="input_cloud_provider"></a> [cloud\_provider](#input\_cloud\_provider) | Cloud provider to use (aws, gcp, or azure) | `string` | n/a | yes |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the EKS cluster where the nullplatform agent will be deployed | `string` | n/a | yes |
+| <a name="input_dns_type"></a> [dns\_type](#input\_dns\_type) | Type of DNS Provider, ej: azure, aws, gcp, or external\_dns | `string` | `""` | no |
+| <a name="input_domain"></a> [domain](#input\_domain) | Base domain name used across resources | `string` | `""` | no |
 | <a name="input_enabled_override"></a> [enabled\_override](#input\_enabled\_override) | Enable custom overrides for scope configurations via command line | `bool` | `false` | no |
 | <a name="input_git_ref"></a> [git\_ref](#input\_git\_ref) | Git reference to use (branch, tag, or commit) | `string` | `"main"` | no |
 | <a name="input_git_repo"></a> [git\_repo](#input\_git\_repo) | GitHub repository containing templates | `string` | `"nullplatform/scopes"` | no |
