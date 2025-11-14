@@ -167,7 +167,7 @@ data "external" "action_specs" {
   ]
 
   program = ["sh", "-c", <<-EOT
-    template_b64="${base64encode(try(data.http.service_spec_template[each.key].response_body, "{}"))}"
+    template_b64="${base64encode(try(data.http.action_templates[each.key].response_body, "{}"))}"
     processed_json=$(echo "$template_b64" | base64 -d | \
     NRN='${local.dependent_env_vars.NRN}' \
     SERVICE_SPECIFICATION_ID='${local.dependent_env_vars.SERVICE_SPECIFICATION_ID}' \
