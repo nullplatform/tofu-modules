@@ -37,6 +37,7 @@ variable "private_dns_resource_group_name" {
 variable "application_domain" {
   type        = bool
   description = "Apply application domain or not"
+  default = false
 }
 
 
