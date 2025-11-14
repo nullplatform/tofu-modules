@@ -21,6 +21,5 @@ serviceAccount:
   annotations:
     eks.amazonaws.com/role-arn: "${aws_iam_role_arn}"
   %{ endif ~}
-
 image:
   tag: "${image_tag}"
