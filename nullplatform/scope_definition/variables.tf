@@ -102,3 +102,6 @@ variable "external_logging_provider" {
   type        = string
   default     = "external"
 }
+
+
+
