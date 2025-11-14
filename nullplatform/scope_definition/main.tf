@@ -64,6 +64,9 @@ locals {
 
 # Create service specification resource from processed template
 resource "nullplatform_service_specification" "from_template" {
+  depends_on = [
+    data.external.action_specs
+  ]
   name                = var.service_spec_name
   visible_to          = local.service_spec_parsed.visible_to
   assignable_to       = local.service_spec_parsed.assignable_to
@@ -126,7 +129,9 @@ locals {
 
 # Create scope type resource linked to service specification
 resource "nullplatform_scope_type" "from_template" {
-  depends_on = [nullplatform_service_specification.from_template]
+  depends_on = [
+    data.external.scope_type,
+    nullplatform_service_specification.from_template]
 
   nrn           = var.nrn
   name          = var.service_spec_name
@@ -169,7 +174,9 @@ locals {
 # Create action specification resources for each action type
 resource "nullplatform_action_specification" "from_templates" {
   for_each   = local.static_action_specs
-  depends_on = [nullplatform_service_specification.from_template]
+  depends_on = [
+    data.external.action_specs,
+    nullplatform_service_specification.from_template]
 
   service_specification_id = local.service_specification_id
   name                     = jsondecode(base64decode(data.external.action_specs[each.key].result.json_b64)).name
@@ -189,7 +196,11 @@ resource "nullplatform_action_specification" "from_templates" {
 
 # Patch NRN with external provider configuration for metrics and logging
 resource "null_resource" "nrn_patch" {
-  depends_on = [nullplatform_service_specification.from_template]
+  depends_on = [
+    nullplatform_action_specification.from_templates,
+    nullplatform_scope_type.from_template,
+    nullplatform_service_specification.from_template
+    ]
 
   triggers = {
     nrn              = var.nrn
