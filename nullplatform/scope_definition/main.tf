@@ -3,42 +3,56 @@
 ################################################################################
 
 # Clone the repository once and use local files
-resource "null_resource" "clone_repo" {
-  triggers = {
-    repo_url = var.github_repo_url
-    ref      = var.github_ref
-  }
-
-  provisioner "local-exec" {
-    command = <<-EOT
-      rm -rf ${path.root}/.terraform-repo
-      git clone --depth 1 --branch ${var.github_ref} ${var.github_repo_url} ${path.root}/.terraform-repo
-    EOT
-  }
-}
+# resource "null_resource" "clone_repo" {
+#   triggers = {
+#     repo_url = var.github_repo_url
+#     ref      = var.github_ref
+#   }
+#
+#   provisioner "local-exec" {
+#     command = <<-EOT
+#       rm -rf ${path.root}/.terraform-repo
+#       git clone --depth 1 --branch ${var.github_ref} ${var.github_repo_url} ${path.root}/.terraform-repo
+#     EOT
+#   }
+# }
 
 ################################################################################
 # Template Fetching (from local git clone)
 ################################################################################
 
-# Read service specification template from local clone
-data "local_file" "service_spec_template" {
-  depends_on = [null_resource.clone_repo]
-  filename   = "${path.root}/.terraform-repo/${var.service_path}/specs/service-spec.json.tpl"
+# # Read service specification template from local clone
+# data "local_file" "service_spec_template" {
+#   depends_on = [null_resource.clone_repo]
+#   filename   = "${path.root}/.terraform-repo/${var.service_path}/specs/service-spec.json.tpl"
+# }
+#
+# # Read scope type definition template from local clone
+# data "local_file" "scope_type_template" {
+#   depends_on = [null_resource.clone_repo]
+#   filename   = "${path.root}/.terraform-repo/${var.service_path}/specs/scope-type-definition.json.tpl"
+# }
+#
+# # Read all action specification templates from local clone
+# data "local_file" "action_templates" {
+#   for_each   = toset(var.action_spec_names)
+#   depends_on = [null_resource.clone_repo]
+#   filename   = "${path.root}/.terraform-repo/${var.service_path}/specs/actions/${each.key}.json.tpl"
+# }
+
+data "http" "service_spec_template" {
+  url = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads/main/k8s/specs/service-spec.json.tpl"
 }
 
-# Read scope type definition template from local clone
-data "local_file" "scope_type_template" {
-  depends_on = [null_resource.clone_repo]
-  filename   = "${path.root}/.terraform-repo/${var.service_path}/specs/scope-type-definition.json.tpl"
+data "http" "scope_type_template" {
+  url = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads/main/k8s/specs/scope-type-definition.json.tpl"
 }
 
-# Read all action specification templates from local clone
-data "local_file" "action_templates" {
+data "http" "action_templates" {
   for_each   = toset(var.action_spec_names)
-  depends_on = [null_resource.clone_repo]
-  filename   = "${path.root}/.terraform-repo/${var.service_path}/specs/actions/${each.key}.json.tpl"
+  url = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads/main/k8s/specs/actions/${each.key}.json.tpl"
 }
+
 
 ################################################################################
 # Service Specification
@@ -46,10 +60,10 @@ data "local_file" "action_templates" {
 
 # Process service specification template using gomplate with NRN variable
 data "external" "service_spec" {
-  depends_on = [data.local_file.service_spec_template]
+  depends_on = [data.http.service_spec_template]
 
   program = ["sh", "-c", <<-EOT
-    template_b64="${base64encode(data.local_file.service_spec_template.content)}"
+    template_b64="${base64encode(data.http.service_spec_template.response_body)}"
     processed_json=$(echo "$template_b64" | base64 -d | \
     NRN='${var.nrn}' \
     gomplate)
@@ -109,11 +123,11 @@ locals {
 data "external" "scope_type" {
   depends_on = [
     nullplatform_service_specification.from_template,
-    data.local_file.scope_type_template
+    data.http.scope_type_template
   ]
 
   program = ["sh", "-c", <<-EOT
-    template_b64="${base64encode(data.local_file.scope_type_template.content)}"
+    template_b64="${base64encode(data.http.scope_type_template.request_body)}"
     processed_json=$(echo "$template_b64" | base64 -d | \
     NRN='${local.dependent_env_vars.NRN}' \
     SERVICE_SPECIFICATION_ID='${local.dependent_env_vars.SERVICE_SPECIFICATION_ID}' \
@@ -149,11 +163,11 @@ data "external" "action_specs" {
   for_each = toset(var.action_spec_names)
   depends_on = [
     nullplatform_service_specification.from_template,
-    data.local_file.action_templates
+    data.http.action_templates
   ]
 
   program = ["sh", "-c", <<-EOT
-    template_b64="${base64encode(try(data.local_file.action_templates[each.key].content, "{}"))}"
+    template_b64="${base64encode(try(data.http.service_spec_template[each.key].response_body, "{}"))}"
     processed_json=$(echo "$template_b64" | base64 -d | \
     NRN='${local.dependent_env_vars.NRN}' \
     SERVICE_SPECIFICATION_ID='${local.dependent_env_vars.SERVICE_SPECIFICATION_ID}' \
