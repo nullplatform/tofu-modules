@@ -65,7 +65,7 @@ locals {
 # Create service specification resource from processed template
 resource "nullplatform_service_specification" "from_template" {
   depends_on = [
-    data.external.action_specs
+    data.external.service_spec
   ]
   name                = var.service_spec_name
   visible_to          = local.service_spec_parsed.visible_to
