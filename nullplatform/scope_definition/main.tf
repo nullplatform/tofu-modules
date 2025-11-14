@@ -205,15 +205,15 @@ resource "null_resource" "nrn_patch" {
   triggers = {
     nrn              = var.nrn
     service_slug     = local.service_slug
-    metrics_provider = var.metrics_provider
-    logging_provider = var.logging_provider
+    metrics_provider = var.external_metrics_provider
+    logging_provider = var.external_logging_provider
   }
 
   provisioner "local-exec" {
     command = <<-EOT
       np nrn patch --nrn "${var.nrn}" --body "{
-        \"global.${local.service_slug}_metric_provider\": \"${var.metrics_provider}\",
-        \"global.${local.service_slug}_log_provider\": \"${var.logging_provider}\"
+        \"global.${local.service_slug}_metric_provider\": \"${var.external_metrics_provider}\",
+        \"global.${local.service_slug}_log_provider\": \"${var.external_logging_provider}\"
       }"
     EOT
 

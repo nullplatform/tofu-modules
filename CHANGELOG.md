@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/nullplatform/tofu-modules/compare/v1.7.0...v1.8.0) (2025-11-12)
+
+
+### Features
+
+* **scope-definition:** fix agent telemetry config ([#50](https://github.com/nullplatform/tofu-modules/issues/50)) ([cd59a81](https://github.com/nullplatform/tofu-modules/commit/cd59a81e4479d8761be1f4988e7d137dd7f126bf))
+
 ## [1.7.0](https://github.com/nullplatform/tofu-modules/compare/v1.6.0...v1.7.0) (2025-11-12)
 
 

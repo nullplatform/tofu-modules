@@ -1,6 +1,6 @@
 # Module: Backend
 
-This module creates a secure S3 backend for storing tofu state files. It provisions an S3 bucket with versioning,
+This module creates a secure S3 backend for storing Tofu state files. It provisions an S3 bucket with versioning,
 server-side encryption, and object lock configuration for state file protection and compliance.
 
 Usage:

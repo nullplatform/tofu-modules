@@ -1,6 +1,6 @@
 # Module: Scope definition
 
-This tofu module clones a Git repository containing service and action specification templates, processes those templates using **gomplate** to inject dynamic variables, and creates the corresponding nullplatform resources (service, scope type, and actions).  
+This Tofu module clones a Git repository containing service and action specification templates, processes those templates using **gomplate** to inject dynamic variables, and creates the corresponding nullplatform resources (service, scope type, and actions).  
 It also patches the target NRN with logging and metrics providers, then cleans up the cloned repository after execution.
 
 ## Usage
@@ -46,18 +46,18 @@ module "scope_definition" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_action_spec_names"></a> [action\_spec\_names](#input\_action\_spec\_names) | List of action specification template names to fetch and create for scope operations. | `list(string)` | <pre>[<br/>  "create-scope",<br/>  "delete-scope",<br/>  "start-initial",<br/>  "start-blue-green",<br/>  "finalize-blue-green",<br/>  "rollback-deployment",<br/>  "delete-deployment",<br/>  "switch-traffic",<br/>  "set-desired-instance-count",<br/>  "pause-autoscaling",<br/>  "resume-autoscaling",<br/>  "restart-pods",<br/>  "kill-instances"<br/>]</pre> | no |
-| <a name="input_github_ref"></a> [github\_ref](#input\_github\_ref) | Branch, tag, or commit SHA of the Git repository to read templates from. | `string` | `"beta"` | no |
-| <a name="input_github_repo_name"></a> [github\_repo\_name](#input\_github\_repo\_name) | Name of the GitHub repository in 'owner/repo' format (e.g., 'nullplatform/service-definitions'). | `string` | `"nullplatform/scopes"` | no |
-| <a name="input_github_repo_url"></a> [github\_repo\_url](#input\_github\_repo\_url) | Git repository URL (HTTPS or SSH format) used to clone the templates. | `string` | `"https://github.com/nullplatform/scopes.git"` | no |
-| <a name="input_logging_provider"></a> [logging\_provider](#input\_logging\_provider) | Name of the external log provider (e.g., 'cloudwatch', 'elastic'). | `string` | `"external"` | no |
-| <a name="input_metrics_provider"></a> [metrics\_provider](#input\_metrics\_provider) | Name of the external metrics provider for monitoring integration. | `string` | `"externalmetrics"` | no |
-| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key used for executing local commands (e.g., 'np nrn patch'). | `string` | n/a | yes |
-| <a name="input_nrn"></a> [nrn](#input\_nrn) | Unique NRN identifier of the environment or resource in nullplatform. | `string` | n/a | yes |
-| <a name="input_repo_path"></a> [repo\_path](#input\_repo\_path) | Base path to the repository used as context for gomplate template rendering. | `string` | `"/root/.np/nullplatform/scopes"` | no |
-| <a name="input_service_path"></a> [service\_path](#input\_service\_path) | Path within the repository where the service specification files are stored (e.g., 'services/api'). | `string` | `"k8s"` | no |
-| <a name="input_service_spec_description"></a> [service\_spec\_description](#input\_service\_spec\_description) | Description of the created service or associated scope type. | `string` | `"Docker containers on pods"` | no |
-| <a name="input_service_spec_name"></a> [service\_spec\_name](#input\_service\_spec\_name) | Name of the service that will be created from the specification template. | `string` | `"Containers"` | no |
+| <a name="input_action_spec_names"></a> [action\_spec\_names](#input\_action\_spec\_names) | List of action specification template names to fetch and create for scope operations | `list(string)` | <pre>[<br/>  "create-scope",<br/>  "delete-scope",<br/>  "start-initial",<br/>  "start-blue-green",<br/>  "finalize-blue-green",<br/>  "rollback-deployment",<br/>  "delete-deployment",<br/>  "switch-traffic",<br/>  "set-desired-instance-count",<br/>  "pause-autoscaling",<br/>  "resume-autoscaling",<br/>  "restart-pods",<br/>  "kill-instances"<br/>]</pre> | no |
+| <a name="input_external_logging_provider"></a> [external\_logging\_provider](#input\_external\_logging\_provider) | Name of the external log provider (e.g., 'cloudwatch', 'elastic') | `string` | `"cloudwatch"` | no |
+| <a name="input_external_metrics_provider"></a> [external\_metrics\_provider](#input\_external\_metrics\_provider) | Name of the external metrics provider for monitoring integration | `string` | `"externalmetrics"` | no |
+| <a name="input_github_ref"></a> [github\_ref](#input\_github\_ref) | Branch, tag, or commit SHA of the Git repository to read templates from | `string` | `"beta"` | no |
+| <a name="input_github_repo_name"></a> [github\_repo\_name](#input\_github\_repo\_name) | Name of the GitHub repository in 'owner/repo' format (e.g., 'nullplatform/service-definitions') | `string` | `"nullplatform/scopes"` | no |
+| <a name="input_github_repo_url"></a> [github\_repo\_url](#input\_github\_repo\_url) | Git repository URL (HTTPS or SSH format) used to clone the templates | `string` | `"https://github.com/nullplatform/scopes.git"` | no |
+| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key used for executing local commands (e.g., 'np nrn patch') | `string` | n/a | yes |
+| <a name="input_nrn"></a> [nrn](#input\_nrn) | Unique NRN identifier of the environment or resource in nullplatform | `string` | n/a | yes |
+| <a name="input_repo_path"></a> [repo\_path](#input\_repo\_path) | Base path to the repository used as context for gomplate template rendering | `string` | `"/root/.np/nullplatform/scopes"` | no |
+| <a name="input_service_path"></a> [service\_path](#input\_service\_path) | Path within the repository where the service specification files are stored (e.g., 'services/api') | `string` | `"k8s"` | no |
+| <a name="input_service_spec_description"></a> [service\_spec\_description](#input\_service\_spec\_description) | Description of the created service or associated scope type | `string` | `"Docker containers on pods"` | no |
+| <a name="input_service_spec_name"></a> [service\_spec\_name](#input\_service\_spec\_name) | Name of the service that will be created from the specification template | `string` | `"Containers"` | no |
 
 ## Outputs
 

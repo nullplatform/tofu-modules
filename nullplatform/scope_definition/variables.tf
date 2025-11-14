@@ -98,7 +98,7 @@ variable "external_metrics_provider" {
 }
 
 variable "external_logging_provider" {
-  description = "Name of the external log provider (e.g., 'cloudwatch', 'elastic')"
+  description = "Name of the external log provider"
   type        = string
-  default     = "cloudwatch"
+  default     = "external"
 }
