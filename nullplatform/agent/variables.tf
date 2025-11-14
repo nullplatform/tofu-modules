@@ -198,3 +198,16 @@ variable "azure_tenant_id" {
   type        = string
   default     = null
 }
+# Type of DNS Provider (azure, aws, gcp, or external_dns)
+variable "dns_type" {
+  description = "Type of DNS Provider, ej: azure, aws, gcp, or external_dns"
+  type        = string
+  default     = ""
+}
+
+# Base domain name used across resources (required when cloud_provider is 'azure')
+variable "domain" {
+  description = "Base domain name used across resources"
+  type        = string
+  default     = ""
+}
