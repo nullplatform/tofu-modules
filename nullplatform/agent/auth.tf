@@ -4,7 +4,7 @@
 
 # Create API key for agent authentication with required role grants
 resource "nullplatform_api_key" "nullplatform_agent_api_key" {
-  name = "NULLPLATFORM-AGENT-API-KEY"
+  name = "nullplatform-agent-api-key"
 
   # Grant control plane agent role for core agent operations
   grants {
