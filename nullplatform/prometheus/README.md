@@ -42,8 +42,8 @@ module "prometheus" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | value | `map` | `{}` | no |
-| <a name="input_install_prometheus"></a> [install\_prometheus](#input\_install\_prometheus) | value | `bool` | `false` | no |
+| <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | name of the dimensions | `map` | `{}` | no |
+| <a name="input_install_prometheus"></a> [install\_prometheus](#input\_install\_prometheus) | Activate the Prometheus installation | `bool` | `false` | no |
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | nullplatform API key for authentication | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name — unique identifier for resources | `string` | n/a | yes |
 | <a name="input_nullplatform_port"></a> [nullplatform\_port](#input\_nullplatform\_port) | Port number for nullplatform service communication | `number` | `2021` | no |
