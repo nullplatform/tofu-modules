@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.0](https://github.com/nullplatform/tofu-modules/compare/v1.9.0...v1.10.0) (2025-11-17)
+
+
+### Features
+
+* **release:** edit yaml release ([#58](https://github.com/nullplatform/tofu-modules/issues/58)) ([b50b97e](https://github.com/nullplatform/tofu-modules/commit/b50b97ed0212e6cded7596ed5c91d2f7d75ea218))
+
 ## [1.9.0](https://github.com/nullplatform/tofu-modules/compare/v1.8.0...v1.9.0) (2025-11-17)
 
 
