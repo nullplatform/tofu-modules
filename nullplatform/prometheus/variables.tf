@@ -29,6 +29,11 @@ variable "install_prometheus" {
 }
 
 variable "prometheus_url" {
-  type        = string
-  default     = null
+  type    = string
+  default = null
+}
+variable "dimensions" {
+  default     = {}
+  description = "value"
+
 }
