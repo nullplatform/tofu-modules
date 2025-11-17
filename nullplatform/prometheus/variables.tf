@@ -22,7 +22,7 @@ variable "nullplatform_port" {
 }
 
 variable "install_prometheus" {
-  description = "value"
+  description = "Activate the Prometheus installation"
   type        = bool
   default     = false
 
@@ -34,6 +34,6 @@ variable "prometheus_url" {
 }
 variable "dimensions" {
   default     = {}
-  description = "value"
+  description = "name of the dimensions"
 
 }
