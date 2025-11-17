@@ -60,7 +60,7 @@ module "aks" {
       max_count            = 5
       #node_count           = 2
       availability_zones   = ["1", "2", "3"]
-      vnet_subnet_id       = var.vnet_subnet_id
+      #vnet_subnet_id       = var.vnet_subnet_id
 
 
 
