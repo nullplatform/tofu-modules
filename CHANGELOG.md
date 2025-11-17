@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.0](https://github.com/nullplatform/tofu-modules/compare/v1.8.0...v1.9.0) (2025-11-17)
+
+
+### Features
+
+* **promnetheus:** edit variables ([#56](https://github.com/nullplatform/tofu-modules/issues/56)) ([45ddc88](https://github.com/nullplatform/tofu-modules/commit/45ddc880afc48a4f93de6f132603ad3a4e73dfb1))
+
 ## [1.8.0](https://github.com/nullplatform/tofu-modules/compare/v1.7.0...v1.8.0) (2025-11-12)
 
 
