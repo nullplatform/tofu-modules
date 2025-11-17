@@ -45,7 +45,7 @@ module "aks" {
   # Agent (system) pool defaults
   ############################################
   agents_size                 = var.system_pool_vm_size
-  temporary_name_for_rotation = "tmpnodepool"
+  temporary_name_for_rotation = "systempool"
   agents_pool_max_surge       = "10%"
 
   ############################################
@@ -58,13 +58,13 @@ module "aks" {
       auto_scaling_enabled = true
       min_count            = 1
       max_count            = 5
-      #node_count           = 2
+      #node_count           = 3
       availability_zones   = ["1", "2", "3"]
       #vnet_subnet_id       = var.vnet_subnet_id
 
 
 
-      temporary_name_for_rotation = "tmpnodepool"
+      temporary_name_for_rotation = "poolrot"
     }
 
 

@@ -1,81 +1,6 @@
 ################################################################################
-# Git Repository Clone
-################################################################################
-
-# Clone the repository once and use local files
-# resource "null_resource" "clone_repo" {
-#   triggers = {
-#     repo_url = var.github_repo_url
-#     ref      = var.github_ref
-#   }
-#
-#   provisioner "local-exec" {
-#     command = <<-EOT
-#       rm -rf ${path.root}/.terraform-repo
-#       git clone --depth 1 --branch ${var.github_ref} ${var.github_repo_url} ${path.root}/.terraform-repo
-#     EOT
-#   }
-# }
-
-################################################################################
-# Template Fetching (from local git clone)
-################################################################################
-
-# # Read service specification template from local clone
-# data "local_file" "service_spec_template" {
-#   depends_on = [null_resource.clone_repo]
-#   filename   = "${path.root}/.terraform-repo/${var.service_path}/specs/service-spec.json.tpl"
-# }
-#
-# # Read scope type definition template from local clone
-# data "local_file" "scope_type_template" {
-#   depends_on = [null_resource.clone_repo]
-#   filename   = "${path.root}/.terraform-repo/${var.service_path}/specs/scope-type-definition.json.tpl"
-# }
-#
-# # Read all action specification templates from local clone
-# data "local_file" "action_templates" {
-#   for_each   = toset(var.action_spec_names)
-#   depends_on = [null_resource.clone_repo]
-#   filename   = "${path.root}/.terraform-repo/${var.service_path}/specs/actions/${each.key}.json.tpl"
-# }
-
-data "http" "service_spec_template" {
-  url = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads/main/k8s/specs/service-spec.json.tpl"
-}
-
-data "http" "scope_type_template" {
-  url = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads/main/k8s/specs/scope-type-definition.json.tpl"
-}
-
-data "http" "action_templates" {
-  for_each   = toset(var.action_spec_names)
-  url = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads/main/k8s/specs/actions/${each.key}.json.tpl"
-}
-
-
-################################################################################
 # Service Specification
 ################################################################################
-
-# Process service specification template using gomplate with NRN variable
-data "external" "service_spec" {
-  depends_on = [data.http.service_spec_template]
-
-  program = ["sh", "-c", <<-EOT
-    template_b64="${base64encode(data.http.service_spec_template.response_body)}"
-    processed_json=$(echo "$template_b64" | base64 -d | \
-    NRN='${var.nrn}' \
-    gomplate)
-    echo "$processed_json" | jq -c '{json: tojson}'
-  EOT
-  ]
-}
-
-locals {
-  service_spec_parsed = jsondecode(data.external.service_spec.result.json)
-}
-
 # Create service specification resource from processed template
 resource "nullplatform_service_specification" "from_template" {
   depends_on = [
@@ -100,47 +25,9 @@ resource "nullplatform_service_specification" "from_template" {
   }
 }
 
-# Extract service specification details for use in dependent resources
-locals {
-  service_specification_id = nullplatform_service_specification.from_template.id
-  service_slug             = nullplatform_service_specification.from_template.slug
-
-  # Environment variables for template processing in dependent resources
-  dependent_env_vars = {
-    NRN                      = var.nrn
-    SERVICE_SPECIFICATION_ID = local.service_specification_id
-    SERVICE_SLUG             = local.service_slug
-    SERVICE_PATH             = var.service_path
-    REPO_PATH                = var.repo_path
-  }
-}
-
 ################################################################################
 # Scope Type
 ################################################################################
-
-# Process scope type template with service specification context
-data "external" "scope_type" {
-  depends_on = [
-    nullplatform_service_specification.from_template,
-    data.http.scope_type_template
-  ]
-
-  program = ["sh", "-c", <<-EOT
-    template_b64="${base64encode(data.http.scope_type_template.response_body)}"
-    processed_json=$(echo "$template_b64" | base64 -d | \
-    NRN='${local.dependent_env_vars.NRN}' \
-    SERVICE_SPECIFICATION_ID='${local.dependent_env_vars.SERVICE_SPECIFICATION_ID}' \
-    gomplate)
-    echo "$processed_json" | jq -c '{json: tojson}'
-  EOT
-  ]
-}
-
-locals {
-  scope_type_def = jsondecode(data.external.scope_type.result.json)
-}
-
 # Create scope type resource linked to service specification
 resource "nullplatform_scope_type" "from_template" {
   depends_on = [
@@ -157,34 +44,6 @@ resource "nullplatform_scope_type" "from_template" {
 ################################################################################
 # Action Specifications
 ################################################################################
-
-# Process all action specification templates with full service context
-data "external" "action_specs" {
-  for_each = toset(var.action_spec_names)
-  depends_on = [
-    nullplatform_service_specification.from_template,
-    data.http.action_templates
-  ]
-
-  program = ["sh", "-c", <<-EOT
-    template_b64="${base64encode(try(data.http.action_templates[each.key].response_body, "{}"))}"
-    processed_json=$(echo "$template_b64" | base64 -d | \
-    NRN='${local.dependent_env_vars.NRN}' \
-    SERVICE_SPECIFICATION_ID='${local.dependent_env_vars.SERVICE_SPECIFICATION_ID}' \
-    SERVICE_SLUG='${local.dependent_env_vars.SERVICE_SLUG}' \
-    SERVICE_PATH='${local.dependent_env_vars.SERVICE_PATH}' \
-    REPO_PATH='${local.dependent_env_vars.REPO_PATH}' \
-    gomplate)
-    echo "$processed_json" | jq -c '{json_b64: (tojson | @base64)}'
-  EOT
-  ]
-}
-
-# Static set to prevent for_each dependency issues during terraform plan/apply
-locals {
-  static_action_specs = toset(var.action_spec_names)
-}
-
 # Create action specification resources for each action type
 resource "nullplatform_action_specification" "from_templates" {
   for_each   = local.static_action_specs
@@ -234,23 +93,5 @@ resource "null_resource" "nrn_patch" {
     environment = {
       NP_API_KEY = var.np_api_key
     }
-  }
-}
-
-################################################################################
-# Cleanup
-################################################################################
-
-# Optional: Clean up cloned repo after apply
-resource "null_resource" "cleanup_repo" {
-  depends_on = [
-    nullplatform_service_specification.from_template,
-    nullplatform_scope_type.from_template,
-    nullplatform_action_specification.from_templates
-  ]
-
-  provisioner "local-exec" {
-    when    = destroy
-    command = "rm -rf ${path.root}/.terraform-repo"
   }
 }
