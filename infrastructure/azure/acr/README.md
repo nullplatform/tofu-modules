@@ -78,6 +78,7 @@ module "acr" {
 | <a name="input_containerregistry_name"></a> [containerregistry\_name](#input\_containerregistry\_name) | The name of the ACR (must be globally unique, lowercase alphanumeric only, 5–50 characters) | `string` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | The location or region where the resource group should be created | `string` | n/a | yes |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | The name of the resource group | `string` | n/a | yes |
+| <a name="input_retention_policy_in_days"></a> [retention\_policy\_in\_days](#input\_retention\_policy\_in\_days) | Days of retention image | `number` | `null` | no |
 | <a name="input_sku"></a> [sku](#input\_sku) | The SKU of the container registry. Possible values: Basic, Standard, Premium | `string` | `"Basic"` | no |
 | <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | The ID of the Azure subscription | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to the ACR resource | `map(string)` | `{}` | no |

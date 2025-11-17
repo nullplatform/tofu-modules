@@ -16,7 +16,7 @@ resource "nullplatform_provider_config" "azure" {
       private_dns_zone_resource_group_name  = var.private_dns_resource_group_name
     }
   })
-lifecycle {
+  lifecycle {
     ignore_changes = [attributes]
   }
 }
