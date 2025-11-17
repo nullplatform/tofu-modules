@@ -75,7 +75,7 @@ module "cert_manager" {
 | <a name="input_azure_secret_key"></a> [azure\_secret\_key](#input\_azure\_secret\_key) | The key name inside the Azure secret that holds the client secret (default: 'client-secret'). | `string` | `"client-secret"` | no |
 | <a name="input_azure_subscription_id"></a> [azure\_subscription\_id](#input\_azure\_subscription\_id) | The Azure subscription ID. | `string` | `""` | no |
 | <a name="input_azure_tenant_id"></a> [azure\_tenant\_id](#input\_azure\_tenant\_id) | The Azure tenant ID. | `string` | `""` | no |
-| <a name="input_cert_manager_config_version"></a> [cert\_manager\_config\_version](#input\_cert\_manager\_config\_version) | n/a | `string` | `"2.10.0"` | no |
+| <a name="input_cert_manager_config_version"></a> [cert\_manager\_config\_version](#input\_cert\_manager\_config\_version) | n/a | `string` | `"2.26.0"` | no |
 | <a name="input_cert_manager_namespace"></a> [cert\_manager\_namespace](#input\_cert\_manager\_namespace) | n/a | `string` | `"cert-manager"` | no |
 | <a name="input_cert_manager_version"></a> [cert\_manager\_version](#input\_cert\_manager\_version) | n/a | `string` | `"1.18.2"` | no |
 | <a name="input_cloudflare_enabled"></a> [cloudflare\_enabled](#input\_cloudflare\_enabled) | Whether to enable the Cloudflare DNS-01 solver in cert-manager. | `bool` | `false` | no |
