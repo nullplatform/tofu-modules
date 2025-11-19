@@ -30,7 +30,7 @@ variable "install_prometheus" {
 
 variable "prometheus_url" {
   type    = string
-  default = null
+  default = ""
 }
 variable "dimensions" {
   default     = {}

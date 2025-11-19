@@ -48,5 +48,5 @@ module "prometheus" {
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name — unique identifier for resources | `string` | n/a | yes |
 | <a name="input_nullplatform_port"></a> [nullplatform\_port](#input\_nullplatform\_port) | Port number for nullplatform service communication | `number` | `2021` | no |
 | <a name="input_prometheus_namespace"></a> [prometheus\_namespace](#input\_prometheus\_namespace) | Kubernetes namespace where Prometheus will be deployed | `string` | `"prometheus"` | no |
-| <a name="input_prometheus_url"></a> [prometheus\_url](#input\_prometheus\_url) | n/a | `string` | `null` | no |
+| <a name="input_prometheus_url"></a> [prometheus\_url](#input\_prometheus\_url) | n/a | `string` | `""` | no |
 <!-- END_TF_DOCS -->
