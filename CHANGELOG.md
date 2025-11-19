@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.1](https://github.com/nullplatform/tofu-modules/compare/v1.10.0...v1.10.1) (2025-11-19)
+
+
+### Bug Fixes
+
+* **prometheus:** fix variable  ([#60](https://github.com/nullplatform/tofu-modules/issues/60)) ([aa177c0](https://github.com/nullplatform/tofu-modules/commit/aa177c0a321233198501558d907c97f2f9d2f731))
+
 ## [1.10.0](https://github.com/nullplatform/tofu-modules/compare/v1.9.0...v1.10.0) (2025-11-17)
 
 
