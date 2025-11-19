@@ -16,7 +16,7 @@ module "eks" {
 
   ami_type       = var.ami_type
   instance_types = var.instance_types
-  use_auto_mode  = var.use_auto_mode
+  use_auto_mode  = var.use_auto_mode # for default false
 }
 ```
 
