@@ -1,26 +1,4 @@
 ################################################################################
-# Repository Configuration
-################################################################################
-
-variable "github_repo_name" {
-  description = "Name of the GitHub repository in 'owner/repo' format (e.g., 'nullplatform/service-definitions')"
-  type        = string
-  default     = "nullplatform/scopes"
-}
-
-variable "github_ref" {
-  description = "Branch, tag, or commit SHA of the Git repository to read templates from"
-  type        = string
-  default     = "beta"
-}
-
-variable "github_repo_url" {
-  description = "Git repository URL (HTTPS or SSH format) used to clone the templates"
-  type        = string
-  default     = "https://github.com/nullplatform/scopes.git"
-}
-
-################################################################################
 # Template Paths and Names
 ################################################################################
 
@@ -102,3 +80,6 @@ variable "external_logging_provider" {
   type        = string
   default     = "external"
 }
+
+
+

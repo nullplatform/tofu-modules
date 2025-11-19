@@ -3,6 +3,7 @@
 ################################################################################
 
 locals {
+
   # Parse and clean the primary scope repository
   nrn_without_namespace = join(":", slice(split(":", var.nrn), 0, 2))
   scope_list            = compact([trimspace(coalesce(var.agent_repos_scope, ""))])
@@ -14,7 +15,8 @@ locals {
 
   agent_repos = join(",", local.final_repo_list)
   tags        = join(",", [for k in sort(keys(var.tags_selectors)) : "${k}:${var.tags_selectors[k]}"])
-  api_key     = nullplatform_api_key.nullplatform_agent_api_key.api_key
+
+  api_key     = tostring(nullplatform_api_key.nullplatform_agent_api_key.api_key)
 
   default_args = [
     "--tags=$(TAGS)",
@@ -60,12 +62,12 @@ locals {
       AZURE_CLIENT_ID         = var.azure_client_id
       AZURE_TENANT_ID         = var.azure_tenant_id
       DNS_TYPE                = var.dns_type
-      USE_ACCOUNT_SLUG        = false
-      IMAGE_PULL_SECRETS      = "{\"ENABLED\": false}"
+      USE_ACCOUNT_SLUG        = var.use_account_slug
+      IMAGE_PULL_SECRETS      = var.image_pull_secrets
       DOMAIN                  = var.domain
-      SERVICE_TEMPLATE        = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/service.yaml.tpl"
-      INITIAL_INGRESS_PATH    = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
-      BLUE_GREEN_INGRESS_PATH = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
+      SERVICE_TEMPLATE        = var.service_template
+      INITIAL_INGRESS_PATH    = var.initial_ingress_path
+      BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
     }
   }
   all_config = merge(local.default_config, lookup(local.cloud_config, var.cloud_provider, {}))
@@ -75,7 +77,7 @@ locals {
     args             = local.all_args
     config_values    = local.all_config
     image_tag        = var.image_tag
-    aws_iam_role_arn = var.cloud_provider == "aws" ? var.aws_iam_role_arn : null
+    aws_iam_role_arn = var.cloud_provider == "aws" ? var.aws_iam_role_arn : ""
     init_scripts     = var.init_scripts
   })
 }

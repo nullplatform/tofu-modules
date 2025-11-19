@@ -40,3 +40,9 @@ variable "tags" {
   description = "A mapping of tags to assign to the ACR resource"
   default     = {}
 }
+
+variable "retention_policy_in_days" {
+  description = "Days of retention image"
+  type = number
+  default = null
+}

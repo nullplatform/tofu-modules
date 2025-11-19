@@ -37,6 +37,7 @@ variable "private_dns_resource_group_name" {
 variable "application_domain" {
   type        = bool
   description = "Apply application domain or not"
+  default = false
 }
 
 
@@ -45,3 +46,5 @@ variable "dimensions" {
   description = "Define dimensions. For more information, see https://docs.nullplatform.com/docs/dimensions"
   default     = {}
 }
+
+variable "private_domain_name" {}

@@ -33,11 +33,11 @@ variable "subnets_definition" {
 # Example:
 # subnets_definition = {
 #   subnet1 = {
-#     name             = "subnet-aks"
+#     name             = "subnet-1"
 #     address_prefixes = ["10.0.0.0/24"]
 #   }
 #   subnet2 = {
-#     name             = "subnet-services"
+#     name             = "subnet-2"
 #     address_prefixes = ["10.0.1.0/24"]
 #   }
 # }
@@ -45,14 +45,4 @@ variable "subnets_definition" {
 variable "subscription_id" {
   type        = string
   description = "The ID of the Azure subscription"
-}
-
-###############################################################################
-# OPTIONAL VARIABLES - TAGS
-###############################################################################
-
-variable "tags" {
-  type        = map(string)
-  description = "A mapping of tags to assign to the virtual network and its subnets"
-  default     = {}
 }
