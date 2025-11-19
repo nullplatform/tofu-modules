@@ -1,6 +1,6 @@
 # Module: EKS
 
-This module provisions an Amazon Elastic Kubernetes Service (EKS) cluster with managed node groups or  auto_mode. It includes
+This module provisions an Amazon Elastic Kubernetes Service (EKS) cluster with managed node groups or  automode. It includes
 essential addons like CoreDNS, kube-proxy, and VPC-CNI, along with configurable managed node groups for workload
 execution.
 
