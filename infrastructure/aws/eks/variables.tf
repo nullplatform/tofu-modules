@@ -61,3 +61,4 @@ variable "auto_mode_node_pools" {
   type        = list(string)
   default     = ["general-purpose", "system"]
 }
+

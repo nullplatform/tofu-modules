@@ -47,13 +47,13 @@ module "eks" {
   # ==========================================
   #  AUTO MODE
   # ==========================================
-  create_auto_mode_iam_resources = var.use_auto_mode ? true : null
+  create_auto_mode_iam_resources = var.use_auto_mode ? true : false
 
   compute_config = var.use_auto_mode ? {
     enabled    = true
     node_pools = var.auto_mode_node_pools
-  } : null
-
-
-
+    } : {
+    enabled    = false
+    node_pools = []
+  }
 }
