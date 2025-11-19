@@ -19,7 +19,7 @@ module "eks" {
   }
 
   access_entries = var.access_entries
-
+  enable_irsa    = true
   # Optional
   endpoint_public_access = true
 
@@ -31,7 +31,7 @@ module "eks" {
   control_plane_subnet_ids = var.aws_subnets_private_ids
 
   # EKS Managed Node Group(s)
-  eks_managed_node_groups = {
+  eks_managed_node_groups = var.use_auto_mode ? {} : {
     nullplatform = {
       # Starting on 1.30, AL2023 is the default AMI type for EKS managed node groups
       ami_type       = var.ami_type
@@ -42,4 +42,18 @@ module "eks" {
       desired_size = 2
     }
   }
+
+
+  # ==========================================
+  #  AUTO MODE
+  # ==========================================
+  create_auto_mode_iam_resources = var.use_auto_mode ? true : null
+
+  compute_config = var.use_auto_mode ? {
+    enabled    = true
+    node_pools = var.auto_mode_node_pools
+  } : null
+
+
+
 }

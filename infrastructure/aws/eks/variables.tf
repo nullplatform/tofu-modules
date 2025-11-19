@@ -49,3 +49,15 @@ variable "access_entries" {
   }))
   default = {}
 }
+
+variable "use_auto_mode" {
+  description = "Use EKS Auto Mode (true) or Managed Node Groups (false)"
+  type        = bool
+  default     = false
+}
+
+variable "auto_mode_node_pools" {
+  description = "Node pools for Auto Mode"
+  type        = list(string)
+  default     = ["general-purpose", "system"]
+}
