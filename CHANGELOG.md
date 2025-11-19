@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.0](https://github.com/nullplatform/tofu-modules/compare/v1.10.1...v1.11.0) (2025-11-19)
+
+
+### Features
+
+* edit readme ([#63](https://github.com/nullplatform/tofu-modules/issues/63)) ([12cb339](https://github.com/nullplatform/tofu-modules/commit/12cb339e7bf54de460251abb328da95de54e5d39))
+
 ## [1.10.1](https://github.com/nullplatform/tofu-modules/compare/v1.10.0...v1.10.1) (2025-11-19)
 
 
