@@ -46,7 +46,7 @@ variable "prefix" {
 ###############################################################################
 # OPTIONAL VARIABLES - NODE POOLS
 ###############################################################################
-
+#https://learn.microsoft.com/en-us/azure/virtual-machines/sizes
 variable "system_pool_vm_size" {
   type        = string
   description = "The VM size for the system node pool (e.g., Standard_D2s_v4, Standard_D4s_v4)"

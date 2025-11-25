@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.11.0](https://github.com/nullplatform/tofu-modules/compare/v1.10.1...v1.11.0) (2025-11-19)
+
+
+### Features
+
+* edit readme ([#63](https://github.com/nullplatform/tofu-modules/issues/63)) ([12cb339](https://github.com/nullplatform/tofu-modules/commit/12cb339e7bf54de460251abb328da95de54e5d39))
+
+## [1.10.1](https://github.com/nullplatform/tofu-modules/compare/v1.10.0...v1.10.1) (2025-11-19)
+
+
+### Bug Fixes
+
+* **prometheus:** fix variable  ([#60](https://github.com/nullplatform/tofu-modules/issues/60)) ([aa177c0](https://github.com/nullplatform/tofu-modules/commit/aa177c0a321233198501558d907c97f2f9d2f731))
+
+## [1.10.0](https://github.com/nullplatform/tofu-modules/compare/v1.9.0...v1.10.0) (2025-11-17)
+
+
+### Features
+
+* **release:** edit yaml release ([#58](https://github.com/nullplatform/tofu-modules/issues/58)) ([b50b97e](https://github.com/nullplatform/tofu-modules/commit/b50b97ed0212e6cded7596ed5c91d2f7d75ea218))
+
+## [1.9.0](https://github.com/nullplatform/tofu-modules/compare/v1.8.0...v1.9.0) (2025-11-17)
+
+
+### Features
+
+* **promnetheus:** edit variables ([#56](https://github.com/nullplatform/tofu-modules/issues/56)) ([45ddc88](https://github.com/nullplatform/tofu-modules/commit/45ddc880afc48a4f93de6f132603ad3a4e73dfb1))
+
 ## [1.8.0](https://github.com/nullplatform/tofu-modules/compare/v1.7.0...v1.8.0) (2025-11-12)
 
 
