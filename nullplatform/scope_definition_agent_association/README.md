@@ -28,15 +28,13 @@ module "scope_definition_agent_association" {
 | Name | Version |
 |------|---------|
 | <a name="provider_external"></a> [external](#provider\_external) | n/a |
-| <a name="provider_local"></a> [local](#provider\_local) | n/a |
-| <a name="provider_null"></a> [null](#provider\_null) | n/a |
+| <a name="provider_http"></a> [http](#provider\_http) | n/a |
 | <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) |  >= 0.0.67 |
 
 ## Resources
 
 | Name | Type |
 |------|------|
-| [null_resource.clone_repo](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [nullplatform_api_key.nullplatform_agent_api_key](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/api_key) | resource |
 | [nullplatform_notification_channel.from_template](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/notification_channel) | resource |
 
