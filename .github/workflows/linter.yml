@@ -3,19 +3,7 @@ on:
   push:
     branches:
       - '**'
-  pull_request:
-    branches:
-      - '**'
 jobs:
   quality:
     uses: nullplatform/actions-nullplatform-terraform/.github/workflows/tofu-lint.yml@main
-    if: |
-      startsWith(github.head_ref, 'fix/') || 
-      startsWith(github.head_ref, 'feature/') || 
-      startsWith(github.head_ref, 'hotfix/') || 
-      startsWith(github.head_ref, 'bugfix/') || 
-      startsWith(github.head_ref, 'release-please--') ||
-      startsWith(github.ref_name, 'fix/') || 
-      startsWith(github.ref_name, 'feature/') || 
-      startsWith(github.ref_name, 'hotfix/') || 
-      startsWith(github.ref_name, 'bugfix/')
+    if:  startsWith(github.ref_name, 'fix/') || startsWith(github.ref_name, 'feature/') || startsWith(github.ref_name, 'hotfix/') || startsWith(github.ref_name, 'bugfix/') || startsWith(github.head_ref, 'release-please--' )
