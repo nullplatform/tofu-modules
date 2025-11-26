@@ -14,7 +14,7 @@ variable "location" {
 
 variable "subscription_id" {
   type        = string
-  description = "The ID of your Azure Subscription"
+  description = "The ID of your Azure subscription"
 }
 
 ###############################################################################

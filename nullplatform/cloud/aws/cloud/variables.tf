@@ -31,7 +31,7 @@ variable "hosted_public_zone_id" {
 }
 
 variable "dimensions" {
-  description = "Map of dimension values to configure Nullplatform"
+  description = "Map of dimension values to configure nullplatform"
   type        = map(string)
   default     = {}
 }

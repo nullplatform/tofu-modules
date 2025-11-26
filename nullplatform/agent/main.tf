@@ -1,5 +1,5 @@
 ################################################################################
-# nullplatform Agent Helm Release
+# Nullplatform agent Helm release
 ################################################################################
 
 # Deploy nullplatform agent to Kubernetes cluster via Helm chart
@@ -19,17 +19,12 @@ resource "helm_release" "agent" {
   timeout           = 600
   atomic            = true # Rollback on failure
   cleanup_on_fail   = true
-  replace           = false
-  recreate_pods     = false
-  reset_values      = false
-  reuse_values      = false
+  replace           = true
+  recreate_pods     = true
+  reset_values      = true
+  reuse_values      = true
   dependency_update = true
   max_history       = 10
 
-  values = concat(
-    [local.nullplatform_agent_values_default],
-    var.cloud_provider == "aws" ? [local.nullplatform_agent_values_aws] : [],
-    var.cloud_provider == "gcp" ? [local.nullplatform_agent_values_gcp] : [],
-    var.cloud_provider == "azure" ? [local.nullplatform_agent_values_azure] : []
-  )
+  values = [local.nullplatform_agent_values]
 }

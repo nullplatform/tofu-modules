@@ -13,7 +13,9 @@ resource "nullplatform_provider_config" "gitlab" {
     "access" : var.gitlab_collaborators_config
     }
   )
-
+ lifecycle {
+    ignore_changes = [attributes]
+  }
 }
 
 /* If the git_provider variable has the value github, create this resource */
@@ -29,4 +31,7 @@ resource "nullplatform_provider_config" "github" {
     },
     }
   )
+lifecycle {
+    ignore_changes = [attributes]
+  }
 }

@@ -1,15 +1,15 @@
 output "acr_login_server" {
-  description = "FQDN del login server del ACR."
+  description = "The FQDN of the ACR login server"
   value       = data.azurerm_container_registry.acr.login_server
 }
 
 output "acr_admin_username" {
-  description = "Usuario admin del ACR."
+  description = "The admin username of the ACR"
   value       = data.azurerm_container_registry.acr.admin_username
   sensitive   = true
 }
 output "acr_admin_password" {
-  description = "Password admin del ACR."
+  description = "The admin password of the ACR"
   value       = data.azurerm_container_registry.acr.admin_password
   sensitive   = true
 }

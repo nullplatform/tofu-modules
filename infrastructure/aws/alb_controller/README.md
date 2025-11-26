@@ -1,6 +1,7 @@
 # Module: ALB Controller
 
-This module deploys the AWS Load Balancer Controller on an EKS cluster using Helm. It provides native AWS Application Load Balancer (ALB) and Network Load Balancer (NLB) support for Kubernetes ingress resources.
+This module deploys the AWS Load Balancer Controller on an EKS cluster using Helm. It provides native AWS Application
+Load Balancer (ALB) and Network Load Balancer (NLB) support for Kubernetes ingress resources.
 
 Usage:
 

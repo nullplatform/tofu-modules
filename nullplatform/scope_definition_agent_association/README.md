@@ -1,22 +1,21 @@
-# Module: Scope Definition agent association
+# Module: Scope definition agent association
 
-This Terraform code creates a notification channel in nullplatform that links to a specific NRN and can dynamically configure an agent-based channel when needed.
+This Tofu code creates a notification channel in nullplatform that links to a specific NRN and can dynamically configure an agent-based channel when needed.
 It injects the agent’s API key, command configuration, and optional overrides, while preserving any filters defined in the original template.
 
-Usage:
+## Usage
 
-```
+```hcl
 module "scope_definition_agent_association" {
-    source                     = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_association?ref=v1.0.0"
-    nrn                        = var.nrn
-    np_api_key                 = var.np_api_key
-    service_specification_id   = module.scope_definition.service_specification_id
-    service_specification_slug = module.scope_definition.service_slug
-    tags_selectors             = var.tags_selectors
-
+  source                     = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_association?ref=v1.0.0"
+  nrn                        = var.nrn
+  np_api_key                 = var.np_api_key
+  service_specification_id   = module.scope_definition.service_specification_id
+  service_specification_slug = module.scope_definition.service_slug
+  tags_selectors             = var.tags_selectors
 }
-
 ```
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -29,15 +28,13 @@ module "scope_definition_agent_association" {
 | Name | Version |
 |------|---------|
 | <a name="provider_external"></a> [external](#provider\_external) | n/a |
-| <a name="provider_local"></a> [local](#provider\_local) | n/a |
-| <a name="provider_null"></a> [null](#provider\_null) | n/a |
+| <a name="provider_http"></a> [http](#provider\_http) | n/a |
 | <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) |  >= 0.0.67 |
 
 ## Resources
 
 | Name | Type |
 |------|------|
-| [null_resource.clone_repo](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [nullplatform_api_key.nullplatform_agent_api_key](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/api_key) | resource |
 | [nullplatform_notification_channel.from_template](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/notification_channel) | resource |
 

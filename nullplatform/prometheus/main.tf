@@ -1,4 +1,5 @@
 resource "helm_release" "prometheus" {
+  count            = var.install_prometheus ? 1 : 0
   name             = "prometheus"
   repository       = "https://prometheus-community.github.io/helm-charts"
   chart            = "prometheus"
@@ -13,10 +14,10 @@ resource "nullplatform_provider_config" "prometheus" {
   type = "prometheus"
   attributes = jsonencode({
     "server" : {
-      "url" : "http://prometheus-server.${var.prometheus_namespace}.svc.cluster.local:80"
+      "url" = local.prometheus_server_url
     }
   })
-  dimensions = {}
+  dimensions = var.dimensions
 
   lifecycle {
     ignore_changes = [attributes]

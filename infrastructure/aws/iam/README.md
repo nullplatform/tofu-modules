@@ -1,6 +1,7 @@
-# Module: Ingress
+# Module: Agent IAM
 
-This module creates Kubernetes ingress resources for both internal and internet-facing Application Load Balancers. It sets up initial ingress configurations with SSL termination and custom 404 responses for the nullplatform environment.
+This module creates the IAM role and policies for the nullplatform agent, using OIDC trust with the EKS service account.
+It grants Route 53, Elastic Load Balancing, and EKS read-only permissions required by the agent.
 
 Usage:
 
@@ -38,12 +39,12 @@ module "agent-iam" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_agent_namespace"></a> [agent\_namespace](#input\_agent\_namespace) | The namespace where run to agent | `string` | n/a | yes |
+| <a name="input_agent_namespace"></a> [agent\_namespace](#input\_agent\_namespace) | Namespace where the agent runs | `string` | n/a | yes |
 | <a name="input_aws_iam_openid_connect_provider_arn"></a> [aws\_iam\_openid\_connect\_provider\_arn](#input\_aws\_iam\_openid\_connect\_provider\_arn) | ARN of the AWS IAM OIDC provider for EKS service account authentication | `string` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_nullplatform_agent_role_arn"></a> [nullplatform\_agent\_role\_arn](#output\_nullplatform\_agent\_role\_arn) | The arn of the agent rol |
+| <a name="output_nullplatform_agent_role_arn"></a> [nullplatform\_agent\_role\_arn](#output\_nullplatform\_agent\_role\_arn) | ARN of the agent role |
 <!-- END_TF_DOCS -->

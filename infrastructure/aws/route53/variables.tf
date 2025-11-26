@@ -1,8 +1,8 @@
 variable "vpc_id" {
   type        = string
-  description = "The VPC id"
+  description = "The ID of the VPC"
 }
 variable "domain_name" {
   type        = string
-  description = "The domains to project"
+  description = "The domain name to be managed"
 }

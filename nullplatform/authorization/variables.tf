@@ -1,10 +1,10 @@
 variable "nrn" {
-  description = "Identifier Nullplatform Resources Name"
+  description = "The nullplatform resource name (NRN)"
   type        = string
 }
 
 variable "destination" {
-  description = "Name of resource to use"
+  description = "The name of the resource to use"
   type        = string
 }
 

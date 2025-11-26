@@ -12,14 +12,14 @@ module "aks" {
   cluster_name        = var.cluster_name
   prefix              = var.prefix
   ############################################
-  # Kubernetes version & upgrades
+  # Kubernetes version and upgrades
   ############################################
 
   kubernetes_version = var.kubernetes_version
 
 
   ############################################
-  # API Server & Control Plane
+  # API server and control plane
   ############################################
 
   api_server_authorized_ip_ranges = var.authorized_ip_ranges
@@ -33,8 +33,9 @@ module "aks" {
   rbac_aad_tenant_id                = data.azurerm_client_config.current.tenant_id
   workload_identity_enabled         = true
   oidc_issuer_enabled               = var.oidc_issuer_enabled
+  
   ############################################
-  # VNET
+  # Virtual network
   ############################################
   vnet_subnet = {
     id = var.vnet_subnet_id
@@ -44,7 +45,7 @@ module "aks" {
   # Agent (system) pool defaults
   ############################################
   agents_size                 = var.system_pool_vm_size
-  temporary_name_for_rotation = "tmpnodepool"
+  temporary_name_for_rotation = "systempool"
   agents_pool_max_surge       = "10%"
 
   ############################################
@@ -57,13 +58,13 @@ module "aks" {
       auto_scaling_enabled = true
       min_count            = 1
       max_count            = 5
-      node_count           = 2
+      #node_count           = 3
       availability_zones   = ["1", "2", "3"]
-      vnet_subnet_id       = var.vnet_subnet_id
+      #vnet_subnet_id       = var.vnet_subnet_id
 
 
 
-      temporary_name_for_rotation = "tmpnodepool"
+      temporary_name_for_rotation = "poolrot"
     }
 
 

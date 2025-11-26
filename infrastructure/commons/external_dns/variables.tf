@@ -1,3 +1,7 @@
+###############################################################################
+# EXTERNAL-DNS CONFIGURATION
+###############################################################################
+
 variable "external_dns_version" {
   type    = string
   default = "1.19.0"
@@ -19,6 +23,12 @@ variable "txt_owner_id" {
 
 }
 
+
+###############################################################################
+# CLOUDFLARE CONFIGURATION
+###############################################################################
+
+
 variable "cloudflare_token" {
   type      = string
   sensitive = true
@@ -29,9 +39,13 @@ variable "cloudflare_token" {
   }
 }
 
+###############################################################################
+# DNS PROVIDER CONFIGURATION
+###############################################################################
+
 variable "dns_provider_name" {
   type        = string
-  description = "The dsn provider name to use with external dns"
+  description = "The DNS provider to use with ExternalDNS "
   validation {
     condition     = contains(["cloudflare", "google"], var.dns_provider_name)
     error_message = "dns_provider_name must be either 'cloudflare' or 'google'."
@@ -41,6 +55,10 @@ variable "dns_provider_name" {
 variable "extra_args" {
   type    = list(string)
 }
+
+###############################################################################
+# GOOGLE CLOUD DNS CONFIGURATION
+###############################################################################
 
 variable "project_id" {
   type    = string
@@ -60,5 +78,5 @@ variable "gsa_name" {
 
 variable "cloudflare_api_token" {
   type    = string
-  default = "mi-token-magico"
+  default = "my-secret-token"
 }

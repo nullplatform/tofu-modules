@@ -1,23 +1,23 @@
 variable "name" {
   type        = string
-  description = "A name of cluster"
+  description = "Cluster name"
 }
 
 variable "ami_type" {
   type        = string
-  description = "The ami type to use with node"
+  description = "AMI type to use with the node"
   default     = "AL2023_x86_64_STANDARD"
 }
 
 variable "instance_types" {
   type        = string
-  description = "The instance type to use"
+  description = "Instance type to use"
   default     = "t3.medium"
 }
 
 variable "kubernetes_version" {
   type        = string
-  description = "The version of K8s to use"
+  description = "K8s version to use"
   default     = "1.32"
 }
 
@@ -27,12 +27,12 @@ variable "aws_vpc_vpc_id" {
 }
 
 variable "aws_subnets_private_ids" {
-  description = "List of private subnet IDs for EKS cluster and node groups"
+  description = "List of private subnet IDs for the EKS cluster and node groups"
   type        = list(string)
 }
 
 variable "access_entries" {
-  description = "Map de access entries para el cluster EKS"
+  description = "Map of access entries for the EKS cluster"
   type = map(object({
     principal_arn     = string
     user_name         = optional(string)
@@ -49,3 +49,16 @@ variable "access_entries" {
   }))
   default = {}
 }
+
+variable "use_auto_mode" {
+  description = "Use EKS Auto Mode (true) or Managed Node Groups (false)"
+  type        = bool
+  default     = false
+}
+
+variable "auto_mode_node_pools" {
+  description = "Node pools for Auto Mode"
+  type        = list(string)
+  default     = ["general-purpose", "system"]
+}
+

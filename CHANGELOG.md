@@ -1,5 +1,92 @@
 # Changelog
 
+## [1.12.0](https://github.com/nullplatform/tofu-modules/compare/v1.11.0...v1.12.0) (2025-11-25)
+
+
+### Features
+
+* **main:** add PR to execute linter& docs ([81ebff6](https://github.com/nullplatform/tofu-modules/commit/81ebff67c08200b31b55ba6974d31f4b6a245b57))
+* **main:** rollback ([1681548](https://github.com/nullplatform/tofu-modules/commit/16815482cd040b4e4ba4259b4342c7bafb3be98a))
+* **scope-definition-agent:** fix data http templates ([f89a4ef](https://github.com/nullplatform/tofu-modules/commit/f89a4ef56d5c281b8f3a2e993f1c14fbf3b59a4c))
+
+## [1.11.0](https://github.com/nullplatform/tofu-modules/compare/v1.10.1...v1.11.0) (2025-11-19)
+
+
+### Features
+
+* edit readme ([#63](https://github.com/nullplatform/tofu-modules/issues/63)) ([12cb339](https://github.com/nullplatform/tofu-modules/commit/12cb339e7bf54de460251abb328da95de54e5d39))
+
+## [1.10.1](https://github.com/nullplatform/tofu-modules/compare/v1.10.0...v1.10.1) (2025-11-19)
+
+
+### Bug Fixes
+
+* **prometheus:** fix variable  ([#60](https://github.com/nullplatform/tofu-modules/issues/60)) ([aa177c0](https://github.com/nullplatform/tofu-modules/commit/aa177c0a321233198501558d907c97f2f9d2f731))
+
+## [1.10.0](https://github.com/nullplatform/tofu-modules/compare/v1.9.0...v1.10.0) (2025-11-17)
+
+
+### Features
+
+* **release:** edit yaml release ([#58](https://github.com/nullplatform/tofu-modules/issues/58)) ([b50b97e](https://github.com/nullplatform/tofu-modules/commit/b50b97ed0212e6cded7596ed5c91d2f7d75ea218))
+
+## [1.9.0](https://github.com/nullplatform/tofu-modules/compare/v1.8.0...v1.9.0) (2025-11-17)
+
+
+### Features
+
+* **promnetheus:** edit variables ([#56](https://github.com/nullplatform/tofu-modules/issues/56)) ([45ddc88](https://github.com/nullplatform/tofu-modules/commit/45ddc880afc48a4f93de6f132603ad3a4e73dfb1))
+
+## [1.8.0](https://github.com/nullplatform/tofu-modules/compare/v1.7.0...v1.8.0) (2025-11-12)
+
+
+### Features
+
+* **scope-definition:** fix agent telemetry config ([#50](https://github.com/nullplatform/tofu-modules/issues/50)) ([cd59a81](https://github.com/nullplatform/tofu-modules/commit/cd59a81e4479d8761be1f4988e7d137dd7f126bf))
+
+## [1.7.0](https://github.com/nullplatform/tofu-modules/compare/v1.6.0...v1.7.0) (2025-11-12)
+
+
+### Features
+
+* **agent:** add azure to agent ([0bde56c](https://github.com/nullplatform/tofu-modules/commit/0bde56cf16e18934d419d8185ef40007fc4cad61))
+* **agent:** fix cert-manager name templates ([a3913db](https://github.com/nullplatform/tofu-modules/commit/a3913dbe5e2737e724a1c7c561c33ab4dd558a8c))
+* **external-dns:** add validation to variables ([c4c3e36](https://github.com/nullplatform/tofu-modules/commit/c4c3e364923802d118ab7557ce545f356bb59275))
+* **external-dns:** add validation to variables ([d091739](https://github.com/nullplatform/tofu-modules/commit/d0917390351562ac3449e4f562661295f3ce58fc))
+* **external-dns:** fix init script ([a2c35fd](https://github.com/nullplatform/tofu-modules/commit/a2c35fd598cc57e212cf6e9b18e52ad6d5387224))
+* **tofu:** resolve conflicts ([61692e3](https://github.com/nullplatform/tofu-modules/commit/61692e3ec78365d96f9cec2eae419768731cf12b))
+
+## [1.6.0](https://github.com/nullplatform/tofu-modules/compare/v1.5.3...v1.6.0) (2025-11-11)
+
+
+### Features
+
+* add support to prometheus operator ([5e85aa1](https://github.com/nullplatform/tofu-modules/commit/5e85aa1bc1c49c926d1747ddd670d046b4d7e5d6))
+* I'm adding support for Prometheus Operator ([f1c6e08](https://github.com/nullplatform/tofu-modules/commit/f1c6e080b1be49f575e625202c72a6aa03011ea9))
+* I'm adding support for Prometheus Operator ([9e1db19](https://github.com/nullplatform/tofu-modules/commit/9e1db198732650b24e06e76592765c647b0d35b5))
+* I'm adding support for Prometheus Operator ([11557ea](https://github.com/nullplatform/tofu-modules/commit/11557eabc0950e07b216e7c4eb7fb78a8b48dd8c))
+
+## [1.5.3](https://github.com/nullplatform/tofu-modules/compare/v1.5.2...v1.5.3) (2025-11-07)
+
+
+### Bug Fixes
+
+* update cert-manager webhook config and improve README ([945f9a7](https://github.com/nullplatform/tofu-modules/commit/945f9a7b273408603fdbb01a11db5b7f6dc2a73f))
+* update cert-manager webhook config and improve README ([cd36b2b](https://github.com/nullplatform/tofu-modules/commit/cd36b2bdf793224b3ba469b913cf525055319a18))
+
+## [1.5.2](https://github.com/nullplatform/tofu-modules/compare/v1.5.1...v1.5.2) (2025-11-06)
+
+
+### Bug Fixes
+
+* **cert-manager:** fix namespace error and improve configuration ([4af6c98](https://github.com/nullplatform/tofu-modules/commit/4af6c98918e309b94e5e03a499316c473ed37821))
+* commons changes readme ([3207ce2](https://github.com/nullplatform/tofu-modules/commit/3207ce234f7f0e20f02748ab7026a6b1841bdb7a))
+* external-dns secret and namespace depends ([4ee0bbd](https://github.com/nullplatform/tofu-modules/commit/4ee0bbd3b56872b85b9589c177d1e26e868506eb))
+* only azure, no gcp ([4556484](https://github.com/nullplatform/tofu-modules/commit/455648472f21d30c573cc4816d4d86526ff73e10))
+* remove version argument from git source module ([ed82438](https://github.com/nullplatform/tofu-modules/commit/ed82438851aa4188bf4d2c5b38c727d7e72f15ec))
+* remove version argument from git source module ([041f1ba](https://github.com/nullplatform/tofu-modules/commit/041f1ba9aa6e0fa2425f53a60170338d55ff6fa4))
+* secret ([5f0885c](https://github.com/nullplatform/tofu-modules/commit/5f0885cade1428a7b0bf40c71cae7db76c474395))
+
 ## [1.5.1](https://github.com/nullplatform/tofu-modules/compare/v1.5.0...v1.5.1) (2025-11-05)
 
 

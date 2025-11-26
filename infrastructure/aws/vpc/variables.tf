@@ -1,5 +1,5 @@
 variable "vpc" {
-  description = "VPC configuration settings"
+  description = "The VPC configuration settings"
   type = object({
     cidr_block      = string
     azs             = list(string)
@@ -10,7 +10,7 @@ variable "vpc" {
 
 variable "organization" {
   type        = string
-  description = "A organization name"
+  description = "The organization name"
 }
 
 variable "account" {

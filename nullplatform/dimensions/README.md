@@ -1,10 +1,10 @@
 # Module: Dimensions
 
-Creates the Environment dimension and populates each provided environment so Nullplatform resources can use consistent selectors.
+Creates the **Environment** dimension and populates each specified environment, enabling nullplatform resources to use consistent selectors.
 
-Usage:
+## Usage
 
-```
+```hcl
 module "dimensions" {
   source       = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/dimensions?ref=v1.0.0"
   nrn          = var.nrn
@@ -39,5 +39,5 @@ module "dimensions" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_environments"></a> [environments](#input\_environments) | The list of environments | `list(string)` | <pre>[<br/>  "development",<br/>  "staging",<br/>  "production"<br/>]</pre> | no |
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication | `string` | n/a | yes |
-| <a name="input_nrn"></a> [nrn](#input\_nrn) | Identifier Nullplatform Resources Name | `string` | n/a | yes |
+| <a name="input_nrn"></a> [nrn](#input\_nrn) | Identifier Nullplatform Resources Name (NRN) | `string` | n/a | yes |
 <!-- END_TF_DOCS -->

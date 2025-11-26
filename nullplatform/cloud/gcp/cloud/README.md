@@ -1,10 +1,12 @@
 # Module: GCP Cloud
 
-Configures Nullplatform for Google Cloud by registering the project, location, networking domain.
+Configures nullplatform for Google Cloud by registering the project, location, networking domain.
 
-Usage:
+## Usage
 
-```
+### Basic example
+
+```hcl
 module "cloud_gcp" {
   source                = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/cloud/gcp/cloud?ref=v1.0.0"
   nrn                   = var.nrn

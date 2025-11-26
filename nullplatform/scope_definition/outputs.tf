@@ -9,17 +9,17 @@
 # Service Specification Outputs
 # ------------------------------------------------------------------------------
 
-# ID of the service specification created in Nullplatform.
+# ID of the service specification created in nullplatform.
 # Useful for referencing the service in other modules or APIs.
 output "service_specification_id" {
-  description = "ID of the service specification created in Nullplatform."
+  description = "ID of the service specification created in nullplatform."
   value       = nullplatform_service_specification.from_template.id
 }
 
 # Slug (unique name) of the created service specification.
 # This is typically used as an identifier for logging, metrics, or automation.
 output "service_slug" {
-  description = "Slug (unique name) of the service specification created in Nullplatform."
+  description = "Slug (unique name) of the service specification created in nullplatform."
   value       = nullplatform_service_specification.from_template.slug
 }
 

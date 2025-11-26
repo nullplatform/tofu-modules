@@ -1,16 +1,15 @@
 # Module: Users
 
-Creates Nullplatform user records and attaches the requested roles to each account through authorization grants.
+This Terraform module creates user records in nullplatform and assigns the specified roles to each account using authorization grants.
 
-Usage:
+## Usage
 
-```
+```hcl
 module "users" {
   source             = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/users?ref=v1.0.0"
   np_api_key         = var.np_api_key
   nullplatform_users = var.nullplatform_users
 }
-```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -37,5 +36,5 @@ module "users" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication | `string` | n/a | yes |
-| <a name="input_nullplatform_users"></a> [nullplatform\_users](#input\_nullplatform\_users) | Map of Nullplatform users to create with their profile information and role assignments | <pre>map(object({<br/>    email      = string<br/>    first_name = string<br/>    last_name  = string<br/>    role_slug  = list(string)<br/>    nrn        = string<br/>  }))</pre> | n/a | yes |
+| <a name="input_nullplatform_users"></a> [nullplatform\_users](#input\_nullplatform\_users) | Map of nullplatform users to create with their profile information and role assignments | <pre>map(object({<br/>    email      = string<br/>    first_name = string<br/>    last_name  = string<br/>    role_slug  = list(string)<br/>    nrn        = string<br/>  }))</pre> | n/a | yes |
 <!-- END_TF_DOCS -->
