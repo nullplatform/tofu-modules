@@ -70,6 +70,7 @@ module "external_dns" {
 | <a name="input_extra_args"></a> [extra\_args](#input\_extra\_args) | n/a | `list(string)` | n/a | yes |
 | <a name="input_gsa_name"></a> [gsa\_name](#input\_gsa\_name) | n/a | `string` | `"external-dns"` | no |
 | <a name="input_ksa_name"></a> [ksa\_name](#input\_ksa\_name) | n/a | `string` | `"external-dns"` | no |
+| <a name="input_policy"></a> [policy](#input\_policy) | The policy to external dns manage the DNS records | `string` | `"upsert-only"` | no |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | n/a | `string` | `" "` | no |
 | <a name="input_txt_owner_id"></a> [txt\_owner\_id](#input\_txt\_owner\_id) | n/a | `string` | `"external_dns"` | no |
 <!-- END_TF_DOCS -->
