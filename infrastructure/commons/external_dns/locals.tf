@@ -10,5 +10,6 @@ locals {
     extra_args   = var.extra_args
     ksa_name     = var.ksa_name
     gsa_email    = var.gsa_email
+    policy      = var.policy
   })
 }

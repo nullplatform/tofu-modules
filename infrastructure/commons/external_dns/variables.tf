@@ -23,7 +23,14 @@ variable "txt_owner_id" {
 
 }
 
-
+variable "policy" {
+  description = "The policy for external dns manage the records"
+  type = string
+  validation {
+    condition     = contains(["create-only", "sync", "upsert-only"], var.policy)
+    error_message = "policy must be either 'create-only', 'sync', 'upsert-only'."
+  }
+}
 ###############################################################################
 # CLOUDFLARE CONFIGURATION
 ###############################################################################
