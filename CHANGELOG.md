@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.2](https://github.com/nullplatform/tofu-modules/compare/v1.12.1...v1.12.2) (2025-11-26)
+
+
+### Bug Fixes
+
+* **external-dns:** change policy to variable ([#73](https://github.com/nullplatform/tofu-modules/issues/73)) ([739ae02](https://github.com/nullplatform/tofu-modules/commit/739ae02d4d8cab9bf37a1b4e020fcde62c9df18c))
+
 ## [1.12.1](https://github.com/nullplatform/tofu-modules/compare/v1.12.0...v1.12.1) (2025-11-26)
 
 
