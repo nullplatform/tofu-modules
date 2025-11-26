@@ -43,6 +43,6 @@ variable "tags" {
 
 variable "retention_policy_in_days" {
   description = "Days of retention image"
-  type = number
-  default = null
+  type        = number
+  default     = null
 }

@@ -10,8 +10,8 @@ data "http" "scope_type_template" {
 }
 
 data "http" "action_templates" {
-  for_each   = toset(var.action_spec_names)
-  url = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads/main/${var.service_path}/specs/actions/${each.key}.json.tpl"
+  for_each = toset(var.action_spec_names)
+  url      = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads/main/${var.service_path}/specs/actions/${each.key}.json.tpl"
 }
 
 # Process service specification template using gomplate with NRN variable

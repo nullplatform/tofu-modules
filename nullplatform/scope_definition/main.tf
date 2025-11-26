@@ -32,7 +32,7 @@ resource "nullplatform_service_specification" "from_template" {
 resource "nullplatform_scope_type" "from_template" {
   depends_on = [
     data.external.scope_type,
-    nullplatform_service_specification.from_template]
+  nullplatform_service_specification.from_template]
 
   nrn           = var.nrn
   name          = var.service_spec_name
@@ -46,10 +46,10 @@ resource "nullplatform_scope_type" "from_template" {
 ################################################################################
 # Create action specification resources for each action type
 resource "nullplatform_action_specification" "from_templates" {
-  for_each   = local.static_action_specs
+  for_each = local.static_action_specs
   depends_on = [
     data.external.action_specs,
-    nullplatform_service_specification.from_template]
+  nullplatform_service_specification.from_template]
 
   service_specification_id = local.service_specification_id
   name                     = jsondecode(base64decode(data.external.action_specs[each.key].result.json_b64)).name
@@ -73,7 +73,7 @@ resource "null_resource" "nrn_patch" {
     nullplatform_action_specification.from_templates,
     nullplatform_scope_type.from_template,
     nullplatform_service_specification.from_template
-    ]
+  ]
 
   triggers = {
     nrn              = var.nrn
