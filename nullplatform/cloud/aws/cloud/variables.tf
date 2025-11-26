@@ -36,6 +36,12 @@ variable "dimensions" {
   default     = {}
 }
 
+variable "application_domain" {
+  type        = bool
+  description = "Add account name in domain"
+  default = false
+}
+
 # NRN Patch Configuration
 variable "np_api_key" {
   type        = string
