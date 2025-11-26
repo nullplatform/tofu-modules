@@ -7,7 +7,7 @@ sources:
 domainFilters:
   - "${domain}"
 
-policy: "upsert-only"
+policy: "${policy}"
 registry: "txt"
 txtOwnerId: "${txt_owner_id}"
 interval: "1m"
