@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.1](https://github.com/nullplatform/tofu-modules/compare/v1.12.0...v1.12.1) (2025-11-26)
+
+
+### Bug Fixes
+
+* **base:** remove provider nullplarform ([#69](https://github.com/nullplatform/tofu-modules/issues/69)) ([bb376e9](https://github.com/nullplatform/tofu-modules/commit/bb376e9aa0128f5e3f485294700a212380e219eb))
+
 ## [1.12.0](https://github.com/nullplatform/tofu-modules/compare/v1.11.0...v1.12.0) (2025-11-25)
 
 
