@@ -13,7 +13,7 @@ resource "nullplatform_provider_config" "gitlab" {
     "access" : var.gitlab_collaborators_config
     }
   )
- lifecycle {
+  lifecycle {
     ignore_changes = [attributes]
   }
 }
@@ -31,7 +31,7 @@ resource "nullplatform_provider_config" "github" {
     },
     }
   )
-lifecycle {
+  lifecycle {
     ignore_changes = [attributes]
   }
 }

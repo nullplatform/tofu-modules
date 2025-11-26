@@ -9,7 +9,7 @@ variable "external_dns_version" {
 }
 
 variable "external_dns_namespace" {
-  type = string
+  type    = string
   default = "external-dns"
 }
 variable "domain" {
@@ -32,7 +32,7 @@ variable "txt_owner_id" {
 variable "cloudflare_token" {
   type      = string
   sensitive = true
-  default     = null
+  default   = null
   validation {
     condition     = var.dns_provider_name != "cloudflare" || var.cloudflare_token != null
     error_message = "cloudflare_token is required when dns_provider_name is 'cloudflare'."
@@ -53,7 +53,7 @@ variable "dns_provider_name" {
 }
 
 variable "extra_args" {
-  type    = list(string)
+  type = list(string)
 }
 
 ###############################################################################

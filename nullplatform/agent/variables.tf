@@ -220,23 +220,23 @@ variable "use_account_slug" {
 variable "image_pull_secrets" {
   description = "Image pull secrets configuration"
   type        = string
-  default = ""
+  default     = ""
 }
 
 variable "service_template" {
   description = "Specifies the name or reference of the scope service template to be used for deployment."
   type        = string
-  default = ""
+  default     = ""
 }
 
 variable "initial_ingress_path" {
   description = "Defines the initial ingress path used when deploying the application for the first time."
   type        = string
-  default = ""
+  default     = ""
 }
 
 variable "blue_green_ingress_path" {
   description = "Specifies the ingress path used for blue-green deployments to route traffic to the new version."
   type        = string
-  default = ""
+  default     = ""
 }

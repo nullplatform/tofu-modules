@@ -33,7 +33,7 @@ module "aks" {
   rbac_aad_tenant_id                = data.azurerm_client_config.current.tenant_id
   workload_identity_enabled         = true
   oidc_issuer_enabled               = var.oidc_issuer_enabled
-  
+
   ############################################
   # Virtual network
   ############################################
@@ -59,7 +59,7 @@ module "aks" {
       min_count            = 1
       max_count            = 5
       #node_count           = 3
-      availability_zones   = ["1", "2", "3"]
+      availability_zones = ["1", "2", "3"]
       #vnet_subnet_id       = var.vnet_subnet_id
 
 

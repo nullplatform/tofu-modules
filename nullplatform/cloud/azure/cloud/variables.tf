@@ -22,7 +22,7 @@ variable "private_dns_resource_group_name" {
 variable "application_domain" {
   type        = bool
   description = "Apply application domain or not"
-  default = false
+  default     = false
 }
 
 
@@ -34,6 +34,6 @@ variable "dimensions" {
 
 variable "private_domain_name" {
   description = "The private domain name to be used"
-  type = string
-  default = ""
+  type        = string
+  default     = ""
 }

@@ -39,7 +39,7 @@ variable "dimensions" {
 variable "application_domain" {
   type        = bool
   description = "Add account name in domain"
-  default = false
+  default     = false
 }
 
 # NRN Patch Configuration

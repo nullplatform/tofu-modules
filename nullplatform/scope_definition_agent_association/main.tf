@@ -36,7 +36,7 @@ resource "nullplatform_notification_channel" "from_template" {
   }
   # Preserve existing filters if defined in template
   filters = can(local.notification_channel_def.filters) ? jsonencode(local.notification_channel_def.filters) : null
-lifecycle {
+  lifecycle {
     ignore_changes = [
       filters,
       source,
