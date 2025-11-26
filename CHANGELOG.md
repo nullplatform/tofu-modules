@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.12.0](https://github.com/nullplatform/tofu-modules/compare/v1.11.0...v1.12.0) (2025-11-25)
+
+
+### Features
+
+* **main:** add PR to execute linter& docs ([81ebff6](https://github.com/nullplatform/tofu-modules/commit/81ebff67c08200b31b55ba6974d31f4b6a245b57))
+* **main:** rollback ([1681548](https://github.com/nullplatform/tofu-modules/commit/16815482cd040b4e4ba4259b4342c7bafb3be98a))
+* **scope-definition-agent:** fix data http templates ([f89a4ef](https://github.com/nullplatform/tofu-modules/commit/f89a4ef56d5c281b8f3a2e993f1c14fbf3b59a4c))
+
 ## [1.11.0](https://github.com/nullplatform/tofu-modules/compare/v1.10.1...v1.11.0) (2025-11-19)
 
 
