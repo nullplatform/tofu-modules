@@ -6,7 +6,7 @@ Deploys **Prometheus** using Helm.
 
 ```hcl
 module "prometheus" {
-  source               = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/prometheus?ref=v1.0.0"
+  source               = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/prometheus?ref=v1.0.0"
   prometheus_namespace = var.prometheus_namespace
   nullplatform_port    = var.nullplatform_port
 }
