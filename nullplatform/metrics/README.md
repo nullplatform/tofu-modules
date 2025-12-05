@@ -1,6 +1,6 @@
 # Module: Metrics
 
-
+This Terraform module configures the Prometheus integration in nullplatform.
 
 ## Usage
 
