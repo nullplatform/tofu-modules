@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.12.3](https://github.com/nullplatform/tofu-modules/compare/v1.12.2...v1.12.3) (2025-12-06)
+
+
+### Bug Fixes
+
+* **scope:** delete wrong file ([e0f3da8](https://github.com/nullplatform/tofu-modules/commit/e0f3da883d7ad24cbebd8de7fa2fc6bb4d1ee169))
+* **scope:** fix naming reference scope association ([4f7059e](https://github.com/nullplatform/tofu-modules/commit/4f7059e067cf82c36d91467933f53406f2359e04))
+* **scope:** fix naming reference scope association ([#75](https://github.com/nullplatform/tofu-modules/issues/75)) ([fec4c30](https://github.com/nullplatform/tofu-modules/commit/fec4c309122d02f3986f9bad171e04efaa08b729))
+
 ## [1.12.2](https://github.com/nullplatform/tofu-modules/compare/v1.12.1...v1.12.2) (2025-11-26)
 
 
