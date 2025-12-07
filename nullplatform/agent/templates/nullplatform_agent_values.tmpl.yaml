@@ -1,26 +1,26 @@
 args:
   %{ for arg in args ~}
-  - "${arg}"
+- "${arg}"
   %{ endfor ~}
+  
+  %{ if aws_iam_role_arn != "" }
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: "${aws_iam_role_arn}"
+  %{ endif }
 
 configuration:
   values:
   %{ for key, value in config_values ~}
-  ${key}: "${value}"
+${key}: "${value}"
   %{ endfor ~}
-  
-  %{ if aws_iam_role_arn != "" ~}
-serviceAccount:
-  annotations:
-    eks.amazonaws.com/role-arn: "${aws_iam_role_arn}"
-  %{ endif ~}
 
 image:
   tag: "${image_tag}"
 
-  %{ if length(init_scripts) > 0 ~}
+  %{ if length(init_scripts) > 0 }
 initScripts:
   %{ for script in init_scripts ~}
-  - "${script}"
+- "${script}"
   %{ endfor ~}
-  %{ endif ~}
+  %{ endif }
