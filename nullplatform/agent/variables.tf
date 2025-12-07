@@ -28,7 +28,7 @@ variable "tags_selectors" {
 variable "nullplatform_agent_helm_version" {
   description = "Version of the nullplatform agent Helm chart to deploy"
   type        = string
-  default     = "2.11.0"
+  default     = "2.26.0"
 }
 
 # Kubernetes namespace where the nullplatform agent will run
