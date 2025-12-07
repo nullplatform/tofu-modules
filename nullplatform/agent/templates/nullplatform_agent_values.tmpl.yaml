@@ -12,7 +12,7 @@ serviceAccount:
 configuration:
   values:
   %{ for key, value in config_values }
-${key}: "${value}"
+    ${key}: "${value}"
   %{ endfor }
 
 image:
@@ -20,7 +20,8 @@ image:
 
   %{ if length(init_scripts) > 0 }
 initScripts:
-  %{ for script in init_scripts ~}
+  %{ for script in init_scripts }
 - "${script}"
-  %{ endfor ~}
+  %{ endfor }
   %{ endif }
+
