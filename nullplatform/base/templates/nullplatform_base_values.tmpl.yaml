@@ -2,7 +2,7 @@
 global:
   installGatewayV2Crd: ${installGatewayV2Crd}
   # Kubernetes provider (options: "oks", "gke", "eks", "aks", "aro")
-  provider: "${cloud_provider}"
+  provider: "${k8s_provider}"
   # AWS region (applicable for EKS provider)
   awsRegion: "${awsRegion}"
 # Namespace configurations

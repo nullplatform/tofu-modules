@@ -21,11 +21,11 @@ variable "np_api_key" {
   description = "Nullplatform API key for authentication (account level)."
 }
 
-variable "cloud_provider" {
+variable "k8s_provider" {
   type        = string
   description = "Cloud provider (eks, gke, aks, oke and aro)."
   validation {
-    condition     = contains(["eks", "gke", "aks", "oke", "aro"], var.cloud_provider)
+    condition     = contains(["eks", "gke", "aks", "oke", "aro"], var.k8s_provider)
     error_message = "cloud_provider must be one of: eks, gke, aks, oke and aro"
   }
 }
