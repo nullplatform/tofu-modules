@@ -1,7 +1,7 @@
 module "aws_load_balancer_controller_role" {
   source                                 = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
   version                                = "~> 6.0"
-  name                                   = "AWSLoadBalancerControllerIAMRole"
+  name                                   = "AWSLoadBalancerControllerIAMRole-${var.cluster_name}"
   attach_load_balancer_controller_policy = true
   use_name_prefix                        = false
   oidc_providers = {
