@@ -52,6 +52,13 @@ variable "agent_repos_extra" {
   default     = []
 }
 
+#Object with additional env vars to agent config
+variable "extra_config" {
+  description = "Additional config to set environment variables to agent"
+  type        = map(string)
+  default     = {}
+}
+
 # List of initialization scripts to execute during agent startup
 variable "init_scripts" {
   description = "List of initialization scripts to execute during agent startup"
