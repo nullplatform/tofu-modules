@@ -8,7 +8,7 @@ locals {
   nrn_without_namespace = join(":", slice(split(":", var.nrn), 0, 2))
   scope_list            = compact([trimspace(coalesce(var.agent_repos_scope, ""))])
   # Parse comma-separated extra repositories and clean whitespace
-  repos_extra = compact([for s in split(",", try(coalesce(var.agent_repos_extra, ""), "")) : trimspace(s)])
+  repos_extra = compact([for s in var.agent_repos_extra : trimspace(s)])
 
   # Merge scope and extra repositories, removing duplicates
   final_repo_list = distinct(concat(local.scope_list, local.repos_extra))
@@ -39,7 +39,7 @@ locals {
   default_config = {
     NP_API_KEY   = local.api_key
     TAGS         = local.tags
-    AGENT_REPOS  = local.final_repo_list
+    AGENT_REPOS  = local.agent_repos
     CLUSTER_NAME = var.cluster_name
     NAMESPACE    = var.namespace
     IMAGE_TAG    = var.image_tag
