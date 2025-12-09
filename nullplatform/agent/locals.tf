@@ -61,6 +61,7 @@ locals {
       AZURE_CLIENT_SECRET     = var.azure_client_secret
       AZURE_CLIENT_ID         = var.azure_client_id
       AZURE_TENANT_ID         = var.azure_tenant_id
+      #move to extra config in this repo https://github.com/n1co-nullplatform/n1co-nullplatform
       DNS_TYPE                = var.dns_type
       USE_ACCOUNT_SLUG        = var.use_account_slug
       IMAGE_PULL_SECRETS      = var.image_pull_secrets
@@ -70,7 +71,14 @@ locals {
       BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
     }
   }
-  all_config = merge(local.default_config, lookup(local.cloud_config, var.cloud_provider, {}))
+
+  extra_config = var.extra_config
+
+  all_config = merge(
+    local.default_config,
+    lookup(local.cloud_config, var.cloud_provider, {}),
+    local.extra_config
+  )
 
   # Template único y simple
   nullplatform_agent_values = templatefile("${path.module}/templates/nullplatform_agent_values.tmpl.yaml", {
