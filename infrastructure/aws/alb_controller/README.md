@@ -27,6 +27,7 @@ module "alb_controller" {
 
 | Name | Version |
 |------|---------|
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 6.0 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | ~> 3.0 |
 | <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | n/a |
 
@@ -40,6 +41,7 @@ module "alb_controller" {
 
 | Name | Type |
 |------|------|
+| [aws_iam_policy.lb_controller](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [helm_release.aws_load_balancer_controller](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [kubernetes_service_account.aws_load_balancer_controller_sa](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/service_account) | resource |
 
