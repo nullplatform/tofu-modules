@@ -1,5 +1,5 @@
 resource "aws_iam_role" "nullplatform_application_role" {
-  name = "nullplatform-application-role"
+  name = "nullplatform-${var.cluster_name}-application-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -26,7 +26,7 @@ resource "aws_iam_role" "nullplatform_application_role" {
 }
 
 resource "aws_iam_policy" "nullplatform_ecr_manager_policy" {
-  name        = "nullplatform-ecr-manager-policy"
+  name        = "nullplatform-${var.cluster_name}-ecr-manager-policy"
   description = "Policy for managing ECR repositories with restricted access"
   policy = jsonencode({
     Version = "2012-10-17",
@@ -70,7 +70,7 @@ resource "aws_iam_policy" "nullplatform_ecr_manager_policy" {
 }
 
 resource "aws_iam_user" "nullplatform_build_workflow_user" {
-  name = "nullplatform-build-workflow-user"
+  name = "nullplatform-${var.cluster_name}-build-workflow-user"
 }
 
 resource "aws_iam_access_key" "nullplatform_build_workflow_user_key" {
