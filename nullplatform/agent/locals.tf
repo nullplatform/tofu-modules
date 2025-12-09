@@ -39,7 +39,7 @@ locals {
   default_config = {
     NP_API_KEY   = local.api_key
     TAGS         = local.tags
-    AGENT_REPOS  = local.agent_repos
+    AGENT_REPOS  = local.final_repo_list
     CLUSTER_NAME = var.cluster_name
     NAMESPACE    = var.namespace
     IMAGE_TAG    = var.image_tag
