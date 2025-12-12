@@ -56,13 +56,14 @@ module "cloud_aws_agent" {
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the EKS cluster where the nullplatform agent will be deployed | `string` | n/a | yes |
 | <a name="input_dns_type"></a> [dns\_type](#input\_dns\_type) | Type of DNS Provider, ej: azure, aws, gcp, or external\_dns | `string` | `""` | no |
 | <a name="input_domain"></a> [domain](#input\_domain) | Base domain name used across resources | `string` | `""` | no |
+| <a name="input_extra_config"></a> [extra\_config](#input\_extra\_config) | Additional config to set environment variables to agent | `map(string)` | `{}` | no |
 | <a name="input_image_pull_secrets"></a> [image\_pull\_secrets](#input\_image\_pull\_secrets) | Image pull secrets configuration | `string` | `""` | no |
 | <a name="input_image_tag"></a> [image\_tag](#input\_image\_tag) | Image tag for the agent container image | `string` | n/a | yes |
 | <a name="input_init_scripts"></a> [init\_scripts](#input\_init\_scripts) | List of initialization scripts to execute during agent startup | `list(string)` | `[]` | no |
 | <a name="input_initial_ingress_path"></a> [initial\_ingress\_path](#input\_initial\_ingress\_path) | Defines the initial ingress path used when deploying the application for the first time. | `string` | `""` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Kubernetes namespace where the nullplatform agent will run | `string` | `"nullplatform-tools"` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name - unique identifier for nullplatform resources | `string` | n/a | yes |
-| <a name="input_nullplatform_agent_helm_version"></a> [nullplatform\_agent\_helm\_version](#input\_nullplatform\_agent\_helm\_version) | Version of the nullplatform agent Helm chart to deploy | `string` | `"2.11.0"` | no |
+| <a name="input_nullplatform_agent_helm_version"></a> [nullplatform\_agent\_helm\_version](#input\_nullplatform\_agent\_helm\_version) | Version of the nullplatform agent Helm chart to deploy | `string` | `"2.26.0"` | no |
 | <a name="input_private_gateway_name"></a> [private\_gateway\_name](#input\_private\_gateway\_name) | Private gateway name for Azure networking | `string` | `null` | no |
 | <a name="input_private_hosted_zone_rg"></a> [private\_hosted\_zone\_rg](#input\_private\_hosted\_zone\_rg) | Resource group for private hosted zone | `string` | `null` | no |
 | <a name="input_public_gateway_name"></a> [public\_gateway\_name](#input\_public\_gateway\_name) | Public gateway name for Azure networking | `string` | `null` | no |

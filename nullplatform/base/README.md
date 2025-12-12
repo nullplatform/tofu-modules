@@ -46,7 +46,6 @@ module "base" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region where resources will be deployed. | `string` | `"us-east-1"` | no |
-| <a name="input_cloud_provider"></a> [cloud\_provider](#input\_cloud\_provider) | Cloud provider (eks, gke, aks, oke and aro). | `string` | n/a | yes |
 | <a name="input_cloudwatch_access_logs_enabled"></a> [cloudwatch\_access\_logs\_enabled](#input\_cloudwatch\_access\_logs\_enabled) | Enable access logs in CloudWatch. | `bool` | `false` | no |
 | <a name="input_cloudwatch_custom_metrics_enabled"></a> [cloudwatch\_custom\_metrics\_enabled](#input\_cloudwatch\_custom\_metrics\_enabled) | Enable custom metrics in CloudWatch. | `bool` | `false` | no |
 | <a name="input_cloudwatch_enabled"></a> [cloudwatch\_enabled](#input\_cloudwatch\_enabled) | Enable CloudWatch (global switch). | `bool` | `false` | no |
@@ -74,6 +73,7 @@ module "base" {
 | <a name="input_image_pull_secrets_username"></a> [image\_pull\_secrets\_username](#input\_image\_pull\_secrets\_username) | Registry username. | `string` | `""` | no |
 | <a name="input_ingressControllers"></a> [ingressControllers](#input\_ingressControllers) | Configuración de los IngressControllers públicos y privados | <pre>object({<br/>    public = object({<br/>      name    = string<br/>      enabled = bool<br/>      scope   = string<br/>      domain  = string<br/>    })<br/>    private = object({<br/>      name    = string<br/>      enabled = bool<br/>      scope   = string<br/>      domain  = string<br/>    })<br/>  })</pre> | <pre>{<br/>  "private": {<br/>    "domain": "",<br/>    "enabled": false,<br/>    "name": "internal",<br/>    "scope": "Internal"<br/>  },<br/>  "public": {<br/>    "domain": "",<br/>    "enabled": false,<br/>    "name": "internet-facing",<br/>    "scope": "External"<br/>  }<br/>}</pre> | no |
 | <a name="input_install_gateway_v2_crd"></a> [install\_gateway\_v2\_crd](#input\_install\_gateway\_v2\_crd) | Install Gateway API v2 CRDs. | `bool` | `false` | no |
+| <a name="input_k8s_provider"></a> [k8s\_provider](#input\_k8s\_provider) | Cloud provider (eks, gke, aks, oke and aro). | `string` | n/a | yes |
 | <a name="input_logging_enabled"></a> [logging\_enabled](#input\_logging\_enabled) | Enable the logging layer. | `bool` | `true` | no |
 | <a name="input_loki_bearer_token"></a> [loki\_bearer\_token](#input\_loki\_bearer\_token) | Loki bearer token (if applicable). | `string` | `""` | no |
 | <a name="input_loki_enabled"></a> [loki\_enabled](#input\_loki\_enabled) | Enable Loki output. | `bool` | `false` | no |
@@ -88,7 +88,7 @@ module "base" {
 | <a name="input_newrelic_region"></a> [newrelic\_region](#input\_newrelic\_region) | New Relic region (e.g., US, EU). | `string` | `""` | no |
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication (account level). | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | The Nullplatform Resource Name (NRN). | `string` | n/a | yes |
-| <a name="input_nullplatform_base_helm_version"></a> [nullplatform\_base\_helm\_version](#input\_nullplatform\_base\_helm\_version) | Helm chart version for the nullplatform base. | `string` | `"2.12.0"` | no |
+| <a name="input_nullplatform_base_helm_version"></a> [nullplatform\_base\_helm\_version](#input\_nullplatform\_base\_helm\_version) | Helm chart version for the nullplatform base. | `string` | `"2.26.0"` | no |
 | <a name="input_prometheus_enabled"></a> [prometheus\_enabled](#input\_prometheus\_enabled) | Enable the Prometheus exporter. | `bool` | `true` | no |
 | <a name="input_tls_required"></a> [tls\_required](#input\_tls\_required) | Whether TLS is required. | `bool` | `true` | no |
 <!-- END_TF_DOCS -->

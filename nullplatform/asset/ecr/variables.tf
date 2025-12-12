@@ -14,3 +14,8 @@ variable "application_manager_assume_role" {
   type        = string
   default     = "arn:aws:iam::283477532906:role/application_manager"
 }
+
+variable "cluster_name" {
+  description = "Name of the cluster where the policy runs"
+  type        = string
+}
