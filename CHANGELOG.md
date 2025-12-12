@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.12.4](https://github.com/nullplatform/tofu-modules/compare/v1.12.3...v1.12.4) (2025-12-12)
+
+
+### Bug Fixes
+
+* **agent:** add extra-config variable ([1ef4815](https://github.com/nullplatform/tofu-modules/commit/1ef4815aff0c4a6ee10759de2ff4262e2955cfac))
+* **agent:** fix repos extra variable ([dbda999](https://github.com/nullplatform/tofu-modules/commit/dbda999d04e6c5d2657653925f13b22ed952ec79))
+* **agent:** fix values tmpl ([b1044bc](https://github.com/nullplatform/tofu-modules/commit/b1044bc4ce0ecb89c931cf12ef7520e55ca5633a))
+* **agent:** fix values tmpl ([26721ab](https://github.com/nullplatform/tofu-modules/commit/26721ab656ec068f52b3d9945c1a15ab0c1acf4a))
+* **agent:** fix values tmpl ([3640da2](https://github.com/nullplatform/tofu-modules/commit/3640da2316ed55630cda4b3f2700ba91bae0db0f))
+* **agent:** fix var repo extra ([bf989fa](https://github.com/nullplatform/tofu-modules/commit/bf989faa6817e7c25407c93543a44a81633b8288))
+* **agent:** refactor values agent ([46023a8](https://github.com/nullplatform/tofu-modules/commit/46023a8b68174e547695d7c3678d15b41fefffb3))
+* **agent:** upgrade helm chart version ([596e05f](https://github.com/nullplatform/tofu-modules/commit/596e05f961ecd32fa8f00796f5f4cf4592cfd43b))
+* **alb-controller:** add perdiod sync variable ([f96191b](https://github.com/nullplatform/tofu-modules/commit/f96191bc4b7c4c7b1d15a55924dbc2128f2620a5))
+* **alb-controller:** add policy to alb controller ([63596f3](https://github.com/nullplatform/tofu-modules/commit/63596f30cf3da80fbdf2a07b22dfaa3411c02d82))
+* **asset:** fix naming policies ([743e5ba](https://github.com/nullplatform/tofu-modules/commit/743e5ba5ea99b7fe5938b6a9a412d92cd8d840d4))
+* **asset:** fix naming policies ([6ecff04](https://github.com/nullplatform/tofu-modules/commit/6ecff04b4825a93bb2b9e83d53c8e41e07f9691c))
+* **base-iam:** fix naming policies to multiple cluster ([c1d5701](https://github.com/nullplatform/tofu-modules/commit/c1d5701301797eb163c2cdbb05d194ba84201c85))
+* **base:** fix naming k8s-provider ([d89fe19](https://github.com/nullplatform/tofu-modules/commit/d89fe1942e4f6127718d8430d98674fd9da044f3))
+* **base:** upgrade version helm ([87c1aae](https://github.com/nullplatform/tofu-modules/commit/87c1aae7e7235a75f3572cad276db1c00a14aa52))
+
 ## [1.12.3](https://github.com/nullplatform/tofu-modules/compare/v1.12.2...v1.12.3) (2025-12-06)
 
 
