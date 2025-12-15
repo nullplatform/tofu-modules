@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.5](https://github.com/nullplatform/tofu-modules/compare/v1.12.4...v1.12.5) (2025-12-15)
+
+
+### Bug Fixes
+
+* **external-dns:** fix gsa_email variable ([d0e20fe](https://github.com/nullplatform/tofu-modules/commit/d0e20fec9c8bd60a57431009b9d3f6993f37c8af))
+
 ## [1.12.4](https://github.com/nullplatform/tofu-modules/compare/v1.12.3...v1.12.4) (2025-12-12)
 
 
