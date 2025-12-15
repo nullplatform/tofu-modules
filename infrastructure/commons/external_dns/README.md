@@ -68,7 +68,7 @@ module "external_dns" {
 | <a name="input_external_dns_namespace"></a> [external\_dns\_namespace](#input\_external\_dns\_namespace) | n/a | `string` | `"external-dns"` | no |
 | <a name="input_external_dns_version"></a> [external\_dns\_version](#input\_external\_dns\_version) | n/a | `string` | `"1.19.0"` | no |
 | <a name="input_extra_args"></a> [extra\_args](#input\_extra\_args) | n/a | `list(string)` | n/a | yes |
-| <a name="input_gsa_name"></a> [gsa\_name](#input\_gsa\_name) | n/a | `string` | `"external-dns"` | no |
+| <a name="input_gsa_email"></a> [gsa\_email](#input\_gsa\_email) | n/a | `string` | `"external-dns"` | no |
 | <a name="input_ksa_name"></a> [ksa\_name](#input\_ksa\_name) | n/a | `string` | `"external-dns"` | no |
 | <a name="input_policy"></a> [policy](#input\_policy) | The policy to external dns manage the DNS records | `string` | `"upsert-only"` | no |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | n/a | `string` | `" "` | no |

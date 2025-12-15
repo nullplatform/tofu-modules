@@ -80,7 +80,7 @@ variable "ksa_name" {
   default = "external-dns"
 }
 
-variable "gsa_name" {
+variable "gsa_email" {
   type    = string
   default = "external-dns"
 }
