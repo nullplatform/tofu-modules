@@ -1,12 +1,10 @@
 terraform {
+  required_version = ">= 1.3"
+
   required_providers {
     nullplatform = {
       source  = "nullplatform/nullplatform"
-      version = ">= 0.0.67"
+      version = ">= 0.0.74"
     }
   }
-}
-provider "nullplatform" {
-
-  api_key = var.np_api_key
 }
