@@ -24,5 +24,5 @@ module "gke" {
 
   node_pools = var.node_pools
 
-  logging_service = "NONE"
+  logging_service = "none"
 }
