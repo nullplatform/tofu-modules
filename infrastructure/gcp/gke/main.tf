@@ -23,4 +23,6 @@ module "gke" {
   master_authorized_networks = var.master_authorized_networks
 
   node_pools = var.node_pools
+
+  logging_service = "NONE"
 }
