@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.6](https://github.com/nullplatform/tofu-modules/compare/v1.12.5...v1.12.6) (2025-12-18)
+
+
+### Bug Fixes
+
+* **scope:** Add support for icon and annotations in service action spec definition ([#82](https://github.com/nullplatform/tofu-modules/issues/82)) ([5c7c1bb](https://github.com/nullplatform/tofu-modules/commit/5c7c1bbd677f3644c7e2df639e3cc25d336b30f0))
+
 ## [1.12.5](https://github.com/nullplatform/tofu-modules/compare/v1.12.4...v1.12.5) (2025-12-15)
 
 
