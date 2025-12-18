@@ -10,7 +10,7 @@ variable "external_dns_version" {
 
 variable "external_dns_namespace" {
   type    = string
-  default = "external_dns"
+  default = "external-dns"
 }
 
 variable "domain_filters" {
