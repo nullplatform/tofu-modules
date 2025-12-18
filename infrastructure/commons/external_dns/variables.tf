@@ -13,7 +13,7 @@ variable "external_dns_namespace" {
   default = "external-dns"
 }
 variable "domain" {
-  type = string
+  type = list(string)
 
 }
 
@@ -25,8 +25,8 @@ variable "txt_owner_id" {
 
 variable "policy" {
   description = "The policy to external dns manage the DNS records"
-  type = string
-  default = "upsert-only"
+  type        = string
+  default     = "upsert-only"
   validation {
     condition     = contains(["create-only", "sync", "upsert-only"], var.policy)
     error_message = "policy must be either 'create-only', 'sync', 'upsert-only' ."
