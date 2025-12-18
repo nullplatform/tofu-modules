@@ -20,18 +20,22 @@ all projects.
 │   │   ├── alb_controller/
 │   │   ├── backend/
 │   │   ├── eks/
+│   │   ├── iam/
+│   │   │   ├── agent/
+│   │   │   └── external_dns/
 │   │   ├── ingress/
 │   │   ├── route53/
 │   │   └── vpc/
 │   │
 │   ├── azure/
 │   │   ├── acr/
+│   │   ├── aks/
 │   │   ├── dns/
 │   │   ├── resource_group/
 │   │   └── vnet/
 │   │
 │   ├── gcp/
-│   │   └── ...
+│   │   └── iam/
 │   │
 │   └── commons/
 │       ├── cert_manager/
@@ -39,20 +43,28 @@ all projects.
 │       └── istio/
 │
 ├── nullplatform/
-│   ├── cloud/
-│   │   ├── aws/
-│   │   ├── azure/
-│   │   └── gcp/
-│   │
 │   ├── account/
+│   ├── agent/
 │   ├── asset/
+│   │   ├── docker_server/
+│   │   └── ecr/
+│   ├── authorization/
+│   ├── base/
+│   ├── cloud/
+│   │   ├── aws/cloud/
+│   │   ├── azure/cloud/
+│   │   └── gcp/cloud/
 │   ├── code_repository/
 │   ├── dimensions/
 │   ├── prometheus/
+│   ├── scope_definition/
+│   ├── scope_definition_agent_association/
 │   └── users/
 │
 ├── .github/
 │   └── workflows/                 # CI/CD workflows, validations, etc.
+├── .pre-commit-config.yaml        # Pre-commit hooks configuration
+├── commitlint.config.js           # Conventional commits validation
 ├── .gitignore
 └── README.md
 ```
@@ -81,15 +93,24 @@ curl -fsSL https://cli.nullplatform.com/install.sh | sh
 1. **Add the module dependency** to your Tofu project:
 
    ```hcl
-   module "my_module" {
-     source = "git@github.com:nullplatform/tofu-modules.git//modules/moduleA"
-     # Alternatively:
-     # source = "github.com/nullplatform/tofu-modules//modules/moduleA?ref=vX.Y.Z"
+   # Example: Using an infrastructure module (AWS VPC)
+   module "vpc" {
+     source = "git@github.com:nullplatform/tofu-modules.git//infrastructure/aws/vpc"
+     # Alternatively with version pinning:
+     # source = "github.com/nullplatform/tofu-modules//infrastructure/aws/vpc?ref=vX.Y.Z"
 
      # Module parameters
      var1 = "value1"
      var2 = "value2"
-     # ...
+   }
+
+   # Example: Using a nullplatform module
+   module "account" {
+     source = "git@github.com:nullplatform/tofu-modules.git//nullplatform/account"
+
+     # Module parameters
+     var1 = "value1"
+     var2 = "value2"
    }
    ```
 
@@ -145,9 +166,43 @@ These ensure code consistency and prevent configuration drift.
 If you want to add or modify a module:
 
 1. Create a `feature/` or `fix/` branch.
-2. Add tests or validations if applicable.  
-3. Update the module’s documentation.  
+2. Add tests or validations if applicable.
+3. Update the module's documentation.
 4. Open a Pull Request for review.
+
+### Commit message format
+
+This repository uses [Conventional Commits](https://www.conventionalcommits.org/) to ensure consistent commit messages. A pre-commit hook validates all commit messages automatically.
+
+**Valid commit examples:**
+
+```bash
+feat: add new EKS module
+feat(aws): add support for multiple availability zones
+fix: resolve VPC peering connection issue
+fix(azure): correct DNS zone configuration
+docs: update README with usage examples
+refactor: simplify IAM role creation
+chore: update provider versions
+```
+
+**Invalid commit examples:**
+
+```bash
+added new feature        # ❌ missing type prefix
+Fix bug                  # ❌ type must be lowercase
+feat add login           # ❌ missing colon after type
+```
+
+**Setup pre-commit hooks:**
+
+```bash
+# Install pre-commit (if not already installed)
+brew install pre-commit
+
+# Install the commit-msg hook
+pre-commit install --hook-type commit-msg
+```
 
 ---
 
