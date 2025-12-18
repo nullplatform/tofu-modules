@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.7](https://github.com/nullplatform/tofu-modules/compare/v1.12.6...v1.12.7) (2025-12-18)
+
+
+### Bug Fixes
+
+* **scope:** Fixing typo in annotation in scope definition module ([#85](https://github.com/nullplatform/tofu-modules/issues/85)) ([75a0d48](https://github.com/nullplatform/tofu-modules/commit/75a0d48a672152e3cf27c4ba907736d5fb75c634))
+
 ## [1.12.6](https://github.com/nullplatform/tofu-modules/compare/v1.12.5...v1.12.6) (2025-12-18)
 
 
