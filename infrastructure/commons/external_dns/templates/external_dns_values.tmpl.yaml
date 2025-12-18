@@ -5,7 +5,9 @@ sources:
   - crd
 
 domainFilters:
-  - "${domain}"
+  %{ for d in domain ~}
+    - "${d}"
+  %{ endfor ~}
 
 policy: "${policy}"
 registry: "txt"
