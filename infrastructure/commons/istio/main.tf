@@ -15,6 +15,10 @@ resource "helm_release" "istiod" {
   chart      = "istiod"
   namespace  = var.namespace
   version    = var.istiod_version
+
+  wait          = true
+  wait_for_jobs = true
+  timeout       = 300
 }
 
 # Setup Istio Gateway using Helm
@@ -26,4 +30,7 @@ resource "helm_release" "istio_ingressgateway" {
   namespace  = var.namespace
   version    = var.istio_ingressgateway_version
   values     = [local.helm_values]
+
+  wait    = true
+  timeout = 300
 }
