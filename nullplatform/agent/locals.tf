@@ -55,6 +55,7 @@ locals {
       INITIAL_INGRESS_PATH    = var.initial_ingress_path
       BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
       DNS_TYPE                = var.dns_type
+      PRIVATE_GATEWAY_NAME    = var.private_gateway_name
     }
 
     azure = {
