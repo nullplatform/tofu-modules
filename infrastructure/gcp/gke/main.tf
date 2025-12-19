@@ -24,5 +24,8 @@ module "gke" {
 
   node_pools = var.node_pools
 
-  logging_service = "none"
+  # Service account with Artifact Registry access
+  grant_registry_access  = true
+  create_service_account = true
+  logging_service        = "none"
 }
