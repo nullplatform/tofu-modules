@@ -1,6 +1,6 @@
 locals {
   base_config = {
-    sources       = ["crd", "services", "ingress"]
+    sources       = ["crd", "service", "ingress"]
     domainFilters = [var.domain_filters]
     policy        = var.policy
     txtOwnerId    = var.txt_owner_id
