@@ -30,6 +30,18 @@ module "eks" {
   subnet_ids               = var.aws_subnets_private_ids
   control_plane_subnet_ids = var.aws_subnets_private_ids
 
+  # Reglas adicionales para webhooks (Istio, cert-manager, etc.)
+  node_security_group_additional_rules = {
+    ingress_allow_access_from_control_plane_to_webhooks = {
+      description                   = "Allow access from control plane to admission webhooks"
+      protocol                      = "tcp"
+      from_port                     = 15017
+      to_port                       = 15017
+      type                          = "ingress"
+      source_cluster_security_group = true
+    }
+  }
+
   # EKS Managed Node Group(s)
   eks_managed_node_groups = var.use_auto_mode ? {} : {
     nullplatform = {
@@ -42,8 +54,6 @@ module "eks" {
       desired_size = 2
     }
   }
-
-
   # ==========================================
   #  AUTO MODE
   # ==========================================
