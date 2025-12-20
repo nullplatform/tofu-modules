@@ -68,11 +68,19 @@ variable "aws_iam_role_arn" {
   }
 }
 
-variable "hosted_zone_id" {
+variable "public_hosted_zone_id" {
   default   = null
   validation {
-    condition     = var.dns_provider_name != "aws" || var.hosted_zone_id != null
-    error_message = "hosted_zone_id is required when dns_provider_name is 'aws'."
+    condition     = var.dns_provider_name != "aws" || var.public_hosted_zone_id != null
+    error_message = "public_hosted_zone_id is required when dns_provider_name is 'aws'."
+  }
+}
+
+variable "private_hosted_zone_id" {
+  default   = null
+  validation {
+    condition     = var.dns_provider_name != "aws" || var.private_hosted_zone_id != null
+    error_message = "private_hosted_zone_id is required when dns_provider_name is 'aws'."
   }
 }
 
@@ -84,7 +92,7 @@ variable "dns_provider_name" {
   type        = string
   description = "The DNS provider to use with ExternalDNS "
   validation {
-    condition     = contains(["cloudflare", "aws"], var.dns_provider_name)
-    error_message = "dns_provider_name must be either 'cloudflare' or 'aws'."
+    condition     = contains(["cloudflare", "route53"], var.dns_provider_name)
+    error_message = "dns_provider_name must be either 'cloudflare' or 'route53'."
   }
 }

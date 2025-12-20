@@ -33,12 +33,15 @@ locals {
         "eks.amazonaws.com/role-arn" = var.aws_iam_role_arn
       }
     }
-    extraArgs = var.hosted_zone_id != "" ? ["--aws-zone-type=public", "--zone-id-filter=${var.hosted_zone_id}"] : []
+    extraArgs = concat(
+        var.public_hosted_zone_id != "" ? ["--zone-id-filter=${var.public_hosted_zone_id}"] : [],
+        var.private_hosted_zone_id != "" ? ["--zone-id-filter=${var.private_hosted_zone_id}"] : []
+    )
   }
 
   provider_configs = {
     cloudflare = local.cloudflare_config
-    aws        = local.route53_config
+    route53        = local.route53_config
   }
 
   external_dns_values = merge(local.base_config, local.provider_configs[var.dns_provider_name])
