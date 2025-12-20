@@ -33,6 +33,12 @@ variable "policy" {
   }
 }
 
+variable "sources" {
+  description = "Array contents the sources to external dns work"
+  type = list(string)
+  default = ["crd"]
+}
+
 ###############################################################################
 # CLOUDFLARE CONFIGURATION
 ###############################################################################
