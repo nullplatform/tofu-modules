@@ -41,7 +41,7 @@ locals {
 
   provider_configs = {
     cloudflare = local.cloudflare_config
-    route53        = local.route53_config
+    aws        = local.route53_config
   }
 
   external_dns_values = merge(local.base_config, local.provider_configs[var.dns_provider_name])

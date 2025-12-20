@@ -92,7 +92,7 @@ variable "dns_provider_name" {
   type        = string
   description = "The DNS provider to use with ExternalDNS "
   validation {
-    condition     = contains(["cloudflare", "route53"], var.dns_provider_name)
-    error_message = "dns_provider_name must be either 'cloudflare' or 'route53'."
+    condition     = contains(["cloudflare", "aws"], var.dns_provider_name)
+    error_message = "dns_provider_name must be either 'cloudflare' or 'aws'."
   }
 }
