@@ -42,7 +42,11 @@ locals {
       enabled      = var.aws_enabled
       region       = var.aws_region
       hostedZoneID = var.aws_hosted_zone_id
-      roleArn      = var.aws_role_arn
+      serviceAccount = {
+        annotations = {
+          "eks.amazonaws.com/role-arn" = var.aws_role_arn
+        }
+      }
     }
   })
 }
