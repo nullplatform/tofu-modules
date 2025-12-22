@@ -167,6 +167,16 @@ variable "aws_role_arn" {
   }
 }
 
+variable "service_account_name" {
+  description = "The Name of the Service Account."
+  type        = string
+  default     = ""
+  validation {
+    condition     = !var.aws_enabled || length(var.service_account_name) > 0
+    error_message = "When aws_enabled is true, service_account_name must not be empty."
+  }
+}
+
 ###############################################################################
 # CLOUDFLARE CONFIGURATION
 ###############################################################################

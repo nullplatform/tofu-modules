@@ -38,13 +38,16 @@ locals {
   })
 
   cert_manager_aws_values = yamlencode({
-    aws = {
+    route53 = {
       enabled      = var.aws_enabled
       region       = var.aws_region
       hostedZoneID = var.aws_hosted_zone_id
-      serviceAccount = {
-        annotations = {
-          "eks.amazonaws.com/role-arn" = var.aws_role_arn
+      role         = var.aws_role_arn
+      auth = {
+        kubernetes = {
+          serviceAccountRef = {
+            name = var.service_account_name
+          }
         }
       }
     }
