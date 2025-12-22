@@ -88,7 +88,6 @@ module "cert_manager" {
 | Name | Type |
 |------|------|
 | [helm_release.cert_manager](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
-| [helm_release.cert_manager_config](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 
 ## Inputs
 
@@ -116,4 +115,5 @@ module "cert_manager" {
 | <a name="input_gcp_enabled"></a> [gcp\_enabled](#input\_gcp\_enabled) | Whether to enable the GCP (Cloud DNS) solver in cert-manager. | `bool` | `false` | no |
 | <a name="input_gcp_service_account_key"></a> [gcp\_service\_account\_key](#input\_gcp\_service\_account\_key) | The contents of the service account JSON for Cloud DNS (use file() if reading from disk). | `string` | `""` | no |
 | <a name="input_hosted_zone_name"></a> [hosted\_zone\_name](#input\_hosted\_zone\_name) | The hosted zone name (if applicable). | `string` | `""` | no |
+| <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | The Name of the Service Account. | `string` | `""` | no |
 <!-- END_TF_DOCS -->
