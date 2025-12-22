@@ -37,6 +37,8 @@ all projects.
 │       ├── cert_manager/
 │       ├── external_dns/
 │       └── istio/
+|       └── prometheus/
+|
 │
 ├── nullplatform/
 │   ├── cloud/
@@ -48,7 +50,7 @@ all projects.
 │   ├── asset/
 │   ├── code_repository/
 │   ├── dimensions/
-│   ├── prometheus/
+│   ├── metrics/
 │   └── users/
 │
 ├── .github/
@@ -106,10 +108,10 @@ curl -fsSL https://cli.nullplatform.com/install.sh | sh
 
 Each module must include its own `README.md` file describing:
 
-- **Purpose** — what the module does and when to use it.  
-- **Inputs** — variables (`variables.tf`) with descriptions, types, and default values.  
-- **Outputs** — (`outputs.tf`) explaining what’s returned.  
-- **Usage examples** — small working HCL snippets.  
+- **Purpose** — what the module does and when to use it.
+- **Inputs** — variables (`variables.tf`) with descriptions, types, and default values.
+- **Outputs** — (`outputs.tf`) explaining what’s returned.
+- **Usage examples** — small working HCL snippets.
 - **Notes** — any internal dependencies, restrictions, or compatibility details.
 
 
@@ -117,9 +119,9 @@ Each module must include its own `README.md` file describing:
 
 In `.github/workflows/`, you can include workflows for:
 
-- Terraform / Tofu syntax validation.  
-- Auto-formatting with `tofu fmt`.  
-- Logical validation using `tofu validate`.  
+- Terraform / Tofu syntax validation.
+- Auto-formatting with `tofu fmt`.
+- Logical validation using `tofu validate`.
 
 These ensure code consistency and prevent configuration drift.
 
@@ -133,10 +135,10 @@ These ensure code consistency and prevent configuration drift.
 
 ## 🛠️ Best practices
 
-- Keep each module isolated: one module = one clear responsibility.  
-- Avoid circular dependencies between modules.  
-- Document all variables (mark required vs optional).  
-- Tag and version releases before using them in production.  
+- Keep each module isolated: one module = one clear responsibility.
+- Avoid circular dependencies between modules.
+- Document all variables (mark required vs optional).
+- Tag and version releases before using them in production.
 - Centralize repeated logic in these modules to avoid duplication.
 
 
@@ -145,8 +147,8 @@ These ensure code consistency and prevent configuration drift.
 If you want to add or modify a module:
 
 1. Create a `feature/` or `fix/` branch.
-2. Add tests or validations if applicable.  
-3. Update the module’s documentation.  
+2. Add tests or validations if applicable.
+3. Update the module’s documentation.
 4. Open a Pull Request for review.
 
 ---
