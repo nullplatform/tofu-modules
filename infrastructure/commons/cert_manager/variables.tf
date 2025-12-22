@@ -7,15 +7,18 @@ variable "cloud_provider" {
 }
 
 variable "gcp_sa_email" {
-  type = string
+  type    = string
+  default = ""
 }
 
 variable "aws_sa_arn" {
-  type = string
+  type    = string
+  default = ""
 }
 
 variable "azure_client_id" {
-  type = string
+  type    = string
+  default = ""
 }
 
 ###############################################################################
