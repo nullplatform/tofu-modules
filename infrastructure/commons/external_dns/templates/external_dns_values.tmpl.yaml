@@ -5,7 +5,9 @@ sources:
   - crd
 
 domainFilters:
-  - "${domain}"
+  %{ for d in domain ~}
+    - "${d}"
+  %{ endfor ~}
 
 policy: "${policy}"
 registry: "txt"
@@ -36,11 +38,11 @@ extraArgs:
 serviceAccount:
   create: true
 %{ if provider == "google" ~}
-name: ${ksa_name}
-annotations:
-  iam.gke.io/gcp-service-account: "${gsa_email}"
+  name: ${ksa_name}
+  annotations:
+    iam.gke.io/gcp-service-account: "${gsa_email}"
 %{ else ~}
-name: "external-dns"
+  name: "external-dns"
 %{ endif ~}
 
 rbac:
