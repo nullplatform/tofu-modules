@@ -95,6 +95,10 @@ module "cert_manager" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_account_slug"></a> [account\_slug](#input\_account\_slug) | The nullplatform account slug. | `string` | `""` | no |
+| <a name="input_aws_enabled"></a> [aws\_enabled](#input\_aws\_enabled) | Whether to enable the AWS Route53 solver in cert-manager. | `bool` | `false` | no |
+| <a name="input_aws_hosted_zone_id"></a> [aws\_hosted\_zone\_id](#input\_aws\_hosted\_zone\_id) | The Route53 hosted zone ID. | `string` | `""` | no |
+| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region where Route53 is configured. | `string` | `""` | no |
+| <a name="input_aws_role_arn"></a> [aws\_role\_arn](#input\_aws\_role\_arn) | The IAM role ARN for IRSA (IAM Roles for Service Accounts). | `string` | `""` | no |
 | <a name="input_azure_client_id"></a> [azure\_client\_id](#input\_azure\_client\_id) | The Azure application (client) ID for authentication. | `string` | `""` | no |
 | <a name="input_azure_client_secret"></a> [azure\_client\_secret](#input\_azure\_client\_secret) | The Azure application client secret value. | `string` | `""` | no |
 | <a name="input_azure_enabled"></a> [azure\_enabled](#input\_azure\_enabled) | Whether to enable the Azure DNS solver in cert-manager. | `bool` | `false` | no |
