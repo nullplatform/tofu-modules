@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.8](https://github.com/nullplatform/tofu-modules/compare/v1.12.7...v1.12.8) (2025-12-22)
+
+
+### Bug Fixes
+
+* **release:** fix commit message ([#88](https://github.com/nullplatform/tofu-modules/issues/88)) ([5926b7b](https://github.com/nullplatform/tofu-modules/commit/5926b7b64b739e76c4d341db480dff86adb4088e))
+
 ## [1.12.7](https://github.com/nullplatform/tofu-modules/compare/v1.12.6...v1.12.7) (2025-12-18)
 
 
