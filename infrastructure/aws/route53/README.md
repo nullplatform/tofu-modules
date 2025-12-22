@@ -26,12 +26,6 @@ module "route53" {
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 6.0 |
 
-## Modules
-
-| Name | Source | Version |
-|------|--------|---------|
-| <a name="module_aws_route53_acm"></a> [aws\_route53\_acm](#module\_aws\_route53\_acm) | ../acm | n/a |
-
 ## Resources
 
 | Name | Type |
