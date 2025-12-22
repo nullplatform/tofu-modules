@@ -1,4 +1,24 @@
 ###############################################################################
+# CERT-MANAGER PROVIDER
+###############################################################################
+variable "cloud_provider" {
+  type    = string
+  default = "gcp" # "gcp" | "aws" | "azure"
+}
+
+variable "gcp_sa_email" {
+  type = string
+}
+
+variable "aws_sa_arn" {
+  type = string
+}
+
+variable "azure_client_id" {
+  type = string
+}
+
+###############################################################################
 # CERT-MANAGER CONFIGURATION
 ###############################################################################
 
@@ -64,12 +84,6 @@ variable "azure_subscription_id" {
 
 variable "azure_resource_group_name" {
   description = "The name of the Azure resource group that contains the DNS zone."
-  type        = string
-  default     = ""
-}
-
-variable "azure_client_id" {
-  description = "The Azure application (client) ID for authentication."
   type        = string
   default     = ""
 }

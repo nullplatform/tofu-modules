@@ -6,14 +6,13 @@ resource "helm_release" "cert_manager" {
   create_namespace = true
   version          = var.cert_manager_version
 
-  set = [{
-    name  = "crds.enabled"
-    value = "true"
-    }
+
+  values = [
+    yamlencode(local.cert_manager_values)
   ]
 }
 
-
+/*
 resource "helm_release" "cert_manager_config" {
   name             = "cert-manager-config"
   repository       = "https://nullplatform.github.io/helm-charts"
@@ -33,3 +32,4 @@ resource "helm_release" "cert_manager_config" {
   depends_on = [helm_release.cert_manager]
 }
 
+*/

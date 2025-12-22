@@ -29,4 +29,41 @@ locals {
     azure_tenant_id           = var.azure_tenant_id != null ? var.azure_tenant_id : ""
     azure_hosted_zone_name    = var.azure_hosted_zone_name != null ? var.azure_hosted_zone_name : ""
   })
+
+  ###############################################################################
+  # CERT-MANAGER
+  ###############################################################################
+  base_annotations = {
+    "{{ .Chart.Name }}-helm-chart/version" = "{{ .Chart.Version }}"
+  }
+
+  annotations_by_provider = {
+    gcp = {
+      "iam.gke.io/gcp-service-account" = var.gcp_sa_email
+    }
+
+    aws = {
+
+      "eks.amazonaws.com/role-arn" = var.aws_sa_arn
+    }
+
+    azure = {
+      "azure.workload.identity/client-id" = var.azure_client_id
+    }
+  }
+
+  cert_manager_values = {
+    cdrs = {
+      enabled = true
+    }
+    serviceAccount = {
+      create = true
+      annotations = merge(
+        local.base_annotations,
+        lookup(local.annotations_by_provider, var.cloud_provider, {})
+    ) }
+    dns01RecursiveNameservers = "8.8.8.8:53,1.1.1.1:53"
+    dns01RecursiveNameserversOnly : true
+  }
+
 }
