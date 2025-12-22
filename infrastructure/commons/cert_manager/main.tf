@@ -28,6 +28,7 @@ resource "helm_release" "cert_manager_config" {
     var.cloudflare_enabled ? [local.cert_manager_cloudfare_values] : [],
     var.gcp_enabled ? [local.cert_manager_gcp_values] : [],
     var.azure_enabled ? [local.cert_manager_azure_values] : [],
+    var.aws_enabled ? [local.cert_manager_aws_values] : [],
   )
 
   depends_on = [helm_release.cert_manager]

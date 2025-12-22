@@ -5,39 +5,67 @@ This module installs cert-manager and applies the nullplatform configuration usi
 
 ## Usage
 
-### Basic example
+### AWS Route53 configuration
 
 ```hcl
 module "cert_manager" {
-  source                       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/cert_manager?ref=1.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/cert_manager?ref=1.0.0"
 
+  aws_enabled        = true
+  aws_region         = var.aws_region
+  aws_hosted_zone_id = var.aws_hosted_zone_id
+  aws_role_arn       = var.aws_role_arn
 
-  #Azure DNS configuration
-  azure_enabled                = true
-  azure_subscription_id        = var.subscription_id
-  azure_resource_group_name    = var.resource_group_name
-  azure_client_id              = var.azure_client_id
-  azure_client_secret          = var.azure_client_secret
-  azure_tenant_id              = var.azure_tenant_id
-  azure_hosted_zone_name       = var.azure_hosted_zone_name
-  gcp_enabled                  = false
-  cloudflare_enabled            = false
+  hosted_zone_name = var.hosted_zone_name
+  account_slug     = var.account_slug
+}
+```
 
-  #Cloudflare DNS configuration
-  cloudflare_enabled           = true
-  cloudflare_secret_name       = var.cloudflare_secret_name
-  cloudflare_token             = var.cloudflare_token
-  azure_subscription_id        = var.azure_subscription_id
-  gcp_enabled                  = false
-  azure_enabled                = false
+### Azure DNS configuration
 
-  #GCP Cloud DNS configuration
-  gcp_enabled                  = var.gcp_enabled
-  gcp_service_account_key      = var.gcp_service_account_key
+```hcl
+module "cert_manager" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/cert_manager?ref=1.0.0"
 
-  hosted_zone_name             = var.hosted_zone_name
-  account_slug                 = "var.account_slug"
+  azure_enabled             = true
+  azure_subscription_id     = var.azure_subscription_id
+  azure_resource_group_name = var.azure_resource_group_name
+  azure_client_id           = var.azure_client_id
+  azure_client_secret       = var.azure_client_secret
+  azure_tenant_id           = var.azure_tenant_id
+  azure_hosted_zone_name    = var.azure_hosted_zone_name
 
+  hosted_zone_name = var.hosted_zone_name
+  account_slug     = var.account_slug
+}
+```
+
+### Cloudflare DNS configuration
+
+```hcl
+module "cert_manager" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/cert_manager?ref=1.0.0"
+
+  cloudflare_enabled     = true
+  cloudflare_secret_name = var.cloudflare_secret_name
+  cloudflare_token       = var.cloudflare_token
+
+  hosted_zone_name = var.hosted_zone_name
+  account_slug     = var.account_slug
+}
+```
+
+### GCP Cloud DNS configuration
+
+```hcl
+module "cert_manager" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/cert_manager?ref=1.0.0"
+
+  gcp_enabled             = true
+  gcp_service_account_key = var.gcp_service_account_key
+
+  hosted_zone_name = var.hosted_zone_name
+  account_slug     = var.account_slug
 }
 ```
 

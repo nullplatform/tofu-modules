@@ -44,6 +44,10 @@ variable "gcp_service_account_key" {
   type        = string
   sensitive   = true
   default     = ""
+  validation {
+    condition     = !var.gcp_enabled || length(var.gcp_service_account_key) > 0
+    error_message = "When gcp_enabled is true, gcp_service_account_key must not be empty."
+  }
 }
 
 ###############################################################################
@@ -60,18 +64,30 @@ variable "azure_subscription_id" {
   description = "The Azure subscription ID."
   type        = string
   default     = ""
+  validation {
+    condition     = !var.azure_enabled || length(var.azure_subscription_id) > 0
+    error_message = "When azure_enabled is true, azure_subscription_id must not be empty."
+  }
 }
 
 variable "azure_resource_group_name" {
   description = "The name of the Azure resource group that contains the DNS zone."
   type        = string
   default     = ""
+  validation {
+    condition     = !var.azure_enabled || length(var.azure_resource_group_name) > 0
+    error_message = "When azure_enabled is true, azure_resource_group_name must not be empty."
+  }
 }
 
 variable "azure_client_id" {
   description = "The Azure application (client) ID for authentication."
   type        = string
   default     = ""
+  validation {
+    condition     = !var.azure_enabled || length(var.azure_client_id) > 0
+    error_message = "When azure_enabled is true, azure_client_id must not be empty."
+  }
 }
 
 variable "azure_secret_key" {
@@ -85,18 +101,70 @@ variable "azure_client_secret" {
   type        = string
   sensitive   = true
   default     = ""
+  validation {
+    condition     = !var.azure_enabled || length(var.azure_client_secret) > 0
+    error_message = "When azure_enabled is true, azure_client_secret must not be empty."
+  }
 }
 
 variable "azure_tenant_id" {
   description = "The Azure tenant ID."
   type        = string
   default     = ""
+  validation {
+    condition     = !var.azure_enabled || length(var.azure_tenant_id) > 0
+    error_message = "When azure_enabled is true, azure_tenant_id must not be empty."
+  }
 }
 
 variable "azure_hosted_zone_name" {
   description = "The hosted zone name in Azure DNS."
   type        = string
   default     = ""
+  validation {
+    condition     = !var.azure_enabled || length(var.azure_hosted_zone_name) > 0
+    error_message = "When azure_enabled is true, azure_hosted_zone_name must not be empty."
+  }
+}
+
+###############################################################################
+# AWS CONFIGURATION
+###############################################################################
+
+variable "aws_enabled" {
+  description = "Whether to enable the AWS Route53 solver in cert-manager."
+  type        = bool
+  default     = false
+}
+
+variable "aws_region" {
+  description = "The AWS region where Route53 is configured."
+  type        = string
+  default     = ""
+  validation {
+    condition     = !var.aws_enabled || length(var.aws_region) > 0
+    error_message = "When aws_enabled is true, aws_region must not be empty."
+  }
+}
+
+variable "aws_hosted_zone_id" {
+  description = "The Route53 hosted zone ID."
+  type        = string
+  default     = ""
+  validation {
+    condition     = !var.aws_enabled || length(var.aws_hosted_zone_id) > 0
+    error_message = "When aws_enabled is true, aws_hosted_zone_id must not be empty."
+  }
+}
+
+variable "aws_role_arn" {
+  description = "The IAM role ARN for IRSA (IAM Roles for Service Accounts)."
+  type        = string
+  default     = ""
+  validation {
+    condition     = !var.aws_enabled || length(var.aws_role_arn) > 0
+    error_message = "When aws_enabled is true, aws_role_arn must not be empty."
+  }
 }
 
 ###############################################################################
