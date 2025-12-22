@@ -2,13 +2,23 @@
 # CERT-MANAGER PROVIDER
 ###############################################################################
 variable "cloud_provider" {
-  type    = string
-  default = "gcp" # "gcp" | "aws" | "azure"
+  description = "El proveedor de nube a utilizar: gcp, azure, o cloudflare"
+  type        = string
+  validation {
+    condition     = contains(["gcp", "azure", "cloudflare"], var.cloud_provider)
+    error_message = "El valor debe ser uno de: gcp, azure, cloudflare."
+  }
 }
 
 variable "gcp_sa_email" {
   type    = string
   default = ""
+}
+
+variable "project_id" {
+  description = "The GCP project ID for cert-manager DNS01 solver"
+  type        = string
+  default     = ""
 }
 
 variable "aws_sa_arn" {
@@ -52,32 +62,13 @@ variable "account_slug" {
   default     = ""
 }
 
-###############################################################################
-# GCP CONFIGURATION
-###############################################################################
 
-variable "gcp_enabled" {
-  description = "Whether to enable the GCP (Cloud DNS) solver in cert-manager."
-  type        = bool
-  default     = false
-}
 
-variable "gcp_service_account_key" {
-  description = "The contents of the service account JSON for Cloud DNS (use file() if reading from disk)."
-  type        = string
-  sensitive   = true
-  default     = ""
-}
 
 ###############################################################################
 # AZURE CONFIGURATION
 ###############################################################################
 
-variable "azure_enabled" {
-  description = "Whether to enable the Azure DNS solver in cert-manager."
-  type        = bool
-  default     = false
-}
 
 variable "azure_subscription_id" {
   description = "The Azure subscription ID."
@@ -88,19 +79,6 @@ variable "azure_subscription_id" {
 variable "azure_resource_group_name" {
   description = "The name of the Azure resource group that contains the DNS zone."
   type        = string
-  default     = ""
-}
-
-variable "azure_secret_key" {
-  description = "The key name inside the Azure secret that holds the client secret (default: 'client-secret')."
-  type        = string
-  default     = "client-secret"
-}
-
-variable "azure_client_secret" {
-  description = "The Azure application client secret value."
-  type        = string
-  sensitive   = true
   default     = ""
 }
 
@@ -120,11 +98,6 @@ variable "azure_hosted_zone_name" {
 # CLOUDFLARE CONFIGURATION
 ###############################################################################
 
-variable "cloudflare_enabled" {
-  description = "Whether to enable the Cloudflare DNS-01 solver in cert-manager."
-  type        = bool
-  default     = false
-}
 
 variable "cloudflare_secret_name" {
   description = "The name of the Kubernetes secret that stores the Cloudflare API token."
@@ -138,7 +111,7 @@ variable "cloudflare_token" {
   sensitive   = true
   default     = ""
   validation {
-    condition     = !var.cloudflare_enabled || length(var.cloudflare_token) > 0
-    error_message = "When cloudflare_enabled is true, cloudflare_token must not be empty."
+    condition     = var.cloud_provider != "cloudflare" || length(var.cloudflare_token) > 0
+    error_message = "When cloud_provider is 'cloudflare', cloudflare_token must not be empty."
   }
 }

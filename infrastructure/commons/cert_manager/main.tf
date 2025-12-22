@@ -12,7 +12,7 @@ resource "helm_release" "cert_manager" {
   ]
 }
 
-/*
+
 resource "helm_release" "cert_manager_config" {
   name             = "cert-manager-config"
   repository       = "https://nullplatform.github.io/helm-charts"
@@ -22,14 +22,11 @@ resource "helm_release" "cert_manager_config" {
   namespace        = var.cert_manager_namespace
 
 
-  values = concat(
-    [local.cert_manager_default_values],
-    var.cloudflare_enabled ? [local.cert_manager_cloudfare_values] : [],
-    var.gcp_enabled ? [local.cert_manager_gcp_values] : [],
-    var.azure_enabled ? [local.cert_manager_azure_values] : [],
-  )
+  values = [
+    local.cert_manager_default_values,
+    local.cert_manager_provider_values,
+  ]
 
   depends_on = [helm_release.cert_manager]
 }
 
-*/

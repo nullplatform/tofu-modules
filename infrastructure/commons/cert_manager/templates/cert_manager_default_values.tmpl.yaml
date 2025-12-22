@@ -1,4 +1,5 @@
 hostedZoneName: "${hosted_zone_name}"
+cloudProvider: "${cloud_provider}"
 
 nullPlatform:
   accountSlug: "${account_slug}"
