@@ -51,7 +51,7 @@ resource "kubernetes_service_account_v1" "cert_manager_acme_dns01_route53" {
     name      = "cert-manager-acme-dns01-route53"
     namespace = "cert-manager"
     annotations = {
-      "eks.amazonaws.com/role-arn" = module.nullplatform_cert_manager_role.iam_role_arn
+      "eks.amazonaws.com/role-arn" = module.nullplatform_cert_manager_role.arn
     }
   }
 }
