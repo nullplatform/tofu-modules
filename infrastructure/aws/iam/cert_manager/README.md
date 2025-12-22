@@ -53,4 +53,5 @@ module "cert_manager_iam" {
 | Name | Description |
 |------|-------------|
 | <a name="output_nullplatform_cert_manager_role_arn"></a> [nullplatform\_cert\_manager\_role\_arn](#output\_nullplatform\_cert\_manager\_role\_arn) | ARN of the cert-manager role |
+| <a name="output_nullplatform_cert_manager_service_account_name"></a> [nullplatform\_cert\_manager\_service\_account\_name](#output\_nullplatform\_cert\_manager\_service\_account\_name) | Name of the SA created |
 <!-- END_TF_DOCS -->
