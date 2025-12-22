@@ -53,7 +53,7 @@ locals {
   }
 
   cert_manager_values = {
-    cdrs = {
+    crds = {
       enabled = true
     }
     serviceAccount = {
