@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.12.9](https://github.com/nullplatform/tofu-modules/compare/v1.12.8...v1.12.9) (2025-12-23)
+
+
+### Bug Fixes
+
+* update to v0.15.0 and replace resource_group_name for parent_id ([#53](https://github.com/nullplatform/tofu-modules/issues/53)) ([fe32430](https://github.com/nullplatform/tofu-modules/commit/fe3243067b684682be22661c993033cb2094f4fc))
+
+## [1.12.8](https://github.com/nullplatform/tofu-modules/compare/v1.12.7...v1.12.8) (2025-12-22)
+
+
+### Bug Fixes
+
+* **release:** fix commit message ([#88](https://github.com/nullplatform/tofu-modules/issues/88)) ([5926b7b](https://github.com/nullplatform/tofu-modules/commit/5926b7b64b739e76c4d341db480dff86adb4088e))
+
+## [1.12.7](https://github.com/nullplatform/tofu-modules/compare/v1.12.6...v1.12.7) (2025-12-18)
+
+
+### Bug Fixes
+
+* **scope:** Fixing typo in annotation in scope definition module ([#85](https://github.com/nullplatform/tofu-modules/issues/85)) ([75a0d48](https://github.com/nullplatform/tofu-modules/commit/75a0d48a672152e3cf27c4ba907736d5fb75c634))
+
+## [1.12.6](https://github.com/nullplatform/tofu-modules/compare/v1.12.5...v1.12.6) (2025-12-18)
+
+
+### Bug Fixes
+
+* **scope:** Add support for icon and annotations in service action spec definition ([#82](https://github.com/nullplatform/tofu-modules/issues/82)) ([5c7c1bb](https://github.com/nullplatform/tofu-modules/commit/5c7c1bbd677f3644c7e2df639e3cc25d336b30f0))
+
 ## [1.12.5](https://github.com/nullplatform/tofu-modules/compare/v1.12.4...v1.12.5) (2025-12-15)
 
 

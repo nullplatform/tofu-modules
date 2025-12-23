@@ -52,13 +52,13 @@ module "aks" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.6 |
-| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | =4.41.0 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 4.52 |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_avm_res_network_virtualnetwork"></a> [avm\_res\_network\_virtualnetwork](#module\_avm\_res\_network\_virtualnetwork) | azure/avm-res-network-virtualnetwork/azurerm | v0.10.0 |
+| <a name="module_avm_res_network_virtualnetwork"></a> [avm\_res\_network\_virtualnetwork](#module\_avm\_res\_network\_virtualnetwork) | azure/avm-res-network-virtualnetwork/azurerm | v0.16.0 |
 
 ## Inputs
 

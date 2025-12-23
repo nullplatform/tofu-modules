@@ -1,0 +1,26 @@
+variable "prometheus_url" {
+  type    = string
+  default = ""
+}
+variable "dimensions" {
+  default     = {}
+  description = "name of the dimensions"
+
+}
+
+variable "nrn" {
+  description = "nullplatform Resource Name — unique identifier for resources"
+  type        = string
+}
+
+variable "np_api_key" {
+  description = "nullplatform API key for authentication"
+  type        = string
+  sensitive   = true
+}
+
+variable "prometheus_namespace" {
+  description = "Kubernetes namespace where Prometheus will be deployed"
+  type        = string
+  default     = "prometheus"
+}

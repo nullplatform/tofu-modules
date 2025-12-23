@@ -57,6 +57,8 @@ resource "nullplatform_action_specification" "from_templates" {
   parameters               = jsonencode(jsondecode(base64decode(data.external.action_specs[each.key].result.json_b64)).parameters)
   results                  = jsonencode(jsondecode(base64decode(data.external.action_specs[each.key].result.json_b64)).results)
   retryable                = try(jsondecode(base64decode(data.external.action_specs[each.key].result.json_b64)).retryable, false)
+  icon                     = try(jsondecode(base64decode(data.external.action_specs[each.key].result.json_b64)).icon, "")
+  annotations              = jsonencode(try(jsondecode(base64decode(data.external.action_specs[each.key].result.json_b64)).annotations, {}))
 
   lifecycle {
     ignore_changes = [name, annotations, parameters, results, type, retryable]
