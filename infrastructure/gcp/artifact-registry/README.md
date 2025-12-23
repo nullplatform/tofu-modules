@@ -17,6 +17,9 @@
 | Name | Type |
 |------|------|
 | [google_artifact_registry_repository.registry](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/artifact_registry_repository) | resource |
+| [google_project_iam_member.artifact_sa_role](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/project_iam_member) | resource |
+| [google_service_account.artifact_sa](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account) | resource |
+| [google_service_account_key.artifact_sa_key](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account_key) | resource |
 
 ## Inputs
 
@@ -33,4 +36,5 @@
 |------|-------------|
 | <a name="output_repository_id"></a> [repository\_id](#output\_repository\_id) | n/a |
 | <a name="output_repository_url"></a> [repository\_url](#output\_repository\_url) | n/a |
+| <a name="output_service_account_key_json"></a> [service\_account\_key\_json](#output\_service\_account\_key\_json) | Service Account key |
 <!-- END_TF_DOCS -->

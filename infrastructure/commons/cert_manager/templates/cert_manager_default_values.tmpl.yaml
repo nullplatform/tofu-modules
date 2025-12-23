@@ -1,7 +1,11 @@
 hostedZoneName: "${hosted_zone_name}"
+cloudProvider: "${cloud_provider}"
 
 nullPlatform:
   accountSlug: "${account_slug}"
 
 namespacecontroller:
   name: "${namespace}"
+
+private:
+  domainName: "${private_domain_name}"

@@ -6,10 +6,9 @@ resource "helm_release" "cert_manager" {
   create_namespace = true
   version          = var.cert_manager_version
 
-  set = [{
-    name  = "crds.enabled"
-    value = "true"
-    }
+
+  values = [
+    yamlencode(local.cert_manager_values)
   ]
 }
 
@@ -23,12 +22,10 @@ resource "helm_release" "cert_manager_config" {
   namespace        = var.cert_manager_namespace
 
 
-  values = concat(
-    [local.cert_manager_default_values],
-    var.cloudflare_enabled ? [local.cert_manager_cloudfare_values] : [],
-    var.gcp_enabled ? [local.cert_manager_gcp_values] : [],
-    var.azure_enabled ? [local.cert_manager_azure_values] : [],
-  )
+  values = [
+    local.cert_manager_default_values,
+    local.cert_manager_provider_values,
+  ]
 
   depends_on = [helm_release.cert_manager]
 }

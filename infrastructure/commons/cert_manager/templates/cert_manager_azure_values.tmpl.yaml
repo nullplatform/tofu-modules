@@ -1,9 +1,6 @@
 azure:
-  enabled: ${azure_enabled}
-  subscriptionID: "${azure_subscription_id}"
-  resourceGroupName: "${azure_resource_group_name}"
-  clientID: "${azure_client_id}"
-  secretKey: "${azure_secret_key}"   # ej: "client-secret"
-  clientSecret: "${azure_client_secret}"
-  tenantID: "${azure_tenant_id}"
-  hostedZoneName: "${azure_hosted_zone_name}"
+  subscriptionID: "${subscription_id}"
+  resourceGroupName: "${resource_group_name}"
+  clientID: "${client_id}"
+  tenantID: "${tenant_id}"
+  hostedZoneName: "${hosted_zone_name}"
