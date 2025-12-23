@@ -87,9 +87,6 @@ variable "account_slug" {
   default     = ""
 }
 
-
-
-
 ###############################################################################
 # AZURE CONFIGURATION
 ###############################################################################
@@ -171,4 +168,3 @@ variable "aws_region" {
     error_message = "When cloud_provider is 'aws', aws_region must not be empty."
   }
 }
-
