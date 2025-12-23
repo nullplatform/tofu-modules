@@ -1,38 +1,15 @@
 ################################################################################
-# Nullplatform Agent API Key
+# Nullplatform Agent Association API Key
 ################################################################################
 
-# Create API key for agent authentication with required role grants
+# Create API key for agent association with minimal required permissions
 resource "nullplatform_api_key" "nullplatform_agent_api_key" {
-  name = "NULLPLATFORM-AGENT-API-KEY"
+  name = "AGENT-ASSOCIATION"
 
-  # Grant control plane agent role for core agent operations
+  # Grant control plane agent role for agent operations
   grants {
     nrn       = local.nrn_without_namespace
     role_slug = "controlplane:agent"
-  }
-
-  # Grant developer role for application deployment operations
-  grants {
-    nrn       = local.nrn_without_namespace
-    role_slug = "developer"
-  }
-
-  # Grant ops role for operational and maintenance tasks
-  grants {
-    nrn       = local.nrn_without_namespace
-    role_slug = "ops"
-  }
-
-  # Grant secops role for security operations and compliance
-  grants {
-    nrn       = local.nrn_without_namespace
-    role_slug = "secops"
-  }
-  # Grant secrets-reader role for accessing application secrets
-  grants {
-    nrn       = local.nrn_without_namespace
-    role_slug = "secrets-reader"
   }
 
   tags {
