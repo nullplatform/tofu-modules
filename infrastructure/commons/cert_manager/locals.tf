@@ -1,55 +1,85 @@
 locals {
-  cert_manager_default_values = yamlencode({
-    hostedZoneName = var.hosted_zone_name
-    nullPlatform = {
-      accountSlug = var.account_slug
-    }
-    namespacecontroller = {
-      name = var.cert_manager_namespace
-    }
-  })
+  common_context = {
+    hosted_zone_name    = var.hosted_zone_name
+    account_slug        = var.account_slug
+    namespace           = var.cert_manager_namespace
+    cloud_provider      = var.cloud_provider
+    private_domain_name = var.private_domain_name
+  }
+  provider_context = merge(
+    var.cloud_provider == "gcp" ? {
+      enabled    = true
+      project_id = var.project_id
+    } : {},
 
-  cert_manager_gcp_values = yamlencode({
-    gcp = {
-      enabled           = var.gcp_enabled
-      serviceAccountKey = var.gcp_service_account_key != null ? var.gcp_service_account_key : ""
-    }
-  })
+    var.cloud_provider == "cloudflare" ? {
+      enabled     = true
+      secret_name = var.cloudflare_secret_name
+      token       = var.cloudflare_token
+    } : {},
 
-  cert_manager_cloudfare_values = yamlencode({
-    cloudflare = {
-      enabled    = var.cloudflare_enabled
-      secretName = var.cloudflare_secret_name
-      apiToken   = var.cloudflare_token
-    }
-  })
+    var.cloud_provider == "azure" ? {
+      enabled             = true
+      subscription_id     = var.azure_subscription_id
+      resource_group_name = var.azure_resource_group_name
+      client_id           = var.azure_client_id
+      tenant_id           = var.azure_tenant_id
+      hosted_zone_name    = var.azure_hosted_zone_name
+    } : {},
 
-  cert_manager_azure_values = yamlencode({
-    azure = {
-      enabled           = var.azure_enabled
-      subscriptionID    = var.azure_subscription_id != null ? var.azure_subscription_id : ""
-      resourceGroupName = var.azure_resource_group_name != null ? var.azure_resource_group_name : ""
-      clientID          = var.azure_client_id != null ? var.azure_client_id : ""
-      secretKey         = var.azure_secret_key != null ? var.azure_secret_key : "client-secret"
-      clientSecret      = var.azure_client_secret != null ? var.azure_client_secret : ""
-      tenantID          = var.azure_tenant_id != null ? var.azure_tenant_id : ""
-      hostedZoneName    = var.azure_hosted_zone_name != null ? var.azure_hosted_zone_name : ""
-    }
-  })
+    var.cloud_provider == "aws" ? {
+      enabled = true
+      region  = var.aws_region
+    } : {}
+  )
 
-  cert_manager_aws_values = yamlencode({
-    route53 = {
-      enabled      = var.aws_enabled
-      region       = var.aws_region
-      hostedZoneID = var.aws_hosted_zone_id
-      role         = var.aws_role_arn
-      auth = {
-        kubernetes = {
-          serviceAccountRef = {
-            name = var.service_account_name
-          }
-        }
-      }
-    }
-  })
+
+  cert_manager_default_values = templatefile(
+    "${path.module}/templates/cert_manager_default_values.tmpl.yaml",
+    local.common_context
+  )
+  cert_manager_provider_values = templatefile(
+    "${path.module}/templates/cert_manager_${var.cloud_provider}_values.tmpl.yaml",
+    local.provider_context
+  )
 }
+
+###############################################################################
+# CERT-MANAGER
+###############################################################################
+locals {
+  base_annotations = {
+    "{{ .Chart.Name }}-helm-chart/version" = "{{ .Chart.Version }}"
+  }
+
+  annotations_by_provider = {
+    gcp = {
+      "iam.gke.io/gcp-service-account" = var.gcp_sa_email
+    }
+
+    aws = {
+      "eks.amazonaws.com/role-arn" = var.aws_sa_arn
+    }
+
+    azure = {
+      "azure.workload.identity/client-id" = var.azure_client_id
+    }
+  }
+
+  cert_manager_values = {
+    crds = {
+      enabled = true
+    }
+    serviceAccount = {
+      create = true
+      annotations = merge(
+        local.base_annotations,
+        lookup(local.annotations_by_provider, var.cloud_provider, {})
+      )
+    }
+    dns01RecursiveNameservers     = "8.8.8.8:53,1.1.1.1:53"
+    dns01RecursiveNameserversOnly = true
+  }
+}
+
+
