@@ -6,3 +6,6 @@ nullPlatform:
 
 namespacecontroller:
   name: "${namespace}"
+
+private:
+  domainName: "${private_domain_name}"

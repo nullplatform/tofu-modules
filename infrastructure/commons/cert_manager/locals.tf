@@ -1,9 +1,10 @@
 locals {
   common_context = {
-    hosted_zone_name = var.hosted_zone_name
-    account_slug     = var.account_slug
-    namespace        = var.cert_manager_namespace
-    cloud_provider   = var.cloud_provider
+    hosted_zone_name    = var.hosted_zone_name
+    account_slug        = var.account_slug
+    namespace           = var.cert_manager_namespace
+    cloud_provider      = var.cloud_provider
+    private_domain_name = var.private_domain_name
   }
   provider_context = merge(
     var.cloud_provider == "gcp" ? {
@@ -26,9 +27,9 @@ locals {
       hosted_zone_name    = var.azure_hosted_zone_name
     } : {},
 
-      var.cloud_provider == "aws" ? {
-      enabled             = true
-      region = var.region
+    var.cloud_provider == "aws" ? {
+      enabled = true
+      region  = var.region
     } : {}
   )
 

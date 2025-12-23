@@ -50,6 +50,12 @@ variable "azure_client_id" {
   }
 }
 
+
+variable "private_domain_name" {
+  type    = string
+  default = ""
+
+}
 ###############################################################################
 # CERT-MANAGER CONFIGURATION
 ###############################################################################
