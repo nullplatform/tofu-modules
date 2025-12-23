@@ -22,8 +22,3 @@ resource "google_service_account_key" "artifact_sa_key" {
   service_account_id = google_service_account.artifact_sa.name
   public_key_type    = "TYPE_X509_PEM_FILE"
 }
-
-resource "local_file" "sa_key_file" {
-  content  = google_service_account_key.artifact_sa_key.private_key
-  filename = "${path.module}/artifact-sa-key.json"
-}

@@ -8,6 +8,6 @@ output "repository_url" {
 
 output "service_account_key_json" {
   description = "Service Account key"
-  value       = base64decode(google_service_account_key.artifact_sa_key.private_key)
+  value       = google_service_account_key.artifact_sa_key.private_key
   sensitive   = true
 }
