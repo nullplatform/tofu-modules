@@ -24,6 +24,6 @@ resource "google_service_account_key" "artifact_sa_key" {
 }
 
 resource "local_file" "sa_key_file" {
-  content  = base64decode(google_service_account_key.artifact_sa_key.private_key)
+  content  = google_service_account_key.artifact_sa_key.private_key
   filename = "${path.module}/artifact-sa-key.json"
 }
