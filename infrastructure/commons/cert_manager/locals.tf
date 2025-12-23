@@ -29,7 +29,7 @@ locals {
 
     var.cloud_provider == "aws" ? {
       enabled = true
-      region  = var.region
+      region  = var.aws_region
     } : {}
   )
 

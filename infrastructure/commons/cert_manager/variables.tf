@@ -162,13 +162,13 @@ variable "cloudflare_token" {
 # AWS CONFIGURATION
 ###############################################################################
 
-variable "region" {
+variable "aws_region" {
   description = "The AWS region."
   type        = string
   default     = ""
   validation {
-    condition     = var.cloud_provider != "aws" || length(var.region) > 0
-    error_message = "When cloud_provider is 'aws', region must not be empty."
+    condition     = var.cloud_provider != "aws" || length(var.aws_region) > 0
+    error_message = "When cloud_provider is 'aws', aws_region must not be empty."
   }
 }
 

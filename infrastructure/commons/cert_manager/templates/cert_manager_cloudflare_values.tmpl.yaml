@@ -1,0 +1,3 @@
+cloudflare:
+  secretName: "${secret_name}"
+  apiToken: "${token}"
