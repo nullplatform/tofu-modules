@@ -2,33 +2,52 @@
 # CERT-MANAGER PROVIDER
 ###############################################################################
 variable "cloud_provider" {
-  description = "El proveedor de nube a utilizar: gcp, azure, o cloudflare"
+  description = "El proveedor de nube a utilizar: gcp, azure, aws, o cloudflare"
   type        = string
   validation {
-    condition     = contains(["gcp", "azure", "cloudflare"], var.cloud_provider)
-    error_message = "El valor debe ser uno de: gcp, azure, cloudflare."
+    condition     = contains(["gcp", "azure", "cloudflare", "aws"], var.cloud_provider)
+    error_message = "El valor debe ser uno de: gcp, azure, cloudflare, aws"
   }
 }
 
 variable "gcp_sa_email" {
-  type    = string
-  default = ""
+  description = "The GCP service account email for cert-manager"
+  type        = string
+  default     = ""
+  validation {
+    condition     = var.cloud_provider != "gcp" || length(var.gcp_sa_email) > 0
+    error_message = "When cloud_provider is 'gcp', gcp_sa_email must not be empty."
+  }
 }
 
 variable "project_id" {
   description = "The GCP project ID for cert-manager DNS01 solver"
   type        = string
   default     = ""
+  validation {
+    condition     = var.cloud_provider != "gcp" || length(var.project_id) > 0
+    error_message = "When cloud_provider is 'gcp', project_id must not be empty."
+  }
 }
 
 variable "aws_sa_arn" {
-  type    = string
-  default = ""
+  description = "The AWS IAM role ARN for cert-manager."
+  type        = string
+  default     = ""
+  validation {
+    condition     = var.cloud_provider != "aws" || length(var.aws_sa_arn) > 0
+    error_message = "When cloud_provider is 'aws', aws_sa_arn must not be empty."
+  }
 }
 
 variable "azure_client_id" {
-  type    = string
-  default = ""
+  description = "The Azure client ID for cert-manager."
+  type        = string
+  default     = ""
+  validation {
+    condition     = var.cloud_provider != "azure" || length(var.azure_client_id) > 0
+    error_message = "When cloud_provider is 'azure', azure_client_id must not be empty."
+  }
 }
 
 ###############################################################################
@@ -74,24 +93,40 @@ variable "azure_subscription_id" {
   description = "The Azure subscription ID."
   type        = string
   default     = ""
+  validation {
+    condition     = var.cloud_provider != "azure" || length(var.azure_subscription_id) > 0
+    error_message = "When cloud_provider is 'azure', azure_subscription_id must not be empty."
+  }
 }
 
 variable "azure_resource_group_name" {
   description = "The name of the Azure resource group that contains the DNS zone."
   type        = string
   default     = ""
+  validation {
+    condition     = var.cloud_provider != "azure" || length(var.azure_resource_group_name) > 0
+    error_message = "When cloud_provider is 'azure', azure_resource_group_name must not be empty."
+  }
 }
 
 variable "azure_tenant_id" {
   description = "The Azure tenant ID."
   type        = string
   default     = ""
+  validation {
+    condition     = var.cloud_provider != "azure" || length(var.azure_tenant_id) > 0
+    error_message = "When cloud_provider is 'azure', azure_tenant_id must not be empty."
+  }
 }
 
 variable "azure_hosted_zone_name" {
   description = "The hosted zone name in Azure DNS."
   type        = string
   default     = ""
+  validation {
+    condition     = var.cloud_provider != "azure" || length(var.azure_hosted_zone_name) > 0
+    error_message = "When cloud_provider is 'azure', azure_hosted_zone_name must not be empty."
+  }
 }
 
 ###############################################################################
@@ -115,3 +150,19 @@ variable "cloudflare_token" {
     error_message = "When cloud_provider is 'cloudflare', cloudflare_token must not be empty."
   }
 }
+
+
+###############################################################################
+# AWS CONFIGURATION
+###############################################################################
+
+variable "region" {
+  description = "The AWS region."
+  type        = string
+  default     = ""
+  validation {
+    condition     = var.cloud_provider != "aws" || length(var.region) > 0
+    error_message = "When cloud_provider is 'aws', region must not be empty."
+  }
+}
+
