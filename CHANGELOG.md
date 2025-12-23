@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.9](https://github.com/nullplatform/tofu-modules/compare/v1.12.8...v1.12.9) (2025-12-23)
+
+
+### Bug Fixes
+
+* update to v0.15.0 and replace resource_group_name for parent_id ([#53](https://github.com/nullplatform/tofu-modules/issues/53)) ([fe32430](https://github.com/nullplatform/tofu-modules/commit/fe3243067b684682be22661c993033cb2094f4fc))
+
 ## [1.12.8](https://github.com/nullplatform/tofu-modules/compare/v1.12.7...v1.12.8) (2025-12-22)
 
 
