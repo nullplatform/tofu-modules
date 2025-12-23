@@ -81,6 +81,7 @@ module "cert_manager" {
 | <a name="input_cloudflare_token"></a> [cloudflare\_token](#input\_cloudflare\_token) | The Cloudflare API token (minimum permissions: Zone:DNS:Edit and Zone:Read). | `string` | `""` | no |
 | <a name="input_gcp_sa_email"></a> [gcp\_sa\_email](#input\_gcp\_sa\_email) | The GCP service account email for cert-manager | `string` | `""` | no |
 | <a name="input_hosted_zone_name"></a> [hosted\_zone\_name](#input\_hosted\_zone\_name) | The hosted zone name (if applicable). | `string` | `""` | no |
+| <a name="input_private_domain_name"></a> [private\_domain\_name](#input\_private\_domain\_name) | n/a | `string` | `""` | no |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | The GCP project ID for cert-manager DNS01 solver | `string` | `""` | no |
 | <a name="input_region"></a> [region](#input\_region) | The AWS region. | `string` | `""` | no |
 <!-- END_TF_DOCS -->
