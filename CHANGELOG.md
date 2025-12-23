@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.10](https://github.com/nullplatform/tofu-modules/compare/v1.12.9...v1.12.10) (2025-12-23)
+
+
+### Bug Fixes
+
+* **cert manager:** fix linter ([#95](https://github.com/nullplatform/tofu-modules/issues/95)) ([260d4c2](https://github.com/nullplatform/tofu-modules/commit/260d4c246c25f924fe49ead3801562cf188b25f4))
+
 ## [1.12.9](https://github.com/nullplatform/tofu-modules/compare/v1.12.8...v1.12.9) (2025-12-23)
 
 
