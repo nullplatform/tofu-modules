@@ -33,10 +33,11 @@ locals {
         "eks.amazonaws.com/role-arn" = var.aws_iam_role_arn
       }
     }
-    extraArgs = concat(
-        var.public_hosted_zone_id != "" ? ["--zone-id-filter=${var.public_hosted_zone_id}"] : [],
-        var.private_hosted_zone_id != "" ? ["--zone-id-filter=${var.private_hosted_zone_id}"] : []
-    )
+    extraArgs = compact([
+      "--aws-zone-type=public",
+      "--zone-id-filter=${var.public_hosted_zone_id}",
+      "--domain-filter=${var.domain_filters}"
+    ])
   }
 
   provider_configs = {
