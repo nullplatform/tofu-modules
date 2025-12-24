@@ -5,6 +5,19 @@ resource "helm_release" "cert_manager" {
   namespace        = var.cert_manager_namespace
   create_namespace = true
   version          = var.cert_manager_version
+  disable_webhooks  = true
+  force_update      = true
+  wait              = true
+  wait_for_jobs     = true
+  timeout           = 600
+  atomic            = true
+  cleanup_on_fail   = true
+  replace           = true
+  recreate_pods     = true
+  reset_values      = true
+  reuse_values      = false
+  dependency_update = true
+  max_history       = 10
 
 
   values = [
@@ -20,7 +33,19 @@ resource "helm_release" "cert_manager_config" {
   create_namespace = true
   version          = var.cert_manager_config_version
   namespace        = var.cert_manager_namespace
-
+  disable_webhooks  = true
+  force_update      = true
+  wait              = true
+  wait_for_jobs     = true
+  timeout           = 600
+  atomic            = true
+  cleanup_on_fail   = true
+  replace           = true
+  recreate_pods     = true
+  reset_values      = false
+  reuse_values      = false
+  dependency_update = true
+  max_history       = 10
 
   values = [
     local.cert_manager_default_values,

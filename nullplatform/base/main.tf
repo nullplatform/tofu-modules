@@ -14,7 +14,7 @@ resource "helm_release" "base" {
   cleanup_on_fail   = true
   replace           = true
   recreate_pods     = true
-  reset_values      = false
+  reset_values      = true
   reuse_values      = false
   dependency_update = true
   max_history       = 10
