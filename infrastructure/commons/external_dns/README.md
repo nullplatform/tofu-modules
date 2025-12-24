@@ -2,36 +2,36 @@
 # Module: external_dns
 
 This OpenTofu module installs **ExternalDNS** using a Helm chart, enabling dynamic DNS record management through
-either **Google Cloud DNS** or **Cloudflare** as your DNS provider.
+either **AWS Route53** or **Cloudflare** as your DNS provider.
 
 
 ## Usage
 
-### Cloudflare example
+### AWS example
 
-```
+```hcl
 module "external_dns" {
-  source                       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/external_dns?ref=fix/change-version-name"
-  dns_provider_name            = "cloudflare"
-  domain                       = "implementations.nullaps.io"
-  external_dns_namespace       = "external-dns"
-  extra_args                   = ["--cloudflare-proxied"]
-  cloudflare_token             = "my-secret-token"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.0.0"
+
+  dns_provider_name      = "aws"
+  aws_region             = var.aws_region
+  aws_iam_role_arn       = var.aws_iam_role_arn
+  public_hosted_zone_id  = var.public_hosted_zone_id
+  private_hosted_zone_id = var.private_hosted_zone_id
+  domain_filters         = var.domain_filters
 }
 ```
 
-### Google Cloud DNS example
+### Cloudflare example
 
-```
+```hcl
 module "external_dns" {
-  source                 = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/external_dns?ref=v1.0.0"
-  dns_provider_name      = "google"
-  zone_name              = "myprivate"
-  project_id             = "myproject"
-  domain                 = "myprivate.zone"
-  external_dns_namespace = var.external_dns_namespace
-  external_dns_version   = var.external_dns_version
-  extra_args             = ["--google-zone-visibility=private"]
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.0.0"
+
+  dns_provider_name = "cloudflare"
+  cloudflare_token  = var.cloudflare_token
+  domain_filters    = var.domain_filters
+  aws_region        = var.aws_region
 }
 ```
 

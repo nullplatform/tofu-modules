@@ -5,39 +5,65 @@ This module installs cert-manager and applies the nullplatform configuration usi
 
 ## Usage
 
-### Basic example
+### AWS example
 
 ```hcl
 module "cert_manager" {
-  source                       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/cert_manager?ref=1.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.0.0"
 
+  cloud_provider      = "aws"
+  aws_sa_arn          = var.aws_sa_arn
+  aws_region          = var.aws_region
+  hosted_zone_name    = var.hosted_zone_name
+  private_domain_name = var.private_domain_name
+  account_slug        = var.account_slug
+}
+```
 
-  #Azure DNS configuration
-  azure_enabled                = true
-  azure_subscription_id        = var.subscription_id
-  azure_resource_group_name    = var.resource_group_name
-  azure_client_id              = var.azure_client_id
-  azure_client_secret          = var.azure_client_secret
-  azure_tenant_id              = var.azure_tenant_id
-  azure_hosted_zone_name       = var.azure_hosted_zone_name
-  gcp_enabled                  = false
-  cloudflare_enabled            = false
+### Azure example
 
-  #Cloudflare DNS configuration
-  cloudflare_enabled           = true
-  cloudflare_secret_name       = var.cloudflare_secret_name
-  cloudflare_token             = var.cloudflare_token
-  azure_subscription_id        = var.azure_subscription_id
-  gcp_enabled                  = false
-  azure_enabled                = false
+```hcl
+module "cert_manager" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.0.0"
 
-  #GCP Cloud DNS configuration
-  gcp_enabled                  = var.gcp_enabled
-  gcp_service_account_key      = var.gcp_service_account_key
+  cloud_provider            = "azure"
+  azure_client_id           = var.azure_client_id
+  azure_subscription_id     = var.azure_subscription_id
+  azure_resource_group_name = var.azure_resource_group_name
+  azure_tenant_id           = var.azure_tenant_id
+  azure_hosted_zone_name    = var.azure_hosted_zone_name
+  hosted_zone_name          = var.hosted_zone_name
+  private_domain_name       = var.private_domain_name
+  account_slug              = var.account_slug
+}
+```
 
-  hosted_zone_name             = var.hosted_zone_name
-  account_slug                 = "var.account_slug"
+### GCP example
 
+```hcl
+module "cert_manager" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.0.0"
+
+  cloud_provider      = "gcp"
+  gcp_sa_email        = var.gcp_sa_email
+  project_id          = var.project_id
+  hosted_zone_name    = var.hosted_zone_name
+  private_domain_name = var.private_domain_name
+  account_slug        = var.account_slug
+}
+```
+
+### Cloudflare example
+
+```hcl
+module "cert_manager" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.0.0"
+
+  cloud_provider      = "cloudflare"
+  cloudflare_token    = var.cloudflare_token
+  hosted_zone_name    = var.hosted_zone_name
+  private_domain_name = var.private_domain_name
+  account_slug        = var.account_slug
 }
 ```
 

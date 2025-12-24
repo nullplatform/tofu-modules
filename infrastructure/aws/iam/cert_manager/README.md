@@ -8,10 +8,11 @@ Additionally, it creates the required Kubernetes ServiceAccount and RBAC resourc
 
 ```hcl
 module "cert_manager_iam" {
-  source                             = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/cert_manager?ref=v1.0.0"
-  cluster_name                       = "my-cluster"
-  aws_iam_openid_connect_provider_arn = module.eks.oidc_provider_arn
-  hosted_zone_public_id              = "Z1234567890ABC"
+  source                              = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/cert_manager?ref=v1.0.0"
+  cluster_name                        = var.cluster_name
+  aws_iam_openid_connect_provider_arn = var.aws_iam_openid_connect_provider_arn
+  hosted_zone_public_id               = var.hosted_zone_public_id
+  hosted_zone_private_id              = var.hosted_zone_private_id
 }
 ```
 

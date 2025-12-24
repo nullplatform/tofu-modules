@@ -200,7 +200,7 @@ variable "azure_tenant_id" {
 
 # Type of DNS Provider (azure, aws, gcp, or external_dns)
 variable "dns_type" {
-  description = "Type of DNS Provider, ej: azure, aws, gcp, or external_dns"
+  description = "Type of DNS Provider, ej: azure, route53, or external_dns"
   type        = string
   default     = ""
 }

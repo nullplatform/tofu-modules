@@ -3,24 +3,26 @@
 ###############################################################################
 
 variable "external_dns_version" {
-  type    = string
-  default = "1.19.0"
-
+  description = "The version of ExternalDNS Helm chart to deploy"
+  type        = string
+  default     = "1.19.0"
 }
 
 variable "external_dns_namespace" {
-  type    = string
-  default = "external-dns"
+  description = "The Kubernetes namespace where ExternalDNS will be deployed"
+  type        = string
+  default     = "external-dns"
 }
 
 variable "domain_filters" {
-  type = string
+  description = "The domain filter to limit ExternalDNS to manage DNS records only for specific domains"
+  type        = string
 }
 
 variable "txt_owner_id" {
-  type    = string
-  default = "external_dns"
-
+  description = "The TXT owner ID used by ExternalDNS to identify DNS records it manages"
+  type        = string
+  default     = "external_dns"
 }
 
 variable "policy" {
@@ -45,9 +47,10 @@ variable "sources" {
 
 
 variable "cloudflare_token" {
-  type      = string
-  sensitive = true
-  default   = null
+  description = "The Cloudflare API token for DNS management (required when dns_provider_name is 'cloudflare')"
+  type        = string
+  sensitive   = true
+  default     = null
   validation {
     condition     = var.dns_provider_name != "cloudflare" || var.cloudflare_token != null
     error_message = "cloudflare_token is required when dns_provider_name is 'cloudflare'."
@@ -58,10 +61,15 @@ variable "cloudflare_token" {
 # AWS CONFIGURATION
 ###############################################################################
 
-variable "aws_region" {}
+variable "aws_region" {
+  description = "The AWS region where the Route53 hosted zones are located"
+  type        = string
+}
 
 variable "aws_iam_role_arn" {
-  default   = null
+  description = "The IAM role ARN for ExternalDNS to assume for Route53 access (required when dns_provider_name is 'aws')"
+  type        = string
+  default     = null
   validation {
     condition     = var.dns_provider_name != "aws" || var.aws_iam_role_arn != null
     error_message = "aws_iam_role_arn is required when dns_provider_name is 'aws'."
@@ -69,7 +77,9 @@ variable "aws_iam_role_arn" {
 }
 
 variable "public_hosted_zone_id" {
-  default   = null
+  description = "The Route53 public hosted zone ID for ExternalDNS to manage (required when dns_provider_name is 'aws')"
+  type        = string
+  default     = null
   validation {
     condition     = var.dns_provider_name != "aws" || var.public_hosted_zone_id != null
     error_message = "public_hosted_zone_id is required when dns_provider_name is 'aws'."
@@ -77,7 +87,9 @@ variable "public_hosted_zone_id" {
 }
 
 variable "private_hosted_zone_id" {
-  default   = null
+  description = "The Route53 private hosted zone ID for ExternalDNS to manage (required when dns_provider_name is 'aws')"
+  type        = string
+  default     = null
   validation {
     condition     = var.dns_provider_name != "aws" || var.private_hosted_zone_id != null
     error_message = "private_hosted_zone_id is required when dns_provider_name is 'aws'."

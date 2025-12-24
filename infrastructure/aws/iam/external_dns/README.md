@@ -7,11 +7,11 @@ It uses IRSA (IAM Roles for Service Accounts) to provide secure access from the 
 
 ```hcl
 module "external_dns_iam" {
-  source                             = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/external_dns?ref=v1.0.0"
-  cluster_name                       = "my-cluster"
-  aws_iam_openid_connect_provider_arn = module.eks.oidc_provider_arn
-  hosted_zone_public_id              = "Z1234567890ABC"
-  hosted_zone_private_id             = "Z0987654321DEF"
+  source                              = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/external_dns?ref=v1.0.0"
+  cluster_name                        = var.cluster_name
+  aws_iam_openid_connect_provider_arn = var.aws_iam_openid_connect_provider_arn
+  hosted_zone_public_id               = var.hosted_zone_public_id
+  hosted_zone_private_id              = var.hosted_zone_private_id
 }
 ```
 
