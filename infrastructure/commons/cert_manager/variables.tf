@@ -53,8 +53,6 @@ variable "azure_client_id" {
 
 variable "private_domain_name" {
   type    = string
-  default = ""
-
 }
 ###############################################################################
 # CERT-MANAGER CONFIGURATION
@@ -78,13 +76,11 @@ variable "cert_manager_config_version" {
 variable "hosted_zone_name" {
   description = "The hosted zone name (if applicable)."
   type        = string
-  default     = ""
 }
 
 variable "account_slug" {
   description = "The nullplatform account slug."
   type        = string
-  default     = ""
 }
 
 ###############################################################################
