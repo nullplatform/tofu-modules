@@ -23,7 +23,6 @@ module "cert_manager_iam" {
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
-| <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | n/a |
 
 ## Modules
 
@@ -36,9 +35,6 @@ module "cert_manager_iam" {
 | Name | Type |
 |------|------|
 | [aws_iam_policy.nullplatform_cert_manager_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [kubernetes_role_binding_v1.cert_manager_acme_dns01_route53_tokenrequest](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/role_binding_v1) | resource |
-| [kubernetes_role_v1.cert_manager_acme_dns01_route53_tokenrequest](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/role_v1) | resource |
-| [kubernetes_service_account_v1.cert_manager_acme_dns01_route53](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/service_account_v1) | resource |
 
 ## Inputs
 
@@ -53,5 +49,4 @@ module "cert_manager_iam" {
 | Name | Description |
 |------|-------------|
 | <a name="output_nullplatform_cert_manager_role_arn"></a> [nullplatform\_cert\_manager\_role\_arn](#output\_nullplatform\_cert\_manager\_role\_arn) | ARN of the cert-manager role |
-| <a name="output_nullplatform_cert_manager_service_account_name"></a> [nullplatform\_cert\_manager\_service\_account\_name](#output\_nullplatform\_cert\_manager\_service\_account\_name) | Name of the SA created |
 <!-- END_TF_DOCS -->
