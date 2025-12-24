@@ -72,7 +72,7 @@ variable "cert_manager_namespace" {
 
 variable "cert_manager_config_version" {
   type    = string
-  default = "2.26.0"
+  default = "2.28.0"
 }
 
 variable "hosted_zone_name" {
