@@ -9,20 +9,19 @@ resource "helm_release" "agent" {
   repository       = "https://nullplatform.github.io/helm-charts"
   namespace        = var.namespace
   version          = var.nullplatform_agent_helm_version
-  create_namespace = true
 
-  # Deployment behavior configuration
-  disable_webhooks  = true
+  create_namespace  = true
+  disable_webhooks  = false
   force_update      = true
   wait              = true
   wait_for_jobs     = true
   timeout           = 600
-  atomic            = true # Rollback on failure
+  atomic            = true
   cleanup_on_fail   = true
   replace           = true
   recreate_pods     = true
   reset_values      = true
-  reuse_values      = true
+  reuse_values      = false
   dependency_update = true
   max_history       = 10
 

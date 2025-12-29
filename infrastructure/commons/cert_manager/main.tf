@@ -3,9 +3,9 @@ resource "helm_release" "cert_manager" {
   repository       = "https://charts.jetstack.io"
   chart            = "cert-manager"
   namespace        = var.cert_manager_namespace
-  create_namespace = true
-  version          = var.cert_manager_version
-  disable_webhooks  = true
+
+  create_namespace  = true
+  disable_webhooks  = false
   force_update      = true
   wait              = true
   wait_for_jobs     = true
@@ -30,10 +30,11 @@ resource "helm_release" "cert_manager_config" {
   name             = "cert-manager-config"
   repository       = "https://nullplatform.github.io/helm-charts"
   chart            = "nullplatform-cert-manager-config"
-  create_namespace = true
   version          = var.cert_manager_config_version
   namespace        = var.cert_manager_namespace
-  disable_webhooks  = true
+
+  create_namespace  = true
+  disable_webhooks  = false
   force_update      = true
   wait              = true
   wait_for_jobs     = true
@@ -42,7 +43,7 @@ resource "helm_release" "cert_manager_config" {
   cleanup_on_fail   = true
   replace           = true
   recreate_pods     = true
-  reset_values      = false
+  reset_values      = true
   reuse_values      = false
   dependency_update = true
   max_history       = 10
