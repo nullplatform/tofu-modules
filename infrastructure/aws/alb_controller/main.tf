@@ -5,16 +5,17 @@ resource "helm_release" "aws_load_balancer_controller" {
   version    = var.aws_load_balancer_controller_version
   namespace  = "kube-system"
 
-  disable_webhooks  = true
+  create_namespace  = true
+  disable_webhooks  = false
   force_update      = true
   wait              = true
   wait_for_jobs     = true
   timeout           = 600
   atomic            = true
   cleanup_on_fail   = true
-  replace           = false
-  recreate_pods     = false
-  reset_values      = false
+  replace           = true
+  recreate_pods     = true
+  reset_values      = true
   reuse_values      = false
   dependency_update = true
   max_history       = 10

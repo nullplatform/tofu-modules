@@ -18,6 +18,6 @@ resource "helm_release" "prometheus" {
   reuse_values      = false
   dependency_update = true
   max_history       = 10
-  
+
   values           = [local.prometheus_values]
 }
