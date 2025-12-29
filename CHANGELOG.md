@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.0](https://github.com/nullplatform/tofu-modules/compare/v1.12.10...v1.13.0) (2025-12-29)
+
+
+### Features
+
+* **externaldns:** support multi external dns ([#97](https://github.com/nullplatform/tofu-modules/issues/97)) ([3ddbd8e](https://github.com/nullplatform/tofu-modules/commit/3ddbd8ebf152722be693539493229a6f6098a27c))
+
 ## [1.12.10](https://github.com/nullplatform/tofu-modules/compare/v1.12.9...v1.12.10) (2025-12-23)
 
 
