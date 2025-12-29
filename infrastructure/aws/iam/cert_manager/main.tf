@@ -35,7 +35,7 @@ resource "aws_iam_policy" "nullplatform_cert_manager_policy" {
           "route53:ListResourceRecordSets"
         ],
         "Resource" : ["arn:aws:route53:::hostedzone/${var.hosted_zone_public_id}",
-          "arn:aws:route53:::hostedzone/${var.hosted_zone_private_id}"]
+        "arn:aws:route53:::hostedzone/${var.hosted_zone_private_id}"]
       },
       {
         "Effect" : "Allow",

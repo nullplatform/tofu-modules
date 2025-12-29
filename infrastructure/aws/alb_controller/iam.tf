@@ -6,7 +6,7 @@ module "aws_load_balancer_controller_role" {
   policies = {
     lb_controller = aws_iam_policy.lb_controller.arn
   }
-  use_name_prefix                        = false
+  use_name_prefix = false
   oidc_providers = {
     main = {
       provider_arn               = var.aws_iam_openid_connect_provider

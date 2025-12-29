@@ -1,10 +1,10 @@
 resource "aws_route53_zone" "public_zone" {
-  name = var.domain_name
+  name          = var.domain_name
   force_destroy = true
 }
 
 resource "aws_route53_zone" "private_zone" {
-  name = var.domain_name
+  name          = var.domain_name
   force_destroy = true
   vpc {
     vpc_id = var.vpc_id

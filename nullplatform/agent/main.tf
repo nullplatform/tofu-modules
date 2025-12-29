@@ -4,11 +4,11 @@
 
 # Deploy nullplatform agent to Kubernetes cluster via Helm chart
 resource "helm_release" "agent" {
-  name             = "nullplatform-agent"
-  chart            = "nullplatform-agent"
-  repository       = "https://nullplatform.github.io/helm-charts"
-  namespace        = var.namespace
-  version          = var.nullplatform_agent_helm_version
+  name       = "nullplatform-agent"
+  chart      = "nullplatform-agent"
+  repository = "https://nullplatform.github.io/helm-charts"
+  namespace  = var.namespace
+  version    = var.nullplatform_agent_helm_version
 
   create_namespace  = true
   disable_webhooks  = false

@@ -27,8 +27,8 @@ variable "txt_owner_id" {
 
 variable "policy" {
   description = "The policy to external dns manage the DNS records"
-  type = string
-  default = "upsert-only"
+  type        = string
+  default     = "upsert-only"
   validation {
     condition     = contains(["create-only", "sync", "upsert-only"], var.policy)
     error_message = "policy must be either 'create-only', 'sync', 'upsert-only' ."
@@ -37,8 +37,8 @@ variable "policy" {
 
 variable "sources" {
   description = "Array contents the sources to external dns work"
-  type = list(string)
-  default = ["crd"]
+  type        = list(string)
+  default     = ["crd"]
 }
 
 ###############################################################################

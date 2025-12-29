@@ -1,10 +1,10 @@
 
 resource "helm_release" "istio_base" {
-  name             = "istio-base"
-  repository       = var.repository
-  chart            = "base"
-  namespace        = var.namespace
-  version          = var.istio_base_version
+  name       = "istio-base"
+  repository = var.repository
+  chart      = "base"
+  namespace  = var.namespace
+  version    = var.istio_base_version
 
   create_namespace  = true
   disable_webhooks  = false
@@ -71,7 +71,7 @@ resource "helm_release" "istio_ingressgateway" {
   dependency_update = true
   max_history       = 10
 
-  values     = [local.helm_values]
+  values = [local.helm_values]
 
 
 }
