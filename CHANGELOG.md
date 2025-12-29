@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.14.0](https://github.com/nullplatform/tofu-modules/compare/v1.13.0...v1.14.0) (2025-12-29)
+
+
+### Features
+
+* **azure:** Add private DNS zone module ([#90](https://github.com/nullplatform/tofu-modules/issues/90)) ([5d4399e](https://github.com/nullplatform/tofu-modules/commit/5d4399ea5f1823cc5d96c1075083b74d426b4ff1))
+
+
+### Bug Fixes
+
+* rename agent API key to AGENT-ASSOCIATION with minimal permissions ([#92](https://github.com/nullplatform/tofu-modules/issues/92)) ([1fb44b2](https://github.com/nullplatform/tofu-modules/commit/1fb44b2c7ead437e082142157baad98ee98d6a66))
+
+## [1.13.0](https://github.com/nullplatform/tofu-modules/compare/v1.12.10...v1.13.0) (2025-12-29)
+
+
+### Features
+
+* **externaldns:** support multi external dns ([#97](https://github.com/nullplatform/tofu-modules/issues/97)) ([3ddbd8e](https://github.com/nullplatform/tofu-modules/commit/3ddbd8ebf152722be693539493229a6f6098a27c))
+
 ## [1.12.10](https://github.com/nullplatform/tofu-modules/compare/v1.12.9...v1.12.10) (2025-12-23)
 
 
