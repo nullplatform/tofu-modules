@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.15.0](https://github.com/nullplatform/tofu-modules/compare/v1.14.0...v1.15.0) (2025-12-30)
+
+
+### Features
+
+* **esternal-dns:** resolve conflicts ([4f71b63](https://github.com/nullplatform/tofu-modules/commit/4f71b6359456c3c4e201deec7aed30c6b72092bd))
+* **tofu:** run fmt ([371342b](https://github.com/nullplatform/tofu-modules/commit/371342bf77151e4f5c70e4e3a3a27c605af16454))
+
 ## [1.14.0](https://github.com/nullplatform/tofu-modules/compare/v1.13.0...v1.14.0) (2025-12-29)
 
 
