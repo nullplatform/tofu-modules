@@ -6,7 +6,7 @@ locals {
     "${path.module}/templates/nullplatform_base_values.tmpl.yaml",
     {
       # ---- global ----
-      k8s_provider      = var.k8s_provider
+      k8s_provider        = var.k8s_provider
       installGatewayV2Crd = var.install_gateway_v2_crd ? "true" : "false"
       awsRegion           = var.aws_region
 

@@ -52,39 +52,39 @@ variable "azure_client_id" {
 
 
 variable "private_domain_name" {
-  type    = string
-  default = ""
-
+  description = "The private domain name for internal certificate issuance"
+  type        = string
 }
 ###############################################################################
 # CERT-MANAGER CONFIGURATION
 ###############################################################################
 
 variable "cert_manager_version" {
-  type    = string
-  default = "1.18.2"
+  description = "The version of cert-manager Helm chart to deploy"
+  type        = string
+  default     = "1.18.2"
 }
 
 variable "cert_manager_namespace" {
-  type    = string
-  default = "cert-manager"
+  description = "The Kubernetes namespace where cert-manager will be deployed"
+  type        = string
+  default     = "cert-manager"
 }
 
 variable "cert_manager_config_version" {
-  type    = string
-  default = "2.26.0"
+  description = "The version of the cert-manager configuration Helm chart"
+  type        = string
+  default     = "2.28.0"
 }
 
 variable "hosted_zone_name" {
   description = "The hosted zone name (if applicable)."
   type        = string
-  default     = ""
 }
 
 variable "account_slug" {
   description = "The nullplatform account slug."
   type        = string
-  default     = ""
 }
 
 ###############################################################################

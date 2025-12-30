@@ -18,7 +18,12 @@ output "private_zone_name" {
   value       = aws_route53_zone.private_zone.name
 }
 
-output "acm_certificate_arn" {
+/*output "acm_certificate_arn" {
   description = "The ARN of the ACM certificate associated with the Route 53 hosted zone"
   value       = module.aws_route53_acm.acm_certificate_arn
+}*/
+
+output "nameservers" {
+  description = "NS records for the public hosted zone"
+  value       = join("\n", aws_route53_zone.public_zone.name_servers)
 }

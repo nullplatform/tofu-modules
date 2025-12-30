@@ -1,11 +1,12 @@
 resource "helm_release" "base" {
-  name              = "nullplatform-base"
-  chart             = "nullplatform-base"
-  repository        = "https://nullplatform.github.io/helm-charts"
-  namespace         = var.namespace
-  version           = var.nullplatform_base_helm_version
+  name       = "nullplatform-base"
+  chart      = "nullplatform-base"
+  repository = "https://nullplatform.github.io/helm-charts"
+  namespace  = var.namespace
+  version    = var.nullplatform_base_helm_version
+
   create_namespace  = true
-  disable_webhooks  = true
+  disable_webhooks  = false
   force_update      = true
   wait              = true
   wait_for_jobs     = true
@@ -14,7 +15,7 @@ resource "helm_release" "base" {
   cleanup_on_fail   = true
   replace           = true
   recreate_pods     = true
-  reset_values      = false
+  reset_values      = true
   reuse_values      = false
   dependency_update = true
   max_history       = 10

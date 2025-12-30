@@ -3,24 +3,26 @@
 ###############################################################################
 
 variable "external_dns_version" {
-  type    = string
-  default = "1.19.0"
-
+  description = "The version of ExternalDNS Helm chart to deploy"
+  type        = string
+  default     = "1.19.0"
 }
 
 variable "external_dns_namespace" {
-  type    = string
-  default = "external-dns"
+  description = "The Kubernetes namespace where ExternalDNS will be deployed"
+  type        = string
+  default     = "external-dns"
 }
-variable "domain" {
-  type = list(string)
 
+variable "domain_filters" {
+  description = "The domain filter to limit ExternalDNS to manage DNS records only for specific domains"
+  type        = string
 }
 
 variable "txt_owner_id" {
-  type    = string
-  default = "external_dns"
-
+  description = "The TXT owner ID used by ExternalDNS to identify DNS records it manages"
+  type        = string
+  default     = "external_dns"
 }
 
 variable "policy" {
@@ -33,10 +35,10 @@ variable "policy" {
   }
 }
 
-variable "release_name" {
-  type    = string
-  default = "external-dns"
-
+variable "sources" {
+  description = "Array contents the sources to external dns work"
+  type        = list(string)
+  default     = ["crd"]
 }
 
 ###############################################################################
@@ -45,12 +47,52 @@ variable "release_name" {
 
 
 variable "cloudflare_token" {
-  type      = string
-  sensitive = true
-  default   = null
+  description = "The Cloudflare API token for DNS management (required when dns_provider_name is 'cloudflare')"
+  type        = string
+  sensitive   = true
+  default     = null
   validation {
     condition     = var.dns_provider_name != "cloudflare" || var.cloudflare_token != null
     error_message = "cloudflare_token is required when dns_provider_name is 'cloudflare'."
+  }
+}
+
+###############################################################################
+# AWS CONFIGURATION
+###############################################################################
+
+variable "aws_region" {
+  description = "The AWS region where the Route53 hosted zones are located"
+  type        = string
+}
+
+variable "aws_iam_role_arn" {
+  description = "The IAM role ARN for ExternalDNS to assume for Route53 access (required when dns_provider_name is 'aws')"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.dns_provider_name != "aws" || var.aws_iam_role_arn != null
+    error_message = "aws_iam_role_arn is required when dns_provider_name is 'aws'."
+  }
+}
+
+variable "public_hosted_zone_id" {
+  description = "The Route53 public hosted zone ID for ExternalDNS to manage (required when dns_provider_name is 'aws')"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.dns_provider_name != "aws" || var.public_hosted_zone_id != null
+    error_message = "public_hosted_zone_id is required when dns_provider_name is 'aws'."
+  }
+}
+
+variable "private_hosted_zone_id" {
+  description = "The Route53 private hosted zone ID for ExternalDNS to manage (required when dns_provider_name is 'aws')"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.dns_provider_name != "aws" || var.private_hosted_zone_id != null
+    error_message = "private_hosted_zone_id is required when dns_provider_name is 'aws'."
   }
 }
 
@@ -62,36 +104,7 @@ variable "dns_provider_name" {
   type        = string
   description = "The DNS provider to use with ExternalDNS "
   validation {
-    condition     = contains(["cloudflare", "google"], var.dns_provider_name)
-    error_message = "dns_provider_name must be either 'cloudflare' or 'google'."
+    condition     = contains(["cloudflare", "aws"], var.dns_provider_name)
+    error_message = "dns_provider_name must be either 'cloudflare' or 'aws'."
   }
-}
-
-variable "extra_args" {
-  type = list(string)
-}
-
-###############################################################################
-# GOOGLE CLOUD DNS CONFIGURATION
-###############################################################################
-
-variable "project_id" {
-  type    = string
-  default = " "
-
-}
-
-variable "ksa_name" {
-  type    = string
-  default = "external-dns"
-}
-
-variable "gsa_email" {
-  type    = string
-  default = "external-dns"
-}
-
-variable "cloudflare_api_token" {
-  type    = string
-  default = "my-secret-token"
 }

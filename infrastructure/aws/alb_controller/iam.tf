@@ -6,7 +6,7 @@ module "aws_load_balancer_controller_role" {
   policies = {
     lb_controller = aws_iam_policy.lb_controller.arn
   }
-  use_name_prefix                        = false
+  use_name_prefix = false
   oidc_providers = {
     main = {
       provider_arn               = var.aws_iam_openid_connect_provider
@@ -15,7 +15,7 @@ module "aws_load_balancer_controller_role" {
   }
 }
 
-resource "kubernetes_service_account" "aws_load_balancer_controller_sa" {
+resource "kubernetes_service_account_v1" "aws_load_balancer_controller_sa" {
   metadata {
     name      = "aws-load-balancer-controller"
     namespace = "kube-system"

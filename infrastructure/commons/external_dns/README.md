@@ -2,36 +2,36 @@
 # Module: external_dns
 
 This OpenTofu module installs **ExternalDNS** using a Helm chart, enabling dynamic DNS record management through
-either **Google Cloud DNS** or **Cloudflare** as your DNS provider.
+either **AWS Route53** or **Cloudflare** as your DNS provider.
 
 
 ## Usage
 
-### Cloudflare example
+### AWS example
 
-```
+```hcl
 module "external_dns" {
-  source                       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/external_dns?ref=fix/change-version-name"
-  dns_provider_name            = "cloudflare"
-  domain                       = "implementations.nullaps.io"
-  external_dns_namespace       = "external-dns"
-  extra_args                   = ["--cloudflare-proxied"]
-  cloudflare_token             = "my-secret-token"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.0.0"
+
+  dns_provider_name      = "aws"
+  aws_region             = var.aws_region
+  aws_iam_role_arn       = var.aws_iam_role_arn
+  public_hosted_zone_id  = var.public_hosted_zone_id
+  private_hosted_zone_id = var.private_hosted_zone_id
+  domain_filters         = var.domain_filters
 }
 ```
 
-### Google Cloud DNS example
+### Cloudflare example
 
-```
+```hcl
 module "external_dns" {
-  source                 = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/external_dns?ref=v1.0.0"
-  dns_provider_name      = "google"
-  zone_name              = "myprivate"
-  project_id             = "myproject"
-  domain                 = "myprivate.zone"
-  external_dns_namespace = var.external_dns_namespace
-  external_dns_version   = var.external_dns_version
-  extra_args             = ["--google-zone-visibility=private"]
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.0.0"
+
+  dns_provider_name = "cloudflare"
+  cloudflare_token  = var.cloudflare_token
+  domain_filters    = var.domain_filters
+  aws_region        = var.aws_region
 }
 ```
 
@@ -61,17 +61,16 @@ module "external_dns" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_cloudflare_api_token"></a> [cloudflare\_api\_token](#input\_cloudflare\_api\_token) | n/a | `string` | `"my-secret-token"` | no |
-| <a name="input_cloudflare_token"></a> [cloudflare\_token](#input\_cloudflare\_token) | n/a | `string` | `null` | no |
+| <a name="input_aws_iam_role_arn"></a> [aws\_iam\_role\_arn](#input\_aws\_iam\_role\_arn) | The IAM role ARN for ExternalDNS to assume for Route53 access (required when dns\_provider\_name is 'aws') | `string` | `null` | no |
+| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region where the Route53 hosted zones are located | `string` | n/a | yes |
+| <a name="input_cloudflare_token"></a> [cloudflare\_token](#input\_cloudflare\_token) | The Cloudflare API token for DNS management (required when dns\_provider\_name is 'cloudflare') | `string` | `null` | no |
 | <a name="input_dns_provider_name"></a> [dns\_provider\_name](#input\_dns\_provider\_name) | The DNS provider to use with ExternalDNS | `string` | n/a | yes |
-| <a name="input_domain"></a> [domain](#input\_domain) | n/a | `list(string)` | n/a | yes |
-| <a name="input_external_dns_namespace"></a> [external\_dns\_namespace](#input\_external\_dns\_namespace) | n/a | `string` | `"external-dns"` | no |
-| <a name="input_external_dns_version"></a> [external\_dns\_version](#input\_external\_dns\_version) | n/a | `string` | `"1.19.0"` | no |
-| <a name="input_extra_args"></a> [extra\_args](#input\_extra\_args) | n/a | `list(string)` | n/a | yes |
-| <a name="input_gsa_email"></a> [gsa\_email](#input\_gsa\_email) | n/a | `string` | `"external-dns"` | no |
-| <a name="input_ksa_name"></a> [ksa\_name](#input\_ksa\_name) | n/a | `string` | `"external-dns"` | no |
+| <a name="input_domain_filters"></a> [domain\_filters](#input\_domain\_filters) | The domain filter to limit ExternalDNS to manage DNS records only for specific domains | `string` | n/a | yes |
+| <a name="input_external_dns_namespace"></a> [external\_dns\_namespace](#input\_external\_dns\_namespace) | The Kubernetes namespace where ExternalDNS will be deployed | `string` | `"external-dns"` | no |
+| <a name="input_external_dns_version"></a> [external\_dns\_version](#input\_external\_dns\_version) | The version of ExternalDNS Helm chart to deploy | `string` | `"1.19.0"` | no |
 | <a name="input_policy"></a> [policy](#input\_policy) | The policy to external dns manage the DNS records | `string` | `"upsert-only"` | no |
-| <a name="input_project_id"></a> [project\_id](#input\_project\_id) | n/a | `string` | `" "` | no |
-| <a name="input_release_name"></a> [release\_name](#input\_release\_name) | n/a | `string` | `"external-dns"` | no |
-| <a name="input_txt_owner_id"></a> [txt\_owner\_id](#input\_txt\_owner\_id) | n/a | `string` | `"external_dns"` | no |
+| <a name="input_private_hosted_zone_id"></a> [private\_hosted\_zone\_id](#input\_private\_hosted\_zone\_id) | The Route53 private hosted zone ID for ExternalDNS to manage (required when dns\_provider\_name is 'aws') | `string` | `null` | no |
+| <a name="input_public_hosted_zone_id"></a> [public\_hosted\_zone\_id](#input\_public\_hosted\_zone\_id) | The Route53 public hosted zone ID for ExternalDNS to manage (required when dns\_provider\_name is 'aws') | `string` | `null` | no |
+| <a name="input_sources"></a> [sources](#input\_sources) | Array contents the sources to external dns work | `list(string)` | <pre>[<br/>  "crd"<br/>]</pre> | no |
+| <a name="input_txt_owner_id"></a> [txt\_owner\_id](#input\_txt\_owner\_id) | The TXT owner ID used by ExternalDNS to identify DNS records it manages | `string` | `"external_dns"` | no |
 <!-- END_TF_DOCS -->

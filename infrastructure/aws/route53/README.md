@@ -26,12 +26,6 @@ module "route53" {
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 6.0 |
 
-## Modules
-
-| Name | Source | Version |
-|------|--------|---------|
-| <a name="module_aws_route53_acm"></a> [aws\_route53\_acm](#module\_aws\_route53\_acm) | ../acm | n/a |
-
 ## Resources
 
 | Name | Type |
@@ -50,7 +44,7 @@ module "route53" {
 
 | Name | Description |
 |------|-------------|
-| <a name="output_acm_certificate_arn"></a> [acm\_certificate\_arn](#output\_acm\_certificate\_arn) | The ARN of the ACM certificate associated with the Route 53 hosted zone |
+| <a name="output_nameservers"></a> [nameservers](#output\_nameservers) | NS records for the public hosted zone |
 | <a name="output_private_zone_id"></a> [private\_zone\_id](#output\_private\_zone\_id) | The ID of the private Route 53 hosted zone |
 | <a name="output_private_zone_name"></a> [private\_zone\_name](#output\_private\_zone\_name) | The domain name of the private Route 53 hosted zone |
 | <a name="output_public_zone_id"></a> [public\_zone\_id](#output\_public\_zone\_id) | The ID of the public Route 53 hosted zone |
