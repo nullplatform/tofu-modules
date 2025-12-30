@@ -1,3 +1,48 @@
+# Module: gke
+
+This module provisions a Google Kubernetes Engine (GKE) cluster using OpenTofu.
+It is designed as a reusable building block to create and manage Kubernetes clusters in a consistent, repeatable way across environments.
+
+
+## Usage
+
+```hcl
+module "gke" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/gke?ref=v1.13.0"
+
+  project_id        = var.gcp_project_id
+  cluster_name      = var.cluster_name
+  region            = var.region
+  network_name      = module.vpc.network_name
+  subnetwork_name   = "subnet-gke"
+  ip_range_pods     = "pods"
+  ip_range_services = "services"
+
+  master_authorized_networks = var.master_authorized_networks
+
+  node_pools = [
+    {
+      name         = "system-pool"
+      machine_type = var.system_pool_machine_type
+      min_count    = 1
+      max_count    = 3
+      disk_size_gb = 50
+    },
+    {
+      name         = "workload-pool"
+      machine_type = var.workload_pool_machine_type
+      min_count    = 1
+      max_count    = 5
+      disk_size_gb = 100
+    }
+  ]
+
+
+}
+
+```
+
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
