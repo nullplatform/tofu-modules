@@ -4,4 +4,4 @@ on:
     types: [opened, edited, synchronize, reopened]
 jobs:
   docs:
-    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/conventional-commit.ymll@main
+    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/conventional-commit.yml@main
