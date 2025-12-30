@@ -2,9 +2,10 @@ module "gke" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/private-cluster"
   version = "~> 33.0"
 
-  project_id = var.project_id
-  name       = var.cluster_name
-  region     = var.region
+  project_id          = var.project_id
+  name                = var.cluster_name
+  region              = var.region
+  deletion_protection = var.deletion_protection
 
   network           = var.network_name
   subnetwork        = var.subnetwork_name
