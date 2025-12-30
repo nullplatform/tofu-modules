@@ -55,3 +55,9 @@ variable "master_authorized_networks" {
   description = "List of master authorized networks"
   default     = []
 }
+
+variable "deletion_protection" {
+  type    = bool
+  default = false
+
+}
