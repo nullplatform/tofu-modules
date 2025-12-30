@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.15.1](https://github.com/nullplatform/tofu-modules/compare/v1.15.0...v1.15.1) (2025-12-30)
+
+
+### Bug Fixes
+
+* **gke:** add protection destroy as false ([#102](https://github.com/nullplatform/tofu-modules/issues/102)) ([26f0788](https://github.com/nullplatform/tofu-modules/commit/26f07883fd2bf6d0f351755d0e730fecc281e49a))
+
 ## [1.15.0](https://github.com/nullplatform/tofu-modules/compare/v1.14.0...v1.15.0) (2025-12-30)
 
 
