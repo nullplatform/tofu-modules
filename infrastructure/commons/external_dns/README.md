@@ -6,6 +6,7 @@ either **AWS Route53** or **Cloudflare** as your DNS provider.
 
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ### AWS example
 
@@ -35,6 +36,7 @@ module "external_dns" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

@@ -3,6 +3,7 @@
 Sets up nullplatform Git provider integrations for GitLab or GitHub, including collaborator access and installation metadata.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 
 **Usage for GitHub:**
@@ -34,6 +35,7 @@ module "code_repository" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

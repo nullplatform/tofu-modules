@@ -4,6 +4,7 @@ This Tofu module clones a Git repository containing service and action specifica
 It also patches the target NRN with logging and metrics providers, then cleans up the cloned repository after execution.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ```hcl
 module "scope_definition" {
@@ -13,6 +14,7 @@ module "scope_definition" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

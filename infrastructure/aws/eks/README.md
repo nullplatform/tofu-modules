@@ -5,6 +5,7 @@ essential addons like CoreDNS, kube-proxy, and VPC-CNI, along with configurable 
 execution.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ```hcl
 module "eks" {
@@ -20,6 +21,7 @@ module "eks" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

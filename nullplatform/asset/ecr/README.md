@@ -4,6 +4,7 @@ This module registers an **Amazon ECR registry** with nullplatform by creating t
 provisioning IAM credentials for build workflows.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ### Basic example
 
@@ -16,6 +17,7 @@ module "ecr" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

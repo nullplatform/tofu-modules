@@ -3,6 +3,7 @@
 Deploys **Prometheus** using Helm.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ```hcl
 module "prometheus" {
@@ -16,6 +17,7 @@ module "prometheus" {
 This module only installs Prometheus; you must configure the metrics provider in order to integrate with Null Platform.
 
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

@@ -4,6 +4,7 @@ This module creates the IAM role and policy required for External DNS to manage 
 It uses IRSA (IAM Roles for Service Accounts) to provide secure access from the Kubernetes service account to AWS resources.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ```hcl
 module "external_dns_iam" {
@@ -15,6 +16,7 @@ module "external_dns_iam" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 
 

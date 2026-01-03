@@ -16,6 +16,7 @@ This module creates an Azure Kubernetes Service (AKS) cluster using the official
 - Configurable tags for resource management
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ### Example with resource dependencies
 
@@ -34,6 +35,7 @@ module "aks" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 ## Node pool configuration
 
 The module creates two node pools:

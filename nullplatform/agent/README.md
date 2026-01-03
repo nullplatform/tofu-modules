@@ -3,6 +3,7 @@
 This code installs and manages the nullplatform agent in a Kubernetes cluster using a Helm chart from the nullplatform Helm repository. It ensures a controlled, reliable deployment with rollback and waiting behavior configured for stability and consistency.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ### Basic example
 
@@ -17,6 +18,7 @@ module "cloud_aws_agent" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

@@ -3,6 +3,7 @@
 This Terraform module creates user records in nullplatform and assigns the specified roles to each account using authorization grants.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ```hcl
 module "users" {
@@ -11,6 +12,7 @@ module "users" {
   nullplatform_users = var.nullplatform_users
 }
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

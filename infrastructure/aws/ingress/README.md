@@ -4,6 +4,7 @@ This module creates Kubernetes ingress resources for both internal and internet-
 It sets up initial ingress configurations with SSL termination and custom 404 responses for the nullplatform environment.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ```hcl
 module "ingress" {
@@ -12,6 +13,7 @@ module "ingress" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 
 

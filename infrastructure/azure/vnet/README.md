@@ -10,6 +10,7 @@ This module creates an Azure Virtual Network with subnets using the Azure Verifi
 - Output subnet IDs mapped by name for easy reference
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ### Basic Example
 
@@ -27,6 +28,7 @@ module "vnet" {
 
 
 
+<!-- END_MODULE_USAGE -->
 ## Using Subnet Outputs
 
 The module outputs `subnet_ids_by_name` which maps subnet names to their IDs:

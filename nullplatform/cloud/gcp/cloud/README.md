@@ -3,6 +3,7 @@
 Configures nullplatform for Google Cloud by registering the project, location, networking domain.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ### Basic example
 
@@ -21,6 +22,7 @@ module "cloud_gcp" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

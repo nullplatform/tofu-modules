@@ -10,6 +10,7 @@ This module creates a private DNS zone in Azure with optional virtual network li
 - Supports configurable tags for resource management
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ### Basic Example
 
@@ -26,6 +27,7 @@ module "private_dns" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 ## Important Notes
 
 - **Domain name**: Can be any valid DNS domain name for private resolution (e.g., `privatelink.database.windows.net`, `internal.company.local`)

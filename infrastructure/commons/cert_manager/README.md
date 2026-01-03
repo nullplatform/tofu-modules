@@ -4,6 +4,7 @@
 This module installs cert-manager and applies the nullplatform configuration using Helm charts.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ### AWS example
 
@@ -68,6 +69,7 @@ module "cert_manager" {
 ```
 
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

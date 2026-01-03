@@ -9,6 +9,7 @@ This module creates an Azure resource group.
 - Outputs the resource group name and location for use in other modules  
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ### Basic Example
 
@@ -21,6 +22,7 @@ module "resource_group" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 ## Important notes
 
 - **Resource group name**: Must be unique within your Azure subscription

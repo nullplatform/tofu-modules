@@ -9,6 +9,7 @@ This module creates a public DNS zone in Azure.
 - Outputs name servers for domain delegation  
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ### Basic Example
 
@@ -21,6 +22,7 @@ module "dns" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 ## Important notes
 
 - **Domain name**: Must be a valid DNS domain (e.g., example.com or subdomain.example.com)

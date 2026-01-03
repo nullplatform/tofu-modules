@@ -4,6 +4,7 @@ This Tofu code creates a notification channel in nullplatform that links to a sp
 It injects the agent’s API key, command configuration, and optional overrides, while preserving any filters defined in the original template.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ```hcl
 module "scope_definition_agent_association" {
@@ -16,6 +17,7 @@ module "scope_definition_agent_association" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

@@ -11,6 +11,7 @@ This module creates an Azure Container Registry using the Azure Verified Module 
 - Includes name validation to ensure compliance with Azure naming requirements
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ### Basic example
 
@@ -38,6 +39,7 @@ module "acr" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 ## Important notes
 
 - **ACR name requirements**: Must be globally unique, 5–50 characters long, and use only lowercase alphanumeric characters

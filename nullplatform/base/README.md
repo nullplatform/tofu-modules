@@ -6,6 +6,7 @@ For more information, see the [our documentation](https://docs.nullplatform.com/
 
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ### Basic example
 
@@ -21,6 +22,7 @@ module "base" {
 
 
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

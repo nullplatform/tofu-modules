@@ -5,6 +5,7 @@ It uses IRSA (IAM Roles for Service Accounts) to provide secure access from the 
 Additionally, it creates the required Kubernetes ServiceAccount and RBAC resources for the DNS01 solver.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ```hcl
 module "cert_manager_iam" {
@@ -16,6 +17,7 @@ module "cert_manager_iam" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 
 

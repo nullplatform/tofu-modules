@@ -5,6 +5,7 @@ It includes NAT gateway configuration for internet access from private subnets a
 integration.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ```hcl
 module "vpc" {
@@ -16,6 +17,7 @@ module "vpc" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

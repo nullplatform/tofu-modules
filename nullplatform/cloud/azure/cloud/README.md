@@ -5,6 +5,7 @@ Creates the nullplatform Azure cloud configuration with account metadata and DNS
 hosted zones and domain.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ### Basic example
 
@@ -23,6 +24,7 @@ module "cloud_azure" {
 ```
 
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

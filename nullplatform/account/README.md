@@ -4,6 +4,7 @@ This module creates **nullplatform accounts** from a provided map, configuring r
 for each account entry.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ### Basic example
 
@@ -15,6 +16,7 @@ module "account" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

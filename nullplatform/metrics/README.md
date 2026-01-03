@@ -3,6 +3,7 @@
 This Terraform module configures the Prometheus integration in nullplatform.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ```hcl
 module "metrics" {
@@ -17,6 +18,7 @@ module "metrics" {
 ***Important!***
 This module only configure  the provider of metrics
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

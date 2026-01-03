@@ -4,6 +4,7 @@
 This module installs **Istio** using Helm charts, including the base components, control plane (`istiod`), and ingress gateway.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ### Basic example
 
@@ -14,6 +15,7 @@ module "istio" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

@@ -3,6 +3,7 @@
 Creates the nullplatform AWS cloud configuration with account metadata and DNS settings sourced from the provided hosted zones and domain.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ### Basic example
 
@@ -20,6 +21,7 @@ module "cloud_aws" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

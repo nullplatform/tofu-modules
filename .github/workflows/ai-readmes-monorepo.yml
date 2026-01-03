@@ -1,0 +1,313 @@
+name: Update module READMEs (GitHub Models)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+  models: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      modules: ${{ steps.modules.outputs.modules }}
+      origin: ${{ steps.repo.outputs.origin }}
+      module_host: ${{ steps.repo.outputs.module_host }}
+      repo_org: ${{ steps.repo.outputs.repo_org }}
+      repo_name: ${{ steps.repo.outputs.repo_name }}
+      preferred_source_first: ${{ steps.repo.outputs.preferred_source_first }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Derive repository metadata
+        id: repo
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          from urllib.parse import urlparse
+
+          origin = subprocess.run(
+              ["git", "remote", "get-url", "origin"],
+              check=True,
+              capture_output=True,
+              text=True,
+          ).stdout.strip()
+          module_host = ""
+          repo_org = ""
+          repo_name = ""
+          if origin.startswith("git@"):
+              _, remainder = origin.split("@", 1)
+              host_part, path_part = remainder.split(":", 1)
+              module_host = host_part
+              path = path_part
+          else:
+              parsed = urlparse(origin)
+              module_host = parsed.hostname or "github.com"
+              path = parsed.path.lstrip("/")
+          if path.endswith(".git"):
+              path = path[:-4]
+          segments = [segment for segment in path.split("/") if segment]
+          if len(segments) >= 2:
+              repo_org = "/".join(segments[:-1])
+              repo_name = segments[-1]
+          elif len(segments) == 1:
+              repo_name = segments[0]
+          preferred = "github"
+          if module_host.endswith("gitlab.com"):
+              preferred = "gitlab"
+          elif module_host.endswith("github.com"):
+              preferred = "github"
+          data = {
+              "origin": origin,
+              "module_host": module_host or "github.com",
+              "repo_org": repo_org or "<org>",
+              "repo_name": repo_name or "<repo>",
+              "preferred_source_first": preferred,
+          }
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+              for key, value in data.items():
+                  fh.write(f"{key}={value}\n")
+          PY
+
+      - name: Discover Terraform modules
+        id: modules
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path('.').resolve()
+          modules = []
+          for main_file in sorted(root.rglob('main.tf')):
+              module_dir = main_file.parent
+              try:
+                  rel = module_dir.relative_to(root)
+              except ValueError:
+                  continue
+              parts = rel.parts
+              if not parts:
+                  continue
+              if any(part.startswith('.') for part in parts):
+                  continue
+              if parts[0] == '.github':
+                  continue
+              if not (module_dir / 'README.md').exists():
+                  continue
+              modules.append(str(rel))
+          matrix_data = json.dumps(modules)
+          print(f"Discovered {len(modules)} module(s)")
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
+              fh.write(f"modules={matrix_data}\n")
+          PY
+
+  update:
+    needs: discover
+    if: ${{ needs.discover.outputs.modules != '' && needs.discover.outputs.modules != '[]' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module_path: ${{ fromJson(needs.discover.outputs.modules) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure Usage markers exist
+        run: |
+          python3 .github/scripts/ensure_usage_markers.py "${{ matrix.module_path }}/README.md"
+
+      - name: Verify markers in README
+        id: check_usage
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+
+          begin = '<!-- BEGIN_MODULE_USAGE -->'
+          end = '<!-- END_MODULE_USAGE -->'
+          readme = Path('${{ matrix.module_path }}/README.md')
+          skip = True
+          if readme.exists():
+              text = readme.read_text(encoding='utf-8')
+              skip = not (begin in text and end in text)
+          if skip:
+              print(f"::notice::Skipping {readme} because module usage markers are missing")
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
+              fh.write(f"skip={'true' if skip else 'false'}\n")
+          PY
+
+      - name: Build Usage context
+        id: context
+        if: ${{ steps.check_usage.outputs.skip != 'true' }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import re
+          import sys
+          from pathlib import Path
+
+          sys.path.insert(0, str(Path('.github/scripts').resolve()))
+          from parse_tf_defaults import find_variable_defaults
+
+          begin = '<!-- BEGIN_MODULE_USAGE -->'
+          end = '<!-- END_MODULE_USAGE -->'
+          workspace = Path(os.environ['GITHUB_WORKSPACE'])
+          module_path = Path('${{ matrix.module_path }}')
+          readme_path = workspace / module_path / 'README.md'
+          if not readme_path.exists():
+              raise SystemExit(f"README not found at {readme_path}")
+          text = readme_path.read_text(encoding='utf-8')
+          try:
+              start = text.index(begin) + len(begin)
+              finish = text.index(end, start)
+          except ValueError as exc:
+              raise SystemExit(f"Usage markers missing in {readme_path}") from exc
+          usage_block = text[start:finish].strip('\n')
+          var_file = workspace / module_path / 'variables.tf'
+          defaults_map: dict[str, bool] = {}
+          if var_file.exists():
+              defaults_map = find_variable_defaults(var_file.read_text(encoding='utf-8'))
+          required_vars = sorted([name for name, has_default in defaults_map.items() if not has_default])
+          optional_vars = sorted([name for name, has_default in defaults_map.items() if has_default])
+          existing_vars: list[str] = []
+          for match in re.findall(r"var\.([A-Za-z0-9_]+)", usage_block):
+              if match not in existing_vars:
+                  existing_vars.append(match)
+          variables_input = ''
+          if var_file.exists():
+              variables_input = f"variables={module_path}/variables.tf"
+          outputs = {
+              'required_vars': json.dumps(required_vars),
+              'optional_vars_with_default': json.dumps(optional_vars),
+              'existing_usage_vars_in_readme': json.dumps(existing_vars),
+              'variables_file_input': variables_input,
+          }
+          gh_output = Path(os.environ['GITHUB_OUTPUT'])
+          with gh_output.open('a', encoding='utf-8') as fh:
+              fh.write("usage_block<<'EOF'\n")
+              fh.write(usage_block)
+              fh.write("\nEOF\n")
+              for key, value in outputs.items():
+                  fh.write(f"{key}={value}\n")
+          PY
+
+      - name: Generate module Usage content
+        id: ai_usage
+        if: ${{ steps.check_usage.outputs.skip != 'true' }}
+        uses: actions/ai-inference@v1
+        with:
+          model: gpt-4o-mini
+          temperature: 0.2
+          max-tokens: 800
+          prompt-file: .github/prompts/module-usage.prompt.yml
+          inputs: |
+            module_path=${{ matrix.module_path }}
+            origin=${{ needs.discover.outputs.origin }}
+            module_host=${{ needs.discover.outputs.module_host }}
+            repo_org=${{ needs.discover.outputs.repo_org }}
+            repo_name=${{ needs.discover.outputs.repo_name }}
+            preferred_source_first=${{ needs.discover.outputs.preferred_source_first }}
+            required_vars=${{ steps.context.outputs.required_vars }}
+            optional_vars_with_default=${{ steps.context.outputs.optional_vars_with_default }}
+            existing_usage_vars_in_readme=${{ steps.context.outputs.existing_usage_vars_in_readme }}
+            existing_usage_block<<'EOF'
+            ${{ steps.context.outputs.usage_block }}
+            EOF
+          file-inputs: |
+            readme=${{ matrix.module_path }}/README.md
+            ${{ steps.context.outputs.variables_file_input }}
+
+      - name: Write AI response to disk
+        id: usage_file
+        if: ${{ steps.check_usage.outputs.skip != 'true' }}
+        run: |
+          cat <<'EOF' > ${RUNNER_TEMP}/usage.md
+          ${{ steps.ai_usage.outputs.response }}
+          EOF
+
+      - name: Update README Usage block
+        if: ${{ steps.check_usage.outputs.skip != 'true' }}
+        run: |
+          python3 .github/scripts/replace_usage_block.py "${{ matrix.module_path }}/README.md" "${RUNNER_TEMP}/usage.md"
+
+      - name: Rebuild terraform-docs section
+        if: ${{ steps.check_usage.outputs.skip != 'true' }}
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:${{ github.workspace }}" \
+            -w "${{ github.workspace }}/${{ matrix.module_path }}" \
+            quay.io/terraform-docs/terraform-docs:latest \
+            markdown table --output-file README.md --output-mode inject .
+
+      - name: Prepare artifact name
+        id: artifact_name
+        if: ${{ steps.check_usage.outputs.skip != 'true' }}
+        run: |
+          name='${{ matrix.module_path }}'
+          safe_name=${name//\//_}
+          echo "value=$safe_name" >> "$GITHUB_OUTPUT"
+
+      - name: Upload README artifact
+        if: ${{ steps.check_usage.outputs.skip != 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: module-readme-${{ steps.artifact_name.outputs.value }}
+          path: ${{ matrix.module_path }}/README.md
+          if-no-files-found: error
+
+  pr:
+    needs:
+      - discover
+      - update
+    if: ${{ needs.discover.outputs.modules != '' && needs.discover.outputs.modules != '[]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download README artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: module-readme-*
+          merge-multiple: true
+          path: .
+          if-no-files-found: ignore
+
+      - name: Configure Git user
+        run: |
+          git config user.name "nullplatform-bot"
+          git config user.email "bot@nullplatform.io"
+
+      - name: Detect content changes
+        id: diff
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git status -sb
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create pull request
+        if: ${{ steps.diff.outputs.changed == 'true' }}
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: automation/ai-readmes
+          commit-message: docs: update module usage blocks (AI)
+          title: docs: update module usage blocks (AI)
+          body: |
+            This PR refreshes each module README Usage block via GitHub Models.
+            Changes are restricted to the <!-- BEGIN_MODULE_USAGE --> / <!-- END_MODULE_USAGE --> section
+            plus terraform-docs reinjection.
+          add-paths: |
+            **/README.md

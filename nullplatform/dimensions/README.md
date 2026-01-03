@@ -3,6 +3,7 @@
 Creates the **Environment** dimension and populates each specified environment, enabling nullplatform resources to use consistent selectors.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ```hcl
 module "dimensions" {
@@ -13,6 +14,7 @@ module "dimensions" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

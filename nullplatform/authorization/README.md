@@ -5,6 +5,7 @@ This module provisions a nullplatform API key for the specified destination and 
 Usage:
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ### Basic example
 
@@ -17,6 +18,7 @@ module "authorization" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

@@ -1,0 +1,68 @@
+version: 1
+name: module_usage_block
+description: |
+  Compose a Terraform/Tofu module usage snippet that stays within the Usage section bounds.
+inputs:
+  module_path:
+    description: Relative path for the module inside the monorepo.
+  origin:
+    description: Git remote URL so you know whether GitHub or GitLab is primary.
+  module_host:
+    description: Either github.com or gitlab.com derived from the repo origin.
+  repo_org:
+    description: Org or top-level group segment from the remote URL.
+  repo_name:
+    description: Repository name from the remote URL.
+  preferred_source_first:
+    description: Either github or gitlab, determines which source line should appear first.
+  required_vars:
+    description: JSON array listing all variables without defaults.
+  optional_vars_with_default:
+    description: JSON array listing variables that have defaults.
+  existing_usage_vars_in_readme:
+    description: JSON array preserving the order of variables already shown inside the README Usage block.
+  existing_usage_block:
+    description: Current content that lives between the markers.
+prompt: |
+  You maintain the Usage section of Terraform/Tofu modules inside a monorepo. Only edit the content that will be injected
+  between the <!-- BEGIN_MODULE_USAGE --> and <!-- END_MODULE_USAGE --> markers. NEVER rewrite or mention the terraform-docs
+  block (<!-- BEGIN_TF_DOCS --> ... <!-- END_TF_DOCS -->) and do not add notes outside the Usage subsection.
+
+  Repository origin: {{ origin }}
+  Module path: {{ module_path }}
+  Primary host preference: {{ preferred_source_first }}
+  Repo org/group: {{ repo_org }}
+  Repo name: {{ repo_name }}
+
+  Existing Usage block content (retain its tone / structure as much as possible):
+  ---
+  {{ existing_usage_block }}
+  ---
+
+  Variables overview (JSON strings):
+    required_vars: {{ required_vars }}
+    optional_vars_with_default: {{ optional_vars_with_default }}
+    existing_usage_vars_in_readme: {{ existing_usage_vars_in_readme }}
+
+  Rules:
+  - Keep the module invocation copy/paste friendly and similar in tone/formatting to what already exists.
+  - Always show two source lines referencing this monorepo: one for GitHub and one for GitLab. Order them so the preferred host
+    ({{ preferred_source_first }}) appears first as the active source line, and place the alternate host as a commented line
+    immediately below it. The source lines must follow this pattern:
+      git::<scheme>://<host>/<org>/<repo>.git///{{ module_path }}?ref=vX.Y.Z
+    Use the repo_org/repo_name inputs if they are known; otherwise, fall back to a clear placeholder like <org>/<repo>.
+    Preserve any ref/tag pattern detected in the existing usage content; if none exists, default to ?ref=main.
+  - List every variable that was present in the existing usage block. Keep their order unless there is a strong reason to
+    group required values before optional comments.
+  - Do NOT introduce new input variables that are not defined in variables.tf.
+  - If the existing usage block is extremely small (e.g., only the module block with no variables) you may add up to five
+    additional required variables that are clearly required (no defaults) in variables.tf, but only when this aids clarity.
+  - For every variable that has a default (present in optional_vars_with_default), keep it in the snippet but mark it as
+    optional by commenting the entire line (e.g., `# optional_flag = var.optional_flag`) or by placing it in a clearly
+    labeled optional block that remains copy/pasteable. Required variables must stay uncommented.
+  - If you are unsure about a value, use explicit TODO-style placeholders such as `<value_here>` instead of inventing
+    resources or settings.
+  - Keep markdown fences (```hcl ... ```) or any surrounding descriptive text consistent with the original block.
+  - Do not mention terraform-docs or any automation details.
+
+  Output ONLY the new Usage block content that belongs between the begin/end markers. No additional commentary.

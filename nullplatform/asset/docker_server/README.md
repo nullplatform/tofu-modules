@@ -4,6 +4,7 @@ This module registers a generic Docker registry with **nullplatform** by creatin
 supplied server endpoint and credentials.
 
 ## Usage
+<!-- BEGIN_MODULE_USAGE -->
 
 ### Basic example
 
@@ -19,6 +20,7 @@ module "docker_server" {
 }
 ```
 
+<!-- END_MODULE_USAGE -->
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
