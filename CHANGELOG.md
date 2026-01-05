@@ -12,7 +12,7 @@
 
 ### Features
 
-* **esternal-dns:** resolve conflicts ([4f71b63](https://github.com/nullplatform/tofu-modules/commit/4f71b6359456c3c4e201deec7aed30c6b72092bd))
+* **external-dns:** resolve conflicts ([4f71b63](https://github.com/nullplatform/tofu-modules/commit/4f71b6359456c3c4e201deec7aed30c6b72092bd))
 * **tofu:** run fmt ([371342b](https://github.com/nullplatform/tofu-modules/commit/371342bf77151e4f5c70e4e3a3a27c605af16454))
 
 ## [1.14.0](https://github.com/nullplatform/tofu-modules/compare/v1.13.0...v1.14.0) (2025-12-29)
@@ -32,7 +32,7 @@
 
 ### Features
 
-* **externaldns:** support multi external dns ([#97](https://github.com/nullplatform/tofu-modules/issues/97)) ([3ddbd8e](https://github.com/nullplatform/tofu-modules/commit/3ddbd8ebf152722be693539493229a6f6098a27c))
+* **external-dns:** support multi external dns ([#97](https://github.com/nullplatform/tofu-modules/issues/97)) ([3ddbd8e](https://github.com/nullplatform/tofu-modules/commit/3ddbd8ebf152722be693539493229a6f6098a27c))
 
 ## [1.12.10](https://github.com/nullplatform/tofu-modules/compare/v1.12.9...v1.12.10) (2025-12-23)
 
@@ -46,7 +46,7 @@
 
 ### Bug Fixes
 
-* update to v0.15.0 and replace resource_group_name for parent_id ([#53](https://github.com/nullplatform/tofu-modules/issues/53)) ([fe32430](https://github.com/nullplatform/tofu-modules/commit/fe3243067b684682be22661c993033cb2094f4fc))
+* update to v0.15.0 and replace resource_group_name with parent_id ([#53](https://github.com/nullplatform/tofu-modules/issues/53)) ([fe32430](https://github.com/nullplatform/tofu-modules/commit/fe3243067b684682be22661c993033cb2094f4fc))
 
 ## [1.12.8](https://github.com/nullplatform/tofu-modules/compare/v1.12.7...v1.12.8) (2025-12-22)
 
@@ -118,14 +118,14 @@
 
 ### Bug Fixes
 
-* **base:** remove provider nullplarform ([#69](https://github.com/nullplatform/tofu-modules/issues/69)) ([bb376e9](https://github.com/nullplatform/tofu-modules/commit/bb376e9aa0128f5e3f485294700a212380e219eb))
+* **base:** remove provider nullplatform ([#69](https://github.com/nullplatform/tofu-modules/issues/69)) ([bb376e9](https://github.com/nullplatform/tofu-modules/commit/bb376e9aa0128f5e3f485294700a212380e219eb))
 
 ## [1.12.0](https://github.com/nullplatform/tofu-modules/compare/v1.11.0...v1.12.0) (2025-11-25)
 
 
 ### Features
 
-* **main:** add PR to execute linter& docs ([81ebff6](https://github.com/nullplatform/tofu-modules/commit/81ebff67c08200b31b55ba6974d31f4b6a245b57))
+* **main:** add PR to execute linter & docs ([81ebff6](https://github.com/nullplatform/tofu-modules/commit/81ebff67c08200b31b55ba6974d31f4b6a245b57))
 * **main:** rollback ([1681548](https://github.com/nullplatform/tofu-modules/commit/16815482cd040b4e4ba4259b4342c7bafb3be98a))
 * **scope-definition-agent:** fix data http templates ([f89a4ef](https://github.com/nullplatform/tofu-modules/commit/f89a4ef56d5c281b8f3a2e993f1c14fbf3b59a4c))
 
@@ -155,7 +155,7 @@
 
 ### Features
 
-* **promnetheus:** edit variables ([#56](https://github.com/nullplatform/tofu-modules/issues/56)) ([45ddc88](https://github.com/nullplatform/tofu-modules/commit/45ddc880afc48a4f93de6f132603ad3a4e73dfb1))
+* **prometheus:** edit variables ([#56](https://github.com/nullplatform/tofu-modules/issues/56)) ([45ddc88](https://github.com/nullplatform/tofu-modules/commit/45ddc880afc48a4f93de6f132603ad3a4e73dfb1))
 
 ## [1.8.0](https://github.com/nullplatform/tofu-modules/compare/v1.7.0...v1.8.0) (2025-11-12)
 
@@ -181,10 +181,10 @@
 
 ### Features
 
-* add support to prometheus operator ([5e85aa1](https://github.com/nullplatform/tofu-modules/commit/5e85aa1bc1c49c926d1747ddd670d046b4d7e5d6))
-* I'm adding support for Prometheus Operator ([f1c6e08](https://github.com/nullplatform/tofu-modules/commit/f1c6e080b1be49f575e625202c72a6aa03011ea9))
-* I'm adding support for Prometheus Operator ([9e1db19](https://github.com/nullplatform/tofu-modules/commit/9e1db198732650b24e06e76592765c647b0d35b5))
-* I'm adding support for Prometheus Operator ([11557ea](https://github.com/nullplatform/tofu-modules/commit/11557eabc0950e07b216e7c4eb7fb78a8b48dd8c))
+* add support for prometheus operator ([5e85aa1](https://github.com/nullplatform/tofu-modules/commit/5e85aa1bc1c49c926d1747ddd670d046b4d7e5d6))
+* add support for Prometheus Operator ([f1c6e08](https://github.com/nullplatform/tofu-modules/commit/f1c6e080b1be49f575e625202c72a6aa03011ea9))
+* add support for Prometheus Operator ([9e1db19](https://github.com/nullplatform/tofu-modules/commit/9e1db198732650b24e06e76592765c647b0d35b5))
+* add support for Prometheus Operator ([11557ea](https://github.com/nullplatform/tofu-modules/commit/11557eabc0950e07b216e7c4eb7fb78a8b48dd8c))
 
 ## [1.5.3](https://github.com/nullplatform/tofu-modules/compare/v1.5.2...v1.5.3) (2025-11-07)
 
@@ -200,7 +200,7 @@
 ### Bug Fixes
 
 * **cert-manager:** fix namespace error and improve configuration ([4af6c98](https://github.com/nullplatform/tofu-modules/commit/4af6c98918e309b94e5e03a499316c473ed37821))
-* commons changes readme ([3207ce2](https://github.com/nullplatform/tofu-modules/commit/3207ce234f7f0e20f02748ab7026a6b1841bdb7a))
+* common changes readme ([3207ce2](https://github.com/nullplatform/tofu-modules/commit/3207ce234f7f0e20f02748ab7026a6b1841bdb7a))
 * external-dns secret and namespace depends ([4ee0bbd](https://github.com/nullplatform/tofu-modules/commit/4ee0bbd3b56872b85b9589c177d1e26e868506eb))
 * only azure, no gcp ([4556484](https://github.com/nullplatform/tofu-modules/commit/455648472f21d30c573cc4816d4d86526ff73e10))
 * remove version argument from git source module ([ed82438](https://github.com/nullplatform/tofu-modules/commit/ed82438851aa4188bf4d2c5b38c727d7e72f15ec))
@@ -231,16 +231,16 @@
 * **agent:** tofu fmt ([e5aa787](https://github.com/nullplatform/tofu-modules/commit/e5aa787583afb204ce32e4b22873bcfa1297d997))
 * **aws-iam:** add aws iam module ([8f53196](https://github.com/nullplatform/tofu-modules/commit/8f53196411950664824cd1a4baece7fa8c986df4))
 * **aws-iam:** add aws iam module ([f728ef3](https://github.com/nullplatform/tofu-modules/commit/f728ef3aed084baffb5e639768041a821601b52a))
-* **aws-iam:** add output to rol arn ([ac7676d](https://github.com/nullplatform/tofu-modules/commit/ac7676d9ce5f652ed3c9b46450bcae2149fffcc8))
+* **aws-iam:** add output to role arn ([ac7676d](https://github.com/nullplatform/tofu-modules/commit/ac7676d9ce5f652ed3c9b46450bcae2149fffcc8))
 
 ## [1.4.0](https://github.com/nullplatform/tofu-modules/compare/v1.3.1...v1.4.0) (2025-10-30)
 
 
 ### Features
 
-* add agent, scope and scope association ([f508cca](https://github.com/nullplatform/tofu-modules/commit/f508ccaf263835b7fc53263bbce4d142976d1cb4))
+* add agent, scope, and scope association ([f508cca](https://github.com/nullplatform/tofu-modules/commit/f508ccaf263835b7fc53263bbce4d142976d1cb4))
 * add agnostic agent ([1d1d5e3](https://github.com/nullplatform/tofu-modules/commit/1d1d5e35720864e035f3995237365392b453f83e))
-* add scope definion agent association ([416526d](https://github.com/nullplatform/tofu-modules/commit/416526d72150a2a1adba90263c1d67955e623ce3))
+* add scope definition agent association ([416526d](https://github.com/nullplatform/tofu-modules/commit/416526d72150a2a1adba90263c1d67955e623ce3))
 * add scope definition modules ([eba0ba3](https://github.com/nullplatform/tofu-modules/commit/eba0ba36e80fdd8245523e78fc376e24930039f3))
 * pipeline ([25c0a28](https://github.com/nullplatform/tofu-modules/commit/25c0a288cdfe4384d888935159ce7d1de126706b))
 
@@ -258,7 +258,7 @@
 ### Features
 
 * add aks module ([ef313d9](https://github.com/nullplatform/tofu-modules/commit/ef313d9077f3d69e207fcff5d3f4aabd64b539d0))
-* add data tenent id ([993dd15](https://github.com/nullplatform/tofu-modules/commit/993dd15bfd9320f753bf26fd43d5da972bec6331))
+* add data tenant id ([993dd15](https://github.com/nullplatform/tofu-modules/commit/993dd15bfd9320f753bf26fd43d5da972bec6331))
 * add output vnet ([d20b871](https://github.com/nullplatform/tofu-modules/commit/d20b871bc710eee36700b2a1e3784384820f1a9e))
 * add sku input ([01450ac](https://github.com/nullplatform/tofu-modules/commit/01450ac176e4f0f96621038e5f7158ed5b6dc5f2))
 * add sku input ([78107a9](https://github.com/nullplatform/tofu-modules/commit/78107a9b62188bc4bda3cc1fe29f4c26de114b40))
@@ -276,9 +276,9 @@
 * edit variables ([cc370e5](https://github.com/nullplatform/tofu-modules/commit/cc370e5a8d18cfbe0a77c4ea804449a684c747dc))
 * edit variables ([3002fcc](https://github.com/nullplatform/tofu-modules/commit/3002fccdfdb33a90657d74b469d7664c423a15b5))
 * edit variables ([99cf67a](https://github.com/nullplatform/tofu-modules/commit/99cf67a6236e279537eabfbfda884c7146a9187e))
-* false redundacy ([199d908](https://github.com/nullplatform/tofu-modules/commit/199d908e8bc7bdaf40ecceb3e28f539a124c892a))
-* false redundacy ([8c5b585](https://github.com/nullplatform/tofu-modules/commit/8c5b5855fba5826d3052523fa1534907dbf09fbe))
-* false redundacy ([7040143](https://github.com/nullplatform/tofu-modules/commit/7040143f3b0519ec4b70b325d403f75e10821f82))
+* false redundancy ([199d908](https://github.com/nullplatform/tofu-modules/commit/199d908e8bc7bdaf40ecceb3e28f539a124c892a))
+* false redundancy ([8c5b585](https://github.com/nullplatform/tofu-modules/commit/8c5b5855fba5826d3052523fa1534907dbf09fbe))
+* false redundancy ([7040143](https://github.com/nullplatform/tofu-modules/commit/7040143f3b0519ec4b70b325d403f75e10821f82))
 * oid enabled ([0f48c61](https://github.com/nullplatform/tofu-modules/commit/0f48c61374a18d62c99b5c5c1ed332d2da490fd2))
 
 ## [1.2.0](https://github.com/nullplatform/tofu-modules/compare/v1.1.9...v1.2.0) (2025-10-22)
