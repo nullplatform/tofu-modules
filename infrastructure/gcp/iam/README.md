@@ -1,11 +1,11 @@
 # Module: iam
 This module manages Google Cloud service accounts and their IAM bindings using OpenTofu.
 
-Creates one or more GCP service accounts based on the service_accounts input (name and display name).
+- Creates one or more GCP service accounts based on the `service_accounts` input (name and display name).
 
-Assigns project-level IAM roles to each service account according to the roles defined in service_accounts.
+- Assigns project-level IAM roles to each service account according to the roles defined in `service_accounts`.
 
-Configures Workload Identity by binding Kubernetes service accounts (namespace + KSA name) to Google service accounts, using the workload_identity_bindings input.
+- Configures Workload Identity by binding Kubernetes service accounts (namespace + KSA name) to Google service accounts, using the `workload_identity_bindings` input.
 
 In short, it automates the creation of service accounts, their permissions, and the Workload Identity mappings needed for GKE workloads to securely use GCP identities.
 

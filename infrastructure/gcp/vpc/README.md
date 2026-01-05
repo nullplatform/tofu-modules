@@ -1,15 +1,13 @@
 # Module: vpc
 This configuration uses the official terraform-google-modules/network/google module to create and manage a VPC network in GCP.
 
-Creates a VPC with the provided network_name in the given project_id.
+- Creates a VPC with the provided `network_name` in the given `project_id`.
 
-Provisions one or more subnets, derived from var.subnets, each with:
-
-Name, CIDR range, region
-
-Private Google access enabled (subnet_private_access = true), so instances without external IPs can reach Google APIs.
-
-Configures secondary IP ranges for the subnets (e.g. for GKE pods and services) using var.secondary_ranges.
+- Provisions one or more subnets, derived from `var.subnets`, each with:
+  
+  - Name, CIDR range, region
+  - Private Google access enabled (`subnet_private_access = true`), so instances without external IPs can reach Google APIs.
+  - Configures secondary IP ranges for the subnets (e.g. for GKE pods and services) using `var.secondary_ranges`.
 
 In short, it standardizes the creation of a VPC and its subnets (including secondary ranges) as a reusable networking building block for GCP.
 
