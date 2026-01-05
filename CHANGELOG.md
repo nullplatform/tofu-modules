@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.16.0](https://github.com/nullplatform/tofu-modules/compare/v1.15.1...v1.16.0) (2026-01-05)
+
+
+### Features
+
+* **agent:** add config external-dns to aws config ([3d69436](https://github.com/nullplatform/tofu-modules/commit/3d694365764e92a23a0c1f2c2a076c644801d2d0))
+* **agent:** add config external-dns to aws config ([#105](https://github.com/nullplatform/tofu-modules/issues/105)) ([1a828f9](https://github.com/nullplatform/tofu-modules/commit/1a828f97f671ea4dfcdf34bb49ee7e21ec5dac43))
+* **agent:** move identical variables to global configuration ([2b78254](https://github.com/nullplatform/tofu-modules/commit/2b78254ab4d16251ac3d1c4504189b5ce3201841))
+
 ## [1.15.1](https://github.com/nullplatform/tofu-modules/compare/v1.15.0...v1.15.1) (2025-12-30)
 
 
