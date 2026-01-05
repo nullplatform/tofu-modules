@@ -43,6 +43,13 @@ locals {
     CLUSTER_NAME = var.cluster_name
     NAMESPACE    = var.namespace
     IMAGE_TAG    = var.image_tag
+    DOMAIN                  = var.domain
+    DNS_TYPE                = var.dns_type
+    USE_ACCOUNT_SLUG        = var.use_account_slug
+    IMAGE_PULL_SECRETS      = var.image_pull_secrets
+    SERVICE_TEMPLATE        = var.service_template
+    INITIAL_INGRESS_PATH    = var.initial_ingress_path
+    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
   }
 
   cloud_config = {
@@ -51,14 +58,8 @@ locals {
     }
 
     gcp = {
-      SERVICE_TEMPLATE        = var.service_template
-      INITIAL_INGRESS_PATH    = var.initial_ingress_path
-      BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
-      DNS_TYPE                = var.dns_type
       PRIVATE_GATEWAY_NAME    = var.private_gateway_name
       PRIVATE_DOMAIN          = var.private_domain
-      DOMAIN                  = var.domain
-
     }
 
     azure = {
@@ -70,23 +71,12 @@ locals {
       AZURE_CLIENT_SECRET    = var.azure_client_secret
       AZURE_CLIENT_ID        = var.azure_client_id
       AZURE_TENANT_ID        = var.azure_tenant_id
-      #move to extra config in this repo https://github.com/n1co-nullplatform/n1co-nullplatform
-      DNS_TYPE                = var.dns_type
-      USE_ACCOUNT_SLUG        = var.use_account_slug
-      IMAGE_PULL_SECRETS      = var.image_pull_secrets
-      DOMAIN                  = var.domain
-      SERVICE_TEMPLATE        = var.service_template
-      INITIAL_INGRESS_PATH    = var.initial_ingress_path
-      BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
     }
   }
-
-  extra_config = var.extra_config
 
   all_config = merge(
     local.default_config,
     lookup(local.cloud_config, var.cloud_provider, {}),
-    local.extra_config
   )
 
   # Template único y simple
