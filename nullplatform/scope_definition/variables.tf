@@ -2,6 +2,43 @@
 # Template Paths and Names
 ################################################################################
 
+variable "repository_service_spec" {
+  type    = string
+  default = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads"
+
+}
+
+variable "repository_service_spec_branch" {
+  type    = string
+  default = "main"
+
+}
+
+variable "repository_scope_template" {
+  type    = string
+  default = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads"
+
+}
+
+
+variable "repository_scope_template_branch" {
+  type    = string
+  default = "main"
+
+}
+
+variable "repository_action_templates" {
+  type    = string
+  default = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads"
+
+}
+
+variable "repository_action_templates_branch" {
+  type    = string
+  default = "main"
+
+}
+
 variable "service_path" {
   description = "Path within the repository where the service specification files are stored (e.g., 'services/api')"
   type        = string
