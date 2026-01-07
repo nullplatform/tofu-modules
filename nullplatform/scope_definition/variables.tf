@@ -3,39 +3,45 @@
 ################################################################################
 
 variable "repository_service_spec" {
-  type    = string
-  default = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads"
+  description = "repository of service spec"
+  type        = string
+  default     = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads"
 
 }
 
 variable "repository_service_spec_branch" {
-  type    = string
-  default = "main"
+  description = "branch reference of service spec"
+  type        = string
+  default     = "main"
 
 }
 
 variable "repository_scope_template" {
-  type    = string
-  default = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads"
+  description = "repository of scope template"
+  type        = string
+  default     = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads"
 
 }
 
 
 variable "repository_scope_template_branch" {
-  type    = string
-  default = "main"
+  description = "branch reference of scope template"
+  type        = string
+  default     = "main"
 
 }
 
 variable "repository_action_templates" {
-  type    = string
-  default = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads"
+  description = "repository of action template"
+  type        = string
+  default     = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads"
 
 }
 
 variable "repository_action_templates_branch" {
-  type    = string
-  default = "main"
+  description = "branch reference of action template"
+  type        = string
+  default     = "main"
 
 }
 
