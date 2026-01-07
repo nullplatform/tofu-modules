@@ -50,6 +50,12 @@ module "scope_definition" {
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key used for executing local commands (e.g., 'np nrn patch') | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Unique NRN identifier of the environment or resource in nullplatform | `string` | n/a | yes |
 | <a name="input_repo_path"></a> [repo\_path](#input\_repo\_path) | Base path to the repository used as context for gomplate template rendering | `string` | `"/root/.np/nullplatform/scopes"` | no |
+| <a name="input_repository_action_templates"></a> [repository\_action\_templates](#input\_repository\_action\_templates) | n/a | `string` | `"https://raw.githubusercontent.com/nullplatform/scopes/refs/heads"` | no |
+| <a name="input_repository_action_templates_branch"></a> [repository\_action\_templates\_branch](#input\_repository\_action\_templates\_branch) | n/a | `string` | `"main"` | no |
+| <a name="input_repository_scope_template"></a> [repository\_scope\_template](#input\_repository\_scope\_template) | n/a | `string` | `"https://raw.githubusercontent.com/nullplatform/scopes/refs/heads"` | no |
+| <a name="input_repository_scope_template_branch"></a> [repository\_scope\_template\_branch](#input\_repository\_scope\_template\_branch) | n/a | `string` | `"main"` | no |
+| <a name="input_repository_service_spec"></a> [repository\_service\_spec](#input\_repository\_service\_spec) | n/a | `string` | `"https://raw.githubusercontent.com/nullplatform/scopes/refs/heads"` | no |
+| <a name="input_repository_service_spec_branch"></a> [repository\_service\_spec\_branch](#input\_repository\_service\_spec\_branch) | n/a | `string` | `"main"` | no |
 | <a name="input_service_path"></a> [service\_path](#input\_service\_path) | Path within the repository where the service specification files are stored (e.g., 'services/api') | `string` | `"k8s"` | no |
 | <a name="input_service_spec_description"></a> [service\_spec\_description](#input\_service\_spec\_description) | Description of the created service or associated scope type | `string` | `"Docker containers on pods"` | no |
 | <a name="input_service_spec_name"></a> [service\_spec\_name](#input\_service\_spec\_name) | Name of the service that will be created from the specification template | `string` | `"Containers"` | no |
