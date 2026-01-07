@@ -1,8 +1,13 @@
-name: pipeline tofu
+name: Tofu Pipeline & Checks
 on:
   push:
     branches:
       - '**'
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
 jobs:
   docs:
     uses: nullplatform/actions-nullplatform-terraform/.github/workflows/tf-docs.yml@main
+  conventional-commit:
+    needs: docs
+    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/conventional-commit.yml@main
