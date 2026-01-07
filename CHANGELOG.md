@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.17.0](https://github.com/nullplatform/tofu-modules/compare/v1.16.0...v1.17.0) (2026-01-07)
+
+
+### Features
+
+* **scope:** parameterize repository values ([#110](https://github.com/nullplatform/tofu-modules/issues/110)) ([297c1a3](https://github.com/nullplatform/tofu-modules/commit/297c1a3ed788faf13cc9ef76c9480ad2227db9dc))
+
 ## [1.16.0](https://github.com/nullplatform/tofu-modules/compare/v1.15.1...v1.16.0) (2026-01-05)
 
 
