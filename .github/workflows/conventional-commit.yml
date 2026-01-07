@@ -1,7 +1,0 @@
-name: conventional-commit
-on:
-  pull_request:
-    types: [opened, edited, synchronize, reopened]
-jobs:
-  conventional-commit:
-    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/conventional-commit.yml@main
