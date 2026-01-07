@@ -2,16 +2,16 @@
 # Template Fetching
 ################################################################################
 data "http" "service_spec_template" {
-  url = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads/main/${var.service_path}/specs/service-spec.json.tpl"
+  url = "${var.repository_service_spec}/${var.repository_service_spec_branch}/${var.service_path}/specs/service-spec.json.tpl"
 }
 
 data "http" "scope_type_template" {
-  url = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads/main/${var.service_path}/specs/scope-type-definition.json.tpl"
+  url = "${var.repository_scope_template}/${var.repository_scope_template_branch}/${var.service_path}/specs/scope-type-definition.json.tpl"
 }
 
 data "http" "action_templates" {
   for_each = toset(var.action_spec_names)
-  url      = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads/main/${var.service_path}/specs/actions/${each.key}.json.tpl"
+  url      = "${var.repository_action_templates}/${var.repository_action_templates_branch}/${var.service_path}/specs/actions/${each.key}.json.tpl"
 }
 
 # Process service specification template using gomplate with NRN variable
