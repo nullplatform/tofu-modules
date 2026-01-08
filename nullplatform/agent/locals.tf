@@ -37,12 +37,12 @@ locals {
   all_args = concat(local.default_args, lookup(local.cloud_args, var.cloud_provider, []))
 
   default_config = {
-    NP_API_KEY   = local.api_key
-    TAGS         = local.tags
-    AGENT_REPOS  = local.agent_repos
-    CLUSTER_NAME = var.cluster_name
-    NAMESPACE    = var.namespace
-    IMAGE_TAG    = var.image_tag
+    NP_API_KEY              = local.api_key
+    TAGS                    = local.tags
+    AGENT_REPOS             = local.agent_repos
+    CLUSTER_NAME            = var.cluster_name
+    NAMESPACE               = var.namespace
+    IMAGE_TAG               = var.image_tag
     DOMAIN                  = var.domain
     DNS_TYPE                = var.dns_type
     USE_ACCOUNT_SLUG        = var.use_account_slug
@@ -58,8 +58,8 @@ locals {
     }
 
     gcp = {
-      PRIVATE_GATEWAY_NAME    = var.private_gateway_name
-      PRIVATE_DOMAIN          = var.private_domain
+      PRIVATE_GATEWAY_NAME = var.private_gateway_name
+      PRIVATE_DOMAIN       = var.private_domain
     }
 
     azure = {
