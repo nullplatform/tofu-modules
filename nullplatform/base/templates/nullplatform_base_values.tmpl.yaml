@@ -34,6 +34,7 @@ gateway:
   internal:
     enabled: ${gateway_internal_enabled}
     name: "gateway-private"
+    azure_load_balancer_subnet: ${gateway_internal_azure_load_balancer_subnet}
     addresses: {}
     autoscaling:
       minReplicas: 2
