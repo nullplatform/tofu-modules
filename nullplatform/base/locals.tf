@@ -27,6 +27,7 @@ locals {
       # ---- gateway ----
       gateway_enabled          = var.gateway_enabled ? "true" : "false"
       gateway_internal_enabled = var.gateway_internal_enabled ? "true" : "false"
+      gateway_internal_azure_load_balancer_subnet = var.internal_azure_load_balancer_subnet
 
       # ---- nullplatform ----
       np_api_key = var.np_api_key
