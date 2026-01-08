@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.17.1](https://github.com/nullplatform/tofu-modules/compare/v1.17.0...v1.17.1) (2026-01-08)
+
+
+### Bug Fixes
+
+* **azure-aks:** add role to vnet ([b40d33d](https://github.com/nullplatform/tofu-modules/commit/b40d33d4f80cbed3c552a5b4f7ac593c145ff5f3))
+* **azure-aks:** principal_id variable ([6e3d54c](https://github.com/nullplatform/tofu-modules/commit/6e3d54c4bc00833161a03d4c65d0b9db8aba9b9f))
+* **azure-aks:** principal_id variable ([6232bf0](https://github.com/nullplatform/tofu-modules/commit/6232bf0f44c7c99377b220f28895bd7a52039b35))
+* **base-gateways:** add annottaion to LB use subnet private ([8e3b09e](https://github.com/nullplatform/tofu-modules/commit/8e3b09e0a57f0a86e0494145b69d8da0540123d7))
+
 ## [1.17.0](https://github.com/nullplatform/tofu-modules/compare/v1.16.0...v1.17.0) (2026-01-07)
 
 
