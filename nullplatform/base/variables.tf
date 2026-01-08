@@ -68,6 +68,12 @@ variable "gateway_internal_enabled" {
   default     = false
 }
 
+
+variable "internal_azure_load_balancer_subnet" {
+  description = "The name of the subnet to use in azure private load balancer"
+  type = string
+  default = "load_balancer"
+}
 ############################################
 # Control Plane
 ############################################
