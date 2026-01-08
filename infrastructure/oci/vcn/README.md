@@ -14,13 +14,17 @@
 
 
 <!-- BEGIN_TF_DOCS -->
+## Requirements
 
+| Name | Version |
+|------|---------|
+| <a name="requirement_oci"></a> [oci](#requirement\_oci) | >= 5.0.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_oci"></a> [oci](#provider\_oci) | n/a |
+| <a name="provider_oci"></a> [oci](#provider\_oci) | >= 5.0.0 |
 
 ## Modules
 
@@ -32,8 +36,8 @@
 
 | Name | Type |
 |------|------|
-| [oci_core_subnet.private_subnet](https://registry.terraform.io/providers/hashicorp/oci/latest/docs/resources/core_subnet) | resource |
-| [oci_core_subnet.public_subnet](https://registry.terraform.io/providers/hashicorp/oci/latest/docs/resources/core_subnet) | resource |
+| [oci_core_subnet.private_subnet](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_subnet) | resource |
+| [oci_core_subnet.public_subnet](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_subnet) | resource |
 
 ## Inputs
 
