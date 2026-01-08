@@ -83,7 +83,7 @@ resource "azurerm_role_assignment" "aks_network_contributor_vnet" {
   count                = var.vnet_id != null ? 1 : 0
   scope                = var.vnet_id
   role_definition_name = "Network Contributor"
-  principal_id         = module.aks.kubelet_identity.object_id
+  principal_id         =  module.aks.kubelet_identity[0].object_id
 
   depends_on = [module.aks]
 }
