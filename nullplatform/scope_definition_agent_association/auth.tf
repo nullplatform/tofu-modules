@@ -2,9 +2,9 @@
 # Nullplatform Agent Association API Key
 ################################################################################
 
-# Create API key for agent association with minimal required permissions
+# Create API key for agent association
 resource "nullplatform_api_key" "nullplatform_agent_api_key" {
-  name = "AGENT-ASSOCIATION"
+  name = "SCOPE_DEFINITION_AGENT_ASSOCIATION"
 
   # Grant control plane agent role for agent operations
   grants {
