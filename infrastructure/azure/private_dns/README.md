@@ -11,18 +11,21 @@ This module creates a private DNS zone in Azure with optional virtual network li
 
 ## Usage
 
-### Basic Example
+### Basic Example (with AKS VNet)
 
 ```hcl
 module "private_dns" {
   source          = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/private_dns?ref=v1.5.0"
-  domain_name     = "privatelink.database.windows.net"
-  resource_group  = "my-resource-group"
-  subscription_id = "00000000-0000-0000-0000-000000000000"
-  tags = {
-    environment = "production"
-    team        = "platform"
-  }
+  domain_name     = var.private_dns_domain_name 
+  resource_group  = var.resource_group
+  subscription_id = var.subscription_id
+
+  virtual_network_links = [
+    {
+      vnet_id              = module.vnet.resource_id 
+      registration_enabled = false                    
+    }
+  ]
 }
 ```
 
