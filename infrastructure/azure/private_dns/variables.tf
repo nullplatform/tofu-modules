@@ -18,7 +18,7 @@ variable "subscription_id" {
 }
 
 ###############################################################################
-# OPTIONAL VARIABLES - VNET LINK
+# REQUIRED VARIABLES - VNET LINK
 ###############################################################################
 
 variable "virtual_network_links" {
@@ -26,8 +26,7 @@ variable "virtual_network_links" {
     vnet_id              = string
     registration_enabled = optional(bool, false)
   }))
-  description = "List of virtual networks to link to the private DNS zone. Each object requires vnet_id and optionally registration_enabled for auto-registration of VM records"
-  default     = []
+  description = "List of virtual networks to link to the private DNS zone. At least one VNet link is required for DNS resolution to work. Each object requires vnet_id and optionally registration_enabled for auto-registration of VM records"
 }
 
 ###############################################################################
