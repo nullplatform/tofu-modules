@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.20.0](https://github.com/nullplatform/tofu-modules/compare/v1.19.0...v1.20.0) (2026-01-12)
+
+
+### Features
+
+* service definition and service association channel ([#121](https://github.com/nullplatform/tofu-modules/issues/121)) ([44e6a8e](https://github.com/nullplatform/tofu-modules/commit/44e6a8e35bf3ed9cf42b0cd090eae215e62ff71a))
+
 ## [1.19.0](https://github.com/nullplatform/tofu-modules/compare/v1.18.0...v1.19.0) (2026-01-12)
 
 
