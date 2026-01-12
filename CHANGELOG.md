@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.19.0](https://github.com/nullplatform/tofu-modules/compare/v1.18.0...v1.19.0) (2026-01-12)
+
+
+### Features
+
+* aks acr integration ([#120](https://github.com/nullplatform/tofu-modules/issues/120)) ([e2237b6](https://github.com/nullplatform/tofu-modules/commit/e2237b608ee9ccfabb40582582ab0e664640e13a))
+
 ## [1.18.0](https://github.com/nullplatform/tofu-modules/compare/v1.17.2...v1.18.0) (2026-01-12)
 
 
