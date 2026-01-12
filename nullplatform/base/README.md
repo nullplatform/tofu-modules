@@ -1,6 +1,6 @@
 # Module: Base
 
-This module installs the **base Helm chart** from **nullplatform**.  
+This module installs the **base Helm chart** from **nullplatform**.
 For more information, see the [our documentation](https://docs.nullplatform.com/docs/providers/helm-charts#base-chart)
 
 

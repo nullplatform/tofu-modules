@@ -112,12 +112,12 @@ variable "environment" {
 }
 
 ###############################################################################
-# OPTIONAL VARIABLES - ACR INTEGRATION
+# OPTIONAL VARIABLES - NETWORK PERMISSIONS
 ###############################################################################
 
-variable "acr_id" {
+variable "vnet_id" {
   type        = string
-  description = "The ID of the Azure Container Registry. If provided, AKS will be granted AcrPull role to pull images."
+  description = "The ID of the VNet where the AKS cluster is deployed. Used to assign Network Contributor role for load balancer creation."
   default     = null
 }
 
