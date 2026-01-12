@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.20.1](https://github.com/nullplatform/tofu-modules/compare/v1.20.0...v1.20.1) (2026-01-12)
+
+
+### Bug Fixes
+
+* **external-dns:** set default value ([#126](https://github.com/nullplatform/tofu-modules/issues/126)) ([c652f64](https://github.com/nullplatform/tofu-modules/commit/c652f64adc2e04683c6495a2eaae8dd4a810e950))
+
 ## [1.20.0](https://github.com/nullplatform/tofu-modules/compare/v1.19.0...v1.20.0) (2026-01-12)
 
 
