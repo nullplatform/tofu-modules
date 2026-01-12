@@ -26,13 +26,14 @@ variable "virtual_network_links" {
     vnet_id              = string
     registration_enabled = optional(bool, false)
   }))
+  description = "List of virtual networks to link to the private DNS zone. Each object requires vnet_id and optionally registration_enabled (false for AKS/Private Link, true for VMs auto-registration)"
 }
 
 #    Example:
 #    virtual_network_links = [
 #      {
-#        vnet_id              = "/subscriptions/.../resourceGroups/.../providers/Microsoft.Network/virtualNetworks/my-vnet"
-#        registration_enabled = false
+#        vnet_id              = module.vnet.resource_id
+#        registration_enabled = false  # Use false for AKS/Private Link, true only for VM auto-registration
 #      }
 #    ]
 
