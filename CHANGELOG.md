@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.20.2](https://github.com/nullplatform/tofu-modules/compare/v1.20.1...v1.20.2) (2026-01-12)
+
+
+### Bug Fixes
+
+* **external-dns:** fix external dns varaible type ([d44879c](https://github.com/nullplatform/tofu-modules/commit/d44879ceeae517c5dec097c7fa6d19e9b8bea06c))
+* **external-dns:** fix external dns varaible type ([#128](https://github.com/nullplatform/tofu-modules/issues/128)) ([af26c59](https://github.com/nullplatform/tofu-modules/commit/af26c590b04089a7202d07a09ac6e6a30feaa06c))
+
 ## [1.20.1](https://github.com/nullplatform/tofu-modules/compare/v1.20.0...v1.20.1) (2026-01-12)
 
 
