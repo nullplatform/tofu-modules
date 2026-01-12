@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.17.2](https://github.com/nullplatform/tofu-modules/compare/v1.17.1...v1.17.2) (2026-01-12)
+
+
+### Bug Fixes
+
+* add disclaimer for registration_enabled usage ([ac1fd0a](https://github.com/nullplatform/tofu-modules/commit/ac1fd0a60b373656a922e5836a8f38fb5986e807))
+* add validation for virtual_network_links ([76438d0](https://github.com/nullplatform/tofu-modules/commit/76438d08e1160f3d18e292f5bfa2c35ac7a3283e))
+* make virtual_network_links required without default ([329f5a5](https://github.com/nullplatform/tofu-modules/commit/329f5a5a3c44d97239eb6875aa6784881a603e41))
+* **private_dns:** make virtual_network_links required and update example ([c75b08f](https://github.com/nullplatform/tofu-modules/commit/c75b08f1950fcff94db4a4a7a0d3c87809da72d7))
+* rename api key to SCOPE_DEFINITION_AGENT_ASSOCIATION ([#117](https://github.com/nullplatform/tofu-modules/issues/117)) ([1ed79ba](https://github.com/nullplatform/tofu-modules/commit/1ed79ba7773d7b1f9792215623d4a3b40a988443))
+
 ## [1.17.1](https://github.com/nullplatform/tofu-modules/compare/v1.17.0...v1.17.1) (2026-01-09)
 
 
