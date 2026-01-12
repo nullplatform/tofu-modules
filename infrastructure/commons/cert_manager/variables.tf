@@ -74,7 +74,7 @@ variable "cert_manager_namespace" {
 variable "cert_manager_config_version" {
   description = "The version of the cert-manager configuration Helm chart"
   type        = string
-  default     = "2.28.0"
+  default     = "2.29.2"
 }
 
 variable "hosted_zone_name" {
