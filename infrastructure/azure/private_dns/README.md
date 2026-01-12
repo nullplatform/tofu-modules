@@ -42,7 +42,7 @@ module "private_dns" {
 | `resource_group` | The name of the resource group where the private DNS zone will be created | `string` | Yes | - |
 | `domain_name` | The domain name to use for the private DNS zone | `string` | Yes | - |
 | `subscription_id` | The ID of the Azure subscription | `string` | Yes | - |
-| `virtual_network_links` | List of virtual networks to link to the private DNS zone | `list(object)` | No | `[]` |
+| `virtual_network_links` | List of virtual networks to link to the private DNS zone (at least one required) | `list(object)` | Yes* | `[]` |
 | `tags` | A mapping of tags to assign to the resources | `map(string)` | No | `{}` |
 
 ## Outputs
@@ -82,7 +82,7 @@ module "private_dns" {
 | <a name="input_resource_group"></a> [resource\_group](#input\_resource\_group) | The name of the resource group where the private DNS zone will be created | `string` | n/a | yes |
 | <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | The ID of the Azure subscription | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to the private DNS zone | `map(string)` | `{}` | no |
-| <a name="input_virtual_network_links"></a> [virtual\_network\_links](#input\_virtual\_network\_links) | List of virtual networks to link to the private DNS zone. At least one VNet link is required for DNS resolution to work. Each object requires vnet\_id and optionally registration\_enabled for auto-registration of VM records | <pre>list(object({<br/>    vnet_id              = string<br/>    registration_enabled = optional(bool, false)<br/>  }))</pre> | n/a | yes |
+| <a name="input_virtual_network_links"></a> [virtual\_network\_links](#input\_virtual\_network\_links) | List of virtual networks to link to the private DNS zone. At least one VNet link is required for DNS resolution to work. Each object requires vnet\_id and optionally registration\_enabled for auto-registration of VM records | <pre>list(object({<br/>    vnet_id              = string<br/>    registration_enabled = optional(bool, false)<br/>  }))</pre> | `[]` | yes* |
 
 ## Outputs
 
