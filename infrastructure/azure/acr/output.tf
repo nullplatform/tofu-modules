@@ -1,3 +1,8 @@
+output "acr_id" {
+  description = "The ID of the Azure Container Registry"
+  value       = data.azurerm_container_registry.acr.id
+}
+
 output "acr_login_server" {
   description = "The FQDN of the ACR login server"
   value       = data.azurerm_container_registry.acr.login_server
