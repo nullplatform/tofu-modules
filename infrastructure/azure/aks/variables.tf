@@ -120,3 +120,13 @@ variable "vnet_id" {
   description = "The ID of the VNet where the AKS cluster is deployed. Used to assign Network Contributor role for load balancer creation."
   default     = null
 }
+
+###############################################################################
+# OPTIONAL VARIABLES - ACR INTEGRATION
+###############################################################################
+
+variable "acr_id" {
+  type        = string
+  description = "The ID of the Azure Container Registry. If provided, AKS will be granted AcrPull role to pull images."
+  default     = null
+}

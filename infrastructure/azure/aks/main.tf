@@ -70,11 +70,14 @@ module "aks" {
 
 
   }
+  
+  attached_acr_id_map = var.acr_id != null ? { acr = var.acr_id } : {}
 
   ############################################
   # Tags
   ############################################
   tags = var.tags
+
 
 }
 
