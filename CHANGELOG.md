@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.18.0](https://github.com/nullplatform/tofu-modules/compare/v1.17.2...v1.18.0) (2026-01-12)
+
+
+### Features
+
+* **chart:** new version of charts ([#122](https://github.com/nullplatform/tofu-modules/issues/122)) ([83a8b39](https://github.com/nullplatform/tofu-modules/commit/83a8b399b836ca053fe8fc7b8689d1c198cd4e32))
+
 ## [1.17.2](https://github.com/nullplatform/tofu-modules/compare/v1.17.1...v1.17.2) (2026-01-12)
 
 
