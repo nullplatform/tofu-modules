@@ -18,7 +18,7 @@ variable "subscription_id" {
 }
 
 ###############################################################################
-# VNET LINK (validated at runtime - at least one link required)
+# VNET LINK
 ###############################################################################
 
 variable "virtual_network_links" {
@@ -26,14 +26,15 @@ variable "virtual_network_links" {
     vnet_id              = string
     registration_enabled = optional(bool, false)
   }))
-  description = "List of virtual networks to link to the private DNS zone. At least one VNet link is required for DNS resolution to work. Each object requires vnet_id and optionally registration_enabled for auto-registration of VM records"
-  default     = []
-
-  validation {
-    condition     = length(var.virtual_network_links) > 0
-    error_message = "At least one virtual network link is required for DNS resolution to work."
-  }
 }
+
+#    Example:
+#    virtual_network_links = [
+#      {
+#        vnet_id              = "/subscriptions/.../resourceGroups/.../providers/Microsoft.Network/virtualNetworks/my-vnet"
+#        registration_enabled = false
+#      }
+#    ]
 
 ###############################################################################
 # OPTIONAL VARIABLES - TAGS
