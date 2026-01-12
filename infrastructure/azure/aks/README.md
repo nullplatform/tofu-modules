@@ -4,12 +4,12 @@ This module creates an Azure Kubernetes Service (AKS) cluster using the official
 
 ## Features
 
-- Creates a production-ready AKS cluster with system and user node pools  
+- Creates a production-ready AKS cluster with system and user node pools
 - Configurable Kubernetes version
 - Auto-scaling enabled for user node pools (1–5 nodes)
-- Workload identity and OIDC issuer enabled by default  
+- Workload identity and OIDC issuer enabled by default
 - RBAC and Azure AD integration
-- Configurable VM sizes for system and user node pools 
+- Configurable VM sizes for system and user node pools
 - Support for private clusters
 - API server IP allowlist support
 - Zone redundancy for high availability
@@ -83,6 +83,7 @@ The module creates two node pools:
 
 | Name | Type |
 |------|------|
+| [azurerm_role_assignment.aks_network_contributor_vnet](https://registry.terraform.io/providers/hashicorp/azurerm/4.41.0/docs/resources/role_assignment) | resource |
 
 ## Inputs
 
@@ -103,6 +104,7 @@ The module creates two node pools:
 | <a name="input_system_pool_vm_size"></a> [system\_pool\_vm\_size](#input\_system\_pool\_vm\_size) | The VM size for the system node pool (e.g., Standard\_D2s\_v4, Standard\_D4s\_v4) | `string` | `"Standard_D2s_v5"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to the AKS cluster and related resources | `map(string)` | `{}` | no |
 | <a name="input_user_pool_vm_size"></a> [user\_pool\_vm\_size](#input\_user\_pool\_vm\_size) | The VM size for the user node pool (e.g., Standard\_D2s\_v5, Standard\_D4s\_v5) | `string` | `"Standard_D2s_v5"` | no |
+| <a name="input_vnet_id"></a> [vnet\_id](#input\_vnet\_id) | The ID of the VNet where the AKS cluster is deployed. Used to assign Network Contributor role for load balancer creation. | `string` | `null` | no |
 | <a name="input_vnet_subnet_id"></a> [vnet\_subnet\_id](#input\_vnet\_subnet\_id) | The ID of the subnet where AKS nodes will be deployed | `string` | n/a | yes |
 
 ## Outputs
