@@ -67,23 +67,14 @@ module "aks" {
       temporary_name_for_rotation = "poolrot"
     }
 
-
-
   }
+  
+  attached_acr_id_map = var.acr_id != null ? { acr = var.acr_id } : {}
+  network_contributor_role_assigned_subnet_ids = { subnet = var.vnet_subnet_id }
 
   ############################################
   # Tags
   ############################################
   tags = var.tags
 
-}
-
-# Role assignment for AKS kubelet identity to manage load balancers in the VNet
-resource "azurerm_role_assignment" "aks_network_contributor_vnet" {
-  count                = var.vnet_id != null ? 1 : 0
-  scope                = var.vnet_id
-  role_definition_name = "Network Contributor"
-  principal_id         = module.aks.cluster_identity.principal_id
-
-  depends_on = [module.aks]
 }
