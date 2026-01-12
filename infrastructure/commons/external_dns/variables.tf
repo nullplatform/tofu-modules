@@ -64,6 +64,11 @@ variable "cloudflare_token" {
 variable "aws_region" {
   description = "The AWS region where the Route53 hosted zones are located"
   type        = string
+  default = null
+  validation {
+    condition     = var.dns_provider_name != "aws" || var.aws_region != null
+    error_message = "aws_region is required when dns_provider_name is 'aws'."
+  }
 }
 
 variable "aws_iam_role_arn" {
