@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.20.3](https://github.com/nullplatform/tofu-modules/compare/v1.20.2...v1.20.3) (2026-01-13)
+
+
+### Bug Fixes
+
+* **release:** fix commit message ([#131](https://github.com/nullplatform/tofu-modules/issues/131)) ([eb4e239](https://github.com/nullplatform/tofu-modules/commit/eb4e2395ce90ae9b2c08425ae99888c4b04cb02f))
+
 ## [1.20.2](https://github.com/nullplatform/tofu-modules/compare/v1.20.1...v1.20.2) (2026-01-12)
 
 
