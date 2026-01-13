@@ -112,16 +112,6 @@ variable "environment" {
 }
 
 ###############################################################################
-# OPTIONAL VARIABLES - NETWORK PERMISSIONS
-###############################################################################
-
-variable "vnet_id" {
-  type        = string
-  description = "The ID of the VNet where the AKS cluster is deployed. Used to assign Network Contributor role for load balancer creation."
-  default     = null
-}
-
-###############################################################################
 # OPTIONAL VARIABLES - ACR INTEGRATION
 ###############################################################################
 
