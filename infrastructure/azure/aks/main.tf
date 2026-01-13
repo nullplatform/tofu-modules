@@ -72,9 +72,6 @@ module "aks" {
   attached_acr_id_map                          = var.acr_id != null ? { acr = var.acr_id } : {}
   network_contributor_role_assigned_subnet_ids = { subnet = var.vnet_subnet_id }
 
-  attached_acr_id_map                          = var.acr_id != null ? { acr = var.acr_id } : {}
-  network_contributor_role_assigned_subnet_ids = { subnet = var.vnet_subnet_id }
-
   ############################################
   # Tags
   ############################################
