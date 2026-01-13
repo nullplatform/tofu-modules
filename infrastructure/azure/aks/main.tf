@@ -78,13 +78,3 @@ module "aks" {
   tags = var.tags
 
 }
-
-# Role assignment for AKS kubelet identity to manage load balancers in the VNet
-resource "azurerm_role_assignment" "aks_network_contributor_vnet" {
-  count                = var.vnet_id != null ? 1 : 0
-  scope                = var.vnet_id
-  role_definition_name = "Network Contributor"
-  principal_id         = module.aks.cluster_identity.principal_id
-
-  depends_on = [module.aks]
-}
