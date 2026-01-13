@@ -120,3 +120,13 @@ variable "acr_id" {
   description = "The ID of the Azure Container Registry. If provided, AKS will be granted AcrPull role to pull images."
   default     = null
 }
+
+###############################################################################
+# OPTIONAL VARIABLES - ACR INTEGRATION
+###############################################################################
+
+variable "acr_id" {
+  type        = string
+  description = "The ID of the Azure Container Registry. If provided, AKS will be granted AcrPull role to pull images."
+  default     = null
+}

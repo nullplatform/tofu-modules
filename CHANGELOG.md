@@ -1,5 +1,41 @@
 # Changelog
 
+## [1.20.2](https://github.com/nullplatform/tofu-modules/compare/v1.20.1...v1.20.2) (2026-01-12)
+
+
+### Bug Fixes
+
+* **external-dns:** fix external dns varaible type ([d44879c](https://github.com/nullplatform/tofu-modules/commit/d44879ceeae517c5dec097c7fa6d19e9b8bea06c))
+* **external-dns:** fix external dns varaible type ([#128](https://github.com/nullplatform/tofu-modules/issues/128)) ([af26c59](https://github.com/nullplatform/tofu-modules/commit/af26c590b04089a7202d07a09ac6e6a30feaa06c))
+
+## [1.20.1](https://github.com/nullplatform/tofu-modules/compare/v1.20.0...v1.20.1) (2026-01-12)
+
+
+### Bug Fixes
+
+* **external-dns:** set default value ([#126](https://github.com/nullplatform/tofu-modules/issues/126)) ([c652f64](https://github.com/nullplatform/tofu-modules/commit/c652f64adc2e04683c6495a2eaae8dd4a810e950))
+
+## [1.20.0](https://github.com/nullplatform/tofu-modules/compare/v1.19.0...v1.20.0) (2026-01-12)
+
+
+### Features
+
+* service definition and service association channel ([#121](https://github.com/nullplatform/tofu-modules/issues/121)) ([44e6a8e](https://github.com/nullplatform/tofu-modules/commit/44e6a8e35bf3ed9cf42b0cd090eae215e62ff71a))
+
+## [1.19.0](https://github.com/nullplatform/tofu-modules/compare/v1.18.0...v1.19.0) (2026-01-12)
+
+
+### Features
+
+* aks acr integration ([#120](https://github.com/nullplatform/tofu-modules/issues/120)) ([e2237b6](https://github.com/nullplatform/tofu-modules/commit/e2237b608ee9ccfabb40582582ab0e664640e13a))
+
+## [1.18.0](https://github.com/nullplatform/tofu-modules/compare/v1.17.2...v1.18.0) (2026-01-12)
+
+
+### Features
+
+* **chart:** new version of charts ([#122](https://github.com/nullplatform/tofu-modules/issues/122)) ([83a8b39](https://github.com/nullplatform/tofu-modules/commit/83a8b399b836ca053fe8fc7b8689d1c198cd4e32))
+
 ## [1.17.2](https://github.com/nullplatform/tofu-modules/compare/v1.17.1...v1.17.2) (2026-01-12)
 
 

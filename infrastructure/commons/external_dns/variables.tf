@@ -64,6 +64,11 @@ variable "cloudflare_token" {
 variable "aws_region" {
   description = "The AWS region where the Route53 hosted zones are located"
   type        = string
+  default = null
+  validation {
+    condition     = var.dns_provider_name != "aws" || var.aws_region != null
+    error_message = "aws_region is required when dns_provider_name is 'aws'."
+  }
 }
 
 variable "aws_iam_role_arn" {
@@ -79,9 +84,9 @@ variable "aws_iam_role_arn" {
 variable "public_hosted_zone_id" {
   description = "The Route53 public hosted zone ID for ExternalDNS to manage (required when dns_provider_name is 'aws')"
   type        = string
-  default     = null
+  default     = ""
   validation {
-    condition     = var.dns_provider_name != "aws" || var.public_hosted_zone_id != null
+    condition     = var.dns_provider_name != "aws" || var.public_hosted_zone_id != ""
     error_message = "public_hosted_zone_id is required when dns_provider_name is 'aws'."
   }
 }
@@ -89,9 +94,9 @@ variable "public_hosted_zone_id" {
 variable "private_hosted_zone_id" {
   description = "The Route53 private hosted zone ID for ExternalDNS to manage (required when dns_provider_name is 'aws')"
   type        = string
-  default     = null
+  default     = ""
   validation {
-    condition     = var.dns_provider_name != "aws" || var.private_hosted_zone_id != null
+    condition     = var.dns_provider_name != "aws" || var.private_hosted_zone_id != ""
     error_message = "private_hosted_zone_id is required when dns_provider_name is 'aws'."
   }
 }
