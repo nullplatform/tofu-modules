@@ -35,3 +35,22 @@ resource "nullplatform_provider_config" "github" {
     ignore_changes = [attributes]
   }
 }
+
+/* If the git_provider variable has the value azure, create this resource */
+resource "nullplatform_provider_config" "azure" {
+  count      = local.is_azure ? 1 : 0
+  nrn        = replace(var.nrn, ":namespace=.*$", "")
+  type       = "azure-devops-configuration"
+  dimensions = {}
+  attributes = jsonencode({
+    "setup" : {
+      "project" : var.azure_project,
+      "access_token" : var.azure_access_token,
+      "agent_pool": var.azure_agent_pool
+    },
+  }
+  )
+  lifecycle {
+    ignore_changes = [attributes]
+  }
+}
