@@ -7,7 +7,7 @@ module "oke" {
 
   compartment_id = var.compartment_id
   region         = var.region
-  cluster_name   = "mi-cluster-oficial"
+  cluster_name   = var.cluster_name
 
   kubernetes_version = "v1.34.1"
 

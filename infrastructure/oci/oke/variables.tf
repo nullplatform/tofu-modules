@@ -18,3 +18,8 @@ variable "home_region" {
   type        = string
   description = "The tenancy's home region"
 }
+
+variable "cluster_name" {
+  type = string
+
+}
