@@ -20,8 +20,8 @@ module "oke" {
   # ---------------------------------------------------------
   # Control Plane / API Endpoint Configuration
   # ---------------------------------------------------------
-  control_plane_is_public           = true
-  assign_public_ip_to_control_plane = true
+  control_plane_is_public           = var.control_plane_is_public
+  assign_public_ip_to_control_plane = var.assign_public_ip_to_control_plane
   control_plane_nsg_ids             = []
 
   # Subnets existentes
