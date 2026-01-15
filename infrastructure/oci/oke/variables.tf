@@ -23,3 +23,8 @@ variable "cluster_name" {
   type = string
 
 }
+
+variable "service_lb_subnet_id" {
+  type        = string
+  description = "Subnet ID for service load balancers (typically public subnet)"
+}

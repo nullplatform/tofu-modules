@@ -33,6 +33,10 @@ module "oke" {
       create = "never"
       id     = var.node_pool_subnet_id
     }
+    pub_lb = {
+      create = "never"
+      id     = var.service_lb_subnet_id
+    }
   }
 
   cni_type = "flannel"
