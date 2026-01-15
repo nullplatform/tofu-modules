@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.0](https://github.com/nullplatform/tofu-modules/compare/v1.20.3...v1.21.0) (2026-01-15)
+
+
+### Features
+
+* **provider:** add support for azure devops ([#133](https://github.com/nullplatform/tofu-modules/issues/133)) ([e0125d9](https://github.com/nullplatform/tofu-modules/commit/e0125d921a288f866623661caf30d95be592e77d))
+
 ## [1.20.3](https://github.com/nullplatform/tofu-modules/compare/v1.20.2...v1.20.3) (2026-01-13)
 
 
