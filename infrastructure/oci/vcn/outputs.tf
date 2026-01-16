@@ -11,10 +11,6 @@ output "vcn_all_attributes" {
   value       = module.vcn.vcn_all_attributes
 }
 
-output "view_id" {
-  description = "The OCID of the DNS private view"
-  value       = module.vcn.vcn_all_attributes.default_view_id
-}
 
 output "default_security_list_id" {
   description = "The OCID of the default security list"
