@@ -34,8 +34,8 @@ locals {
       }
     }
     extraArgs = compact([
-      "--aws-zone-type=public",
-      "--zone-id-filter=${var.public_hosted_zone_id}",
+      "--aws-zone-type=${var.zone_type}",
+      "--zone-id-filter=${var.zone_id_filter}",
       "--domain-filter=${var.domain_filters}"
     ])
   }
