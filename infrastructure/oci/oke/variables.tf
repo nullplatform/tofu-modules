@@ -38,3 +38,6 @@ variable "control_plane_is_public" {
   default = false
 
 }
+variable "control_plane_nsg_ids" {
+
+}
