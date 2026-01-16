@@ -76,5 +76,4 @@
 | <a name="output_sgw_route_id"></a> [sgw\_route\_id](#output\_sgw\_route\_id) | The OCID of the Service Gateway route table |
 | <a name="output_vcn_all_attributes"></a> [vcn\_all\_attributes](#output\_vcn\_all\_attributes) | All attributes of the VCN |
 | <a name="output_vcn_id"></a> [vcn\_id](#output\_vcn\_id) | The OCID of the VCN |
-| <a name="output_view_id"></a> [view\_id](#output\_view\_id) | The OCID of the DNS private view |
 <!-- END_TF_DOCS -->
