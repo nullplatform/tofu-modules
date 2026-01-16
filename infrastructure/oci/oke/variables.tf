@@ -39,5 +39,7 @@ variable "control_plane_is_public" {
 
 }
 variable "control_plane_nsg_ids" {
+  type    = set(string)
+  default = ["0.0.0.0/0"]
 
 }
