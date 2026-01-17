@@ -6,7 +6,6 @@ module "eks" {
   kubernetes_version = var.kubernetes_version
 
   create_cloudwatch_log_group = false
-  attach_cluster_primary_security_group = var.attach_cluster_primary_security_group
 
   addons = {
     coredns = {}
@@ -53,6 +52,7 @@ module "eks" {
       min_size     = 2
       max_size     = 10
       desired_size = 2
+      attach_cluster_primary_security_group = var.attach_cluster_primary_security_group
     }
   }
   # ==========================================
