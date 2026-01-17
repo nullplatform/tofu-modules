@@ -1,11 +1,12 @@
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = ">= 21.15, < 22.0"
+  version = ">= 21.14, < 22.0"
 
   name               = var.name
   kubernetes_version = var.kubernetes_version
 
   create_cloudwatch_log_group = false
+  attach_cluster_primary_security_group = var.attach_cluster_primary_security_group
 
   addons = {
     coredns = {}
