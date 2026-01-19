@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.2](https://github.com/nullplatform/tofu-modules/compare/v1.21.1...v1.21.2) (2026-01-19)
+
+
+### Bug Fixes
+
+* **base:** adding gateway name parameter ([#139](https://github.com/nullplatform/tofu-modules/issues/139)) ([a47a299](https://github.com/nullplatform/tofu-modules/commit/a47a299a890570a2960b90195247de9b45d0921a))
+
 ## [1.21.1](https://github.com/nullplatform/tofu-modules/compare/v1.21.0...v1.21.1) (2026-01-19)
 
 
