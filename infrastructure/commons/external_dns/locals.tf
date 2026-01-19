@@ -35,7 +35,7 @@ locals {
     }
     extraArgs = compact([
       "--aws-zone-type=public",
-      "--zone-id-filter=${var.public_hosted_zone_id}",
+      var.public_hosted_zone_id != null ? "--zone-id-filter=${var.public_hosted_zone_id}" : "",
       "--domain-filter=${var.domain_filters}"
     ])
   }
@@ -56,7 +56,7 @@ locals {
       }
     }
     extraArgs = compact([
-      "--oci-compartment-ocid=${var.oci_compartment_ocid}",
+      var.oci_compartment_ocid != null ? "--oci-compartment-ocid=${var.oci_compartment_ocid}" : "",
       "--oci-auth-instance-principal",
       "--domain-filter=${var.domain_filters}",
       "--txt-owner-id=${var.txt_owner_id}"
