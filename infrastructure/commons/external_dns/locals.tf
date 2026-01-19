@@ -35,20 +35,17 @@ locals {
     }
     rbac = {
       create = true
-      clusterRole = {
-        rules = [
+      additionalPermissions = [
           {
             apiGroups = ["externaldns.k8s.io"]
             resources = ["dnsendpoints"]
             verbs     = ["get", "list", "watch", "create", "update", "patch", "delete"]
           }
         ]
-      }
     }
     extraArgs = compact([
       "--aws-zone-type=${var.zone_type}",
-      "--zone-id-filter=${var.zone_id_filter}",
-      "--domain-filter=${var.domain_filters}"
+      "--zone-id-filter=${var.zone_id_filter}"
     ])
   }
 
