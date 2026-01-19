@@ -57,9 +57,7 @@ locals {
     }
     extraArgs = compact([
       var.oci_compartment_ocid != null ? "--oci-compartment-ocid=${var.oci_compartment_ocid}" : "",
-      "--oci-auth-instance-principal",
-      "--domain-filter=${var.domain_filters}",
-      "--txt-owner-id=${var.txt_owner_id}"
+      "--oci-auth-instance-principal"
     ])
   }
 
