@@ -1,11 +1,15 @@
 ################################################################################
-# Nullplatform Scope Definition Agent Association API Key
+# Nullplatform Service Definition Agent Association API Key
 ################################################################################
+
+locals {
+  nrn_without_namespace = replace(var.nrn, ":namespace=.*$", "")
+}
 
 module "api_key" {
   source = "../api_key"
 
-  name = "SCOPE_DEFINITION_AGENT_ASSOCIATION"
+  name = "SERVICE_DEFINITION_AGENT_ASSOCIATION-${upper(var.service_slug)}"
 
   grants = [
     {
@@ -21,7 +25,7 @@ module "api_key" {
     },
     {
       key   = "source"
-      value = "tofu-modules/nullplatform/scope_definition_agent_association"
+      value = "tofu-modules/nullplatform/service_definition_agent_association"
     }
   ]
 }

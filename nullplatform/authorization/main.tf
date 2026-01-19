@@ -1,29 +1,47 @@
-resource "nullplatform_api_key" "nullplatform_agent_api_key" {
-  name = "NULLPLATFORM-${upper(var.destination)}-API-KEY"
+################################################################################
+# Nullplatform Authorization API Key
+################################################################################
 
-  grants {
-    nrn       = replace(var.nrn, ":namespace=.*$", "")
-    role_slug = "controlplane:agent"
-  }
-  grants {
-    nrn       = replace(var.nrn, ":namespace=.*$", "")
-    role_slug = "developer"
-  }
-  grants {
-    nrn       = replace(var.nrn, ":namespace=.*$", "")
-    role_slug = "ops"
-  }
-  grants {
-    nrn       = replace(var.nrn, ":namespace=.*$", "")
-    role_slug = "secops"
-  }
-  grants {
-    nrn       = replace(var.nrn, ":namespace=.*$", "")
-    role_slug = "secrets-reader"
-  }
+locals {
+  nrn_without_namespace = replace(var.nrn, ":namespace=.*$", "")
+}
 
-  tags {
-    key   = "managed-by"
-    value = "IaC"
-  }
+module "api_key" {
+  source = "../api_key"
+
+  name = "NULLPLATFORM-${upper(var.destination)}-AUTH-API-KEY"
+
+  grants = [
+    {
+      nrn       = local.nrn_without_namespace
+      role_slug = "controlplane:agent"
+    },
+    {
+      nrn       = local.nrn_without_namespace
+      role_slug = "developer"
+    },
+    {
+      nrn       = local.nrn_without_namespace
+      role_slug = "ops"
+    },
+    {
+      nrn       = local.nrn_without_namespace
+      role_slug = "secops"
+    },
+    {
+      nrn       = local.nrn_without_namespace
+      role_slug = "secrets-reader"
+    }
+  ]
+
+  tags = [
+    {
+      key   = "managed-by"
+      value = "IaC"
+    },
+    {
+      key   = "source"
+      value = "tofu-modules/nullplatform/authorization"
+    }
+  ]
 }

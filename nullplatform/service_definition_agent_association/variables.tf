@@ -27,12 +27,6 @@ variable "channel_type" {
 
 }
 
-variable "np_api_key" {
-  description = "Nullplatform API key for authentication."
-  type        = string
-  sensitive   = true
-}
-
 variable "service_slug" {
   type        = string
   description = "The slug of the scope definition"
