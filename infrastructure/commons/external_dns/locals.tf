@@ -33,7 +33,6 @@ locals {
         "eks.amazonaws.com/role-arn" = var.aws_iam_role_arn
       }
     }
-    registry = "crd"
     rbac = {
       create = true
       clusterRole = {
