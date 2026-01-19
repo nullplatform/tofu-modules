@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.1](https://github.com/nullplatform/tofu-modules/compare/v1.21.0...v1.21.1) (2026-01-19)
+
+
+### Bug Fixes
+
+* **eks:** disable node security group to avoid ALB controller conflict ([#137](https://github.com/nullplatform/tofu-modules/issues/137)) ([8cbe80b](https://github.com/nullplatform/tofu-modules/commit/8cbe80b63d8edf2763d8bb1ed88e3b9b1b64a111))
+
 ## [1.21.0](https://github.com/nullplatform/tofu-modules/compare/v1.20.3...v1.21.0) (2026-01-15)
 
 
