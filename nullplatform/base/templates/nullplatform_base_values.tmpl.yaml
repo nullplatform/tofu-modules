@@ -34,6 +34,8 @@ gateway:
   internal:
     enabled: ${gateway_internal_enabled}
     name: "gateway-private"
+    aws: 
+      name: ${gateway_internal_aws_name}
     azure_load_balancer_subnet: ${gateway_internal_azure_load_balancer_subnet}
     addresses: {}
     autoscaling:
@@ -42,6 +44,8 @@ gateway:
     loadBalancerType: "internal"  # internal, external
   public:
     name: "gateway-public"
+    aws: 
+      name: ${gateway_public_aws_name}
     addresses: {}
     autoscaling:
       minReplicas: 2
