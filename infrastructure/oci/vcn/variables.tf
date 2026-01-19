@@ -81,3 +81,15 @@ variable "subnet_public_display_name" {
   description = "value"
 }
 
+##### OKE Control Plane NSG
+variable "create_oke_control_plane_nsg" {
+  type        = bool
+  default     = true
+  description = "Whether to create an NSG for OKE control plane access"
+}
+
+variable "oke_api_endpoint_allowed_cidrs" {
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+  description = "List of CIDR blocks allowed to access the Kubernetes API endpoint (port 6443)"
+}
