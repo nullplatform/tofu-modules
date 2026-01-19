@@ -97,6 +97,26 @@ variable "private_hosted_zone_id" {
 }
 
 ###############################################################################
+# OCI CONFIGURATION
+###############################################################################
+
+variable "oci_compartment_ocid" {
+  description = "The OCI compartment OCID where the DNS zones are located (required when dns_provider_name is 'oci')"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.dns_provider_name != "oci" || var.oci_compartment_ocid != null
+    error_message = "oci_compartment_ocid is required when dns_provider_name is 'oci'."
+  }
+}
+
+variable "oci_service_account_name" {
+  description = "The Kubernetes service account name for OCI Workload Identity"
+  type        = string
+  default     = "external-dns"
+}
+
+###############################################################################
 # DNS PROVIDER CONFIGURATION
 ###############################################################################
 
@@ -104,7 +124,7 @@ variable "dns_provider_name" {
   type        = string
   description = "The DNS provider to use with ExternalDNS "
   validation {
-    condition     = contains(["cloudflare", "aws"], var.dns_provider_name)
-    error_message = "dns_provider_name must be either 'cloudflare' or 'aws'."
+    condition     = contains(["cloudflare", "aws", "oci"], var.dns_provider_name)
+    error_message = "dns_provider_name must be either 'cloudflare', 'aws', or 'oci'."
   }
 }
