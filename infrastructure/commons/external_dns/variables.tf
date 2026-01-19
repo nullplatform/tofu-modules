@@ -64,6 +64,7 @@ variable "cloudflare_token" {
 variable "aws_region" {
   description = "The AWS region where the Route53 hosted zones are located"
   type        = string
+  default     = ""
 }
 
 variable "aws_iam_role_arn" {
