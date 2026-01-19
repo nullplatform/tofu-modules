@@ -41,7 +41,16 @@ variable "sources" {
   default     = ["crd"]
 }
 
-variable "type" {}
+variable "type" {
+  description = "Determines whether the external-dns deployment is public or private"
+  type    = string
+  default = "public"
+  validation {
+    condition     = contains(["public", "private"], var.type)
+    error_message = "The \"type\" variable must be either \"public\" or \"private\"."
+  }
+}
+
 ###############################################################################
 # CLOUDFLARE CONFIGURATION
 ###############################################################################
