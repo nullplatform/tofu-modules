@@ -88,3 +88,11 @@ output "private_subnet_display_name" {
   description = "The display name of the private subnet"
   value       = oci_core_subnet.private_subnet.display_name
 }
+
+# -----------------------------------------------------------------------
+# OKE Control Plane NSG Outputs
+# -----------------------------------------------------------------------
+output "oke_control_plane_nsg_id" {
+  description = "The OCID of the OKE control plane NSG"
+  value       = var.create_oke_control_plane_nsg ? oci_core_network_security_group.oke_control_plane[0].id : null
+}
