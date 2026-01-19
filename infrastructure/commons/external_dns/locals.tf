@@ -51,11 +51,15 @@ locals {
     serviceAccount = {
       create = true
       name   = var.oci_service_account_name
+      annotations = {
+        "oci.oraclecloud.com/workload-identity" = "true"
+      }
     }
     extraArgs = compact([
       "--oci-compartment-ocid=${var.oci_compartment_ocid}",
       "--oci-auth-instance-principal",
-      "--domain-filter=${var.domain_filters}"
+      "--domain-filter=${var.domain_filters}",
+      "--txt-owner-id=${var.txt_owner_id}"
     ])
   }
 
