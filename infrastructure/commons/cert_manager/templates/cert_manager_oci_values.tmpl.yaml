@@ -1,0 +1,2 @@
+oci:
+  compartmentOCID: "${compartment_ocid}"

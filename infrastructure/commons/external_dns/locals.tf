@@ -40,9 +40,29 @@ locals {
     ])
   }
 
+  oci_config = {
+    provider = { name = "oci" }
+    env = [
+      {
+        name  = "OCI_RESOURCE_PRINCIPAL_VERSION"
+        value = "2.2"
+      }
+    ]
+    serviceAccount = {
+      create = true
+      name   = var.oci_service_account_name
+    }
+    extraArgs = compact([
+      "--oci-compartment-ocid=${var.oci_compartment_ocid}",
+      "--oci-auth-instance-principal",
+      "--domain-filter=${var.domain_filters}"
+    ])
+  }
+
   provider_configs = {
     cloudflare = local.cloudflare_config
     aws        = local.route53_config
+    oci        = local.oci_config
   }
 
   external_dns_values = merge(local.base_config, local.provider_configs[var.dns_provider_name])
