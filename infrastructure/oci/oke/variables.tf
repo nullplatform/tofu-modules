@@ -43,3 +43,20 @@ variable "control_plane_nsg_ids" {
   default = ["0.0.0.0/0"]
 
 }
+
+variable "worker_pools" {
+  type = any
+  default = {
+    pool_principal = {
+      mode             = "node-pool"
+      shape            = "VM.Standard.E4.Flex"
+      ocpus            = 2
+      memory           = 16
+      size             = 2
+      boot_volume_size = 50
+      image_type       = "platform"
+      os               = "Oracle Linux"
+      os_version       = "8"
+    }
+  }
+}

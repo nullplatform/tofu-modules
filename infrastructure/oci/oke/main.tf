@@ -51,20 +51,7 @@ module "oke" {
   worker_pool_mode = "node-pool"
   worker_pool_size = 2
 
-  worker_pools = {
-    pool_principal = {
-      mode             = "node-pool"
-      shape            = "VM.Standard.E4.Flex"
-      ocpus            = 2
-      memory           = 16
-      size             = 2
-      boot_volume_size = 50
-      image_type       = "platform"
-      os               = "Oracle Linux"
-      os_version       = "8"
-    }
-  }
-
+  worker_pools = var.worker_pools
   # ---------------------------------------------------------
   # Bastion & Operator
   # ---------------------------------------------------------
@@ -74,7 +61,7 @@ module "oke" {
   # ---------------------------------------------------------
   # OIDC Configuration (required for Workload Identity)
   # ---------------------------------------------------------
-  oidc_discovery_enabled = false # Step 1: First upgrade to Enhanced, then enable OIDC
+  oidc_discovery_enabled = true
 
   # ---------------------------------------------------------
   # Output Configuration
