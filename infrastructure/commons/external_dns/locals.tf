@@ -55,10 +55,24 @@ locals {
         "oci.oraclecloud.com/workload-identity" = "true"
       }
     }
-    extraArgs = compact([
-      "--oci-auth-workload-identity",
-      var.oci_compartment_ocid != null ? "--oci-compartment-ocid=${var.oci_compartment_ocid}" : ""
-    ])
+    extraArgs = [
+      "--config=/etc/kubernetes/oci.yaml"
+    ]
+    extraVolumes = [
+      {
+        name = "oci-config"
+        secret = {
+          secretName = "external-dns-oci-config"
+        }
+      }
+    ]
+    extraVolumeMounts = [
+      {
+        name      = "oci-config"
+        mountPath = "/etc/kubernetes"
+        readOnly  = true
+      }
+    ]
   }
 
   provider_configs = {

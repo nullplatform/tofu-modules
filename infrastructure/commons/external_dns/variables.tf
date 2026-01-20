@@ -111,6 +111,16 @@ variable "oci_compartment_ocid" {
   }
 }
 
+variable "oci_region" {
+  description = "The OCI region where the DNS zones are located (required when dns_provider_name is 'oci')"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.dns_provider_name != "oci" || var.oci_region != null
+    error_message = "oci_region is required when dns_provider_name is 'oci'."
+  }
+}
+
 variable "oci_service_account_name" {
   description = "The Kubernetes service account name for OCI Workload Identity"
   type        = string
