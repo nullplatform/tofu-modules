@@ -12,6 +12,7 @@ module "oke" {
   cluster_name   = var.cluster_name
 
   kubernetes_version = "v1.34.1"
+  cluster_type       = "enhanced"
 
   # ---------------------------------------------------------
   # VCN Configuration
