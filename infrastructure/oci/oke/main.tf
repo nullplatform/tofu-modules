@@ -58,6 +58,9 @@ module "oke" {
       memory           = 16
       size             = 2
       boot_volume_size = 50
+      image_type       = "platform"
+      os               = "Oracle Linux"
+      os_version       = "8"
     }
   }
 
