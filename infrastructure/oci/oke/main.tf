@@ -74,7 +74,7 @@ module "oke" {
   # ---------------------------------------------------------
   # OIDC Configuration (required for Workload Identity)
   # ---------------------------------------------------------
-  oidc_discovery_enabled = true
+  oidc_discovery_enabled = false # Step 1: First upgrade to Enhanced, then enable OIDC
 
   # ---------------------------------------------------------
   # Output Configuration
