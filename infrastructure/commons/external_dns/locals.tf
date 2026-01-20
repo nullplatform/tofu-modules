@@ -42,35 +42,22 @@ locals {
 
   oci_config = {
     provider = { name = "oci" }
-    env = [
-      {
-        name  = "OCI_RESOURCE_PRINCIPAL_VERSION"
-        value = "2.2"
-      }
-    ]
     serviceAccount = {
       create = true
       name   = var.oci_service_account_name
-      annotations = {
-        "oci.oraclecloud.com/workload-identity" = "true"
-      }
     }
-    extraArgs = [
-      "--config=/etc/kubernetes/oci.yaml"
-    ]
     extraVolumes = [
       {
-        name = "oci-config"
+        name = "config"
         secret = {
-          secretName = "external-dns-oci-config"
+          secretName = "external-dns-config"
         }
       }
     ]
     extraVolumeMounts = [
       {
-        name      = "oci-config"
-        mountPath = "/etc/kubernetes"
-        readOnly  = true
+        name      = "config"
+        mountPath = "/etc/kubernetes/"
       }
     ]
   }
