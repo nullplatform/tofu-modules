@@ -71,6 +71,11 @@ module "oke" {
   create_operator = false
 
   # ---------------------------------------------------------
+  # OIDC Configuration (required for Workload Identity)
+  # ---------------------------------------------------------
+  oidc_discovery_enabled = true
+
+  # ---------------------------------------------------------
   # Output Configuration
   # ---------------------------------------------------------
   output_detail = true
