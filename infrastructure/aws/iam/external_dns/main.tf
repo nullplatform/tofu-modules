@@ -7,7 +7,10 @@ module "nullplatform_external_dns_role" {
   oidc_providers = {
     main = {
       provider_arn               = var.aws_iam_openid_connect_provider_arn
-      namespace_service_accounts = ["external-dns:external-dns"]
+      namespace_service_accounts = [
+        "external-dns:external-dns-private",
+        "external-dns:external-dns-public",
+      ]
     }
   }
 
@@ -29,7 +32,8 @@ resource "aws_iam_policy" "nullplatform_external_dns_policy" {
           "Action" : [
             "route53:ChangeResourceRecordSets",
             "route53:ListResourceRecordSets",
-            "route53:ListTagsForResources"
+            "route53:ListTagsForResources",
+            "route53:ListHostedZones"
           ],
           "Resource" : [
             "arn:aws:route53:::hostedzone/${var.hosted_zone_public_id}",

@@ -33,10 +33,19 @@ locals {
         "eks.amazonaws.com/role-arn" = var.aws_iam_role_arn
       }
     }
+    rbac = {
+      create = true
+      additionalPermissions = [
+          {
+            apiGroups = ["externaldns.k8s.io"]
+            resources = ["dnsendpoints"]
+            verbs     = ["get", "list", "watch", "create", "update", "patch", "delete"]
+          }
+        ]
+    }
     extraArgs = compact([
-      "--aws-zone-type=public",
-      "--zone-id-filter=${var.public_hosted_zone_id}",
-      "--domain-filter=${var.domain_filters}"
+      "--aws-zone-type=${var.zone_type}",
+      "--zone-id-filter=${var.zone_id_filter}"
     ])
   }
 
