@@ -12,7 +12,8 @@ locals {
   matching_rule = "ALL {resource.type='workloadidentity',resource.compartment.id='${var.compartment_id}',resource.cluster.id='${var.cluster_id}',resource.kubernetes.namespace='${var.external_dns_namespace}',resource.kubernetes.serviceaccount='${var.external_dns_service_account}'}"
 
   dns_policy_statements = [
-    # Permite leer DNS zones
+    # Permite inspeccionar y leer DNS zones
+    "Allow dynamic-group ${oci_identity_dynamic_group.external_dns.name} to inspect dns-zones in ${local.policy_scope}",
     "Allow dynamic-group ${oci_identity_dynamic_group.external_dns.name} to read dns-zones in ${local.policy_scope}",
 
     # Permite gestionar records en DNS zones
