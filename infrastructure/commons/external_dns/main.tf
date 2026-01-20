@@ -2,7 +2,7 @@ resource "kubernetes_secret_v1" "external_dns_oci_config" {
   count = var.dns_provider_name == "oci" ? 1 : 0
 
   metadata {
-    name      = "external-dns-oci-config"
+    name      = "external-dns-config"
     namespace = var.external_dns_namespace
   }
 
