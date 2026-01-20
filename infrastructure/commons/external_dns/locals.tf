@@ -56,7 +56,7 @@ locals {
       }
     }
     extraArgs = compact([
-      "--oci-auth-instance-principal",
+      "--oci-auth-workload-identity",
       var.oci_compartment_ocid != null ? "--oci-compartment-ocid=${var.oci_compartment_ocid}" : ""
     ])
   }
