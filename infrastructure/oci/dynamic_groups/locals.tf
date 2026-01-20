@@ -27,7 +27,10 @@ locals {
 
   # Usar statements restringidos si hay zone IDs, sino usar los generales
   final_policy_statements = length(var.dns_zone_ids) > 0 ? concat(
-    ["Allow dynamic-group ${oci_identity_dynamic_group.external_dns.name} to read dns-zones in ${local.policy_scope}"],
+    [
+      "Allow dynamic-group ${oci_identity_dynamic_group.external_dns.name} to inspect dns-zones in ${local.policy_scope}",
+      "Allow dynamic-group ${oci_identity_dynamic_group.external_dns.name} to read dns-zones in ${local.policy_scope}"
+    ],
     local.dns_policy_statements_restricted
   ) : local.dns_policy_statements
 }
