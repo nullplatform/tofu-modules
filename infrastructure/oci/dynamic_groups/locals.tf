@@ -1,35 +1,37 @@
 locals {
   dynamic_group_name = "${var.name_prefix}-external-dns"
 
-  # Detectar si compartment_id es el tenancy root
+  # Detect if compartment_id is the tenancy root
   is_tenancy_root = var.compartment_id == var.tenancy_id
 
-  # Scope para las políticas: "tenancy" si es root, o "compartment id <ocid>" si es un compartment
+  # Policy scope: "tenancy" if root, or "compartment id <ocid>" if it's a compartment
   policy_scope = local.is_tenancy_root ? "tenancy" : "compartment id ${var.compartment_id}"
 
-  # Matching rule para OKE Enhanced Workload Identity
-  # Esto matchea pods específicos basándose en el cluster, namespace y service account
+  # Matching rule for OKE Enhanced Workload Identity
+  # Matches specific pods based on cluster, namespace and service account
   matching_rule = "ALL {resource.type='workloadidentity',resource.compartment.id='${var.compartment_id}',resource.cluster.id='${var.cluster_id}',resource.kubernetes.namespace='${var.external_dns_namespace}',resource.kubernetes.serviceaccount='${var.external_dns_service_account}'}"
 
   dns_policy_statements = [
-    # Permite inspeccionar y leer DNS zones
+    # Allow inspect, read and use DNS zones
     "Allow dynamic-group ${oci_identity_dynamic_group.external_dns.name} to inspect dns-zones in ${local.policy_scope}",
     "Allow dynamic-group ${oci_identity_dynamic_group.external_dns.name} to read dns-zones in ${local.policy_scope}",
+    "Allow dynamic-group ${oci_identity_dynamic_group.external_dns.name} to use dns-zones in ${local.policy_scope}",
 
-    # Permite gestionar records en DNS zones
+    # Allow manage DNS records
     "Allow dynamic-group ${oci_identity_dynamic_group.external_dns.name} to manage dns-records in ${local.policy_scope}",
   ]
 
-  # Si se especifican zone IDs específicos, agregar restricciones
+  # If specific zone IDs are provided, add restrictions
   dns_policy_statements_restricted = length(var.dns_zone_ids) > 0 ? [
     for zone_id in var.dns_zone_ids : "Allow dynamic-group ${oci_identity_dynamic_group.external_dns.name} to manage dns-records in ${local.policy_scope} where target.dns-zone.id = '${zone_id}'"
   ] : []
 
-  # Usar statements restringidos si hay zone IDs, sino usar los generales
+  # Use restricted statements if zone IDs are provided, otherwise use general statements
   final_policy_statements = length(var.dns_zone_ids) > 0 ? concat(
     [
       "Allow dynamic-group ${oci_identity_dynamic_group.external_dns.name} to inspect dns-zones in ${local.policy_scope}",
-      "Allow dynamic-group ${oci_identity_dynamic_group.external_dns.name} to read dns-zones in ${local.policy_scope}"
+      "Allow dynamic-group ${oci_identity_dynamic_group.external_dns.name} to read dns-zones in ${local.policy_scope}",
+      "Allow dynamic-group ${oci_identity_dynamic_group.external_dns.name} to use dns-zones in ${local.policy_scope}"
     ],
     local.dns_policy_statements_restricted
   ) : local.dns_policy_statements
