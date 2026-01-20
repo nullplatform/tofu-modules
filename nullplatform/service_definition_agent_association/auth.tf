@@ -23,21 +23,17 @@ module "api_key" {
     {
       nrn       = local.nrn_without_namespace
       role_slug = "ops"
-    },
-    {
-      nrn       = local.nrn_without_namespace
-      role_slug = "secops"
     }
   ]
 
   tags = [
     {
-      key   = "managed-by"
+      key   = "managedby"
       value = "IaC"
     },
     {
       key   = "source"
-      value = "tofu-modules/nullplatform/service_definition_agent_association"
+      value = "tofu-modules/nullplatform/service_definition_agent_association/${upper(var.service_slug)}"
     }
   ]
 }

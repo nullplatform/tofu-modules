@@ -11,12 +11,16 @@ module "api_key" {
     {
       nrn       = local.nrn_without_namespace
       role_slug = "controlplane:agent"
+    },
+    {
+      nrn       = local.nrn_without_namespace
+      role_slug = "ops"
     }
   ]
 
   tags = [
     {
-      key   = "managed-by"
+      key   = "managedby"
       value = "IaC"
     },
     {
