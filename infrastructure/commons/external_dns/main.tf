@@ -1,3 +1,24 @@
+resource "kubernetes_secret_v1" "external_dns_oci_config" {
+  count = var.dns_provider_name == "oci" ? 1 : 0
+
+  metadata {
+    name      = "external-dns-oci-config"
+    namespace = var.external_dns_namespace
+  }
+
+  data = {
+    "oci.yaml" = yamlencode({
+      auth = {
+        region              = var.oci_region
+        useWorkloadIdentity = true
+      }
+      compartment = var.oci_compartment_ocid
+    })
+  }
+
+  depends_on = [kubernetes_namespace_v1.external_dns]
+}
+
 resource "helm_release" "external_dns" {
   name       = "external-dns"
   repository = "https://kubernetes-sigs.github.io/external-dns/"
@@ -23,6 +44,7 @@ resource "helm_release" "external_dns" {
   values = [yamlencode(local.external_dns_values)]
 
   depends_on = [
-    kubernetes_secret_v1.external_dns_cloudflare
+    kubernetes_secret_v1.external_dns_cloudflare,
+    kubernetes_secret_v1.external_dns_oci_config
   ]
 }
