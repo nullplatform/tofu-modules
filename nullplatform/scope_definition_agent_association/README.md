@@ -31,11 +31,16 @@ module "scope_definition_agent_association" {
 | <a name="provider_http"></a> [http](#provider\_http) | n/a |
 | <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) |  >= 0.0.67 |
 
+## Modules
+
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_api_key"></a> [api\_key](#module\_api\_key) | ../api_key | n/a |
+
 ## Resources
 
 | Name | Type |
 |------|------|
-| [nullplatform_api_key.nullplatform_agent_api_key](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/api_key) | resource |
 | [nullplatform_notification_channel.from_template](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/notification_channel) | resource |
 
 ## Inputs

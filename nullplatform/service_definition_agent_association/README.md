@@ -74,6 +74,12 @@ No modules.
 |------|---------|
 | <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | n/a |
 
+## Modules
+
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_api_key"></a> [api\_key](#module\_api\_key) | ../api_key | n/a |
+
 ## Resources
 
 | Name | Type |
@@ -87,7 +93,6 @@ No modules.
 | <a name="input_agent_command"></a> [agent\_command](#input\_agent\_command) | n/a | <pre>object({<br/>    type = string<br/>    data = object({<br/>      cmdline     = string<br/>      arguments   = optional(list(string), [])<br/>      environment = optional(map(string), {})<br/>    })<br/>  })</pre> | `null` | no |
 | <a name="input_channel_sources"></a> [channel\_sources](#input\_channel\_sources) | List of sources for the notification channel (e.g., ['monitoring', 'alerts']) | `list(string)` | <pre>[<br/>  "telemetry",<br/>  "service"<br/>]</pre> | no |
 | <a name="input_channel_type"></a> [channel\_type](#input\_channel\_type) | Type of the notification channel (e.g., 'agent') | `string` | `"agent"` | no |
-| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication. | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name (organization:account format) | `string` | `null` | no |
 | <a name="input_service_path"></a> [service\_path](#input\_service\_path) | Path to the service configuration | `string` | `null` | no |
 | <a name="input_service_slug"></a> [service\_slug](#input\_service\_slug) | The slug of the scope definition | `string` | `null` | no |

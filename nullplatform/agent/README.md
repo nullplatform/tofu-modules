@@ -30,14 +30,18 @@ module "cloud_aws_agent" {
 | Name | Version |
 |------|---------|
 | <a name="provider_helm"></a> [helm](#provider\_helm) | ~> 3.0 |
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | ~> 0.0.63 |
+
+## Modules
+
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_api_key"></a> [api\_key](#module\_api\_key) | ../api_key | n/a |
 
 ## Resources
 
 | Name | Type |
 |------|------|
 | [helm_release.agent](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
-| [nullplatform_api_key.nullplatform_agent_api_key](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/api_key) | resource |
 
 ## Inputs
 
