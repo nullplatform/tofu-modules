@@ -52,7 +52,7 @@ locals {
     ]
     extraVolumes = [
       {
-        name = "config"
+        name = "oci-config"
         secret = {
           secretName = "external-dns-config"
         }
@@ -60,8 +60,9 @@ locals {
     ]
     extraVolumeMounts = [
       {
-        name      = "config"
+        name      = "oci-config"
         mountPath = "/etc/kubernetes/"
+        readOnly  = true
       }
     ]
   }

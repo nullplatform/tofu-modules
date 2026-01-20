@@ -112,7 +112,7 @@ variable "oci_compartment_ocid" {
 }
 
 variable "oci_region" {
-  description = "The OCI region where the DNS zones are located (required when dns_provider_name is 'oci')"
+  description = "The OCI region for workload identity configuration (required when dns_provider_name is 'oci')"
   type        = string
   default     = null
   validation {
