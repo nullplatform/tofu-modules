@@ -46,6 +46,10 @@ locals {
       create = true
       name   = var.oci_service_account_name
     }
+    extraArgs = [
+      "--oci-zone-scope=${var.oci_zone_scope}",
+      "--oci-zones-cache-duration=${var.oci_zones_cache_duration}"
+    ]
     extraVolumes = [
       {
         name = "config"
