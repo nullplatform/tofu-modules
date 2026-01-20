@@ -47,6 +47,7 @@ locals {
       name   = var.oci_service_account_name
     }
     extraArgs = [
+      "--oci-compartment-ocid=${var.oci_compartment_ocid}",
       "--oci-zone-scope=${var.oci_zone_scope}",
       "--oci-zones-cache-duration=${var.oci_zones_cache_duration}"
     ]
