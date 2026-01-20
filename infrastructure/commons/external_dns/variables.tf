@@ -127,6 +127,22 @@ variable "oci_service_account_name" {
   default     = "external-dns"
 }
 
+variable "oci_zone_scope" {
+  description = "The scope of the DNS zones in OCI (GLOBAL or PRIVATE)"
+  type        = string
+  default     = "GLOBAL"
+  validation {
+    condition     = contains(["GLOBAL", "PRIVATE"], var.oci_zone_scope)
+    error_message = "oci_zone_scope must be either 'GLOBAL' or 'PRIVATE'."
+  }
+}
+
+variable "oci_zones_cache_duration" {
+  description = "The duration to cache OCI DNS zones (e.g., '30s', '1m'). Set to '0s' to disable caching."
+  type        = string
+  default     = "30s"
+}
+
 ###############################################################################
 # DNS PROVIDER CONFIGURATION
 ###############################################################################
