@@ -1,25 +1,25 @@
 output "dynamic_group_id" {
-  description = "OCID del dynamic group creado"
+  description = "OCID of the created dynamic group"
   value       = oci_identity_dynamic_group.external_dns.id
 }
 
 output "dynamic_group_name" {
-  description = "Nombre del dynamic group"
+  description = "Name of the dynamic group"
   value       = oci_identity_dynamic_group.external_dns.name
 }
 
 output "policy_id" {
-  description = "OCID de la policy creada"
+  description = "OCID of the created policy"
   value       = oci_identity_policy.external_dns.id
 }
 
 output "policy_name" {
-  description = "Nombre de la policy"
+  description = "Name of the policy"
   value       = oci_identity_policy.external_dns.name
 }
 
 output "external_dns_helm_values" {
-  description = "Valores sugeridos para el Helm chart de external-dns"
+  description = "Suggested values for the external-dns Helm chart"
   value       = <<-EOT
     provider: oracle
     oracle:
