@@ -15,6 +15,18 @@ module "api_key" {
     {
       nrn       = local.nrn_without_namespace
       role_slug = "controlplane:agent"
+    },
+    {
+      nrn       = local.nrn_without_namespace
+      role_slug = "admin"
+    },
+    {
+      nrn       = local.nrn_without_namespace
+      role_slug = "ops"
+    },
+    {
+      nrn       = local.nrn_without_namespace
+      role_slug = "secops"
     }
   ]
 
