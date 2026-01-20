@@ -41,6 +41,16 @@ variable "sources" {
   default     = ["crd"]
 }
 
+variable "type" {
+  description = "Determines whether the external-dns deployment is public or private"
+  type    = string
+  default = "public"
+  validation {
+    condition     = contains(["public", "private"], var.type)
+    error_message = "The \"type\" variable must be either \"public\" or \"private\"."
+  }
+}
+
 ###############################################################################
 # CLOUDFLARE CONFIGURATION
 ###############################################################################
@@ -81,23 +91,24 @@ variable "aws_iam_role_arn" {
   }
 }
 
-variable "public_hosted_zone_id" {
-  description = "The Route53 public hosted zone ID for ExternalDNS to manage (required when dns_provider_name is 'aws')"
+variable "zone_id_filter" {
+  description = "The Route53 public or private hosted zone ID for ExternalDNS to manage (required when dns_provider_name is 'aws')"
   type        = string
   default     = ""
   validation {
-    condition     = var.dns_provider_name != "aws" || var.public_hosted_zone_id != ""
-    error_message = "public_hosted_zone_id is required when dns_provider_name is 'aws'."
+    condition     = var.dns_provider_name != "aws" || var.zone_id_filter != ""
+    error_message = "zone_id_filter is required when dns_provider_name is 'aws'."
   }
 }
 
-variable "private_hosted_zone_id" {
-  description = "The Route53 private hosted zone ID for ExternalDNS to manage (required when dns_provider_name is 'aws')"
+variable "zone_type" {
+  description = "The Route53 hosted zone type for ExternalDNS to manage (public or private)"
   type        = string
   default     = ""
   validation {
-    condition     = var.dns_provider_name != "aws" || var.private_hosted_zone_id != ""
-    error_message = "private_hosted_zone_id is required when dns_provider_name is 'aws'."
+    condition = (
+    var.dns_provider_name != "aws" || (var.zone_type != "" && contains(["public", "private"], lower(var.zone_type))))
+    error_message = "When dns_provider_name is 'aws', zone_type must be 'public' or 'private'."
   }
 }
 
