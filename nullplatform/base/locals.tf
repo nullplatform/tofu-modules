@@ -25,8 +25,11 @@ locals {
       ingress_private_domain  = var.ingressControllers.private.domain
 
       # ---- gateway ----
-      gateway_enabled          = var.gateway_enabled ? "true" : "false"
-      gateway_internal_enabled = var.gateway_internal_enabled ? "true" : "false"
+      gateway_enabled                             = var.gateway_enabled ? "true" : "false"
+      gateway_internal_enabled                    = var.gateway_internal_enabled ? "true" : "false"
+      gateway_internal_azure_load_balancer_subnet = var.internal_azure_load_balancer_subnet
+      gateway_public_aws_name                     = var.gateway_public_aws_name
+      gateway_internal_aws_name                     = var.gateway_internal_aws_name
 
       # ---- nullplatform ----
       np_api_key = var.np_api_key

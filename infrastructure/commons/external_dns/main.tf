@@ -1,3 +1,9 @@
+resource "kubernetes_namespace_v1" "external_dns" {
+  metadata {
+    name = var.external_dns_namespace
+  }
+}
+
 resource "kubernetes_secret_v1" "external_dns_oci_config" {
   count = var.dns_provider_name == "oci" ? 1 : 0
 
@@ -19,13 +25,13 @@ EOT
 }
 
 resource "helm_release" "external_dns" {
-  name       = "external-dns"
+  name       = "external-dns-${var.type}"
   repository = "https://kubernetes-sigs.github.io/external-dns/"
   chart      = "external-dns"
   namespace  = var.external_dns_namespace
   version    = var.external_dns_version
 
-  create_namespace  = true
+  create_namespace  = false
   disable_webhooks  = false
   force_update      = true
   wait              = true

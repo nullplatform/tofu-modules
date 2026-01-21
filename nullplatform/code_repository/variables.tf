@@ -96,6 +96,37 @@ variable "github_installation_id" {
   }
 }
 
+# Azure-specific variables
+variable "azure_project" {
+  description = "Azure devops project name"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.git_provider != "azure" || var.azure_project != null
+    error_message = "project is required when git_provider is 'azure'."
+  }
+}
+
+variable "azure_access_token" {
+  description = "Azure devops personal access token"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.git_provider != "azure" || var.azure_access_token != null
+    error_message = "access_token is required when git_provider is 'azure'."
+  }
+}
+
+variable "azure_agent_pool" {
+  description = "Azure devops CI agent pool"
+  type        = string
+  default     = "Default"
+  validation {
+    condition     = var.git_provider != "azure" || var.azure_agent_pool != null
+    error_message = "agent_pool is required when git_provider is 'azure'."
+  }
+}
+
 # Common variables (always required)
 variable "np_api_key" {
   description = "Nullplatform API key for authentication."

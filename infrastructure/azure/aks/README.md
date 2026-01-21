@@ -4,16 +4,17 @@ This module creates an Azure Kubernetes Service (AKS) cluster using the official
 
 ## Features
 
-- Creates a production-ready AKS cluster with system and user node pools  
+- Creates a production-ready AKS cluster with system and user node pools
 - Configurable Kubernetes version
 - Auto-scaling enabled for user node pools (1–5 nodes)
-- Workload identity and OIDC issuer enabled by default  
+- Workload identity and OIDC issuer enabled by default
 - RBAC and Azure AD integration
-- Configurable VM sizes for system and user node pools 
+- Configurable VM sizes for system and user node pools
 - Support for private clusters
 - API server IP allowlist support
 - Zone redundancy for high availability
 - Configurable tags for resource management
+- Optional Azure Container Registry (ACR) integration with automatic AcrPull role assignment
 
 ## Usage
 
@@ -29,6 +30,7 @@ module "aks" {
   vnet_subnet_id      = module.vnet.subnet_ids_by_name["subnet-1"]
   system_pool_vm_size = "Standard_D2s_v5"
   user_pool_vm_size   = "Standard_D2s_v5"
+  acr_id = module.acr.acr_id
 
   depends_on = [module.resource_group, module.vnet]
 }
@@ -88,6 +90,7 @@ The module creates two node pools:
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_acr_id"></a> [acr\_id](#input\_acr\_id) | The ID of the Azure Container Registry. If provided, AKS will be granted AcrPull role to pull images. | `string` | `null` | no |
 | <a name="input_authorized_ip_ranges"></a> [authorized\_ip\_ranges](#input\_authorized\_ip\_ranges) | The set of authorized IP ranges allowed to access the Kubernetes API server | `set(string)` | `null` | no |
 | <a name="input_cluster_log_analytics_workspace_name"></a> [cluster\_log\_analytics\_workspace\_name](#input\_cluster\_log\_analytics\_workspace\_name) | The name of the Log Analytics workspace used for cluster monitoring | `string` | `null` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The name of the AKS cluster | `string` | n/a | yes |

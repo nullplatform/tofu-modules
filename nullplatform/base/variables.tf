@@ -1,7 +1,7 @@
 variable "nullplatform_base_helm_version" {
   description = "Helm chart version for the nullplatform base."
   type        = string
-  default     = "2.28.1"
+  default     = "2.30.1"
 }
 
 variable "namespace" {
@@ -68,6 +68,12 @@ variable "gateway_internal_enabled" {
   default     = false
 }
 
+
+variable "internal_azure_load_balancer_subnet" {
+  description = "The name of the subnet to use in azure private load balancer"
+  type        = string
+  default     = "load_balancer"
+}
 ############################################
 # Control Plane
 ############################################
@@ -302,6 +308,20 @@ variable "gateway_api_crds_install" {
   description = "Install Gateway API CRDs."
   default     = false
 }
+
+
+variable "gateway_public_aws_name" {
+  type        = string
+  description = "Name of public gateway in AWS."
+  default     = "k8s-nullplatform-internet-facing"
+}
+
+variable "gateway_internal_aws_name" {
+  type        = string
+  description = "Name of private gateway in AWS."
+  default     = "k8s-nullplatform-internal"
+}
+
 
 ############################################
 # Image Pull Secrets
