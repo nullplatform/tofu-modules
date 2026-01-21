@@ -80,9 +80,6 @@ resource "helm_release" "cert_manager_webhook_oci" {
   dependency_update = true
   max_history       = 10
 
-  values = [
-
-  ]
 
   depends_on = [helm_release.cert_manager]
 }
