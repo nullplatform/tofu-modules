@@ -36,12 +36,12 @@ locals {
     rbac = {
       create = true
       additionalPermissions = [
-          {
-            apiGroups = ["externaldns.k8s.io"]
-            resources = ["dnsendpoints"]
-            verbs     = ["get", "list", "watch", "create", "update", "patch", "delete"]
-          }
-        ]
+        {
+          apiGroups = ["externaldns.k8s.io"]
+          resources = ["dnsendpoints"]
+          verbs     = ["get", "list", "watch", "create", "update", "patch", "delete"]
+        }
+      ]
     }
     extraArgs = compact([
       "--aws-zone-type=${var.zone_type}",

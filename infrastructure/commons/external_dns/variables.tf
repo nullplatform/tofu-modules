@@ -43,8 +43,8 @@ variable "sources" {
 
 variable "type" {
   description = "Determines whether the external-dns deployment is public or private"
-  type    = string
-  default = "public"
+  type        = string
+  default     = "public"
   validation {
     condition     = contains(["public", "private"], var.type)
     error_message = "The \"type\" variable must be either \"public\" or \"private\"."
@@ -74,7 +74,7 @@ variable "cloudflare_token" {
 variable "aws_region" {
   description = "The AWS region where the Route53 hosted zones are located"
   type        = string
-  default = null
+  default     = null
   validation {
     condition     = var.dns_provider_name != "aws" || var.aws_region != null
     error_message = "aws_region is required when dns_provider_name is 'aws'."

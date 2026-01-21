@@ -163,9 +163,9 @@ resource "aws_iam_policy" "nullplatform_avp_policy" {
       {
         "Effect" : "Allow",
         "Action" : [
-          "verifiedpermissions: *"
+          "verifiedpermissions:*"
         ],
-        "Resource" : *,
+        "Resource" : "*",
         "Condition" : {
           "StringEquals" : {
             "aws:RequestedRegion" : [
