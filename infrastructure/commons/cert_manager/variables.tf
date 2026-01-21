@@ -192,3 +192,15 @@ variable "oci_sa_ocid" {
     error_message = "When cloud_provider is 'oci', oci_sa_ocid must not be empty."
   }
 }
+##########web hook
+variable "cert_manager_webhook_oci_version" {
+  type    = string
+  default = "1.1.0"
+
+}
+
+variable "cert_manager_webhook_oci_namespace" {
+  type    = string
+  default = "cert-manager"
+
+}
