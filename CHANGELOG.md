@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.22.0](https://github.com/nullplatform/tofu-modules/compare/v1.21.4...v1.22.0) (2026-01-21)
+
+
+### Features
+
+* **oci:** add support for oci ([#146](https://github.com/nullplatform/tofu-modules/issues/146)) ([ffaa72d](https://github.com/nullplatform/tofu-modules/commit/ffaa72d6d529ef168a422b7a4242a80a56920104))
+
 ## [1.21.4](https://github.com/nullplatform/tofu-modules/compare/v1.21.3...v1.21.4) (2026-01-21)
 
 
