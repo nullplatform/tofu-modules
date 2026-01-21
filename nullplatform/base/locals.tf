@@ -31,6 +31,18 @@ locals {
       gateway_public_aws_name                     = var.gateway_public_aws_name
       gateway_internal_aws_name                   = var.gateway_internal_aws_name
 
+      # ---- gateway security (AWS) ----
+      gateway_public_aws_security_groups  = local.create_aws_security && var.gateways_enabled ? aws_security_group.public_gateway[0].id : ""
+      gateway_private_aws_security_groups = local.create_aws_security && var.gateway_internal_enabled ? aws_security_group.private_gateway[0].id : ""
+
+      # ---- gateway security (Azure) ----
+      gateway_public_azure_nsg  = local.create_azure_security && var.gateways_enabled ? azurerm_network_security_group.public_gateway[0].id : ""
+      gateway_private_azure_nsg = local.create_azure_security && var.gateway_internal_enabled ? azurerm_network_security_group.private_gateway[0].id : ""
+
+      # ---- gateway security (GCP) ----
+      gateway_public_gcp_firewall  = local.create_gcp_security && var.gateways_enabled ? google_compute_firewall.public_gateway_https[0].name : ""
+      gateway_private_gcp_firewall = local.create_gcp_security && var.gateway_internal_enabled ? google_compute_firewall.private_gateway_https[0].name : ""
+
       # ---- nullplatform ----
       np_api_key = var.np_api_key
       # You left secretName empty in the template; if you want to make it configurable, add var.nullplatform_secret_name

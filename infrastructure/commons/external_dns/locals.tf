@@ -49,9 +49,44 @@ locals {
     ])
   }
 
+  oci_config = {
+    provider = { name = "oci" }
+    serviceAccount = {
+      create = true
+      name   = var.oci_service_account_name
+    }
+    env = [
+      {
+        name  = "OCI_GO_SDK_DEBUG"
+        value = "info"
+      }
+    ]
+    extraArgs = [
+      "--oci-compartment-ocid=${var.oci_compartment_ocid}",
+      "--oci-zone-scope=${var.oci_zone_scope}",
+      "--oci-zones-cache-duration=${var.oci_zones_cache_duration}"
+    ]
+    extraVolumes = [
+      {
+        name = "oci-config"
+        secret = {
+          secretName = "external-dns-config"
+        }
+      }
+    ]
+    extraVolumeMounts = [
+      {
+        name      = "oci-config"
+        mountPath = "/etc/kubernetes/"
+        readOnly  = true
+      }
+    ]
+  }
+
   provider_configs = {
     cloudflare = local.cloudflare_config
     aws        = local.route53_config
+    oci        = local.oci_config
   }
 
   external_dns_values = merge(local.base_config, local.provider_configs[var.dns_provider_name])

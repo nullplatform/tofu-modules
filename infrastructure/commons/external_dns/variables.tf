@@ -113,6 +113,52 @@ variable "zone_type" {
 }
 
 ###############################################################################
+# OCI CONFIGURATION
+###############################################################################
+
+variable "oci_compartment_ocid" {
+  description = "The OCI compartment OCID where the DNS zones are located (required when dns_provider_name is 'oci')"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.dns_provider_name != "oci" || var.oci_compartment_ocid != null
+    error_message = "oci_compartment_ocid is required when dns_provider_name is 'oci'."
+  }
+}
+
+variable "oci_region" {
+  description = "The OCI region for workload identity configuration (required when dns_provider_name is 'oci')"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.dns_provider_name != "oci" || var.oci_region != null
+    error_message = "oci_region is required when dns_provider_name is 'oci'."
+  }
+}
+
+variable "oci_service_account_name" {
+  description = "The Kubernetes service account name for OCI Workload Identity"
+  type        = string
+  default     = "external-dns"
+}
+
+variable "oci_zone_scope" {
+  description = "The scope of the DNS zones in OCI (GLOBAL or PRIVATE)"
+  type        = string
+  default     = "GLOBAL"
+  validation {
+    condition     = contains(["GLOBAL", "PRIVATE"], var.oci_zone_scope)
+    error_message = "oci_zone_scope must be either 'GLOBAL' or 'PRIVATE'."
+  }
+}
+
+variable "oci_zones_cache_duration" {
+  description = "The duration to cache OCI DNS zones (e.g., '30s', '1m'). Set to '0s' to disable caching."
+  type        = string
+  default     = "30s"
+}
+
+###############################################################################
 # DNS PROVIDER CONFIGURATION
 ###############################################################################
 
@@ -120,7 +166,7 @@ variable "dns_provider_name" {
   type        = string
   description = "The DNS provider to use with ExternalDNS "
   validation {
-    condition     = contains(["cloudflare", "aws"], var.dns_provider_name)
-    error_message = "dns_provider_name must be either 'cloudflare' or 'aws'."
+    condition     = contains(["cloudflare", "aws", "oci"], var.dns_provider_name)
+    error_message = "dns_provider_name must be either 'cloudflare', 'aws', or 'oci'."
   }
 }
