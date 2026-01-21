@@ -46,6 +46,12 @@ locals {
       create = true
       name   = var.oci_service_account_name
     }
+    env = [
+      {
+        name  = "OCI_GO_SDK_DEBUG"
+        value = "info"
+      }
+    ]
     extraArgs = [
       "--oci-compartment-ocid=${var.oci_compartment_ocid}",
       "--oci-zone-scope=${var.oci_zone_scope}",
