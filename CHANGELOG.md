@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.3](https://github.com/nullplatform/tofu-modules/compare/v1.21.2...v1.21.3) (2026-01-20)
+
+
+### Bug Fixes
+
+* **external-dns:** add rbac  ([#141](https://github.com/nullplatform/tofu-modules/issues/141)) ([ea5c5bb](https://github.com/nullplatform/tofu-modules/commit/ea5c5bbedb559b5d797185186204353a6d65186a))
+
 ## [1.21.2](https://github.com/nullplatform/tofu-modules/compare/v1.21.1...v1.21.2) (2026-01-19)
 
 
