@@ -1,3 +1,11 @@
+resource "kubernetes_namespace_v1" "external_dns" {
+  metadata {
+    name = var.external_dns_namespace
+  }
+}
+
+
+
 resource "helm_release" "external_dns" {
   name       = "external-dns-${var.type}"
   repository = "https://kubernetes-sigs.github.io/external-dns/"
@@ -5,7 +13,7 @@ resource "helm_release" "external_dns" {
   namespace  = var.external_dns_namespace
   version    = var.external_dns_version
 
-  create_namespace  = true
+  create_namespace  = false
   disable_webhooks  = false
   force_update      = true
   wait              = true
@@ -23,6 +31,7 @@ resource "helm_release" "external_dns" {
   values = [yamlencode(local.external_dns_values)]
 
   depends_on = [
-    kubernetes_secret_v1.external_dns_cloudflare
+    kubernetes_secret_v1.external_dns_cloudflare,
+    kubernetes_secret_v1.external_dns_oci_config
   ]
 }
