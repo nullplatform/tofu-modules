@@ -25,16 +25,7 @@ locals {
   service_spec_parsed = jsondecode(local.service_spec_rendered)
   available_actions   = try(local.service_spec_parsed.available_actions, [])
   available_links     = try(local.service_spec_parsed.available_links, [])
-  has_links           = length(local.available_links) > 0
   visible_to_nrns     = concat([var.nrn], var.extra_visibile_to_nrns)
-}
-
-# Fetch link specification template (only if service has links)
-data "github_repository_file" "link_spec_template" {
-  count      = local.has_links ? 1 : 0
-  repository = var.git_repo
-  branch     = var.git_ref
-  file       = "${var.git_service_path}/specs/link-spec.json${var.use_tpl_files ? ".tpl" : ""}"
 }
 
 # Fetch action specification templates
@@ -45,26 +36,12 @@ data "github_repository_file" "action_templates" {
   file       = "${var.git_service_path}/specs/actions/${each.key}.json${var.use_tpl_files ? ".tpl" : ""}"
 }
 
-# Fetch link specification templates (only if service has links)
+# Fetch link specification templates from links/ directory (based on available_links)
 data "github_repository_file" "link_templates" {
   for_each   = toset(local.available_links)
   repository = var.git_repo
   branch     = var.git_ref
   file       = "${var.git_service_path}/specs/links/${each.key}.json${var.use_tpl_files ? ".tpl" : ""}"
-}
-
-################################################################################
-# Step 3: Process Link Specification (if applicable)
-################################################################################
-
-locals {
-  # Process link spec template only if service has links
-  link_spec_rendered = local.has_links ? (var.use_tpl_files ? replace(
-    data.github_repository_file.link_spec_template[0].content,
-    "/\"{{\\s+env.Getenv\\s+\".*\"\\s+}}\"/",
-    "\"${var.nrn}\""
-  ) : data.github_repository_file.link_spec_template[0].content) : "{}"
-  link_spec_parsed = local.has_links ? jsondecode(local.link_spec_rendered) : {}
 }
 
 # Create service specification
@@ -136,25 +113,8 @@ locals {
   }
 }
 
-# Create link specification from link-spec template (only if service has links)
-resource "nullplatform_link_specification" "service_link_from_template" {
-  count      = local.has_links ? 1 : 0
-  depends_on = [nullplatform_service_specification.from_template]
-
-  name                = local.link_spec_parsed.name
-  unique              = try(local.link_spec_parsed.unique, false)
-  specification_id    = local.service_specification_id
-  attributes          = jsonencode(local.link_spec_parsed.attributes)
-  use_default_actions = try(local.link_spec_parsed.use_default_actions, true)
-  selectors {
-    category     = try(local.link_spec_parsed.selectors.category, local.service_spec_parsed.selectors.category)
-    imported     = try(local.link_spec_parsed.selectors.imported, local.service_spec_parsed.selectors.imported)
-    provider     = try(local.link_spec_parsed.selectors.provider, local.service_spec_parsed.selectors.provider)
-    sub_category = try(local.link_spec_parsed.selectors.sub_category, local.service_spec_parsed.selectors.sub_category)
-  }
-}
-
-resource "nullplatform_link_specification" "service_link_from_templates" {
+# Create link specifications from links/ directory (based on available_links in service-spec)
+resource "nullplatform_link_specification" "from_templates" {
   for_each   = toset(local.available_links)
   depends_on = [nullplatform_service_specification.from_template]
 
