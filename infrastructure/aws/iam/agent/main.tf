@@ -18,7 +18,8 @@ module "nullplatform_agent_role" {
   policies = {
     "nullplatform_route53_policy" = aws_iam_policy.nullplatform_route53_policy.arn,
     "nullplatform_eks_policy"     = aws_iam_policy.nullplatform_eks_policy.arn,
-    "nullplatform_elb_policy"     = aws_iam_policy.nullplatform_elb_policy.arn
+    "nullplatform_elb_policy"     = aws_iam_policy.nullplatform_elb_policy.arn,
+    "nullplatform_avp_policy"     = aws_iam_policy.nullplatform_avp_policy.arn
   }
 }
 
@@ -136,6 +137,35 @@ resource "aws_iam_policy" "nullplatform_eks_policy" {
           "arn:aws:eks:*:*:nodegroup/*",
           "arn:aws:eks:*:*:addon/*"
         ],
+        "Condition" : {
+          "StringEquals" : {
+            "aws:RequestedRegion" : [
+              data.aws_region.current.region
+            ]
+          }
+        }
+      }
+    ]
+  })
+}
+
+################################################################################
+# AVP policy
+################################################################################
+
+# Grant permissions to describe and list EKS cluster resources
+resource "aws_iam_policy" "nullplatform_avp_policy" {
+  name        = "nullplatform_${var.cluster_name}_avp_policy"
+  description = "Policy for managing AVP resources"
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "verifiedpermissions:*"
+        ],
+        "Resource" : "*",
         "Condition" : {
           "StringEquals" : {
             "aws:RequestedRegion" : [

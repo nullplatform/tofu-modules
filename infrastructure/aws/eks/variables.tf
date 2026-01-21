@@ -64,7 +64,7 @@ variable "auto_mode_node_pools" {
 
 
 variable "attach_cluster_primary_security_group" {
-    description = "Attach cluster primary security group to node groups"
-    type        = bool
-    default     = true
-  }
+  description = "Attach cluster primary security group to node groups"
+  type        = bool
+  default     = true
+}

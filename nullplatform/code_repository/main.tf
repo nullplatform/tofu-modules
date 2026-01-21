@@ -46,9 +46,9 @@ resource "nullplatform_provider_config" "azure" {
     "setup" : {
       "project" : var.azure_project,
       "access_token" : var.azure_access_token,
-      "agent_pool": var.azure_agent_pool
+      "agent_pool" : var.azure_agent_pool
     },
-  }
+    }
   )
   lifecycle {
     ignore_changes = [attributes]
