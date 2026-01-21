@@ -11,18 +11,21 @@ This module creates a private DNS zone in Azure with optional virtual network li
 
 ## Usage
 
-### Basic Example
+### Basic Example (with AKS VNet)
 
 ```hcl
 module "private_dns" {
   source          = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/private_dns?ref=v1.5.0"
-  domain_name     = "privatelink.database.windows.net"
-  resource_group  = "my-resource-group"
-  subscription_id = "00000000-0000-0000-0000-000000000000"
-  tags = {
-    environment = "production"
-    team        = "platform"
-  }
+  domain_name     = var.private_dns_domain_name 
+  resource_group  = var.resource_group
+  subscription_id = var.subscription_id
+
+  virtual_network_links = [
+    {
+      vnet_id              = module.vnet.resource_id 
+      registration_enabled = false                    
+    }
+  ]
 }
 ```
 
@@ -39,7 +42,7 @@ module "private_dns" {
 | `resource_group` | The name of the resource group where the private DNS zone will be created | `string` | Yes | - |
 | `domain_name` | The domain name to use for the private DNS zone | `string` | Yes | - |
 | `subscription_id` | The ID of the Azure subscription | `string` | Yes | - |
-| `virtual_network_links` | List of virtual networks to link to the private DNS zone | `list(object)` | No | `[]` |
+| `virtual_network_links` | List of virtual networks to link to the private DNS zone | `list(object)` | Yes | - |
 | `tags` | A mapping of tags to assign to the resources | `map(string)` | No | `{}` |
 
 ## Outputs
@@ -79,7 +82,7 @@ module "private_dns" {
 | <a name="input_resource_group"></a> [resource\_group](#input\_resource\_group) | The name of the resource group where the private DNS zone will be created | `string` | n/a | yes |
 | <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | The ID of the Azure subscription | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to the private DNS zone | `map(string)` | `{}` | no |
-| <a name="input_virtual_network_links"></a> [virtual\_network\_links](#input\_virtual\_network\_links) | List of virtual networks to link to the private DNS zone. Each object requires vnet\_id and optionally registration\_enabled for auto-registration of VM records | <pre>list(object({<br/>    vnet_id              = string<br/>    registration_enabled = optional(bool, false)<br/>  }))</pre> | `[]` | no |
+| <a name="input_virtual_network_links"></a> [virtual\_network\_links](#input\_virtual\_network\_links) | List of virtual networks to link to the private DNS zone. Each object requires vnet\_id and optionally registration\_enabled (false for AKS/Private Link, true for VMs auto-registration) | <pre>list(object({<br/>    vnet_id              = string<br/>    registration_enabled = optional(bool, false)<br/>  }))</pre> | n/a | yes |
 
 ## Outputs
 

@@ -1,5 +1,101 @@
 # Changelog
 
+## [1.21.3](https://github.com/nullplatform/tofu-modules/compare/v1.21.2...v1.21.3) (2026-01-20)
+
+
+### Bug Fixes
+
+* **external-dns:** add rbac  ([#141](https://github.com/nullplatform/tofu-modules/issues/141)) ([ea5c5bb](https://github.com/nullplatform/tofu-modules/commit/ea5c5bbedb559b5d797185186204353a6d65186a))
+
+## [1.21.2](https://github.com/nullplatform/tofu-modules/compare/v1.21.1...v1.21.2) (2026-01-19)
+
+
+### Bug Fixes
+
+* **base:** adding gateway name parameter ([#139](https://github.com/nullplatform/tofu-modules/issues/139)) ([a47a299](https://github.com/nullplatform/tofu-modules/commit/a47a299a890570a2960b90195247de9b45d0921a))
+
+## [1.21.1](https://github.com/nullplatform/tofu-modules/compare/v1.21.0...v1.21.1) (2026-01-19)
+
+
+### Bug Fixes
+
+* **eks:** disable node security group to avoid ALB controller conflict ([#137](https://github.com/nullplatform/tofu-modules/issues/137)) ([8cbe80b](https://github.com/nullplatform/tofu-modules/commit/8cbe80b63d8edf2763d8bb1ed88e3b9b1b64a111))
+
+## [1.21.0](https://github.com/nullplatform/tofu-modules/compare/v1.20.3...v1.21.0) (2026-01-15)
+
+
+### Features
+
+* **provider:** add support for azure devops ([#133](https://github.com/nullplatform/tofu-modules/issues/133)) ([e0125d9](https://github.com/nullplatform/tofu-modules/commit/e0125d921a288f866623661caf30d95be592e77d))
+
+## [1.20.3](https://github.com/nullplatform/tofu-modules/compare/v1.20.2...v1.20.3) (2026-01-13)
+
+
+### Bug Fixes
+
+* **release:** fix commit message ([#131](https://github.com/nullplatform/tofu-modules/issues/131)) ([eb4e239](https://github.com/nullplatform/tofu-modules/commit/eb4e2395ce90ae9b2c08425ae99888c4b04cb02f))
+
+## [1.20.2](https://github.com/nullplatform/tofu-modules/compare/v1.20.1...v1.20.2) (2026-01-12)
+
+
+### Bug Fixes
+
+* **external-dns:** fix external dns varaible type ([d44879c](https://github.com/nullplatform/tofu-modules/commit/d44879ceeae517c5dec097c7fa6d19e9b8bea06c))
+* **external-dns:** fix external dns varaible type ([#128](https://github.com/nullplatform/tofu-modules/issues/128)) ([af26c59](https://github.com/nullplatform/tofu-modules/commit/af26c590b04089a7202d07a09ac6e6a30feaa06c))
+
+## [1.20.1](https://github.com/nullplatform/tofu-modules/compare/v1.20.0...v1.20.1) (2026-01-12)
+
+
+### Bug Fixes
+
+* **external-dns:** set default value ([#126](https://github.com/nullplatform/tofu-modules/issues/126)) ([c652f64](https://github.com/nullplatform/tofu-modules/commit/c652f64adc2e04683c6495a2eaae8dd4a810e950))
+
+## [1.20.0](https://github.com/nullplatform/tofu-modules/compare/v1.19.0...v1.20.0) (2026-01-12)
+
+
+### Features
+
+* service definition and service association channel ([#121](https://github.com/nullplatform/tofu-modules/issues/121)) ([44e6a8e](https://github.com/nullplatform/tofu-modules/commit/44e6a8e35bf3ed9cf42b0cd090eae215e62ff71a))
+
+## [1.19.0](https://github.com/nullplatform/tofu-modules/compare/v1.18.0...v1.19.0) (2026-01-12)
+
+
+### Features
+
+* aks acr integration ([#120](https://github.com/nullplatform/tofu-modules/issues/120)) ([e2237b6](https://github.com/nullplatform/tofu-modules/commit/e2237b608ee9ccfabb40582582ab0e664640e13a))
+
+## [1.18.0](https://github.com/nullplatform/tofu-modules/compare/v1.17.2...v1.18.0) (2026-01-12)
+
+
+### Features
+
+* **chart:** new version of charts ([#122](https://github.com/nullplatform/tofu-modules/issues/122)) ([83a8b39](https://github.com/nullplatform/tofu-modules/commit/83a8b399b836ca053fe8fc7b8689d1c198cd4e32))
+
+## [1.17.2](https://github.com/nullplatform/tofu-modules/compare/v1.17.1...v1.17.2) (2026-01-12)
+
+
+### Bug Fixes
+
+* add disclaimer for registration_enabled usage ([ac1fd0a](https://github.com/nullplatform/tofu-modules/commit/ac1fd0a60b373656a922e5836a8f38fb5986e807))
+* add validation for virtual_network_links ([76438d0](https://github.com/nullplatform/tofu-modules/commit/76438d08e1160f3d18e292f5bfa2c35ac7a3283e))
+* make virtual_network_links required without default ([329f5a5](https://github.com/nullplatform/tofu-modules/commit/329f5a5a3c44d97239eb6875aa6784881a603e41))
+* **private_dns:** make virtual_network_links required and update example ([c75b08f](https://github.com/nullplatform/tofu-modules/commit/c75b08f1950fcff94db4a4a7a0d3c87809da72d7))
+* rename api key to SCOPE_DEFINITION_AGENT_ASSOCIATION ([#117](https://github.com/nullplatform/tofu-modules/issues/117)) ([1ed79ba](https://github.com/nullplatform/tofu-modules/commit/1ed79ba7773d7b1f9792215623d4a3b40a988443))
+
+## [1.17.1](https://github.com/nullplatform/tofu-modules/compare/v1.17.0...v1.17.1) (2026-01-09)
+
+
+### Bug Fixes
+
+* **aks:** add network contributor ([0305ade](https://github.com/nullplatform/tofu-modules/commit/0305ade8dda6389a57e47cb4999abeb9e2362f5c))
+* **aks:** add network contributor ([#114](https://github.com/nullplatform/tofu-modules/issues/114)) ([1542270](https://github.com/nullplatform/tofu-modules/commit/1542270b0f8a34ff52918bbdcbca42a75936f5e8))
+* **azure-aks:** add role to vnet ([b40d33d](https://github.com/nullplatform/tofu-modules/commit/b40d33d4f80cbed3c552a5b4f7ac593c145ff5f3))
+* **azure-aks:** principal_id variable ([6e3d54c](https://github.com/nullplatform/tofu-modules/commit/6e3d54c4bc00833161a03d4c65d0b9db8aba9b9f))
+* **azure-aks:** principal_id variable ([6232bf0](https://github.com/nullplatform/tofu-modules/commit/6232bf0f44c7c99377b220f28895bd7a52039b35))
+* **base-gateways:** add annottaion to LB use subnet private ([8e3b09e](https://github.com/nullplatform/tofu-modules/commit/8e3b09e0a57f0a86e0494145b69d8da0540123d7))
+* **base:** update version chart ([0bc1fbd](https://github.com/nullplatform/tofu-modules/commit/0bc1fbdd45ae873a42c13c7a8618bd5f54f140ca))
+* **base:** update version chart ([#116](https://github.com/nullplatform/tofu-modules/issues/116)) ([26a1034](https://github.com/nullplatform/tofu-modules/commit/26a1034eec4285cb3fca8f8904c0a4d2da76524f))
+
 ## [1.17.0](https://github.com/nullplatform/tofu-modules/compare/v1.16.0...v1.17.0) (2026-01-07)
 
 
