@@ -2,11 +2,11 @@
 # CERT-MANAGER PROVIDER
 ###############################################################################
 variable "cloud_provider" {
-  description = "El proveedor de nube a utilizar: gcp, azure, aws, o cloudflare"
+  description = "The cloud provider to use: gcp, azure, aws, cloudflare, or oci"
   type        = string
   validation {
-    condition     = contains(["gcp", "azure", "cloudflare", "aws"], var.cloud_provider)
-    error_message = "El valor debe ser uno de: gcp, azure, cloudflare, aws"
+    condition     = contains(["gcp", "azure", "cloudflare", "aws", "oci"], var.cloud_provider)
+    error_message = "Value must be one of: gcp, azure, cloudflare, aws, oci"
   }
 }
 
@@ -166,5 +166,29 @@ variable "aws_region" {
   validation {
     condition     = var.cloud_provider != "aws" || length(var.aws_region) > 0
     error_message = "When cloud_provider is 'aws', aws_region must not be empty."
+  }
+}
+
+###############################################################################
+# OCI CONFIGURATION
+###############################################################################
+
+variable "oci_compartment_ocid" {
+  description = "The OCID of the OCI compartment where the DNS zone is located."
+  type        = string
+  default     = ""
+  validation {
+    condition     = var.cloud_provider != "oci" || length(var.oci_compartment_ocid) > 0
+    error_message = "When cloud_provider is 'oci', oci_compartment_ocid must not be empty."
+  }
+}
+
+variable "oci_sa_ocid" {
+  description = "The OCID of the OCI workload identity principal for cert-manager."
+  type        = string
+  default     = ""
+  validation {
+    condition     = var.cloud_provider != "oci" || length(var.oci_sa_ocid) > 0
+    error_message = "When cloud_provider is 'oci', oci_sa_ocid must not be empty."
   }
 }
