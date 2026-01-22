@@ -41,12 +41,19 @@ variable "np_api_key" {
   type = string
 
 }
-variable "service_specification_slug" {
 
-}
 variable "service_specification_id" {
-
+  type        = string
+  description = "The ID of the scope definition associated with the agent"
+  default     = null
 }
+
+variable "service_specification_slug" {
+  type        = string
+  description = "The slug of the scope definition"
+  default     = null
+}
+
 variable "repo_path" {
   description = "Local filesystem path where the scope repository will be cloned"
   type        = string

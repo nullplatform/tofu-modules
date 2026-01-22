@@ -5,7 +5,7 @@
 module "api_key" {
   source = "../api_key"
 
-  name = "SCOPE_DEFINITION_AGENT_ASSOCIATION"
+  name = "SCOPE_${upper(var.service_specification_slug)}_CHANNEL"
 
   grants = [
     {
@@ -20,12 +20,16 @@ module "api_key" {
 
   tags = [
     {
-      key   = "managedby"
+      key   = "managedBy"
       value = "IaC"
     },
     {
-      key   = "source"
-      value = "tofu-modules/nullplatform/scope_definition_agent_association"
+      key   = "level"
+      value = var.nrn
+    },
+    {
+      key   = "usedBy"
+      value = "${upper(var.service_specification_slug)}"
     }
   ]
 }

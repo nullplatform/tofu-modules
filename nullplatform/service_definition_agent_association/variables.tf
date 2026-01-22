@@ -27,9 +27,9 @@ variable "channel_type" {
 
 }
 
-variable "service_slug" {
+variable "service_specification_slug" {
   type        = string
-  description = "The slug of the scope definition"
+  description = "The slug of the service definition"
   default     = null
 }
 variable "workflow_override_path" {
@@ -69,6 +69,4 @@ variable "service_specification_id" {
   type        = string
   description = "The ID of the service definition associated with the agent"
   default     = null
-
 }
-

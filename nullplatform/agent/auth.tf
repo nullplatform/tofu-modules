@@ -5,7 +5,7 @@
 module "api_key" {
   source = "../api_key"
 
-  name = "NULLPLATFORM-AGENT-${var.cluster_name}-API-KEY"
+  name = "AGENT"
 
   grants = [
     {
@@ -32,16 +32,12 @@ module "api_key" {
 
   tags = [
     {
-      key   = "managed-by"
+      key   = "managedBy"
       value = "IaC"
     },
     {
-      key   = "owner"
+      key   = "level"
       value = var.nrn
-    },
-    {
-      key   = "source"
-      value = "tofu-modules/nullplatform/agent"
     }
   ]
 }

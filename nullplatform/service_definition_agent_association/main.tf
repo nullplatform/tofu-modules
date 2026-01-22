@@ -30,7 +30,7 @@ resource "nullplatform_notification_channel" "channel_from_template" {
 
   filters = jsonencode({
     "$or" = [
-      { "service.specification.slug" = { "$eq" : var.service_slug } }
+      { "service.specification.slug" = { "$eq" : var.service_specification_slug } }
     ]
   })
 }

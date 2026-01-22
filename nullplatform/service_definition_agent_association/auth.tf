@@ -9,7 +9,7 @@ locals {
 module "api_key" {
   source = "../api_key"
 
-  name = "SERVICE_DEFINITION_AGENT_ASSOCIATION-${upper(var.service_slug)}"
+  name = "SERVICE_DEFINITION_AGENT_ASSOCIATION"
 
   grants = [
     {
@@ -28,12 +28,16 @@ module "api_key" {
 
   tags = [
     {
-      key   = "managedby"
+      key   = "managedBy"
       value = "IaC"
     },
     {
-      key   = "source"
-      value = "tofu-modules/nullplatform/service_definition_agent_association/${upper(var.service_slug)}"
+      key   = "level"
+      value = var.nrn
+    },
+    {
+      key   = "usedBy"
+      value = "${upper(var.service_specification_slug)}"
     }
   ]
 }
