@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.22.1](https://github.com/nullplatform/tofu-modules/compare/v1.22.0...v1.22.1) (2026-01-22)
+
+
+### Bug Fixes
+
+* **agent:** add permission to verifiedpermissions ([#145](https://github.com/nullplatform/tofu-modules/issues/145)) ([369012e](https://github.com/nullplatform/tofu-modules/commit/369012e79199a5f70d696a5f2dc082ed76d208b4))
+* **tofu:** fmt ([a9da839](https://github.com/nullplatform/tofu-modules/commit/a9da83956908a28fd9796a52768d0c8656d274f7))
+* **tofu:** resolve conflicts ([013628f](https://github.com/nullplatform/tofu-modules/commit/013628f8e0530d20d0622f58008ea47b2970e54a))
+
 ## [1.22.0](https://github.com/nullplatform/tofu-modules/compare/v1.21.4...v1.22.0) (2026-01-21)
 
 
