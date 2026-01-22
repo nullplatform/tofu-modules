@@ -55,8 +55,8 @@ module "scope_definition_agent_association" {
 | <a name="input_override_repo_path"></a> [override\_repo\_path](#input\_override\_repo\_path) | Local filesystem path where the scope repository will be cloned | `string` | `null` | no |
 | <a name="input_overrides_service_path"></a> [overrides\_service\_path](#input\_overrides\_service\_path) | Local filesystem path to the directory containing override configurations | `string` | `null` | no |
 | <a name="input_repo_path"></a> [repo\_path](#input\_repo\_path) | Local filesystem path where the scope repository will be cloned | `string` | `"/root/.np/nullplatform/scopes"` | no |
+| <a name="input_scope_specification_id"></a> [scope\_specification\_id](#input\_scope\_specification\_id) | n/a | `any` | n/a | yes |
+| <a name="input_scope_specification_slug"></a> [scope\_specification\_slug](#input\_scope\_specification\_slug) | n/a | `any` | n/a | yes |
 | <a name="input_service_path"></a> [service\_path](#input\_service\_path) | Path to the service directory within the repository structure | `string` | `"k8s"` | no |
-| <a name="input_service_specification_id"></a> [service\_specification\_id](#input\_service\_specification\_id) | The ID of the scope definition associated with the agent | `string` | `null` | no |
-| <a name="input_service_specification_slug"></a> [service\_specification\_slug](#input\_service\_specification\_slug) | The slug of the scope definition | `string` | `null` | no |
 | <a name="input_tags_selectors"></a> [tags\_selectors](#input\_tags\_selectors) | Map of tags used to select and filter channels and agents | `map(string)` | n/a | yes |
 <!-- END_TF_DOCS -->
