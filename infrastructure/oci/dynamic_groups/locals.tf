@@ -15,12 +15,12 @@ locals {
   # This is the recommended approach for OKE Enhanced Cluster workload identity
   workload_identity_conditions = "request.principal.type = 'workload', request.principal.namespace = '${var.namespace}', request.principal.service_account = '${var.service_account}', request.principal.cluster_id = '${var.cluster_id}'"
 
-  # DNS policy statements using dynamic-group approach
+  # DNS policy statements using direct request.principal.* approach (recommended for workload identity)
   dns_policy_statements = var.enable_dns_permissions ? [
-    "Allow dynamic-group ${local.dynamic_group_name} to inspect dns-zones in ${local.policy_scope}",
-    "Allow dynamic-group ${local.dynamic_group_name} to read dns-zones in ${local.policy_scope}",
-    "Allow dynamic-group ${local.dynamic_group_name} to use dns-zones in ${local.policy_scope}",
-    "Allow dynamic-group ${local.dynamic_group_name} to manage dns-records in ${local.policy_scope}",
+    "Allow any-user to inspect dns-zones in ${local.policy_scope} where all {${local.workload_identity_conditions}}",
+    "Allow any-user to read dns-zones in ${local.policy_scope} where all {${local.workload_identity_conditions}}",
+    "Allow any-user to use dns-zones in ${local.policy_scope} where all {${local.workload_identity_conditions}}",
+    "Allow any-user to manage dns-records in ${local.policy_scope} where all {${local.workload_identity_conditions}}",
   ] : []
 
   # Combine DNS statements with custom policy statements

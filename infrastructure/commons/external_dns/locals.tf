@@ -54,9 +54,6 @@ locals {
     serviceAccount = {
       create = true
       name   = var.oci_service_account_name
-      annotations = {
-        "oci.oraclecloud.com/workload-identity" = "true"
-      }
     }
     env = [
       {
