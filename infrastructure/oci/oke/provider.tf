@@ -1,17 +1,9 @@
 terraform {
   required_providers {
     oci = {
-      source  = "oracle/oci"
-      version = ">= 5.0.0"
+      source                = "oracle/oci"
+      version               = ">= 5.0.0"
+      configuration_aliases = [oci, oci.home]
     }
   }
-}
-
-provider "oci" {
-  region = var.region
-}
-
-provider "oci" {
-  alias  = "home"
-  region = var.home_region
 }

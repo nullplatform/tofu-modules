@@ -39,3 +39,45 @@ spec:
     targets:
     # "{{ .gateway_ip }}"
     - "203.0.113.50"
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  # k-8-s-{{ .scope.slug }}-{{ .scope.id }}-dns
+  name: k-8-s-production-4004-private
+
+  # {{ .k8s_namespace }}
+  namespace: nullplatform
+
+  labels:
+    nullplatform: "true"
+
+    # {{ .account.slug }}
+    account: acme-corp
+    # "{{ .account.id }}"
+    account_id: "1001"
+
+    # {{ .namespace.slug }}
+    namespace: pagos
+    # "{{ .namespace.id }}"
+    namespace_id: "2002"
+
+    # {{ .application.slug }}
+    application: api-gateway
+    # "{{ .application.id }}"
+    application_id: "3003"
+
+    # {{ .scope.slug }}
+    scope: production
+    # "{{ .scope.id }}"
+    scope_id: "4004"
+
+spec:
+  endpoints:
+  # {{ .scope.domain }}
+  - dnsName: test.internal-oci.nullimplementation.com
+    recordTTL: 60
+    recordType: A
+    targets:
+    # "{{ .gateway_ip }}"
+    - "10.0.0.1"
