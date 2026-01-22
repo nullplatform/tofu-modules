@@ -16,13 +16,17 @@ resource "oci_identity_dynamic_group" "this" {
 }
 
 resource "oci_identity_policy" "this" {
+  count = length(local.final_policy_statements) > 0 ? 1 : 0
+
   compartment_id = var.compartment_id
   name           = "${var.name_prefix}-${var.workload_name}-policy"
   description    = "Policy for ${var.workload_name} workload identity"
-  statements     = var.policy_statements
+  statements     = local.final_policy_statements
 
   defined_tags  = var.defined_tags
   freeform_tags = var.freeform_tags
+
+  depends_on = [oci_identity_dynamic_group.this]
 
   lifecycle {
     ignore_changes = [

@@ -28,9 +28,16 @@ variable "service_account" {
   description = "Name of the Kubernetes service account"
 }
 
-variable "policy_statements" {
+variable "enable_dns_permissions" {
+  type        = bool
+  description = "Enable automatic DNS policy statements (inspect, read, use dns-zones and manage dns-records)"
+  default     = false
+}
+
+variable "additional_policy_statements" {
   type        = list(string)
-  description = "List of OCI IAM policy statements to apply"
+  description = "Additional custom OCI IAM policy statements to apply"
+  default     = []
 }
 
 variable "name_prefix" {
