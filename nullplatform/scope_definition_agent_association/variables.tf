@@ -42,16 +42,14 @@ variable "np_api_key" {
 
 }
 
-variable "service_specification_id" {
-  type        = string
-  description = "The ID of the scope definition associated with the agent"
-  default     = null
+variable "scope_specification_id" {
+
+
 }
 
-variable "service_specification_slug" {
-  type        = string
-  description = "The slug of the scope definition"
-  default     = null
+variable "scope_specification_slug" {
+
+
 }
 
 variable "repo_path" {

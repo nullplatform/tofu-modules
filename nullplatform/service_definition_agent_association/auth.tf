@@ -9,7 +9,7 @@ locals {
 module "api_key" {
   source = "../api_key"
 
-  name = "SERVICE_${upper(var.service_specification_slug)}_CHANNEL"
+  name = "SERVICE-NOTIFICATION-CHANNEL-${upper(var.service_specification_slug)}"
 
   grants = [
     {

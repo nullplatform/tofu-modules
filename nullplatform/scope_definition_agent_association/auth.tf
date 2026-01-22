@@ -5,7 +5,7 @@
 module "api_key" {
   source = "../api_key"
 
-  name = "SCOPE_${upper(var.service_specification_slug)}_CHANNEL"
+  name = "SCOPE-NOTIFICATION-CHANNEL-${upper(var.scope_specification_slug)}"
 
   grants = [
     {
@@ -29,7 +29,7 @@ module "api_key" {
     },
     {
       key   = "usedBy"
-      value = "${upper(var.service_specification_slug)}"
+      value = "${upper(var.scope_specification_slug)}"
     }
   ]
 }

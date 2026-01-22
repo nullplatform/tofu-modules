@@ -21,8 +21,8 @@ data "external" "notification_channel" {
     NP_API_KEY='${module.api_key.api_key}' \
     REPO_PATH='${var.repo_path}' \
     SERVICE_PATH='${var.service_path}' \
-    SERVICE_SLUG='${var.service_specification_slug}' \
-    SERVICE_SPECIFICATION_ID='${var.service_specification_id}' \
+    SERVICE_SLUG='${var.scope_specification_slug}' \
+    SERVICE_SPECIFICATION_ID='${var.scope_specification_id}' \
     gomplate)
     echo "$processed_json" | jq -c '{json: tojson}'
   EOT
