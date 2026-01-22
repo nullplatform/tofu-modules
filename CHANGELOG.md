@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.22.2](https://github.com/nullplatform/tofu-modules/compare/v1.22.1...v1.22.2) (2026-01-22)
+
+
+### Bug Fixes
+
+* trigger release ([#150](https://github.com/nullplatform/tofu-modules/issues/150)) ([466546a](https://github.com/nullplatform/tofu-modules/commit/466546a9ca80d39037a02bcdb7acb8e41c9d6923))
+
 ## [1.22.1](https://github.com/nullplatform/tofu-modules/compare/v1.22.0...v1.22.1) (2026-01-22)
 
 
