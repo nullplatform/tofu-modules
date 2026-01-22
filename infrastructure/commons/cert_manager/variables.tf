@@ -184,13 +184,9 @@ variable "oci_compartment_ocid" {
 }
 
 variable "oci_sa_ocid" {
-  description = "The OCID of the OCI workload identity principal for cert-manager."
+  description = "The OCID of the OCI workload identity principal for cert-manager. Optional when using Dynamic Groups with Workload Identity."
   type        = string
   default     = ""
-  validation {
-    condition     = var.cloud_provider != "oci" || length(var.oci_sa_ocid) > 0
-    error_message = "When cloud_provider is 'oci', oci_sa_ocid must not be empty."
-  }
 }
 ##########web hook
 variable "cert_manager_webhook_oci_version" {
