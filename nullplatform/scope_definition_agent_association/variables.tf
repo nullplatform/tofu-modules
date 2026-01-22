@@ -42,11 +42,11 @@ variable "np_api_key" {
 
 }
 
-variable "service_specification_id" {
-  type        = string
-  description = "The ID of the scope definition associated with the agent"
-  default     = null
-}
+#variable "service_specification_id" {
+#  type        = string
+#  description = "The ID of the scope definition associated with the agent"
+#  default     = null
+#}
 
 variable "service_specification_slug" {
   type        = string
