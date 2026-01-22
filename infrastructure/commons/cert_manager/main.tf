@@ -61,7 +61,7 @@ resource "helm_release" "cert_manager_webhook_oci" {
   count      = var.cloud_provider == "oci" ? 1 : 0
   name       = "cert-manager-webhook-oci"
   repository = "https://dn13.gitlab.io/cert-manager-webhook-oci"
-  chart      = "cert-manager-webhook-oci/cert-manager-webhook-oci"
+  chart      = "cert-manager-webhook-oci"
   version    = var.cert_manager_webhook_oci_version
   namespace  = var.cert_manager_webhook_oci_namespace
 
