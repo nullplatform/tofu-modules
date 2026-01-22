@@ -5,7 +5,7 @@ variable "tenancy_id" {
 
 variable "compartment_id" {
   type        = string
-  description = "OCID of the compartment where resources are located (cluster, DNS zones)"
+  description = "OCID of the compartment where resources are located"
 }
 
 variable "cluster_id" {
@@ -13,22 +13,24 @@ variable "cluster_id" {
   description = "OCID of the OKE cluster"
 }
 
-variable "external_dns_namespace" {
+variable "workload_name" {
   type        = string
-  description = "Kubernetes namespace where external-dns runs"
-  default     = "external-dns"
+  description = "Name of the workload (e.g., external-dns, cert-manager)"
 }
 
-variable "external_dns_service_account" {
+variable "namespace" {
   type        = string
-  description = "Name of the external-dns service account"
-  default     = "external-dns"
+  description = "Kubernetes namespace where the workload runs"
 }
 
-variable "dns_zone_ids" {
+variable "service_account" {
+  type        = string
+  description = "Name of the Kubernetes service account"
+}
+
+variable "policy_statements" {
   type        = list(string)
-  description = "List of DNS zone OCIDs that external-dns can manage (optional, if not specified allows all zones in the compartment)"
-  default     = []
+  description = "List of OCI IAM policy statements to apply"
 }
 
 variable "name_prefix" {
