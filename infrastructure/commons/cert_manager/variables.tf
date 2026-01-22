@@ -191,8 +191,7 @@ variable "oci_sa_ocid" {
 ##########web hook
 variable "cert_manager_webhook_oci_version" {
   type    = string
-  default = "1.1.0"
-
+  default = "1.4.1"
 }
 
 variable "cert_manager_webhook_oci_namespace" {
