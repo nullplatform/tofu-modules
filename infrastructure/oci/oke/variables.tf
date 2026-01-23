@@ -60,3 +60,9 @@ variable "worker_pools" {
     }
   }
 }
+
+variable "worker_cloud_init" {
+  description = "Cloud init configuration for worker nodes. See: https://cloudinit.readthedocs.io/en/latest/reference/modules.html"
+  type        = list(map(string))
+  default     = []
+}
