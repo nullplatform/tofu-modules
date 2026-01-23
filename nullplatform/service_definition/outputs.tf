@@ -27,7 +27,7 @@ output "action_specification_ids" {
 
 output "link_specification_ids" {
   value = {
-    for k, v in nullplatform_link_specification.service_link_from_templates : k => v.id
+    for k, v in nullplatform_link_specification.from_templates : k => v.id
   }
   description = "Map of link specification names to their IDs"
 }
