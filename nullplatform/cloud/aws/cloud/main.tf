@@ -9,7 +9,7 @@ resource "nullplatform_provider_config" "aws" {
     }
     account = {
       id     = data.aws_caller_identity.current.id
-      region = data.aws_region.current.region
+      region = data.aws_region.current.name
     }
     networking = {
       application_domain    = var.application_domain,
