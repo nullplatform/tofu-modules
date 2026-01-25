@@ -14,7 +14,7 @@ resource "nullplatform_api_key" "nullplatform_agent_api_key" {
 
   grants {
     nrn       = local.nrn_without_namespace
-    role_slug = "devops"
+    role_slug = "ops"
   }
 
   tags {
