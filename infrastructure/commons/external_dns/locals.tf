@@ -25,12 +25,12 @@ locals {
     provider = { name = "aws" }
     env = [{
       name  = "AWS_DEFAULT_REGION"
-      value = var.aws_region
+      value = var.aws_region != null ? var.aws_region : ""
     }]
     serviceAccount = {
       create = true
       annotations = {
-        "eks.amazonaws.com/role-arn" = var.aws_iam_role_arn
+        "eks.amazonaws.com/role-arn" = var.aws_iam_role_arn != null ? var.aws_iam_role_arn : ""
       }
     }
     rbac = {
@@ -62,7 +62,7 @@ locals {
       }
     ]
     extraArgs = [
-      "--oci-compartment-ocid=${var.oci_compartment_ocid}",
+      "--oci-compartment-ocid=${var.oci_compartment_ocid != null ? var.oci_compartment_ocid : ""}",
       "--oci-zone-scope=${var.oci_zone_scope}",
       "--oci-zones-cache-duration=${var.oci_zones_cache_duration}"
     ]
@@ -83,11 +83,68 @@ locals {
     ]
   }
 
+  azure_workload_identity_config = {
+    provider = { name = "azure" }
+    serviceAccount = {
+      create = true
+      labels = {
+        "azure.workload.identity/use" = "true"
+      }
+      annotations = {
+        "azure.workload.identity/client-id" = var.azure_client_id != null ? var.azure_client_id : ""
+      }
+    }
+    podLabels = {
+      "azure.workload.identity/use" = "true"
+    }
+    env = [
+      {
+        name  = "AZURE_TENANT_ID"
+        value = var.azure_tenant_id != null ? var.azure_tenant_id : ""
+      },
+      {
+        name  = "AZURE_SUBSCRIPTION_ID"
+        value = var.azure_subscription_id != null ? var.azure_subscription_id : ""
+      }
+    ]
+    extraArgs = [
+      "--azure-resource-group=${var.azure_resource_group != null ? var.azure_resource_group : ""}",
+      "--azure-config-file="
+    ]
+  }
+
+  azure_service_principal_config = {
+    provider = { name = "azure" }
+    extraArgs = [
+      "--azure-resource-group=${var.azure_resource_group != null ? var.azure_resource_group : ""}"
+    ]
+    extraVolumes = [
+      {
+        name = "azure-config"
+        secret = {
+          secretName = "external-dns-azure"
+        }
+      }
+    ]
+    extraVolumeMounts = [
+      {
+        name      = "azure-config"
+        mountPath = "/etc/kubernetes/"
+        readOnly  = true
+      }
+    ]
+  }
+
   provider_configs = {
     cloudflare = local.cloudflare_config
     aws        = local.route53_config
     oci        = local.oci_config
+    azure      = local.azure_workload_identity_config
+    azure-sp   = local.azure_service_principal_config
   }
 
-  external_dns_values = merge(local.base_config, local.provider_configs[var.dns_provider_name])
+  # Determine the actual provider key to use
+  effective_provider_key = var.dns_provider_name == "azure" && !var.azure_use_workload_identity ? "azure-sp" : var.dns_provider_name
+
+  external_dns_values = merge(local.base_config, local.provider_configs[local.effective_provider_key])
 }

@@ -2,7 +2,7 @@
 # Module: external_dns
 
 This OpenTofu module installs **ExternalDNS** using a Helm chart, enabling dynamic DNS record management through
-either **AWS Route53** or **Cloudflare** as your DNS provider.
+**AWS Route53**, **Cloudflare**, **OCI DNS**, or **Azure DNS** as your DNS provider.
 
 
 ## Usage
@@ -35,6 +35,39 @@ module "external_dns" {
 }
 ```
 
+### Azure DNS example (with Workload Identity - recommended for AKS)
+
+```hcl
+module "external_dns" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.0.0"
+
+  dns_provider_name           = "azure"
+  azure_resource_group        = var.azure_resource_group
+  azure_tenant_id             = var.azure_tenant_id
+  azure_subscription_id       = var.azure_subscription_id
+  azure_client_id             = var.azure_managed_identity_client_id
+  azure_use_workload_identity = true
+  domain_filters              = var.domain_filters
+}
+```
+
+### Azure DNS example (with Service Principal)
+
+```hcl
+module "external_dns" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.0.0"
+
+  dns_provider_name           = "azure"
+  azure_resource_group        = var.azure_resource_group
+  azure_tenant_id             = var.azure_tenant_id
+  azure_subscription_id       = var.azure_subscription_id
+  azure_client_id             = var.azure_client_id
+  azure_client_secret         = var.azure_client_secret
+  azure_use_workload_identity = false
+  domain_filters              = var.domain_filters
+}
+```
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -55,6 +88,7 @@ module "external_dns" {
 |------|------|
 | [helm_release.external_dns](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [kubernetes_namespace_v1.external_dns](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace_v1) | resource |
+| [kubernetes_secret_v1.external_dns_azure](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/secret_v1) | resource |
 | [kubernetes_secret_v1.external_dns_cloudflare](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/secret_v1) | resource |
 | [kubernetes_secret_v1.external_dns_oci_config](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/secret_v1) | resource |
 
@@ -64,6 +98,12 @@ module "external_dns" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_aws_iam_role_arn"></a> [aws\_iam\_role\_arn](#input\_aws\_iam\_role\_arn) | The IAM role ARN for ExternalDNS to assume for Route53 access (required when dns\_provider\_name is 'aws') | `string` | `null` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region where the Route53 hosted zones are located | `string` | `null` | no |
+| <a name="input_azure_client_id"></a> [azure\_client\_id](#input\_azure\_client\_id) | The Azure client ID (application ID) for service principal authentication. Required when azure\_use\_workload\_identity is false. | `string` | `null` | no |
+| <a name="input_azure_client_secret"></a> [azure\_client\_secret](#input\_azure\_client\_secret) | The Azure client secret for service principal authentication. Required when azure\_use\_workload\_identity is false. | `string` | `null` | no |
+| <a name="input_azure_resource_group"></a> [azure\_resource\_group](#input\_azure\_resource\_group) | The Azure resource group containing the DNS zone (required when dns\_provider\_name is 'azure') | `string` | `null` | no |
+| <a name="input_azure_subscription_id"></a> [azure\_subscription\_id](#input\_azure\_subscription\_id) | The Azure subscription ID containing the DNS zone (required when dns\_provider\_name is 'azure') | `string` | `null` | no |
+| <a name="input_azure_tenant_id"></a> [azure\_tenant\_id](#input\_azure\_tenant\_id) | The Azure tenant ID for authentication (required when dns\_provider\_name is 'azure') | `string` | `null` | no |
+| <a name="input_azure_use_workload_identity"></a> [azure\_use\_workload\_identity](#input\_azure\_use\_workload\_identity) | Whether to use Azure Workload Identity for authentication (recommended for AKS) | `bool` | `true` | no |
 | <a name="input_cloudflare_token"></a> [cloudflare\_token](#input\_cloudflare\_token) | The Cloudflare API token for DNS management (required when dns\_provider\_name is 'cloudflare') | `string` | `null` | no |
 | <a name="input_dns_provider_name"></a> [dns\_provider\_name](#input\_dns\_provider\_name) | The DNS provider to use with ExternalDNS | `string` | n/a | yes |
 | <a name="input_domain_filters"></a> [domain\_filters](#input\_domain\_filters) | The domain filter to limit ExternalDNS to manage DNS records only for specific domains | `string` | n/a | yes |

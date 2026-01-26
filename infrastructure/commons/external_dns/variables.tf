@@ -113,6 +113,63 @@ variable "zone_type" {
 }
 
 ###############################################################################
+# AZURE CONFIGURATION
+###############################################################################
+
+variable "azure_resource_group" {
+  description = "The Azure resource group containing the DNS zone (required when dns_provider_name is 'azure')"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.dns_provider_name != "azure" || var.azure_resource_group != null
+    error_message = "azure_resource_group is required when dns_provider_name is 'azure'."
+  }
+}
+
+variable "azure_tenant_id" {
+  description = "The Azure tenant ID for authentication (required when dns_provider_name is 'azure')"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.dns_provider_name != "azure" || var.azure_tenant_id != null
+    error_message = "azure_tenant_id is required when dns_provider_name is 'azure'."
+  }
+}
+
+variable "azure_subscription_id" {
+  description = "The Azure subscription ID containing the DNS zone (required when dns_provider_name is 'azure')"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.dns_provider_name != "azure" || var.azure_subscription_id != null
+    error_message = "azure_subscription_id is required when dns_provider_name is 'azure'."
+  }
+}
+
+variable "azure_use_workload_identity" {
+  description = "Whether to use Azure Workload Identity for authentication (recommended for AKS)"
+  type        = bool
+  default     = true
+}
+
+variable "azure_client_id" {
+  description = "The Azure client ID (application ID) for service principal authentication. Required when azure_use_workload_identity is false."
+  type        = string
+  default     = null
+}
+
+variable "azure_client_secret" {
+  description = "The Azure client secret for service principal authentication. Required when azure_use_workload_identity is false."
+  type        = string
+  sensitive   = true
+  default     = null
+  validation {
+    condition     = var.dns_provider_name != "azure" || var.azure_use_workload_identity == true || (var.azure_client_id != null && var.azure_client_secret != null)
+    error_message = "azure_client_id and azure_client_secret are required when dns_provider_name is 'azure' and azure_use_workload_identity is false."
+  }
+}
+
+###############################################################################
 # OCI CONFIGURATION
 ###############################################################################
 
@@ -166,7 +223,7 @@ variable "dns_provider_name" {
   type        = string
   description = "The DNS provider to use with ExternalDNS "
   validation {
-    condition     = contains(["cloudflare", "aws", "oci"], var.dns_provider_name)
-    error_message = "dns_provider_name must be either 'cloudflare', 'aws', or 'oci'."
+    condition     = contains(["cloudflare", "aws", "oci", "azure"], var.dns_provider_name)
+    error_message = "dns_provider_name must be either 'cloudflare', 'aws', 'oci', or 'azure'."
   }
 }

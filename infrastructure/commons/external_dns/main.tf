@@ -32,6 +32,7 @@ resource "helm_release" "external_dns" {
 
   depends_on = [
     kubernetes_secret_v1.external_dns_cloudflare,
-    kubernetes_secret_v1.external_dns_oci_config
+    kubernetes_secret_v1.external_dns_oci_config,
+    kubernetes_secret_v1.external_dns_azure
   ]
 }
