@@ -38,9 +38,9 @@ module "eks" {
       ami_type       = var.ami_type
       instance_types = [var.instance_types]
 
-      min_size     = 2
-      max_size     = 10
-      desired_size = 2
+      min_size                              = 2
+      max_size                              = 10
+      desired_size                          = 2
       attach_cluster_primary_security_group = var.attach_cluster_primary_security_group
     }
   }

@@ -30,6 +30,11 @@ locals {
     var.cloud_provider == "aws" ? {
       enabled = true
       region  = var.aws_region
+    } : {},
+
+    var.cloud_provider == "oci" ? {
+      enabled          = true
+      compartment_ocid = var.oci_compartment_ocid
     } : {}
   )
 
@@ -63,6 +68,10 @@ locals {
 
     azure = {
       "azure.workload.identity/client-id" = var.azure_client_id
+    }
+
+    oci = {
+      "oci.oraclecloud.com/workload-identity-principal" = var.oci_sa_ocid
     }
   }
 
