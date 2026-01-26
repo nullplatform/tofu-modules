@@ -12,6 +12,11 @@ resource "nullplatform_api_key" "nullplatform_agent_api_key" {
     role_slug = "controlplane:agent"
   }
 
+  grants {
+    nrn       = local.nrn_without_namespace
+    role_slug = "ops"
+  }
+
   tags {
     key   = "managed-by"
     value = "IaC"
