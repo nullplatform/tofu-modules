@@ -3,7 +3,7 @@
 ################################################################################
 
 module "api_key" {
-  source = "../api_key"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=main"
 
   name = "SCOPE-NOTIFICATION-CHANNEL-${upper(var.scope_specification_slug)}"
 

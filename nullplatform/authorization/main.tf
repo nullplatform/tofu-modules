@@ -7,7 +7,7 @@ locals {
 }
 
 module "api_key" {
-  source = "../api_key"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=main"
 
   name = "NULLPLATFORM-${upper(var.destination)}-AUTH-API-KEY"
 
@@ -36,12 +36,12 @@ module "api_key" {
 
   tags = [
     {
-      key   = "managed-by"
+      key   = "managedBy"
       value = "IaC"
     },
     {
-      key   = "source"
-      value = "tofu-modules/nullplatform/authorization"
+      key   = "usedBy"
+      value = "${upper(var.destination)}"
     }
   ]
 }

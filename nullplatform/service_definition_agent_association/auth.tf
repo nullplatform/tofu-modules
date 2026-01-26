@@ -7,7 +7,7 @@ locals {
 }
 
 module "api_key" {
-  source = "../api_key"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=main"
 
   name = "SERVICE-NOTIFICATION-CHANNEL-${upper(var.service_specification_slug)}"
 
