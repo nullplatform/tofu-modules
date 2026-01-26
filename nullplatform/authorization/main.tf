@@ -9,7 +9,7 @@ locals {
 module "api_key" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=main"
 
-  name = "NULLPLATFORM-${upper(var.destination)}-AUTH-API-KEY"
+  name = "${upper(var.destination)}-AUTH"
 
   grants = [
     {

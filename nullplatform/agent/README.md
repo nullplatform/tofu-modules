@@ -7,13 +7,13 @@ This code installs and manages the nullplatform agent in a Kubernetes cluster us
 ### Basic example
 
 ```hcl
-module "cloud_aws_agent" {
-  source                              = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.0.0"
-  cluster_name                        = var.cluster_name
-  nrn                                 = var.nrn
-  np_api_key                          = var.np_api_key
-  tags_selectors                      = var.tags_selectors
-  namespace                           = var.namespace
+module "agent" {
+  source         = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=main"
+  cluster_name   = var.cluster_name
+  nrn            = var.nrn
+  tags_selectors = var.tags_selectors
+  image_tag      = var.image_tag
+  cloud_provider = var.cloud_provider
 }
 ```
 
