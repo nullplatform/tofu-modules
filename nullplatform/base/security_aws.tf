@@ -33,11 +33,11 @@ data "aws_vpc" "this" {
 
 locals {
   # Derived values from data sources
-  aws_vpc_id      = local.create_aws_security ? data.aws_vpc.this[0].id : ""
-  aws_vpc_cidr    = local.create_aws_security ? data.aws_vpc.this[0].cidr_block : ""
+  aws_vpc_id   = local.create_aws_security ? data.aws_vpc.this[0].id : ""
+  aws_vpc_cidr = local.create_aws_security ? data.aws_vpc.this[0].cidr_block : ""
 
   # Use override if provided, otherwise use derived value
-  effective_aws_vpc_id   = var.vpc_id != "" ? var.vpc_id : local.aws_vpc_id
+  effective_aws_vpc_id       = var.vpc_id != "" ? var.vpc_id : local.aws_vpc_id
   effective_aws_network_cidr = var.network_cidr != "" ? var.network_cidr : local.aws_vpc_cidr
 }
 

@@ -47,8 +47,8 @@ data "azurerm_virtual_network" "this" {
 
 locals {
   # Derived values from data sources
-  azure_location   = local.create_azure_security ? data.azurerm_kubernetes_cluster.this[0].location : ""
-  azure_vnet_cidr  = local.create_azure_security ? data.azurerm_virtual_network.this[0].address_space[0] : ""
+  azure_location  = local.create_azure_security ? data.azurerm_kubernetes_cluster.this[0].location : ""
+  azure_vnet_cidr = local.create_azure_security ? data.azurerm_virtual_network.this[0].address_space[0] : ""
 
   # Use override if provided, otherwise use derived value
   effective_azure_location     = var.azure_location != "" ? var.azure_location : local.azure_location
