@@ -35,7 +35,7 @@ module "cloud_aws_agent" {
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_api_key"></a> [api\_key](#module\_api\_key) | ../api_key | n/a |
+| <a name="module_api_key"></a> [api\_key](#module\_api\_key) | git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key | main |
 
 ## Resources
 
