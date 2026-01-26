@@ -10,7 +10,7 @@ Usage:
 
 ```hcl
 module "authorization" {
-  source      = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/authorization?ref=main"
+  source      = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/authorization?ref=v1.24.0"
   nrn         = var.nrn
   destination = var.destination
   np_api_key  = var.np_api_key

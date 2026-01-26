@@ -6,7 +6,7 @@ This module creates a notification channel that associates agents with a specifi
 
 ```hcl
 module "service_definition_agent_association" {
-  source                     = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=main"
+  source                     = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v1.24.0"
   nrn                        = var.nrn
   tags_selectors             = var.tags_selectors
   service_specification_id   = module.service_definition.service_specification_id

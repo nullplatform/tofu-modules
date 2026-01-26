@@ -8,7 +8,7 @@ This code installs and manages the nullplatform agent in a Kubernetes cluster us
 
 ```hcl
 module "agent" {
-  source         = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=main"
+  source         = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.24.0"
   cluster_name   = var.cluster_name
   nrn            = var.nrn
   tags_selectors = var.tags_selectors

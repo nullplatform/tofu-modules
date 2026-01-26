@@ -7,7 +7,7 @@ It injects the agent’s API key, command configuration, and optional overrides,
 
 ```hcl
 module "scope_definition_agent_association" {
-  source                   = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=main"
+  source                   = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=v1.24.0"
   nrn                      = var.nrn
   np_api_key               = var.np_api_key
   scope_specification_id   = module.scope_definition.scope_specification_id
