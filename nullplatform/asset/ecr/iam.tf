@@ -13,7 +13,7 @@ resource "aws_iam_role" "nullplatform_application_role" {
         Condition = {
           StringEquals = {
             "aws:RequestedRegion" = [
-              data.aws_region.current.region
+              data.aws_region.current.name
             ]
           },
           DateGreaterThan = {
@@ -52,7 +52,7 @@ resource "aws_iam_policy" "nullplatform_ecr_manager_policy" {
         Condition = {
           StringEquals = {
             "aws:RequestedRegion" = [
-              data.aws_region.current.region
+              data.aws_region.current.name
             ]
           }
         }
