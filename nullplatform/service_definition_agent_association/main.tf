@@ -9,7 +9,7 @@ resource "nullplatform_notification_channel" "channel_from_template" {
     dynamic "agent" {
       for_each = var.agent_command != null ? [1] : []
       content {
-        api_key = var.np_api_key
+        api_key = module.api_key.api_key
         command {
           type = var.agent_command.type
           data = {
@@ -30,7 +30,7 @@ resource "nullplatform_notification_channel" "channel_from_template" {
 
   filters = jsonencode({
     "$or" = [
-      { "service.specification.slug" = { "$eq" : var.service_slug } }
+      { "service.specification.slug" = { "$eq" : var.service_specification_slug } }
     ]
   })
 }

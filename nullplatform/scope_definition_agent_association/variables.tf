@@ -41,12 +41,17 @@ variable "np_api_key" {
   type = string
 
 }
-variable "service_specification_slug" {
+
+variable "scope_specification_id" {
+
 
 }
-variable "service_specification_id" {
+
+variable "scope_specification_slug" {
+
 
 }
+
 variable "repo_path" {
   description = "Local filesystem path where the scope repository will be cloned"
   type        = string

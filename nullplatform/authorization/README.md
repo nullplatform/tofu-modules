@@ -10,10 +10,10 @@ Usage:
 
 ```hcl
 module "authorization" {
-  source       = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/authorization?ref=v1.0.0"
-  nrn          = var.nrn
-  destination  = var.destination
-  np_api_key   = var.np_api_key
+  source      = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/authorization?ref=v1.24.0"
+  nrn         = var.nrn
+  destination = var.destination
+  np_api_key  = var.np_api_key
 }
 ```
 
@@ -26,17 +26,11 @@ module "authorization" {
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 3.0 |
 | <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.63 |
 
-## Providers
+## Modules
 
-| Name | Version |
-|------|---------|
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | ~> 0.0.63 |
-
-## Resources
-
-| Name | Type |
-|------|------|
-| [nullplatform_api_key.nullplatform_agent_api_key](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/api_key) | resource |
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_api_key"></a> [api\_key](#module\_api\_key) | git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key | v1.24.0 |
 
 ## Inputs
 

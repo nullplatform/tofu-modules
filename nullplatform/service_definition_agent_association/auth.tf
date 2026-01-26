@@ -1,5 +1,5 @@
 ################################################################################
-# Nullplatform Authorization API Key
+# Nullplatform Service Definition Agent Association API Key
 ################################################################################
 
 locals {
@@ -9,7 +9,7 @@ locals {
 module "api_key" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.24.0"
 
-  name = "${upper(var.destination)}-AUTH"
+  name = "SERVICE-NOTIFICATION-CHANNEL-${upper(var.service_specification_slug)}"
 
   grants = [
     {
@@ -18,19 +18,11 @@ module "api_key" {
     },
     {
       nrn       = local.nrn_without_namespace
-      role_slug = "developer"
+      role_slug = "admin"
     },
     {
       nrn       = local.nrn_without_namespace
       role_slug = "ops"
-    },
-    {
-      nrn       = local.nrn_without_namespace
-      role_slug = "secops"
-    },
-    {
-      nrn       = local.nrn_without_namespace
-      role_slug = "secrets-reader"
     }
   ]
 
@@ -40,8 +32,12 @@ module "api_key" {
       value = "IaC"
     },
     {
+      key   = "level"
+      value = var.nrn
+    },
+    {
       key   = "usedBy"
-      value = "${upper(var.destination)}"
+      value = "${upper(var.service_specification_slug)}"
     }
   ]
 }
