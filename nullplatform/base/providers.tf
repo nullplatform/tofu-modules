@@ -10,7 +10,6 @@ terraform {
       version = "~> 3.0"
     }
 
-    # Cloud providers for gateway security resources
     aws = {
       source  = "hashicorp/aws"
       version = ">= 5.0"
