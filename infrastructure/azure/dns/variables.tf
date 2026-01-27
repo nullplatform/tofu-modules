@@ -2,7 +2,7 @@
 # REQUIRED VARIABLES
 ###############################################################################
 
-variable "resource_group" {
+variable "resource_group_name" {
   type        = string
   description = "The name of the resource group where the DNS zone will be created"
 }
