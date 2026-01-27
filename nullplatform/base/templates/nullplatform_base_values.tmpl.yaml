@@ -36,11 +36,11 @@ gateway:
     name: "gateway-private"
     aws:
       name: ${gateway_internal_aws_name}
-      securityGroups: ""
+      securityGroups: "${gateway_private_aws_security_groups}"
     azure:
-      networkSecurityGroup: ""
+      networkSecurityGroup: "${gateway_private_azure_nsg}"
     gcp:
-      firewallRule: ""
+      firewallRule: "${gateway_private_gcp_firewall}"
     azure_load_balancer_subnet: ${gateway_internal_azure_load_balancer_subnet}
     loadBalancerSourceRanges: []
     addresses: {}
@@ -52,11 +52,11 @@ gateway:
     name: "gateway-public"
     aws:
       name: ${gateway_public_aws_name}
-      securityGroups: ""
+      securityGroups: "${gateway_public_aws_security_groups}"
     azure:
-      networkSecurityGroup: ""
+      networkSecurityGroup: "${gateway_public_azure_nsg}"
     gcp:
-      firewallRule: ""
+      firewallRule: "${gateway_public_gcp_firewall}"
     loadBalancerSourceRanges: []
     addresses: {}
     autoscaling:
