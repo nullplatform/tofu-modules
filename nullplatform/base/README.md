@@ -1,21 +1,74 @@
 # Module: Base
 
-This module installs the **base Helm chart** from **nullplatform**.
+This module installs the **base Helm chart** from **nullplatform** and optionally creates cloud-specific network security resources (Security Groups, NSGs, Firewall Rules) to restrict gateway health check port access.
+
 For more information, see the [our documentation](https://docs.nullplatform.com/docs/providers/helm-charts#base-chart)
 
+## Gateway Security
 
+When `gateway_security_enabled = true`, the module creates cloud-specific network security resources based on the `k8s_provider` value:
+
+| `k8s_provider` | Security Resources Created |
+|---|---|
+| `eks` | AWS Security Groups for public/private gateways |
+| `aks`, `aro` | Azure Network Security Groups (NSGs) for public/private gateways |
+| `gke` | GCP Firewall Rules for public/private gateways |
+
+The security resource IDs are automatically injected into the Helm chart values, so the gateways reference the correct security groups/NSGs/firewall rules.
+
+### Required variables per cloud (when security is enabled)
+
+| Cloud | Required Variables |
+|---|---|
+| AWS (EKS) | `cluster_name` |
+| Azure (AKS/ARO) | `cluster_name`, `resource_group_name`, `azure_location` |
+| GCP (GKE) | `cluster_name`, `gcp_project_id`, `gcp_region` |
+
+> **Note:** This module requires all three cloud providers (aws, azurerm, google) to be configured, even if only one is used. For clouds not in use, configure provider stubs in the root module. See the usage examples below.
 
 ## Usage
 
-### Basic example
+### Basic example (without security)
 
 ```hcl
 module "base" {
-    source = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/base?ref=v1.0.0"
+    source     = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.0.0"
     np_api_key = var.np_api_key
-    nrn = var.nrn
-    cloud_provider = "gke"
-    nullplatform-base-helm-version = "2.16.0"
+    nrn        = var.nrn
+    k8s_provider = "gke"
+}
+```
+
+### With gateway security enabled (Azure example)
+
+```hcl
+module "base" {
+    source                   = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.0.0"
+    np_api_key               = var.np_api_key
+    nrn                      = var.nrn
+    k8s_provider             = "aks"
+    gateway_internal_enabled = true
+    gateway_security_enabled = true
+    cluster_name             = "my-aks-cluster"
+    resource_group_name      = "my-resource-group"
+    azure_location           = "eastus2"
+}
+```
+
+### Provider stubs for unused clouds
+
+```hcl
+# When using Azure, stub AWS and GCP providers:
+provider "aws" {
+  skip_credentials_validation = true
+  skip_requesting_account_id  = true
+  skip_metadata_api_check     = true
+  region                      = "us-east-1"
+}
+
+provider "google" {
+  project = "unused"
+  region  = "us-central1"
 }
 ```
 
