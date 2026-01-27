@@ -2,7 +2,7 @@ terraform {
   required_providers {
     nullplatform = {
       source  = "nullplatform/nullplatform"
-      version = "~> 0.0.63"
+      version = "~> 0.0.76"
     }
 
     helm = {
@@ -18,7 +18,7 @@ terraform {
 
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.0"
+      version = ">= 4.0"
     }
 
     google = {

@@ -18,18 +18,17 @@ module "api_key" {
     }
   ]
 
-  tags = [
-    {
-      key   = "managedBy"
-      value = "IaC"
-    },
-    {
-      key   = "level"
-      value = var.nrn
-    },
-    {
-      key   = "usedBy"
-      value = "${upper(var.scope_specification_slug)}"
-    }
-  ]
+  tags = concat(
+    [
+      {
+        key   = "managedBy"
+        value = "IaC"
+      },
+      {
+        key   = "usedBy"
+        value = upper(var.scope_specification_slug)
+      }
+    ],
+    local.nrn_tags
+  )
 }

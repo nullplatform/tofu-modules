@@ -30,14 +30,13 @@ module "api_key" {
     }
   ]
 
-  tags = [
-    {
-      key   = "managedBy"
-      value = "IaC"
-    },
-    {
-      key   = "level"
-      value = var.nrn
-    }
-  ]
+  tags = concat(
+    [
+      {
+        key   = "managedBy"
+        value = "IaC"
+      }
+    ],
+    local.nrn_tags
+  )
 }
