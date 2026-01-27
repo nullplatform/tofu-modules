@@ -4,3 +4,6 @@ azure:
   clientID: "${client_id}"
   tenantID: "${tenant_id}"
   hostedZoneName: "${hosted_zone_name}"
+%{ if client_secret != "" ~}
+  clientSecret: "${client_secret}"
+%{ endif ~}

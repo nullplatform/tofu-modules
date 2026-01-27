@@ -132,6 +132,19 @@ variable "azure_hosted_zone_name" {
   }
 }
 
+variable "azure_client_secret" {
+  description = "The Azure client secret for Service Principal authentication."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "azure_use_workload_identity" {
+  description = "Whether to use Azure Workload Identity (true) or Service Principal (false)."
+  type        = bool
+  default     = false
+}
+
 ###############################################################################
 # CLOUDFLARE CONFIGURATION
 ###############################################################################

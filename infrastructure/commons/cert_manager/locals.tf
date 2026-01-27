@@ -25,6 +25,7 @@ locals {
       client_id           = var.azure_client_id
       tenant_id           = var.azure_tenant_id
       hosted_zone_name    = var.azure_hosted_zone_name
+      client_secret       = var.azure_client_secret
     } : {},
 
     var.cloud_provider == "aws" ? {
