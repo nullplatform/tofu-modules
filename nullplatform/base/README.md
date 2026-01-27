@@ -78,6 +78,7 @@ module "base" {
 | <a name="input_gateway_internal_aws_name"></a> [gateway\_internal\_aws\_name](#input\_gateway\_internal\_aws\_name) | Name of private gateway in AWS. | `string` | `"k8s-nullplatform-internal"` | no |
 | <a name="input_gateway_internal_enabled"></a> [gateway\_internal\_enabled](#input\_gateway\_internal\_enabled) | Enable the internal (private) gateway. | `bool` | `false` | no |
 | <a name="input_gateway_public_aws_name"></a> [gateway\_public\_aws\_name](#input\_gateway\_public\_aws\_name) | Name of public gateway in AWS. | `string` | `"k8s-nullplatform-internet-facing"` | no |
+| <a name="input_gateway_security_enabled"></a> [gateway\_security\_enabled](#input\_gateway\_security\_enabled) | Enable creation of security resources (Security Groups for AWS, NSGs for Azure, Firewall Rules for GCP) to restrict health check port access. | `bool` | `false` | no |
 | <a name="input_gateways_enabled"></a> [gateways\_enabled](#input\_gateways\_enabled) | Enable gateway resources (Helm chart). | `bool` | `true` | no |
 | <a name="input_gcp_network_name"></a> [gcp\_network\_name](#input\_gcp\_network\_name) | Override: GCP VPC network name for firewall rules. If empty, derived from cluster. | `string` | `""` | no |
 | <a name="input_gcp_project_id"></a> [gcp\_project\_id](#input\_gcp\_project\_id) | GCP project ID. | `string` | `""` | no |
