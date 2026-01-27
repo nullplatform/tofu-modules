@@ -2,6 +2,10 @@
 # Nullplatform agent Helm release
 ################################################################################
 
+resource "terraform_data" "api_key_trigger" {
+  input = module.api_key.api_key
+}
+
 # Deploy nullplatform agent to Kubernetes cluster via Helm chart
 resource "helm_release" "agent" {
   name       = "nullplatform-agent"
@@ -28,6 +32,6 @@ resource "helm_release" "agent" {
   values = [local.nullplatform_agent_values]
 
   lifecycle {
-    replace_triggered_by = [module.api_key]
+    replace_triggered_by = [terraform_data.api_key_trigger]
   }
 }
