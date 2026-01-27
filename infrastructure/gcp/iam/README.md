@@ -48,13 +48,15 @@ module "iam" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
 | <a name="requirement_google"></a> [google](#requirement\_google) | ~> 5.0 |
+| <a name="requirement_google"></a> [google](#requirement\_google) | >= 5.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_google"></a> [google](#provider\_google) | ~> 5.0 |
+| <a name="provider_google"></a> [google](#provider\_google) | ~> 5.0 >= 5.0 |
 
 ## Resources
 
@@ -76,5 +78,5 @@ module "iam" {
 
 | Name | Description |
 |------|-------------|
-| <a name="output_service_accounts"></a> [service\_accounts](#output\_service\_accounts) | A map of service account names to their email addresses |
+| <a name="output_service_accounts"></a> [service\_accounts](#output\_service\_accounts) | n/a |
 <!-- END_TF_DOCS -->
