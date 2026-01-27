@@ -1,24 +1,35 @@
 ################################################################################
-# Nullplatform Agent Association API Key
+# Nullplatform Scope Definition Agent Association API Key
 ################################################################################
 
-# Create API key for agent association
-resource "nullplatform_api_key" "nullplatform_agent_api_key" {
-  name = "SCOPE_DEFINITION_AGENT_ASSOCIATION"
+module "api_key" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.24.0"
 
-  # Grant control plane agent role for agent operations
-  grants {
-    nrn       = local.nrn_without_namespace
-    role_slug = "controlplane:agent"
-  }
+  name = "SCOPE-NOTIFICATION-CHANNEL-${upper(var.scope_specification_slug)}"
 
-  grants {
-    nrn       = local.nrn_without_namespace
-    role_slug = "ops"
-  }
+  grants = [
+    {
+      nrn       = local.nrn_without_namespace
+      role_slug = "controlplane:agent"
+    },
+    {
+      nrn       = local.nrn_without_namespace
+      role_slug = "ops"
+    }
+  ]
 
-  tags {
-    key   = "managed-by"
-    value = "IaC"
-  }
+  tags = [
+    {
+      key   = "managedBy"
+      value = "IaC"
+    },
+    {
+      key   = "level"
+      value = var.nrn
+    },
+    {
+      key   = "usedBy"
+      value = "${upper(var.scope_specification_slug)}"
+    }
+  ]
 }

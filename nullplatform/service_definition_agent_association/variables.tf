@@ -27,15 +27,9 @@ variable "channel_type" {
 
 }
 
-variable "np_api_key" {
-  description = "Nullplatform API key for authentication."
+variable "service_specification_slug" {
   type        = string
-  sensitive   = true
-}
-
-variable "service_slug" {
-  type        = string
-  description = "The slug of the scope definition"
+  description = "The slug of the service definition"
   default     = null
 }
 variable "workflow_override_path" {
@@ -75,6 +69,4 @@ variable "service_specification_id" {
   type        = string
   description = "The ID of the service definition associated with the agent"
   default     = null
-
 }
-

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.24.0](https://github.com/nullplatform/tofu-modules/compare/v1.23.0...v1.24.0) (2026-01-26)
+
+
+### Features
+
+* introduce api_key module for unified API key management  ([#155](https://github.com/nullplatform/tofu-modules/issues/155)) ([aded8a6](https://github.com/nullplatform/tofu-modules/commit/aded8a6b048590d2427f8072e419edd91af83064))
+
 ## [1.23.0](https://github.com/nullplatform/tofu-modules/compare/v1.22.1...v1.23.0) (2026-01-26)
 
 
