@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.24.1](https://github.com/nullplatform/tofu-modules/compare/v1.24.0...v1.24.1) (2026-01-27)
+
+
+### Bug Fixes
+
+* api key lifecycle ([#163](https://github.com/nullplatform/tofu-modules/issues/163)) ([beaa60f](https://github.com/nullplatform/tofu-modules/commit/beaa60fdcc527122acac669f78a8ccf10a687042))
+* **api_key:** add create_before_destroy to prevent service disruption ([7efc3ed](https://github.com/nullplatform/tofu-modules/commit/7efc3edb82945e50d39734eb1a1b0de6b29d58fc))
+* replace agent helm release when API key rotates ([b0ea1c9](https://github.com/nullplatform/tofu-modules/commit/b0ea1c903477d25ba46cc656a85c0245511d2d4f))
+* replace notification channels when API key rotates ([07d3e17](https://github.com/nullplatform/tofu-modules/commit/07d3e17f29087c64028aad6b61dfc37cb1443e32))
+
 ## [1.24.0](https://github.com/nullplatform/tofu-modules/compare/v1.23.0...v1.24.0) (2026-01-26)
 
 
