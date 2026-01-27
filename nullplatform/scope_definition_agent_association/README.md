@@ -30,6 +30,7 @@ module "scope_definition_agent_association" {
 | <a name="provider_external"></a> [external](#provider\_external) | n/a |
 | <a name="provider_http"></a> [http](#provider\_http) | n/a |
 | <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) |  >= 0.0.67 |
+| <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Modules
 
@@ -42,6 +43,7 @@ module "scope_definition_agent_association" {
 | Name | Type |
 |------|------|
 | [nullplatform_notification_channel.from_template](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/notification_channel) | resource |
+| [terraform_data.api_key_trigger](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 
 ## Inputs
 
