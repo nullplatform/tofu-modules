@@ -26,4 +26,8 @@ resource "helm_release" "agent" {
   max_history       = 10
 
   values = [local.nullplatform_agent_values]
+
+  lifecycle {
+    replace_triggered_by = [module.api_key]
+  }
 }

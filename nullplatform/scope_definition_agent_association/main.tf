@@ -42,5 +42,6 @@ resource "nullplatform_notification_channel" "from_template" {
       source,
       type,
     ]
+    replace_triggered_by = [module.api_key]
   }
 }

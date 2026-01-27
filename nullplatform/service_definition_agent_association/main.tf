@@ -33,4 +33,8 @@ resource "nullplatform_notification_channel" "channel_from_template" {
       { "service.specification.slug" = { "$eq" : var.service_specification_slug } }
     ]
   })
+
+  lifecycle {
+    replace_triggered_by = [module.api_key]
+  }
 }
