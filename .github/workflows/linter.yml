@@ -1,8 +1,10 @@
-name: pipeline tofu
+name: OpenTofu
+
 on:
-  push:
+  pull_request:
     branches:
-      - '**'
+      - main
+
 jobs:
-  quality:
+  validate:
     uses: nullplatform/actions-nullplatform-terraform/.github/workflows/tofu-lint.yml@main
