@@ -3,7 +3,7 @@
 ############################################
 
 module "security_aws" {
-  count  = var.k8s_provider == "eks" ? 1 : 0
+  count  = var.gateway_security_enabled && var.k8s_provider == "eks" ? 1 : 0
   source = "./security_aws"
 
   cluster_name             = var.cluster_name
@@ -14,7 +14,7 @@ module "security_aws" {
 }
 
 module "security_azure" {
-  count  = contains(["aks", "aro"], var.k8s_provider) ? 1 : 0
+  count  = var.gateway_security_enabled && contains(["aks", "aro"], var.k8s_provider) ? 1 : 0
   source = "./security_azure"
 
   cluster_name             = var.cluster_name
@@ -26,7 +26,7 @@ module "security_azure" {
 }
 
 module "security_gcp" {
-  count  = var.k8s_provider == "gke" ? 1 : 0
+  count  = var.gateway_security_enabled && var.k8s_provider == "gke" ? 1 : 0
   source = "./security_gcp"
 
   cluster_name             = var.cluster_name

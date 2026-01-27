@@ -352,6 +352,16 @@ variable "image_pull_secrets_password" {
 }
 
 ############################################
+# Gateway Security Configuration
+############################################
+
+variable "gateway_security_enabled" {
+  type        = bool
+  description = "Enable creation of security resources (Security Groups for AWS, NSGs for Azure, Firewall Rules for GCP) to restrict health check port access."
+  default     = false
+}
+
+############################################
 # Security Modules
 ############################################
 

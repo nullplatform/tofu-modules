@@ -32,16 +32,16 @@ locals {
       gateway_internal_aws_name = var.gateway_internal_aws_name
 
       # ---- gateway security (AWS) ----
-      gateway_public_aws_security_groups  = var.k8s_provider == "eks" && var.gateways_enabled ? module.security_aws[0].public_gateway_security_group_id : ""
-      gateway_private_aws_security_groups = var.k8s_provider == "eks" && var.gateway_internal_enabled ? module.security_aws[0].private_gateway_security_group_id : ""
+      gateway_public_aws_security_groups  = var.gateway_security_enabled && var.k8s_provider == "eks" && var.gateways_enabled ? module.security_aws[0].public_gateway_security_group_id : ""
+      gateway_private_aws_security_groups = var.gateway_security_enabled && var.k8s_provider == "eks" && var.gateway_internal_enabled ? module.security_aws[0].private_gateway_security_group_id : ""
 
       # ---- gateway security (Azure) ----
-      gateway_public_azure_nsg  = contains(["aks", "aro"], var.k8s_provider) && var.gateways_enabled ? module.security_azure[0].public_gateway_nsg_id : ""
-      gateway_private_azure_nsg = contains(["aks", "aro"], var.k8s_provider) && var.gateway_internal_enabled ? module.security_azure[0].private_gateway_nsg_id : ""
+      gateway_public_azure_nsg  = var.gateway_security_enabled && contains(["aks", "aro"], var.k8s_provider) && var.gateways_enabled ? module.security_azure[0].public_gateway_nsg_id : ""
+      gateway_private_azure_nsg = var.gateway_security_enabled && contains(["aks", "aro"], var.k8s_provider) && var.gateway_internal_enabled ? module.security_azure[0].private_gateway_nsg_id : ""
 
       # ---- gateway security (GCP) ----
-      gateway_public_gcp_firewall  = var.k8s_provider == "gke" && var.gateways_enabled ? module.security_gcp[0].public_gateway_firewall_rules.https : ""
-      gateway_private_gcp_firewall = var.k8s_provider == "gke" && var.gateway_internal_enabled ? module.security_gcp[0].private_gateway_firewall_rules.https : ""
+      gateway_public_gcp_firewall  = var.gateway_security_enabled && var.k8s_provider == "gke" && var.gateways_enabled ? module.security_gcp[0].public_gateway_firewall_rules.https : ""
+      gateway_private_gcp_firewall = var.gateway_security_enabled && var.k8s_provider == "gke" && var.gateway_internal_enabled ? module.security_gcp[0].private_gateway_firewall_rules.https : ""
 
       # ---- nullplatform ----
       np_api_key = var.np_api_key
