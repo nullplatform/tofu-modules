@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.24.2](https://github.com/nullplatform/tofu-modules/compare/v1.24.1...v1.24.2) (2026-01-28)
+
+
+### Bug Fixes
+
+* api key lifecycle ([#165](https://github.com/nullplatform/tofu-modules/issues/165)) ([86fd93e](https://github.com/nullplatform/tofu-modules/commit/86fd93e8be4569b41b43b791585260f3168425c7))
+
 ## [1.24.1](https://github.com/nullplatform/tofu-modules/compare/v1.24.0...v1.24.1) (2026-01-27)
 
 
