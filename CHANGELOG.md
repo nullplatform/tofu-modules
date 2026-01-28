@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.24.3](https://github.com/nullplatform/tofu-modules/compare/v1.24.2...v1.24.3) (2026-01-28)
+
+
+### Bug Fixes
+
+* **eks:** resolve Auto Mode compatibility issues ([#167](https://github.com/nullplatform/tofu-modules/issues/167)) ([c58baea](https://github.com/nullplatform/tofu-modules/commit/c58baea3611b3e3c9e847e7b742f1975372eae69))
+
 ## [1.24.2](https://github.com/nullplatform/tofu-modules/compare/v1.24.1...v1.24.2) (2026-01-28)
 
 
