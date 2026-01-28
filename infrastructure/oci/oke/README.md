@@ -36,6 +36,7 @@
 
 | Name | Type |
 |------|------|
+| [oci_identity_dynamic_group.ocir_nodes](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_dynamic_group) | resource |
 | [oci_identity_policy.ocir_nodes](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.ocir_workload_identity](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 
@@ -67,6 +68,9 @@
 | <a name="output_cluster_ca_cert"></a> [cluster\_ca\_cert](#output\_cluster\_ca\_cert) | OKE cluster CA certificate |
 | <a name="output_cluster_endpoints"></a> [cluster\_endpoints](#output\_cluster\_endpoints) | Endpoints for the OKE cluster |
 | <a name="output_cluster_id"></a> [cluster\_id](#output\_cluster\_id) | The OCID of the OKE cluster |
+| <a name="output_ocir_credential_provider_cloud_init"></a> [ocir\_credential\_provider\_cloud\_init](#output\_ocir\_credential\_provider\_cloud\_init) | Cloud-init script to install OCIR credential provider on worker nodes (if enabled) |
+| <a name="output_ocir_dynamic_group_id"></a> [ocir\_dynamic\_group\_id](#output\_ocir\_dynamic\_group\_id) | The OCID of the OCIR nodes dynamic group (if enabled) |
+| <a name="output_ocir_kubelet_extra_args"></a> [ocir\_kubelet\_extra\_args](#output\_ocir\_kubelet\_extra\_args) | Extra kubelet arguments needed for OCIR credential provider |
 | <a name="output_ocir_nodes_policy_id"></a> [ocir\_nodes\_policy\_id](#output\_ocir\_nodes\_policy\_id) | The OCID of the OCIR nodes policy (if enabled) |
 | <a name="output_ocir_policy_statements"></a> [ocir\_policy\_statements](#output\_ocir\_policy\_statements) | All OCIR policy statements (if enabled) |
 | <a name="output_ocir_workload_policy_id"></a> [ocir\_workload\_policy\_id](#output\_ocir\_workload\_policy\_id) | The OCID of the OCIR workload identity policy (if enabled) |
