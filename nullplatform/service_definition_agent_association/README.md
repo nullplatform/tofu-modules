@@ -28,7 +28,7 @@ module "service_definition_agent_association" {
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_api_key"></a> [api\_key](#module\_api\_key) | git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key | v1.24.0 |
+| <a name="module_api_key"></a> [api\_key](#module\_api\_key) | git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key | v1.24.1 |
 
 ## Resources
 
