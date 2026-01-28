@@ -1,6 +1,11 @@
 ################################################################################
 # Notification Channel Resource
 ################################################################################
+
+resource "terraform_data" "api_key_trigger" {
+  input = module.api_key.api_key
+}
+
 # Create notification channel with agent configuration and optional overrides
 resource "nullplatform_notification_channel" "from_template" {
   nrn    = var.nrn
@@ -42,6 +47,6 @@ resource "nullplatform_notification_channel" "from_template" {
       source,
       type,
     ]
-    replace_triggered_by = [module.api_key]
+    replace_triggered_by = [terraform_data.api_key_trigger]
   }
 }
