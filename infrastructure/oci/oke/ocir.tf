@@ -35,29 +35,29 @@ locals {
   ocir_credential_provider_cloud_init = var.enable_ocir_pull ? {
     content_type = "text/x-shellscript"
     content      = <<-EOT
-      #!/bin/bash
-      set -ex
+#!/bin/bash
+set -ex
 
-      # Get OKE init script from metadata service
-      curl --fail -H "Authorization: Bearer Oracle" -L0 \
-        http://169.254.169.254/opc/v2/instance/metadata/oke_init_script | base64 --decode > /var/run/oke-init.sh
+# Get OKE init script from metadata service
+curl --fail -H "Authorization: Bearer Oracle" -L0 \
+  http://169.254.169.254/opc/v2/instance/metadata/oke_init_script | base64 --decode > /var/run/oke-init.sh
 
-      # Create kubernetes config directory if it doesn't exist
-      mkdir -p /etc/kubernetes
+# Create kubernetes config directory if it doesn't exist
+mkdir -p /etc/kubernetes
 
-      # Download OCIR credential provider binary
-      wget -q https://github.com/oracle-devrel/oke-credential-provider-for-ocir/releases/latest/download/oke-credential-provider-for-ocir-linux-amd64 \
-        -O /usr/local/bin/credential-provider-oke
+# Download OCIR credential provider binary using curl (wget may not be available)
+curl -fsSL -o /usr/local/bin/credential-provider-oke \
+  https://github.com/oracle-devrel/oke-credential-provider-for-ocir/releases/latest/download/oke-credential-provider-for-ocir-linux-amd64
 
-      # Download credential provider config
-      wget -q https://github.com/oracle-devrel/oke-credential-provider-for-ocir/releases/latest/download/credential-provider-config.yaml \
-        -O /etc/kubernetes/credential-provider-config.yaml
+# Download credential provider config
+curl -fsSL -o /etc/kubernetes/credential-provider-config.yaml \
+  https://github.com/oracle-devrel/oke-credential-provider-for-ocir/releases/latest/download/credential-provider-config.yaml
 
-      # Make binary executable
-      chmod 755 /usr/local/bin/credential-provider-oke
+# Make binary executable
+chmod 755 /usr/local/bin/credential-provider-oke
 
-      # Run OKE init script with kubelet extra args for credential provider
-      bash /var/run/oke-init.sh --kubelet-extra-args "--image-credential-provider-bin-dir=/usr/local/bin/ --image-credential-provider-config=/etc/kubernetes/credential-provider-config.yaml"
+# Run OKE init script with kubelet extra args for credential provider
+bash /var/run/oke-init.sh --kubelet-extra-args "--image-credential-provider-bin-dir=/usr/local/bin/ --image-credential-provider-config=/etc/kubernetes/credential-provider-config.yaml"
     EOT
   } : null
 }
