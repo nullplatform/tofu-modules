@@ -49,12 +49,34 @@ mkdir -p /etc/kubernetes
 curl -fsSL -o /usr/local/bin/credential-provider-oke \
   https://github.com/oracle-devrel/oke-credential-provider-for-ocir/releases/latest/download/oke-credential-provider-for-ocir-linux-amd64
 
-# Download credential provider config
-curl -fsSL -o /etc/kubernetes/credential-provider-config.yaml \
-  https://github.com/oracle-devrel/oke-credential-provider-for-ocir/releases/latest/download/credential-provider-config.yaml
-
 # Make binary executable
 chmod 755 /usr/local/bin/credential-provider-oke
+
+# Create credential provider config with correct matchImages patterns
+# The default config uses *.ocir.io but OCIR URLs are ocir.*.oci.oraclecloud.com
+cat > /etc/kubernetes/credential-provider-config.yaml << 'CONFIGEOF'
+apiVersion: kubelet.config.k8s.io/v1
+kind: CredentialProviderConfig
+providers:
+  - name: credential-provider-oke
+    apiVersion: credentialprovider.kubelet.k8s.io/v1
+    matchImages:
+      - "*.ocir.io"
+      - "ocir.*.oci.oraclecloud.com"
+      - "*.ocir.*.oci.oraclecloud.com"
+    defaultCacheDuration: 55m
+    env:
+      - name: REGISTRY_TOKEN_PATH
+        value: /20180419/docker/token
+      - name: DEFAULT_USER
+        value: BEARER_TOKEN
+      - name: REGISTRY_PROTOCOL
+        value: https
+      - name: OCIR_AUTH_METHOD
+        value: INSTANCE_PRINCIPAL
+      - name: TOKEN_VALIDATION
+        value: enabled
+CONFIGEOF
 
 # Run OKE init script with kubelet extra args for credential provider
 bash /var/run/oke-init.sh --kubelet-extra-args "--image-credential-provider-bin-dir=/usr/local/bin/ --image-credential-provider-config=/etc/kubernetes/credential-provider-config.yaml"
