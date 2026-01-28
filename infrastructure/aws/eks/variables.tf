@@ -57,9 +57,16 @@ variable "use_auto_mode" {
 }
 
 variable "auto_mode_node_pools" {
-  description = "Node pools for Auto Mode"
+  description = "Node pools for Auto Mode. Valid values are 'general-purpose' and 'system'."
   type        = list(string)
   default     = ["general-purpose", "system"]
+
+  validation {
+    condition = alltrue([
+      for pool in var.auto_mode_node_pools : contains(["general-purpose", "system"], pool)
+    ])
+    error_message = "auto_mode_node_pools must only contain 'general-purpose' and/or 'system'."
+  }
 }
 
 
@@ -67,4 +74,22 @@ variable "attach_cluster_primary_security_group" {
   description = "Attach cluster primary security group to node groups"
   type        = bool
   default     = true
+}
+
+variable "node_group_min_size" {
+  description = "Minimum number of nodes in the managed node group"
+  type        = number
+  default     = 2
+}
+
+variable "node_group_max_size" {
+  description = "Maximum number of nodes in the managed node group"
+  type        = number
+  default     = 10
+}
+
+variable "node_group_desired_size" {
+  description = "Desired number of nodes in the managed node group"
+  type        = number
+  default     = 2
 }
