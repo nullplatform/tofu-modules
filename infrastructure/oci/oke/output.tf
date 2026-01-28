@@ -27,3 +27,18 @@ output "ocir_policy_statements" {
   description = "All OCIR policy statements (if enabled)"
   value       = concat(local.ocir_workload_policy_statements, local.ocir_nodes_policy_statements)
 }
+
+output "ocir_dynamic_group_id" {
+  description = "The OCID of the OCIR nodes dynamic group (if enabled)"
+  value       = var.enable_ocir_pull ? oci_identity_dynamic_group.ocir_nodes[0].id : null
+}
+
+output "ocir_credential_provider_cloud_init" {
+  description = "Cloud-init script to install OCIR credential provider on worker nodes (if enabled)"
+  value       = local.ocir_credential_provider_cloud_init
+}
+
+output "ocir_kubelet_extra_args" {
+  description = "Extra kubelet arguments needed for OCIR credential provider"
+  value       = var.enable_ocir_pull ? "--image-credential-provider-bin-dir=/usr/local/bin/ --image-credential-provider-config=/etc/kubernetes/credential-provider-config.yaml" : ""
+}
