@@ -34,7 +34,7 @@ run "aws_provider_context" {
   command = plan
 
   assert {
-    condition     = local.provider_context["enabled"] == true
+    condition     = local.provider_context["enabled"] == "true"
     error_message = "AWS provider context should be enabled"
   }
 

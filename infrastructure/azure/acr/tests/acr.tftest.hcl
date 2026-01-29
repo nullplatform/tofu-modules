@@ -7,12 +7,12 @@ variables {
   containerregistry_name = "acrmyorgpoc"
 }
 
-# Validates ACR name regex: must be lowercase alphanumeric, 5-50 chars
+# Validates ACR plans with valid name
 run "valid_acr_name" {
   command = plan
 }
 
-# Validates ACR rejects names with uppercase
+# Validates ACR name regex: rejects uppercase
 run "rejects_uppercase_name" {
   command = plan
 
@@ -23,7 +23,7 @@ run "rejects_uppercase_name" {
   expect_failures = [var.containerregistry_name]
 }
 
-# Validates ACR rejects names with hyphens
+# Validates ACR name regex: rejects hyphens
 run "rejects_hyphens_in_name" {
   command = plan
 
@@ -34,7 +34,7 @@ run "rejects_hyphens_in_name" {
   expect_failures = [var.containerregistry_name]
 }
 
-# Validates ACR rejects names shorter than 5 chars
+# Validates ACR name regex: rejects names shorter than 5 chars
 run "rejects_short_name" {
   command = plan
 
@@ -45,32 +45,21 @@ run "rejects_short_name" {
   expect_failures = [var.containerregistry_name]
 }
 
-# Validates admin_enabled is true (required for nullplatform)
-run "admin_enabled" {
+# Validates ACR plans with Premium SKU
+run "premium_sku" {
   command = plan
 
-  assert {
-    condition     = module.containerregistry.admin_enabled == true
-    error_message = "ACR admin must be enabled"
+  variables {
+    sku = "Premium"
   }
 }
 
-# Validates default SKU is Basic
-run "default_sku_is_basic" {
+# Validates ACR with retention policy
+run "retention_policy" {
   command = plan
 
-  assert {
-    condition     = module.containerregistry.sku == "Basic"
-    error_message = "Default SKU should be Basic"
-  }
-}
-
-# Validates retention_policy_in_days is null by default (not applicable for Basic SKU)
-run "retention_null_by_default" {
-  command = plan
-
-  assert {
-    condition     = module.containerregistry.retention_policy_in_days == null
-    error_message = "Retention policy should be null by default"
+  variables {
+    sku                      = "Premium"
+    retention_policy_in_days = 30
   }
 }

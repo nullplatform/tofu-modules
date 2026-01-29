@@ -52,7 +52,7 @@ run "azure_provider_context_complete" {
   command = plan
 
   assert {
-    condition     = local.provider_context["enabled"] == true
+    condition     = local.provider_context["enabled"] == "true"
     error_message = "Azure provider context should be enabled"
   }
 

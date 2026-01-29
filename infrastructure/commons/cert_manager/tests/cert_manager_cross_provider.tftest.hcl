@@ -33,7 +33,7 @@ run "gcp_vars_not_required_for_azure" {
 
   # Should pass without GCP vars
   assert {
-    condition     = local.provider_context["enabled"] == true
+    condition     = local.provider_context["enabled"] == "true"
     error_message = "Azure config should work without GCP vars"
   }
 }
@@ -52,7 +52,7 @@ run "aws_vars_not_required_for_cloudflare" {
   }
 
   assert {
-    condition     = local.provider_context["enabled"] == true
+    condition     = local.provider_context["enabled"] == "true"
     error_message = "Cloudflare config should work without AWS vars"
   }
 }

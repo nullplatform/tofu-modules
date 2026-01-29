@@ -23,7 +23,7 @@ run "cloudflare_provider_context" {
   command = plan
 
   assert {
-    condition     = local.provider_context["enabled"] == true
+    condition     = local.provider_context["enabled"] == "true"
     error_message = "Cloudflare provider context should be enabled"
   }
 
