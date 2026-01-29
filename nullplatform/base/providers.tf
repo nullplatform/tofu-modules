@@ -2,7 +2,7 @@ terraform {
   required_providers {
     nullplatform = {
       source  = "nullplatform/nullplatform"
-      version = "~> 0.0.63"
+      version = "~> 0.0.76"
     }
 
     helm = {
@@ -10,23 +10,22 @@ terraform {
       version = "~> 3.0"
     }
 
-    # Cloud providers for gateway security resources
     aws = {
-      source  = "hashicorp/aws"
-      version = ">= 5.0"
+      source                = "hashicorp/aws"
+      version               = "~> 6.0"
+      configuration_aliases = [aws]
     }
 
     azurerm = {
-      source  = "hashicorp/azurerm"
-      version = ">= 3.0"
+      source                = "hashicorp/azurerm"
+      version               = "~> 4.0"
+      configuration_aliases = [azurerm]
     }
 
     google = {
-      source  = "hashicorp/google"
-      version = ">= 5.0"
+      source                = "hashicorp/google"
+      version               = "~> 5.0"
+      configuration_aliases = [google]
     }
   }
 }
-
-
-

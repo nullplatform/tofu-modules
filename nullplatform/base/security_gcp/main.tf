@@ -5,7 +5,6 @@
 ###############################################################################
 
 locals {
-  create_gcp_security = var.gateway_security_enabled && var.k8s_provider == "gke"
   # GCP health check ranges that need access for load balancer health checks
   gcp_health_check_ranges = ["35.191.0.0/16", "130.211.0.0/22"]
 }
@@ -16,7 +15,7 @@ locals {
 
 # Get GKE cluster info
 data "google_container_cluster" "this" {
-  count    = local.create_gcp_security ? 1 : 0
+  count    = var.cluster_name != "" ? 1 : 0
   name     = var.cluster_name
   location = var.gcp_region
   project  = var.gcp_project_id
@@ -24,22 +23,22 @@ data "google_container_cluster" "this" {
   lifecycle {
     precondition {
       condition     = var.cluster_name != ""
-      error_message = "cluster_name is required when gateway_security_enabled is true and k8s_provider is 'gke'."
+      error_message = "cluster_name is required."
     }
     precondition {
       condition     = var.gcp_project_id != ""
-      error_message = "gcp_project_id is required when gateway_security_enabled is true and k8s_provider is 'gke'."
+      error_message = "gcp_project_id is required."
     }
     precondition {
       condition     = var.gcp_region != ""
-      error_message = "gcp_region is required when gateway_security_enabled is true and k8s_provider is 'gke'."
+      error_message = "gcp_region is required."
     }
   }
 }
 
 # Get subnetwork info to derive CIDR
 data "google_compute_subnetwork" "this" {
-  count   = local.create_gcp_security ? 1 : 0
+  count   = var.cluster_name != "" ? 1 : 0
   name    = data.google_container_cluster.this[0].subnetwork
   region  = var.gcp_region
   project = var.gcp_project_id
@@ -47,23 +46,23 @@ data "google_compute_subnetwork" "this" {
 
 locals {
   # Derived values from data sources
-  gcp_network_name = local.create_gcp_security ? data.google_container_cluster.this[0].network : ""
-  gcp_subnet_cidr  = local.create_gcp_security ? data.google_compute_subnetwork.this[0].ip_cidr_range : ""
+  gcp_network_name = var.cluster_name != "" ? data.google_container_cluster.this[0].network : ""
+  gcp_subnet_cidr  = var.cluster_name != "" ? data.google_compute_subnetwork.this[0].ip_cidr_range : ""
 
   # Use override if provided, otherwise use derived value
-  effective_gcp_network_name = var.gcp_network_name != "" ? var.gcp_network_name : local.gcp_network_name
-  effective_gcp_network_cidr = var.network_cidr != "" ? var.network_cidr : local.gcp_subnet_cidr
+  effective_network_name = var.gcp_network_name != "" ? var.gcp_network_name : local.gcp_network_name
+  effective_network_cidr = var.network_cidr != "" ? var.network_cidr : local.gcp_subnet_cidr
 }
 
 # Firewall Rules for Public Gateway (GCP/GKE)
 # - Port 443 (HTTPS): Open to internet (0.0.0.0/0)
 # - Port 15021 (Health Check): Restricted to VPC CIDR + GCP health check ranges
 resource "google_compute_firewall" "public_gateway_https" {
-  count = local.create_gcp_security && var.gateways_enabled ? 1 : 0
+  count = var.gateways_enabled ? 1 : 0
 
   name        = "${var.cluster_name}-istio-public-https"
   project     = var.gcp_project_id
-  network     = local.effective_gcp_network_name
+  network     = local.effective_network_name
   description = "Allow HTTPS traffic from internet to Istio public gateway"
 
   direction = "INGRESS"
@@ -79,11 +78,11 @@ resource "google_compute_firewall" "public_gateway_https" {
 }
 
 resource "google_compute_firewall" "public_gateway_health_check" {
-  count = local.create_gcp_security && var.gateways_enabled ? 1 : 0
+  count = var.gateways_enabled ? 1 : 0
 
   name        = "${var.cluster_name}-istio-public-health"
   project     = var.gcp_project_id
-  network     = local.effective_gcp_network_name
+  network     = local.effective_network_name
   description = "Allow health check traffic from VPC and GCP health checkers to Istio public gateway"
 
   direction = "INGRESS"
@@ -95,17 +94,17 @@ resource "google_compute_firewall" "public_gateway_health_check" {
   }
 
   # Allow from VPC CIDR and GCP health check ranges
-  source_ranges = concat([local.effective_gcp_network_cidr], local.gcp_health_check_ranges)
+  source_ranges = concat([local.effective_network_cidr], local.gcp_health_check_ranges)
   target_tags   = ["${var.cluster_name}-istio-public-gateway"]
 }
 
 # Deny rule for health check from internet (lower priority than allow rule)
 resource "google_compute_firewall" "public_gateway_deny_health_check" {
-  count = local.create_gcp_security && var.gateways_enabled ? 1 : 0
+  count = var.gateways_enabled ? 1 : 0
 
   name        = "${var.cluster_name}-istio-public-deny-health"
   project     = var.gcp_project_id
-  network     = local.effective_gcp_network_name
+  network     = local.effective_network_name
   description = "Deny health check traffic from internet to Istio public gateway"
 
   direction = "INGRESS"
@@ -124,11 +123,11 @@ resource "google_compute_firewall" "public_gateway_deny_health_check" {
 # - Port 443 (HTTPS): Restricted to VPC CIDR only
 # - Port 15021 (Health Check): Restricted to VPC CIDR + GCP health check ranges
 resource "google_compute_firewall" "private_gateway_https" {
-  count = local.create_gcp_security && var.gateway_internal_enabled ? 1 : 0
+  count = var.gateway_internal_enabled ? 1 : 0
 
   name        = "${var.cluster_name}-istio-private-https"
   project     = var.gcp_project_id
-  network     = local.effective_gcp_network_name
+  network     = local.effective_network_name
   description = "Allow HTTPS traffic from VPC to Istio private gateway"
 
   direction = "INGRESS"
@@ -139,16 +138,16 @@ resource "google_compute_firewall" "private_gateway_https" {
     ports    = ["443"]
   }
 
-  source_ranges = [local.effective_gcp_network_cidr]
+  source_ranges = [local.effective_network_cidr]
   target_tags   = ["${var.cluster_name}-istio-private-gateway"]
 }
 
 resource "google_compute_firewall" "private_gateway_health_check" {
-  count = local.create_gcp_security && var.gateway_internal_enabled ? 1 : 0
+  count = var.gateway_internal_enabled ? 1 : 0
 
   name        = "${var.cluster_name}-istio-private-health"
   project     = var.gcp_project_id
-  network     = local.effective_gcp_network_name
+  network     = local.effective_network_name
   description = "Allow health check traffic from VPC and GCP health checkers to Istio private gateway"
 
   direction = "INGRESS"
@@ -160,6 +159,6 @@ resource "google_compute_firewall" "private_gateway_health_check" {
   }
 
   # Allow from VPC CIDR and GCP health check ranges (needed for internal LB)
-  source_ranges = concat([local.effective_gcp_network_cidr], local.gcp_health_check_ranges)
+  source_ranges = concat([local.effective_network_cidr], local.gcp_health_check_ranges)
   target_tags   = ["${var.cluster_name}-istio-private-gateway"]
 }
