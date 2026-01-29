@@ -8,9 +8,9 @@ They were extracted from `nullplatform/base` so that the base module no longer r
 
 | Submodule | Provider | Resources |
 |-----------|----------|-----------|
-| `security/aws` | `aws >= 5.0` | `aws_security_group`, `aws_vpc_security_group_ingress_rule`, `aws_vpc_security_group_egress_rule` |
-| `security/azure` | `azurerm >= 3.0` | `azurerm_network_security_group`, `azurerm_network_security_rule` |
-| `security/gcp` | `google >= 5.0` | `google_compute_firewall` |
+| `infrastructure/aws/security` | `aws >= 5.0` | `aws_security_group`, `aws_vpc_security_group_ingress_rule`, `aws_vpc_security_group_egress_rule` |
+| `infrastructure/azure/security` | `azurerm >= 3.0` | `azurerm_network_security_group`, `azurerm_network_security_rule` |
+| `infrastructure/gcp/security` | `google >= 5.0` | `google_compute_firewall` |
 
 ## Usage
 
@@ -20,7 +20,7 @@ Call the security submodule for your cloud, then pass the outputs to `nullplatfo
 
 ```hcl
 module "base_security" {
-  source       = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base/security/aws?ref=<version>"
+  source       = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/security?ref=<version>"
   cluster_name = "my-eks-cluster"
 }
 
@@ -39,7 +39,7 @@ module "base" {
 
 ```hcl
 module "base_security" {
-  source                   = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base/security/azure?ref=<version>"
+  source                   = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/security?ref=<version>"
   cluster_name             = "my-aks-cluster"
   resource_group_name      = "my-rg"
   azure_location           = "eastus"
@@ -63,7 +63,7 @@ module "base" {
 
 ```hcl
 module "base_security" {
-  source         = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base/security/gcp?ref=<version>"
+  source         = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/security?ref=<version>"
   cluster_name   = "my-gke-cluster"
   gcp_project_id = "my-project"
   gcp_region     = "us-central1"
