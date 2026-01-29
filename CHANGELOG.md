@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.25.0](https://github.com/nullplatform/tofu-modules/compare/v1.24.3...v1.25.0) (2026-01-29)
+
+
+### Features
+
+* **613:** add support cert manager for oci ([#152](https://github.com/nullplatform/tofu-modules/issues/152)) ([1282171](https://github.com/nullplatform/tofu-modules/commit/12821712e781ae1b976feeafa6f29b4be0abb4c4))
+
 ## [1.24.3](https://github.com/nullplatform/tofu-modules/compare/v1.24.2...v1.24.3) (2026-01-28)
 
 
