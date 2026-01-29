@@ -120,15 +120,47 @@ jobs:
         working-directory: ${{ matrix.module }}
         run: tofu test
 
+  test-nullplatform-modules:
+    name: "Test Nullplatform: ${{ matrix.module }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - nullplatform/account
+          - nullplatform/api_key
+          - nullplatform/dimensions
+          - nullplatform/users
+          - nullplatform/metrics
+          - nullplatform/asset/docker_server
+          - nullplatform/cloud/azure/cloud
+          - nullplatform/cloud/gcp/cloud
+          - nullplatform/cloud/aws/cloud
+          - nullplatform/code_repository
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: "1.10.6"
+
+      - name: Run tofu init
+        working-directory: ${{ matrix.module }}
+        run: tofu init -backend=false
+
+      - name: Run tofu test
+        working-directory: ${{ matrix.module }}
+        run: tofu test
+
   test-gate:
     name: All module tests passed
     runs-on: ubuntu-latest
-    needs: [test-azure-modules, test-commons-modules, test-aws-modules, test-gcp-modules]
+    needs: [test-azure-modules, test-commons-modules, test-aws-modules, test-gcp-modules, test-nullplatform-modules]
     if: always()
     steps:
       - name: Check test results
         run: |
-          if [[ "${{ needs.test-azure-modules.result }}" != "success" || "${{ needs.test-commons-modules.result }}" != "success" || "${{ needs.test-aws-modules.result }}" != "success" || "${{ needs.test-gcp-modules.result }}" != "success" ]]; then
+          if [[ "${{ needs.test-azure-modules.result }}" != "success" || "${{ needs.test-commons-modules.result }}" != "success" || "${{ needs.test-aws-modules.result }}" != "success" || "${{ needs.test-gcp-modules.result }}" != "success" || "${{ needs.test-nullplatform-modules.result }}" != "success" ]]; then
             echo "One or more test jobs failed"
             exit 1
           fi
