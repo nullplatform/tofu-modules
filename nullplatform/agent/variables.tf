@@ -81,8 +81,8 @@ variable "cloud_provider" {
   description = "Cloud provider to use (aws, gcp, or azure)"
   type        = string
   validation {
-    condition     = contains(["aws", "gcp", "azure"], var.cloud_provider)
-    error_message = "cloud_provider must be either 'aws' , 'gcp', or 'azure'."
+    condition     = contains(["aws", "gcp", "azure", "oci"], var.cloud_provider)
+    error_message = "cloud_provider must be either 'aws' , 'gcp', 'oci' or 'azure'."
   }
 }
 

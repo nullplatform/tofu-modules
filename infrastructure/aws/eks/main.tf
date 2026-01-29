@@ -38,9 +38,9 @@ module "eks" {
       ami_type       = var.ami_type
       instance_types = [var.instance_types]
 
-      min_size                              = 2
-      max_size                              = 10
-      desired_size                          = 2
+      min_size                              = var.node_group_min_size
+      max_size                              = var.node_group_max_size
+      desired_size                          = var.node_group_desired_size
       attach_cluster_primary_security_group = var.attach_cluster_primary_security_group
     }
   }
@@ -52,8 +52,5 @@ module "eks" {
   compute_config = var.use_auto_mode ? {
     enabled    = true
     node_pools = var.auto_mode_node_pools
-    } : {
-    enabled    = false
-    node_pools = []
-  }
+  } : null
 }

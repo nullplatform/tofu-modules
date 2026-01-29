@@ -18,3 +18,13 @@ output "eks_oidc_provider_arn" {
   value       = module.eks.oidc_provider_arn
   description = "ARN of the cluster's OIDC provider"
 }
+
+output "eks_node_iam_role_arn" {
+  value       = module.eks.node_iam_role_arn
+  description = "ARN of the IAM role for EKS nodes (Auto Mode or Managed Node Groups)"
+}
+
+output "eks_node_iam_role_name" {
+  value       = module.eks.node_iam_role_name
+  description = "Name of the IAM role for EKS nodes"
+}

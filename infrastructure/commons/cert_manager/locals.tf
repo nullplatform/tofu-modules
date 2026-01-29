@@ -35,6 +35,7 @@ locals {
     var.cloud_provider == "oci" ? {
       enabled          = true
       compartment_ocid = var.oci_compartment_ocid
+      region           = var.oci_region
     } : {}
   )
 
