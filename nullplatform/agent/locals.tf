@@ -41,6 +41,7 @@ locals {
     aws   = []
     gcp   = []
     azure = []
+    oci   = []
   }
 
   all_args = concat(local.default_args, lookup(local.cloud_args, var.cloud_provider, []))
@@ -80,6 +81,11 @@ locals {
       AZURE_CLIENT_SECRET    = var.azure_client_secret
       AZURE_CLIENT_ID        = var.azure_client_id
       AZURE_TENANT_ID        = var.azure_tenant_id
+    }
+
+    oci = {
+      PRIVATE_GATEWAY_NAME = var.private_gateway_name
+      PRIVATE_DOMAIN       = var.private_domain
     }
   }
 
