@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.26.1](https://github.com/nullplatform/tofu-modules/compare/v1.26.0...v1.26.1) (2026-01-29)
+
+
+### Bug Fixes
+
+* **base:** update outputs to use input vars instead of removed modules ([ac34128](https://github.com/nullplatform/tofu-modules/commit/ac34128a98a1758f827e00b4a4bc34a6c6b07e85))
+* **gcp:** remove duplicate output and version files ([4004729](https://github.com/nullplatform/tofu-modules/commit/400472926ed4c90cbec89a29ff3ef5a032d4f081))
+* **security:** align provider version constraints with repo conventions ([a47de86](https://github.com/nullplatform/tofu-modules/commit/a47de86ce69b6a2dcf699d519304c69bebea995d))
+
 ## [1.26.0](https://github.com/nullplatform/tofu-modules/compare/v1.25.0...v1.26.0) (2026-01-29)
 
 
