@@ -1,6 +1,6 @@
 
 resource "terraform_data" "api_key_trigger" {
-  input = module.api_key.api_key
+  input = var.api_key
 }
 
 resource "nullplatform_notification_channel" "channel_from_template" {
@@ -13,7 +13,7 @@ resource "nullplatform_notification_channel" "channel_from_template" {
     dynamic "agent" {
       for_each = var.agent_command != null ? [1] : []
       content {
-        api_key = module.api_key.api_key
+        api_key = var.api_key
         command {
           type = var.agent_command.type
           data = {
