@@ -47,14 +47,14 @@ module "iam" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
-| <a name="requirement_google"></a> [google](#requirement\_google) | >= 5.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3 |
+| <a name="requirement_google"></a> [google](#requirement\_google) | ~> 5.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_google"></a> [google](#provider\_google) | >= 5.0 |
+| <a name="provider_google"></a> [google](#provider\_google) | ~> 5.0 |
 
 ## Resources
 
@@ -70,11 +70,11 @@ module "iam" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | The GCP project ID | `string` | n/a | yes |
 | <a name="input_service_accounts"></a> [service\_accounts](#input\_service\_accounts) | List of service accounts to create with their roles | <pre>list(object({<br/>    name         = string<br/>    display_name = optional(string)<br/>    roles        = optional(list(string), [])<br/>  }))</pre> | `[]` | no |
-| <a name="input_workload_identity_bindings"></a> [workload\_identity\_bindings](#input\_workload\_identity\_bindings) | Workload Identity bindings (GSA -> KSA) | <pre>list(object({<br/>    service_account_email = string<br/>    namespace             = string<br/>    ksa_name              = string<br/>  }))</pre> | `[]` | no |
+| <a name="input_workload_identity_bindings"></a> [workload\_identity\_bindings](#input\_workload\_identity\_bindings) | Workload Identity bindings (GCP Service Account -> Kubernetes Service Account) | <pre>list(object({<br/>    service_account_email = string<br/>    namespace             = string<br/>    ksa_name              = string<br/>  }))</pre> | `[]` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_service_accounts"></a> [service\_accounts](#output\_service\_accounts) | n/a |
+| <a name="output_service_accounts"></a> [service\_accounts](#output\_service\_accounts) | A map of service account names to their email addresses |
 <!-- END_TF_DOCS -->

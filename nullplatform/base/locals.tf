@@ -28,20 +28,20 @@ locals {
       gateway_enabled                             = var.gateway_enabled ? "true" : "false"
       gateway_internal_enabled                    = var.gateway_internal_enabled ? "true" : "false"
       gateway_internal_azure_load_balancer_subnet = var.internal_azure_load_balancer_subnet
-      gateway_public_aws_name                     = var.gateway_public_aws_name
-      gateway_internal_aws_name                   = var.gateway_internal_aws_name
+      gateway_public_aws_name   = var.gateway_public_aws_name
+      gateway_internal_aws_name = var.gateway_internal_aws_name
 
       # ---- gateway security (AWS) ----
-      gateway_public_aws_security_groups  = local.create_aws_security && var.gateways_enabled ? aws_security_group.public_gateway[0].id : ""
-      gateway_private_aws_security_groups = local.create_aws_security && var.gateway_internal_enabled ? aws_security_group.private_gateway[0].id : ""
+      gateway_public_aws_security_groups  = var.gateway_public_aws_security_group_id
+      gateway_private_aws_security_groups = var.gateway_private_aws_security_group_id
 
       # ---- gateway security (Azure) ----
-      gateway_public_azure_nsg  = local.create_azure_security && var.gateways_enabled ? azurerm_network_security_group.public_gateway[0].id : ""
-      gateway_private_azure_nsg = local.create_azure_security && var.gateway_internal_enabled ? azurerm_network_security_group.private_gateway[0].id : ""
+      gateway_public_azure_nsg  = var.gateway_public_azure_nsg_id
+      gateway_private_azure_nsg = var.gateway_private_azure_nsg_id
 
       # ---- gateway security (GCP) ----
-      gateway_public_gcp_firewall  = local.create_gcp_security && var.gateways_enabled ? google_compute_firewall.public_gateway_https[0].name : ""
-      gateway_private_gcp_firewall = local.create_gcp_security && var.gateway_internal_enabled ? google_compute_firewall.private_gateway_https[0].name : ""
+      gateway_public_gcp_firewall  = var.gateway_public_gcp_firewall_name
+      gateway_private_gcp_firewall = var.gateway_private_gcp_firewall_name
 
       # ---- nullplatform ----
       np_api_key = var.np_api_key

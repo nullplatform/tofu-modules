@@ -16,22 +16,24 @@
 
 | Name | Type |
 |------|------|
-| [oci_identity_dynamic_group.external_dns](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_dynamic_group) | resource |
-| [oci_identity_policy.external_dns](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
+| [oci_identity_dynamic_group.this](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_dynamic_group) | resource |
+| [oci_identity_policy.this](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_additional_policy_statements"></a> [additional\_policy\_statements](#input\_additional\_policy\_statements) | Additional custom OCI IAM policy statements to apply | `list(string)` | `[]` | no |
 | <a name="input_cluster_id"></a> [cluster\_id](#input\_cluster\_id) | OCID of the OKE cluster | `string` | n/a | yes |
-| <a name="input_compartment_id"></a> [compartment\_id](#input\_compartment\_id) | OCID of the compartment where resources are located (cluster, DNS zones) | `string` | n/a | yes |
+| <a name="input_compartment_id"></a> [compartment\_id](#input\_compartment\_id) | OCID of the compartment where resources are located | `string` | n/a | yes |
 | <a name="input_defined_tags"></a> [defined\_tags](#input\_defined\_tags) | Defined tags for resources | `map(string)` | `{}` | no |
-| <a name="input_dns_zone_ids"></a> [dns\_zone\_ids](#input\_dns\_zone\_ids) | List of DNS zone OCIDs that external-dns can manage (optional, if not specified allows all zones in the compartment) | `list(string)` | `[]` | no |
-| <a name="input_external_dns_namespace"></a> [external\_dns\_namespace](#input\_external\_dns\_namespace) | Kubernetes namespace where external-dns runs | `string` | `"external-dns"` | no |
-| <a name="input_external_dns_service_account"></a> [external\_dns\_service\_account](#input\_external\_dns\_service\_account) | Name of the external-dns service account | `string` | `"external-dns"` | no |
+| <a name="input_enable_dns_permissions"></a> [enable\_dns\_permissions](#input\_enable\_dns\_permissions) | Enable automatic DNS policy statements (inspect, read, use dns-zones and manage dns-records) | `bool` | `false` | no |
 | <a name="input_freeform_tags"></a> [freeform\_tags](#input\_freeform\_tags) | Freeform tags for resources | `map(string)` | `{}` | no |
 | <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Prefix for resource names | `string` | `"oke"` | no |
+| <a name="input_namespace"></a> [namespace](#input\_namespace) | Kubernetes namespace where the workload runs | `string` | n/a | yes |
+| <a name="input_service_account"></a> [service\_account](#input\_service\_account) | Name of the Kubernetes service account | `string` | n/a | yes |
 | <a name="input_tenancy_id"></a> [tenancy\_id](#input\_tenancy\_id) | OCID of the tenancy (dynamic groups are created at tenancy level) | `string` | n/a | yes |
+| <a name="input_workload_name"></a> [workload\_name](#input\_workload\_name) | Name of the workload (e.g., external-dns, cert-manager) | `string` | n/a | yes |
 
 ## Outputs
 
@@ -39,7 +41,9 @@
 |------|-------------|
 | <a name="output_dynamic_group_id"></a> [dynamic\_group\_id](#output\_dynamic\_group\_id) | OCID of the created dynamic group |
 | <a name="output_dynamic_group_name"></a> [dynamic\_group\_name](#output\_dynamic\_group\_name) | Name of the dynamic group |
-| <a name="output_external_dns_helm_values"></a> [external\_dns\_helm\_values](#output\_external\_dns\_helm\_values) | Suggested values for the external-dns Helm chart |
 | <a name="output_policy_id"></a> [policy\_id](#output\_policy\_id) | OCID of the created policy |
 | <a name="output_policy_name"></a> [policy\_name](#output\_policy\_name) | Name of the policy |
+| <a name="output_policy_scope"></a> [policy\_scope](#output\_policy\_scope) | The policy scope (tenancy or compartment) |
+| <a name="output_policy_statements"></a> [policy\_statements](#output\_policy\_statements) | The policy statements applied |
+| <a name="output_workload_identity_conditions"></a> [workload\_identity\_conditions](#output\_workload\_identity\_conditions) | The workload identity conditions for use in custom policies |
 <!-- END_TF_DOCS -->
