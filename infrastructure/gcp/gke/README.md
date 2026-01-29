@@ -49,9 +49,7 @@ module "gke" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3 |
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3 |
 | <a name="requirement_google"></a> [google](#requirement\_google) | ~> 5.0 |
-| <a name="requirement_google"></a> [google](#requirement\_google) | >= 5.0 |
 
 ## Modules
 
@@ -80,9 +78,7 @@ module "gke" {
 
 | Name | Description |
 |------|-------------|
-| <a name="output_ca_certificate"></a> [ca\_certificate](#output\_ca\_certificate) | n/a |
 | <a name="output_cluster_ca_certificate"></a> [cluster\_ca\_certificate](#output\_cluster\_ca\_certificate) | The cluster CA certificate in base64 |
-| <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | n/a |
-| <a name="output_endpoint"></a> [endpoint](#output\_endpoint) | n/a |
+| <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | The name of the GKE cluster |
 | <a name="output_host"></a> [host](#output\_host) | The API server endpoint |
 <!-- END_TF_DOCS -->
