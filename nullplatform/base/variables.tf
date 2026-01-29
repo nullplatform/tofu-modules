@@ -323,6 +323,50 @@ variable "gateway_internal_aws_name" {
 }
 
 ############################################
+# Gateway Security Resource IDs
+# These are outputs from the security submodules:
+#   infrastructure/aws/security
+#   infrastructure/azure/security
+#   infrastructure/gcp/security
+############################################
+
+variable "gateway_public_aws_security_group_id" {
+  type        = string
+  description = "The ID of the AWS security group for the public gateway. Output from infrastructure/aws/security module."
+  default     = ""
+}
+
+variable "gateway_private_aws_security_group_id" {
+  type        = string
+  description = "The ID of the AWS security group for the private gateway. Output from infrastructure/aws/security module."
+  default     = ""
+}
+
+variable "gateway_public_azure_nsg_id" {
+  type        = string
+  description = "The ID of the Azure NSG for the public gateway. Output from infrastructure/azure/security module."
+  default     = ""
+}
+
+variable "gateway_private_azure_nsg_id" {
+  type        = string
+  description = "The ID of the Azure NSG for the private gateway. Output from infrastructure/azure/security module."
+  default     = ""
+}
+
+variable "gateway_public_gcp_firewall_name" {
+  type        = string
+  description = "The name of the GCP firewall rule for the public gateway. Output from infrastructure/gcp/security module."
+  default     = ""
+}
+
+variable "gateway_private_gcp_firewall_name" {
+  type        = string
+  description = "The name of the GCP firewall rule for the private gateway. Output from infrastructure/gcp/security module."
+  default     = ""
+}
+
+############################################
 # Image Pull Secrets
 ############################################
 
@@ -348,68 +392,6 @@ variable "image_pull_secrets_password" {
   type        = string
   description = "Registry password or token."
   sensitive   = true
-  default     = ""
-}
-
-############################################
-# Gateway Security Configuration
-############################################
-
-variable "gateway_security_enabled" {
-  type        = bool
-  description = "Enable creation of security resources (Security Groups for AWS, NSGs for Azure, Firewall Rules for GCP) to restrict health check port access."
-  default     = false
-}
-
-############################################
-# Security Modules
-############################################
-
-variable "cluster_name" {
-  type        = string
-  description = "The Kubernetes cluster name (used by security modules to derive network info)."
-  default     = ""
-}
-
-variable "vpc_id" {
-  type        = string
-  description = "Override: AWS VPC ID. If empty, derived automatically from cluster name."
-  default     = ""
-}
-
-variable "network_cidr" {
-  type        = string
-  description = "Override: Network CIDR block for restricting health check access. If empty, derived automatically."
-  default     = ""
-}
-
-variable "resource_group_name" {
-  type        = string
-  description = "Azure resource group name for NSG resources."
-  default     = ""
-}
-
-variable "azure_location" {
-  type        = string
-  description = "Override: Azure region. If empty, derived automatically from cluster."
-  default     = ""
-}
-
-variable "gcp_project_id" {
-  type        = string
-  description = "GCP project ID."
-  default     = ""
-}
-
-variable "gcp_region" {
-  type        = string
-  description = "GCP region where the GKE cluster is located."
-  default     = ""
-}
-
-variable "gcp_network_name" {
-  type        = string
-  description = "Override: GCP VPC network name for firewall rules. If empty, derived from cluster."
   default     = ""
 }
 

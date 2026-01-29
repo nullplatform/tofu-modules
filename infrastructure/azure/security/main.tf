@@ -8,6 +8,10 @@
 # DATA SOURCES - Derive VNet and CIDR from cluster name
 ###############################################################################
 
+locals {
+  need_data = var.gateways_enabled || var.gateway_internal_enabled
+}
+
 # Get AKS cluster info
 data "azurerm_kubernetes_cluster" "this" {
   count               = var.cluster_name != "" ? 1 : 0
@@ -50,6 +54,10 @@ locals {
   effective_location     = var.azure_location != "" ? var.azure_location : local.azure_location
   effective_network_cidr = var.network_cidr != "" ? var.network_cidr : local.azure_vnet_cidr
 }
+
+###############################################################################
+# PUBLIC GATEWAY
+###############################################################################
 
 # Network Security Group for Public Gateway (Azure/AKS)
 # - Port 443 (HTTPS): Open to internet (0.0.0.0/0)
@@ -114,6 +122,10 @@ resource "azurerm_network_security_rule" "public_gateway_deny_health_check_inter
   resource_group_name         = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.public_gateway[0].name
 }
+
+###############################################################################
+# PRIVATE GATEWAY
+###############################################################################
 
 # Network Security Group for Private/Internal Gateway (Azure/AKS)
 # - Port 443 (HTTPS): Restricted to VNet CIDR only

@@ -54,6 +54,10 @@ locals {
   effective_network_cidr = var.network_cidr != "" ? var.network_cidr : local.gcp_subnet_cidr
 }
 
+###############################################################################
+# PUBLIC GATEWAY
+###############################################################################
+
 # Firewall Rules for Public Gateway (GCP/GKE)
 # - Port 443 (HTTPS): Open to internet (0.0.0.0/0)
 # - Port 15021 (Health Check): Restricted to VPC CIDR + GCP health check ranges
@@ -118,6 +122,10 @@ resource "google_compute_firewall" "public_gateway_deny_health_check" {
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["${var.cluster_name}-istio-public-gateway"]
 }
+
+###############################################################################
+# PRIVATE GATEWAY
+###############################################################################
 
 # Firewall Rules for Private/Internal Gateway (GCP/GKE)
 # - Port 443 (HTTPS): Restricted to VPC CIDR only

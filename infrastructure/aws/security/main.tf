@@ -28,6 +28,8 @@ data "aws_vpc" "this" {
 }
 
 locals {
+  need_data = var.gateways_enabled || var.gateway_internal_enabled
+
   # Derived values from data sources
   aws_vpc_id   = var.cluster_name != "" ? data.aws_vpc.this[0].id : ""
   aws_vpc_cidr = var.cluster_name != "" ? data.aws_vpc.this[0].cidr_block : ""
@@ -36,6 +38,10 @@ locals {
   effective_vpc_id       = var.vpc_id != "" ? var.vpc_id : local.aws_vpc_id
   effective_network_cidr = var.network_cidr != "" ? var.network_cidr : local.aws_vpc_cidr
 }
+
+###############################################################################
+# PUBLIC GATEWAY
+###############################################################################
 
 # Security Group for Public Gateway (AWS/EKS)
 # - Port 443 (HTTPS): Open to internet (0.0.0.0/0)
@@ -95,6 +101,10 @@ resource "aws_vpc_security_group_egress_rule" "public_gateway_all" {
     Name = "${var.cluster_name}-istio-public-egress"
   }
 }
+
+###############################################################################
+# PRIVATE GATEWAY
+###############################################################################
 
 # Security Group for Private/Internal Gateway (AWS/EKS)
 # - Port 443 (HTTPS): Restricted to VPC CIDR only
