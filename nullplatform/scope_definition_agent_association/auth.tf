@@ -3,7 +3,7 @@
 ################################################################################
 
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.24.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.24.1"
 
   name = "SCOPE-NOTIFICATION-CHANNEL-${upper(var.scope_specification_slug)}"
 
@@ -18,18 +18,17 @@ module "api_key" {
     }
   ]
 
-  tags = [
-    {
-      key   = "managedBy"
-      value = "IaC"
-    },
-    {
-      key   = "level"
-      value = var.nrn
-    },
-    {
-      key   = "usedBy"
-      value = "${upper(var.scope_specification_slug)}"
-    }
-  ]
+  tags = concat(
+    [
+      {
+        key   = "managedBy"
+        value = "IaC"
+      },
+      {
+        key   = "usedBy"
+        value = upper(var.scope_specification_slug)
+      }
+    ],
+    local.nrn_tags
+  )
 }

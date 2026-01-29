@@ -3,7 +3,7 @@
 ################################################################################
 
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.24.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.24.1"
 
   name = "AGENT"
 
@@ -30,14 +30,13 @@ module "api_key" {
     }
   ]
 
-  tags = [
-    {
-      key   = "managedBy"
-      value = "IaC"
-    },
-    {
-      key   = "level"
-      value = var.nrn
-    }
-  ]
+  tags = concat(
+    [
+      {
+        key   = "managedBy"
+        value = "IaC"
+      }
+    ],
+    local.nrn_tags
+  )
 }

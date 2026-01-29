@@ -1,5 +1,44 @@
 # Changelog
 
+## [1.26.0](https://github.com/nullplatform/tofu-modules/compare/v1.25.0...v1.26.0) (2026-01-29)
+
+
+### Features
+
+* **azure:** unify variable names and update module conventions ([#162](https://github.com/nullplatform/tofu-modules/issues/162)) ([d8bccf1](https://github.com/nullplatform/tofu-modules/commit/d8bccf17878008538978d2127e678364f988ff34))
+* **base:** security and nrn tags ([#160](https://github.com/nullplatform/tofu-modules/issues/160)) ([2ad4b2f](https://github.com/nullplatform/tofu-modules/commit/2ad4b2f9227b89032d5a2259a513a3a75a14014f))
+
+## [1.25.0](https://github.com/nullplatform/tofu-modules/compare/v1.24.3...v1.25.0) (2026-01-29)
+
+
+### Features
+
+* **613:** add support cert manager for oci ([#152](https://github.com/nullplatform/tofu-modules/issues/152)) ([1282171](https://github.com/nullplatform/tofu-modules/commit/12821712e781ae1b976feeafa6f29b4be0abb4c4))
+
+## [1.24.3](https://github.com/nullplatform/tofu-modules/compare/v1.24.2...v1.24.3) (2026-01-28)
+
+
+### Bug Fixes
+
+* **eks:** resolve Auto Mode compatibility issues ([#167](https://github.com/nullplatform/tofu-modules/issues/167)) ([c58baea](https://github.com/nullplatform/tofu-modules/commit/c58baea3611b3e3c9e847e7b742f1975372eae69))
+
+## [1.24.2](https://github.com/nullplatform/tofu-modules/compare/v1.24.1...v1.24.2) (2026-01-28)
+
+
+### Bug Fixes
+
+* api key lifecycle ([#165](https://github.com/nullplatform/tofu-modules/issues/165)) ([86fd93e](https://github.com/nullplatform/tofu-modules/commit/86fd93e8be4569b41b43b791585260f3168425c7))
+
+## [1.24.1](https://github.com/nullplatform/tofu-modules/compare/v1.24.0...v1.24.1) (2026-01-27)
+
+
+### Bug Fixes
+
+* api key lifecycle ([#163](https://github.com/nullplatform/tofu-modules/issues/163)) ([beaa60f](https://github.com/nullplatform/tofu-modules/commit/beaa60fdcc527122acac669f78a8ccf10a687042))
+* **api_key:** add create_before_destroy to prevent service disruption ([7efc3ed](https://github.com/nullplatform/tofu-modules/commit/7efc3edb82945e50d39734eb1a1b0de6b29d58fc))
+* replace agent helm release when API key rotates ([b0ea1c9](https://github.com/nullplatform/tofu-modules/commit/b0ea1c903477d25ba46cc656a85c0245511d2d4f))
+* replace notification channels when API key rotates ([07d3e17](https://github.com/nullplatform/tofu-modules/commit/07d3e17f29087c64028aad6b61dfc37cb1443e32))
+
 ## [1.24.0](https://github.com/nullplatform/tofu-modules/compare/v1.23.0...v1.24.0) (2026-01-26)
 
 

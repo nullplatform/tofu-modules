@@ -1,4 +1,8 @@
 
+resource "terraform_data" "api_key_trigger" {
+  input = module.api_key.api_key
+}
+
 resource "nullplatform_notification_channel" "channel_from_template" {
   nrn    = var.nrn
   type   = var.channel_type
@@ -33,4 +37,8 @@ resource "nullplatform_notification_channel" "channel_from_template" {
       { "service.specification.slug" = { "$eq" : var.service_specification_slug } }
     ]
   })
+
+  lifecycle {
+    replace_triggered_by = [terraform_data.api_key_trigger]
+  }
 }

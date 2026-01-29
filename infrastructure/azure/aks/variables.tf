@@ -86,16 +86,6 @@ variable "oidc_issuer_enabled" {
 }
 
 ###############################################################################
-# OPTIONAL VARIABLES - MONITORING
-###############################################################################
-
-variable "cluster_log_analytics_workspace_name" {
-  type        = string
-  description = "The name of the Log Analytics workspace used for cluster monitoring"
-  default     = null
-}
-
-###############################################################################
 # OPTIONAL VARIABLES - TAGS AND METADATA
 ###############################################################################
 

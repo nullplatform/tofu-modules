@@ -35,3 +35,4 @@ resource "helm_release" "external_dns" {
     kubernetes_secret_v1.external_dns_oci_config
   ]
 }
+

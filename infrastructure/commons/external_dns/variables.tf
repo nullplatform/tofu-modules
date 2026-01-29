@@ -119,9 +119,9 @@ variable "zone_type" {
 variable "oci_compartment_ocid" {
   description = "The OCI compartment OCID where the DNS zones are located (required when dns_provider_name is 'oci')"
   type        = string
-  default     = null
+  default     = " "
   validation {
-    condition     = var.dns_provider_name != "oci" || var.oci_compartment_ocid != null
+    condition     = var.dns_provider_name != "oci" || var.oci_compartment_ocid != ""
     error_message = "oci_compartment_ocid is required when dns_provider_name is 'oci'."
   }
 }
@@ -129,9 +129,9 @@ variable "oci_compartment_ocid" {
 variable "oci_region" {
   description = "The OCI region for workload identity configuration (required when dns_provider_name is 'oci')"
   type        = string
-  default     = null
+  default     = ""
   validation {
-    condition     = var.dns_provider_name != "oci" || var.oci_region != null
+    condition     = var.dns_provider_name != "oci" || var.oci_region != ""
     error_message = "oci_region is required when dns_provider_name is 'oci'."
   }
 }
