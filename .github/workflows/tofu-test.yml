@@ -1,0 +1,77 @@
+name: tofu test
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test-azure-modules:
+    name: "Test Azure: ${{ matrix.module }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - infrastructure/azure/resource_group
+          - infrastructure/azure/vnet
+          - infrastructure/azure/aks
+          - infrastructure/azure/acr
+          - infrastructure/azure/dns
+          - infrastructure/azure/private_dns
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: "1.8.0"
+
+      - name: Run tofu init
+        working-directory: ${{ matrix.module }}
+        run: tofu init -backend=false
+
+      - name: Run tofu test
+        working-directory: ${{ matrix.module }}
+        run: tofu test
+
+  test-commons-modules:
+    name: "Test Commons: ${{ matrix.module }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - infrastructure/commons/cert_manager
+          - infrastructure/commons/external_dns
+          - infrastructure/commons/istio
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: "1.8.0"
+
+      - name: Run tofu init
+        working-directory: ${{ matrix.module }}
+        run: tofu init -backend=false
+
+      - name: Run tofu test
+        working-directory: ${{ matrix.module }}
+        run: tofu test
+
+  test-gate:
+    name: All module tests passed
+    runs-on: ubuntu-latest
+    needs: [test-azure-modules, test-commons-modules]
+    if: always()
+    steps:
+      - name: Check test results
+        run: |
+          if [[ "${{ needs.test-azure-modules.result }}" != "success" || "${{ needs.test-commons-modules.result }}" != "success" ]]; then
+            echo "One or more test jobs failed"
+            exit 1
+          fi
