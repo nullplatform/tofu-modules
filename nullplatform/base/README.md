@@ -158,12 +158,10 @@ provider "google" {
 
 | Name | Description |
 |------|-------------|
-| <a name="output_private_gateway_firewall_rules"></a> [private\_gateway\_firewall\_rules](#output\_private\_gateway\_firewall\_rules) | The names of the private gateway firewall rules (GCP) |
+| <a name="output_private_gateway_firewall_name"></a> [private\_gateway\_firewall\_name](#output\_private\_gateway\_firewall\_name) | The name of the private gateway firewall rule (GCP) |
 | <a name="output_private_gateway_nsg_id"></a> [private\_gateway\_nsg\_id](#output\_private\_gateway\_nsg\_id) | The ID of the private gateway NSG (Azure) |
-| <a name="output_private_gateway_nsg_name"></a> [private\_gateway\_nsg\_name](#output\_private\_gateway\_nsg\_name) | The name of the private gateway NSG (Azure) |
 | <a name="output_private_gateway_security_group_id"></a> [private\_gateway\_security\_group\_id](#output\_private\_gateway\_security\_group\_id) | The ID of the private gateway security group (AWS) |
-| <a name="output_public_gateway_firewall_rules"></a> [public\_gateway\_firewall\_rules](#output\_public\_gateway\_firewall\_rules) | The names of the public gateway firewall rules (GCP) |
+| <a name="output_public_gateway_firewall_name"></a> [public\_gateway\_firewall\_name](#output\_public\_gateway\_firewall\_name) | The name of the public gateway firewall rule (GCP) |
 | <a name="output_public_gateway_nsg_id"></a> [public\_gateway\_nsg\_id](#output\_public\_gateway\_nsg\_id) | The ID of the public gateway NSG (Azure) |
-| <a name="output_public_gateway_nsg_name"></a> [public\_gateway\_nsg\_name](#output\_public\_gateway\_nsg\_name) | The name of the public gateway NSG (Azure) |
 | <a name="output_public_gateway_security_group_id"></a> [public\_gateway\_security\_group\_id](#output\_public\_gateway\_security\_group\_id) | The ID of the public gateway security group (AWS) |
 <!-- END_TF_DOCS -->
