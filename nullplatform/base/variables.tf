@@ -325,47 +325,46 @@ variable "gateway_internal_aws_name" {
 ############################################
 # Gateway Security Resource IDs
 # These are outputs from the security submodules:
-#   nullplatform/base/security/aws
-#   nullplatform/base/security/azure
-#   nullplatform/base/security/gcp
+#   infrastructure/aws/security
+#   infrastructure/azure/security
+#   infrastructure/gcp/security
 ############################################
 
 variable "gateway_public_aws_security_group_id" {
   type        = string
-  description = "The ID of the AWS security group for the public gateway. Output from security/aws module."
+  description = "The ID of the AWS security group for the public gateway. Output from infrastructure/aws/security module."
   default     = ""
 }
 
 variable "gateway_private_aws_security_group_id" {
   type        = string
-  description = "The ID of the AWS security group for the private gateway. Output from security/aws module."
+  description = "The ID of the AWS security group for the private gateway. Output from infrastructure/aws/security module."
   default     = ""
 }
 
 variable "gateway_public_azure_nsg_id" {
   type        = string
-  description = "The ID of the Azure NSG for the public gateway. Output from security/azure module."
+  description = "The ID of the Azure NSG for the public gateway. Output from infrastructure/azure/security module."
   default     = ""
 }
 
 variable "gateway_private_azure_nsg_id" {
   type        = string
-  description = "The ID of the Azure NSG for the private gateway. Output from security/azure module."
+  description = "The ID of the Azure NSG for the private gateway. Output from infrastructure/azure/security module."
   default     = ""
 }
 
 variable "gateway_public_gcp_firewall_name" {
   type        = string
-  description = "The name of the GCP firewall rule for the public gateway. Output from security/gcp module."
+  description = "The name of the GCP firewall rule for the public gateway. Output from infrastructure/gcp/security module."
   default     = ""
 }
 
 variable "gateway_private_gcp_firewall_name" {
   type        = string
-  description = "The name of the GCP firewall rule for the private gateway. Output from security/gcp module."
+  description = "The name of the GCP firewall rule for the private gateway. Output from infrastructure/gcp/security module."
   default     = ""
 }
-
 
 ############################################
 # Image Pull Secrets

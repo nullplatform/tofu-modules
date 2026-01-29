@@ -10,7 +10,7 @@
 
 # Get EKS cluster info to derive VPC ID
 data "aws_eks_cluster" "this" {
-  count = var.gateways_enabled || var.gateway_internal_enabled ? 1 : 0
+  count = var.cluster_name != "" ? 1 : 0
   name  = var.cluster_name
 
   lifecycle {
@@ -23,7 +23,7 @@ data "aws_eks_cluster" "this" {
 
 # Get VPC info to derive CIDR block
 data "aws_vpc" "this" {
-  count = var.gateways_enabled || var.gateway_internal_enabled ? 1 : 0
+  count = var.cluster_name != "" ? 1 : 0
   id    = data.aws_eks_cluster.this[0].vpc_config[0].vpc_id
 }
 
@@ -31,12 +31,12 @@ locals {
   need_data = var.gateways_enabled || var.gateway_internal_enabled
 
   # Derived values from data sources
-  aws_vpc_id   = local.need_data ? data.aws_vpc.this[0].id : ""
-  aws_vpc_cidr = local.need_data ? data.aws_vpc.this[0].cidr_block : ""
+  aws_vpc_id   = var.cluster_name != "" ? data.aws_vpc.this[0].id : ""
+  aws_vpc_cidr = var.cluster_name != "" ? data.aws_vpc.this[0].cidr_block : ""
 
   # Use override if provided, otherwise use derived value
-  effective_aws_vpc_id       = var.vpc_id != "" ? var.vpc_id : local.aws_vpc_id
-  effective_aws_network_cidr = var.network_cidr != "" ? var.network_cidr : local.aws_vpc_cidr
+  effective_vpc_id       = var.vpc_id != "" ? var.vpc_id : local.aws_vpc_id
+  effective_network_cidr = var.network_cidr != "" ? var.network_cidr : local.aws_vpc_cidr
 }
 
 ###############################################################################
@@ -51,7 +51,7 @@ resource "aws_security_group" "public_gateway" {
 
   name        = "${var.cluster_name}-istio-public-gateway"
   description = "Security group for Istio public gateway - HTTPS open, health check restricted to VPC"
-  vpc_id      = local.effective_aws_vpc_id
+  vpc_id      = local.effective_vpc_id
 
   tags = {
     Name      = "${var.cluster_name}-istio-public-gateway"
@@ -82,7 +82,7 @@ resource "aws_vpc_security_group_ingress_rule" "public_gateway_health_check" {
   from_port         = 15021
   to_port           = 15021
   ip_protocol       = "tcp"
-  cidr_ipv4         = local.effective_aws_network_cidr
+  cidr_ipv4         = local.effective_network_cidr
 
   tags = {
     Name = "${var.cluster_name}-istio-public-health-check"
@@ -114,7 +114,7 @@ resource "aws_security_group" "private_gateway" {
 
   name        = "${var.cluster_name}-istio-private-gateway"
   description = "Security group for Istio private gateway - All traffic restricted to VPC"
-  vpc_id      = local.effective_aws_vpc_id
+  vpc_id      = local.effective_vpc_id
 
   tags = {
     Name      = "${var.cluster_name}-istio-private-gateway"
@@ -130,7 +130,7 @@ resource "aws_vpc_security_group_ingress_rule" "private_gateway_https" {
   from_port         = 443
   to_port           = 443
   ip_protocol       = "tcp"
-  cidr_ipv4         = local.effective_aws_network_cidr
+  cidr_ipv4         = local.effective_network_cidr
 
   tags = {
     Name = "${var.cluster_name}-istio-private-https"
@@ -145,7 +145,7 @@ resource "aws_vpc_security_group_ingress_rule" "private_gateway_health_check" {
   from_port         = 15021
   to_port           = 15021
   ip_protocol       = "tcp"
-  cidr_ipv4         = local.effective_aws_network_cidr
+  cidr_ipv4         = local.effective_network_cidr
 
   tags = {
     Name = "${var.cluster_name}-istio-private-health-check"

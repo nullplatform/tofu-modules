@@ -14,7 +14,7 @@ locals {
 
 # Get AKS cluster info
 data "azurerm_kubernetes_cluster" "this" {
-  count               = local.need_data ? 1 : 0
+  count               = var.cluster_name != "" ? 1 : 0
   name                = var.cluster_name
   resource_group_name = var.resource_group_name
 
@@ -33,26 +33,26 @@ data "azurerm_kubernetes_cluster" "this" {
 locals {
   # Parse the subnet ID to extract VNet info
   # Format: /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet}/subnets/{subnet}
-  azure_subnet_id_parts = local.need_data ? split("/", data.azurerm_kubernetes_cluster.this[0].agent_pool_profile[0].vnet_subnet_id) : []
-  azure_vnet_name       = local.need_data ? local.azure_subnet_id_parts[8] : ""
-  azure_vnet_rg         = local.need_data ? local.azure_subnet_id_parts[4] : ""
+  azure_subnet_id_parts = var.cluster_name != "" ? split("/", data.azurerm_kubernetes_cluster.this[0].agent_pool_profile[0].vnet_subnet_id) : []
+  azure_vnet_name       = var.cluster_name != "" ? local.azure_subnet_id_parts[8] : ""
+  azure_vnet_rg         = var.cluster_name != "" ? local.azure_subnet_id_parts[4] : ""
 }
 
 # Get VNet info to derive address space
 data "azurerm_virtual_network" "this" {
-  count               = local.need_data ? 1 : 0
+  count               = var.cluster_name != "" ? 1 : 0
   name                = local.azure_vnet_name
   resource_group_name = local.azure_vnet_rg
 }
 
 locals {
   # Derived values from data sources
-  azure_location  = local.need_data ? data.azurerm_kubernetes_cluster.this[0].location : ""
-  azure_vnet_cidr = local.need_data ? data.azurerm_virtual_network.this[0].address_space[0] : ""
+  azure_location  = var.cluster_name != "" ? data.azurerm_kubernetes_cluster.this[0].location : ""
+  azure_vnet_cidr = var.cluster_name != "" ? data.azurerm_virtual_network.this[0].address_space[0] : ""
 
   # Use override if provided, otherwise use derived value
-  effective_azure_location     = var.azure_location != "" ? var.azure_location : local.azure_location
-  effective_azure_network_cidr = var.network_cidr != "" ? var.network_cidr : local.azure_vnet_cidr
+  effective_location     = var.azure_location != "" ? var.azure_location : local.azure_location
+  effective_network_cidr = var.network_cidr != "" ? var.network_cidr : local.azure_vnet_cidr
 }
 
 ###############################################################################
@@ -66,7 +66,7 @@ resource "azurerm_network_security_group" "public_gateway" {
   count = var.gateways_enabled ? 1 : 0
 
   name                = "${var.cluster_name}-istio-public-gateway"
-  location            = local.effective_azure_location
+  location            = local.effective_location
   resource_group_name = var.resource_group_name
 
   tags = {
@@ -101,7 +101,7 @@ resource "azurerm_network_security_rule" "public_gateway_health_check" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "15021"
-  source_address_prefix       = local.effective_azure_network_cidr
+  source_address_prefix       = local.effective_network_cidr
   destination_address_prefix  = "*"
   resource_group_name         = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.public_gateway[0].name
@@ -134,7 +134,7 @@ resource "azurerm_network_security_group" "private_gateway" {
   count = var.gateway_internal_enabled ? 1 : 0
 
   name                = "${var.cluster_name}-istio-private-gateway"
-  location            = local.effective_azure_location
+  location            = local.effective_location
   resource_group_name = var.resource_group_name
 
   tags = {
@@ -153,7 +153,7 @@ resource "azurerm_network_security_rule" "private_gateway_https" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "443"
-  source_address_prefix       = local.effective_azure_network_cidr
+  source_address_prefix       = local.effective_network_cidr
   destination_address_prefix  = "*"
   resource_group_name         = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.private_gateway[0].name
@@ -169,7 +169,7 @@ resource "azurerm_network_security_rule" "private_gateway_health_check" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "15021"
-  source_address_prefix       = local.effective_azure_network_cidr
+  source_address_prefix       = local.effective_network_cidr
   destination_address_prefix  = "*"
   resource_group_name         = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.private_gateway[0].name
