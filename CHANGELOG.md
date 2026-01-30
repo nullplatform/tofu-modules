@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.26.1](https://github.com/nullplatform/tofu-modules/compare/v1.26.0...v1.26.1) (2026-01-29)
+
+
+### Bug Fixes
+
+* **base:** update outputs to use input vars instead of removed modules ([ac34128](https://github.com/nullplatform/tofu-modules/commit/ac34128a98a1758f827e00b4a4bc34a6c6b07e85))
+* **gcp:** remove duplicate output and version files ([4004729](https://github.com/nullplatform/tofu-modules/commit/400472926ed4c90cbec89a29ff3ef5a032d4f081))
+* **security:** align provider version constraints with repo conventions ([a47de86](https://github.com/nullplatform/tofu-modules/commit/a47de86ce69b6a2dcf699d519304c69bebea995d))
+
+## [1.26.0](https://github.com/nullplatform/tofu-modules/compare/v1.25.0...v1.26.0) (2026-01-29)
+
+
+### Features
+
+* **azure:** unify variable names and update module conventions ([#162](https://github.com/nullplatform/tofu-modules/issues/162)) ([d8bccf1](https://github.com/nullplatform/tofu-modules/commit/d8bccf17878008538978d2127e678364f988ff34))
+* **base:** security and nrn tags ([#160](https://github.com/nullplatform/tofu-modules/issues/160)) ([2ad4b2f](https://github.com/nullplatform/tofu-modules/commit/2ad4b2f9227b89032d5a2259a513a3a75a14014f))
+
+## [1.25.0](https://github.com/nullplatform/tofu-modules/compare/v1.24.3...v1.25.0) (2026-01-29)
+
+
+### Features
+
+* **613:** add support cert manager for oci ([#152](https://github.com/nullplatform/tofu-modules/issues/152)) ([1282171](https://github.com/nullplatform/tofu-modules/commit/12821712e781ae1b976feeafa6f29b4be0abb4c4))
+
+## [1.24.3](https://github.com/nullplatform/tofu-modules/compare/v1.24.2...v1.24.3) (2026-01-28)
+
+
+### Bug Fixes
+
+* **eks:** resolve Auto Mode compatibility issues ([#167](https://github.com/nullplatform/tofu-modules/issues/167)) ([c58baea](https://github.com/nullplatform/tofu-modules/commit/c58baea3611b3e3c9e847e7b742f1975372eae69))
+
 ## [1.24.2](https://github.com/nullplatform/tofu-modules/compare/v1.24.1...v1.24.2) (2026-01-28)
 
 

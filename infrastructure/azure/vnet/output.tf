@@ -1,10 +1,14 @@
-
-output "resource_id" {
-  description = "The resource ID of the virtual network."
+output "vnet_id" {
+  description = "The resource ID of the virtual network"
   value       = module.avm_res_network_virtualnetwork.resource_id
 }
 
-output "subnet_ids_by_name" {
+output "vnet_name" {
+  description = "The name of the virtual network"
+  value       = module.avm_res_network_virtualnetwork.name
+}
+
+output "subnet_ids" {
   description = "Map of subnet names to their resource IDs"
   value = {
     for k, s in var.subnets_definition :

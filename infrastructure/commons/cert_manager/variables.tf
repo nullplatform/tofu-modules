@@ -1,6 +1,6 @@
 ###############################################################################
 # CERT-MANAGER PROVIDER
-###############################################################################
+#################################################ß##############################
 variable "cloud_provider" {
   description = "The cloud provider to use: gcp, azure, aws, cloudflare, or oci"
   type        = string
@@ -55,7 +55,7 @@ variable "private_domain_name" {
   description = "The private domain name for internal certificate issuance"
   type        = string
 }
-###############################################################################
+####################ß###########################################################
 # CERT-MANAGER CONFIGURATION
 ###############################################################################
 
@@ -183,12 +183,29 @@ variable "oci_compartment_ocid" {
   }
 }
 
-variable "oci_sa_ocid" {
-  description = "The OCID of the OCI workload identity principal for cert-manager."
+variable "oci_region" {
+  description = "The OCI region for DNS operations (e.g., us-ashburn-1)."
   type        = string
   default     = ""
   validation {
-    condition     = var.cloud_provider != "oci" || length(var.oci_sa_ocid) > 0
-    error_message = "When cloud_provider is 'oci', oci_sa_ocid must not be empty."
+    condition     = var.cloud_provider != "oci" || length(var.oci_region) > 0
+    error_message = "When cloud_provider is 'oci', oci_region must not be empty."
   }
+}
+
+variable "oci_sa_ocid" {
+  description = "The OCID of the OCI workload identity principal for cert-manager. Optional when using Dynamic Groups with Workload Identity."
+  type        = string
+  default     = ""
+}
+##########web hook
+variable "cert_manager_webhook_oci_version" {
+  type    = string
+  default = "1.4.1"
+}
+
+variable "cert_manager_webhook_oci_namespace" {
+  type    = string
+  default = "cert-manager"
+
 }
