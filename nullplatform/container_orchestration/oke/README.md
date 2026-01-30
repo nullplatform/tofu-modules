@@ -1,5 +1,14 @@
-# Module: Container orchestration for oke
+# Module: Container orchestration for OKE
 
+## Description
+
+This Terraform module configures Oracle Kubernetes Engine (OKE) as a container orchestration provider in nullplatform. It creates the necessary provider configuration to enable nullplatform to deploy and manage applications on an existing OKE cluster.
+
+The module sets up:
+- **Cluster configuration**: Connects nullplatform to your OKE cluster by specifying the cluster name, default application namespace, and OCI region.
+- **Gateway configuration**: Configures public and private gateway names used for routing traffic to your applications.
+
+This module should be used after setting up the OCI cloud provider configuration (`nullplatform/cloud/oci`).
 
 ## Usage
 
