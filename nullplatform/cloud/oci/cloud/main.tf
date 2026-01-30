@@ -1,6 +1,6 @@
 resource "nullplatform_provider_config" "oci" {
   nrn  = var.nrn
-  type = "oci"
+  type = "oci-configuration"
 
 
   dimensions = var.dimensions
