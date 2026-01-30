@@ -1,7 +1,7 @@
 mock_provider "azurerm" {}
 
 variables {
-  resource_group  = "rg-test"
+  resource_group_name = "rg-test"
   domain_name     = "myorg.nullimplementation.com"
   subscription_id = "00000000-0000-0000-0000-000000000000"
 }

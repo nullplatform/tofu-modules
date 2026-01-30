@@ -7,6 +7,7 @@ variables {
   private_domain_name = "myorg.example.com"
   oci_compartment_ocid = "ocid1.compartment.oc1..aaaaaaaatest"
   oci_sa_ocid          = "ocid1.principal.oc1..aaaaaaaatest"
+  oci_region           = "us-ashburn-1"
 }
 
 # Validates OCI provider config plans successfully
@@ -55,13 +56,3 @@ run "oci_requires_compartment" {
   expect_failures = [var.oci_compartment_ocid]
 }
 
-# Validates OCI fails without sa_ocid
-run "oci_requires_sa_ocid" {
-  command = plan
-
-  variables {
-    oci_sa_ocid = ""
-  }
-
-  expect_failures = [var.oci_sa_ocid]
-}

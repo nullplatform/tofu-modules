@@ -74,7 +74,7 @@ run "oci_requires_compartment" {
   command = plan
 
   variables {
-    oci_compartment_ocid = null
+    oci_compartment_ocid = ""
   }
 
   expect_failures = [var.oci_compartment_ocid]
@@ -85,7 +85,7 @@ run "oci_requires_region" {
   command = plan
 
   variables {
-    oci_region = null
+    oci_region = ""
   }
 
   expect_failures = [var.oci_region]

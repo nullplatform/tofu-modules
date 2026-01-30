@@ -23,17 +23,17 @@ run "subnet_ids_by_name_maps_correctly" {
   }
 
   assert {
-    condition     = contains(keys(output.subnet_ids_by_name), "subnet-1")
+    condition     = contains(keys(output.subnet_ids), "subnet-1")
     error_message = "subnet_ids_by_name should contain key 'subnet-1'"
   }
 
   assert {
-    condition     = contains(keys(output.subnet_ids_by_name), "subnet-2")
+    condition     = contains(keys(output.subnet_ids), "subnet-2")
     error_message = "subnet_ids_by_name should contain key 'subnet-2'"
   }
 
   assert {
-    condition     = length(output.subnet_ids_by_name) == 2
+    condition     = length(output.subnet_ids) == 2
     error_message = "subnet_ids_by_name should have exactly 2 entries"
   }
 }
@@ -57,7 +57,7 @@ run "single_subnet_works" {
   }
 
   assert {
-    condition     = length(output.subnet_ids_by_name) == 1
+    condition     = length(output.subnet_ids) == 1
     error_message = "Should have exactly 1 subnet"
   }
 }
