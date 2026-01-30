@@ -1,10 +1,5 @@
-variable "account" {
-  description = "Nullplatform account ID"
-  type        = string
-}
-
-variable "namespace" {
-  description = "Nullplatform namespace"
+variable "nrn" {
+  description = "Nullplatform NRN (e.g., organization=X:account=Y:namespace=Z)"
   type        = string
 }
 

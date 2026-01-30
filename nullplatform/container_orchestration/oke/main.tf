@@ -1,7 +1,5 @@
 resource "nullplatform_provider_config" "oke_config" {
-  account     = var.account
-  namespace   = var.namespace
-  application = "oke-clusters"
+  nrn = var.nrn
 
   type       = "oke"
   dimensions = var.dimensions
