@@ -37,7 +37,7 @@ jobs:
 
   test-gate:
     name: All module tests passed
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [test-azure-modules, test-commons-modules, test-aws-modules, test-gcp-modules, test-nullplatform-modules]
     if: always()
     steps:
