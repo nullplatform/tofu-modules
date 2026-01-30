@@ -45,4 +45,33 @@ module "agent" {
 ```
 
 <!-- BEGIN_TF_DOCS -->
+
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | n/a |
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [nullplatform_api_key.this](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/api_key) | resource |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name (e.g., organization=123:account=456:namespace=789) | `string` | n/a | yes |
+| <a name="input_specification_slug"></a> [specification\_slug](#input\_specification\_slug) | Specification slug used for the usedBy tag (required for scope\_notification and service\_notification types) | `string` | `null` | no |
+| <a name="input_type"></a> [type](#input\_type) | Type of API key to create. Determines the pre-configured grants and tags. | `string` | n/a | yes |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_api_key"></a> [api\_key](#output\_api\_key) | The generated API key value |
+| <a name="output_id"></a> [id](#output\_id) | The ID of the API key resource |
+| <a name="output_name"></a> [name](#output\_name) | The name of the API key |
 <!-- END_TF_DOCS -->
