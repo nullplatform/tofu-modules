@@ -1,10 +1,9 @@
 terraform {
-  required_version = ">= 1.3"
-
   required_providers {
     nullplatform = {
       source  = "nullplatform/nullplatform"
-      version = ">= 0.0.74"
+      version = "~> 0.0.63"
     }
   }
 }
+
