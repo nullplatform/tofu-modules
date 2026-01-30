@@ -1,5 +1,5 @@
 
-# Module: Azure Cloud
+# Module: Oracle Cloud
 This resource defines an Oracle Cloud Infrastructure (OCI) provider configuration in Nullplatform. It registers the OCI account, compartment, and networking details required for Nullplatform to manage resources in OCI.
 
 The configuration includes account and region information, the target compartment, and domain settings for networking. Attributes are JSON-encoded and changes to them are ignored after creation to prevent unnecessary updates.
