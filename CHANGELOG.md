@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.27.0](https://github.com/nullplatform/tofu-modules/compare/v1.26.1...v1.27.0) (2026-01-30)
+
+
+### Features
+
+* **oci:** cloud provider ([#175](https://github.com/nullplatform/tofu-modules/issues/175)) ([bcdc2b5](https://github.com/nullplatform/tofu-modules/commit/bcdc2b55818859d660c5694a4bc20c051b9e6563))
+
+
+### Bug Fixes
+
+* **pipeline:** fix reference ([#176](https://github.com/nullplatform/tofu-modules/issues/176)) ([ac897ab](https://github.com/nullplatform/tofu-modules/commit/ac897ab2669f3f2f4535e64d378de6e0c4addce0))
+
 ## [1.26.1](https://github.com/nullplatform/tofu-modules/compare/v1.26.0...v1.26.1) (2026-01-29)
 
 
