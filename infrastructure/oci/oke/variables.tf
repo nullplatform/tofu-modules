@@ -60,3 +60,30 @@ variable "worker_pools" {
     }
   }
 }
+
+variable "worker_cloud_init" {
+  description = "Cloud init configuration for worker nodes. See: https://cloudinit.readthedocs.io/en/latest/reference/modules.html"
+  type        = list(map(string))
+  default     = []
+}
+
+# ---------------------------------------------------------
+# OCIR (Oracle Container Image Registry) Configuration
+# ---------------------------------------------------------
+variable "enable_ocir_pull" {
+  type        = bool
+  default     = false
+  description = "Enable IAM policy to allow workloads to pull images from OCIR"
+}
+
+variable "ocir_pull_namespaces" {
+  type        = list(string)
+  default     = []
+  description = "List of Kubernetes namespaces allowed to pull from OCIR. If empty, all namespaces in the cluster are allowed."
+}
+
+variable "tenancy_id" {
+  type        = string
+  default     = null
+  description = "The tenancy OCID (required when enable_ocir_pull is true)"
+}

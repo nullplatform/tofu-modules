@@ -1,7 +1,15 @@
+###############################################################################
+# REQUIRED VARIABLES
+###############################################################################
+
 variable "project_id" {
   type        = string
   description = "The GCP project ID"
 }
+
+###############################################################################
+# OPTIONAL VARIABLES - SERVICE ACCOUNTS
+###############################################################################
 
 variable "service_accounts" {
   type = list(object({
@@ -13,12 +21,16 @@ variable "service_accounts" {
   default     = []
 }
 
+###############################################################################
+# OPTIONAL VARIABLES - WORKLOAD IDENTITY
+###############################################################################
+
 variable "workload_identity_bindings" {
   type = list(object({
     service_account_email = string
     namespace             = string
     ksa_name              = string
   }))
-  description = "Workload Identity bindings (GSA -> KSA)"
+  description = "Workload Identity bindings (GCP Service Account -> Kubernetes Service Account)"
   default     = []
 }

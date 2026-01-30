@@ -46,3 +46,13 @@ variable "subscription_id" {
   type        = string
   description = "The ID of the Azure subscription"
 }
+
+###############################################################################
+# OPTIONAL VARIABLES - TAGS AND METADATA
+###############################################################################
+
+variable "tags" {
+  type        = map(string)
+  description = "A mapping of tags to assign to the virtual network resources"
+  default     = {}
+}

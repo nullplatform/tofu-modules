@@ -20,4 +20,8 @@ resource "nullplatform_api_key" "this" {
       value = tags.value.value
     }
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }

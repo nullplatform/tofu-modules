@@ -1,3 +1,11 @@
+locals {
+  # Combine user cloud-init with OCIR credential provider cloud-init when enabled
+  combined_cloud_init = var.enable_ocir_pull ? concat(
+    [local.ocir_credential_provider_cloud_init],
+    var.worker_cloud_init
+  ) : var.worker_cloud_init
+}
+
 module "oke" {
   source  = "oracle-terraform-modules/oke/oci"
   version = "5.3.3"
@@ -52,6 +60,12 @@ module "oke" {
   worker_pool_size = 2
 
   worker_pools = var.worker_pools
+
+  # When OCIR pull is enabled, we disable default cloud-init and use our own
+  # that includes the credential provider setup with kubelet-extra-args
+  worker_disable_default_cloud_init = var.enable_ocir_pull
+  worker_cloud_init                 = local.combined_cloud_init
+
   # ---------------------------------------------------------
   # Bastion & Operator
   # ---------------------------------------------------------

@@ -1,3 +1,7 @@
+############################################
+# Helm Release
+############################################
+
 resource "helm_release" "base" {
   name       = "nullplatform-base"
   chart      = "nullplatform-base"
