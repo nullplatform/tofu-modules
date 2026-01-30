@@ -7,7 +7,7 @@ on:
     types: [opened, edited, synchronize, reopened]
 jobs:
   docs:
-    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/tf-docs.yml@main
+    uses: nullplatform/actions-nullplatform/.github/workflows/tf-docs.yml@main
   conventional-commit:
     needs: docs
-    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/conventional-commit.yml@main
+    uses: nullplatform/actions-nullplatform/.github/workflows/conventional-commit.yml@main
