@@ -11,146 +11,29 @@ on:
 
 jobs:
   test-azure-modules:
-    name: "Test Azure: ${{ matrix.module }}"
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        module:
-          - infrastructure/azure/resource_group
-          - infrastructure/azure/vnet
-          - infrastructure/azure/acr
-          - infrastructure/azure/dns
-          - infrastructure/azure/private_dns
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: opentofu/setup-opentofu@v1
-        with:
-          tofu_version: "1.10.6"
-
-      - name: Run tofu init
-        working-directory: ${{ matrix.module }}
-        run: tofu init -backend=false
-
-      - name: Run tofu test
-        working-directory: ${{ matrix.module }}
-        run: tofu test
+    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/tofu-test.yml@main
+    with:
+      modules: '["infrastructure/azure/resource_group", "infrastructure/azure/vnet", "infrastructure/azure/acr", "infrastructure/azure/dns", "infrastructure/azure/private_dns"]'
 
   test-commons-modules:
-    name: "Test Commons: ${{ matrix.module }}"
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        module:
-          - infrastructure/commons/cert_manager
-          - infrastructure/commons/external_dns
-          - infrastructure/commons/istio
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: opentofu/setup-opentofu@v1
-        with:
-          tofu_version: "1.10.6"
-
-      - name: Run tofu init
-        working-directory: ${{ matrix.module }}
-        run: tofu init -backend=false
-
-      - name: Run tofu test
-        working-directory: ${{ matrix.module }}
-        run: tofu test
+    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/tofu-test.yml@main
+    with:
+      modules: '["infrastructure/commons/cert_manager", "infrastructure/commons/external_dns", "infrastructure/commons/istio"]'
 
   test-aws-modules:
-    name: "Test AWS: ${{ matrix.module }}"
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        module:
-          - infrastructure/aws/vpc
-          - infrastructure/aws/acm
-          - infrastructure/aws/route53
-          - infrastructure/aws/alb_controller
-          - infrastructure/aws/ingress
-          - infrastructure/aws/iam/cert_manager
-          - infrastructure/aws/iam/external_dns
-          - infrastructure/aws/iam/agent
-          - infrastructure/aws/backend
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: opentofu/setup-opentofu@v1
-        with:
-          tofu_version: "1.10.6"
-
-      - name: Run tofu init
-        working-directory: ${{ matrix.module }}
-        run: tofu init -backend=false
-
-      - name: Run tofu test
-        working-directory: ${{ matrix.module }}
-        run: tofu test
+    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/tofu-test.yml@main
+    with:
+      modules: '["infrastructure/aws/vpc", "infrastructure/aws/acm", "infrastructure/aws/route53", "infrastructure/aws/alb_controller", "infrastructure/aws/ingress", "infrastructure/aws/iam/cert_manager", "infrastructure/aws/iam/external_dns", "infrastructure/aws/iam/agent", "infrastructure/aws/backend"]'
 
   test-gcp-modules:
-    name: "Test GCP: ${{ matrix.module }}"
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        module:
-          - infrastructure/gcp/artifact-registry
-          - infrastructure/gcp/cloud-dns
-          - infrastructure/gcp/cloud-nat
-          - infrastructure/gcp/iam
-          - infrastructure/gcp/vpc
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: opentofu/setup-opentofu@v1
-        with:
-          tofu_version: "1.10.6"
-
-      - name: Run tofu init
-        working-directory: ${{ matrix.module }}
-        run: tofu init -backend=false
-
-      - name: Run tofu test
-        working-directory: ${{ matrix.module }}
-        run: tofu test
+    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/tofu-test.yml@main
+    with:
+      modules: '["infrastructure/gcp/artifact-registry", "infrastructure/gcp/cloud-dns", "infrastructure/gcp/cloud-nat", "infrastructure/gcp/iam", "infrastructure/gcp/vpc"]'
 
   test-nullplatform-modules:
-    name: "Test Nullplatform: ${{ matrix.module }}"
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        module:
-          - nullplatform/account
-          - nullplatform/api_key
-          - nullplatform/dimensions
-          - nullplatform/users
-          - nullplatform/metrics
-          - nullplatform/asset/docker_server
-          - nullplatform/cloud/azure/cloud
-          - nullplatform/cloud/gcp/cloud
-          - nullplatform/cloud/aws/cloud
-          - nullplatform/code_repository
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: opentofu/setup-opentofu@v1
-        with:
-          tofu_version: "1.10.6"
-
-      - name: Run tofu init
-        working-directory: ${{ matrix.module }}
-        run: tofu init -backend=false
-
-      - name: Run tofu test
-        working-directory: ${{ matrix.module }}
-        run: tofu test
+    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/tofu-test.yml@main
+    with:
+      modules: '["nullplatform/account", "nullplatform/api_key", "nullplatform/dimensions", "nullplatform/users", "nullplatform/metrics", "nullplatform/asset/docker_server", "nullplatform/cloud/azure/cloud", "nullplatform/cloud/gcp/cloud", "nullplatform/cloud/aws/cloud", "nullplatform/code_repository"]'
 
   test-gate:
     name: All module tests passed
