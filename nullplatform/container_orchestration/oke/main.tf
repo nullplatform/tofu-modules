@@ -5,7 +5,7 @@ resource "nullplatform_provider_config" "oke_config" {
   dimensions = var.dimensions
   attributes = jsonencode({
     cluster = {
-      name      = var.cluster_name
+      id        = var.cluster_name
       namespace = var.namespace_application_default
       location  = var.region
     },
