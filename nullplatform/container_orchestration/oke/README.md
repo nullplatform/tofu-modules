@@ -3,7 +3,25 @@
 
 ## Usage
 
+
+
 ```hcl
+ module "oke" {
+
+    source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/oke?ref=feature/ocicloud"
+
+    depends_on = [module.name]
+
+    nrn        = "organization=xxx:account=xxx:namespace=xxx"
+    dimension  = {}
+    cluster_name                  = "oke-cluster-nullplatform"
+    namespace_application_default = "nullplatform"
+    region                        = "us-ashburn-1"
+
+    gateway_namespace    = "gateways"
+    public_gateway_name  = "public-gateway"
+    private_gateway_name = "private-gateway"
+  }
 
 ```
 
