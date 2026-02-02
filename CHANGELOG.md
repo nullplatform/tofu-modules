@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.28.0](https://github.com/nullplatform/tofu-modules/compare/v1.27.0...v1.28.0) (2026-02-02)
+
+
+### Features
+
+* add pre-configured api_key modules for agent, scope and service notifications ([d5d1d76](https://github.com/nullplatform/tofu-modules/commit/d5d1d7622cab8b8905ee6ddf89a39e25a3a103b5))
+
+
+### Bug Fixes
+
+* **ci:** correct workflow reference path in tofu-test pipeline ([0c97f44](https://github.com/nullplatform/tofu-modules/commit/0c97f44f4d38198056391e89e579ca739a82e439))
+
 ## [1.27.0](https://github.com/nullplatform/tofu-modules/compare/v1.26.1...v1.27.0) (2026-01-30)
 
 
