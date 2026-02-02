@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.28.1](https://github.com/nullplatform/tofu-modules/compare/v1.28.0...v1.28.1) (2026-02-02)
+
+
+### Bug Fixes
+
+* **api_key:** rename backend.tf to providers.tf and add version constraint ([543b174](https://github.com/nullplatform/tofu-modules/commit/543b17409f56b8be9336fc67bef8f69475448d9c))
+
 ## [1.28.0](https://github.com/nullplatform/tofu-modules/compare/v1.27.0...v1.28.0) (2026-02-02)
 
 
