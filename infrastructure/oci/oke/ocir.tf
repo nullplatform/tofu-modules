@@ -87,7 +87,7 @@ bash /var/run/oke-init.sh --kubelet-extra-args "--image-credential-provider-bin-
 # Policy for OKE workloads (pods) - Workload Identity
 resource "oci_identity_policy" "ocir_workload_identity" {
   count          = var.enable_ocir_pull ? 1 : 0
-  provider       = oci
+  provider       = oci.home
   compartment_id = var.tenancy_id
   name           = "${var.cluster_name}-ocir-workload-identity"
   description    = "Allow OKE workloads in cluster ${var.cluster_name} to pull images from OCIR"
@@ -101,7 +101,7 @@ resource "oci_identity_policy" "ocir_workload_identity" {
 # Dynamic Group for OKE worker nodes - Required for Instance Principal authentication
 resource "oci_identity_dynamic_group" "ocir_nodes" {
   count          = var.enable_ocir_pull ? 1 : 0
-  provider       = oci
+  provider       = oci.home
   compartment_id = var.tenancy_id
   name           = "${var.cluster_name}-ocir-nodes"
   description    = "Dynamic group for OKE worker nodes in cluster ${var.cluster_name} to pull images from OCIR"
@@ -115,7 +115,7 @@ resource "oci_identity_dynamic_group" "ocir_nodes" {
 # Policy for OKE worker nodes (instances) - Required for image pulls via Instance Principal
 resource "oci_identity_policy" "ocir_nodes" {
   count          = var.enable_ocir_pull ? 1 : 0
-  provider       = oci
+  provider       = oci.home
   compartment_id = var.tenancy_id
   name           = "${var.cluster_name}-ocir-nodes"
   description    = "Allow OKE worker nodes in cluster ${var.cluster_name} to pull images from OCIR"
