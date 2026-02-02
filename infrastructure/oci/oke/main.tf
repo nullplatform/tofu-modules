@@ -12,7 +12,7 @@ module "oke" {
 
   providers = {
     oci      = oci
-    oci.home = oci.home
+    oci.home = oci
   }
 
   compartment_id = var.compartment_id
