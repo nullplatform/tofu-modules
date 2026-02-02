@@ -105,3 +105,13 @@ variable "endpoint_private_access" {
   type        = bool
   default     = false
 }
+
+variable "cluster_endpoint_public_access_cidrs" {
+  description = "List of CIDR blocks allowed to access the public EKS API server endpoint"
+  type        = list(string)
+  default     = []
+  validation {
+    condition     = var.endpoint_public_access == false || length(var.cluster_endpoint_public_access_cidrs) > 0
+    error_message = "cluster_endpoint_public_access_cidrs is required when endpoint_public_access is 'true'."
+  }
+}
