@@ -41,3 +41,21 @@ run "service_notification_api_key" {
     error_message = "Service notification API key name should be 'SERVICE-NOTIFICATION-CHANNEL-POSTGRESQL'"
   }
 }
+
+run "custom_api_key" {
+  command = plan
+
+  variables {
+    type              = "custom"
+    custom_name       = "MY-CUSTOM-KEY"
+    custom_role_slugs = ["controlplane:agent", "developer"]
+    custom_tags = [
+      { key = "team", value = "platform" }
+    ]
+  }
+
+  assert {
+    condition     = nullplatform_api_key.this.name == "MY-CUSTOM-KEY"
+    error_message = "Custom API key name should be 'MY-CUSTOM-KEY'"
+  }
+}
