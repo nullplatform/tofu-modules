@@ -23,6 +23,12 @@ resource "oci_dns_zone" "zones" {
   defined_tags  = merge(var.defined_tags, each.value.defined_tags)
   freeform_tags = merge(var.freeform_tags, each.value.freeform_tags)
 
+  timeouts {
+    create = "5m"
+    update = "5m"
+    delete = "5m"
+  }
+
   lifecycle {
     ignore_changes = [
       defined_tags["Oracle-Tags.CreatedBy"],
