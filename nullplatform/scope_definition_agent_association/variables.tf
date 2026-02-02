@@ -37,9 +37,10 @@ variable "nrn" {
   type = string
 
 }
-variable "np_api_key" {
-  type = string
-
+variable "api_key" {
+  description = "API key for authenticating with the nullplatform API"
+  type        = string
+  sensitive   = true
 }
 
 variable "scope_specification_id" {

@@ -1,77 +1,43 @@
 mock_provider "nullplatform" {}
 
 variables {
-  name = "TEST-API-KEY"
-  grants = [
-    {
-      nrn       = "organization=myorg:account=myaccount"
-      role_slug = "admin"
-    }
-  ]
+  type = "agent"
+  nrn  = "organization=myorg:account=myaccount:namespace=mynamespace"
 }
 
-run "api_key_name" {
+run "agent_api_key" {
   command = plan
 
   assert {
-    condition     = nullplatform_api_key.this.name == "TEST-API-KEY"
-    error_message = "API key name should match input"
+    condition     = nullplatform_api_key.this.name == "AGENT"
+    error_message = "Agent API key name should be 'AGENT'"
   }
 }
 
-run "with_multiple_grants" {
+run "scope_notification_api_key" {
   command = plan
 
   variables {
-    grants = [
-      {
-        nrn       = "organization=myorg:account=myaccount"
-        role_slug = "admin"
-      },
-      {
-        nrn       = "organization=myorg:account=myaccount"
-        role_slug = "developer"
-      },
-      {
-        nrn       = "organization=myorg:account=myaccount"
-        role_slug = "ops"
-      }
-    ]
+    type               = "scope_notification"
+    specification_slug = "k8s"
   }
 
   assert {
-    condition     = nullplatform_api_key.this.name == "TEST-API-KEY"
-    error_message = "API key name should match input"
+    condition     = nullplatform_api_key.this.name == "SCOPE-NOTIFICATION-CHANNEL-K8S"
+    error_message = "Scope notification API key name should be 'SCOPE-NOTIFICATION-CHANNEL-K8S'"
   }
 }
 
-run "default_tags" {
-  command = plan
-
-  assert {
-    condition     = nullplatform_api_key.this.name == "TEST-API-KEY"
-    error_message = "API key name should match input"
-  }
-}
-
-run "custom_tags" {
+run "service_notification_api_key" {
   command = plan
 
   variables {
-    tags = [
-      {
-        key   = "environment"
-        value = "production"
-      },
-      {
-        key   = "team"
-        value = "platform"
-      }
-    ]
+    type               = "service_notification"
+    specification_slug = "PostgreSQL"
   }
 
   assert {
-    condition     = nullplatform_api_key.this.name == "TEST-API-KEY"
-    error_message = "API key name should match input"
+    condition     = nullplatform_api_key.this.name == "SERVICE-NOTIFICATION-CHANNEL-POSTGRESQL"
+    error_message = "Service notification API key name should be 'SERVICE-NOTIFICATION-CHANNEL-POSTGRESQL'"
   }
 }

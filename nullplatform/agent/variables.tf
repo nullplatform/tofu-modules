@@ -2,6 +2,13 @@
 # Required Variables
 ################################################################################
 
+# API key for authenticating with the nullplatform API
+variable "api_key" {
+  description = "API key for authenticating with the nullplatform API"
+  type        = string
+  sensitive   = true
+}
+
 # Name of the EKS cluster where the nullplatform agent will be deployed
 variable "cluster_name" {
   description = "Name of the EKS cluster where the nullplatform agent will be deployed"
