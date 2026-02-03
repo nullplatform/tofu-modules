@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.30.1](https://github.com/nullplatform/tofu-modules/compare/v1.30.0...v1.30.1) (2026-02-03)
+
+
+### Bug Fixes
+
+* **code-repository:** fix version ([c7a371b](https://github.com/nullplatform/tofu-modules/commit/c7a371bd2995eef9abbde98de9616edd32120a5a))
+* **code-repository:** fix version ([eaa3117](https://github.com/nullplatform/tofu-modules/commit/eaa3117f6f4d467bbb298a3f0d056903f522ebd2))
+* **tofu:** resolve conflicts ([57ef623](https://github.com/nullplatform/tofu-modules/commit/57ef623285f2515428877880f4d014ca125ea443))
+
 ## [1.30.0](https://github.com/nullplatform/tofu-modules/compare/v1.29.0...v1.30.0) (2026-02-03)
 
 
