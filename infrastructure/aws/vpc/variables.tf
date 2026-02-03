@@ -10,10 +10,10 @@ variable "vpc" {
 
 variable "organization" {
   type        = string
-  description = "The organization name"
+  description = "The nullplatform organization name"
 }
 
 variable "account" {
   type        = string
-  description = "The account name"
+  description = "The nullplatform account name"
 }
