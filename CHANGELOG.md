@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.29.0](https://github.com/nullplatform/tofu-modules/compare/v1.28.1...v1.29.0) (2026-02-03)
+
+
+### Features
+
+* **customers-aws-image:** update readme ([66532ba](https://github.com/nullplatform/tofu-modules/commit/66532ba80c1a305bf16be1970f74ea1f8df2dda9))
+* **nullplatform-base:** update version ([13b459d](https://github.com/nullplatform/tofu-modules/commit/13b459df47525039f7e4637d2fa9436ffd2580f8))
+
+
+### Bug Fixes
+
+* **aws-eks:** fix name varible ([8c27b14](https://github.com/nullplatform/tofu-modules/commit/8c27b142a002ff488f83725c2e4ea1f80a7210de))
+* **commons-external-dns:** add switch to namespaces create ([38bff59](https://github.com/nullplatform/tofu-modules/commit/38bff59d27fb2177f862dec10d6a061ab19bc891))
+* **commons-external-dns:** add switch to namespaces create ([68de519](https://github.com/nullplatform/tofu-modules/commit/68de5196d00f7af291902ef0944ab4a649cbef27))
+
 ## [1.28.1](https://github.com/nullplatform/tofu-modules/compare/v1.28.0...v1.28.1) (2026-02-02)
 
 
