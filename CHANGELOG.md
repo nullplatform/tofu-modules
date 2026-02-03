@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.31.0](https://github.com/nullplatform/tofu-modules/compare/v1.30.1...v1.31.0) (2026-02-03)
+
+
+### Features
+
+* add istio security groups ([#190](https://github.com/nullplatform/tofu-modules/issues/190)) ([5e06e8c](https://github.com/nullplatform/tofu-modules/commit/5e06e8c5c8737c89c3081e85c9445f123a3d3de3))
+
 ## [1.30.1](https://github.com/nullplatform/tofu-modules/compare/v1.30.0...v1.30.1) (2026-02-03)
 
 
