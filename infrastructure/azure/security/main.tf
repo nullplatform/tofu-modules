@@ -75,6 +75,7 @@ resource "azurerm_network_security_group" "public_gateway" {
   }
 }
 
+#tfsec:ignore:azure-network-no-public-ingress
 resource "azurerm_network_security_rule" "public_gateway_https" {
   count = var.gateways_enabled ? 1 : 0
 

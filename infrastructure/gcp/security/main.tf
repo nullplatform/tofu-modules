@@ -61,6 +61,7 @@ locals {
 # Firewall Rules for Public Gateway (GCP/GKE)
 # - Port 443 (HTTPS): Open to internet (0.0.0.0/0)
 # - Port 15021 (Health Check): Restricted to VPC CIDR + GCP health check ranges
+#tfsec:ignore:google-compute-no-public-ingress
 resource "google_compute_firewall" "public_gateway_https" {
   count = var.gateways_enabled ? 1 : 0
 

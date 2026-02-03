@@ -1,6 +1,7 @@
 
 data "azurerm_client_config" "current" {}
 
+#tfsec:ignore:azure-container-limit-authorized-ips
 module "aks" {
   source  = "Azure/aks/azurerm"
   version = "11.0.0"
