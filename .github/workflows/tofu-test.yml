@@ -1,0 +1,49 @@
+name: Tofu Unit Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test-azure-modules:
+    uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
+    with:
+      modules: '["infrastructure/azure/resource_group", "infrastructure/azure/vnet", "infrastructure/azure/acr", "infrastructure/azure/dns", "infrastructure/azure/private_dns"]'
+
+  test-commons-modules:
+    uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
+    with:
+      modules: '["infrastructure/commons/cert_manager", "infrastructure/commons/external_dns", "infrastructure/commons/istio"]'
+
+  test-aws-modules:
+    uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
+    with:
+      modules: '["infrastructure/aws/vpc", "infrastructure/aws/acm", "infrastructure/aws/route53", "infrastructure/aws/alb_controller", "infrastructure/aws/ingress", "infrastructure/aws/iam/cert_manager", "infrastructure/aws/iam/external_dns", "infrastructure/aws/iam/agent", "infrastructure/aws/backend"]'
+
+  test-gcp-modules:
+    uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
+    with:
+      modules: '["infrastructure/gcp/artifact-registry", "infrastructure/gcp/cloud-dns", "infrastructure/gcp/cloud-nat", "infrastructure/gcp/iam", "infrastructure/gcp/vpc"]'
+
+  test-nullplatform-modules:
+    uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
+    with:
+      modules: '["nullplatform/account", "nullplatform/api_key", "nullplatform/dimensions", "nullplatform/users", "nullplatform/metrics", "nullplatform/asset/docker_server", "nullplatform/cloud/azure/cloud", "nullplatform/cloud/gcp/cloud", "nullplatform/cloud/aws/cloud", "nullplatform/code_repository"]'
+
+  test-gate:
+    name: All module tests passed
+    runs-on: ubuntu-24.04
+    needs: [test-azure-modules, test-commons-modules, test-aws-modules, test-gcp-modules, test-nullplatform-modules]
+    if: always()
+    steps:
+      - name: Check test results
+        run: |
+          if [[ "${{ needs.test-azure-modules.result }}" != "success" || "${{ needs.test-commons-modules.result }}" != "success" || "${{ needs.test-aws-modules.result }}" != "success" || "${{ needs.test-gcp-modules.result }}" != "success" || "${{ needs.test-nullplatform-modules.result }}" != "success" ]]; then
+            echo "One or more test jobs failed"
+            exit 1
+          fi

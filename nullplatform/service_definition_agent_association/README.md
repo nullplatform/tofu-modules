@@ -24,12 +24,6 @@ module "service_definition_agent_association" {
 | <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | n/a |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
-## Modules
-
-| Name | Source | Version |
-|------|--------|---------|
-| <a name="module_api_key"></a> [api\_key](#module\_api\_key) | git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key | v1.24.1 |
-
 ## Resources
 
 | Name | Type |
@@ -42,6 +36,7 @@ module "service_definition_agent_association" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_agent_command"></a> [agent\_command](#input\_agent\_command) | n/a | <pre>object({<br/>    type = string<br/>    data = object({<br/>      cmdline     = string<br/>      arguments   = optional(list(string), [])<br/>      environment = optional(map(string), {})<br/>    })<br/>  })</pre> | `null` | no |
+| <a name="input_api_key"></a> [api\_key](#input\_api\_key) | API key for authenticating with the nullplatform API | `string` | n/a | yes |
 | <a name="input_channel_sources"></a> [channel\_sources](#input\_channel\_sources) | List of sources for the notification channel (e.g., ['monitoring', 'alerts']) | `list(string)` | <pre>[<br/>  "telemetry",<br/>  "service"<br/>]</pre> | no |
 | <a name="input_channel_type"></a> [channel\_type](#input\_channel\_type) | Type of the notification channel (e.g., 'agent') | `string` | `"agent"` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name (organization:account format) | `string` | `null` | no |

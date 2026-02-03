@@ -14,6 +14,12 @@ variable "external_dns_namespace" {
   default     = "external-dns"
 }
 
+variable "create_namespace" {
+  description = "Whether to create the Kubernetes namespace. Set to false if the namespace already exists (e.g., when deploying multiple instances)"
+  type        = bool
+  default     = true
+}
+
 variable "domain_filters" {
   description = "The domain filter to limit ExternalDNS to manage DNS records only for specific domains"
   type        = string

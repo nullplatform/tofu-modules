@@ -6,8 +6,8 @@ on:
       - main
 
 jobs:
-  branch-name:
-    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/branch-validation.yml@main
-
-  commitlint:
-    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/conventional-commit.yml@main
+  docs:
+    uses: nullplatform/actions-nullplatform/.github/workflows/tf-docs.yml@main
+  conventional-commit:
+    needs: docs
+    uses: nullplatform/actions-nullplatform/.github/workflows/conventional-commit.yml@main

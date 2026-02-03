@@ -8,6 +8,12 @@ variable "nrn" {
   default     = null
 }
 
+variable "api_key" {
+  description = "API key for authenticating with the nullplatform API"
+  type        = string
+  sensitive   = true
+}
+
 variable "tags_selectors" {
   description = "Map of tags used to select and filter agents"
   type        = map(string)

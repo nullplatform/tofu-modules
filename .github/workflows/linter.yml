@@ -6,5 +6,5 @@ on:
       - main
 
 jobs:
-  validate:
-    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/tofu-lint.yml@main
+  quality:
+    uses: nullplatform/actions-nullplatform/.github/workflows/tofu-lint.yml@main

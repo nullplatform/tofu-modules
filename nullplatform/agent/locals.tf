@@ -25,7 +25,7 @@ locals {
   agent_repos = join(",", local.final_repo_list)
   tags        = join(",", [for k in sort(keys(var.tags_selectors)) : "${k}:${var.tags_selectors[k]}"])
 
-  api_key = module.api_key.api_key
+  api_key = var.api_key
 
   default_args = [
     "--tags=$(TAGS)",

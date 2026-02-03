@@ -3,7 +3,7 @@
 ################################################################################
 
 resource "terraform_data" "api_key_trigger" {
-  input = module.api_key.api_key
+  input = var.api_key
 }
 
 # Deploy nullplatform agent to Kubernetes cluster via Helm chart
