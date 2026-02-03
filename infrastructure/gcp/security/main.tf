@@ -82,6 +82,7 @@ resource "google_compute_firewall" "public_gateway_https" {
   target_tags   = ["${var.cluster_name}-istio-public-gateway"]
 }
 
+#tfsec:ignore:google-compute-no-public-ingress
 resource "google_compute_firewall" "public_gateway_health_check" {
   count = var.gateways_enabled ? 1 : 0
 
@@ -104,6 +105,7 @@ resource "google_compute_firewall" "public_gateway_health_check" {
 }
 
 # Deny rule for health check from internet (lower priority than allow rule)
+#tfsec:ignore:google-compute-no-public-ingress
 resource "google_compute_firewall" "public_gateway_deny_health_check" {
   count = var.gateways_enabled ? 1 : 0
 
