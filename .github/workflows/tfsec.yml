@@ -1,0 +1,21 @@
+name: Security Scan
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**/*.tf'
+
+jobs:
+  tfsec:
+    uses: nullplatform/actions-nullplatform/.github/workflows/tfsec.yml@main
+    continue-on-error: true
+    permissions:
+      contents: read
+      pull-requests: write
+      security-events: write
+    with:
+      minimum_severity: 'HIGH'
+      upload_sarif: true
+      post_comment: true

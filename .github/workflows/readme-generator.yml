@@ -1,0 +1,24 @@
+name: Generate README
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*.tf'
+
+concurrency:
+  group: main-branch-push
+  cancel-in-progress: false
+
+jobs:
+  generate-readme:
+    uses: nullplatform/actions-nullplatform/.github/workflows/readme-ai-v2.yml@main
+    permissions:
+      contents: write
+      models: read
+    with:
+      base_dir: '.'
+      generate_all: false
+      ai_provider: 'openai'
+      ai_model: 'gpt-4o'

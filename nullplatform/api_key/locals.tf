@@ -51,13 +51,8 @@ locals {
     }
   ]
 
-  used_by_tag = var.specification_slug != null && var.type != "custom" ? [
-    { key = "usedBy", value = upper(var.specification_slug) }
-  ] : []
-
   tags = concat(
     [{ key = "managedBy", value = "IaC" }],
-    local.used_by_tag,
     local.nrn_tags,
     var.custom_tags,
   )
