@@ -11,9 +11,25 @@ concurrency:
 
 jobs:
   release:
-    uses: nullplatform/actions-nullplatform/.github/workflows/release.yml@main
-    permissions:
-      contents: write
-      pull-requests: write
-    with:
-      update_readme_versions: false
+    name: Release Please
+    runs-on: ubuntu-24.04
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      pr: ${{ steps.release.outputs.pr }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Release
+        id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          release-type: terraform-module
+
+      - name: Enable auto-merge for release PR
+        if: ${{ steps.release.outputs.pr }}
+        run: |
+          gh pr merge ${{ steps.release.outputs.pr }} --auto --squash
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
