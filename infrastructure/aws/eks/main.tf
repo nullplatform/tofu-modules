@@ -9,7 +9,7 @@ module "eks" {
   create_node_security_group  = false
 
   # Security group rules for NLB health checks and Istio gateway traffic
-  cluster_security_group_additional_rules = var.vpc_cidr != null ? {
+  security_group_additional_rules = var.vpc_cidr != null ? {
     ingress_nlb_health_check = {
       description = "Allow NLB health checks (Istio status port)"
       protocol    = "tcp"
