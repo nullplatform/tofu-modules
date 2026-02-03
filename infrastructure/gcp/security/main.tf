@@ -61,6 +61,7 @@ locals {
 # Firewall Rules for Public Gateway (GCP/GKE)
 # - Port 443 (HTTPS): Open to internet (0.0.0.0/0)
 # - Port 15021 (Health Check): Restricted to VPC CIDR + GCP health check ranges
+#tfsec:ignore:google-compute-no-public-ingress
 resource "google_compute_firewall" "public_gateway_https" {
   count = var.gateways_enabled ? 1 : 0
 
@@ -81,6 +82,7 @@ resource "google_compute_firewall" "public_gateway_https" {
   target_tags   = ["${var.cluster_name}-istio-public-gateway"]
 }
 
+#tfsec:ignore:google-compute-no-public-ingress
 resource "google_compute_firewall" "public_gateway_health_check" {
   count = var.gateways_enabled ? 1 : 0
 
@@ -103,6 +105,7 @@ resource "google_compute_firewall" "public_gateway_health_check" {
 }
 
 # Deny rule for health check from internet (lower priority than allow rule)
+#tfsec:ignore:google-compute-no-public-ingress
 resource "google_compute_firewall" "public_gateway_deny_health_check" {
   count = var.gateways_enabled ? 1 : 0
 

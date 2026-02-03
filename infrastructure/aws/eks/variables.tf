@@ -115,3 +115,9 @@ variable "endpoint_public_access_cidrs" {
     error_message = "endpoint_public_access_cidrs is required when endpoint_public_access is 'true'."
   }
 }
+
+variable "security_group_additional_rules" {
+  description = "Whether to create additional security group rules for NLB health checks and HTTPS traffic"
+  type        = bool
+  default     = true
+}
