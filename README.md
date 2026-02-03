@@ -79,9 +79,8 @@ all projects.
 │   └── users/                         # User management
 │
 ├── .github/
-│   └── workflows/                     # CI/CD workflows
-├── .pre-commit-config.yaml
-├── commitlint.config.js
+│   └── workflows/                     # CI/CD workflows, validations, etc.
+├── .pre-commit-config.yaml            # Pre-commit hooks configuration
 ├── .gitignore
 └── README.md
 ```
@@ -385,25 +384,44 @@ These ensure code consistency and prevent configuration drift.
 
 If you want to add or modify a module:
 
-1. Create a `feature/` or `fix/` branch.
+1. Create a branch following the naming convention (see below).
 2. Add tests or validations if applicable.
 3. Update the module's documentation.
 4. Open a Pull Request for review.
 
+### Branch naming convention
+
+Branches must follow the pattern: `type/description`
+
+**Valid types:** `feat`, `feature`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
+
+**Examples:**
+
+```bash
+feat/add-eks-module
+feature/new-vpc-support
+fix/resolve-iam-permissions
+docs/update-readme
+ci/add-validation-workflow
+```
+
 ### Commit message format
 
-This repository uses [Conventional Commits](https://www.conventionalcommits.org/) to ensure consistent commit messages. A pre-commit hook validates all commit messages automatically.
+This repository uses [Conventional Commits](https://www.conventionalcommits.org/) to ensure consistent commit messages. CI validates all commit messages automatically.
+
+**Valid types:** `feat`, `feature`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
 
 **Valid commit examples:**
 
 ```bash
 feat: add new EKS module
-feat(aws): add support for multiple availability zones
+feature(aws): add support for multiple availability zones
 fix: resolve VPC peering connection issue
 fix(azure): correct DNS zone configuration
 docs: update README with usage examples
 refactor: simplify IAM role creation
 chore: update provider versions
+ci: add security scanning workflow
 ```
 
 **Invalid commit examples:**
@@ -414,7 +432,7 @@ Fix bug                  # ❌ type must be lowercase
 feat add login           # ❌ missing colon after type
 ```
 
-**Setup pre-commit hooks:**
+**Setup pre-commit hooks (optional):**
 
 ```bash
 # Install pre-commit (if not already installed)
