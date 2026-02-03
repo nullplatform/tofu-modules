@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.31.1](https://github.com/nullplatform/tofu-modules/compare/v1.31.0...v1.31.1) (2026-02-03)
+
+
+### Bug Fixes
+
+* disable readme version update temporarily ([#192](https://github.com/nullplatform/tofu-modules/issues/192)) ([58072e7](https://github.com/nullplatform/tofu-modules/commit/58072e7bf5c5da92c153a91290cf084704c056ce))
+
 ## [1.31.0](https://github.com/nullplatform/tofu-modules/compare/v1.30.1...v1.31.0) (2026-02-03)
 
 
