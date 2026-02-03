@@ -1,10 +1,9 @@
 resource "kubernetes_namespace_v1" "external_dns" {
+  count = var.create_namespace ? 1 : 0
   metadata {
     name = var.external_dns_namespace
   }
 }
-
-
 
 resource "helm_release" "external_dns" {
   name       = "external-dns-${var.type}"

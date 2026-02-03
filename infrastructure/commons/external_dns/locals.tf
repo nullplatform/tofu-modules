@@ -40,6 +40,11 @@ locals {
           apiGroups = ["externaldns.k8s.io"]
           resources = ["dnsendpoints"]
           verbs     = ["get", "list", "watch", "create", "update", "patch", "delete"]
+        },
+        {
+          apiGroups = ["gateway.networking.k8s.io"]
+          resources = ["gateways", "httproutes"]
+          verbs     = ["get", "list", "watch"]
         }
       ]
     }

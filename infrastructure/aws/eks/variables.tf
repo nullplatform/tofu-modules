@@ -93,3 +93,25 @@ variable "node_group_desired_size" {
   type        = number
   default     = 2
 }
+
+variable "endpoint_public_access" {
+  description = "Whether the Amazon EKS public API server endpoint is enabled"
+  type        = bool
+  default     = true
+}
+
+variable "endpoint_private_access" {
+  description = "Whether the Amazon EKS private API server endpoint is enabled"
+  type        = bool
+  default     = false
+}
+
+variable "endpoint_public_access_cidrs" {
+  description = "List of CIDR blocks allowed to access the public EKS API server endpoint"
+  type        = list(string)
+  default     = []
+  validation {
+    condition     = var.endpoint_public_access == false || length(var.endpoint_public_access_cidrs) > 0
+    error_message = "endpoint_public_access_cidrs is required when endpoint_public_access is 'true'."
+  }
+}
