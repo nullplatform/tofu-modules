@@ -93,3 +93,9 @@ variable "node_group_desired_size" {
   type        = number
   default     = 2
 }
+
+variable "vpc_cidr" {
+  description = "VPC CIDR block for allowing internal traffic to the cluster (NLB health checks, Istio gateway)"
+  type        = string
+  default     = null
+}

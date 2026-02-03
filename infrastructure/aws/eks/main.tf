@@ -8,6 +8,26 @@ module "eks" {
   create_cloudwatch_log_group = false
   create_node_security_group  = false
 
+  # Security group rules for NLB health checks and Istio gateway traffic
+  cluster_security_group_additional_rules = var.vpc_cidr != null ? {
+    ingress_nlb_health_check = {
+      description = "Allow NLB health checks (Istio status port)"
+      protocol    = "tcp"
+      from_port   = 15021
+      to_port     = 15021
+      type        = "ingress"
+      cidr_blocks = [var.vpc_cidr]
+    }
+    ingress_nlb_https = {
+      description = "Allow HTTPS traffic from NLB"
+      protocol    = "tcp"
+      from_port   = 443
+      to_port     = 443
+      type        = "ingress"
+      cidr_blocks = [var.vpc_cidr]
+    }
+  } : {}
+
   addons = {
     coredns = {}
     eks-pod-identity-agent = {

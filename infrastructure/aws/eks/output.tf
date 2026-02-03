@@ -28,3 +28,8 @@ output "eks_node_iam_role_name" {
   value       = module.eks.node_iam_role_name
   description = "Name of the IAM role for EKS nodes"
 }
+
+output "eks_cluster_security_group_id" {
+  value       = module.eks.cluster_security_group_id
+  description = "Security group ID attached to the EKS cluster"
+}
