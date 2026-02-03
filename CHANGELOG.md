@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.31.2](https://github.com/nullplatform/tofu-modules/compare/v1.31.1...v1.31.2) (2026-02-03)
+
+
+### Bug Fixes
+
+* improve vpc variable descriptions for clarity ([#194](https://github.com/nullplatform/tofu-modules/issues/194)) ([a165d43](https://github.com/nullplatform/tofu-modules/commit/a165d43eecb13d3677d847425947c826fda18bd4))
+
 ## [1.31.1](https://github.com/nullplatform/tofu-modules/compare/v1.31.0...v1.31.1) (2026-02-03)
 
 
