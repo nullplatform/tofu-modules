@@ -27,11 +27,22 @@ module "eks" {
 |------|---------|
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.0 |
 
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 6.0 |
+
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | >= 21.14, < 22.0 |
+
+## Resources
+
+| Name | Type |
+|------|------|
 
 ## Inputs
 
