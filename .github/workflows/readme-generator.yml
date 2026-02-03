@@ -13,11 +13,12 @@ concurrency:
 
 jobs:
   generate-readme:
-    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/readme-ai.yml@main
+    uses: nullplatform/actions-nullplatform/.github/workflows/readme-ai-v2.yml@main
     permissions:
       contents: write
       models: read
     with:
-      modules_base_dir: '.'
+      base_dir: '.'
       generate_all: false
+      ai_provider: 'openai'
       ai_model: 'gpt-4o'
