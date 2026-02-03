@@ -3,7 +3,7 @@
 ################################################################################
 
 resource "terraform_data" "api_key_trigger" {
-  input = module.api_key.api_key
+  input = var.api_key
 }
 
 # Create notification channel with agent configuration and optional overrides

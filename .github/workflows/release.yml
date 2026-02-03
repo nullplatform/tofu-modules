@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   release:
-    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/release.yml@main
+    uses: nullplatform/actions-nullplatform/.github/workflows/release.yml@main
     permissions:
       contents: write
       pull-requests: write

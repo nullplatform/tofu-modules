@@ -7,4 +7,4 @@ on:
 
 jobs:
   validate:
-    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/tofu-lint.yml@main
+    uses: nullplatform/actions-nullplatform/.github/workflows/tofu-lint.yml@main

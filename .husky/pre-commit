@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# Validate branch name
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+PATTERN="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)/.+$"
+
+if [ "$BRANCH" != "main" ] && ! echo "$BRANCH" | grep -Eq "$PATTERN"; then
+  echo "Invalid branch name: $BRANCH"
+  echo ""
+  echo "Branch name must follow the pattern: type/description"
+  echo "  Examples: feat/add-login, fix/bug-123, docs/readme"
+  echo ""
+  echo "Valid types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+  exit 1
+fi

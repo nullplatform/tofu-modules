@@ -14,6 +14,13 @@ module "vpc" {
   enable_nat_gateway = true
   single_nat_gateway = true
 
+  map_public_ip_on_launch = false
+
+  # Uncomment to block all inbound traffic from the Internet Gateway
+  # vpc_block_public_access_options = {
+  #   internet_gateway_block_mode = "block-ingress"
+  # }
+
   public_subnet_tags = {
     "kubernetes.io/role/elb" = 1
   }

@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   generate-readme:
-    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/readme-ai.yml@main
+    uses: nullplatform/actions-nullplatform/.github/workflows/readme-ai.yml@main
     permissions:
       contents: write
       models: read

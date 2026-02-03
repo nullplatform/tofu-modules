@@ -9,7 +9,7 @@ on:
 
 jobs:
   tfsec:
-    uses: nullplatform/actions-nullplatform-terraform/.github/workflows/tfsec.yml@main
+    uses: nullplatform/actions-nullplatform/.github/workflows/tfsec.yml@main
     permissions:
       contents: read
       pull-requests: write
