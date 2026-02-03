@@ -11,7 +11,7 @@ on:
 
 jobs:
   test-azure-modules:
-    uses: nullplatform/actions-nullplatform.github/workflows/tofu-test.yml@main
+    uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
     with:
       modules: '["infrastructure/azure/resource_group", "infrastructure/azure/vnet", "infrastructure/azure/acr", "infrastructure/azure/dns", "infrastructure/azure/private_dns"]'
 

@@ -18,7 +18,7 @@ data "external" "notification_channel" {
     template_b64="${base64encode(data.http.notification_channel_template.response_body)}"
     processed_json=$(echo "$template_b64" | base64 -d | \
     NRN='${var.nrn}' \
-    NP_API_KEY='${module.api_key.api_key}' \
+    NP_API_KEY='${var.api_key}' \
     REPO_PATH='${var.repo_path}' \
     SERVICE_PATH='${var.service_path}' \
     SERVICE_SLUG='${var.scope_specification_slug}' \
