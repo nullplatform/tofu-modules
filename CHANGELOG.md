@@ -5,6 +5,25 @@
 
 ### Features
 
+* **aws-eks:** add private access to k8s API ([7d971ad](https://github.com/nullplatform/tofu-modules/commit/7d971adae341ae920b93d0d71a01705de364be90))
+* **aws-vpc:** disable public ip to EC2 ([973f1bc](https://github.com/nullplatform/tofu-modules/commit/973f1bc600fba7b2aac7450604c3b48086674fe2))
+* **customers-aws-image:** update readme ([f367a8f](https://github.com/nullplatform/tofu-modules/commit/f367a8f4e6cc303958e02d76c6ff1197b05d919e))
+* **nullplatform-base:** update version ([a872b6f](https://github.com/nullplatform/tofu-modules/commit/a872b6f5e3875b6988b2b432065b7ce819644555))
+
+
+### Bug Fixes
+
+* **aws-eks:** fix name varible ([2b178e1](https://github.com/nullplatform/tofu-modules/commit/2b178e11321408c165465c8b345d1acb36a26f63))
+* **commitlint:** disable body-max-line-length rule ([3ed3244](https://github.com/nullplatform/tofu-modules/commit/3ed32441e387090dcc08d00fbf5532a6a1b80e9a))
+* **commons-external-dns:** add switch to namespaces create ([06852f7](https://github.com/nullplatform/tofu-modules/commit/06852f7077aa8c203f5a080d8780cc6a871a43e7))
+* **commons-external-dns:** add switch to namespaces create ([19cd4a6](https://github.com/nullplatform/tofu-modules/commit/19cd4a62ced0ed218ccbed07f4a29629071e02b3))
+* **nullplatform-asset-ecr:** fix deprecated attribute name for region ([ed29e76](https://github.com/nullplatform/tofu-modules/commit/ed29e7687fec7799f26310e62fc118526ff75b0e))
+
+## [1.29.0](https://github.com/nullplatform/tofu-modules/compare/v1.28.1...v1.29.0) (2026-02-03)
+
+
+### Features
+
 * **customers-aws-image:** update readme ([66532ba](https://github.com/nullplatform/tofu-modules/commit/66532ba80c1a305bf16be1970f74ea1f8df2dda9))
 * **nullplatform-base:** update version ([13b459d](https://github.com/nullplatform/tofu-modules/commit/13b459df47525039f7e4637d2fa9436ffd2580f8))
 
