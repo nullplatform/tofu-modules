@@ -366,6 +366,19 @@ variable "gateway_private_gcp_firewall_name" {
   default     = ""
 }
 
+# OCI Gateway Security
+variable "gateway_public_oci_security_list_management_mode" {
+  type        = string
+  description = "OCI Load Balancer security list management mode for the public gateway. Options: 'All' (recommended - auto-manages security lists), 'Frontend' (only frontend rules), 'None' (manual management)."
+  default     = "All"
+}
+
+variable "gateway_private_oci_security_list_management_mode" {
+  type        = string
+  description = "OCI Load Balancer security list management mode for the private gateway. Options: 'All' (recommended - auto-manages security lists), 'Frontend' (only frontend rules), 'None' (manual management)."
+  default     = "All"
+}
+
 ############################################
 # Image Pull Secrets
 ############################################
