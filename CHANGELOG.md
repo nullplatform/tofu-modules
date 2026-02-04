@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.32.0](https://github.com/nullplatform/tofu-modules/compare/v1.31.2...v1.32.0) (2026-02-04)
+
+
+### Features
+
+* OCI security list auto-management and namespace race condition fix ([#197](https://github.com/nullplatform/tofu-modules/issues/197)) ([3d2a723](https://github.com/nullplatform/tofu-modules/commit/3d2a723cce84718f9e23c140fbad8b26855f00e5))
+
 ## [1.31.2](https://github.com/nullplatform/tofu-modules/compare/v1.31.1...v1.31.2) (2026-02-03)
 
 
