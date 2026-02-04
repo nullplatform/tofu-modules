@@ -9,7 +9,7 @@ resource "helm_release" "base" {
   namespace  = var.namespace
   version    = var.nullplatform_base_helm_version
 
-  create_namespace  = false
+  create_namespace  = true
   disable_webhooks  = false
   force_update      = true
   wait              = true
