@@ -43,6 +43,10 @@ locals {
       gateway_public_gcp_firewall  = var.gateway_public_gcp_firewall_name
       gateway_private_gcp_firewall = var.gateway_private_gcp_firewall_name
 
+      # ---- gateway security (OCI) ----
+      gateway_public_oci_security_list_management_mode  = var.gateway_public_oci_security_list_management_mode
+      gateway_private_oci_security_list_management_mode = var.gateway_private_oci_security_list_management_mode
+
       # ---- nullplatform ----
       np_api_key = var.np_api_key
       # You left secretName empty in the template; if you want to make it configurable, add var.nullplatform_secret_name
