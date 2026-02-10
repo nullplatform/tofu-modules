@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.32.1](https://github.com/nullplatform/tofu-modules/compare/v1.32.0...v1.32.1) (2026-02-10)
+
+
+### Bug Fixes
+
+* replace deprecated data.aws_region.current.name with .region ([5e90e4a](https://github.com/nullplatform/tofu-modules/commit/5e90e4a7e8eae1a99ba28cb9452b7bcbed106430))
+* replace deprecated data.aws_region.current.name with .region ([#201](https://github.com/nullplatform/tofu-modules/issues/201)) ([0ba762b](https://github.com/nullplatform/tofu-modules/commit/0ba762b9daf66346d522ea8faeb7eee9b8e0e3ad))
+
 ## [1.32.0](https://github.com/nullplatform/tofu-modules/compare/v1.31.2...v1.32.0) (2026-02-04)
 
 
