@@ -49,7 +49,7 @@ resource "aws_iam_policy" "nullplatform_route53_policy" {
         "Condition" : {
           "StringEquals" : {
             "aws:RequestedRegion" : [
-              data.aws_region.current.name
+              data.aws_region.current.region
             ]
           }
         }
@@ -80,7 +80,7 @@ resource "aws_iam_policy" "nullplatform_elb_policy" {
           "Condition" : {
             "StringEquals" : {
               "aws:RequestedRegion" : [
-                data.aws_region.current.name
+                data.aws_region.current.region
               ]
             }
           }
@@ -140,7 +140,7 @@ resource "aws_iam_policy" "nullplatform_eks_policy" {
         "Condition" : {
           "StringEquals" : {
             "aws:RequestedRegion" : [
-              data.aws_region.current.name
+              data.aws_region.current.region
             ]
           }
         }
@@ -169,7 +169,7 @@ resource "aws_iam_policy" "nullplatform_avp_policy" {
         "Condition" : {
           "StringEquals" : {
             "aws:RequestedRegion" : [
-              data.aws_region.current.name
+              data.aws_region.current.region
             ]
           }
         }
