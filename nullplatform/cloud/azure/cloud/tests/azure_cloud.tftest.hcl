@@ -1,8 +1,8 @@
 mock_provider "nullplatform" {}
 
 variables {
-  nrn                        = "organization=myorg:account=myaccount"
-  azure_resource_group_name  = "myorg-rg"
+  nrn                             = "organization=myorg:account=myaccount"
+  azure_resource_group_name       = "myorg-rg"
   private_dns_resource_group_name = "myorg-dns-rg"
 }
 

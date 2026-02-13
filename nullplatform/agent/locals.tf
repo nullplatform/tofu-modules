@@ -15,7 +15,7 @@ locals {
       value = local.nrn_parts[key]
     } if contains(keys(local.nrn_parts), key)
   ]
-  scope_list            = compact([trimspace(coalesce(var.agent_repos_scope, ""))])
+  scope_list = compact([trimspace(coalesce(var.agent_repos_scope, ""))])
   # Parse comma-separated extra repositories and clean whitespace
   repos_extra = compact([for s in var.agent_repos_extra : trimspace(s)])
 

@@ -1,10 +1,10 @@
 mock_provider "helm" {}
 
 variables {
-  cloud_provider      = "oci"
-  hosted_zone_name    = "myorg.example.com"
-  account_slug        = "myorg"
-  private_domain_name = "myorg.example.com"
+  cloud_provider       = "oci"
+  hosted_zone_name     = "myorg.example.com"
+  account_slug         = "myorg"
+  private_domain_name  = "myorg.example.com"
   oci_compartment_ocid = "ocid1.compartment.oc1..aaaaaaaatest"
   oci_sa_ocid          = "ocid1.principal.oc1..aaaaaaaatest"
   oci_region           = "us-ashburn-1"
