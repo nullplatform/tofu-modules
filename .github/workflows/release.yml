@@ -79,6 +79,35 @@ jobs:
           AI_PROVIDER: anthropic
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
+      - name: Restore root README
+        if: steps.check_pr.outputs.pr_exists == 'true'
+        run: |
+          git checkout HEAD -- README.md
+          echo "Root README.md restored"
+
+      - name: Update version references in READMEs
+        if: steps.check_pr.outputs.pr_exists == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PR_TITLE=$(gh pr view ${{ steps.check_pr.outputs.pr_number }} \
+            --repo ${{ github.repository }} \
+            --json title --jq '.title')
+          VERSION=$(echo "$PR_TITLE" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+
+          if [ -z "$VERSION" ]; then
+            echo "Could not extract version from PR title: $PR_TITLE"
+            exit 1
+          fi
+
+          echo "Updating all READMEs to v$VERSION"
+          find . -name "README.md" -not -path "*/.terraform/*" -not -path "./.actions-scripts/*" -not -path "./README.md" -type f | while read -r README; do
+            if grep -q "ref=v[0-9]" "$README"; then
+              sed -i "s/ref=v[0-9]*\.[0-9]*\.[0-9]*/ref=v$VERSION/g" "$README"
+              echo "  Updated: $README"
+            fi
+          done
+
       - name: Commit and push
         if: steps.check_pr.outputs.pr_exists == 'true'
         run: |
