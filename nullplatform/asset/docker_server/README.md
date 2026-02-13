@@ -1,21 +1,37 @@
-# Module: asset docker server
+# Module: docker_server
 
-This module registers a generic Docker registry with **nullplatform** by creating a provider configuration using the
-supplied server endpoint and credentials.
+## Description
 
-## Usage
+Configures a Docker server provider in nullplatform with authentication credentials and registry path
 
-### Basic example
+## Features
 
+- Creates a nullplatform provider configuration for Docker server
+- Configures Docker registry authentication with username and password
+- Sets up Docker server login credentials and registry path
+- Supports custom Docker registry server configuration
+- Manages Docker registry namespace settings
+
+## Basic Usage
 
 ```hcl
 module "docker_server" {
-  source                = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/asset/docker_server?ref=v1.0.0"
-  nrn                   = var.nrn
-  login_server          = var.login_server
-  path                  = var.path
-  username              = var.username
-  password              = var.password
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/docker_server?ref=v1.34.0"
+
+  login_server = "your-login-server"
+  np_api_key   = "your-np-api-key"
+  nrn          = "your-nrn"
+  password     = "your-password"
+  path         = "your-path"
+}
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.docker_server.id
 }
 ```
 

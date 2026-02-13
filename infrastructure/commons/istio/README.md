@@ -1,16 +1,32 @@
+# Module: istio
 
-# Modules: istio
+## Description
 
-This module installs **Istio** using Helm charts, including the base components, control plane (`istiod`), and ingress gateway.
+Deploys Istio service mesh components (base, istiod, and ingress gateway) on Kubernetes using Helm charts
 
-## Usage
+## Features
 
-### Basic example
+- Installs Istio base components with configurable versions
+- Deploys Istiod control plane with dependency management
+- Configures Istio ingress gateway with customizable service types and ports
+- Supports optional HTTP/2 protocol exposure
+- Manages Helm release lifecycle with atomic updates and cleanup
+- Provides flexible port configuration for HTTPS and status endpoints
 
+## Basic Usage
 
 ```hcl
 module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/istio?ref=v1.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v1.34.0"
+}
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.istio.id
 }
 ```
 

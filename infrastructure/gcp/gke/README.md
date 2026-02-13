@@ -1,47 +1,43 @@
 # Module: gke
 
-This module provisions a Google Kubernetes Engine (GKE) cluster using OpenTofu.
-It is designed as a reusable building block to create and manage Kubernetes clusters in a consistent, repeatable way across environments.
+## Description
 
+Creates a private Google Kubernetes Engine (GKE) cluster with configurable node pools and network settings
 
-## Usage
+## Features
+
+- Creates a private GKE cluster with public endpoint access
+- Configures VPC-native networking with secondary IP ranges for pods and services
+- Provisions customizable node pools with auto-scaling capabilities
+- Grants Artifact Registry access through managed service accounts
+- Implements master authorized networks for API server security
+- Supports deletion protection and network isolation
+- Removes default node pool for enhanced security control
+
+## Basic Usage
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/gke?ref=v1.13.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/gke?ref=v1.34.0"
 
-  project_id        = var.gcp_project_id
-  cluster_name      = var.cluster_name
-  region            = var.region
-  network_name      = module.vpc.network_name
-  subnetwork_name   = "subnet-gke"
-  ip_range_pods     = "pods"
-  ip_range_services = "services"
-
-  master_authorized_networks = var.master_authorized_networks
-
-  node_pools = [
-    {
-      name         = "system-pool"
-      machine_type = var.system_pool_machine_type
-      min_count    = 1
-      max_count    = 3
-      disk_size_gb = 50
-    },
-    {
-      name         = "workload-pool"
-      machine_type = var.workload_pool_machine_type
-      min_count    = 1
-      max_count    = 5
-      disk_size_gb = 100
-    }
-  ]
-
-
+  cluster_name      = "your-cluster-name"
+  ip_range_pods     = "your-ip-range-pods"
+  ip_range_services = "your-ip-range-services"
+  location          = "your-location"
+  project_id        = "your-project-id"
+  vpc_name          = "your-vpc-name"
+  vpc_subnet_name   = "your-vpc-subnet-name"
 }
-
 ```
 
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.gke.cluster_name
+}
+```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

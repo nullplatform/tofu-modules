@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.34.0](https://github.com/nullplatform/tofu-modules/compare/v1.33.1...v1.34.0) (2026-02-13)
+
+
+### Features
+
+* **ci:** integrate AI readme generation into Release Please workflow ([#209](https://github.com/nullplatform/tofu-modules/issues/209)) ([5ea8de5](https://github.com/nullplatform/tofu-modules/commit/5ea8de5726e89330ac4141e94726740fc0f76224))
+
+
+### Bug Fixes
+
+* **ci:** update readme versions to release target and exclude root README ([#211](https://github.com/nullplatform/tofu-modules/issues/211)) ([2b70f1b](https://github.com/nullplatform/tofu-modules/commit/2b70f1bf569d62b8272afdc425c5819566bdc583))
+
 ## [1.33.1](https://github.com/nullplatform/tofu-modules/compare/v1.33.0...v1.33.1) (2026-02-13)
 
 

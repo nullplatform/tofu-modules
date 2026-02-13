@@ -1,22 +1,38 @@
-# Module: AWS Cloud
+# Module: cloud
 
-Creates the nullplatform AWS cloud configuration with account metadata and DNS settings sourced from the provided hosted zones and domain.
+## Description
 
-## Usage
+Configures Nullplatform provider with AWS account settings, IAM roles, and DNS zone information for application deployment
 
-### Basic example
+## Features
+
+- Configures Nullplatform provider with AWS account and region details
+- Manages networking configuration with domain names and hosted zones
+- Supports both private and public DNS zone configuration
+- Integrates AWS account identity and region data automatically
+- Provides optional application domain configuration
+- Uses lifecycle management to ignore attribute changes
+
+## Basic Usage
 
 ```hcl
-module "cloud_aws" {
-  source                    = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/cloud/aws/cloud?ref=v1.0.0"
-  nrn                       = var.nrn
-  np_api_key                = var.np_api_key
-  domain_name               = var.domain_name
-  hosted_private_zone_id    = var.hosted_private_zone_id
-  hosted_public_zone_id     = var.hosted_public_zone_id
-  dimensions                = var.dimensions
-  include_environment       = var.include_environment
-  scope_manager_assume_role = var.scope_manager_assume_role
+module "cloud" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/cloud?ref=v1.34.0"
+
+  domain_name            = "your-domain-name"
+  hosted_private_zone_id = "your-hosted-private-zone-id"
+  hosted_public_zone_id  = "your-hosted-public-zone-id"
+  np_api_key             = "your-np-api-key"
+  nrn                    = "your-nrn"
+}
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.cloud.id
 }
 ```
 

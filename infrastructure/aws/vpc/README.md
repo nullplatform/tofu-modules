@@ -1,18 +1,36 @@
-# Module: VPC
+# Module: vpc
 
-This module creates a Virtual Private Cloud (VPC) with public and private subnets across multiple availability zones.  
-It includes NAT gateway configuration for internet access from private subnets and appropriate tags for Kubernetes
-integration.
+## Description
 
-## Usage
+Creates an AWS VPC with public and private subnets, NAT gateway, and Kubernetes-ready subnet tags
+
+## Features
+
+- Creates VPC with configurable CIDR block across multiple availability zones
+- Provisions public and private subnets with customizable CIDR ranges
+- Configures single NAT gateway for private subnet internet access
+- Enables DNS hostnames for VPC resources
+- Tags subnets for Kubernetes ELB and internal-ELB integration
+- Outputs VPC ID and subnet IDs for downstream resource configuration
+
+## Basic Usage
 
 ```hcl
 module "vpc" {
-  source       = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/aws/vpc?ref=v1.0.0"
-  organization = var.organization
-  account      = var.account
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v1.34.0"
 
-  vpc = var.vpc
+  account      = "your-account"
+  organization = "your-organization"
+  vpc          = "your-vpc"
+}
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.vpc.vpc_id
 }
 ```
 

@@ -1,37 +1,76 @@
-
 # Module: external_dns
 
-This OpenTofu module installs **ExternalDNS** using a Helm chart, enabling dynamic DNS record management through
-either **AWS Route53** or **Cloudflare** as your DNS provider.
+## Description
 
+Deploys and configures ExternalDNS on Kubernetes to automatically manage DNS records across multiple cloud providers (Cloudflare, AWS Route53, and OCI DNS)
 
-## Usage
+## Features
 
-### AWS example
+- Deploys ExternalDNS using Helm chart with configurable version and namespace
+- Supports multiple DNS providers including Cloudflare, AWS Route53, and OCI DNS
+- Configures provider-specific authentication using Kubernetes secrets and service accounts
+- Manages DNS record policies with options for create-only, sync, or upsert-only strategies
+- Supports both public and private DNS zone management
+- Implements workload identity for AWS (IAM roles) and OCI cloud providers
+- Creates and manages Kubernetes namespace with optional namespace creation control
+
+## Basic Usage
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.34.0"
 
-  dns_provider_name      = "aws"
-  aws_region             = var.aws_region
-  aws_iam_role_arn       = var.aws_iam_role_arn
-  public_hosted_zone_id  = var.public_hosted_zone_id
-  private_hosted_zone_id = var.private_hosted_zone_id
-  domain_filters         = var.domain_filters
+  dns_provider_name = "your-dns-provider-name"
+  domain_filters    = "your-domain-filters"
 }
 ```
 
-### Cloudflare example
+### Usage with Cloudflare DNS Provider
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.34.0"
 
+  cloudflare_token  = "your-cloudflare-token"  # Required when dns_provider_name = "cloudflare"
   dns_provider_name = "cloudflare"
-  cloudflare_token  = var.cloudflare_token
-  domain_filters    = var.domain_filters
-  aws_region        = var.aws_region
+  domain_filters    = "your-domain-filters"
+}
+```
+
+### Usage with AWS Route53 DNS Provider
+
+```hcl
+module "external_dns" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.34.0"
+
+  aws_iam_role_arn  = "your-aws-iam-role-arn"  # Required when dns_provider_name = "aws"
+  aws_region        = "your-aws-region"  # Required when dns_provider_name = "aws"
+  dns_provider_name = "aws"
+  domain_filters    = "your-domain-filters"
+  zone_id_filter    = "your-zone-id-filter"  # Required when dns_provider_name = "aws"
+  zone_type         = "your-zone-type"  # Required when dns_provider_name = "aws"
+}
+```
+
+### Usage with OCI DNS Provider
+
+```hcl
+module "external_dns" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.34.0"
+
+  dns_provider_name    = "oci"
+  domain_filters       = "your-domain-filters"
+  oci_compartment_ocid = "your-oci-compartment-ocid"  # Required when dns_provider_name = "oci"
+  oci_region           = "your-oci-region"  # Required when dns_provider_name = "oci"
+}
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.external_dns.id
 }
 ```
 

@@ -1,13 +1,31 @@
-# Module: Backend
+# Module: backend
 
-This module creates a secure S3 backend for storing Tofu state files. It provisions an S3 bucket with versioning,
-server-side encryption, and object lock configuration for state file protection and compliance.
+## Description
 
-Usage:
+Creates an S3 bucket configured for Terraform state storage with versioning, encryption, and object lock enabled
+
+## Features
+
+- Creates an S3 bucket with a randomly generated suffix for unique naming
+- Enables versioning to maintain state file history
+- Configures AES256 server-side encryption for data protection
+- Implements object lock with COMPLIANCE mode to prevent state file deletion
+- Sets force_destroy option for easy cleanup during testing
+
+## Basic Usage
 
 ```hcl
 module "backend" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/aws/backend?ref=v1.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/backend?ref=v1.34.0"
+}
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.backend.id
 }
 ```
 

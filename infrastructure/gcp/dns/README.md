@@ -1,22 +1,36 @@
-# Module: cloud-dns
-This module manages DNS zones in ClouDNS using OpenTofu.
-It’s designed as a reusable building block to consistently create and manage both public and private zones in your ClouDNS account.
+# Module: dns
 
+## Description
 
-## Usage
+Creates and manages a Google Cloud DNS managed zone with configurable visibility and VPC associations
+
+## Features
+
+- Creates a Google Cloud DNS managed zone with public or private visibility
+- Supports custom DNS zone naming or auto-generates from domain name
+- Configures private DNS zones with VPC network associations
+- Manages DNS zone labels for resource organization
+- Outputs DNS zone details including name servers for delegation
+
+## Basic Usage
 
 ```hcl
 module "dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/cloud-dns?ref=v1.13.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/dns?ref=v1.34.0"
 
-  project_id  = var.gcp_project_id
-  zone_name   = var.dns_zone_name
-  domain_name = var.domain_name
-  visibility  = "public"
+  domain_name = "your-domain-name"
+  project_id  = "your-project-id"
 }
 ```
 
+## Using Outputs
 
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.dns.dns_zone_name
+}
+```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

@@ -1,50 +1,40 @@
-# Azure Virtual Network (VNet) Module
+# Module: vnet
 
-This module creates an Azure Virtual Network with subnets using the Azure Verified Module (AVM).
+## Description
+
+Creates an Azure Virtual Network with customizable subnets using the Azure Verified Module for network virtual networks
 
 ## Features
 
-- Creates Azure Virtual Network with configurable address space
-- Creates multiple subnets within the VNet
-- Configurable tags for resource management
-- Output subnet IDs mapped by name for easy reference
+- Creates an Azure Virtual Network with specified address space and location
+- Configures multiple subnets with custom address prefixes using a map-based definition
+- Supports tagging of virtual network resources for organization and cost tracking
+- Outputs virtual network ID, name, and subnet resource IDs for downstream module usage
+- Leverages Azure Verified Module for standardized and best-practice virtual network deployment
 
-## Usage
-
-### Basic Example
+## Basic Usage
 
 ```hcl
 module "vnet" {
-  source              = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/vnet?ref=v1.5.0"
-  vnet_name           = var.vnet_name
-  resource_group_name = module.resource_group.resource_group_name
-  location            = var.location
-  address_space       = var.address_space
-  subnets_definition  = var.subnets_definition
-  subscription_id     = var.subscription_id
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/vnet?ref=v1.34.0"
+
+  address_space       = "your-address-space"
+  location            = "your-location"
+  resource_group_name = "your-resource-group-name"
+  subnets_definition  = "your-subnets-definition"
+  subscription_id     = "your-subscription-id"
+  vnet_name           = "your-vnet-name"
 }
 ```
 
-
-
-## Using Subnet Outputs
-
-The module outputs `subnet_ids_by_name` which maps subnet names to their IDs:
+## Using Outputs
 
 ```hcl
-module "aks" {
-  source         = "..."
-  vnet_subnet_id = module.vnet.subnet_ids_by_name["subnet-aks"]
-  # ...
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.vnet.vnet_id
 }
 ```
-
-## Important Notes
-
-- **Address Space**: Ensure the address space is large enough for all planned subnets
-- **Subnet Sizing**: Plan subnet sizes carefully based on expected resource counts
-- **Naming**: Subnet names must be unique within the VNet
-
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

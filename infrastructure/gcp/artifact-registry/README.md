@@ -1,20 +1,37 @@
-# Module: artifacts-registry
+# Module: artifact-registry
 
-This module provisions a Google Cloud Artifact Registry repository and exposes the credentials required to authenticate against it.
-It is designed to be used with OpenTofu as a reusable building block in your infrastructure-as-code setup.
+## Description
 
-## Usage
+Creates a Google Artifact Registry repository with an associated service account for pushing and pulling artifacts
+
+## Features
+
+- Creates a Google Artifact Registry repository with configurable format (DOCKER, NPM, PYTHON, etc.)
+- Provisions a dedicated service account with Artifact Registry writer permissions
+- Generates service account key for authentication
+- Assigns IAM roles automatically for repository access
+- Outputs repository URL and credentials for CI/CD integration
+
+## Basic Usage
 
 ```hcl
-module "artifact_registry" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/artifact-registry?ref=v1.13.0"
-  project_id    = var.gcp_project_id
-  location      = var.region
-  repository_id = var.repository_name
-  format        = "DOCKER"
+module "artifact-registry" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/artifact-registry?ref=v1.34.0"
+
+  location      = "your-location"
+  project_id    = "your-project-id"
+  repository_id = "your-repository-id"
 }
 ```
 
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.artifact-registry.repository_id
+}
+```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

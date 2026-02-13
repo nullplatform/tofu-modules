@@ -1,20 +1,34 @@
-# Module: Prometheus
+# Module: prometheus
 
-Deploys **Prometheus** using Helm.
+## Description
 
-## Usage
+Deploys Prometheus monitoring system to a Kubernetes cluster using Helm with customized configuration for nullplatform integration
+
+## Features
+
+- Deploys Prometheus using the official Helm chart from prometheus-community repository
+- Creates and manages a dedicated Kubernetes namespace for Prometheus deployment
+- Configures Prometheus with templated values for nullplatform service integration
+- Enables atomic deployment with automatic cleanup on failure
+- Manages Helm release lifecycle with forced updates and pod recreation
+- Maintains deployment history with a maximum of 10 revisions
+
+## Basic Usage
 
 ```hcl
 module "prometheus" {
-  source               = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/commons/prometheus?ref=v1.0.0"
-  prometheus_namespace = var.prometheus_namespace
-  nullplatform_port    = var.nullplatform_port
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v1.34.0"
 }
 ```
 
-***Important!***
-This module only installs Prometheus; you must configure the metrics provider in order to integrate with Null Platform.
+## Using Outputs
 
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.prometheus.id
+}
+```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

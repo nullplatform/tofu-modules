@@ -1,18 +1,36 @@
-# Module: Cert Manager IAM
+# Module: cert_manager
 
-This module creates the IAM role and policy required for Cert Manager to perform DNS01 challenges via Route 53.
-It uses IRSA (IAM Roles for Service Accounts) to provide secure access from the Kubernetes service account to AWS resources.
-Additionally, it creates the required Kubernetes ServiceAccount and RBAC resources for the DNS01 solver.
+## Description
 
-## Usage
+Creates an IAM role and policy for cert-manager to manage Route53 DNS records for SSL certificate DNS-01 validation challenges
+
+## Features
+
+- Creates an IAM role with OIDC provider trust for Kubernetes service account authentication
+- Configures Route53 permissions for managing DNS records in public and private hosted zones
+- Grants cert-manager access to perform DNS-01 challenge validation for SSL certificates
+- Implements least-privilege IAM policy for Route53 change management
+- Supports both public and private hosted zones for certificate validation
+
+## Basic Usage
 
 ```hcl
-module "cert_manager_iam" {
-  source                              = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/cert_manager?ref=v1.0.0"
-  cluster_name                        = var.cluster_name
-  aws_iam_openid_connect_provider_arn = var.aws_iam_openid_connect_provider_arn
-  hosted_zone_public_id               = var.hosted_zone_public_id
-  hosted_zone_private_id              = var.hosted_zone_private_id
+module "cert_manager" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/cert_manager?ref=v1.34.0"
+
+  aws_iam_openid_connect_provider_arn = "your-aws-iam-openid-connect-provider-arn"
+  cluster_name                        = "your-cluster-name"
+  hosted_zone_private_id              = "your-hosted-zone-private-id"
+  hosted_zone_public_id               = "your-hosted-zone-public-id"
+}
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.cert_manager.nullplatform_cert_manager_role_arn
 }
 ```
 

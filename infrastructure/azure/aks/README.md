@@ -1,65 +1,41 @@
-# Module: Azure Kubernetes Service (AKS)
+# Module: aks
 
-This module creates an Azure Kubernetes Service (AKS) cluster using the official Azure AKS Tofu module.
+## Description
+
+Creates an Azure Kubernetes Service (AKS) cluster with system and user node pools, workload identity, and optional ACR integration
 
 ## Features
 
-- Creates a production-ready AKS cluster with system and user node pools
-- Configurable Kubernetes version
-- Auto-scaling enabled for user node pools (1–5 nodes)
-- Workload identity and OIDC issuer enabled by default
-- RBAC and Azure AD integration
-- Configurable VM sizes for system and user node pools
-- Support for private clusters
-- API server IP allowlist support
-- Zone redundancy for high availability
-- Configurable tags for resource management
-- Optional Azure Container Registry (ACR) integration with automatic AcrPull role assignment
+- Creates an AKS cluster with RBAC and Azure AD integration enabled
+- Configures system node pool with auto-scaling and availability zones
+- Provisions user node pool with configurable VM sizes and auto-scaling capabilities
+- Enables workload identity and OIDC issuer for modern authentication
+- Supports private cluster mode for enhanced security
+- Integrates with Azure Container Registry for image pulling
+- Configures API server authorized IP ranges for network access control
 
-## Usage
-
-### Example with resource dependencies
+## Basic Usage
 
 ```hcl
 module "aks" {
-  source              = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/aks?ref=v1.5.0"
-  resource_group_name = module.resource_group.resource_group_name
-  location            = module.resource_group.resource_group_location
-  cluster_name        = var.cluster_name
-  subscription_id     = var.subscription_id
-  vnet_subnet_id      = module.vnet.subnet_ids_by_name["subnet-1"]
-  system_pool_vm_size = "Standard_D2s_v5"
-  user_pool_vm_size   = "Standard_D2s_v5"
-  acr_id = module.acr.acr_id
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v1.34.0"
 
-  depends_on = [module.resource_group, module.vnet]
+  cluster_name        = "your-cluster-name"
+  location            = "your-location"
+  resource_group_name = "your-resource-group-name"
+  subscription_id     = "your-subscription-id"
+  vnet_subnet_id      = "your-vnet-subnet-id"
 }
 ```
 
-## Node pool configuration
+## Using Outputs
 
-The module creates two node pools:
-
-- **System node pool**: For system pods and Kubernetes components
-  - Configured via `system_pool_vm_size`
-  - Default: `Standard_D2s_v4`
-
-- **User node pool** (named `nodepool`): For application workloads
-  - Configured via `user_pool_vm_size`
-  - Default: `Standard_D2s_v4`
-  - Auto-scaling: 1-5 nodes
-  - Initial count: 2 nodes
-  - Availability zones: 1, 2, 3
-
-## Important notes
-
-- **Dependencies**: The AKS module **requires** `depends_on = [module.resource_group, module.vnet]` to ensure proper resource creation order
-- **Workload identity**: Enabled by default for enhanced security
-- **OIDC issuer**: Enabled by default for federated identity support
-- **RBAC**: Azure RBAC is enabled at the cluster level
-- **Networking**: The cluster uses Azure CNI networking with the provided subnet
-- **Upgrades**: Surge upgrades are configured at 10% for the system pool
-
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.aks.cluster_name
+}
+```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

@@ -1,21 +1,37 @@
-# Module: Metrics
+# Module: metrics
 
-This Terraform module configures the Prometheus integration in nullplatform.
+## Description
 
-## Usage
+Configures a Prometheus provider integration for nullplatform with customizable server URL and dimensions
+
+## Features
+
+- Creates a nullplatform provider configuration for Prometheus monitoring
+- Supports custom Prometheus server URL or defaults to in-cluster service
+- Configures Prometheus server connection with JSON-encoded attributes
+- Enables dimension-based resource organization
+- Ignores attribute changes in lifecycle management to prevent configuration drift
+- Deploys Prometheus integration in configurable Kubernetes namespace
+
+## Basic Usage
 
 ```hcl
 module "metrics" {
-  source               = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/metrics?ref=v1.0.0"
-  dimensions           = var.dimensions
-  nrn                  = var.nrn
-  np_api_key           = var.np_api_key
-  prometheus_url       = var.prometheus_url
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/metrics?ref=v1.34.0"
+
+  np_api_key = "your-np-api-key"
+  nrn        = "your-nrn"
 }
 ```
 
-***Important!***
-This module only configure  the provider of metrics
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.metrics.id
+}
+```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

@@ -1,20 +1,38 @@
-# Module: artifacts-registry
+# Module: acr
 
-This module provisions a Google Cloud Artifact Registry repository and exposes the credentials required to authenticate against it.
-It is designed to be used with OpenTofu as a reusable building block in your infrastructure-as-code setup.
+## Description
 
-## Usage
+Provisions a Google Artifact Registry repository with a dedicated service account for push/pull operations
+
+## Features
+
+- Creates a Google Artifact Registry repository with configurable format
+- Provisions a dedicated service account with Artifact Registry writer permissions
+- Generates service account key for authentication
+- Supports multiple artifact formats including Docker, NPM, and Python
+- Applies custom labels to the registry for organization and cost tracking
+- Outputs repository URL and sensitive service account credentials
+
+## Basic Usage
 
 ```hcl
-module "artifact_registry" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/artifact-registry?ref=v1.13.0"
-  project_id    = var.gcp_project_id
-  location      = var.region
-  repository_id = var.repository_name
-  format        = "DOCKER"
+module "acr" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/acr?ref=v1.34.0"
+
+  containerregistry_name = "your-containerregistry-name"
+  location               = "your-location"
+  project_id             = "your-project-id"
 }
 ```
 
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.acr.acr_id
+}
+```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

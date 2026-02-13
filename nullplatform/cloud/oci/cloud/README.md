@@ -1,27 +1,43 @@
+# Module: cloud
 
-# Module: Oracle Cloud
-This resource defines an Oracle Cloud Infrastructure (OCI) provider configuration in Nullplatform. It registers the OCI account, compartment, and networking details required for Nullplatform to manage resources in OCI.
+## Description
 
-The configuration includes account and region information, the target compartment, and domain settings for networking. Attributes are JSON-encoded and changes to them are ignored after creation to prevent unnecessary updates.
+Configures Oracle Cloud Infrastructure (OCI) provider settings for Nullplatform with account, compartment, and networking configurations
 
-### Basic example
+## Features
+
+- Creates Nullplatform provider configuration for OCI integration
+- Configures OCI account settings including tenancy ID, name, and region
+- Manages OCI compartment configuration for resource organization
+- Supports custom domain name configuration for networking
+- Supports optional application domain and private domain name settings
+- Enables custom dimensions for flexible provider configuration
+- Implements lifecycle management to preserve attribute changes
+
+## Basic Usage
 
 ```hcl
-module "cloud_azure" {
-  source                    = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/cloud/oci/cloud?ref=v1.0.0"
-  nrn                       = "organization=xxxxx:account=xxxx"
-  account_id                = "ocid1.tenancy.oc1..aaaaaaaaim2j6bxtwrlc7s4ii4gntgbwhyoxtvm4cf7zzmvyar3on2ba3olq"
-  account_name              = "nullplatformoci"
-  account_region            = "us-ashburn-1"
-  compartment_id            = "ocid1.compartment.oc1..aaaaaaaexamplecompartmentocid1234567890abcdefghijk"
-  compartment_name          = "oci"
-  domain_name               = "oci.domain.com"
-  private_domain_name       = "internal.domian.com"
+module "cloud" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/oci/cloud?ref=v1.34.0"
 
+  account_id       = "your-account-id"
+  account_name     = "your-account-name"
+  account_region   = "your-account-region"
+  compartment_id   = "your-compartment-id"
+  compartment_name = "your-compartment-name"
+  domain_name      = "your-domain-name"
+  nrn              = "your-nrn"
 }
 ```
 
+## Using Outputs
 
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.cloud.id
+}
+```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

@@ -1,37 +1,37 @@
-# Module: Container orchestration for OKE
+# Module: oke
 
 ## Description
 
-This Terraform module configures Oracle Kubernetes Engine (OKE) as a container orchestration provider in nullplatform. It creates the necessary provider configuration to enable nullplatform to deploy and manage applications on an existing OKE cluster.
+Configures Nullplatform provider settings for Oracle Kubernetes Engine (OKE) clusters
 
-The module sets up:
-- **Cluster configuration**: Connects nullplatform to your OKE cluster by specifying the cluster name, default application namespace, and OCI region.
-- **Gateway configuration**: Configures public and private gateway names used for routing traffic to your applications.
+## Features
 
-This module should be used after setting up the OCI cloud provider configuration (`nullplatform/cloud/oci`).
+- Creates Nullplatform provider configuration for OKE clusters
+- Configures cluster identification with name, namespace, and location
+- Supports custom dimensions for provider configuration
+- Defines gateway settings for public and private traffic routing
+- Manages Kubernetes namespace configuration for applications and gateways
+- Integrates OKE cluster metadata with Nullplatform infrastructure
 
-## Usage
-
-
+## Basic Usage
 
 ```hcl
- module "oke" {
+module "oke" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/oke?ref=v1.34.0"
 
-    source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/oke?ref=feature/ocicloud"
+  cluster_name = "your-cluster-name"
+  nrn          = "your-nrn"
+  region       = "your-region"
+}
+```
 
-    depends_on = [module.name]
+## Using Outputs
 
-    nrn        = "organization=xxx:account=xxx:namespace=xxx"
-    dimension  = {}
-    cluster_name                  = "oke-cluster-nullplatform"
-    namespace_application_default = "nullplatform"
-    region                        = "us-ashburn-1"
-
-    gateway_namespace    = "gateways"
-    public_gateway_name  = "public-gateway"
-    private_gateway_name = "private-gateway"
-  }
-
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.oke.id
+}
 ```
 
 <!-- BEGIN_TF_DOCS -->
