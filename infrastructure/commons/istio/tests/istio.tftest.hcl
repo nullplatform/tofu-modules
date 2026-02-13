@@ -45,9 +45,9 @@ run "consistent_versions" {
   command = plan
 
   variables {
-    istio_base_version            = "1.27.1"
-    istiod_version                = "1.27.1"
-    istio_ingressgateway_version  = "1.27.1"
+    istio_base_version           = "1.27.1"
+    istiod_version               = "1.27.1"
+    istio_ingressgateway_version = "1.27.1"
   }
 
   assert {

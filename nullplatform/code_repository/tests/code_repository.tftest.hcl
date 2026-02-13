@@ -4,11 +4,11 @@ run "github_provider_config" {
   command = plan
 
   variables {
-    git_provider            = "github"
-    nrn                     = "organization=myorg:account=myaccount"
-    np_api_key              = "test-api-key"
-    github_organization     = "myorg"
-    github_installation_id  = "12345"
+    git_provider           = "github"
+    nrn                    = "organization=myorg:account=myaccount"
+    np_api_key             = "test-api-key"
+    github_organization    = "myorg"
+    github_installation_id = "12345"
   }
 
   assert {

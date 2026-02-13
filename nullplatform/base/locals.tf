@@ -28,8 +28,8 @@ locals {
       gateway_enabled                             = var.gateway_enabled ? "true" : "false"
       gateway_internal_enabled                    = var.gateway_internal_enabled ? "true" : "false"
       gateway_internal_azure_load_balancer_subnet = var.internal_azure_load_balancer_subnet
-      gateway_public_aws_name   = var.gateway_public_aws_name
-      gateway_internal_aws_name = var.gateway_internal_aws_name
+      gateway_public_aws_name                     = var.gateway_public_aws_name
+      gateway_internal_aws_name                   = var.gateway_internal_aws_name
 
       # ---- gateway security (AWS) ----
       gateway_public_aws_security_groups  = var.gateway_public_aws_security_group_id

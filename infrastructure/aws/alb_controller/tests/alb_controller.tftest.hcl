@@ -16,8 +16,8 @@ mock_provider "helm" {}
 mock_provider "kubernetes" {}
 
 variables {
-  cluster_name                     = "test-cluster"
-  vpc_id                           = "vpc-12345678"
+  cluster_name                    = "test-cluster"
+  vpc_id                          = "vpc-12345678"
   aws_iam_openid_connect_provider = "arn:aws:iam::123456789012:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/EXAMPLE"
 }
 
