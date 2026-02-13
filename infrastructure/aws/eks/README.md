@@ -1,22 +1,37 @@
-# Module: EKS
+# Module: eks
 
-This module provisions an Amazon Elastic Kubernetes Service (EKS) cluster with managed node groups or  automode. It includes
-essential addons like CoreDNS, kube-proxy, and VPC-CNI, along with configurable managed node groups for workload
-execution.
+## Description
 
-## Usage
+Provisions an AWS EKS cluster with support for both Auto Mode and Managed Node Groups configurations
+
+## Features
+
+- Creates an EKS cluster with configurable Kubernetes version and API endpoint access controls
+- Supports both EKS Auto Mode and traditional Managed Node Groups deployment models
+- Configures essential EKS add-ons including CoreDNS, VPC CNI, kube-proxy, and pod identity agent
+- Enables IAM Roles for Service Accounts (IRSA) and EKS Pod Identity for workload authentication
+- Implements security group rules for NLB health checks and Istio gateway traffic
+- Provides flexible access entry management for cluster authentication and authorization
+- Configures public and private API endpoint access with CIDR-based restrictions
+
+## Basic Usage
 
 ```hcl
 module "eks" {
-  source                  = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/aws/eks?ref=v1.0.0"
-  name                    = var.name
-  kubernetes_version      = var.kubernetes_version
-  aws_vpc_vpc_id          = var.aws_vpc_vpc_id
-  aws_subnets_private_ids = var.aws_subnets_private_ids
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/eks?ref=v1.34.0"
 
-  ami_type       = var.ami_type
-  instance_types = var.instance_types
-  use_auto_mode  = var.use_auto_mode # for default false
+  aws_subnets_private_ids = "your-aws-subnets-private-ids"
+  aws_vpc_vpc_id          = "your-aws-vpc-vpc-id"
+  name                    = "your-name"
+}
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.eks.eks_cluster_name
 }
 ```
 

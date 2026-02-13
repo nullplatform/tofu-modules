@@ -1,19 +1,109 @@
-# Module: Agent
+# Module: agent
 
-This code installs and manages the nullplatform agent in a Kubernetes cluster using a Helm chart from the nullplatform Helm repository. It ensures a controlled, reliable deployment with rollback and waiting behavior configured for stability and consistency.
+## Description
 
-## Usage
+Deploys and configures the Nullplatform agent on Kubernetes clusters across multiple cloud providers using Helm
 
-### Basic example
+## Features
+
+- Deploys Nullplatform agent to Kubernetes clusters via Helm chart
+- Supports multi-cloud deployments across AWS, GCP, Azure, and OCI
+- Configures cloud-specific authentication and networking settings
+- Manages agent repositories and tag-based resource selection
+- Provides DNS and domain configuration options
+- Executes custom initialization scripts during agent startup
+- Implements automatic recreation on API key changes
+
+## Basic Usage
 
 ```hcl
 module "agent" {
-  source         = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.24.0"
-  cluster_name   = var.cluster_name
-  nrn            = var.nrn
-  tags_selectors = var.tags_selectors
-  image_tag      = var.image_tag
-  cloud_provider = var.cloud_provider
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.34.0"
+
+  api_key        = "your-api-key"
+  cloud_provider = "your-cloud-provider"
+  cluster_name   = "your-cluster-name"
+  image_tag      = "your-image-tag"
+  nrn            = "your-nrn"
+  tags_selectors = "your-tags-selectors"
+}
+```
+
+### Usage with AWS Configuration
+
+```hcl
+module "agent" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.34.0"
+
+  api_key          = "your-api-key"
+  aws_iam_role_arn = "your-aws-iam-role-arn"  # Required when cloud_provider = "aws"
+  cloud_provider   = "aws"
+  cluster_name     = "your-cluster-name"
+  image_tag        = "your-image-tag"
+  nrn              = "your-nrn"
+  tags_selectors   = "your-tags-selectors"
+}
+```
+
+### Usage with GCP Configuration
+
+```hcl
+module "agent" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.34.0"
+
+  api_key        = "your-api-key"
+  cloud_provider = "gcp"
+  cluster_name   = "your-cluster-name"
+  image_tag      = "your-image-tag"
+  nrn            = "your-nrn"
+  tags_selectors = "your-tags-selectors"
+}
+```
+
+### Usage with Azure Configuration
+
+```hcl
+module "agent" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.34.0"
+
+  api_key                = "your-api-key"
+  azure_client_id        = "your-azure-client-id"  # Required when cloud_provider = "azure"
+  azure_client_secret    = "your-azure-client-secret"  # Required when cloud_provider = "azure"
+  azure_resource_group   = "your-azure-resource-group"  # Required when cloud_provider = "azure"
+  azure_subscription_id  = "your-azure-subscription-id"  # Required when cloud_provider = "azure"
+  azure_tenant_id        = "your-azure-tenant-id"  # Required when cloud_provider = "azure"
+  cloud_provider         = "azure"
+  cluster_name           = "your-cluster-name"
+  image_tag              = "your-image-tag"
+  nrn                    = "your-nrn"
+  private_gateway_name   = "your-private-gateway-name"  # Required when cloud_provider = "azure"
+  private_hosted_zone_rg = "your-private-hosted-zone-rg"  # Required when cloud_provider = "azure"
+  public_gateway_name    = "your-public-gateway-name"  # Required when cloud_provider = "azure"
+  tags_selectors         = "your-tags-selectors"
+}
+```
+
+### Usage with OCI Configuration
+
+```hcl
+module "agent" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.34.0"
+
+  api_key        = "your-api-key"
+  cloud_provider = "oci"
+  cluster_name   = "your-cluster-name"
+  image_tag      = "your-image-tag"
+  nrn            = "your-nrn"
+  tags_selectors = "your-tags-selectors"
+}
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.agent.id
 }
 ```
 

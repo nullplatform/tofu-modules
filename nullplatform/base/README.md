@@ -1,78 +1,99 @@
-# Module: Base
+# Module: base
 
-This module installs the **base Helm chart** from **nullplatform** and optionally creates cloud-specific network security resources (Security Groups, NSGs, Firewall Rules) to restrict gateway health check port access.
+## Description
 
-For more information, see the [our documentation](https://docs.nullplatform.com/docs/providers/helm-charts#base-chart)
+Deploys the Nullplatform base components to Kubernetes clusters across multiple cloud providers with configurable ingress, gateway, logging, and monitoring integrations
 
-## Gateway Security
+## Features
 
-When `gateway_security_enabled = true`, the module creates cloud-specific network security resources based on the `k8s_provider` value:
+- Creates Nullplatform namespaces and base infrastructure on Kubernetes clusters
+- Supports multiple cloud providers including AWS EKS, GCP GKE, Azure AKS, Oracle OKE, and OpenShift ARO
+- Configures ingress controllers for public and private traffic management
+- Enables HTTP gateways with cloud-specific security group and firewall integration
+- Integrates logging and monitoring solutions including Prometheus, Loki, GELF, Dynatrace, Datadog, New Relic, and CloudWatch
+- Manages TLS configuration and image pull secrets for container registries
+- Deploys Gateway API resources with optional CRD installation
 
-| `k8s_provider` | Security Resources Created |
-|---|---|
-| `eks` | AWS Security Groups for public/private gateways |
-| `aks`, `aro` | Azure Network Security Groups (NSGs) for public/private gateways |
-| `gke` | GCP Firewall Rules for public/private gateways |
-
-The security resource IDs are automatically injected into the Helm chart values, so the gateways reference the correct security groups/NSGs/firewall rules.
-
-### Required variables per cloud (when security is enabled)
-
-| Cloud | Required Variables |
-|---|---|
-| AWS (EKS) | `cluster_name` |
-| Azure (AKS/ARO) | `cluster_name`, `resource_group_name`, `azure_location` |
-| GCP (GKE) | `cluster_name`, `gcp_project_id`, `gcp_region` |
-
-> **Note:** This module requires all three cloud providers (aws, azurerm, google) to be configured, even if only one is used. For clouds not in use, configure provider stubs in the root module. See the usage examples below.
-
-## Usage
-
-### Basic example (without security)
+## Basic Usage
 
 ```hcl
 module "base" {
-    source     = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.0.0"
-    np_api_key = var.np_api_key
-    nrn        = var.nrn
-    k8s_provider = "gke"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.34.0"
+
+  k8s_provider = "your-k8s-provider"
+  np_api_key   = "your-np-api-key"
+  nrn          = "your-nrn"
 }
 ```
 
-### With gateway security enabled (Azure example)
+### Usage with AWS EKS Provider
 
 ```hcl
 module "base" {
-    source                   = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.0.0"
-    np_api_key               = var.np_api_key
-    nrn                      = var.nrn
-    k8s_provider             = "aks"
-    gateway_internal_enabled = true
-    gateway_security_enabled = true
-    cluster_name             = "my-aks-cluster"
-    resource_group_name      = "my-resource-group"
-    azure_location           = "eastus2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.34.0"
+
+  k8s_provider = "eks"
+  np_api_key   = "your-np-api-key"
+  nrn          = "your-nrn"
 }
 ```
 
-### Provider stubs for unused clouds
+### Usage with GCP GKE Provider
 
 ```hcl
-# When using Azure, stub AWS and GCP providers:
-provider "aws" {
-  skip_credentials_validation = true
-  skip_requesting_account_id  = true
-  skip_metadata_api_check     = true
-  region                      = "us-east-1"
-}
+module "base" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.34.0"
 
-provider "google" {
-  project = "unused"
-  region  = "us-central1"
+  k8s_provider = "gke"
+  np_api_key   = "your-np-api-key"
+  nrn          = "your-nrn"
 }
 ```
 
+### Usage with Azure AKS Provider
 
+```hcl
+module "base" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.34.0"
+
+  k8s_provider = "aks"
+  np_api_key   = "your-np-api-key"
+  nrn          = "your-nrn"
+}
+```
+
+### Usage with Oracle OKE Provider
+
+```hcl
+module "base" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.34.0"
+
+  k8s_provider = "oke"
+  np_api_key   = "your-np-api-key"
+  nrn          = "your-nrn"
+}
+```
+
+### Usage with OpenShift ARO Provider
+
+```hcl
+module "base" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.34.0"
+
+  k8s_provider = "aro"
+  np_api_key   = "your-np-api-key"
+  nrn          = "your-nrn"
+}
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.base.public_gateway_security_group_id
+}
+```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

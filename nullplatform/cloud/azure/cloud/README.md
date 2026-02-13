@@ -1,27 +1,37 @@
+# Module: cloud
 
-# Module: Azure Cloud
+## Description
 
-Creates the nullplatform Azure cloud configuration with account metadata and DNS settings sourced from the provided
-hosted zones and domain.
+Configures nullplatform provider with Azure networking and DNS settings
 
-## Usage
+## Features
 
-### Basic example
+- Creates a nullplatform provider configuration for Azure
+- Configures public and private DNS zone settings
+- Manages networking configuration including application domain settings
+- Supports custom dimensions for resource organization
+- Integrates Azure resource groups with nullplatform infrastructure
+
+## Basic Usage
 
 ```hcl
-module "cloud_azure" {
-  source                    = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/cloud/azure/cloud?ref=v1.0.0"
-  nrn                       = var.nrn
-  np_api_key                = var.np_api_key
-  domain_name               = var.domain_name
-  dimensions                = var.dimensions
-  azure_resource_group_name = var.azure_resource_group_name
-  azure_tenant_id           = var.azure_tenant_id
-  azure_subscription_id     = var.azure_subscription_id
+module "cloud" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/azure/cloud?ref=v1.34.0"
 
+  azure_resource_group_name       = "your-azure-resource-group-name"
+  nrn                             = "your-nrn"
+  private_dns_resource_group_name = "your-private-dns-resource-group-name"
 }
 ```
 
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.cloud.id
+}
+```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

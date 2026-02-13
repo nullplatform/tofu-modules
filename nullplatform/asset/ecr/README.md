@@ -1,18 +1,36 @@
-# Module: Asset ECR
+# Module: ecr
 
-This module registers an **Amazon ECR registry** with nullplatform by creating the required provider configuration and
-provisioning IAM credentials for build workflows.
+## Description
 
-## Usage
+Configures AWS ECR integration with Nullplatform, creating IAM roles, policies, and build workflow credentials for container registry management
 
-### Basic example
+## Features
+
+- Creates IAM role for Nullplatform application management with AssumeRole policy
+- Configures ECR manager policy with permissions for repository and image operations
+- Provisions IAM user and access keys for build workflow automation
+- Attaches ECR management policies to both role and user resources
+- Registers ECR provider configuration in Nullplatform with CI and setup credentials
+- Restricts operations to specific AWS region with conditional policies
+
+## Basic Usage
 
 ```hcl
 module "ecr" {
-  source                          = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/asset/ecr?ref=v1.0.0"
-  nrn                             = var.nrn
-  application_manager_assume_role = var.application_manager_assume_role
-  np_api_key                      = var.np_api_key
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v1.34.0"
+
+  cluster_name = "your-cluster-name"
+  np_api_key   = "your-np-api-key"
+  nrn          = "your-nrn"
+}
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.ecr.id
 }
 ```
 

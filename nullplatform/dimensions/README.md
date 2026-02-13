@@ -1,15 +1,34 @@
-# Module: Dimensions
+# Module: dimensions
 
-Creates the **Environment** dimension and populates each specified environment, enabling nullplatform resources to use consistent selectors.
+## Description
 
-## Usage
+Creates and manages a Nullplatform environment dimension with configurable environment values
+
+## Features
+
+- Creates a Nullplatform dimension resource for environment organization
+- Configures dimension ordering and naming
+- Provisions multiple environment values dynamically based on input list
+- Associates dimension values with the parent dimension using NRN
+- Supports customizable environment names with sensible defaults
+
+## Basic Usage
 
 ```hcl
 module "dimensions" {
-  source       = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/dimensions?ref=v1.0.0"
-  nrn          = var.nrn
-  np_api_key   = var.np_api_key
-  environments = var.environments
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimensions?ref=v1.34.0"
+
+  np_api_key = "your-np-api-key"
+  nrn        = "your-nrn"
+}
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.dimensions.id
 }
 ```
 

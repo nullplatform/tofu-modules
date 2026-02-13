@@ -1,16 +1,36 @@
-# Module: Service Definition Agent Association
+# Module: service_definition_agent_association
 
-This module creates a notification channel that associates agents with a specific service definition, enabling agent-based operations for services within that scope.
+## Description
 
-## Usage
+Creates a Nullplatform notification channel with agent configuration and service filtering capabilities
+
+## Features
+
+- Creates a Nullplatform notification channel with configurable type and sources
+- Configures agent commands with custom command lines, arguments, and environment variables
+- Supports tag-based agent selection and filtering
+- Filters notifications based on service specification slug
+- Allows workflow override paths and custom service paths
+- Provides API key-based authentication with automatic resource replacement on key changes
+- Supports multiple notification sources including telemetry and service events
+
+## Basic Usage
 
 ```hcl
 module "service_definition_agent_association" {
-  source                     = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v1.24.0"
-  nrn                        = var.nrn
-  tags_selectors             = var.tags_selectors
-  service_specification_id   = module.service_definition.service_specification_id
-  service_specification_slug = module.service_definition.service_slug
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v1.34.0"
+
+  api_key        = "your-api-key"
+  tags_selectors = "your-tags-selectors"
+}
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.service_definition_agent_association.id
 }
 ```
 

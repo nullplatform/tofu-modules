@@ -1,46 +1,35 @@
 # Module: iam
-This module manages Google Cloud service accounts and their IAM bindings using OpenTofu.
 
-- Creates one or more GCP service accounts based on the `service_accounts` input (name and display name).
+## Description
 
-- Assigns project-level IAM roles to each service account according to the roles defined in `service_accounts`.
+Manages Google Cloud Platform service accounts with IAM roles and Workload Identity bindings for Kubernetes integration
 
-- Configures Workload Identity by binding Kubernetes service accounts (namespace + KSA name) to Google service accounts, using the `workload_identity_bindings` input.
+## Features
 
-In short, it automates the creation of service accounts, their permissions, and the Workload Identity mappings needed for GKE workloads to securely use GCP identities.
+- Creates multiple GCP service accounts with configurable display names
+- Assigns IAM roles to service accounts at the project level
+- Configures Workload Identity bindings between GCP and Kubernetes service accounts
+- Outputs a map of service account names to their email addresses
+- Supports batch creation and management of service accounts with their associated roles
 
-
-## Usage
+## Basic Usage
 
 ```hcl
 module "iam" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/iam?ref=v1.13.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/iam?ref=v1.34.0"
 
-  project_id = var.gcp_project_id
-
-  service_accounts = [
-    {
-      name         = "external-dns"
-      display_name = "External DNS"
-      roles        = ["roles/dns.admin"]
-    }
-  ]
-
-  workload_identity_bindings = [
-    {
-      service_account_email = "external-dns@${var.gcp_project_id}.iam.gserviceaccount.com"
-      namespace             = "external-dns"
-      ksa_name              = "external-dns"
-    }
-  ]
-
-
+  project_id = "your-project-id"
 }
-
 ```
 
+## Using Outputs
 
-
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.iam.service_accounts
+}
+```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

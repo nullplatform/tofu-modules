@@ -1,15 +1,36 @@
-# Module: Users
+# Module: users
 
-This Terraform module creates user records in nullplatform and assigns the specified roles to each account using authorization grants.
+## Description
 
-## Usage
+Creates and manages Nullplatform users with role-based access control assignments
+
+## Features
+
+- Creates Nullplatform user accounts with profile information
+- Configures multiple role assignments per user
+- Manages authorization grants based on NRN (Nullplatform Resource Name)
+- Supports bulk user creation through map-based configuration
+- Assigns multiple roles to users through authorization grants
+
+## Basic Usage
 
 ```hcl
 module "users" {
-  source             = "git::https://github.com/nullplatform/tofu-modules.git///nullplatform/users?ref=v1.0.0"
-  np_api_key         = var.np_api_key
-  nullplatform_users = var.nullplatform_users
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/users?ref=v1.34.0"
+
+  np_api_key         = "your-np-api-key"
+  nullplatform_users = "your-nullplatform-users"
 }
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.users.id
+}
+```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

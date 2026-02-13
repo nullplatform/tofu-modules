@@ -1,50 +1,40 @@
-# Module: Azure Container Registry (ACR)
+# Module: acr
 
-This module creates an Azure Container Registry using the Azure Verified Module (AVM).
+## Description
+
+Creates and configures an Azure Container Registry with admin access enabled and customizable SKU options
 
 ## Features
 
-- Creates an Azure Container Registry with configurable SKU (Basic, Standard, Premium)
-- Supports zone redundancy (Premium SKU only)
-- Enables the admin user by default for easy authentication
-- Allows configurable tags for resource management
-- Includes name validation to ensure compliance with Azure naming requirements
+- Creates an Azure Container Registry with globally unique naming validation
+- Configures admin access with username and password outputs
+- Supports multiple SKU tiers (Basic, Standard, Premium)
+- Enables optional zone redundancy for high availability
+- Configures retention policies for untagged manifests
+- Applies custom tags for resource organization
+- Outputs registry ID, login server, and admin credentials
 
-## Usage
-
-### Basic example
-
-```hcl
-module "acr" {
-  source                 = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/acr?ref=v1.5.0"
-  containerregistry_name = var.containerregistry_name
-  resource_group_name    = module.resource_group.resource_group_name
-  location               = var.location
-  subscription_id        = var.subscription_id
-}
-```
-
-### Premium SKU with zone redundancy
+## Basic Usage
 
 ```hcl
 module "acr" {
-  source                  = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/acr?ref=v1.5.0"
-  containerregistry_name  = var.containerregistry_name
-  resource_group_name     = var.resource_group_name
-  location                = var.location
-  subscription_id         = var.subscription_id
-  sku                     = "Premium"
-  zone_redundancy_enabled = true
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/acr?ref=v1.34.0"
+
+  containerregistry_name = "your-containerregistry-name"
+  location               = "your-location"
+  resource_group_name    = "your-resource-group-name"
+  subscription_id        = "your-subscription-id"
 }
 ```
 
-## Important notes
+## Using Outputs
 
-- **ACR name requirements**: Must be globally unique, 5–50 characters long, and use only lowercase alphanumeric characters
-- **Zone redundancy**: Available only with the Premium SKU
-- **Admin user**: Enabled by default to allow retrieval of admin credentials via outputs
-
-
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.acr.acr_id
+}
+```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

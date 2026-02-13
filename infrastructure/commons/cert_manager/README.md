@@ -1,72 +1,117 @@
+# Module: cert_manager
 
-# Modules: cert_manager
+## Description
 
-This module installs cert-manager and applies the nullplatform configuration using Helm charts.
+Deploys and configures cert-manager with multi-cloud DNS provider support for automated certificate management in Kubernetes
 
-## Usage
+## Features
 
-### AWS example
+- Deploys cert-manager Helm chart with CRDs and custom resource definitions
+- Configures DNS01 challenge solvers for automated domain validation
+- Supports multiple cloud providers including GCP, AWS, Azure, Cloudflare, and OCI
+- Creates provider-specific service account annotations for workload identity
+- Deploys cert-manager configuration using nullplatform Helm charts
+- Configures recursive DNS nameservers for DNS01 challenges
+- Installs OCI webhook for Oracle Cloud Infrastructure DNS integration
+
+## Basic Usage
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.34.0"
 
-  cloud_provider      = "aws"
-  aws_sa_arn          = var.aws_sa_arn
-  aws_region          = var.aws_region
-  hosted_zone_name    = var.hosted_zone_name
-  private_domain_name = var.private_domain_name
-  account_slug        = var.account_slug
+  account_slug        = "your-account-slug"
+  cloud_provider      = "your-cloud-provider"
+  hosted_zone_name    = "your-hosted-zone-name"
+  private_domain_name = "your-private-domain-name"
 }
 ```
 
-### Azure example
+### Usage with GCP Configuration
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.34.0"
 
-  cloud_provider            = "azure"
-  azure_client_id           = var.azure_client_id
-  azure_subscription_id     = var.azure_subscription_id
-  azure_resource_group_name = var.azure_resource_group_name
-  azure_tenant_id           = var.azure_tenant_id
-  azure_hosted_zone_name    = var.azure_hosted_zone_name
-  hosted_zone_name          = var.hosted_zone_name
-  private_domain_name       = var.private_domain_name
-  account_slug              = var.account_slug
-}
-```
-
-### GCP example
-
-```hcl
-module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.0.0"
-
+  account_slug        = "your-account-slug"
   cloud_provider      = "gcp"
-  gcp_sa_email        = var.gcp_sa_email
-  project_id          = var.project_id
-  hosted_zone_name    = var.hosted_zone_name
-  private_domain_name = var.private_domain_name
-  account_slug        = var.account_slug
+  gcp_sa_email        = "your-gcp-sa-email"  # Required when cloud_provider = "gcp"
+  hosted_zone_name    = "your-hosted-zone-name"
+  private_domain_name = "your-private-domain-name"
+  project_id          = "your-project-id"  # Required when cloud_provider = "gcp"
 }
 ```
 
-### Cloudflare example
+### Usage with Azure Configuration
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.34.0"
 
-  cloud_provider      = "cloudflare"
-  cloudflare_token    = var.cloudflare_token
-  hosted_zone_name    = var.hosted_zone_name
-  private_domain_name = var.private_domain_name
-  account_slug        = var.account_slug
+  account_slug              = "your-account-slug"
+  azure_client_id           = "your-azure-client-id"  # Required when cloud_provider = "azure"
+  azure_hosted_zone_name    = "your-azure-hosted-zone-name"  # Required when cloud_provider = "azure"
+  azure_resource_group_name = "your-azure-resource-group-name"  # Required when cloud_provider = "azure"
+  azure_subscription_id     = "your-azure-subscription-id"  # Required when cloud_provider = "azure"
+  azure_tenant_id           = "your-azure-tenant-id"  # Required when cloud_provider = "azure"
+  cloud_provider            = "azure"
+  hosted_zone_name          = "your-hosted-zone-name"
+  private_domain_name       = "your-private-domain-name"
 }
 ```
 
+### Usage with Cloudflare Configuration
+
+```hcl
+module "cert_manager" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.34.0"
+
+  account_slug        = "your-account-slug"
+  cloud_provider      = "cloudflare"
+  cloudflare_token    = "your-cloudflare-token"  # Required when cloud_provider = "cloudflare"
+  hosted_zone_name    = "your-hosted-zone-name"
+  private_domain_name = "your-private-domain-name"
+}
+```
+
+### Usage with AWS Configuration
+
+```hcl
+module "cert_manager" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.34.0"
+
+  account_slug        = "your-account-slug"
+  aws_region          = "your-aws-region"  # Required when cloud_provider = "aws"
+  aws_sa_arn          = "your-aws-sa-arn"  # Required when cloud_provider = "aws"
+  cloud_provider      = "aws"
+  hosted_zone_name    = "your-hosted-zone-name"
+  private_domain_name = "your-private-domain-name"
+}
+```
+
+### Usage with OCI Configuration
+
+```hcl
+module "cert_manager" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.34.0"
+
+  account_slug         = "your-account-slug"
+  cloud_provider       = "oci"
+  hosted_zone_name     = "your-hosted-zone-name"
+  oci_compartment_ocid = "your-oci-compartment-ocid"  # Required when cloud_provider = "oci"
+  oci_region           = "your-oci-region"  # Required when cloud_provider = "oci"
+  private_domain_name  = "your-private-domain-name"
+}
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.cert_manager.id
+}
+```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

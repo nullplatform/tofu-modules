@@ -1,57 +1,38 @@
-# Module: Azure Private DNS Zone
+# Module: private_dns
 
-This module creates a private DNS zone in Azure with optional virtual network links.
+## Description
+
+Creates an Azure Private DNS Zone with configurable virtual network links for private endpoint name resolution
 
 ## Features
 
-- Creates an Azure private DNS zone
-- Supports linking to multiple virtual networks
-- Optional auto-registration of VM DNS records
-- Supports configurable tags for resource management
+- Creates an Azure Private DNS Zone with a specified domain name
+- Supports linking multiple virtual networks to the private DNS zone
+- Configures optional VM auto-registration per virtual network link
+- Manages resource tagging for organizational purposes
+- Outputs DNS zone details and virtual network link IDs for reference
 
-## Usage
-
-### Basic Example (with AKS VNet)
+## Basic Usage
 
 ```hcl
 module "private_dns" {
-  source          = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/azure/private_dns?ref=v1.5.0"
-  domain_name     = var.private_dns_domain_name 
-  resource_group  = var.resource_group
-  subscription_id = var.subscription_id
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/private_dns?ref=v1.34.0"
 
-  virtual_network_links = [
-    {
-      vnet_id              = module.vnet.resource_id 
-      registration_enabled = false                    
-    }
-  ]
+  domain_name           = "your-domain-name"
+  resource_group_name   = "your-resource-group-name"
+  subscription_id       = "your-subscription-id"
+  virtual_network_links = "your-virtual-network-links"
 }
 ```
 
-## Important Notes
+## Using Outputs
 
-- **Domain name**: Can be any valid DNS domain name for private resolution (e.g., `privatelink.database.windows.net`, `internal.company.local`)
-- **Virtual network links**: Required for DNS resolution within VNets
-- **Auto-registration**: When `registration_enabled = true`, VM records are automatically created in the DNS zone
-
-## Inputs
-
-| Name | Description | Type | Required | Default |
-|------|-------------|------|----------|---------|
-| `resource_group` | The name of the resource group where the private DNS zone will be created | `string` | Yes | - |
-| `domain_name` | The domain name to use for the private DNS zone | `string` | Yes | - |
-| `subscription_id` | The ID of the Azure subscription | `string` | Yes | - |
-| `virtual_network_links` | List of virtual networks to link to the private DNS zone | `list(object)` | Yes | - |
-| `tags` | A mapping of tags to assign to the resources | `map(string)` | No | `{}` |
-
-## Outputs
-
-| Name | Description |
-|------|-------------|
-| `private_dns_zone_name` | The name of the created private DNS zone |
-| `private_dns_zone_id` | The ID of the private DNS zone |
-| `virtual_network_link_ids` | The IDs of the virtual network links |
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.private_dns.private_dns_zone_name
+}
+```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

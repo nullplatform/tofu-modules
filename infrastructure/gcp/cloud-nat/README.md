@@ -1,25 +1,39 @@
 # Module: cloud-nat
 
-This module provisions a Google Cloud NAT configuration using OpenTofu.
-It is designed to be a reusable building block to provide egress internet access for private resources (such as GCE instances or GKE nodes without external IPs) in your VPC.
+## Description
 
+Creates a GCP Cloud Router with Cloud NAT for enabling outbound internet access from private instances
 
-## Usage
+## Features
+
+- Creates a Cloud Router in a specified VPC network and region
+- Configures Cloud NAT with automatic IP allocation for all subnetworks
+- Enables outbound internet connectivity for private GCP resources
+- Supports all IP ranges across all subnetworks in the VPC
+- Provides output values for router and NAT resource names
+
+## Basic Usage
 
 ```hcl
-module "cloud_nat" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/cloud-nat?ref=v1.13.0"
+module "cloud-nat" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/cloud-nat?ref=v1.34.0"
 
-  project_id  = var.gcp_project_id
-  region      = var.region
-  network_id  = module.vpc.network_self_link
-  router_name = var.router
-  nat_name    = var.nat_name
-
+  nat_name    = "your-nat-name"
+  network_id  = "your-network-id"
+  project_id  = "your-project-id"
+  region      = "your-region"
+  router_name = "your-router-name"
 }
-
 ```
 
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.cloud-nat.router_name
+}
+```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

@@ -1,14 +1,36 @@
-# Module: Agent IAM
+# Module: agent
 
-This module creates the IAM role and policies for the nullplatform agent, using OIDC trust with the EKS service account.
-It grants Route 53, Elastic Load Balancing, and EKS read-only permissions required by the agent.
+## Description
 
-Usage:
+Creates an IAM role and policies for the nullplatform agent service account to manage AWS resources including Route 53, ELB, EKS, and AVP
+
+## Features
+
+- Creates an IAM role with OIDC provider trust for Kubernetes service accounts
+- Configures Route 53 permissions for DNS record management and service discovery
+- Grants Elastic Load Balancing permissions to describe and monitor load balancers and target groups
+- Provides EKS cluster resource management permissions for describing and listing clusters, nodegroups, and addons
+- Enables Amazon Verified Permissions (AVP) resource management capabilities
+- Implements region-specific access controls for all AWS service permissions
+
+## Basic Usage
 
 ```hcl
-module "agent-iam" {
-  source          = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam?ref=v1.0.0"
-  aws_iam_openid_connect_provider_arn = var.aws_iam_openid_connect_provider_arn
+module "agent" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/agent?ref=v1.34.0"
+
+  agent_namespace                     = "your-agent-namespace"
+  aws_iam_openid_connect_provider_arn = "your-aws-iam-openid-connect-provider-arn"
+  cluster_name                        = "your-cluster-name"
+}
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.agent.nullplatform_agent_role_arn
 }
 ```
 

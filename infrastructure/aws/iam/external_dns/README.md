@@ -1,17 +1,36 @@
-# Module: External DNS IAM
+# Module: external_dns
 
-This module creates the IAM role and policy required for External DNS to manage Route 53 DNS records in AWS.
-It uses IRSA (IAM Roles for Service Accounts) to provide secure access from the Kubernetes service account to AWS resources.
+## Description
 
-## Usage
+Creates IAM roles and policies for external-dns to manage Route 53 DNS records in both public and private hosted zones
+
+## Features
+
+- Creates IAM role with OIDC provider trust for Kubernetes service accounts
+- Grants permissions to manage Route 53 DNS records for service discovery
+- Supports both public and private hosted zones for DNS management
+- Configures IAM policies for external-dns controllers in the external-dns namespace
+- Enables automatic DNS record management for EKS workloads
+
+## Basic Usage
 
 ```hcl
-module "external_dns_iam" {
-  source                              = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/external_dns?ref=v1.0.0"
-  cluster_name                        = var.cluster_name
-  aws_iam_openid_connect_provider_arn = var.aws_iam_openid_connect_provider_arn
-  hosted_zone_public_id               = var.hosted_zone_public_id
-  hosted_zone_private_id              = var.hosted_zone_private_id
+module "external_dns" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/external_dns?ref=v1.34.0"
+
+  aws_iam_openid_connect_provider_arn = "your-aws-iam-openid-connect-provider-arn"
+  cluster_name                        = "your-cluster-name"
+  hosted_zone_private_id              = "your-hosted-zone-private-id"
+  hosted_zone_public_id               = "your-hosted-zone-public-id"
+}
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.external_dns.nullplatform_external_dns_role_arn
 }
 ```
 

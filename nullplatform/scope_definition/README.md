@@ -1,15 +1,36 @@
-# Module: Scope definition
+# Module: scope_definition
 
-This Tofu module clones a Git repository containing service and action specification templates, processes those templates using **gomplate** to inject dynamic variables, and creates the corresponding nullplatform resources (service, scope type, and actions).  
-It also patches the target NRN with logging and metrics providers, then cleans up the cloned repository after execution.
+## Description
 
-## Usage
+Creates and configures a nullplatform service specification with scope types and action specifications from templates
+
+## Features
+
+- Creates service specifications from remote JSON templates using gomplate
+- Configures scope types linked to service specifications
+- Generates multiple action specifications for scope operations
+- Patches NRN configuration with external metrics and logging providers
+- Supports customizable repository sources and branches for templates
+- Processes templates with environment-specific variables
+- Manages lifecycle of service specifications, scope types, and actions
+
+## Basic Usage
 
 ```hcl
 module "scope_definition" {
-  source     = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v1.0.0"
-  nrn        = local.nrn_without_namespace
-  np_api_key = var.np_api_key
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v1.34.0"
+
+  np_api_key = "your-np-api-key"
+  nrn        = "your-nrn"
+}
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.scope_definition.service_specification_id
 }
 ```
 
@@ -69,4 +90,3 @@ module "scope_definition" {
 | <a name="output_service_slug"></a> [service\_slug](#output\_service\_slug) | Slug (unique name) of the service specification created in nullplatform. |
 | <a name="output_service_specification_id"></a> [service\_specification\_id](#output\_service\_specification\_id) | ID of the service specification created in nullplatform. |
 <!-- END_TF_DOCS -->
-

@@ -1,53 +1,37 @@
 # Module: vpc
-This configuration uses the official terraform-google-modules/network/google module to create and manage a VPC network in GCP.
 
-- Creates a VPC with the provided `network_name` in the given `project_id`.
+## Description
 
-- Provisions one or more subnets, derived from `var.subnets`, each with:
-  
-  - Name, CIDR range, region
-  - Private Google access enabled (`subnet_private_access = true`), so instances without external IPs can reach Google APIs.
-  - Configures secondary IP ranges for the subnets (e.g. for GKE pods and services) using `var.secondary_ranges`.
+Creates a Google Cloud VPC network with configurable subnets and secondary IP ranges using the official Google Network module
 
-In short, it standardizes the creation of a VPC and its subnets (including secondary ranges) as a reusable networking building block for GCP.
+## Features
 
+- Creates a VPC network in Google Cloud Platform
+- Configures multiple subnets with custom IP ranges and regions
+- Enables private Google access on all subnets by default
+- Supports secondary IP ranges for GKE pods and services
+- Outputs network and subnet identifiers for reference in other modules
 
-## Usage
+## Basic Usage
 
 ```hcl
 module "vpc" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/vpc?ref=v1.13.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/vpc?ref=v1.34.0"
 
-  project_id   = var.gcp_project_id
-  network_name = var.network_name
-
-  subnets = [
-    {
-      subnet_name   = "subnet-gke"
-      subnet_ip     = var.subnet_cidr
-      subnet_region = var.region
-    }
-  ]
-
-  secondary_ranges = {
-    "subnet-gke" = [
-      {
-        range_name    = "pods"
-        ip_cidr_range = var.pods_cidr
-      },
-      {
-        range_name    = "services"
-        ip_cidr_range = var.services_cidr
-      }
-    ]
-  }
+  network_name = "your-network-name"
+  project_id   = "your-project-id"
+  subnets      = "your-subnets"
 }
-
-
 ```
 
+## Using Outputs
 
-
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.vpc.network_name
+}
+```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

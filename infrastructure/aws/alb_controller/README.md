@@ -1,17 +1,37 @@
-# Module: ALB Controller
+# Module: alb_controller
 
-This module deploys the AWS Load Balancer Controller on an EKS cluster using Helm. It provides native AWS Application
-Load Balancer (ALB) and Network Load Balancer (NLB) support for Kubernetes ingress resources.
+## Description
 
-Usage:
+Deploys the AWS Load Balancer Controller on an EKS cluster with IAM roles for service accounts (IRSA) and necessary permissions to manage Application and Network Load Balancers
+
+## Features
+
+- Creates an IAM role with IRSA for the AWS Load Balancer Controller with comprehensive ELB permissions
+- Deploys the AWS Load Balancer Controller Helm chart to the kube-system namespace
+- Configures a Kubernetes service account with proper annotations for IAM role assumption
+- Manages IAM policies for EC2, ELB, WAF, Shield, ACM, and Cognito resources
+- Supports both Application Load Balancers (ALB) and Network Load Balancers (NLB)
+- Enables automatic security group and target group management
+- Provides integration with AWS Certificate Manager and AWS WAF
+
+## Basic Usage
 
 ```hcl
 module "alb_controller" {
-  source                             = "git::https://github.com/nullplatform/tofu-modules.git///infrastructure/aws/alb_controller?ref=v1.0.0"
-  cluster_name                       = var.cluster_name
-  vpc_id                             = var.vpc_id
-  aws_iam_openid_connect_provider    = var.aws_iam_openid_connect_provider
-  aws_load_balancer_controller_version = "1.13.4"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/alb_controller?ref=v1.34.0"
+
+  aws_iam_openid_connect_provider = "your-aws-iam-openid-connect-provider"
+  cluster_name                    = "your-cluster-name"
+  vpc_id                          = "your-vpc-id"
+}
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.alb_controller.id
 }
 ```
 

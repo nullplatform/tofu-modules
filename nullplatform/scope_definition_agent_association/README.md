@@ -1,18 +1,39 @@
-# Module: Scope definition agent association
+# Module: scope_definition_agent_association
 
-This Tofu code creates a notification channel in nullplatform that links to a specific NRN and can dynamically configure an agent-based channel when needed.
-It injects the agent’s API key, command configuration, and optional overrides, while preserving any filters defined in the original template.
+## Description
 
-## Usage
+Creates and manages a Nullplatform notification channel with agent configuration and template-based setup
+
+## Features
+
+- Creates notification channels from remote JSON templates using gomplate processing
+- Configures agent-based notification channels with dynamic command injection
+- Supports optional configuration overrides via command line flags
+- Manages notification channel lifecycle with API key-based replacement triggers
+- Processes template variables including NRN, service paths, and specification identifiers
+- Applies tag-based selectors for channel and agent filtering
+- Preserves existing filters and source configurations across updates
+
+## Basic Usage
 
 ```hcl
 module "scope_definition_agent_association" {
-  source                   = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=v1.24.0"
-  nrn                      = var.nrn
-  np_api_key               = var.np_api_key
-  scope_specification_id   = module.scope_definition.scope_specification_id
-  scope_specification_slug = module.scope_definition.scope_slug
-  tags_selectors           = var.tags_selectors
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=v1.34.0"
+
+  api_key                  = "your-api-key"
+  nrn                      = "your-nrn"
+  scope_specification_id   = "your-scope-specification-id"
+  scope_specification_slug = "your-scope-specification-slug"
+  tags_selectors           = "your-tags-selectors"
+}
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.scope_definition_agent_association.id
 }
 ```
 

@@ -1,17 +1,44 @@
-# Module:
+# Module: oke
 
+## Description
 
+Deploys an Oracle Kubernetes Engine (OKE) cluster with enhanced configuration, custom VCN integration, and optional OCIR image pull capabilities using workload identity and instance principals
 
-## Usage
+## Features
+
+- Creates an enhanced OKE cluster with Kubernetes v1.34.1 using existing VCN and subnets
+- Configures customizable worker node pools with flexible compute shapes and sizes
+- Supports OCIR image pulling through workload identity and instance principal authentication
+- Enables OKE credential provider for kubelet to pull private images from OCIR
+- Deploys dynamic groups and IAM policies for secure container image access
+- Provides custom cloud-init integration for worker node initialization
+- Enables OIDC discovery for workload identity authentication
+
+## Basic Usage
 
 ```hcl
+module "oke" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/oke?ref=v1.34.0"
 
-
-
+  api_endpoint_subnet_id = "your-api-endpoint-subnet-id"
+  cluster_name           = "your-cluster-name"
+  compartment_id         = "your-compartment-id"
+  existing_vcn_id        = "your-existing-vcn-id"
+  home_region            = "your-home-region"
+  node_pool_subnet_id    = "your-node-pool-subnet-id"
+  region                 = "your-region"
+  service_lb_subnet_id   = "your-service-lb-subnet-id"
+}
 ```
 
+## Using Outputs
 
-
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.oke.cluster_id
+}
+```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
