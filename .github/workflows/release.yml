@@ -17,3 +17,82 @@ jobs:
       pull-requests: write
     with:
       update_readme_versions: false
+
+  generate-readmes:
+    name: Generate READMEs for Release PR
+    needs: release
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Check if Release Please PR exists
+        id: check_pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PR_NUMBER=$(gh pr list \
+            --repo ${{ github.repository }} \
+            --head release-please--branches--main \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')
+
+          if [ -z "$PR_NUMBER" ]; then
+            echo "No Release Please PR found. Skipping README generation."
+            echo "pr_exists=false" >> $GITHUB_OUTPUT
+          else
+            echo "Found Release Please PR #$PR_NUMBER"
+            echo "pr_exists=true" >> $GITHUB_OUTPUT
+            echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout Release PR branch
+        if: steps.check_pr.outputs.pr_exists == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: release-please--branches--main
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        if: steps.check_pr.outputs.pr_exists == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Checkout README generation scripts
+        if: steps.check_pr.outputs.pr_exists == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: nullplatform/actions-nullplatform
+          path: .actions-scripts
+          sparse-checkout: |
+            .github/scripts
+          sparse-checkout-cone-mode: false
+
+      - name: Generate READMEs
+        if: steps.check_pr.outputs.pr_exists == 'true'
+        run: |
+          node .actions-scripts/.github/scripts/generate-readme-v2.js \
+            --all --base-dir "." --verbose
+        env:
+          AI_PROVIDER: anthropic
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Commit and push
+        if: steps.check_pr.outputs.pr_exists == 'true'
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+
+          git add -A '*.md' || true
+
+          if git diff --staged --quiet; then
+            echo "No README changes to commit"
+          else
+            git commit -m "docs: update READMEs with AI-generated content"
+            git push origin release-please--branches--main
+            echo "READMEs updated in Release PR #${{ steps.check_pr.outputs.pr_number }}"
+          fi
+        env:
+          HUSKY: 0
