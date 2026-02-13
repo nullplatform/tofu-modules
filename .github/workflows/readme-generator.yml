@@ -19,6 +19,5 @@ jobs:
       models: read
     with:
       base_dir: '.'
-      generate_all: false
-      ai_provider: 'openai'
-      ai_model: 'gpt-4o'
+      generate_all: true
+      ai_provider: 'anthropic'
