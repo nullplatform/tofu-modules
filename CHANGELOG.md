@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.33.0](https://github.com/nullplatform/tofu-modules/compare/v1.32.1...v1.33.0) (2026-02-13)
+
+
+### Features
+
+* **ci:** enable AI readme generator workflow ([#203](https://github.com/nullplatform/tofu-modules/issues/203)) ([5ed8c84](https://github.com/nullplatform/tofu-modules/commit/5ed8c8492cc0825a4b8094b63f35e795da37f833))
+
 ## [1.32.1](https://github.com/nullplatform/tofu-modules/compare/v1.32.0...v1.32.1) (2026-02-10)
 
 
