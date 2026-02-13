@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.33.1](https://github.com/nullplatform/tofu-modules/compare/v1.33.0...v1.33.1) (2026-02-13)
+
+
+### Bug Fixes
+
+* **ci:** pass secrets to readme-generator workflow ([#207](https://github.com/nullplatform/tofu-modules/issues/207)) ([a99fa51](https://github.com/nullplatform/tofu-modules/commit/a99fa5104bf79ed5bf1512e7d23befa126d93133))
+* **ci:** remove push trigger from tofu-test workflow ([#205](https://github.com/nullplatform/tofu-modules/issues/205)) ([aef2384](https://github.com/nullplatform/tofu-modules/commit/aef23846f41fded075b0b54370032f1e5f24c317))
+
 ## [1.33.0](https://github.com/nullplatform/tofu-modules/compare/v1.32.1...v1.33.0) (2026-02-13)
 
 
