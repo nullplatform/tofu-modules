@@ -17,6 +17,7 @@ jobs:
     permissions:
       contents: write
       models: read
+    secrets: inherit
     with:
       base_dir: '.'
       generate_all: true
