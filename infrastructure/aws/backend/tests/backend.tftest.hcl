@@ -1,5 +1,9 @@
 mock_provider "aws" {}
 
+variables {
+  aws_region = "us-east-1"
+}
+
 run "s3_object_lock_enabled" {
   command = plan
 
@@ -47,5 +51,48 @@ run "force_destroy_enabled" {
   assert {
     condition     = aws_s3_bucket.tf_state.force_destroy == true
     error_message = "S3 bucket should have force_destroy enabled"
+  }
+}
+
+run "public_access_blocked" {
+  command = plan
+
+  assert {
+    condition     = aws_s3_bucket_public_access_block.tf_state.block_public_acls == true
+    error_message = "S3 bucket should block public ACLs"
+  }
+
+  assert {
+    condition     = aws_s3_bucket_public_access_block.tf_state.block_public_policy == true
+    error_message = "S3 bucket should block public policy"
+  }
+
+  assert {
+    condition     = aws_s3_bucket_public_access_block.tf_state.ignore_public_acls == true
+    error_message = "S3 bucket should ignore public ACLs"
+  }
+
+  assert {
+    condition     = aws_s3_bucket_public_access_block.tf_state.restrict_public_buckets == true
+    error_message = "S3 bucket should restrict public buckets"
+  }
+}
+
+run "dynamodb_lock_table" {
+  command = plan
+
+  assert {
+    condition     = aws_dynamodb_table.tf_state_lock.name == "tf-state-lock"
+    error_message = "DynamoDB table name should be tf-state-lock"
+  }
+
+  assert {
+    condition     = aws_dynamodb_table.tf_state_lock.billing_mode == "PAY_PER_REQUEST"
+    error_message = "DynamoDB table should use PAY_PER_REQUEST billing mode"
+  }
+
+  assert {
+    condition     = aws_dynamodb_table.tf_state_lock.hash_key == "LockID"
+    error_message = "DynamoDB table hash key should be LockID"
   }
 }
