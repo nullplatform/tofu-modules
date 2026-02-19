@@ -92,6 +92,53 @@ run "provider_annotations_are_distinct" {
   }
 }
 
+# Validates OCI-specific vars are not required when using AWS
+run "oci_vars_not_required_for_aws" {
+  command = plan
+
+  variables {
+    cloud_provider      = "aws"
+    hosted_zone_name    = "myorg.example.com"
+    account_slug        = "myorg"
+    private_domain_name = "myorg.example.com"
+    aws_sa_arn          = "arn:aws:iam::123456789012:role/cert-manager"
+    aws_region          = "us-east-1"
+    # oci_compartment_ocid, oci_region, oci_sa_ocid intentionally left empty
+  }
+
+  assert {
+    condition     = local.provider_context["enabled"] == "true"
+    error_message = "AWS config should work without OCI vars"
+  }
+
+  assert {
+    condition     = length(helm_release.cert_manager_webhook_oci) == 0
+    error_message = "OCI webhook should not be deployed for AWS provider"
+  }
+}
+
+# Validates OCI webhook is not deployed for non-OCI providers
+run "oci_webhook_not_deployed_for_azure" {
+  command = plan
+
+  variables {
+    cloud_provider            = "azure"
+    hosted_zone_name          = "myorg.example.com"
+    account_slug              = "myorg"
+    private_domain_name       = "myorg.example.com"
+    azure_client_id           = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+    azure_subscription_id     = "00000000-0000-0000-0000-000000000000"
+    azure_resource_group_name = "rg-test"
+    azure_tenant_id           = "11111111-2222-3333-4444-555555555555"
+    azure_hosted_zone_name    = "myorg.example.com"
+  }
+
+  assert {
+    condition     = length(helm_release.cert_manager_webhook_oci) == 0
+    error_message = "OCI webhook should not be deployed for Azure provider"
+  }
+}
+
 # Validates DNS01 recursive nameservers are always configured
 run "dns01_nameservers_always_set" {
   command = plan
