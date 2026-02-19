@@ -156,12 +156,8 @@ dist
 .idea
 
 # Terraform
-*.tfstate
-*.tfstate.*
-.terraform/
 terraform.tfstate
 terraform.tfstate.backup
-*.tfvars
 
 # VS Code
 .vscode/

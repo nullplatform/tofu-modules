@@ -1,0 +1,28 @@
+#
+# Infrastructure - Specific Variables
+#
+# Usage: tofu plan -var-file=../common.tfvars -var-file=./terraform.tfvars
+#
+
+# VPC Configuration
+vpc = {
+  cidr_block      = "10.0.0.0/16"
+  azs             = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+  public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+}
+
+# EKS Configuration
+eks_cluster_name             = "my-eks-cluster"
+eks_instance_types           = "t3.medium"
+eks_kubernetes_version       = "1.32"
+endpoint_public_access       = true
+endpoint_public_access_cidrs = ["0.0.0.0/0"]
+
+# Agent Configuration (Istio/external_dns scheme)
+agent_dns_type                = "external_dns"
+agent_use_account_slug        = "<true|false>"
+agent_image_pull_secrets      = "<secret-name-or-empty>"
+agent_service_template        = "<path/to/service/template>"
+agent_initial_ingress_path    = "<path/to/initial/ingress>"
+agent_blue_green_ingress_path = "<path/to/blue-green/ingress>"
