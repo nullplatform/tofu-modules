@@ -1,9 +1,0 @@
-#
-# Nullplatform Bindings - Specific Variables
-#
-# Usage: tofu plan -var-file=../common.tfvars -var-file=./terraform.tfvars
-#
-
-# GitHub Configuration
-github_organization    = "my-org"
-github_installation_id = "<github-app-installation-id>"

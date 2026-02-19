@@ -1,9 +1,0 @@
-#
-# Backend - Specific Variables
-#
-# Usage: tofu plan -var-file=./terraform.tfvars
-#
-
-aws_region    = "us-east-1"
-aws_profile   = "my-aws-profile"
-force_destroy = false
