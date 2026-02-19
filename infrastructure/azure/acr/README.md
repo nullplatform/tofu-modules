@@ -2,23 +2,23 @@
 
 ## Description
 
-Creates and configures an Azure Container Registry with admin access enabled and customizable SKU options
+Creates an Azure Container Registry with configurable SKU, zone redundancy, and retention policies
 
 ## Features
 
-- Creates an Azure Container Registry with globally unique naming validation
+- Creates an Azure Container Registry with validated naming constraints
 - Configures admin access with username and password outputs
-- Supports multiple SKU tiers (Basic, Standard, Premium)
-- Enables optional zone redundancy for high availability
+- Supports Basic, Standard, and Premium SKU tiers
+- Enables zone redundancy for high availability (Premium SKU)
 - Configures retention policies for untagged manifests
+- Provides ACR login server and credentials as outputs
 - Applies custom tags for resource organization
-- Outputs registry ID, login server, and admin credentials
 
 ## Basic Usage
 
 ```hcl
 module "acr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/acr?ref=v1.34.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/acr?ref=v1.35.0"
 
   containerregistry_name = "your-containerregistry-name"
   location               = "your-location"

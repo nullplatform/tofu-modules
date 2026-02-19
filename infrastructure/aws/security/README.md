@@ -2,23 +2,22 @@
 
 ## Description
 
-Creates AWS security groups for Istio gateways on EKS with configurable public and private gateway access controls
+Creates AWS security groups for Istio gateways with restricted health check access and configurable HTTPS traffic rules
 
 ## Features
 
-- Creates security group for Istio public gateway with HTTPS open to internet and health check restricted to VPC
-- Creates security group for Istio private gateway with all traffic restricted to VPC CIDR
+- Creates security groups for Istio public and private gateways on AWS EKS
+- Restricts health check port (15021) to VPC CIDR for enhanced security
+- Configures HTTPS (443) traffic rules with internet or VPC-only access based on gateway type
 - Automatically derives VPC ID and CIDR block from EKS cluster name
-- Supports manual override of VPC ID and network CIDR block
-- Configures health check port (15021) access restricted to VPC network
-- Manages ingress rules for HTTPS (443) and Istio health check ports
-- Allows conditional enabling of public and private gateway security groups
+- Supports manual override of VPC ID and network CIDR for custom configurations
+- Provides separate security groups for public (internet-facing) and private (internal) gateways
 
 ## Basic Usage
 
 ```hcl
 module "security" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/security?ref=v1.34.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/security?ref=v1.35.0"
 
   cluster_name = "your-cluster-name"
 }
