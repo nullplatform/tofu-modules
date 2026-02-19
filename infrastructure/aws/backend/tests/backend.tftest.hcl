@@ -78,21 +78,3 @@ run "public_access_blocked" {
   }
 }
 
-run "dynamodb_lock_table" {
-  command = plan
-
-  assert {
-    condition     = aws_dynamodb_table.tf_state_lock.name == "tf-state-lock"
-    error_message = "DynamoDB table name should be tf-state-lock"
-  }
-
-  assert {
-    condition     = aws_dynamodb_table.tf_state_lock.billing_mode == "PAY_PER_REQUEST"
-    error_message = "DynamoDB table should use PAY_PER_REQUEST billing mode"
-  }
-
-  assert {
-    condition     = aws_dynamodb_table.tf_state_lock.hash_key == "LockID"
-    error_message = "DynamoDB table hash key should be LockID"
-  }
-}

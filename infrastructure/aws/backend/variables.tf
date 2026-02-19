@@ -9,12 +9,6 @@ variable "bucket_prefix" {
   default     = "tf-state"
 }
 
-variable "dynamodb_table_name" {
-  type        = string
-  description = "Name of the DynamoDB table for state locking"
-  default     = "tf-state-lock"
-}
-
 variable "object_lock_retention_days" {
   type        = number
   description = "Number of days for S3 object lock retention in COMPLIANCE mode"
