@@ -26,3 +26,9 @@ variable "network_cidr" {
   description = "Override: The network CIDR block. If empty, derived automatically from VPC."
   default     = ""
 }
+
+variable "additional_network_cidrs" {
+  type        = list(string)
+  description = "Additional CIDR blocks to allow in security group rules (e.g., peered VPC, on-premises network)."
+  default     = []
+}
