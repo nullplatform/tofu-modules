@@ -2,11 +2,11 @@
 
 ## Description
 
-Configures Nullplatform provider settings for Google Kubernetes Engine (GKE) clusters
+Configures nullplatform provider settings for Google Kubernetes Engine (GKE) clusters
 
 ## Features
 
-- Creates Nullplatform provider configuration for GKE clusters
+- Creates nullplatform provider configuration for GKE clusters
 - Configures cluster identification with name, location, and namespace
 - Defines gateway settings for public and private traffic routing
 - Manages Kubernetes resource allocation and limit settings
@@ -71,7 +71,7 @@ resource "example_resource" "this" {
 | <a name="input_memory_cpu_ratio"></a> [memory\_cpu\_ratio](#input\_memory\_cpu\_ratio) | Amount of MiB of ram per CPU. Default value is 2048, it means 1 core for every 2 GiB of RAM | `string` | `""` | no |
 | <a name="input_memory_request_to_limit_ratio"></a> [memory\_request\_to\_limit\_ratio](#input\_memory\_request\_to\_limit\_ratio) | Sets the ratio between requested and limit memory. Default value is 1, must be a number greater than or equal to 1 | `string` | `""` | no |
 | <a name="input_namespace_application_default"></a> [namespace\_application\_default](#input\_namespace\_application\_default) | Default Kubernetes namespace for applications | `string` | `"nullplatform"` | no |
-| <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform NRN (e.g., organization=X:account=Y:namespace=Z) | `string` | n/a | yes |
+| <a name="input_nrn"></a> [nrn](#input\_nrn) | nullplatform NRN (e.g., organization=X:account=Y:namespace=Z) | `string` | n/a | yes |
 | <a name="input_object_modifiers"></a> [object\_modifiers](#input\_object\_modifiers) | List of modifications to dynamically modify k8s objects | `list(object)` | `[]` | no |
 | <a name="input_private_gateway_name"></a> [private\_gateway\_name](#input\_private\_gateway\_name) | Name of the private gateway | `string` | `""` | no |
 | <a name="input_public_gateway_name"></a> [public\_gateway\_name](#input\_public\_gateway\_name) | Name of the public gateway | `string` | n/a | yes |
