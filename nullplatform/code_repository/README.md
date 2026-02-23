@@ -2,23 +2,22 @@
 
 ## Description
 
-Configures Git provider integrations (GitHub, GitLab, or Azure DevOps) for Nullplatform with provider-specific authentication and repository settings
+Configures Git provider integrations for Nullplatform supporting GitHub, GitLab, and Azure DevOps
 
 ## Features
 
-- Supports multiple Git providers including GitHub, GitLab, and Azure DevOps
-- Configures provider-specific authentication and access tokens
-- Manages repository creation settings and organizational structure
-- Handles GitLab group paths and collaborator permissions
-- Configures GitHub organization and app installation settings
-- Sets up Azure DevOps project and agent pool configuration
-- Integrates with Nullplatform API for centralized Git provider management
+- Configures GitHub provider with organization and installation ID settings
+- Configures GitLab provider with group path, access token, and collaborator management
+- Configures Azure DevOps provider with project, access token, and agent pool settings
+- Manages provider-specific authentication and access control
+- Supports dynamic provider selection through conditional resource creation
+- Handles lifecycle management with attribute ignore changes
 
 ## Basic Usage
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.34.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.35.0"
 
   git_provider = "your-git-provider"
   np_api_key   = "your-np-api-key"
@@ -30,7 +29,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.34.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.35.0"
 
   git_provider           = "github"
   github_installation_id = "your-github-installation-id"  # Required when git_provider = "github"
@@ -44,7 +43,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.34.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.35.0"
 
   git_provider                = "gitlab"
   gitlab_access_token         = "your-gitlab-access-token"  # Required when git_provider = "gitlab"

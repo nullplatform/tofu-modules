@@ -13,6 +13,16 @@ repos:
         - --args=-no-color
       exclude: '\.terraform/|\.terragrunt-cache/'
 
+- repo: local
+  hooks:
+    - id: tofu-test
+      name: tofu test
+      entry: scripts/tofu-test.sh
+      language: script
+      files: '\.tf$|\.tftest\.hcl$'
+      require_serial: true
+      exclude: '\.terraform/|\.terragrunt-cache/'
+
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v6.0.0  # Use the ref you want to point at
   hooks:
