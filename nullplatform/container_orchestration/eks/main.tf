@@ -1,20 +1,20 @@
 locals {
   cluster = merge(
     {
-      id             = var.cluster_name
-      resource_group = var.resource_group
-      namespace      = var.namespace_application_default
+      id = var.cluster_name
     },
-    var.authentication_mode != "" ? { authentication_mode = var.authentication_mode } : {},
+    var.namespace_application_default != "" ? { namespace = var.namespace_application_default } : {},
+    var.use_nullplatform_namespace ? { use_nullplatform_namespace = var.use_nullplatform_namespace } : {},
   )
 
-  gateway = merge(
-    {
-      namespace   = var.gateway_namespace
-      public_name = var.public_gateway_name
-    },
-    var.private_gateway_name != "" ? { private_name = var.private_gateway_name } : {},
-  )
+  balancer = { for k, v in {
+    public_name  = var.public_balancer_name
+    private_name = var.private_balancer_name
+  } : k => v if v != "" }
+
+  network = { for k, v in {
+    balancer_group_suffix = var.balancer_group_suffix
+  } : k => v if v != "" }
 
   resource_management = { for k, v in {
     memory_cpu_ratio              = var.memory_cpu_ratio
@@ -31,8 +31,9 @@ locals {
   attributes = merge(
     {
       cluster = local.cluster
-      gateway = local.gateway
     },
+    length(local.balancer) > 0 ? { balancer = local.balancer } : {},
+    length(local.network) > 0 ? { network = local.network } : {},
     length(local.resource_management) > 0 ? { resource_management = local.resource_management } : {},
     length(local.security) > 0 ? { security = local.security } : {},
     var.traffic_manager_version != "" ? { traffic_manager = { version = var.traffic_manager_version } } : {},
@@ -40,10 +41,10 @@ locals {
   )
 }
 
-resource "nullplatform_provider_config" "aks_config" {
+resource "nullplatform_provider_config" "eks_config" {
   nrn = var.nrn
 
-  type       = "aks-configuration"
+  type       = "eks-configuration"
   dimensions = var.dimensions
   attributes = jsonencode(local.attributes)
 }

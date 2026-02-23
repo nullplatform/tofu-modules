@@ -1,18 +1,9 @@
 locals {
-  cluster = merge(
-    {
-      id             = var.cluster_name
-      resource_group = var.resource_group
-      namespace      = var.namespace_application_default
-    },
-    var.authentication_mode != "" ? { authentication_mode = var.authentication_mode } : {},
-  )
-
   gateway = merge(
     {
-      namespace   = var.gateway_namespace
       public_name = var.public_gateway_name
     },
+    var.gateway_namespace != "" ? { namespace = var.gateway_namespace } : {},
     var.private_gateway_name != "" ? { private_name = var.private_gateway_name } : {},
   )
 
@@ -30,7 +21,11 @@ locals {
 
   attributes = merge(
     {
-      cluster = local.cluster
+      cluster = {
+        id        = var.cluster_name
+        location  = var.location
+        namespace = var.namespace_application_default
+      }
       gateway = local.gateway
     },
     length(local.resource_management) > 0 ? { resource_management = local.resource_management } : {},
@@ -40,10 +35,10 @@ locals {
   )
 }
 
-resource "nullplatform_provider_config" "aks_config" {
+resource "nullplatform_provider_config" "gke_config" {
   nrn = var.nrn
 
-  type       = "aks-configuration"
+  type       = "gke-configuration"
   dimensions = var.dimensions
   attributes = jsonencode(local.attributes)
 }
