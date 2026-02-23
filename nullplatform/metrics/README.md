@@ -2,22 +2,21 @@
 
 ## Description
 
-Configures a Prometheus provider connection in nullplatform with customizable server URL and dimensions
+Configures a Prometheus provider for monitoring and metrics collection in nullplatform
 
 ## Features
 
-- Creates a nullplatform provider configuration for Prometheus integration
-- Supports custom Prometheus server URL or auto-generates default cluster URL
-- Configures Prometheus server endpoint using local or external URLs
-- Allows custom dimensions to be associated with the provider configuration
-- Supports namespace-based Prometheus deployments in Kubernetes clusters
-- Implements lifecycle management to ignore attribute changes after creation
+- Creates a nullplatform provider configuration for Prometheus
+- Supports custom Prometheus server URL or auto-generates from namespace
+- Configures Prometheus server endpoint with customizable namespace
+- Enables dimension-based resource organization
+- Manages lifecycle to ignore attribute changes after creation
 
 ## Basic Usage
 
 ```hcl
 module "metrics" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/metrics?ref=v1.35.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/metrics?ref=v1.36.0"
 
   np_api_key = "your-np-api-key"
   nrn        = "your-nrn"

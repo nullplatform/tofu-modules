@@ -2,21 +2,22 @@
 
 ## Description
 
-Creates an IAM role with Route 53 permissions for cert-manager to perform DNS-01 ACME challenges in Kubernetes
+Creates an IAM role and policy for cert-manager to manage Route 53 DNS records for SSL/TLS certificate validation using OIDC authentication in Kubernetes
 
 ## Features
 
-- Creates IAM role with OIDC provider trust for cert-manager Kubernetes service account
-- Configures Route 53 permissions for managing DNS records in public and private hosted zones
-- Grants permissions for DNS-01 challenge validation via Route 53
-- Supports both public and private hosted zone DNS record management
-- Implements least-privilege IAM policy for cert-manager operations
+- Creates an IAM role with OIDC provider trust for Kubernetes service accounts
+- Configures IAM policies for Route 53 DNS record management
+- Supports DNS01 challenge validation for SSL/TLS certificates
+- Integrates with cert-manager Kubernetes service account
+- Manages both public and private Route 53 hosted zones
+- Provides secure authentication using AWS IAM OIDC provider
 
 ## Basic Usage
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/cert_manager?ref=v1.35.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/cert_manager?ref=v1.36.0"
 
   aws_iam_openid_connect_provider_arn = "your-aws-iam-openid-connect-provider-arn"
   cluster_name                        = "your-cluster-name"

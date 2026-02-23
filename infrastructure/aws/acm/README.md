@@ -2,21 +2,22 @@
 
 ## Description
 
-Creates an AWS ACM wildcard SSL certificate with automatic DNS validation via Route53
+Creates and validates an AWS ACM wildcard certificate using DNS validation with Route53
 
 ## Features
 
 - Creates a wildcard ACM certificate for the specified domain
-- Configures DNS validation using Route53 records
-- Supports additional subject alternative names (SANs)
-- Automatically validates the certificate using Route53 DNS records
-- Implements create_before_destroy lifecycle to prevent downtime during certificate renewal
+- Configures DNS validation method using Route53
+- Automatically creates Route53 validation records
+- Supports subject alternative names for additional domains
+- Implements create_before_destroy lifecycle for zero-downtime certificate rotation
+- Waits for certificate validation to complete before marking as ready
 
 ## Basic Usage
 
 ```hcl
 module "acm" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/acm?ref=v1.35.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/acm?ref=v1.36.0"
 
   domain_name = "your-domain-name"
   zone_id     = "your-zone-id"

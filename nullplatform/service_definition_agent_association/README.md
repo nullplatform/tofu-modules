@@ -2,23 +2,23 @@
 
 ## Description
 
-Creates and manages a nullplatform notification channel with agent configuration and service filtering
+Creates and configures a Nullplatform notification channel with agent-based command execution and service filtering capabilities
 
 ## Features
 
-- Creates a nullplatform notification channel with configurable type and sources
-- Configures agent commands with custom cmdline, arguments, and environment variables
-- Supports dynamic workflow override paths and service paths for agent execution
+- Creates a Nullplatform notification channel with configurable type and sources
+- Configures agent-based command execution with dynamic command line construction
+- Supports custom workflow override paths and service configuration paths
 - Filters notifications based on service specification slug
-- Manages tag-based agent selection using configurable selectors
-- Triggers channel replacement when API key changes
-- Outputs the created notification channel ID for reference
+- Manages API key lifecycle with automatic resource replacement on key changes
+- Enables tag-based agent selection and filtering
+- Supports optional command arguments and environment variables
 
 ## Basic Usage
 
 ```hcl
 module "service_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v1.35.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v1.36.0"
 
   api_key        = "your-api-key"
   tags_selectors = "your-tags-selectors"
