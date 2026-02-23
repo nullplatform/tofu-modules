@@ -2,23 +2,22 @@
 
 ## Description
 
-Creates a private Google Kubernetes Engine (GKE) cluster with configurable node pools and network settings
+Provisions a private Google Kubernetes Engine (GKE) cluster with public API endpoint access
 
 ## Features
 
-- Creates a private GKE cluster with public API endpoint and private nodes
-- Configures VPC-native networking with separate IP ranges for pods and services
-- Supports multiple node pools with customizable machine types and autoscaling
-- Grants Artifact Registry access through managed service accounts
-- Configures master authorized networks for API server access control
-- Removes default node pool for enhanced security and customization
-- Supports deletion protection and configurable master network CIDR block
+- Creates a private GKE cluster with private nodes and public API endpoint
+- Configures VPC-native networking with secondary IP ranges for pods and services
+- Provisions customizable node pools with autoscaling capabilities
+- Manages master authorized networks for secure API server access
+- Creates service account with Artifact Registry access for container image pulling
+- Supports deletion protection and security defaults with removed default node pool
 
 ## Basic Usage
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/gke?ref=v1.35.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/gke?ref=v1.36.0"
 
   cluster_name      = "your-cluster-name"
   ip_range_pods     = "your-ip-range-pods"
