@@ -2,21 +2,22 @@
 
 ## Description
 
-Creates an Azure Private DNS Zone with configurable virtual network links for private endpoint name resolution
+Creates an Azure Private DNS Zone with virtual network links for private endpoint DNS resolution
 
 ## Features
 
-- Creates an Azure Private DNS Zone with a specified domain name
-- Supports linking multiple virtual networks to the private DNS zone
-- Configures optional VM auto-registration per virtual network link
-- Manages resource tagging for organizational purposes
-- Outputs DNS zone details and virtual network link IDs for reference
+- Creates an Azure Private DNS Zone with a custom domain name
+- Configures virtual network links to enable DNS resolution within specified VNets
+- Supports multiple virtual network links with individual registration settings
+- Enables optional VM auto-registration for specified virtual networks
+- Applies custom tags to the private DNS zone and virtual network links
+- Outputs DNS zone information and virtual network link IDs for reference
 
 ## Basic Usage
 
 ```hcl
 module "private_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/private_dns?ref=v1.34.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/private_dns?ref=v1.35.0"
 
   domain_name           = "your-domain-name"
   resource_group_name   = "your-resource-group-name"

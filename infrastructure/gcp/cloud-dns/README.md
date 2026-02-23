@@ -8,15 +8,15 @@ Creates and manages a Google Cloud DNS managed zone with support for both public
 
 - Creates a Google Cloud DNS managed zone
 - Supports both public and private zone visibility
-- Configures private zone network associations dynamically
-- Manages DNS zone naming and domain configuration
+- Configures private zone network associations when visibility is set to private
 - Outputs zone name and name servers for DNS delegation
+- Manages DNS zone naming with automatic trailing dot handling
 
 ## Basic Usage
 
 ```hcl
 module "cloud-dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/cloud-dns?ref=v1.34.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/cloud-dns?ref=v1.35.0"
 
   domain_name = "your-domain-name"
   project_id  = "your-project-id"

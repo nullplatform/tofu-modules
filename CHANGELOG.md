@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.35.0](https://github.com/nullplatform/tofu-modules/compare/v1.34.0...v1.35.0) (2026-02-19)
+
+
+### Features
+
+* oci test ([#213](https://github.com/nullplatform/tofu-modules/issues/213)) ([33594c7](https://github.com/nullplatform/tofu-modules/commit/33594c7ffcb07f79ecc914bbbd482bedde9dae08))
+
 ## [1.34.0](https://github.com/nullplatform/tofu-modules/compare/v1.33.1...v1.34.0) (2026-02-13)
 
 

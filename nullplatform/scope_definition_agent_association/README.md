@@ -2,23 +2,23 @@
 
 ## Description
 
-Creates and manages a Nullplatform notification channel with agent configuration and template-based setup
+Creates and manages Nullplatform notification channels with agent configuration and optional override support
 
 ## Features
 
-- Creates notification channels from remote JSON templates using gomplate processing
-- Configures agent-based notification channels with dynamic command injection
-- Supports optional configuration overrides via command line flags
-- Manages notification channel lifecycle with API key-based replacement triggers
-- Processes template variables including NRN, service paths, and specification identifiers
-- Applies tag-based selectors for channel and agent filtering
-- Preserves existing filters and source configurations across updates
+- Creates notification channels from templated specifications
+- Configures agent-based notification channels with API key authentication
+- Supports dynamic command configuration with environment variable injection
+- Enables optional override paths for custom scope configurations
+- Manages tag-based selector filtering for channels and agents
+- Handles automatic resource replacement on API key changes
+- Preserves existing filters, source, and type configurations through lifecycle management
 
 ## Basic Usage
 
 ```hcl
 module "scope_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=v1.34.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=v1.35.0"
 
   api_key                  = "your-api-key"
   nrn                      = "your-nrn"

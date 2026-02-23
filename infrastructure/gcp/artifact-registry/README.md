@@ -2,21 +2,21 @@
 
 ## Description
 
-Creates a Google Artifact Registry repository with an associated service account for pushing and pulling artifacts
+Creates a Google Artifact Registry repository with a dedicated service account for pushing and pulling artifacts
 
 ## Features
 
 - Creates a Google Artifact Registry repository with configurable format (DOCKER, NPM, PYTHON, etc.)
 - Provisions a dedicated service account with Artifact Registry writer permissions
-- Generates service account key for authentication
-- Assigns IAM roles automatically for repository access
-- Outputs repository URL and credentials for CI/CD integration
+- Generates service account keys for authentication
+- Supports multiple artifact formats through configurable repository format
+- Outputs repository URL and service account credentials for CI/CD integration
 
 ## Basic Usage
 
 ```hcl
 module "artifact-registry" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/artifact-registry?ref=v1.34.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/artifact-registry?ref=v1.35.0"
 
   location      = "your-location"
   project_id    = "your-project-id"
