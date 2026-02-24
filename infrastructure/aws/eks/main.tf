@@ -18,7 +18,7 @@ module "eks" {
       from_port   = 15021
       to_port     = 15021
       type        = "ingress"
-      cidr_blocks = [data.aws_vpc.this.cidr_block]
+      cidr_blocks = concat([data.aws_vpc.this.cidr_block], var.additional_network_cidrs)
     }
     ingress_nlb_https = {
       description = "Allow HTTPS traffic from NLB"
@@ -26,7 +26,7 @@ module "eks" {
       from_port   = 443
       to_port     = 443
       type        = "ingress"
-      cidr_blocks = [data.aws_vpc.this.cidr_block]
+      cidr_blocks = concat([data.aws_vpc.this.cidr_block], var.additional_network_cidrs)
     }
   } : {}
 

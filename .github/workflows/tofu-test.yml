@@ -32,15 +32,20 @@ jobs:
     with:
       modules: '["nullplatform/account", "nullplatform/api_key", "nullplatform/dimensions", "nullplatform/users", "nullplatform/metrics", "nullplatform/asset/docker_server", "nullplatform/cloud/azure/cloud", "nullplatform/cloud/gcp/cloud", "nullplatform/cloud/aws/cloud", "nullplatform/code_repository"]'
 
+  test-container-orchestration-modules:
+    uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
+    with:
+      modules: '["nullplatform/container_orchestration/aks", "nullplatform/container_orchestration/eks", "nullplatform/container_orchestration/gke"]'
+
   test-gate:
     name: All module tests passed
     runs-on: ubuntu-24.04
-    needs: [test-azure-modules, test-commons-modules, test-aws-modules, test-gcp-modules, test-nullplatform-modules]
+    needs: [test-azure-modules, test-commons-modules, test-aws-modules, test-gcp-modules, test-nullplatform-modules, test-container-orchestration-modules]
     if: always()
     steps:
       - name: Check test results
         run: |
-          if [[ "${{ needs.test-azure-modules.result }}" != "success" || "${{ needs.test-commons-modules.result }}" != "success" || "${{ needs.test-aws-modules.result }}" != "success" || "${{ needs.test-gcp-modules.result }}" != "success" || "${{ needs.test-nullplatform-modules.result }}" != "success" ]]; then
+          if [[ "${{ needs.test-azure-modules.result }}" != "success" || "${{ needs.test-commons-modules.result }}" != "success" || "${{ needs.test-aws-modules.result }}" != "success" || "${{ needs.test-gcp-modules.result }}" != "success" || "${{ needs.test-nullplatform-modules.result }}" != "success" || "${{ needs.test-container-orchestration-modules.result }}" != "success" ]]; then
             echo "One or more test jobs failed"
             exit 1
           fi
