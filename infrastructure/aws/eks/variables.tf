@@ -121,3 +121,9 @@ variable "security_group_additional_rules" {
   type        = bool
   default     = true
 }
+
+variable "additional_network_cidrs" {
+  type        = list(string)
+  description = "Additional CIDR blocks to allow in security group rules (e.g., peered VPC, on-premises network)."
+  default     = []
+}

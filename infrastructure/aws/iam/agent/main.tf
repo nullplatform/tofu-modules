@@ -46,13 +46,13 @@ resource "aws_iam_policy" "nullplatform_route53_policy" {
         "Resource" : [
           "arn:aws:route53:::hostedzone/*"
         ],
-        "Condition" : {
-          "StringEquals" : {
-            "aws:RequestedRegion" : [
-              data.aws_region.current.region
-            ]
-          }
-        }
+        # "Condition" : {
+        #   "StringEquals" : {
+        #     "aws:RequestedRegion" : [
+        #       data.aws_region.current.region
+        #     ]
+        #   }
+        # }
       }
     ]
   })
@@ -96,15 +96,13 @@ resource "aws_iam_policy" "nullplatform_elb_policy" {
             "arn:aws:elasticloadbalancing:*:*:loadbalancer/app/k8s-nullplatform-*",
             "arn:aws:elasticloadbalancing:*:*:targetgroup/k8s-nullplatform-*"
           ],
-          "Condition" : {
-            "StringEquals" : {
-              "aws:RequestedRegion" : [
-                "us-east-1",
-                "us-west-2",
-                "eu-west-1"
-              ]
-            }
-          }
+          # "Condition" : {
+          #   "StringEquals" : {
+          #     "aws:RequestedRegion" : [
+          #       data.aws_region.current.region
+          #     ]
+          #   }
+          # }
         }
       ]
     }
@@ -137,13 +135,13 @@ resource "aws_iam_policy" "nullplatform_eks_policy" {
           "arn:aws:eks:*:*:nodegroup/*",
           "arn:aws:eks:*:*:addon/*"
         ],
-        "Condition" : {
-          "StringEquals" : {
-            "aws:RequestedRegion" : [
-              data.aws_region.current.region
-            ]
-          }
-        }
+        # "Condition" : {
+        #   "StringEquals" : {
+        #     "aws:RequestedRegion" : [
+        #       data.aws_region.current.region
+        #     ]
+        #   }
+        # }
       }
     ]
   })
@@ -166,13 +164,13 @@ resource "aws_iam_policy" "nullplatform_avp_policy" {
           "verifiedpermissions:*"
         ],
         "Resource" : "*",
-        "Condition" : {
-          "StringEquals" : {
-            "aws:RequestedRegion" : [
-              data.aws_region.current.region
-            ]
-          }
-        }
+        # "Condition" : {
+        #   "StringEquals" : {
+        #     "aws:RequestedRegion" : [
+        #       data.aws_region.current.region
+        #     ]
+        #   }
+        # }
       }
     ]
   })

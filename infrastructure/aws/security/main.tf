@@ -89,6 +89,21 @@ resource "aws_vpc_security_group_ingress_rule" "public_gateway_health_check" {
   }
 }
 
+resource "aws_vpc_security_group_ingress_rule" "public_gateway_health_check_additional" {
+  for_each = var.gateways_enabled ? toset(var.additional_network_cidrs) : toset([])
+
+  security_group_id = aws_security_group.public_gateway[0].id
+  description       = "Istio health check from additional CIDR"
+  from_port         = 15021
+  to_port           = 15021
+  ip_protocol       = "tcp"
+  cidr_ipv4         = each.value
+
+  tags = {
+    Name = "${var.cluster_name}-istio-public-health-check-additional"
+  }
+}
+
 resource "aws_vpc_security_group_egress_rule" "public_gateway_all" {
   count = var.gateways_enabled ? 1 : 0
 
@@ -149,6 +164,36 @@ resource "aws_vpc_security_group_ingress_rule" "private_gateway_health_check" {
 
   tags = {
     Name = "${var.cluster_name}-istio-private-health-check"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "private_gateway_https_additional" {
+  for_each = var.gateway_internal_enabled ? toset(var.additional_network_cidrs) : toset([])
+
+  security_group_id = aws_security_group.private_gateway[0].id
+  description       = "HTTPS from additional CIDR"
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
+  cidr_ipv4         = each.value
+
+  tags = {
+    Name = "${var.cluster_name}-istio-private-https-additional"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "private_gateway_health_check_additional" {
+  for_each = var.gateway_internal_enabled ? toset(var.additional_network_cidrs) : toset([])
+
+  security_group_id = aws_security_group.private_gateway[0].id
+  description       = "Istio health check from additional CIDR"
+  from_port         = 15021
+  to_port           = 15021
+  ip_protocol       = "tcp"
+  cidr_ipv4         = each.value
+
+  tags = {
+    Name = "${var.cluster_name}-istio-private-health-check-additional"
   }
 }
 
