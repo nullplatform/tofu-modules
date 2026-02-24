@@ -10,16 +10,16 @@ resource "aws_iam_role" "nullplatform_application_role" {
           AWS = var.application_manager_assume_role
         },
         Action = "sts:AssumeRole",
-        Condition = {
-          StringEquals = {
-            "aws:RequestedRegion" = [
-              data.aws_region.current.region
-            ]
-          },
-          DateGreaterThan = {
-            "aws:CurrentTime" = "2024-01-01T00:00:00Z"
-          }
-        }
+        # Condition = {
+        #   StringEquals = {
+        #     "aws:RequestedRegion" = [
+        #       data.aws_region.current.region
+        #     ]
+        #   },
+        #   DateGreaterThan = {
+        #     "aws:CurrentTime" = "2024-01-01T00:00:00Z"
+        #   }
+        # }
       }
     ]
   })
@@ -49,13 +49,13 @@ resource "aws_iam_policy" "nullplatform_ecr_manager_policy" {
         Resource = [
           "arn:aws:ecr:*:*:repository/*"
         ],
-        Condition = {
-          StringEquals = {
-            "aws:RequestedRegion" = [
-              data.aws_region.current.region
-            ]
-          }
-        }
+        # Condition = {
+        #   StringEquals = {
+        #     "aws:RequestedRegion" = [
+        #       data.aws_region.current.region
+        #     ]
+        #   }
+        # }
       },
       {
         Effect = "Allow",
