@@ -2,23 +2,23 @@
 
 ## Description
 
-Creates an Azure Kubernetes Service (AKS) cluster with system and user node pools, workload identity, and optional ACR integration
+Creates an Azure Kubernetes Service (AKS) cluster with configurable node pools, networking, RBAC, and workload identity support
 
 ## Features
 
-- Creates an AKS cluster with RBAC and Azure AD integration enabled
-- Configures system node pool with auto-scaling and availability zones
-- Provisions user node pool with configurable VM sizes and auto-scaling capabilities
-- Enables workload identity and OIDC issuer for modern authentication
-- Supports private cluster mode for enhanced security
-- Integrates with Azure Container Registry for image pulling
-- Configures API server authorized IP ranges for network access control
+- Creates an AKS cluster with system and user node pools in specified subnet
+- Configures Azure AD integration with RBAC and workload identity enabled
+- Supports private cluster mode with configurable API server access restrictions
+- Enables automatic scaling for user node pools across multiple availability zones
+- Integrates with Azure Container Registry for image pull access
+- Configures OIDC issuer for workload identity authentication
+- Supports custom Kubernetes version and VM sizes for node pools
 
 ## Basic Usage
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v1.34.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v1.36.0"
 
   cluster_name        = "your-cluster-name"
   location            = "your-location"

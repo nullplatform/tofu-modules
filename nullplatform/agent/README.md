@@ -2,23 +2,23 @@
 
 ## Description
 
-Deploys and configures the Nullplatform agent on Kubernetes clusters across multiple cloud providers using Helm
+Deploys and configures the Nullplatform agent on Kubernetes clusters across AWS, GCP, Azure, or OCI using Helm
 
 ## Features
 
-- Deploys Nullplatform agent to Kubernetes clusters via Helm chart
-- Supports multi-cloud deployments across AWS, GCP, Azure, and OCI
+- Deploys Nullplatform agent to Kubernetes using Helm chart
 - Configures cloud-specific authentication and networking settings
-- Manages agent repositories and tag-based resource selection
-- Provides DNS and domain configuration options
-- Executes custom initialization scripts during agent startup
-- Implements automatic recreation on API key changes
+- Supports multiple cloud providers including AWS, GCP, Azure, and OCI
+- Manages agent repository configurations with scope and extra repositories
+- Provides DNS and domain configuration for resource routing
+- Enables custom initialization scripts during agent startup
+- Integrates with cloud IAM roles for secure authentication
 
 ## Basic Usage
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.34.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.36.0"
 
   api_key        = "your-api-key"
   cloud_provider = "your-cloud-provider"
@@ -33,7 +33,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.34.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.36.0"
 
   api_key          = "your-api-key"
   aws_iam_role_arn = "your-aws-iam-role-arn"  # Required when cloud_provider = "aws"
@@ -49,7 +49,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.34.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.36.0"
 
   api_key        = "your-api-key"
   cloud_provider = "gcp"
@@ -64,7 +64,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.34.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.36.0"
 
   api_key                = "your-api-key"
   azure_client_id        = "your-azure-client-id"  # Required when cloud_provider = "azure"
@@ -87,7 +87,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.34.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.36.0"
 
   api_key        = "your-api-key"
   cloud_provider = "oci"

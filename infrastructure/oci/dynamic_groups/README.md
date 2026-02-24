@@ -2,23 +2,23 @@
 
 ## Description
 
-Creates OCI dynamic groups and IAM policies for OKE Enhanced Workload Identity to grant Kubernetes workloads access to Oracle Cloud Infrastructure resources
+Creates an OCI dynamic group and IAM policy for OKE Enhanced Workload Identity to enable Kubernetes workloads to access Oracle Cloud Infrastructure resources
 
 ## Features
 
-- Creates dynamic group for OKE workload identity matching specific cluster, namespace, and service account
-- Generates IAM policies scoped to tenancy or compartment level automatically
-- Supports optional DNS permissions for managing OCI DNS zones and records
-- Allows custom policy statements to grant additional OCI resource permissions
-- Provides workload identity conditions for use in external policy definitions
-- Implements recommended OCI request.principal approach for workload identity validation
-- Handles both tenancy root and compartment-level policy scoping automatically
+- Creates a dynamic group at tenancy level matching OKE workload identity criteria
+- Generates matching rules based on cluster ID, namespace, and service account
+- Supports automatic DNS policy statements for DNS zone management
+- Allows custom IAM policy statements for additional resource permissions
+- Automatically detects and configures tenancy-level or compartment-level policy scope
+- Provides workload identity conditions as outputs for custom policy creation
+- Supports both defined and freeform tags for resource organization
 
 ## Basic Usage
 
 ```hcl
 module "dynamic_groups" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/dynamic_groups?ref=v1.34.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/dynamic_groups?ref=v1.36.0"
 
   cluster_id      = "your-cluster-id"
   compartment_id  = "your-compartment-id"
