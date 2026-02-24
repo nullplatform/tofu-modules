@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.37.0](https://github.com/nullplatform/tofu-modules/compare/v1.36.0...v1.37.0) (2026-02-24)
+
+
+### Features
+
+* rename route53 to dns and add diagnose actions to scope definition ([#215](https://github.com/nullplatform/tofu-modules/issues/215)) ([a40c98b](https://github.com/nullplatform/tofu-modules/commit/a40c98b9d3a092cc6eb132b770edf11c3f225118))
+
 ## [1.36.0](https://github.com/nullplatform/tofu-modules/compare/v1.35.0...v1.36.0) (2026-02-23)
 
 
