@@ -75,7 +75,7 @@ resource "aws_vpc_security_group_ingress_rule" "public_gateway_https" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "public_gateway_health_check" {
-  count = var.gateways_enabled ? 1 : 0
+  count = var.gateways_enabled && var.health_check_rules_enabled ? 1 : 0
 
   security_group_id = aws_security_group.public_gateway[0].id
   description       = "Istio health check from VPC only"
@@ -90,7 +90,7 @@ resource "aws_vpc_security_group_ingress_rule" "public_gateway_health_check" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "public_gateway_health_check_additional" {
-  for_each = var.gateways_enabled ? toset(var.additional_network_cidrs) : toset([])
+  for_each = var.gateways_enabled && var.health_check_rules_enabled ? toset(var.additional_network_cidrs) : toset([])
 
   security_group_id = aws_security_group.public_gateway[0].id
   description       = "Istio health check from additional CIDR"
@@ -153,7 +153,7 @@ resource "aws_vpc_security_group_ingress_rule" "private_gateway_https" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "private_gateway_health_check" {
-  count = var.gateway_internal_enabled ? 1 : 0
+  count = var.gateway_internal_enabled && var.health_check_rules_enabled ? 1 : 0
 
   security_group_id = aws_security_group.private_gateway[0].id
   description       = "Istio health check from VPC only"
@@ -183,7 +183,7 @@ resource "aws_vpc_security_group_ingress_rule" "private_gateway_https_additional
 }
 
 resource "aws_vpc_security_group_ingress_rule" "private_gateway_health_check_additional" {
-  for_each = var.gateway_internal_enabled ? toset(var.additional_network_cidrs) : toset([])
+  for_each = var.gateway_internal_enabled && var.health_check_rules_enabled ? toset(var.additional_network_cidrs) : toset([])
 
   security_group_id = aws_security_group.private_gateway[0].id
   description       = "Istio health check from additional CIDR"

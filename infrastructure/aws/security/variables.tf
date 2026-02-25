@@ -32,3 +32,9 @@ variable "additional_network_cidrs" {
   description = "Additional CIDR blocks to allow in security group rules (e.g., peered VPC, on-premises network)."
   default     = []
 }
+
+variable "health_check_rules_enabled" {
+  type        = bool
+  description = "Whether to create port 15021 (Istio health check) inbound rules on the gateway SGs. Set to false when using ALB (health checks are outbound from ALB, not inbound). Only needed for NLB/direct access patterns."
+  default     = true
+}
