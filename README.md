@@ -346,10 +346,10 @@ module "acr" {
 
 Each module must include its own `README.md` file describing:
 
-- **Purpose** — what the module does and when to use it.  
-- **Inputs** — variables (`variables.tf`) with descriptions, types, and default values.  
-- **Outputs** — (`outputs.tf`) explaining what’s returned.  
-- **Usage examples** — small working HCL snippets.  
+- **Purpose** — what the module does and when to use it.
+- **Inputs** — variables (`variables.tf`) with descriptions, types, and default values.
+- **Outputs** — (`outputs.tf`) explaining what’s returned.
+- **Usage examples** — small working HCL snippets.
 - **Notes** — any internal dependencies, restrictions, or compatibility details.
 
 
@@ -357,9 +357,9 @@ Each module must include its own `README.md` file describing:
 
 In `.github/workflows/`, you can include workflows for:
 
-- Terraform / Tofu syntax validation.  
-- Auto-formatting with `tofu fmt`.  
-- Logical validation using `tofu validate`.  
+- Terraform / Tofu syntax validation.
+- Auto-formatting with `tofu fmt`.
+- Logical validation using `tofu validate`.
 
 These ensure code consistency and prevent configuration drift.
 
@@ -373,10 +373,10 @@ These ensure code consistency and prevent configuration drift.
 
 ## 🛠️ Best practices
 
-- Keep each module isolated: one module = one clear responsibility.  
-- Avoid circular dependencies between modules.  
-- Document all variables (mark required vs optional).  
-- Tag and version releases before using them in production.  
+- Keep each module isolated: one module = one clear responsibility.
+- Avoid circular dependencies between modules.
+- Document all variables (mark required vs optional).
+- Tag and version releases before using them in production.
 - Centralize repeated logic in these modules to avoid duplication.
 
 
@@ -441,6 +441,8 @@ brew install pre-commit
 # Install the commit-msg hook
 pre-commit install --hook-type commit-msg
 ```
+
+
 
 ---
 
