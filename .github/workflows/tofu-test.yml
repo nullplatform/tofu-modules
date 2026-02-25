@@ -2,11 +2,8 @@ name: Tofu Unit Tests
 
 on:
   pull_request:
-    branches:
-      - main
-  push:
-    branches: [ release-please--branches--main ]
-  workflow_dispatch:
+    branches: [ main ]
+    types: [opened, synchronize, reopened]
 
 jobs:
   test-azure-modules:
