@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.38.0](https://github.com/nullplatform/tofu-modules/compare/v1.37.0...v1.38.0) (2026-02-25)
+
+
+### Features
+
+* edit readme ([#222](https://github.com/nullplatform/tofu-modules/issues/222)) ([4f94816](https://github.com/nullplatform/tofu-modules/commit/4f94816cb9bdbbe86b14ef8709e39f59ac34f8c2))
+
+
+### Bug Fixes
+
+* use configurable branch for notification channel template URL ([#224](https://github.com/nullplatform/tofu-modules/issues/224)) ([825343d](https://github.com/nullplatform/tofu-modules/commit/825343d9ad562cb2a48e6c207175d2ce7276112e))
+
 ## [1.37.0](https://github.com/nullplatform/tofu-modules/compare/v1.36.0...v1.37.0) (2026-02-24)
 
 

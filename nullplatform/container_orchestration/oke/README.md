@@ -2,22 +2,22 @@
 
 ## Description
 
-Configures a Nullplatform provider for Oracle Kubernetes Engine (OKE) clusters with gateway settings
+Configures Nullplatform provider settings for Oracle Container Engine for Kubernetes (OKE) clusters
 
 ## Features
 
-- Creates a Nullplatform provider configuration for OKE clusters
-- Configures cluster identification with name, namespace, and location
+- Configures Nullplatform provider for OKE cluster integration
+- Manages cluster identification and location attributes
+- Defines gateway configuration for public and private access
 - Supports custom dimensions for provider configuration
-- Configures public and private gateway settings
-- Manages default Kubernetes namespace for applications
-- Integrates OKE clusters with Nullplatform infrastructure
+- Sets default Kubernetes namespace for application deployments
+- Configures gateway namespace and naming conventions
 
 ## Basic Usage
 
 ```hcl
 module "oke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/oke?ref=v1.36.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/oke?ref=v1.38.0"
 
   cluster_name = "your-cluster-name"
   nrn          = "your-nrn"
