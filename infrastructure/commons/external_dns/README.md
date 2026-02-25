@@ -2,23 +2,23 @@
 
 ## Description
 
-Deploys and configures ExternalDNS on Kubernetes to automatically manage DNS records across multiple cloud providers including Cloudflare, AWS Route53, and OCI DNS
+Deploys and configures ExternalDNS on Kubernetes to automatically manage DNS records across multiple cloud providers (Cloudflare, AWS Route53, and OCI DNS)
 
 ## Features
 
-- Deploys ExternalDNS via Helm chart with configurable version and namespace management
-- Supports multiple DNS providers including Cloudflare, AWS Route53, and Oracle Cloud Infrastructure (OCI)
-- Configures provider-specific authentication using Kubernetes secrets and IAM roles
-- Manages DNS record synchronization policies including create-only, sync, and upsert-only modes
-- Supports both public and private DNS zone management across different cloud providers
-- Creates necessary RBAC permissions and service accounts for cloud provider integration
-- Implements domain filtering to limit DNS record management to specific domains
+- Deploys ExternalDNS using Helm chart with configurable version and namespace
+- Supports multiple DNS providers including Cloudflare, AWS Route53, and OCI DNS
+- Configures provider-specific authentication using Kubernetes secrets and service accounts
+- Manages DNS record policies with create-only, sync, and upsert-only options
+- Supports both public and private DNS zone management
+- Creates and manages Kubernetes namespace for ExternalDNS deployment
+- Configures domain filtering and TXT owner ID for DNS record management
 
 ## Basic Usage
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.38.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.38.2"
 
   dns_provider_name = "your-dns-provider-name"
   domain_filters    = "your-domain-filters"
@@ -29,7 +29,7 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.38.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.38.2"
 
   cloudflare_token  = "your-cloudflare-token"  # Required when dns_provider_name = "cloudflare"
   dns_provider_name = "cloudflare"
@@ -41,7 +41,7 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.38.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.38.2"
 
   aws_iam_role_arn  = "your-aws-iam-role-arn"  # Required when dns_provider_name = "aws"
   aws_region        = "your-aws-region"  # Required when dns_provider_name = "aws"
@@ -56,7 +56,7 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.38.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.38.2"
 
   dns_provider_name    = "oci"
   domain_filters       = "your-domain-filters"

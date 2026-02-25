@@ -2,23 +2,23 @@
 
 ## Description
 
-Deploys and configures the AWS Load Balancer Controller on an EKS cluster with necessary IAM roles and permissions
+Deploys and configures the AWS Load Balancer Controller on an EKS cluster with IAM roles for service accounts (IRSA) integration
 
 ## Features
 
-- Creates IAM role with service account binding for AWS Load Balancer Controller
-- Configures IAM policy with comprehensive permissions for managing Application and Network Load Balancers
-- Deploys AWS Load Balancer Controller via Helm chart to kube-system namespace
-- Provisions Kubernetes service account with OIDC authentication annotations
-- Supports security group management and VPC resource discovery for load balancers
-- Enables WAF, Shield, and ACM certificate integration for load balancers
-- Configures automatic cleanup and rollback capabilities for Helm deployments
+- Creates IAM role and policy for AWS Load Balancer Controller with least-privilege permissions
+- Deploys AWS Load Balancer Controller using Helm chart to kube-system namespace
+- Configures Kubernetes service account with IRSA annotations for AWS API access
+- Manages security groups and EC2 resources for load balancer provisioning
+- Supports Application Load Balancers (ALB) and Network Load Balancers (NLB) management
+- Integrates with AWS WAF, Shield, and ACM for enhanced security features
+- Enables automatic target group and listener management for Kubernetes ingress resources
 
 ## Basic Usage
 
 ```hcl
 module "alb_controller" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/alb_controller?ref=v1.38.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/alb_controller?ref=v1.38.2"
 
   aws_iam_openid_connect_provider = "your-aws-iam-openid-connect-provider"
   cluster_name                    = "your-cluster-name"

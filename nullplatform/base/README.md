@@ -2,23 +2,23 @@
 
 ## Description
 
-Deploys the Nullplatform base Helm chart to Kubernetes with support for multiple cloud providers, gateways, logging integrations, and monitoring tools
+Deploys the Nullplatform base Helm chart to Kubernetes with support for multiple cloud providers and observability integrations
 
 ## Features
 
 - Creates Kubernetes namespaces for Nullplatform tools and applications
-- Deploys nullplatform-base Helm chart with configurable version
-- Supports multiple cloud providers (EKS, GKE, AKS, OKE, ARO)
-- Configures public and private ingress controllers with custom domains
-- Integrates with multiple logging backends (Loki, GELF, Dynatrace, Datadog, New Relic, CloudWatch)
-- Manages gateway security across AWS, Azure, GCP, and OCI
-- Enables optional features including TLS, control plane, metrics server, and Gateway API
+- Deploys Nullplatform base Helm chart with configurable version and settings
+- Supports multiple cloud providers (EKS, GKE, AKS, OKE, ARO) with provider-specific configurations
+- Configures ingress controllers for public and private network scopes
+- Integrates with multiple observability platforms (Prometheus, Loki, Dynatrace, Datadog, New Relic, CloudWatch)
+- Manages gateway security configurations across AWS, Azure, GCP, and OCI
+- Enables Gateway API and custom resource definitions for advanced routing
 
 ## Basic Usage
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.38.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.38.2"
 
   k8s_provider = "your-k8s-provider"
   np_api_key   = "your-np-api-key"
@@ -30,7 +30,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.38.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.38.2"
 
   k8s_provider = "eks"
   np_api_key   = "your-np-api-key"
@@ -42,7 +42,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.38.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.38.2"
 
   k8s_provider = "gke"
   np_api_key   = "your-np-api-key"
@@ -54,7 +54,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.38.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.38.2"
 
   k8s_provider = "aks"
   np_api_key   = "your-np-api-key"
@@ -66,7 +66,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.38.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.38.2"
 
   k8s_provider = "oke"
   np_api_key   = "your-np-api-key"
@@ -78,7 +78,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.38.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.38.2"
 
   k8s_provider = "aro"
   np_api_key   = "your-np-api-key"

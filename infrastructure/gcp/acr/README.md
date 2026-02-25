@@ -2,22 +2,22 @@
 
 ## Description
 
-Creates a Google Artifact Registry repository with service account authentication for container image management
+Creates a Google Artifact Registry repository with a service account for push/pull access
 
 ## Features
 
-- Creates a Google Artifact Registry repository with configurable format (DOCKER, NPM, PYTHON, etc.)
-- Provisions a dedicated service account with artifact registry writer permissions
-- Generates service account key for programmatic authentication
+- Creates a Google Artifact Registry repository with configurable format
+- Provisions a dedicated service account for artifact registry access
+- Assigns artifactregistry.writer role to the service account
+- Generates service account key for authentication
 - Supports custom labels/tags for resource organization
-- Outputs registry URL and authentication credentials
-- Configures IAM roles for secure push/pull access
+- Outputs registry URL and sensitive service account credentials
 
 ## Basic Usage
 
 ```hcl
 module "acr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/acr?ref=v1.38.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/acr?ref=v1.38.2"
 
   containerregistry_name = "your-containerregistry-name"
   location               = "your-location"

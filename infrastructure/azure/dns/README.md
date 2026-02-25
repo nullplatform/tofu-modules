@@ -2,21 +2,21 @@
 
 ## Description
 
-Creates an Azure public DNS zone within a specified resource group
+Creates an Azure DNS zone for managing domain name system records in a specified resource group
 
 ## Features
 
-- Creates an Azure public DNS zone resource
-- Configures DNS zone with custom domain name
-- Supports custom tagging for resource organization
-- Outputs DNS zone ID and name for reference
-- Provides name server information for domain delegation
+- Creates a public Azure DNS zone with a specified domain name
+- Supports custom tagging for resource organization and management
+- Outputs DNS zone name, ID, and name servers for integration
+- Configures Azure provider with CLI authentication
+- Manages DNS zone within a specified Azure subscription and resource group
 
 ## Basic Usage
 
 ```hcl
 module "dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/dns?ref=v1.38.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/dns?ref=v1.38.2"
 
   domain_name         = "your-domain-name"
   resource_group_name = "your-resource-group-name"

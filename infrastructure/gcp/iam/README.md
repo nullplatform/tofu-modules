@@ -2,22 +2,22 @@
 
 ## Description
 
-Manages Google Cloud Platform service accounts with IAM roles and Workload Identity bindings for Kubernetes integration
+Creates and manages Google Cloud service accounts with IAM role bindings and Workload Identity configurations
 
 ## Features
 
-- Creates multiple GCP service accounts with configurable display names
-- Assigns IAM roles to service accounts at the project level
-- Configures Workload Identity bindings between GCP service accounts and Kubernetes service accounts
-- Supports multiple role assignments per service account
-- Outputs service account email addresses for reference
-- Enables secure pod-to-GCP authentication without service account keys
+- Creates multiple Google Cloud service accounts with customizable display names
+- Assigns project-level IAM roles to service accounts
+- Configures Workload Identity bindings for Kubernetes service accounts
+- Outputs a map of service account names to email addresses
+- Supports flexible role assignment per service account
+- Enables GKE workload identity integration
 
 ## Basic Usage
 
 ```hcl
 module "iam" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/iam?ref=v1.38.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/iam?ref=v1.38.2"
 
   project_id = "your-project-id"
 }
