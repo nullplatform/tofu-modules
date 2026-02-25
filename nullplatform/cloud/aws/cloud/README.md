@@ -2,22 +2,23 @@
 
 ## Description
 
-Configures Nullplatform provider with AWS account settings, networking configuration, and DNS zone management
+Configures Nullplatform provider with AWS account settings, IAM roles, and DNS networking parameters
 
 ## Features
 
-- Creates Nullplatform provider configuration for AWS integration
-- Configures AWS account ID and region information
-- Manages private and public hosted DNS zone associations
-- Supports custom domain name configuration with optional application domain prefix
-- Provides flexible dimension mapping for resource organization
-- Enables secure authentication using Nullplatform API key
+- Configures Nullplatform provider with AWS account integration
+- Sets up networking configuration with domain names and hosted zones
+- Retrieves current AWS account ID and region automatically
+- Supports both private and public DNS hosted zones
+- Manages provider configuration with lifecycle ignore changes
+- Enables optional application domain prefixing
+- Integrates with Nullplatform API using secure API key authentication
 
 ## Basic Usage
 
 ```hcl
 module "cloud" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/cloud?ref=v1.38.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/cloud?ref=v1.38.1"
 
   domain_name            = "your-domain-name"
   hosted_private_zone_id = "your-hosted-private-zone-id"

@@ -2,21 +2,21 @@
 
 ## Description
 
-Configures a Docker server provider in Nullplatform with authentication credentials and registry path settings
+Configures a Docker server provider in Nullplatform for container registry authentication and management
 
 ## Features
 
 - Creates a Nullplatform Docker server provider configuration
 - Configures Docker registry authentication with username and password
-- Sets up Docker server login endpoint and registry path
-- Supports custom Docker registry configurations
-- Manages sensitive credentials securely through Terraform
+- Supports custom Docker login server and registry path configuration
+- Manages Docker registry access through Nullplatform provider system
+- Enables secure credential storage for Docker registry authentication
 
 ## Basic Usage
 
 ```hcl
 module "docker_server" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/docker_server?ref=v1.38.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/docker_server?ref=v1.38.1"
 
   login_server = "your-login-server"
   np_api_key   = "your-np-api-key"

@@ -2,22 +2,23 @@
 
 ## Description
 
-Configures a Nullplatform provider for Google Cloud Platform with networking and project settings
+Configures a nullplatform provider for Google Cloud Platform with networking and project settings
 
 ## Features
 
-- Creates a Nullplatform provider configuration for GCP
-- Configures GCP project ID and location for resource deployment
-- Manages networking settings including domain names and DNS zones
-- Supports optional public and private DNS zone configuration
-- Provides customizable dimensions for provider configuration
-- Exports provider configuration ID and NRN as outputs
+- Creates a nullplatform provider configuration for GCP
+- Configures GCP project ID and location settings
+- Manages networking configuration including domain names and DNS zones
+- Supports custom dimensions for provider configuration
+- Handles both public and private DNS zone configuration
+- Enables application domain configuration
+- Ignores changes to attributes after initial creation
 
 ## Basic Usage
 
 ```hcl
 module "cloud" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/gcp/cloud?ref=v1.38.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/gcp/cloud?ref=v1.38.1"
 
   domain_name = "your-domain-name"
   location    = "your-location"
