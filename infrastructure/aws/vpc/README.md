@@ -2,22 +2,23 @@
 
 ## Description
 
-Creates an AWS VPC with public and private subnets, NAT gateway, and Kubernetes-ready tags using the terraform-aws-modules/vpc module
+Creates an AWS VPC with public and private subnets, NAT gateway, and Kubernetes-compatible subnet tags
 
 ## Features
 
 - Creates a VPC with configurable CIDR block across multiple availability zones
-- Provisions separate public and private subnets with customizable IP ranges
+- Provisions public and private subnets with automatic routing configuration
 - Configures a single NAT gateway for private subnet internet access
 - Enables DNS hostnames for internal service discovery
-- Tags subnets appropriately for Kubernetes ELB and internal ELB integration
-- Supports organization and account-based VPC naming conventions
+- Applies Kubernetes-specific tags for ELB and internal ELB subnet discovery
+- Supports VPC block public access options for enhanced security
+- Organizes resources with organization and account naming conventions
 
 ## Basic Usage
 
 ```hcl
 module "vpc" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v1.38.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v1.38.1"
 
   account      = "your-account"
   organization = "your-organization"

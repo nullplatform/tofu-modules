@@ -2,23 +2,23 @@
 
 ## Description
 
-Configures Oracle Cloud Infrastructure (OCI) provider settings in Nullplatform with account, compartment, and networking details
+Configures Oracle Cloud Infrastructure (OCI) provider settings in Nullplatform with account, compartment, and networking configurations
 
 ## Features
 
 - Creates a Nullplatform provider configuration for OCI
-- Configures OCI account settings including tenancy ID, region, and name
-- Manages OCI compartment configuration with ID and name
-- Defines networking settings with domain names for applications
-- Supports optional application domain and private domain configuration
-- Provides flexible dimension mapping for provider configuration
-- Implements lifecycle management to prevent attribute changes
+- Configures OCI account details including tenancy ID, region, and account name
+- Manages OCI compartment configuration for resource organization
+- Supports custom networking configuration with domain names
+- Enables optional application domain configuration
+- Supports private domain name configuration
+- Allows custom dimensions for provider configuration
 
 ## Basic Usage
 
 ```hcl
 module "cloud" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/oci/cloud?ref=v1.38.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/oci/cloud?ref=v1.38.1"
 
   account_id       = "your-account-id"
   account_name     = "your-account-name"

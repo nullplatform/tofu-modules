@@ -2,21 +2,22 @@
 
 ## Description
 
-Creates an S3 bucket for Terraform state storage with versioning, encryption, and object lock enabled
+Creates a secure S3 bucket for Terraform state storage with versioning, encryption, and object lock enabled
 
 ## Features
 
-- Creates an S3 bucket with a randomly generated suffix for uniqueness
-- Enables bucket versioning to track state file changes
-- Configures server-side encryption using AES256
-- Implements object lock in COMPLIANCE mode with 1-day retention
-- Supports force destroy for bucket deletion with objects
+- Creates an S3 bucket with a randomly generated suffix for unique naming
+- Enables versioning to maintain history of state file changes
+- Configures server-side encryption using AES256 for data security
+- Implements object lock with compliance mode and 1-day retention
+- Supports force destroy to allow bucket deletion even with objects
+- Provides protection against accidental state file deletion or modification
 
 ## Basic Usage
 
 ```hcl
 module "backend" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/backend?ref=v1.38.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/backend?ref=v1.38.1"
 }
 ```
 

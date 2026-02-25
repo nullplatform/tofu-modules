@@ -2,21 +2,21 @@
 
 ## Description
 
-Creates an IAM role with OIDC authentication and Route 53 permissions for ExternalDNS to manage DNS records in both public and private hosted zones
+Creates IAM role and policy for External DNS to manage Route 53 DNS records in both public and private hosted zones with OIDC authentication for Kubernetes service accounts
 
 ## Features
 
 - Creates IAM role with OIDC provider trust for Kubernetes service accounts
-- Configures permissions to manage Route 53 DNS records across public and private hosted zones
-- Supports ExternalDNS service accounts in the external-dns namespace
-- Grants permissions for DNS record creation, modification, and deletion
-- Enables automatic DNS management for Kubernetes services and ingresses
+- Configures IAM policy for Route 53 DNS record management
+- Supports both public and private hosted zone DNS management
+- Enables External DNS integration with EKS clusters
+- Grants permissions for listing and modifying Route 53 resource record sets
 
 ## Basic Usage
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/external_dns?ref=v1.38.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/external_dns?ref=v1.38.1"
 
   aws_iam_openid_connect_provider_arn = "your-aws-iam-openid-connect-provider-arn"
   cluster_name                        = "your-cluster-name"
