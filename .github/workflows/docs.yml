@@ -2,10 +2,8 @@ name: Commitlint
 
 on:
   pull_request:
-    branches:
-      - main
-  push:
-    branches: [ release-please--branches--main ]
+    branches: [ main ]
+    types: [opened, synchronize, reopened]
 
 jobs:
   branch-name:
