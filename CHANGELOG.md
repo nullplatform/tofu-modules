@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.38.2](https://github.com/nullplatform/tofu-modules/compare/v1.38.1...v1.38.2) (2026-02-25)
+
+
+### Bug Fixes
+
+* actions ([#227](https://github.com/nullplatform/tofu-modules/issues/227)) ([1bff3ae](https://github.com/nullplatform/tofu-modules/commit/1bff3ae87930036fbbceee00a3918f362846ece1))
+
 ## [1.38.1](https://github.com/nullplatform/tofu-modules/compare/v1.38.0...v1.38.1) (2026-02-25)
 
 
