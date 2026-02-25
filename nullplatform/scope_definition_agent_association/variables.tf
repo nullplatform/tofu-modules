@@ -28,6 +28,18 @@ variable "github_ref" {
   default     = "beta"
 }
 
+variable "repository_notification_channel" {
+  description = "repository of notification channel template"
+  type        = string
+  default     = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads"
+}
+
+variable "repository_notification_channel_branch" {
+  description = "branch reference of notification channel template"
+  type        = string
+  default     = "main"
+}
+
 variable "service_path" {
   description = "Path to the service directory within the repository structure"
   type        = string
