@@ -2,23 +2,23 @@
 
 ## Description
 
-Configures Nullplatform provider settings for Azure Kubernetes Service (AKS) cluster integration with gateway and resource management options
+Configures Azure Kubernetes Service (AKS) provider settings for Nullplatform including cluster details, gateway configuration, and resource management policies
 
 ## Features
 
-- Creates Nullplatform provider configuration for AKS clusters
-- Configures public and optional private Application Gateway integration
-- Supports customizable authentication modes for cluster access
-- Manages resource allocation ratios for memory and CPU limits
-- Configures security settings including image pull secrets and service accounts
-- Enables traffic manager sidecar version specification
-- Supports dynamic Kubernetes object modifications through object modifiers
+- Configures AKS cluster integration with Nullplatform using cluster name and resource group
+- Manages gateway settings for public and optionally private Application Gateways
+- Supports custom resource management policies including memory-CPU ratios and core limits
+- Configures authentication modes for AKS cluster access (localAccounts, azureActiveDirectory, localandAAD)
+- Enables security configurations with image pull secrets and service account management
+- Supports traffic manager sidecar versioning for service mesh deployments
+- Allows dynamic Kubernetes object modifications through configurable object modifiers
 
 ## Basic Usage
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v1.36.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v1.38.0"
 
   cluster_name        = "your-cluster-name"
   nrn                 = "your-nrn"

@@ -2,22 +2,21 @@
 
 ## Description
 
-Creates and manages Nullplatform dimension resources for organizing environments within a specified scope
+Creates and manages environment dimensions and their values in Nullplatform
 
 ## Features
 
-- Creates a Nullplatform dimension named 'Environment' with order priority
-- Provisions dimension values for each specified environment
-- Supports customizable list of environments with sensible defaults
-- Associates all resources with a specified Nullplatform Resource Name (NRN)
-- Manages environment-based organizational structure in Nullplatform
-- Enables dynamic environment value creation using for_each iteration
+- Creates a Nullplatform dimension named 'Environment' with configurable ordering
+- Provisions multiple environment dimension values from a customizable list
+- Supports default environments including development, staging, and production
+- Associates dimension resources with a specified Nullplatform Resource Name (NRN)
+- Enables dynamic environment value creation using Terraform for_each loops
 
 ## Basic Usage
 
 ```hcl
 module "dimensions" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimensions?ref=v1.36.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimensions?ref=v1.38.0"
 
   np_api_key = "your-np-api-key"
   nrn        = "your-nrn"
