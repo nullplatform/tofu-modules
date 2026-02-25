@@ -2,22 +2,23 @@
 
 ## Description
 
-Creates GCP firewall rules for Istio gateways (public and private) with health check port restrictions and HTTPS traffic management
+Creates GCP firewall rules for Istio gateways to control HTTPS and health check traffic for both public and private gateways
 
 ## Features
 
-- Creates firewall rules for Istio public gateway allowing HTTPS traffic from internet and health checks from VPC CIDR
-- Configures firewall rules for Istio private gateway restricting HTTPS and health check traffic to VPC CIDR only
-- Derives network and CIDR information automatically from GKE cluster configuration
-- Supports GCP health check ranges for load balancer health checks on port 15021
-- Implements deny rules to block health check traffic from internet to public gateway
-- Allows override of network name and CIDR block for custom configurations
+- Creates firewall rules for Istio public gateway allowing HTTPS traffic from internet
+- Restricts health check port (15021) access to VPC CIDR and GCP health check ranges
+- Configures separate firewall rules for private/internal Istio gateway with VPC-only access
+- Derives network and CIDR automatically from GKE cluster data sources
+- Supports network name and CIDR overrides for custom configurations
+- Implements deny rules to prevent unauthorized health check access from internet
+- Applies appropriate network tags for gateway traffic routing
 
 ## Basic Usage
 
 ```hcl
 module "security" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/security?ref=v1.38.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/security?ref=v1.38.2"
 
   cluster_name   = "your-cluster-name"
   gcp_project_id = "your-gcp-project-id"
