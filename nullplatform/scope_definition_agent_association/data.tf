@@ -3,7 +3,7 @@
 ################################################################################
 
 data "http" "notification_channel_template" {
-  url = "https://raw.githubusercontent.com/nullplatform/scopes/refs/heads/main/${var.service_path}/specs/notification-channel.json.tpl"
+  url = "${var.repository_notification_channel}/${var.repository_notification_channel_branch}/${var.service_path}/specs/notification-channel.json.tpl"
 }
 
 ################################################################################
