@@ -252,3 +252,9 @@ variable "blue_green_ingress_path" {
   type        = string
   default     = ""
 }
+
+variable "extra_envs" {
+  description = "Additional environment variables to pass to the agent"
+  type        = map(string)
+  default     = {}
+}
