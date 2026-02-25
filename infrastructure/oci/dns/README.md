@@ -2,22 +2,23 @@
 
 ## Description
 
-Creates and manages OCI DNS zones with support for primary and secondary zone types, external masters, and tagging
+Creates and manages Oracle Cloud Infrastructure (OCI) DNS zones with support for primary and secondary zones, external masters, and custom tagging
 
 ## Features
 
-- Creates multiple DNS zones in OCI compartments
-- Supports both PRIMARY and SECONDARY zone types
-- Configures external masters for SECONDARY zones with TSIG key authentication
-- Manages zone scope (GLOBAL or PRIVATE) and view associations
-- Applies defined and freeform tags to DNS zones
-- Outputs comprehensive zone details including nameservers and metadata
+- Creates multiple DNS zones in OCI with configurable zone types (PRIMARY or SECONDARY)
+- Supports external master servers configuration for secondary zones with TSIG key authentication
+- Configures zone scope (GLOBAL or PRIVATE) and associates zones with DNS views
+- Manages defined tags and freeform tags at both module and individual zone levels
+- Provides comprehensive outputs including zone IDs, nameservers, and zone metadata
+- Implements lifecycle rules to ignore Oracle-managed tags for stability
+- Sets configurable timeouts for create, update, and delete operations
 
 ## Basic Usage
 
 ```hcl
 module "dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/dns?ref=v1.34.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/dns?ref=v1.36.0"
 
   compartment_id = "your-compartment-id"
 }

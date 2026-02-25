@@ -2,22 +2,21 @@
 
 ## Description
 
-Creates and manages nullplatform accounts with configurable repository settings
+Creates and manages Nullplatform accounts with configurable repository settings
 
 ## Features
 
-- Creates multiple nullplatform accounts from a map configuration
-- Configures repository prefix and provider settings for each account
-- Supports GitHub as the default repository provider
-- Manages account slugs for identification
-- Provides optional repository configuration with sensible defaults
-- Integrates with nullplatform provider using organization-level API key
+- Creates multiple Nullplatform accounts from a map configuration
+- Configures repository prefix and provider for each account
+- Supports custom slug generation for account identification
+- Manages accounts using the Nullplatform provider
+- Provides default values for repository settings
 
 ## Basic Usage
 
 ```hcl
 module "account" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/account?ref=v1.34.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/account?ref=v1.36.0"
 
   np_api_key            = "your-np-api-key"
   nullplatform_accounts = "your-nullplatform-accounts"

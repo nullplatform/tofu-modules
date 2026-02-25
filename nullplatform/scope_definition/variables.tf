@@ -73,7 +73,9 @@ variable "action_spec_names" {
     "pause-autoscaling",
     "resume-autoscaling",
     "restart-pods",
-    "kill-instances"
+    "kill-instances",
+    "diagnose-deployment",
+    "diagnose-scope"
   ]
 }
 

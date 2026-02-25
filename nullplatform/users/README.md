@@ -2,21 +2,21 @@
 
 ## Description
 
-Creates and manages Nullplatform users with role-based access control assignments
+Creates and manages Nullplatform users with role-based authorization grants
 
 ## Features
 
-- Creates Nullplatform user accounts with profile information
-- Configures multiple role assignments per user
-- Manages authorization grants based on NRN (Nullplatform Resource Name)
-- Supports bulk user creation through map-based configuration
-- Assigns multiple roles to users through authorization grants
+- Creates multiple Nullplatform users with profile information
+- Assigns role-based authorization grants to users
+- Supports multiple role assignments per user
+- Manages user access through NRN (Nullplatform Resource Name) scoping
+- Provides sensitive handling of API credentials
 
 ## Basic Usage
 
 ```hcl
 module "users" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/users?ref=v1.34.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/users?ref=v1.36.0"
 
   np_api_key         = "your-np-api-key"
   nullplatform_users = "your-nullplatform-users"

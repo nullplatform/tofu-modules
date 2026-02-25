@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.37.0](https://github.com/nullplatform/tofu-modules/compare/v1.36.0...v1.37.0) (2026-02-24)
+
+
+### Features
+
+* rename route53 to dns and add diagnose actions to scope definition ([#215](https://github.com/nullplatform/tofu-modules/issues/215)) ([a40c98b](https://github.com/nullplatform/tofu-modules/commit/a40c98b9d3a092cc6eb132b770edf11c3f225118))
+
+## [1.36.0](https://github.com/nullplatform/tofu-modules/compare/v1.35.0...v1.36.0) (2026-02-23)
+
+
+### Features
+
+* container orchestration ([#216](https://github.com/nullplatform/tofu-modules/issues/216)) ([1a87622](https://github.com/nullplatform/tofu-modules/commit/1a8762245f86762aec6fc300297170cf454e9190))
+
+## [1.35.0](https://github.com/nullplatform/tofu-modules/compare/v1.34.0...v1.35.0) (2026-02-19)
+
+
+### Features
+
+* oci test ([#213](https://github.com/nullplatform/tofu-modules/issues/213)) ([33594c7](https://github.com/nullplatform/tofu-modules/commit/33594c7ffcb07f79ecc914bbbd482bedde9dae08))
+
 ## [1.34.0](https://github.com/nullplatform/tofu-modules/compare/v1.33.1...v1.34.0) (2026-02-13)
 
 
