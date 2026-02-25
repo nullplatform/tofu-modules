@@ -442,8 +442,6 @@ brew install pre-commit
 pre-commit install --hook-type commit-msg
 ```
 
-
-
 ---
 
 <!-- BEGIN_TF_DOCS -->
