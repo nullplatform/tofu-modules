@@ -75,7 +75,7 @@ resource "aws_vpc_security_group_ingress_rule" "public_gateway_https" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "public_gateway_health_check" {
-  count = var.gateways_enabled ? 1 : 0
+  count = var.gateways_enabled && var.health_check_rules_enabled ? 1 : 0
 
   security_group_id = aws_security_group.public_gateway[0].id
   description       = "Istio health check from VPC only"
@@ -90,7 +90,7 @@ resource "aws_vpc_security_group_ingress_rule" "public_gateway_health_check" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "public_gateway_health_check_additional" {
-  for_each = var.gateways_enabled ? toset(var.additional_network_cidrs) : toset([])
+  for_each = var.gateways_enabled && var.health_check_rules_enabled ? toset(var.additional_network_cidrs) : toset([])
 
   security_group_id = aws_security_group.public_gateway[0].id
   description       = "Istio health check from additional CIDR"
@@ -153,7 +153,7 @@ resource "aws_vpc_security_group_ingress_rule" "private_gateway_https" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "private_gateway_health_check" {
-  count = var.gateway_internal_enabled ? 1 : 0
+  count = var.gateway_internal_enabled && var.health_check_rules_enabled ? 1 : 0
 
   security_group_id = aws_security_group.private_gateway[0].id
   description       = "Istio health check from VPC only"
@@ -183,7 +183,7 @@ resource "aws_vpc_security_group_ingress_rule" "private_gateway_https_additional
 }
 
 resource "aws_vpc_security_group_ingress_rule" "private_gateway_health_check_additional" {
-  for_each = var.gateway_internal_enabled ? toset(var.additional_network_cidrs) : toset([])
+  for_each = var.gateway_internal_enabled && var.health_check_rules_enabled ? toset(var.additional_network_cidrs) : toset([])
 
   security_group_id = aws_security_group.private_gateway[0].id
   description       = "Istio health check from additional CIDR"
@@ -194,6 +194,74 @@ resource "aws_vpc_security_group_ingress_rule" "private_gateway_health_check_add
 
   tags = {
     Name = "${var.cluster_name}-istio-private-health-check-additional"
+  }
+}
+
+###############################################################################
+# CLUSTER SG RULES
+# When cluster_security_group_id is provided, allow traffic from the gateway
+# SGs to the cluster SG on the gateway port and health check port.
+# This is required for ALB setups where the ALB uses the gateway SGs and
+# needs to reach pods running in the cluster.
+###############################################################################
+
+resource "aws_vpc_security_group_ingress_rule" "cluster_from_public_gateway_traffic" {
+  count = var.gateways_enabled && var.cluster_security_group_id != "" ? 1 : 0
+
+  security_group_id            = var.cluster_security_group_id
+  description                  = "Traffic from public ALB to Istio gateway"
+  from_port                    = var.gateway_port
+  to_port                      = var.gateway_port
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.public_gateway[0].id
+
+  tags = {
+    Name = "${var.cluster_name}-cluster-from-public-alb-traffic"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "cluster_from_public_gateway_health" {
+  count = var.gateways_enabled && var.cluster_security_group_id != "" ? 1 : 0
+
+  security_group_id            = var.cluster_security_group_id
+  description                  = "Health check from public ALB to Istio gateway"
+  from_port                    = 15021
+  to_port                      = 15021
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.public_gateway[0].id
+
+  tags = {
+    Name = "${var.cluster_name}-cluster-from-public-alb-health"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "cluster_from_private_gateway_traffic" {
+  count = var.gateway_internal_enabled && var.cluster_security_group_id != "" ? 1 : 0
+
+  security_group_id            = var.cluster_security_group_id
+  description                  = "Traffic from private ALB to Istio gateway"
+  from_port                    = var.gateway_port
+  to_port                      = var.gateway_port
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.private_gateway[0].id
+
+  tags = {
+    Name = "${var.cluster_name}-cluster-from-private-alb-traffic"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "cluster_from_private_gateway_health" {
+  count = var.gateway_internal_enabled && var.cluster_security_group_id != "" ? 1 : 0
+
+  security_group_id            = var.cluster_security_group_id
+  description                  = "Health check from private ALB to Istio gateway"
+  from_port                    = 15021
+  to_port                      = 15021
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.private_gateway[0].id
+
+  tags = {
+    Name = "${var.cluster_name}-cluster-from-private-alb-health"
   }
 }
 
