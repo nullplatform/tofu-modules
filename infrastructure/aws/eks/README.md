@@ -2,23 +2,23 @@
 
 ## Description
 
-Provisions an Amazon EKS cluster with support for managed node groups or Auto Mode, configurable networking, security rules, and access entries
+Provisions an Amazon EKS cluster with support for both Auto Mode and Managed Node Groups configurations
 
 ## Features
 
-- Creates an EKS cluster with configurable Kubernetes version and networking options
-- Supports both EKS Auto Mode and traditional managed node groups
-- Configures essential EKS add-ons including CoreDNS, VPC CNI, kube-proxy, and pod identity agent
-- Manages cluster access entries and IAM roles for service accounts (IRSA)
-- Implements security group rules for NLB health checks and Istio gateway traffic
-- Enables public and private API server endpoint access with CIDR restrictions
-- Provides configurable node group scaling parameters and instance types
+- Creates an EKS cluster with configurable Kubernetes version and access controls
+- Supports EKS Auto Mode with configurable node pools or traditional Managed Node Groups
+- Configures essential EKS addons including CoreDNS, VPC-CNI, kube-proxy, and pod identity agent
+- Enables IRSA (IAM Roles for Service Accounts) and OIDC provider for pod-level IAM permissions
+- Manages security group rules for NLB health checks and Istio gateway traffic
+- Provides flexible API endpoint access control with public and private access options
+- Supports custom access entries for fine-grained cluster authentication and authorization
 
 ## Basic Usage
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/eks?ref=v1.38.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/eks?ref=v1.38.3"
 
   aws_subnets_private_ids = "your-aws-subnets-private-ids"
   aws_vpc_vpc_id          = "your-aws-vpc-vpc-id"

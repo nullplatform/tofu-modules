@@ -2,21 +2,21 @@
 
 ## Description
 
-Creates a Nullplatform dimension for environments with configurable environment values
+Creates and manages an Environment dimension with configurable environment values in Nullplatform
 
 ## Features
 
-- Creates a Nullplatform dimension named 'Environment' with order priority
-- Provisions dimension values for each specified environment
-- Supports customizable list of environments with defaults for development, staging, and production
-- Manages environment dimension resources using Nullplatform provider
-- Associates all resources with a specified Nullplatform Resources Name (NRN)
+- Creates an Environment dimension in Nullplatform with order priority
+- Manages multiple environment values (development, staging, production by default)
+- Supports customizable list of environment names
+- Associates dimension and values with a specified Nullplatform Resource Name (NRN)
+- Enables environment-based resource organization in Nullplatform
 
 ## Basic Usage
 
 ```hcl
 module "dimensions" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimensions?ref=v1.38.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimensions?ref=v1.38.3"
 
   np_api_key = "your-np-api-key"
   nrn        = "your-nrn"
