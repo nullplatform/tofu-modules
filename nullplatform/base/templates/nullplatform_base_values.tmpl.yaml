@@ -1,7 +1,7 @@
 # Global settings
 global:
   installGatewayV2Crd: ${installGatewayV2Crd}
-  # Kubernetes provider (options: "oks", "gke", "eks", "aks", "aro")
+  # Kubernetes provider (options: "oke", "gke", "eks", "aks", "aro")
   provider: "${k8s_provider}"
   # AWS region (applicable for EKS provider)
   awsRegion: "${awsRegion}"
@@ -29,6 +29,7 @@ tls:
   secretName: "wildcard-tls"
   # Gateway configurations
 gateway:
+  useClusterIP: ${gateway_use_cluster_ip}
   http:
     enabled: ${gateway_enabled}
   internal:
@@ -37,6 +38,7 @@ gateway:
     aws:
       name: ${gateway_internal_aws_name}
       securityGroups: "${gateway_private_aws_security_groups}"
+      dns_name: ${gateway_private_aws_dns_name}
     azure:
       networkSecurityGroup: "${gateway_private_azure_nsg}"
     gcp:
@@ -52,9 +54,11 @@ gateway:
     loadBalancerType: "internal"  # internal, external
   public:
     name: "gateway-public"
+    enabled: ${gateway_public_enabled}
     aws:
       name: ${gateway_public_aws_name}
       securityGroups: "${gateway_public_aws_security_groups}"
+      dns_name: ${gateway_public_aws_dns_name}
     azure:
       networkSecurityGroup: "${gateway_public_azure_nsg}"
     gcp:
