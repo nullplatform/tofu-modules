@@ -2,23 +2,22 @@
 
 ## Description
 
-Deploys Prometheus monitoring system to a Kubernetes cluster using Helm with customizable nullplatform integration
+Deploys Prometheus monitoring system to a Kubernetes cluster using Helm with configurable nullplatform integration
 
 ## Features
 
-- Installs Prometheus from the official Prometheus Community Helm chart
-- Configures automatic namespace creation for Prometheus deployment
-- Enables atomic updates with automatic rollback on failure
-- Supports customizable nullplatform service port configuration
-- Manages pod recreation and cleanup on configuration changes
-- Maintains deployment history with configurable retention limit
-- Enforces dependency updates during Helm release operations
+- Deploys Prometheus using the official Helm chart from the Prometheus community repository
+- Configures nullplatform service integration with customizable port settings
+- Creates dedicated Kubernetes namespace for Prometheus deployment
+- Enables automatic cleanup and atomic deployments with comprehensive Helm release management
+- Supports custom namespace configuration for flexible deployment strategies
+- Implements templated values configuration for dynamic Prometheus settings
 
 ## Basic Usage
 
 ```hcl
 module "prometheus" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v1.38.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v1.38.3"
 }
 ```
 

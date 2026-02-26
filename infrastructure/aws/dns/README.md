@@ -2,21 +2,21 @@
 
 ## Description
 
-Creates both public and private Route 53 hosted zones for a given domain name with VPC association
+Creates both public and private Route 53 hosted zones for a domain name with VPC association
 
 ## Features
 
 - Creates a public Route 53 hosted zone for external DNS resolution
-- Creates a private Route 53 hosted zone associated with a VPC for internal DNS resolution
-- Enables force_destroy on both zones for easier cleanup
-- Outputs zone IDs and nameservers for integration with other resources
-- Supports DNS management for both public internet and private VPC networks
+- Creates a private Route 53 hosted zone associated with a specified VPC
+- Enables force destroy on both zones for easier cleanup
+- Outputs zone IDs and name servers for integration with other resources
+- Supports the same domain name across both public and private zones
 
 ## Basic Usage
 
 ```hcl
 module "dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/dns?ref=v1.38.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/dns?ref=v1.38.3"
 
   domain_name = "your-domain-name"
   vpc_id      = "your-vpc-id"
