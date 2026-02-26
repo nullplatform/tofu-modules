@@ -1,7 +1,7 @@
 locals {
   aws_load_balancer_controller_values = templatefile("${path.module}/templates/aws_load_balancer_controller_values.tmpl.yaml", {
     cluster_name         = var.cluster_name
-    service_account_name = kubernetes_service_account_v1.aws_load_balancer_controller_sa.metadata[0].name
+    service_account_name = var.service_account_name
     vpc_id               = var.vpc_id
   })
 }
