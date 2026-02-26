@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.38.3](https://github.com/nullplatform/tofu-modules/compare/v1.38.2...v1.38.3) (2026-02-26)
+
+
+### Bug Fixes
+
+* **security,base:** add health check toggle, ALB-to-pod rules, and gateway fixes ([#230](https://github.com/nullplatform/tofu-modules/issues/230)) ([f60a1a5](https://github.com/nullplatform/tofu-modules/commit/f60a1a5bb3752693c15da880ba1b3c855a129299))
+
 ## [1.38.2](https://github.com/nullplatform/tofu-modules/compare/v1.38.1...v1.38.2) (2026-02-25)
 
 
