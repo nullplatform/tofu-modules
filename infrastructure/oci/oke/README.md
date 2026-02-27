@@ -2,23 +2,23 @@
 
 ## Description
 
-Provisions an Oracle Container Engine for Kubernetes (OKE) cluster with optional OCIR image pull authentication using existing VCN infrastructure
+Provisions an Oracle Container Engine for Kubernetes (OKE) cluster with optional OCIR image pull authentication using workload identity and instance principal
 
 ## Features
 
 - Creates an enhanced OKE cluster with Kubernetes v1.34.1 using existing VCN and subnets
-- Configures customizable worker node pools with flexible compute shapes and sizing
-- Supports OIDC discovery for workload identity integration
-- Enables OCIR credential provider for private image pulls via Instance Principal and Workload Identity
-- Creates IAM policies and dynamic groups for OCIR access when enabled
-- Supports custom cloud-init scripts for worker node configuration
-- Configures public or private control plane endpoints with custom NSG rules
+- Configures flexible worker node pools with customizable shapes, sizes, and cloud-init scripts
+- Supports OCIR image pull authentication via workload identity for pods and instance principal for nodes
+- Enables OIDC discovery for workload identity integration
+- Deploys OCIR credential provider on worker nodes when OCIR pull is enabled
+- Creates IAM policies and dynamic groups for secure OCIR registry access
+- Supports namespace-level or cluster-wide OCIR pull permissions
 
 ## Basic Usage
 
 ```hcl
 module "oke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/oke?ref=v1.39.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/oke?ref=v1.40.0"
 
   api_endpoint_subnet_id = "your-api-endpoint-subnet-id"
   cluster_name           = "your-cluster-name"
