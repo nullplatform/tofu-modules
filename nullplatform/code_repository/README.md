@@ -2,22 +2,22 @@
 
 ## Description
 
-Configures Git provider integration for Nullplatform with support for GitHub, GitLab, and Azure DevOps
+Configures Git provider integration with Nullplatform for GitHub, GitLab, or Azure DevOps
 
 ## Features
 
-- Configures GitHub organization integration with App installation
-- Configures GitLab group integration with access tokens and collaborators
-- Configures Azure DevOps project integration with CI agent pools
-- Manages provider-specific authentication and credentials
-- Supports multiple Git provider configurations through a single module
-- Handles provider-specific attributes and setup requirements
+- Supports multiple Git providers (GitHub, GitLab, Azure DevOps)
+- Configures provider-specific authentication and access tokens
+- Manages organization and project settings for each Git provider
+- Configures repository collaborators and permissions for GitLab
+- Handles provider-specific installation URLs and IDs
+- Creates provider configuration resources based on selected Git provider
 
 ## Basic Usage
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.40.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.41.0"
 
   git_provider = "your-git-provider"
   np_api_key   = "your-np-api-key"
@@ -29,7 +29,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.40.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.41.0"
 
   git_provider           = "github"
   github_installation_id = "your-github-installation-id"  # Required when git_provider = "github"
@@ -43,7 +43,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.40.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.41.0"
 
   git_provider                = "gitlab"
   gitlab_access_token         = "your-gitlab-access-token"  # Required when git_provider = "gitlab"
