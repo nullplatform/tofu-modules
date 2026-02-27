@@ -2,22 +2,21 @@
 
 ## Description
 
-Creates both public and private AWS Route 53 hosted zones for a domain name with VPC association
+Creates both public and private AWS Route 53 hosted zones for a specified domain name with VPC association
 
 ## Features
 
 - Creates a public Route 53 hosted zone for external DNS resolution
-- Creates a private Route 53 hosted zone associated with a specified VPC
-- Enables force destroy on both zones for easy cleanup
-- Outputs nameservers for the public hosted zone
-- Provides zone IDs and names for both public and private zones
-- Supports integration with ACM certificate management (commented out)
+- Creates a private Route 53 hosted zone associated with a VPC for internal DNS resolution
+- Configures force_destroy on both zones to allow deletion when DNS records exist
+- Outputs zone IDs, names, and nameservers for integration with other resources
+- Supports dual-zone configuration for split-horizon DNS architecture
 
 ## Basic Usage
 
 ```hcl
 module "dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/dns?ref=v1.40.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/dns?ref=v1.41.0"
 
   domain_name = "your-domain-name"
   vpc_id      = "your-vpc-id"
