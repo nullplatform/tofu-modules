@@ -15,12 +15,15 @@ module "nullplatform_agent_role" {
     }
   }
 
-  policies = {
-    "nullplatform_route53_policy" = aws_iam_policy.nullplatform_route53_policy.arn,
-    "nullplatform_eks_policy"     = aws_iam_policy.nullplatform_eks_policy.arn,
-    "nullplatform_elb_policy"     = aws_iam_policy.nullplatform_elb_policy.arn,
-    "nullplatform_avp_policy"     = aws_iam_policy.nullplatform_avp_policy.arn
-  }
+  policies = merge(
+    {
+      "nullplatform_route53_policy" = aws_iam_policy.nullplatform_route53_policy.arn,
+      "nullplatform_eks_policy"     = aws_iam_policy.nullplatform_eks_policy.arn,
+      "nullplatform_elb_policy"     = aws_iam_policy.nullplatform_elb_policy.arn,
+      "nullplatform_avp_policy"     = aws_iam_policy.nullplatform_avp_policy.arn
+    },
+    var.additional_policies
+  )
 }
 
 ################################################################################

@@ -92,6 +92,7 @@ locals {
   all_config = merge(
     local.default_config,
     lookup(local.cloud_config, var.cloud_provider, {}),
+    var.extra_envs,
   )
 
   # Template único y simple
