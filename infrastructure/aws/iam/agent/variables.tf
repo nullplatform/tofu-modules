@@ -12,3 +12,9 @@ variable "cluster_name" {
   description = "Name of the cluster where the policy runs"
   type        = string
 }
+
+variable "additional_policies" {
+  description = "Additional policy ARNs to attach to the agent role"
+  type        = map(string)
+  default     = {}
+}
