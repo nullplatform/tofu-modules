@@ -2,23 +2,22 @@
 
 ## Description
 
-Creates and manages Nullplatform API keys with pre-configured or custom role grants and tags
+Creates and manages Nullplatform API keys with configurable role-based access control and tagging
 
 ## Features
 
-- Creates Nullplatform API keys with configurable access roles
-- Supports pre-configured key types (agent, scope_notification, service_notification) with automatic role assignments
-- Enables custom API key configuration with user-defined roles and tags
-- Automatically applies organization, account, and namespace tags from NRN
-- Manages role grants based on key type with dynamic grant assignment
-- Supports specification-based naming for notification channel keys
-- Implements lifecycle preconditions to validate custom key requirements
+- Creates Nullplatform API keys with pre-configured or custom role assignments
+- Supports four API key types: agent, scope notification, service notification, and custom
+- Automatically assigns role grants based on the selected key type
+- Applies managed tags including organization, account, and namespace from NRN
+- Enables custom role slugs and tags for flexible access control configurations
+- Implements lifecycle preconditions to validate required fields for custom types
 
 ## Basic Usage
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.38.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.39.0"
 
   nrn  = "your-nrn"
   type = "your-type"
@@ -29,7 +28,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.38.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.39.0"
 
   nrn  = "your-nrn"
   type = "agent"
@@ -40,7 +39,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.38.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.39.0"
 
   nrn  = "your-nrn"
   type = "scope_notification"
@@ -51,7 +50,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.38.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.39.0"
 
   nrn  = "your-nrn"
   type = "service_notification"
@@ -62,7 +61,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.38.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.39.0"
 
   custom_name       = "your-custom-name"  # Required when type = "custom"
   custom_role_slugs = "your-custom-role-slugs"  # Required when type = "custom"
