@@ -3,9 +3,8 @@ resource "random_id" "bucket_suffix" {
 }
 
 resource "aws_s3_bucket" "tf_state" {
-  bucket              = "tf-state-${lower(random_id.bucket_suffix.hex)}"
-  object_lock_enabled = true
-  force_destroy       = true
+  bucket        = "${var.bucket_prefix}-${lower(random_id.bucket_suffix.hex)}"
+  force_destroy = var.force_destroy
 }
 
 resource "aws_s3_bucket_versioning" "tf_state_versioning" {
@@ -21,17 +20,25 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "tf_state_sse" {
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      sse_algorithm     = var.sse_algorithm
+      kms_master_key_id = var.kms_key_id
     }
   }
 }
 
-resource "aws_s3_bucket_object_lock_configuration" "tf_state_lock" {
+resource "aws_s3_bucket_public_access_block" "tf_state" {
   bucket = aws_s3_bucket.tf_state.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_ownership_controls" "tf_state" {
+  bucket = aws_s3_bucket.tf_state.id
+
   rule {
-    default_retention {
-      mode = "COMPLIANCE"
-      days = 1
-    }
+    object_ownership = "BucketOwnerEnforced"
   }
 }
