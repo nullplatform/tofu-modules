@@ -2,22 +2,22 @@
 
 ## Description
 
-Creates Azure Network Security Groups (NSGs) for Istio gateways on AKS with configurable rules for public and private ingress traffic
+Creates Azure Network Security Groups for Istio gateways with configurable public and private gateway rules
 
 ## Features
 
-- Creates NSG for public Istio gateway with HTTPS (443) open to internet and health check (15021) restricted to VNet
-- Creates NSG for private Istio gateway with HTTPS (443) and health check (15021) restricted to VNet only
-- Automatically derives VNet CIDR and Azure location from AKS cluster configuration
-- Supports manual override of Azure location and network CIDR for custom configurations
-- Implements security rules to block internet access to health check endpoints
-- Configures conditional creation of public and private gateway NSGs based on enable flags
+- Creates Network Security Groups for Istio public and private gateways on Azure AKS
+- Configures port 443 (HTTPS) access rules for public gateway with internet access
+- Restricts health check port 15021 to VNet CIDR only for security
+- Supports optional private gateway with VNet-only access to both HTTPS and health check ports
+- Automatically derives VNet CIDR and location from AKS cluster configuration
+- Allows manual override of Azure location and network CIDR if needed
 
 ## Basic Usage
 
 ```hcl
 module "security" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/security?ref=v1.38.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/security?ref=v1.38.3"
 
   cluster_name        = "your-cluster-name"
   resource_group_name = "your-resource-group-name"

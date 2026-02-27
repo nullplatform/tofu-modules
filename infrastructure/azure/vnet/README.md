@@ -2,21 +2,22 @@
 
 ## Description
 
-Creates an Azure Virtual Network with customizable subnets using the Azure Verified Modules pattern
+Creates an Azure Virtual Network with configurable subnets using the Azure Verified Module for network virtual networks
 
 ## Features
 
-- Creates an Azure Virtual Network with specified address space
-- Configures multiple subnets with custom address prefixes
-- Supports resource tagging for organization and cost tracking
-- Integrates with Azure Verified Modules for standardized resource deployment
-- Outputs subnet IDs for easy reference by dependent resources
+- Creates an Azure Virtual Network with customizable address space
+- Configures multiple subnets within the virtual network using a map-based definition
+- Supports resource tagging for better resource organization and cost tracking
+- Outputs virtual network ID, name, and subnet resource IDs for integration with other modules
+- Leverages Azure Verified Module (AVM) for standardized and validated virtual network deployment
+- Provides flexible subnet configuration with individual address prefixes per subnet
 
 ## Basic Usage
 
 ```hcl
 module "vnet" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/vnet?ref=v1.38.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/vnet?ref=v1.38.3"
 
   address_space       = "your-address-space"
   location            = "your-location"

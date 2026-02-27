@@ -1,7 +1,7 @@
 variable "nullplatform_base_helm_version" {
   description = "Helm chart version for the nullplatform base."
   type        = string
-  default     = "2.36.0"
+  default     = "2.38.0"
 }
 
 variable "namespace" {
@@ -26,7 +26,7 @@ variable "k8s_provider" {
   description = "Cloud provider (eks, gke, aks, oke and aro)."
   validation {
     condition     = contains(["eks", "gke", "aks", "oke", "aro"], var.k8s_provider)
-    error_message = "cloud_provider must be one of: eks, gke, aks, oke and aro"
+    error_message = "k8s_provider must be one of: eks, gke, aks, oke and aro"
   }
 }
 
@@ -65,14 +65,37 @@ variable "gateway_enabled" {
 variable "gateway_internal_enabled" {
   type        = bool
   description = "Enable the internal (private) gateway."
-  default     = false
+  default     = true
 }
 
+variable "gateway_public_enabled" {
+  type        = bool
+  description = "Enable the public gateway."
+  default     = true
+}
 
 variable "internal_azure_load_balancer_subnet" {
   description = "The name of the subnet to use in azure private load balancer"
   type        = string
   default     = "load_balancer"
+}
+
+variable "gateway_use_cluster_ip" {
+  description = ""
+  type = bool
+  default = false
+}
+
+
+variable "gateway_public_aws_dns_name" {
+  description = ""
+  type = string
+  default = ""
+}
+variable "gateway_private_aws_dns_name" {
+  description = ""
+  type = string
+  default = ""
 }
 ############################################
 # Control Plane

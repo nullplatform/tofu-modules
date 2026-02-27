@@ -2,23 +2,23 @@
 
 ## Description
 
-Creates a nullplatform service specification with scope types and action specifications from templated JSON files
+Creates and configures nullplatform service specifications, scope types, and action specifications from templates for container-based services
 
 ## Features
 
-- Fetches service specification, scope type, and action templates from remote repositories
-- Processes templates using gomplate with dynamic environment variables
-- Creates nullplatform service specification with configurable attributes and selectors
-- Generates scope type resources linked to service specifications
-- Creates multiple action specifications for scope operations (create, delete, deploy, scale, etc.)
-- Patches NRN configuration with external metrics and logging provider settings
-- Supports customizable repository sources and branches for template fetching
+- Fetches and processes service specification templates from remote repositories using gomplate
+- Creates nullplatform service specifications with configurable selectors and attributes
+- Generates scope type definitions linked to service specifications
+- Creates multiple action specifications for scope operations like deployment, scaling, and diagnostics
+- Configures external metrics and logging providers via NRN patching
+- Supports customizable repository paths and branches for template sources
+- Manages lifecycle of service specifications with selective change ignoring
 
 ## Basic Usage
 
 ```hcl
 module "scope_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v1.38.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v1.38.3"
 
   np_api_key = "your-np-api-key"
   nrn        = "your-nrn"
