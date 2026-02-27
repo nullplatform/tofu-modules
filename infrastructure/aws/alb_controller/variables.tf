@@ -14,7 +14,8 @@ variable "aws_load_balancer_controller_version" {
   default     = "1.13.4"
 }
 
-variable "aws_iam_openid_connect_provider" {
-  description = "AWS IAM OpenID Connect Provider for EKS cluster authentication"
+variable "service_account_name" {
+  description = "Name of the Kubernetes service account for the AWS Load Balancer Controller"
   type        = string
+  default     = "aws-load-balancer-controller"
 }

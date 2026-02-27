@@ -9,7 +9,7 @@ module "aws_load_balancer_controller_role" {
   use_name_prefix = false
   oidc_providers = {
     main = {
-      provider_arn               = var.aws_iam_openid_connect_provider
+      provider_arn               = var.aws_iam_openid_connect_provider_arn
       namespace_service_accounts = ["kube-system:aws-load-balancer-controller"]
     }
   }
