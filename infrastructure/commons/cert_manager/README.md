@@ -2,23 +2,23 @@
 
 ## Description
 
-Deploys and configures cert-manager with multi-cloud DNS provider support for automated TLS certificate management in Kubernetes
+Deploys and configures cert-manager on Kubernetes with multi-cloud DNS provider support for automated certificate management
 
 ## Features
 
-- Deploys cert-manager Helm chart with CRDs and service account configuration
-- Configures DNS01 challenge solvers with recursive nameservers for certificate validation
+- Deploys cert-manager Helm chart with CRDs enabled
+- Configures DNS01 challenge solvers for automated certificate validation
 - Supports multiple cloud providers including GCP, AWS, Azure, Cloudflare, and OCI
-- Creates cloud-specific service account annotations for workload identity integration
-- Deploys provider-specific configuration using templated values for each cloud platform
-- Installs OCI webhook extension when using Oracle Cloud Infrastructure
-- Manages cert-manager configuration chart for certificate issuers and private domain certificates
+- Creates provider-specific service account annotations for workload identity
+- Deploys cert-manager configuration with custom ClusterIssuers
+- Configures recursive DNS nameservers for DNS01 challenges
+- Deploys OCI webhook for cert-manager when using Oracle Cloud Infrastructure
 
 ## Basic Usage
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.39.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.40.0"
 
   account_slug        = "your-account-slug"
   cloud_provider      = "your-cloud-provider"
@@ -31,7 +31,7 @@ module "cert_manager" {
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.39.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.40.0"
 
   account_slug        = "your-account-slug"
   cloud_provider      = "gcp"
@@ -46,7 +46,7 @@ module "cert_manager" {
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.39.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.40.0"
 
   account_slug              = "your-account-slug"
   azure_client_id           = "your-azure-client-id"  # Required when cloud_provider = "azure"
@@ -64,7 +64,7 @@ module "cert_manager" {
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.39.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.40.0"
 
   account_slug        = "your-account-slug"
   cloud_provider      = "cloudflare"
@@ -78,7 +78,7 @@ module "cert_manager" {
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.39.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.40.0"
 
   account_slug        = "your-account-slug"
   aws_region          = "your-aws-region"  # Required when cloud_provider = "aws"
@@ -93,7 +93,7 @@ module "cert_manager" {
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.39.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.40.0"
 
   account_slug         = "your-account-slug"
   cloud_provider       = "oci"

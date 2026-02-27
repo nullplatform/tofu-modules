@@ -2,23 +2,23 @@
 
 ## Description
 
-Creates Kubernetes ingress resources and namespace for nullplatform with internal and internet-facing AWS Application Load Balancers
+Creates Kubernetes ingress resources for Nullplatform with both internal and internet-facing AWS Application Load Balancers
 
 ## Features
 
-- Creates a dedicated nullplatform Kubernetes namespace
+- Creates a dedicated Kubernetes namespace for Nullplatform resources
 - Configures an internal ALB ingress with SSL/TLS certificate support
 - Configures an internet-facing ALB ingress with SSL/TLS certificate support
-- Implements automatic HTTP to HTTPS redirection on port 443
-- Provides custom 404 response for undeployed or missing scopes
-- Configures target group deregistration delay for faster deployments
-- Supports IP-based target type routing for Kubernetes services
+- Implements automatic SSL redirect from HTTP to HTTPS on port 443
+- Provides custom 404 error responses for non-existent or undeployed scopes
+- Configures target group with optimized deregistration delay of 10 seconds
+- Uses IP target type for direct pod routing
 
 ## Basic Usage
 
 ```hcl
 module "ingress" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/ingress?ref=v1.39.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/ingress?ref=v1.40.0"
 
   certificate_arn = "your-certificate-arn"
 }

@@ -2,23 +2,23 @@
 
 ## Description
 
-Creates a Nullplatform service specification from Git-based templates with configurable actions, links, and dimensions
+Creates a Nullplatform service specification with associated actions and links from GitHub repository templates
 
 ## Features
 
-- Fetches service specification templates from GitHub repositories
-- Creates service specifications with configurable selectors and attributes
-- Generates action specifications from template files
-- Creates link specifications based on available links in service spec
-- Supports both template (.tpl) and JSON file formats
-- Manages visibility permissions across multiple NRNs
-- Configures custom dimensions for service specifications
+- Creates service specifications from GitHub repository templates
+- Supports both .tpl and .json template file formats
+- Generates action specifications based on available actions in service spec
+- Creates link specifications from repository link definitions
+- Configures service visibility across multiple NRNs
+- Processes and renders template files with variable substitution
+- Associates dimensions and tags with service specifications
 
 ## Basic Usage
 
 ```hcl
 module "service_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v1.39.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v1.40.0"
 
   git_service_path    = "your-git-service-path"
   np_api_key          = "your-np-api-key"

@@ -2,21 +2,21 @@
 
 ## Description
 
-Creates a Google Cloud VPC network with configurable subnets and optional secondary IP ranges for GKE workloads
+Creates a Google Cloud VPC network with configurable subnets and secondary IP ranges using the official terraform-google-modules/network module
 
 ## Features
 
-- Creates a VPC network in Google Cloud using the official terraform-google-modules/network module
+- Creates a VPC network in a specified GCP project
 - Configures multiple subnets across different regions with private Google access enabled
 - Supports secondary IP ranges for GKE pods and services
-- Outputs network and subnet identifiers for resource linking
-- Enforces private access on all subnets for secure communication
+- Outputs network and subnet details for integration with other resources
+- Leverages the official Google Cloud Network Terraform module for best practices
 
 ## Basic Usage
 
 ```hcl
 module "vpc" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/vpc?ref=v1.39.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/vpc?ref=v1.40.0"
 
   network_name = "your-network-name"
   project_id   = "your-project-id"
