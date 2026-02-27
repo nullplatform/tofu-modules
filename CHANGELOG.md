@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.40.0](https://github.com/nullplatform/tofu-modules/compare/v1.39.0...v1.40.0) (2026-02-27)
+
+
+### Features
+
+* add eks_cluster_primary_security_group_id output ([#236](https://github.com/nullplatform/tofu-modules/issues/236)) ([46412f8](https://github.com/nullplatform/tofu-modules/commit/46412f809fac72cceeb8fd918435ef029cb4852e))
+
 ## [1.39.0](https://github.com/nullplatform/tofu-modules/compare/v1.38.3...v1.39.0) (2026-02-27)
 
 

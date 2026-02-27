@@ -2,21 +2,21 @@
 
 ## Description
 
-Provisions Nullplatform users and assigns them roles with authorization grants based on Nullplatform Resource Names (NRNs)
+Manages nullplatform users and their authorization grants by creating user accounts and assigning roles with specific resource access
 
 ## Features
 
-- Creates multiple Nullplatform users with configurable profile information
-- Assigns multiple roles to each user through authorization grants
-- Maps users to specific resources using Nullplatform Resource Names (NRNs)
-- Manages user authentication credentials securely
-- Supports bulk user provisioning through map-based configuration
+- Creates nullplatform user accounts with email and profile information
+- Assigns multiple roles to users through authorization grants
+- Maps users to specific resources using nullplatform resource names (NRNs)
+- Supports dynamic user and role management through map-based configuration
+- Enables granular access control by linking users, roles, and resources
 
 ## Basic Usage
 
 ```hcl
 module "users" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/users?ref=v1.39.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/users?ref=v1.40.0"
 
   np_api_key         = "your-np-api-key"
   nullplatform_users = "your-nullplatform-users"

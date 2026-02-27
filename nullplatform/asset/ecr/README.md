@@ -2,22 +2,22 @@
 
 ## Description
 
-Configures Nullplatform provider with AWS ECR integration, creating necessary IAM roles, policies, and users for container image management
+Configures AWS ECR repository management with IAM roles and policies for Nullplatform application deployments
 
 ## Features
 
-- Creates IAM role for Nullplatform application with ECR access permissions
-- Configures IAM policy for managing ECR repositories with create, delete, and push/pull capabilities
-- Provisions IAM user and access keys for build workflow automation
-- Attaches ECR management policies to both the application role and build workflow user
-- Configures Nullplatform provider with ECR credentials for CI/CD and runtime setup
-- Supports cross-account role assumption for application management
+- Creates IAM role for Nullplatform application management with ECR access
+- Configures ECR repository permissions for image management and lifecycle operations
+- Provisions IAM user and access keys for CI/CD build workflows
+- Attaches ECR manager policies to both role and user for consistent access
+- Integrates with Nullplatform provider configuration for ECR setup
+- Supports cross-account role assumption for application managers
 
 ## Basic Usage
 
 ```hcl
 module "ecr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v1.39.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v1.40.0"
 
   cluster_name = "your-cluster-name"
   np_api_key   = "your-np-api-key"
