@@ -2,23 +2,23 @@
 
 ## Description
 
-Configures an Amazon EKS cluster integration with Nullplatform, managing cluster settings, networking, resource management, and security configurations
+Configures Nullplatform provider settings for Amazon EKS cluster integration with customizable namespace, load balancer, resource management, and security options
 
 ## Features
 
 - Creates Nullplatform provider configuration for EKS clusters
-- Configures load balancer settings for public and private traffic routing
-- Manages resource allocation with customizable CPU and memory ratios
-- Supports Kubernetes namespace configuration with custom or system namespaces
-- Enables image pull secrets for secure private container registry access
-- Configures traffic manager sidecar container deployment
-- Supports dynamic Kubernetes object modifications through custom modifiers
+- Configures public and private load balancers for traffic routing
+- Manages Kubernetes namespace settings with custom or system namespace support
+- Defines resource management policies for CPU and memory allocation
+- Configures security settings including image pull secrets and service accounts
+- Supports traffic manager version configuration
+- Enables dynamic Kubernetes object modifications through object modifiers
 
 ## Basic Usage
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v1.38.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v1.39.0"
 
   cluster_name = "your-cluster-name"
   nrn          = "your-nrn"

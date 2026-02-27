@@ -2,21 +2,21 @@
 
 ## Description
 
-Creates a Google Cloud Router and Cloud NAT for outbound internet connectivity from private GCP resources
+Creates a Google Cloud Router and Cloud NAT configuration for enabling outbound internet connectivity from private VPC resources
 
 ## Features
 
-- Creates a Cloud Router in a specified VPC network and region
-- Provisions a Cloud NAT gateway with automatic IP allocation
-- Configures NAT for all subnetworks and IP ranges
-- Enables outbound internet connectivity for instances without external IPs
+- Creates a Google Cloud Router in the specified region and VPC network
+- Configures a Cloud NAT gateway with automatic IP allocation
+- Enables all subnetworks to use NAT for outbound internet access
+- Supports custom naming for both router and NAT resources
 - Outputs router and NAT resource names for reference
 
 ## Basic Usage
 
 ```hcl
 module "cloud-nat" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/cloud-nat?ref=v1.38.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/cloud-nat?ref=v1.39.0"
 
   nat_name    = "your-nat-name"
   network_id  = "your-network-id"

@@ -2,21 +2,21 @@
 
 ## Description
 
-Creates an IAM role and policy for cert-manager to manage Route53 DNS records for certificate validation in EKS clusters
+Creates an IAM role and policy for cert-manager to manage Route 53 DNS records for SSL certificate validation using DNS01 challenge in Kubernetes
 
 ## Features
 
-- Creates IAM role with OIDC provider trust for cert-manager Kubernetes service account
-- Configures IAM policy granting Route53 permissions for DNS01 challenge validation
-- Supports both public and private Route53 hosted zones for DNS record management
-- Enables cert-manager to automatically create and delete DNS validation records
-- Implements least-privilege access by scoping permissions to specific hosted zones
+- Creates an IAM role for service accounts (IRSA) with OIDC provider trust for cert-manager
+- Configures IAM policy with Route 53 permissions for DNS record management
+- Supports DNS01 challenge validation for both public and private hosted zones
+- Grants permissions to change and list resource record sets in specified hosted zones
+- Enables cert-manager to automatically validate SSL certificates via DNS
 
 ## Basic Usage
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/cert_manager?ref=v1.38.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/cert_manager?ref=v1.39.0"
 
   aws_iam_openid_connect_provider_arn = "your-aws-iam-openid-connect-provider-arn"
   cluster_name                        = "your-cluster-name"

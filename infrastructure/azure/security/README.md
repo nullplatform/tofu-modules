@@ -2,22 +2,22 @@
 
 ## Description
 
-Creates Azure Network Security Groups for Istio gateways with configurable public and private gateway rules
+Creates Azure Network Security Groups for Istio gateways with rules restricting health check ports to VNet CIDR while allowing HTTPS traffic
 
 ## Features
 
-- Creates Network Security Groups for Istio public and private gateways on Azure AKS
-- Configures port 443 (HTTPS) access rules for public gateway with internet access
-- Restricts health check port 15021 to VNet CIDR only for security
-- Supports optional private gateway with VNet-only access to both HTTPS and health check ports
-- Automatically derives VNet CIDR and location from AKS cluster configuration
-- Allows manual override of Azure location and network CIDR if needed
+- Creates Network Security Group for public Istio gateway with internet-accessible HTTPS
+- Creates Network Security Group for private Istio gateway with VNet-restricted access
+- Configures health check port (15021) restrictions to VNet CIDR only
+- Derives VNet and location information automatically from AKS cluster
+- Supports manual override of Azure location and network CIDR
+- Implements security rules for both public and private gateway configurations
 
 ## Basic Usage
 
 ```hcl
 module "security" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/security?ref=v1.38.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/security?ref=v1.39.0"
 
   cluster_name        = "your-cluster-name"
   resource_group_name = "your-resource-group-name"

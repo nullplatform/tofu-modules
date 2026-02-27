@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.39.0](https://github.com/nullplatform/tofu-modules/compare/v1.38.3...v1.39.0) (2026-02-27)
+
+
+### Features
+
+* add additional_policies variable to agent IAM module ([#233](https://github.com/nullplatform/tofu-modules/issues/233)) ([7762406](https://github.com/nullplatform/tofu-modules/commit/77624065a5686d00be0355db014a8dd738858a8c))
+* add extra_envs variable to agent module ([#229](https://github.com/nullplatform/tofu-modules/issues/229)) ([996b24f](https://github.com/nullplatform/tofu-modules/commit/996b24fbdd044b5483387deff1b56ff0b7375520))
+
 ## [1.38.3](https://github.com/nullplatform/tofu-modules/compare/v1.38.2...v1.38.3) (2026-02-26)
 
 
