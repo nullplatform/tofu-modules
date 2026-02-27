@@ -33,3 +33,8 @@ output "eks_cluster_security_group_id" {
   value       = module.eks.cluster_security_group_id
   description = "Security group ID attached to the EKS cluster"
 }
+
+output "eks_cluster_primary_security_group_id" {
+  value       = module.eks.cluster_primary_security_group_id
+  description = "Primary security group ID of the EKS cluster (auto-created by EKS, attached to all nodes and ENIs)"
+}

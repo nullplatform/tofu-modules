@@ -2,23 +2,23 @@
 
 ## Description
 
-Configures a Google Kubernetes Engine (GKE) cluster provider for Nullplatform with gateway, resource management, and security settings
+Configures Nullplatform provider settings for Google Kubernetes Engine (GKE) clusters
 
 ## Features
 
 - Creates Nullplatform provider configuration for GKE clusters
-- Configures public and optional private gateway settings with custom namespaces
-- Supports resource management controls including memory-CPU ratios and core limits
-- Manages security settings with image pull secrets and service account configuration
+- Configures gateway settings for public and optionally private access
+- Supports resource management configuration with memory and CPU ratios
+- Manages security settings including image pull secrets and service accounts
 - Enables traffic manager version specification for sidecar containers
-- Supports dynamic Kubernetes object modifications through configurable modifiers
-- Provides flexible dimension-based configuration scoping
+- Supports dynamic Kubernetes object modifications through object modifiers
+- Configures default application namespace for deployments
 
 ## Basic Usage
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v1.39.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v1.40.0"
 
   cluster_name        = "your-cluster-name"
   location            = "your-location"

@@ -9,16 +9,15 @@ Creates an Oracle Cloud Infrastructure (OCI) Virtual Cloud Network (VCN) with pu
 - Creates a VCN with configurable CIDR blocks and DNS labels
 - Provisions public and private subnets with dedicated route tables
 - Configures Internet Gateway, NAT Gateway, and Service Gateway for network connectivity
-- Creates optional Network Security Group for OKE control plane with configurable API access rules
-- Supports customizable security rules for Kubernetes API endpoint access
-- Manages route tables for public (Internet Gateway) and private (NAT Gateway) subnet traffic
-- Provides comprehensive outputs for all created network resources including OCIDs and attributes
+- Creates optional Network Security Group (NSG) for OKE control plane with customizable API endpoint access rules
+- Supports prohibiting public IPs on private subnet VNICs for enhanced security
+- Configures security rules for Kubernetes API endpoint access and internal cluster communication
 
 ## Basic Usage
 
 ```hcl
 module "vcn" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/vcn?ref=v1.39.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/vcn?ref=v1.40.0"
 }
 ```
 
