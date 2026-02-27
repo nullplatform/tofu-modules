@@ -54,6 +54,33 @@ jobs:
           ref: release-please--branches--main
           fetch-depth: 0
 
+      - name: Detect changed modules
+        if: steps.check_pr.outputs.pr_exists == 'true'
+        id: changed
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            echo "No previous tag found. Will regenerate all."
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "dirs=--all --base-dir ." >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          CHANGED_DIRS=$(git diff --name-only "$LAST_TAG"..HEAD -- '*.tf' \
+            | grep -v '\.terraform/' \
+            | xargs -I{} dirname {} \
+            | sort -u \
+            | tr '\n' ' ')
+
+          if [ -z "$CHANGED_DIRS" ]; then
+            echo "No .tf changes detected since $LAST_TAG"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "Changed modules: $CHANGED_DIRS"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "dirs=$CHANGED_DIRS" >> $GITHUB_OUTPUT
+          fi
+
       - name: Setup Node.js
         if: steps.check_pr.outputs.pr_exists == 'true'
         uses: actions/setup-node@v4
@@ -71,10 +98,10 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Generate READMEs
-        if: steps.check_pr.outputs.pr_exists == 'true'
+        if: steps.check_pr.outputs.pr_exists == 'true' && steps.changed.outputs.has_changes == 'true'
         run: |
           node .actions-scripts/.github/scripts/generate-readme-v2.js \
-            --all --base-dir "." --verbose
+            ${{ steps.changed.outputs.dirs }} --verbose
         env:
           AI_PROVIDER: anthropic
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -119,7 +146,11 @@ jobs:
           if git diff --staged --quiet; then
             echo "No README changes to commit"
           else
-            git commit -m "docs: update READMEs with AI-generated content"
+            if [ "${{ steps.changed.outputs.has_changes }}" = "true" ]; then
+              git commit -m "docs: regenerate READMEs for changed modules and update versions"
+            else
+              git commit -m "docs: update version references in READMEs"
+            fi
             git push origin release-please--branches--main
             echo "READMEs updated in Release PR #${{ steps.check_pr.outputs.pr_number }}"
           fi
