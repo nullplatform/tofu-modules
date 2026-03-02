@@ -2,22 +2,23 @@
 
 ## Description
 
-Configures Nullplatform Azure provider settings with networking and DNS zone configuration
+Configures Azure networking and DNS settings for a nullplatform provider configuration
 
 ## Features
 
-- Creates Nullplatform Azure provider configuration resource
+- Creates a nullplatform provider configuration for Azure
 - Configures public and private DNS zone settings
-- Supports application domain configuration
+- Supports custom domain name configuration
 - Manages Azure resource group associations for DNS zones
-- Allows custom dimension definitions for organizational hierarchy
-- Ignores changes to attributes after initial creation to prevent drift
+- Enables application domain mapping
+- Supports multi-dimensional resource organization
+- Provides lifecycle management with attribute change ignoring
 
 ## Basic Usage
 
 ```hcl
 module "cloud" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/azure/cloud?ref=v1.40.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/azure/cloud?ref=v1.41.0"
 
   azure_resource_group_name       = "your-azure-resource-group-name"
   nrn                             = "your-nrn"

@@ -2,22 +2,22 @@
 
 ## Description
 
-Creates an OCI Object Storage bucket configured for storing OpenTofu/Terraform state files with S3-compatible backend support
+Creates an Oracle Cloud Infrastructure Object Storage bucket configured for storing OpenTofu/Terraform state files with S3-compatible backend support
 
 ## Features
 
-- Creates an Object Storage bucket in Oracle Cloud Infrastructure
-- Configures bucket with customizable access type and storage tier
-- Supports object versioning with Enabled, Disabled, or Suspended states
-- Generates S3-compatible endpoint configuration for OpenTofu backend
-- Applies automatic tagging for state management and infrastructure tracking
-- Provides ready-to-use backend configuration output for easy integration
+- Creates an OCI Object Storage bucket with configurable access controls and storage tier
+- Configures bucket versioning to protect state file history
+- Supports S3-compatible backend configuration for OpenTofu/Terraform
+- Applies predefined and custom freeform tags for resource organization
+- Generates ready-to-use backend configuration with endpoint and bucket details
+- Retrieves regional endpoint information automatically from tenancy subscriptions
 
 ## Basic Usage
 
 ```hcl
 module "backend" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/backend?ref=v1.40.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/backend?ref=v1.41.0"
 
   compartment_id = "your-compartment-id"
   namespace      = "your-namespace"

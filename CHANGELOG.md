@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.41.0](https://github.com/nullplatform/tofu-modules/compare/v1.40.0...v1.41.0) (2026-02-27)
+
+
+### Features
+
+* **aws-backend:** make backend module compliant with OpenTofu S3 backend docs ([#238](https://github.com/nullplatform/tofu-modules/issues/238)) ([d494c20](https://github.com/nullplatform/tofu-modules/commit/d494c20153232076fbd7ad6978dd501938b18284))
+
 ## [1.40.0](https://github.com/nullplatform/tofu-modules/compare/v1.39.0...v1.40.0) (2026-02-27)
 
 

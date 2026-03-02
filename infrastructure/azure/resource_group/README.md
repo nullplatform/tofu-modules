@@ -2,21 +2,21 @@
 
 ## Description
 
-Creates an Azure Resource Group with configurable tags and location
+Creates an Azure Resource Group with configurable location and tags
 
 ## Features
 
-- Creates an Azure Resource Group in a specified location
-- Configures custom tags for resource organization and management
-- Outputs resource group name and location for downstream module consumption
-- Supports resource provider registration control
-- Uses Azure CLI authentication for provider configuration
+- Creates a new Azure Resource Group in a specified region
+- Configures resource group with custom name and location
+- Supports optional tagging for resource organization
+- Outputs resource group name and location for reference
+- Integrates with Azure CLI authentication
 
 ## Basic Usage
 
 ```hcl
 module "resource_group" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/resource_group?ref=v1.40.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/resource_group?ref=v1.41.0"
 
   location            = "your-location"
   resource_group_name = "your-resource-group-name"
