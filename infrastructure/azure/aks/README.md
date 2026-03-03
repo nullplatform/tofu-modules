@@ -18,7 +18,7 @@ Provisions an Azure Kubernetes Service (AKS) cluster with configurable node pool
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v1.41.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v1.41.1"
 
   cluster_name        = "your-cluster-name"
   location            = "your-location"

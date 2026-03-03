@@ -18,7 +18,7 @@ Creates and manages OCI DNS zones with support for primary and secondary zone ty
 
 ```hcl
 module "dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/dns?ref=v1.41.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/dns?ref=v1.41.1"
 
   compartment_id = "your-compartment-id"
 }

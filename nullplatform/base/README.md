@@ -18,7 +18,7 @@ Deploys the Nullplatform base infrastructure components including gateways, logg
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.41.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.41.1"
 
   k8s_provider = "your-k8s-provider"
   np_api_key   = "your-np-api-key"
@@ -30,7 +30,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.41.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.41.1"
 
   k8s_provider = "eks"
   np_api_key   = "your-np-api-key"
@@ -42,7 +42,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.41.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.41.1"
 
   k8s_provider = "gke"
   np_api_key   = "your-np-api-key"
@@ -54,7 +54,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.41.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.41.1"
 
   k8s_provider = "aks"
   np_api_key   = "your-np-api-key"
@@ -66,7 +66,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.41.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.41.1"
 
   k8s_provider = "oke"
   np_api_key   = "your-np-api-key"
@@ -78,7 +78,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.41.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.41.1"
 
   k8s_provider = "aro"
   np_api_key   = "your-np-api-key"

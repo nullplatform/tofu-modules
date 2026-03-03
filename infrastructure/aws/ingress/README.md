@@ -18,7 +18,7 @@ Creates initial Kubernetes ingress resources for nullplatform with internal and 
 
 ```hcl
 module "ingress" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/ingress?ref=v1.41.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/ingress?ref=v1.41.1"
 
   certificate_arn = "your-certificate-arn"
 }

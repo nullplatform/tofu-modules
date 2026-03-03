@@ -18,7 +18,7 @@ Deploys Prometheus monitoring system to a Kubernetes cluster using Helm with con
 
 ```hcl
 module "prometheus" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v1.41.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v1.41.1"
 }
 ```
 

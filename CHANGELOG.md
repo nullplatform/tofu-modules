@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.41.1](https://github.com/nullplatform/tofu-modules/compare/v1.41.0...v1.41.1) (2026-03-03)
+
+
+### Bug Fixes
+
+* delete conflicting aws provider from backend module ([#240](https://github.com/nullplatform/tofu-modules/issues/240)) ([aa6cb87](https://github.com/nullplatform/tofu-modules/commit/aa6cb877e112590c1048bae712aa980236d513ba))
+
 ## [1.41.0](https://github.com/nullplatform/tofu-modules/compare/v1.40.0...v1.41.0) (2026-02-27)
 
 

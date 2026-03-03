@@ -17,7 +17,7 @@ Configures Git provider integration with Nullplatform for GitHub, GitLab, or Azu
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.41.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.41.1"
 
   git_provider = "your-git-provider"
   np_api_key   = "your-np-api-key"
@@ -29,7 +29,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.41.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.41.1"
 
   git_provider           = "github"
   github_installation_id = "your-github-installation-id"  # Required when git_provider = "github"
@@ -43,7 +43,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.41.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.41.1"
 
   git_provider                = "gitlab"
   gitlab_access_token         = "your-gitlab-access-token"  # Required when git_provider = "gitlab"
