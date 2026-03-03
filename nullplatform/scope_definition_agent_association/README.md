@@ -17,7 +17,7 @@ Creates a Nullplatform notification channel with dynamic configuration from temp
 
 ```hcl
 module "scope_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=v1.41.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=v1.41.1"
 
   api_key                  = "your-api-key"
   nrn                      = "your-nrn"

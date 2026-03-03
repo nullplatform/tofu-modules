@@ -16,7 +16,7 @@ Creates an Azure public DNS zone with configurable tags and outputs name servers
 
 ```hcl
 module "dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/dns?ref=v1.41.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/dns?ref=v1.41.1"
 
   domain_name         = "your-domain-name"
   resource_group_name = "your-resource-group-name"

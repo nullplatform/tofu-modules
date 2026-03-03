@@ -17,7 +17,7 @@ Creates a Google Artifact Registry repository with a service account for push/pu
 
 ```hcl
 module "acr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/acr?ref=v1.41.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/acr?ref=v1.41.1"
 
   containerregistry_name = "your-containerregistry-name"
   location               = "your-location"
