@@ -135,7 +135,7 @@ variable "additional_network_cidrs" {
 variable "enabled_log_types" {
   description = "List of EKS control plane log types to enable. Valid values: api, audit, authenticator, controllerManager, scheduler"
   type        = list(string)
-  default     = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+  default     = []
 }
 
 variable "create_cloudwatch_log_group" {
