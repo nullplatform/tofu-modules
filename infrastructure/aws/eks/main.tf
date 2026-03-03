@@ -7,8 +7,10 @@ module "eks" {
   name               = var.name
   kubernetes_version = var.kubernetes_version
 
-  create_cloudwatch_log_group = false
-  create_node_security_group  = false
+  create_cloudwatch_log_group            = var.create_cloudwatch_log_group
+  cloudwatch_log_group_retention_in_days = var.cloudwatch_log_group_retention_in_days
+  enabled_log_types                      = var.enabled_log_types
+  create_node_security_group             = false
 
   # Security group rules for NLB health checks and Istio gateway traffic
   security_group_additional_rules = var.security_group_additional_rules ? {
