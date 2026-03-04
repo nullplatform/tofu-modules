@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.42.0](https://github.com/nullplatform/tofu-modules/compare/v1.41.1...v1.42.0) (2026-03-04)
+
+
+### Features
+
+* **eks:** expose control plane logging configuration ([#242](https://github.com/nullplatform/tofu-modules/issues/242)) ([322d3f6](https://github.com/nullplatform/tofu-modules/commit/322d3f626354bd285687141c43c8883b97fe4d49))
+
 ## [1.41.1](https://github.com/nullplatform/tofu-modules/compare/v1.41.0...v1.41.1) (2026-03-03)
 
 

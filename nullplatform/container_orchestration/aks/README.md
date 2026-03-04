@@ -18,7 +18,7 @@ Configures Nullplatform provider settings for Azure Kubernetes Service (AKS) clu
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v1.41.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v1.42.0"
 
   cluster_name        = "your-cluster-name"
   nrn                 = "your-nrn"

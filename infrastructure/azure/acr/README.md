@@ -18,7 +18,7 @@ Creates and configures an Azure Container Registry (ACR) with admin access enabl
 
 ```hcl
 module "acr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/acr?ref=v1.41.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/acr?ref=v1.42.0"
 
   containerregistry_name = "your-containerregistry-name"
   location               = "your-location"

@@ -17,7 +17,7 @@ Creates a Nullplatform dimension for environments with configurable environment 
 
 ```hcl
 module "dimensions" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimensions?ref=v1.41.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimensions?ref=v1.42.0"
 
   np_api_key = "your-np-api-key"
   nrn        = "your-nrn"

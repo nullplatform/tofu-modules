@@ -17,7 +17,7 @@ Creates an Oracle Cloud Infrastructure Object Storage bucket configured for stor
 
 ```hcl
 module "backend" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/backend?ref=v1.41.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/backend?ref=v1.42.0"
 
   compartment_id = "your-compartment-id"
   namespace      = "your-namespace"

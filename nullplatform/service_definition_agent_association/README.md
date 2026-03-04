@@ -18,7 +18,7 @@ Creates a Nullplatform notification channel with agent configuration and service
 
 ```hcl
 module "service_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v1.41.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v1.42.0"
 
   api_key        = "your-api-key"
   tags_selectors = "your-tags-selectors"
