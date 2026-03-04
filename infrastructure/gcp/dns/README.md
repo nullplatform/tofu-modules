@@ -17,7 +17,7 @@ Creates and manages a Google Cloud DNS managed zone with support for both public
 
 ```hcl
 module "dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/dns?ref=v1.41.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/dns?ref=v1.42.0"
 
   domain_name = "your-domain-name"
   project_id  = "your-project-id"

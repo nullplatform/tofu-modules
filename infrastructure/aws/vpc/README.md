@@ -18,7 +18,7 @@ Creates an AWS VPC with public and private subnets, NAT gateway, and Kubernetes-
 
 ```hcl
 module "vpc" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v1.41.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v1.42.0"
 
   account      = "your-account"
   organization = "your-organization"

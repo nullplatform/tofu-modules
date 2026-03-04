@@ -18,7 +18,7 @@ Configures Oracle Cloud Infrastructure (OCI) provider settings in Nullplatform w
 
 ```hcl
 module "cloud" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/oci/cloud?ref=v1.41.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/oci/cloud?ref=v1.42.0"
 
   account_id       = "your-account-id"
   account_name     = "your-account-name"

@@ -18,7 +18,7 @@ Configures Nullplatform provider settings for Oracle Kubernetes Engine (OKE) clu
 
 ```hcl
 module "oke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/oke?ref=v1.41.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/oke?ref=v1.42.0"
 
   cluster_name = "your-cluster-name"
   nrn          = "your-nrn"

@@ -18,7 +18,7 @@ Creates a Nullplatform service specification with associated action and link spe
 
 ```hcl
 module "service_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v1.41.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v1.42.0"
 
   git_service_path    = "your-git-service-path"
   np_api_key          = "your-np-api-key"

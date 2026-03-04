@@ -18,7 +18,7 @@ Creates a secure S3 bucket for storing Terraform state with versioning, encrypti
 
 ```hcl
 module "backend" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/backend?ref=v1.41.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/backend?ref=v1.42.0"
 }
 ```
 

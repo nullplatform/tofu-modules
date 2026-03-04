@@ -16,7 +16,7 @@ Creates a GCP VPC network with configurable subnets and secondary IP ranges for 
 
 ```hcl
 module "vpc" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/vpc?ref=v1.41.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/vpc?ref=v1.42.0"
 
   network_name = "your-network-name"
   project_id   = "your-project-id"

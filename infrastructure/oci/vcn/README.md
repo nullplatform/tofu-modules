@@ -18,7 +18,7 @@ Creates an Oracle Cloud Infrastructure (OCI) Virtual Cloud Network (VCN) with pu
 
 ```hcl
 module "vcn" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/vcn?ref=v1.41.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/vcn?ref=v1.42.0"
 }
 ```
 

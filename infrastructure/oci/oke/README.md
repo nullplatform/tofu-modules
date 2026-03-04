@@ -18,7 +18,7 @@ Provisions an Oracle Container Engine for Kubernetes (OKE) cluster with enhanced
 
 ```hcl
 module "oke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/oke?ref=v1.41.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/oke?ref=v1.42.0"
 
   api_endpoint_subnet_id = "your-api-endpoint-subnet-id"
   cluster_name           = "your-cluster-name"
