@@ -127,3 +127,25 @@ variable "additional_network_cidrs" {
   description = "Additional CIDR blocks to allow in security group rules (e.g., peered VPC, on-premises network)."
   default     = []
 }
+
+# ============================================================================
+# Control Plane Logging
+# ============================================================================
+
+variable "enabled_log_types" {
+  description = "List of EKS control plane log types to enable. Valid values: api, audit, authenticator, controllerManager, scheduler"
+  type        = list(string)
+  default     = []
+}
+
+variable "create_cloudwatch_log_group" {
+  description = "Whether to create a CloudWatch log group for cluster logs. If false and logging is enabled, AWS creates it automatically but outside of Terraform management."
+  type        = bool
+  default     = true
+}
+
+variable "cloudwatch_log_group_retention_in_days" {
+  description = "Number of days to retain log events in the CloudWatch log group"
+  type        = number
+  default     = 90
+}
