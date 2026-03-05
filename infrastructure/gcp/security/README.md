@@ -19,19 +19,17 @@ Creates GCP firewall rules for Istio gateways with health check port restriction
 module "security" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/security?ref=v1.42.0"
 
-  cluster_name   = "your-cluster-name"
-  gcp_project_id = "your-gcp-project-id"
-  gcp_region     = "your-gcp-region"
+  cluster_name   = module.gke.cluster_name
+  gcp_project_id = var.gcp_project_id
+  gcp_region     = var.gcp_region
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.security.public_gateway_firewall_name
-}
+# This module manages GCP firewall rules and has no outputs consumed by other modules.
+# The security rules are applied automatically to the GKE cluster network.
 ```
 
 <!-- BEGIN_TF_DOCS -->

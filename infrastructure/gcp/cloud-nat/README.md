@@ -18,21 +18,19 @@ Creates a Google Cloud Router with NAT configuration for enabling outbound inter
 module "cloud-nat" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/cloud-nat?ref=v1.42.0"
 
-  nat_name    = "your-nat-name"
-  network_id  = "your-network-id"
-  project_id  = "your-project-id"
-  region      = "your-region"
-  router_name = "your-router-name"
+  nat_name    = var.nat_name
+  network_id  = module.vpc.network_id
+  project_id  = var.project_id
+  region      = var.region
+  router_name = var.router_name
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.cloud-nat.router_name
-}
+# Cloud NAT enables outbound internet access for private GKE nodes.
+# No downstream Terraform consumers — networking is applied automatically.
 ```
 
 <!-- BEGIN_TF_DOCS -->

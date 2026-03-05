@@ -20,17 +20,18 @@ Creates and configures Nullplatform service specifications, scope types, and act
 module "scope_definition" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v1.42.0"
 
-  np_api_key = "your-np-api-key"
-  nrn        = "your-nrn"
+  np_api_key = var.np_api_key
+  nrn        = var.nrn
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.scope_definition.service_specification_id
+# service_specification_id is used by scope_definition_agent_association
+module "scope_definition_agent_association" {
+  scope_specification_id   = module.scope_definition.service_specification_id
+  scope_specification_slug = module.scope_definition.service_specification_slug
 }
 ```
 

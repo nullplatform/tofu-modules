@@ -18,18 +18,33 @@ Creates a Google Cloud VPC network with configurable subnets and optional second
 module "vnet" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/vnet?ref=v1.42.0"
 
-  project_id         = "your-project-id"
-  subnets_definition = "your-subnets-definition"
-  vpc_name           = "your-vpc-name"
+  project_id = var.gcp_project_id
+  subnets_definition = [
+    {
+      name           = "mycompany-subnet"
+      address_prefix = "10.0.0.0/20"
+      location       = var.gcp_region
+    }
+  ]
+  vpc_name = "mycompany-vpc"
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.vnet.vnet_name
+module "gke" {
+  source     = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/gke?ref=v1.42.0"
+
+  network    = module.vnet.vnet_name
+  subnetwork = module.vnet.subnet_names[0]
+  project_id = var.gcp_project_id
+}
+
+module "nat" {
+  source   = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/nat?ref=v1.42.0"
+
+  vpc_id   = module.vnet.vnet_id
 }
 ```
 

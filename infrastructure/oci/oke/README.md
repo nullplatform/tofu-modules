@@ -20,23 +20,26 @@ Provisions an Oracle Container Engine for Kubernetes (OKE) cluster with enhanced
 module "oke" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/oke?ref=v1.42.0"
 
-  api_endpoint_subnet_id = "your-api-endpoint-subnet-id"
-  cluster_name           = "your-cluster-name"
-  compartment_id         = "your-compartment-id"
-  existing_vcn_id        = "your-existing-vcn-id"
-  home_region            = "your-home-region"
-  node_pool_subnet_id    = "your-node-pool-subnet-id"
-  region                 = "your-region"
-  service_lb_subnet_id   = "your-service-lb-subnet-id"
+  api_endpoint_subnet_id = module.vcn.api_endpoint_subnet_id
+  cluster_name           = local.cluster_name
+  compartment_id         = var.compartment_id
+  existing_vcn_id        = module.vcn.vcn_id
+  home_region            = var.home_region
+  node_pool_subnet_id    = module.vcn.node_pool_subnet_id
+  region                 = var.region
+  service_lb_subnet_id   = module.vcn.service_lb_subnet_id
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.oke.cluster_id
+module "agent" {
+  cluster_name = module.oke.cluster_id
+}
+
+module "container_orchestration" {
+  cluster_name = module.oke.cluster_id
 }
 ```
 

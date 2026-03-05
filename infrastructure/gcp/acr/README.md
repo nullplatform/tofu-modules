@@ -19,18 +19,20 @@ Creates a Google Artifact Registry repository with a service account for push/pu
 module "acr" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/acr?ref=v1.42.0"
 
-  containerregistry_name = "your-containerregistry-name"
-  location               = "your-location"
-  project_id             = "your-project-id"
+  containerregistry_name = "mycompany-registry"
+  location               = var.gcp_region
+  project_id             = var.gcp_project_id
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.acr.acr_id
+# The registry URL and credentials are consumed by the nullplatform cloud module
+module "nullplatform_cloud" {
+  source               = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/gcp/cloud?ref=v1.42.0"
+
+  registry_login_server = module.acr.acr_login_server
 }
 ```
 

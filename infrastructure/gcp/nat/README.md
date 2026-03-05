@@ -18,21 +18,19 @@ Creates a Google Cloud Router and Cloud NAT gateway for enabling outbound intern
 module "nat" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/nat?ref=v1.42.0"
 
-  location    = "your-location"
-  nat_name    = "your-nat-name"
-  project_id  = "your-project-id"
-  router_name = "your-router-name"
-  vpc_id      = "your-vpc-id"
+  location    = var.gcp_region
+  nat_name    = "mycompany-nat"
+  project_id  = var.gcp_project_id
+  router_name = "mycompany-router"
+  vpc_id      = module.vnet.vnet_id
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.nat.router_name
-}
+# This module provides outbound internet connectivity for private GKE nodes.
+# No outputs are consumed by other nullplatform modules.
 ```
 
 <!-- BEGIN_TF_DOCS -->

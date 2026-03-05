@@ -18,18 +18,21 @@ Creates an Azure Resource Group with configurable location and tags
 module "resource_group" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/resource_group?ref=v1.42.0"
 
-  location            = "your-location"
-  resource_group_name = "your-resource-group-name"
-  subscription_id     = "your-subscription-id"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  subscription_id     = var.subscription_id
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.resource_group.resource_group_name
+module "vnet" {
+  resource_group_name = module.resource_group.resource_group_name
+}
+
+module "aks" {
+  resource_group_name = module.resource_group.resource_group_name
 }
 ```
 

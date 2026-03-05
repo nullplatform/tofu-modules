@@ -25,9 +25,13 @@ module "backend" {
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.backend.bucket_name
+# Use the bucket name in your Terraform backend configuration (terraform.tf)
+terraform {
+  backend "s3" {
+    bucket = module.backend.bucket_name
+    region = module.backend.bucket_region
+    key    = "terraform.tfstate"
+  }
 }
 ```
 

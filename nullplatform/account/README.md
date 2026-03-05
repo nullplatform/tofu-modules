@@ -18,18 +18,16 @@ Creates and manages Nullplatform accounts with configurable repository settings
 module "account" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/account?ref=v1.42.0"
 
-  np_api_key            = "your-np-api-key"
-  nullplatform_accounts = "your-nullplatform-accounts"
+  np_api_key            = var.np_api_key
+  nullplatform_accounts = var.nullplatform_accounts
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.account.id
-}
+# This module creates Nullplatform accounts.
+# No downstream Terraform consumers — accounts are managed via the Nullplatform API.
 ```
 
 <!-- BEGIN_TF_DOCS -->

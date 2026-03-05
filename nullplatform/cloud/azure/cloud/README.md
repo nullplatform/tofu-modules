@@ -20,19 +20,17 @@ Configures Azure networking and DNS settings for a nullplatform provider configu
 module "cloud" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/azure/cloud?ref=v1.42.0"
 
-  azure_resource_group_name       = "your-azure-resource-group-name"
-  nrn                             = "your-nrn"
-  private_dns_resource_group_name = "your-private-dns-resource-group-name"
+  azure_resource_group_name       = module.resource_group.resource_group_name
+  nrn                             = var.nrn
+  private_dns_resource_group_name = var.private_dns_resource_group_name
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.cloud.id
-}
+# This module registers the Azure cloud provider in Nullplatform.
+# No downstream Terraform consumers — configuration is applied via the Nullplatform API.
 ```
 
 <!-- BEGIN_TF_DOCS -->

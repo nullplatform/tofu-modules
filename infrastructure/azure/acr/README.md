@@ -20,20 +20,18 @@ Creates and configures an Azure Container Registry (ACR) with admin access enabl
 module "acr" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/acr?ref=v1.42.0"
 
-  containerregistry_name = "your-containerregistry-name"
-  location               = "your-location"
-  resource_group_name    = "your-resource-group-name"
-  subscription_id        = "your-subscription-id"
+  containerregistry_name = var.containerregistry_name
+  location               = var.location
+  resource_group_name    = module.resource_group.resource_group_name
+  subscription_id        = var.subscription_id
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.acr.acr_id
-}
+# This module creates the Azure Container Registry.
+# No downstream Terraform consumers — registry credentials are configured separately.
 ```
 
 <!-- BEGIN_TF_DOCS -->

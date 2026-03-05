@@ -20,17 +20,15 @@ Creates initial Kubernetes ingress resources for nullplatform with internal and 
 module "ingress" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/ingress?ref=v1.42.0"
 
-  certificate_arn = "your-certificate-arn"
+  certificate_arn = module.acm.acm_certificate_arn
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.ingress.id
-}
+# This module has no outputs. The ALB ingresses are ready
+# to receive traffic once applied.
 ```
 
 <!-- BEGIN_TF_DOCS -->

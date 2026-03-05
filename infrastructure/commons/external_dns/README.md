@@ -20,8 +20,8 @@ Deploys and configures ExternalDNS on Kubernetes to automatically manage DNS rec
 module "external_dns" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.42.0"
 
-  dns_provider_name = "your-dns-provider-name"
-  domain_filters    = "your-domain-filters"
+  dns_provider_name = var.dns_provider
+  domain_filters    = local.domain_name
 }
 ```
 
@@ -31,9 +31,9 @@ module "external_dns" {
 module "external_dns" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.42.0"
 
-  cloudflare_token  = "your-cloudflare-token"  # Required when dns_provider_name = "cloudflare"
+  cloudflare_token  = var.cloudflare_token  # Required when dns_provider_name = "cloudflare"
   dns_provider_name = "cloudflare"
-  domain_filters    = "your-domain-filters"
+  domain_filters    = local.domain_name
 }
 ```
 
@@ -43,12 +43,12 @@ module "external_dns" {
 module "external_dns" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.42.0"
 
-  aws_iam_role_arn  = "your-aws-iam-role-arn"  # Required when dns_provider_name = "aws"
-  aws_region        = "your-aws-region"  # Required when dns_provider_name = "aws"
+  aws_iam_role_arn  = module.external_dns_iam.nullplatform_external_dns_role_arn  # Required when dns_provider_name = "aws"
+  aws_region        = var.aws_region  # Required when dns_provider_name = "aws"
   dns_provider_name = "aws"
-  domain_filters    = "your-domain-filters"
-  zone_id_filter    = "your-zone-id-filter"  # Required when dns_provider_name = "aws"
-  zone_type         = "your-zone-type"  # Required when dns_provider_name = "aws"
+  domain_filters    = local.domain_name
+  zone_id_filter    = module.dns.public_zone_id  # Required when dns_provider_name = "aws"
+  zone_type         = "public"  # Required when dns_provider_name = "aws"
 }
 ```
 
@@ -59,19 +59,17 @@ module "external_dns" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.42.0"
 
   dns_provider_name    = "oci"
-  domain_filters       = "your-domain-filters"
-  oci_compartment_ocid = "your-oci-compartment-ocid"  # Required when dns_provider_name = "oci"
-  oci_region           = "your-oci-region"  # Required when dns_provider_name = "oci"
+  domain_filters       = local.domain_name
+  oci_compartment_ocid = var.compartment_id  # Required when dns_provider_name = "oci"
+  oci_region           = var.oci_region  # Required when dns_provider_name = "oci"
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.external_dns.id
-}
+# This module deploys ExternalDNS via Helm and has no outputs.
+# Once deployed, ExternalDNS automatically syncs Kubernetes service/ingress DNS records.
 ```
 
 <!-- BEGIN_TF_DOCS -->

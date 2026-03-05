@@ -20,20 +20,18 @@ Configures a Nullplatform provider for Google Kubernetes Engine (GKE) with clust
 module "gke" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v1.42.0"
 
-  cluster_name        = "your-cluster-name"
-  location            = "your-location"
-  nrn                 = "your-nrn"
-  public_gateway_name = "your-public-gateway-name"
+  cluster_name        = module.gke.cluster_name
+  location            = var.location
+  nrn                 = var.nrn
+  public_gateway_name = var.public_gateway_name
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.gke.id
-}
+# This module registers the GKE cluster in Nullplatform.
+# No downstream Terraform consumers — cluster config is applied via the Nullplatform API.
 ```
 
 <!-- BEGIN_TF_DOCS -->

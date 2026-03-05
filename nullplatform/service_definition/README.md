@@ -20,20 +20,20 @@ Creates a Nullplatform service specification with associated action and link spe
 module "service_definition" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v1.42.0"
 
-  git_service_path    = "your-git-service-path"
-  np_api_key          = "your-np-api-key"
-  nrn                 = "your-nrn"
-  service_description = "your-service-description"
-  service_name        = "your-service-name"
+  git_service_path    = var.git_service_path
+  np_api_key          = var.np_api_key
+  nrn                 = var.nrn
+  service_description = var.service_description
+  service_name        = var.service_name
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.service_definition.service_specification_id
+# service_specification_id is used by service_definition_agent_association
+module "service_definition_agent_association" {
+  # (references service_specification_id internally)
 }
 ```
 

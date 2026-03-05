@@ -20,22 +20,25 @@ Creates a private Google Kubernetes Engine (GKE) cluster with public endpoint ac
 module "gke" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/gke?ref=v1.42.0"
 
-  cluster_name      = "your-cluster-name"
-  ip_range_pods     = "your-ip-range-pods"
-  ip_range_services = "your-ip-range-services"
-  location          = "your-location"
-  project_id        = "your-project-id"
-  vpc_name          = "your-vpc-name"
-  vpc_subnet_name   = "your-vpc-subnet-name"
+  cluster_name      = local.cluster_name
+  ip_range_pods     = var.ip_range_pods
+  ip_range_services = var.ip_range_services
+  location          = var.location
+  project_id        = var.project_id
+  vpc_name          = module.vpc.network_name
+  vpc_subnet_name   = module.vpc.subnet_names[0]
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.gke.cluster_name
+module "agent" {
+  cluster_name = module.gke.cluster_name
+}
+
+module "container_orchestration" {
+  cluster_name = module.gke.cluster_name
 }
 ```
 

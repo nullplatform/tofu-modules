@@ -18,19 +18,20 @@ Creates an IAM role and policy for cert-manager to manage Route53 DNS records fo
 module "cert_manager" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/cert_manager?ref=v1.42.0"
 
-  aws_iam_openid_connect_provider_arn = "your-aws-iam-openid-connect-provider-arn"
-  cluster_name                        = "your-cluster-name"
-  hosted_zone_private_id              = "your-hosted-zone-private-id"
-  hosted_zone_public_id               = "your-hosted-zone-public-id"
+  aws_iam_openid_connect_provider_arn = module.eks.eks_oidc_provider_arn
+  cluster_name                        = module.eks.eks_cluster_name
+  hosted_zone_private_id              = module.dns.private_zone_id
+  hosted_zone_public_id               = module.dns.public_zone_id
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.cert_manager.nullplatform_cert_manager_role_arn
+# The role ARN is consumed by the commons/cert_manager Helm module
+module "cert_manager" {
+  source     = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.42.0"
+  aws_sa_arn = module.cert_manager_iam.nullplatform_cert_manager_role_arn
 }
 ```
 

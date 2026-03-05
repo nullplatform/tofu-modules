@@ -20,18 +20,26 @@ Creates and configures an AWS EKS cluster with support for both Auto Mode and Ma
 module "eks" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/eks?ref=v1.42.0"
 
-  aws_subnets_private_ids = "your-aws-subnets-private-ids"
-  aws_vpc_vpc_id          = "your-aws-vpc-vpc-id"
-  name                    = "your-name"
+  aws_subnets_private_ids = module.vpc.private_subnets
+  aws_vpc_vpc_id          = module.vpc.vpc_id
+  name                    = "mycompany-prod"
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.eks.eks_cluster_name
+module "agent_iam" {
+  cluster_name                        = module.eks.eks_cluster_name
+  aws_iam_openid_connect_provider_arn = module.eks.eks_oidc_provider_arn
+}
+
+module "aws_load_balancer_controller" {
+  cluster_name = module.eks.eks_cluster_name
+}
+
+module "security" {
+  cluster_name = module.eks.eks_cluster_name
 }
 ```
 

@@ -17,21 +17,22 @@ Creates an IAM role with OIDC provider trust for the Nullplatform agent service 
 ## Basic Usage
 
 ```hcl
-module "agent" {
+module "agent_iam" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/agent?ref=v1.42.0"
 
-  agent_namespace                     = "your-agent-namespace"
-  aws_iam_openid_connect_provider_arn = "your-aws-iam-openid-connect-provider-arn"
-  cluster_name                        = "your-cluster-name"
+  agent_namespace                     = var.agent_namespace
+  aws_iam_openid_connect_provider_arn = module.eks.eks_oidc_provider_arn
+  cluster_name                        = module.eks.eks_cluster_name
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.agent.nullplatform_agent_role_arn
+# The role ARN is consumed by the nullplatform/agent Helm module
+module "agent" {
+  source           = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.42.0"
+  aws_iam_role_arn = module.agent_iam.nullplatform_agent_role_arn
 }
 ```
 

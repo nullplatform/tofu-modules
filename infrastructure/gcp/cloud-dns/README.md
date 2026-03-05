@@ -19,19 +19,16 @@ Creates and manages a Google Cloud DNS managed zone with support for both public
 module "cloud-dns" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/cloud-dns?ref=v1.42.0"
 
-  domain_name = "your-domain-name"
-  project_id  = "your-project-id"
-  zone_name   = "your-zone-name"
+  domain_name = local.domain_name
+  project_id  = var.project_id
+  zone_name   = var.zone_name
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.cloud-dns.zone_name
-}
+# zone_name is consumed by cert_manager and external_dns modules for DNS config.
 ```
 
 <!-- BEGIN_TF_DOCS -->

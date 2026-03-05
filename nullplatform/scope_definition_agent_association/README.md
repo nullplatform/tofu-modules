@@ -19,21 +19,19 @@ Creates a Nullplatform notification channel with dynamic configuration from temp
 module "scope_definition_agent_association" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=v1.42.0"
 
-  api_key                  = "your-api-key"
-  nrn                      = "your-nrn"
-  scope_specification_id   = "your-scope-specification-id"
-  scope_specification_slug = "your-scope-specification-slug"
-  tags_selectors           = "your-tags-selectors"
+  api_key                  = var.np_api_key
+  nrn                      = var.nrn
+  scope_specification_id   = module.scope_definition.service_specification_id
+  scope_specification_slug = module.scope_definition.service_specification_slug
+  tags_selectors           = var.tags_selectors
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.scope_definition_agent_association.id
-}
+# This module associates a scope definition with agents.
+# No downstream Terraform consumers — configuration is applied via the Nullplatform API.
 ```
 
 <!-- BEGIN_TF_DOCS -->

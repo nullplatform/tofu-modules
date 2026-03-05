@@ -18,19 +18,17 @@ Creates an Azure public DNS zone with configurable tags and outputs name servers
 module "dns" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/dns?ref=v1.42.0"
 
-  domain_name         = "your-domain-name"
-  resource_group_name = "your-resource-group-name"
-  subscription_id     = "your-subscription-id"
+  domain_name         = local.domain_name
+  resource_group_name = module.resource_group.resource_group_name
+  subscription_id     = var.subscription_id
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.dns.dns_zone_name
-}
+# dns_zone_name is used by cert_manager and external_dns modules
+# No direct Terraform module reference — consumed via provider configuration.
 ```
 
 <!-- BEGIN_TF_DOCS -->

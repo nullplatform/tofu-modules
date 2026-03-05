@@ -19,21 +19,20 @@ Creates an Azure Virtual Network with configurable address space and subnets usi
 module "vnet" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/vnet?ref=v1.42.0"
 
-  address_space       = "your-address-space"
-  location            = "your-location"
-  resource_group_name = "your-resource-group-name"
-  subnets_definition  = "your-subnets-definition"
-  subscription_id     = "your-subscription-id"
-  vnet_name           = "your-vnet-name"
+  address_space       = var.address_space
+  location            = var.location
+  resource_group_name = module.resource_group.resource_group_name
+  subnets_definition  = var.subnets_definition
+  subscription_id     = var.subscription_id
+  vnet_name           = var.vnet_name
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.vnet.vnet_id
+module "aks" {
+  vnet_subnet_id = module.vnet.aks_subnet_id
 }
 ```
 

@@ -19,8 +19,8 @@ Creates a Nullplatform API key with pre-configured or custom role grants and tag
 module "api_key" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.42.0"
 
-  nrn  = "your-nrn"
-  type = "your-type"
+  nrn  = var.nrn
+  type = "agent"  # agent | scope_notification | service_notification | custom
 }
 ```
 
@@ -30,7 +30,7 @@ module "api_key" {
 module "api_key" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.42.0"
 
-  nrn  = "your-nrn"
+  nrn  = var.nrn
   type = "agent"
 }
 ```
@@ -41,7 +41,7 @@ module "api_key" {
 module "api_key" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.42.0"
 
-  nrn  = "your-nrn"
+  nrn  = var.nrn
   type = "scope_notification"
 }
 ```
@@ -52,7 +52,7 @@ module "api_key" {
 module "api_key" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.42.0"
 
-  nrn  = "your-nrn"
+  nrn  = var.nrn
   type = "service_notification"
 }
 ```
@@ -63,9 +63,9 @@ module "api_key" {
 module "api_key" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.42.0"
 
-  custom_name       = "your-custom-name"  # Required when type = "custom"
-  custom_role_slugs = "your-custom-role-slugs"  # Required when type = "custom"
-  nrn               = "your-nrn"
+  custom_name       = var.custom_name  # Required when type = "custom"
+  custom_role_slugs = var.custom_role_slugs  # Required when type = "custom"
+  nrn               = var.nrn
   type              = "custom"
 }
 ```
@@ -73,9 +73,9 @@ module "api_key" {
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.api_key.api_key
+# The api_key output is consumed by the nullplatform/agent module
+module "agent" {
+  api_key = module.agent_api_key.api_key
 }
 ```
 

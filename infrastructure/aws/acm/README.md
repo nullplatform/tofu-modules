@@ -19,17 +19,17 @@ Creates an AWS ACM wildcard certificate with DNS validation via Route53
 module "acm" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/acm?ref=v1.42.0"
 
-  domain_name = "your-domain-name"
-  zone_id     = "your-zone-id"
+  domain_name               = local.domain_name
+  zone_id                   = module.dns.public_zone_id
+  subject_alternative_names = ["*.${local.domain_name}"]
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.acm.acm_certificate_arn
+module "ingress" {
+  certificate_arn = module.acm.acm_certificate_arn
 }
 ```
 

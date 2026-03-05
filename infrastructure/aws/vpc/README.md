@@ -20,18 +20,27 @@ Creates an AWS VPC with public and private subnets, NAT gateway, and Kubernetes-
 module "vpc" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v1.42.0"
 
-  account      = "your-account"
-  organization = "your-organization"
-  vpc          = "your-vpc"
+  account      = "mycompany"
+  organization = "myorg"
+  vpc = {
+    cidr_block      = "10.0.0.0/16"
+    azs             = ["us-east-1a", "us-east-1b", "us-east-1c"]
+    private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+    public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+  }
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.vpc.vpc_id
+module "dns" {
+  vpc_id = module.vpc.vpc_id
+}
+
+module "eks" {
+  aws_vpc_vpc_id          = module.vpc.vpc_id
+  aws_subnets_private_ids = module.vpc.private_subnets
 }
 ```
 

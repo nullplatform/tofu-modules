@@ -20,17 +20,14 @@ Creates and manages OCI DNS zones with support for primary and secondary zone ty
 module "dns" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/dns?ref=v1.42.0"
 
-  compartment_id = "your-compartment-id"
+  compartment_id = var.compartment_id
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.dns.dns_zones
-}
+# dns_zones output is used by external_dns and cert_manager for DNS record management.
 ```
 
 <!-- BEGIN_TF_DOCS -->

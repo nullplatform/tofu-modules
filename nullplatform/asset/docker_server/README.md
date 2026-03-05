@@ -19,21 +19,19 @@ Creates and configures a Docker server provider in nullplatform for container re
 module "docker_server" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/docker_server?ref=v1.42.0"
 
-  login_server = "your-login-server"
-  np_api_key   = "your-np-api-key"
-  nrn          = "your-nrn"
-  password     = "your-password"
-  path         = "your-path"
+  login_server = var.login_server
+  np_api_key   = var.np_api_key
+  nrn          = var.nrn
+  password     = var.registry_password
+  path         = var.registry_path
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.docker_server.id
-}
+# This module registers a Docker registry in Nullplatform.
+# No downstream Terraform consumers — configuration is applied via the Nullplatform API.
 ```
 
 <!-- BEGIN_TF_DOCS -->

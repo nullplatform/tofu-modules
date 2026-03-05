@@ -19,9 +19,9 @@ Configures Git provider integration with Nullplatform for GitHub, GitLab, or Azu
 module "code_repository" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.42.0"
 
-  git_provider = "your-git-provider"
-  np_api_key   = "your-np-api-key"
-  nrn          = "your-nrn"
+  git_provider = "github"  # github | gitlab | azure
+  np_api_key   = var.np_api_key
+  nrn          = var.nrn
 }
 ```
 
@@ -32,10 +32,10 @@ module "code_repository" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.42.0"
 
   git_provider           = "github"
-  github_installation_id = "your-github-installation-id"  # Required when git_provider = "github"
-  github_organization    = "your-github-organization"  # Required when git_provider = "github"
-  np_api_key             = "your-np-api-key"
-  nrn                    = "your-nrn"
+  github_installation_id = var.github_installation_id  # Required when git_provider = "github"
+  github_organization    = var.github_organization  # Required when git_provider = "github"
+  np_api_key             = var.np_api_key
+  nrn                    = var.nrn
 }
 ```
 
@@ -46,24 +46,22 @@ module "code_repository" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.42.0"
 
   git_provider                = "gitlab"
-  gitlab_access_token         = "your-gitlab-access-token"  # Required when git_provider = "gitlab"
-  gitlab_collaborators_config = "your-gitlab-collaborators-config"  # Required when git_provider = "gitlab"
-  gitlab_group_path           = "your-gitlab-group-path"  # Required when git_provider = "gitlab"
-  gitlab_installation_url     = "your-gitlab-installation-url"  # Required when git_provider = "gitlab"
-  gitlab_repository_prefix    = "your-gitlab-repository-prefix"  # Required when git_provider = "gitlab"
-  gitlab_slug                 = "your-gitlab-slug"  # Required when git_provider = "gitlab"
-  np_api_key                  = "your-np-api-key"
-  nrn                         = "your-nrn"
+  gitlab_access_token         = var.gitlab_access_token  # Required when git_provider = "gitlab"
+  gitlab_collaborators_config = var.gitlab_collaborators_config  # Required when git_provider = "gitlab"
+  gitlab_group_path           = var.gitlab_group_path  # Required when git_provider = "gitlab"
+  gitlab_installation_url     = var.gitlab_installation_url  # Required when git_provider = "gitlab"
+  gitlab_repository_prefix    = var.gitlab_repository_prefix  # Required when git_provider = "gitlab"
+  gitlab_slug                 = var.gitlab_slug  # Required when git_provider = "gitlab"
+  np_api_key                  = var.np_api_key
+  nrn                         = var.nrn
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.code_repository.id
-}
+# This module registers the code repository in Nullplatform.
+# No downstream Terraform consumers — configuration is applied via the Nullplatform API.
 ```
 
 <!-- BEGIN_TF_DOCS -->

@@ -20,21 +20,19 @@ Configures Nullplatform provider with AWS account, region, and networking settin
 module "cloud" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/cloud?ref=v1.42.0"
 
-  domain_name            = "your-domain-name"
-  hosted_private_zone_id = "your-hosted-private-zone-id"
-  hosted_public_zone_id  = "your-hosted-public-zone-id"
-  np_api_key             = "your-np-api-key"
-  nrn                    = "your-nrn"
+  domain_name            = local.domain_name
+  hosted_private_zone_id = module.dns.private_zone_id
+  hosted_public_zone_id  = module.dns.public_zone_id
+  np_api_key             = var.np_api_key
+  nrn                    = var.nrn
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.cloud.id
-}
+# This module registers the AWS cloud provider in Nullplatform.
+# No downstream Terraform consumers — configuration is applied via the Nullplatform API.
 ```
 
 <!-- BEGIN_TF_DOCS -->

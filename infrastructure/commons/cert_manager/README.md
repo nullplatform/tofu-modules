@@ -20,10 +20,10 @@ Deploys and configures cert-manager on Kubernetes with multi-cloud DNS provider 
 module "cert_manager" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.42.0"
 
-  account_slug        = "your-account-slug"
-  cloud_provider      = "your-cloud-provider"
-  hosted_zone_name    = "your-hosted-zone-name"
-  private_domain_name = "your-private-domain-name"
+  account_slug        = var.account_slug
+  cloud_provider      = var.cloud_provider
+  hosted_zone_name    = local.domain_name
+  private_domain_name = "private.${local.domain_name}"
 }
 ```
 
@@ -33,12 +33,12 @@ module "cert_manager" {
 module "cert_manager" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.42.0"
 
-  account_slug        = "your-account-slug"
+  account_slug        = var.account_slug
   cloud_provider      = "gcp"
-  gcp_sa_email        = "your-gcp-sa-email"  # Required when cloud_provider = "gcp"
-  hosted_zone_name    = "your-hosted-zone-name"
-  private_domain_name = "your-private-domain-name"
-  project_id          = "your-project-id"  # Required when cloud_provider = "gcp"
+  gcp_sa_email        = var.gcp_sa_email  # Required when cloud_provider = "gcp"
+  hosted_zone_name    = local.domain_name
+  private_domain_name = "private.${local.domain_name}"
+  project_id          = var.gcp_project_id  # Required when cloud_provider = "gcp"
 }
 ```
 
@@ -48,15 +48,15 @@ module "cert_manager" {
 module "cert_manager" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.42.0"
 
-  account_slug              = "your-account-slug"
-  azure_client_id           = "your-azure-client-id"  # Required when cloud_provider = "azure"
-  azure_hosted_zone_name    = "your-azure-hosted-zone-name"  # Required when cloud_provider = "azure"
-  azure_resource_group_name = "your-azure-resource-group-name"  # Required when cloud_provider = "azure"
-  azure_subscription_id     = "your-azure-subscription-id"  # Required when cloud_provider = "azure"
-  azure_tenant_id           = "your-azure-tenant-id"  # Required when cloud_provider = "azure"
+  account_slug              = var.account_slug
+  azure_client_id           = var.azure_client_id  # Required when cloud_provider = "azure"
+  azure_hosted_zone_name    = local.domain_name  # Required when cloud_provider = "azure"
+  azure_resource_group_name = var.azure_resource_group  # Required when cloud_provider = "azure"
+  azure_subscription_id     = var.azure_subscription_id  # Required when cloud_provider = "azure"
+  azure_tenant_id           = var.azure_tenant_id  # Required when cloud_provider = "azure"
   cloud_provider            = "azure"
-  hosted_zone_name          = "your-hosted-zone-name"
-  private_domain_name       = "your-private-domain-name"
+  hosted_zone_name          = local.domain_name
+  private_domain_name       = "private.${local.domain_name}"
 }
 ```
 
@@ -66,11 +66,11 @@ module "cert_manager" {
 module "cert_manager" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.42.0"
 
-  account_slug        = "your-account-slug"
+  account_slug        = var.account_slug
   cloud_provider      = "cloudflare"
-  cloudflare_token    = "your-cloudflare-token"  # Required when cloud_provider = "cloudflare"
-  hosted_zone_name    = "your-hosted-zone-name"
-  private_domain_name = "your-private-domain-name"
+  cloudflare_token    = var.cloudflare_token  # Required when cloud_provider = "cloudflare"
+  hosted_zone_name    = local.domain_name
+  private_domain_name = "private.${local.domain_name}"
 }
 ```
 
@@ -80,12 +80,12 @@ module "cert_manager" {
 module "cert_manager" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.42.0"
 
-  account_slug        = "your-account-slug"
-  aws_region          = "your-aws-region"  # Required when cloud_provider = "aws"
-  aws_sa_arn          = "your-aws-sa-arn"  # Required when cloud_provider = "aws"
+  account_slug        = var.account_slug
+  aws_region          = var.aws_region  # Required when cloud_provider = "aws"
+  aws_sa_arn          = module.cert_manager_iam.nullplatform_cert_manager_role_arn  # Required when cloud_provider = "aws"
   cloud_provider      = "aws"
-  hosted_zone_name    = "your-hosted-zone-name"
-  private_domain_name = "your-private-domain-name"
+  hosted_zone_name    = local.domain_name
+  private_domain_name = "private.${local.domain_name}"
 }
 ```
 
@@ -95,22 +95,20 @@ module "cert_manager" {
 module "cert_manager" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.42.0"
 
-  account_slug         = "your-account-slug"
+  account_slug         = var.account_slug
   cloud_provider       = "oci"
-  hosted_zone_name     = "your-hosted-zone-name"
-  oci_compartment_ocid = "your-oci-compartment-ocid"  # Required when cloud_provider = "oci"
-  oci_region           = "your-oci-region"  # Required when cloud_provider = "oci"
-  private_domain_name  = "your-private-domain-name"
+  hosted_zone_name     = local.domain_name
+  oci_compartment_ocid = var.compartment_id  # Required when cloud_provider = "oci"
+  oci_region           = var.oci_region  # Required when cloud_provider = "oci"
+  private_domain_name  = "private.${local.domain_name}"
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.cert_manager.id
-}
+# This module deploys cert-manager and cluster issuers via Helm and has no outputs.
+# Once deployed, cert-manager automatically issues TLS certificates for your domains.
 ```
 
 <!-- BEGIN_TF_DOCS -->

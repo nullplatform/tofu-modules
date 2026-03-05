@@ -18,11 +18,12 @@ all projects.
 ├── infrastructure/                    # Cloud-specific infrastructure modules
 │   ├── aws/
 │   │   ├── acm/                       # AWS Certificate Manager
-│   │   ├── alb_controller/            # ALB Ingress Controller
+│   │   ├── aws_load_balancer_controller/ # AWS Load Balancer Controller (Helm)
 │   │   ├── backend/                   # S3/DynamoDB remote state backend
 │   │   ├── eks/                       # Elastic Kubernetes Service
 │   │   ├── iam/
 │   │   │   ├── agent/                 # IAM role for nullplatform agent
+│   │   │   ├── aws_loadbalancer_controller_iam/ # IAM role for AWS Load Balancer Controller
 │   │   │   ├── cert_manager/          # IAM role for cert-manager
 │   │   │   └── external_dns/          # IAM role for external-dns
 │   │   ├── ingress/                   # Ingress resources

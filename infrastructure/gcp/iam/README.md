@@ -19,17 +19,15 @@ Creates and manages Google Cloud Platform service accounts with IAM roles and Wo
 module "iam" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/iam?ref=v1.42.0"
 
-  project_id = "your-project-id"
+  project_id = var.project_id
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.iam.service_accounts
-}
+# service_accounts output is used by GKE workload identity configuration.
+# No downstream Terraform consumers in this repo — applied via GKE node pool config.
 ```
 
 <!-- BEGIN_TF_DOCS -->

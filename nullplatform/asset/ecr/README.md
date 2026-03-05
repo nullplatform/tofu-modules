@@ -19,19 +19,17 @@ Configures AWS ECR integration with Nullplatform by creating IAM roles, policies
 module "ecr" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v1.42.0"
 
-  cluster_name = "your-cluster-name"
-  np_api_key   = "your-np-api-key"
-  nrn          = "your-nrn"
+  cluster_name = module.eks.eks_cluster_name
+  np_api_key   = var.np_api_key
+  nrn          = var.nrn
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.ecr.id
-}
+# This module registers ECR as the container registry in Nullplatform.
+# No downstream Terraform consumers — configuration is applied via the Nullplatform API.
 ```
 
 <!-- BEGIN_TF_DOCS -->

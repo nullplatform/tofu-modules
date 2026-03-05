@@ -20,9 +20,9 @@ Deploys the Nullplatform base infrastructure components including gateways, logg
 module "base" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.42.0"
 
-  k8s_provider = "your-k8s-provider"
-  np_api_key   = "your-np-api-key"
-  nrn          = "your-nrn"
+  k8s_provider = var.k8s_provider  # eks | gke | aks | oke | aro
+  np_api_key   = var.np_api_key
+  nrn          = var.nrn
 }
 ```
 
@@ -33,8 +33,8 @@ module "base" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.42.0"
 
   k8s_provider = "eks"
-  np_api_key   = "your-np-api-key"
-  nrn          = "your-nrn"
+  np_api_key   = var.np_api_key
+  nrn          = var.nrn
 }
 ```
 
@@ -45,8 +45,8 @@ module "base" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.42.0"
 
   k8s_provider = "gke"
-  np_api_key   = "your-np-api-key"
-  nrn          = "your-nrn"
+  np_api_key   = var.np_api_key
+  nrn          = var.nrn
 }
 ```
 
@@ -57,8 +57,8 @@ module "base" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.42.0"
 
   k8s_provider = "aks"
-  np_api_key   = "your-np-api-key"
-  nrn          = "your-nrn"
+  np_api_key   = var.np_api_key
+  nrn          = var.nrn
 }
 ```
 
@@ -69,8 +69,8 @@ module "base" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.42.0"
 
   k8s_provider = "oke"
-  np_api_key   = "your-np-api-key"
-  nrn          = "your-nrn"
+  np_api_key   = var.np_api_key
+  nrn          = var.nrn
 }
 ```
 
@@ -81,17 +81,18 @@ module "base" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.42.0"
 
   k8s_provider = "aro"
-  np_api_key   = "your-np-api-key"
-  nrn          = "your-nrn"
+  np_api_key   = var.np_api_key
+  nrn          = var.nrn
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.base.public_gateway_security_group_id
+# Security group IDs from base are used by nullplatform/agent (AWS only)
+module "agent" {
+  gateway_public_aws_security_group_id  = module.base.public_gateway_security_group_id
+  gateway_private_aws_security_group_id = module.base.private_gateway_security_group_id
 }
 ```
 

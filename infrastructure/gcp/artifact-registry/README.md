@@ -19,19 +19,17 @@ Creates a Google Artifact Registry repository with a dedicated service account f
 module "artifact-registry" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/artifact-registry?ref=v1.42.0"
 
-  location      = "your-location"
-  project_id    = "your-project-id"
-  repository_id = "your-repository-id"
+  location      = var.location
+  project_id    = var.project_id
+  repository_id = var.repository_id
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.artifact-registry.repository_id
-}
+# repository_id is used to configure the container registry in Nullplatform.
+# No downstream Terraform consumers — registry is referenced by URL.
 ```
 
 <!-- BEGIN_TF_DOCS -->

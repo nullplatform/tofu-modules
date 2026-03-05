@@ -24,10 +24,8 @@ module "istio" {
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.istio.id
-}
+# This module deploys Istio components (base, istiod, ingressgateway) and has no outputs.
+# Once deployed, configure your ingress resources to use the Istio ingress gateway.
 ```
 
 <!-- BEGIN_TF_DOCS -->

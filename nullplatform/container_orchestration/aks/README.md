@@ -20,20 +20,18 @@ Configures Nullplatform provider settings for Azure Kubernetes Service (AKS) clu
 module "aks" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v1.42.0"
 
-  cluster_name        = "your-cluster-name"
-  nrn                 = "your-nrn"
-  public_gateway_name = "your-public-gateway-name"
-  resource_group      = "your-resource-group"
+  cluster_name        = module.aks.cluster_name
+  nrn                 = var.nrn
+  public_gateway_name = var.public_gateway_name
+  resource_group      = module.resource_group.resource_group_name
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.aks.id
-}
+# This module registers the AKS cluster in Nullplatform.
+# No downstream Terraform consumers — cluster config is applied via the Nullplatform API.
 ```
 
 <!-- BEGIN_TF_DOCS -->

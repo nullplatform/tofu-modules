@@ -20,20 +20,23 @@ Provisions an Azure Kubernetes Service (AKS) cluster with configurable node pool
 module "aks" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v1.42.0"
 
-  cluster_name        = "your-cluster-name"
-  location            = "your-location"
-  resource_group_name = "your-resource-group-name"
-  subscription_id     = "your-subscription-id"
-  vnet_subnet_id      = "your-vnet-subnet-id"
+  cluster_name        = local.cluster_name
+  location            = var.location
+  resource_group_name = module.resource_group.resource_group_name
+  subscription_id     = var.subscription_id
+  vnet_subnet_id      = module.vnet.aks_subnet_id
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.aks.cluster_name
+module "agent" {
+  cluster_name = module.aks.cluster_name
+}
+
+module "container_orchestration" {
+  cluster_name = module.aks.cluster_name
 }
 ```
 

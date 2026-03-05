@@ -18,20 +18,17 @@ Creates an Azure Private DNS Zone with configurable virtual network links for pr
 module "private_dns" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/private_dns?ref=v1.42.0"
 
-  domain_name           = "your-domain-name"
-  resource_group_name   = "your-resource-group-name"
-  subscription_id       = "your-subscription-id"
-  virtual_network_links = "your-virtual-network-links"
+  domain_name           = local.domain_name
+  resource_group_name   = module.resource_group.resource_group_name
+  subscription_id       = var.subscription_id
+  virtual_network_links = var.virtual_network_links
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.private_dns.private_dns_zone_name
-}
+# private_dns_zone_name is used by the nullplatform/agent module for private DNS routing.
 ```
 
 <!-- BEGIN_TF_DOCS -->

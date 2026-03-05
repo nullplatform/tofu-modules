@@ -18,18 +18,18 @@ Creates a GCP VPC network with configurable subnets and secondary IP ranges for 
 module "vpc" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/vpc?ref=v1.42.0"
 
-  network_name = "your-network-name"
-  project_id   = "your-project-id"
-  subnets      = "your-subnets"
+  network_name = var.network_name
+  project_id   = var.project_id
+  subnets      = var.subnets
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.vpc.network_name
+module "gke" {
+  vpc_name        = module.vpc.network_name
+  vpc_subnet_name = module.vpc.subnet_names[0]
 }
 ```
 

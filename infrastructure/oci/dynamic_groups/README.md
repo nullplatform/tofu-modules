@@ -20,21 +20,29 @@ Creates OCI dynamic groups and IAM policies for OKE Enhanced Workload Identity, 
 module "dynamic_groups" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/dynamic_groups?ref=v1.42.0"
 
-  cluster_id      = "your-cluster-id"
-  compartment_id  = "your-compartment-id"
-  namespace       = "your-namespace"
-  service_account = "your-service-account"
-  tenancy_id      = "your-tenancy-id"
-  workload_name   = "your-workload-name"
+  cluster_id      = module.oke.cluster_id
+  compartment_id  = var.compartment_id
+  namespace       = "external-dns"
+  service_account = "external-dns"
+  tenancy_id      = var.tenancy_id
+  workload_name   = "external-dns"
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.dynamic_groups.dynamic_group_id
+# Dynamic groups and policies are applied automatically to OCI IAM.
+# The workload identity conditions can be referenced for custom policies:
+module "cert_manager_dynamic_groups" {
+  source          = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/dynamic_groups?ref=v1.42.0"
+
+  cluster_id      = module.oke.cluster_id
+  compartment_id  = var.compartment_id
+  namespace       = "cert-manager"
+  service_account = "cert-manager"
+  tenancy_id      = var.tenancy_id
+  workload_name   = "cert-manager"
 }
 ```
 

@@ -19,17 +19,28 @@ Creates an Oracle Cloud Infrastructure Object Storage bucket configured for stor
 module "backend" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/backend?ref=v1.42.0"
 
-  compartment_id = "your-compartment-id"
-  namespace      = "your-namespace"
+  compartment_id = var.compartment_id
+  namespace      = var.oci_namespace
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.backend.bucket_name
+# Use the backend_config output to configure the OpenTofu S3-compatible backend
+terraform {
+  backend "s3" {
+    # Populate with values from module.backend.backend_config
+    bucket   = "<module.backend.bucket_name>"
+    endpoint = "<module.backend.bucket_endpoint>"
+    region   = "us-ashburn-1"
+    key      = "tofu.tfstate"
+
+    skip_credentials_validation = true
+    skip_requesting_account_id  = true
+    skip_metadata_api_check     = true
+    force_path_style            = true
+  }
 }
 ```
 

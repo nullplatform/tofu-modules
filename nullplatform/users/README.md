@@ -18,18 +18,16 @@ Creates and manages Nullplatform users with their profile information and role-b
 module "users" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/users?ref=v1.42.0"
 
-  np_api_key         = "your-np-api-key"
-  nullplatform_users = "your-nullplatform-users"
+  np_api_key         = var.np_api_key
+  nullplatform_users = var.nullplatform_users
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.users.id
-}
+# This module creates Nullplatform users.
+# No downstream Terraform consumers — user config is applied via the Nullplatform API.
 ```
 
 <!-- BEGIN_TF_DOCS -->

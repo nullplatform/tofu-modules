@@ -20,20 +20,18 @@ Configures a Nullplatform provider for Google Cloud Platform with networking and
 module "cloud" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/gcp/cloud?ref=v1.42.0"
 
-  domain_name = "your-domain-name"
-  location    = "your-location"
-  nrn         = "your-nrn"
-  project_id  = "your-project-id"
+  domain_name = local.domain_name
+  location    = var.location
+  nrn         = var.nrn
+  project_id  = var.project_id
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.cloud.provider_config_id
-}
+# This module registers the GCP cloud provider in Nullplatform.
+# No downstream Terraform consumers — configuration is applied via the Nullplatform API.
 ```
 
 <!-- BEGIN_TF_DOCS -->

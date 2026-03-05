@@ -19,19 +19,20 @@ Creates IAM roles and policies for external-dns to manage Route53 DNS records in
 module "external_dns" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/external_dns?ref=v1.42.0"
 
-  aws_iam_openid_connect_provider_arn = "your-aws-iam-openid-connect-provider-arn"
-  cluster_name                        = "your-cluster-name"
-  hosted_zone_private_id              = "your-hosted-zone-private-id"
-  hosted_zone_public_id               = "your-hosted-zone-public-id"
+  aws_iam_openid_connect_provider_arn = module.eks.eks_oidc_provider_arn
+  cluster_name                        = module.eks.eks_cluster_name
+  hosted_zone_private_id              = module.dns.private_zone_id
+  hosted_zone_public_id               = module.dns.public_zone_id
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.external_dns.nullplatform_external_dns_role_arn
+# The role ARN is consumed by the commons/external_dns Helm module
+module "external_dns_public" {
+  source           = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.42.0"
+  aws_iam_role_arn = module.external_dns_iam.nullplatform_external_dns_role_arn
 }
 ```
 

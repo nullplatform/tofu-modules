@@ -20,19 +20,17 @@ Configures Nullplatform provider settings for Oracle Kubernetes Engine (OKE) clu
 module "oke" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/oke?ref=v1.42.0"
 
-  cluster_name = "your-cluster-name"
-  nrn          = "your-nrn"
-  region       = "your-region"
+  cluster_name = module.oke.cluster_id
+  nrn          = var.nrn
+  region       = var.region
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.oke.id
-}
+# This module registers the OKE cluster in Nullplatform.
+# No downstream Terraform consumers — cluster config is applied via the Nullplatform API.
 ```
 
 <!-- BEGIN_TF_DOCS -->

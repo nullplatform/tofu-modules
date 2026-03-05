@@ -20,18 +20,16 @@ Configures Nullplatform provider settings for Amazon EKS cluster integration wit
 module "eks" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v1.42.0"
 
-  cluster_name = "your-cluster-name"
-  nrn          = "your-nrn"
+  cluster_name = module.eks.eks_cluster_name
+  nrn          = var.nrn
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.eks.id
-}
+# This module registers the EKS cluster in Nullplatform.
+# No downstream Terraform consumers — cluster config is applied via the Nullplatform API.
 ```
 
 <!-- BEGIN_TF_DOCS -->

@@ -18,17 +18,27 @@ Creates both public and private AWS Route 53 hosted zones for a specified domain
 module "dns" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/dns?ref=v1.42.0"
 
-  domain_name = "your-domain-name"
-  vpc_id      = "your-vpc-id"
+  domain_name = "mycompany.nullapps.io"
+  vpc_id      = module.vpc.vpc_id
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.dns.public_zone_id
+module "acm" {
+  domain_name = module.dns.public_zone_name
+  zone_id     = module.dns.public_zone_id
+}
+
+module "cert_manager" {
+  hosted_zone_public_id  = module.dns.public_zone_id
+  hosted_zone_private_id = module.dns.private_zone_id
+}
+
+module "external_dns" {
+  hosted_zone_public_id  = module.dns.public_zone_id
+  hosted_zone_private_id = module.dns.private_zone_id
 }
 ```
 

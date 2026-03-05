@@ -20,18 +20,16 @@ Creates Azure Network Security Groups with security rules for Istio gateway traf
 module "security" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/security?ref=v1.42.0"
 
-  cluster_name        = "your-cluster-name"
-  resource_group_name = "your-resource-group-name"
+  cluster_name        = local.cluster_name
+  resource_group_name = module.resource_group.resource_group_name
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.security.public_gateway_nsg_id
-}
+# NSG IDs are assigned to AKS subnets or gateway resources.
+# No downstream Terraform consumers in this repo — applied via Azure networking config.
 ```
 
 <!-- BEGIN_TF_DOCS -->

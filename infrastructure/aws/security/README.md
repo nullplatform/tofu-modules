@@ -19,17 +19,16 @@ Creates AWS security groups for Istio gateways on EKS with configurable public a
 module "security" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/security?ref=v1.42.0"
 
-  cluster_name = "your-cluster-name"
+  cluster_name = module.eks.eks_cluster_name
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.security.public_gateway_security_group_id
-}
+# Security group IDs are used by Istio gateway configuration.
+# This module has no downstream Terraform consumers — outputs are
+# referenced directly from kubectl or Helm values.
 ```
 
 <!-- BEGIN_TF_DOCS -->

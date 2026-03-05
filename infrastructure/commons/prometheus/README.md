@@ -25,10 +25,8 @@ module "prometheus" {
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.prometheus.id
-}
+# This module deploys Prometheus via Helm and has no outputs.
+# Prometheus is accessible within the cluster at the configured namespace and port.
 ```
 
 <!-- BEGIN_TF_DOCS -->

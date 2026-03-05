@@ -20,12 +20,12 @@ Deploys and configures the Nullplatform agent on Kubernetes clusters across AWS,
 module "agent" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.42.0"
 
-  api_key        = "your-api-key"
-  cloud_provider = "your-cloud-provider"
-  cluster_name   = "your-cluster-name"
-  image_tag      = "your-image-tag"
-  nrn            = "your-nrn"
-  tags_selectors = "your-tags-selectors"
+  api_key        = module.agent_api_key.api_key
+  cloud_provider = var.cloud_provider
+  cluster_name   = module.eks.eks_cluster_name
+  image_tag      = var.image_tag
+  nrn            = var.nrn
+  tags_selectors = var.tags_selectors
 }
 ```
 
@@ -35,13 +35,15 @@ module "agent" {
 module "agent" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.42.0"
 
-  api_key          = "your-api-key"
-  aws_iam_role_arn = "your-aws-iam-role-arn"  # Required when cloud_provider = "aws"
+  api_key          = module.agent_api_key.api_key
+  aws_iam_role_arn = module.agent_iam.nullplatform_agent_role_arn
   cloud_provider   = "aws"
-  cluster_name     = "your-cluster-name"
-  image_tag        = "your-image-tag"
-  nrn              = "your-nrn"
-  tags_selectors   = "your-tags-selectors"
+  cluster_name     = module.eks.eks_cluster_name
+  dns_type         = var.dns_type
+  domain           = local.domain_name
+  image_tag        = var.image_tag
+  nrn              = var.nrn
+  tags_selectors   = var.tags_selectors
 }
 ```
 
@@ -51,12 +53,12 @@ module "agent" {
 module "agent" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.42.0"
 
-  api_key        = "your-api-key"
+  api_key        = var.np_api_key
   cloud_provider = "gcp"
-  cluster_name   = "your-cluster-name"
-  image_tag      = "your-image-tag"
-  nrn            = "your-nrn"
-  tags_selectors = "your-tags-selectors"
+  cluster_name   = module.gke.cluster_name
+  image_tag      = "2.29.2"
+  nrn            = "organization=${var.organization_id}:account=${var.account_id}"
+  tags_selectors = var.tags_selectors
 }
 ```
 
@@ -66,20 +68,20 @@ module "agent" {
 module "agent" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.42.0"
 
-  api_key                = "your-api-key"
-  azure_client_id        = "your-azure-client-id"  # Required when cloud_provider = "azure"
-  azure_client_secret    = "your-azure-client-secret"  # Required when cloud_provider = "azure"
-  azure_resource_group   = "your-azure-resource-group"  # Required when cloud_provider = "azure"
-  azure_subscription_id  = "your-azure-subscription-id"  # Required when cloud_provider = "azure"
-  azure_tenant_id        = "your-azure-tenant-id"  # Required when cloud_provider = "azure"
+  api_key                = var.np_api_key
+  azure_client_id        = var.azure_client_id
+  azure_client_secret    = var.azure_client_secret
+  azure_resource_group   = var.azure_resource_group
+  azure_subscription_id  = var.azure_subscription_id
+  azure_tenant_id        = var.azure_tenant_id
   cloud_provider         = "azure"
-  cluster_name           = "your-cluster-name"
-  image_tag              = "your-image-tag"
-  nrn                    = "your-nrn"
-  private_gateway_name   = "your-private-gateway-name"  # Required when cloud_provider = "azure"
-  private_hosted_zone_rg = "your-private-hosted-zone-rg"  # Required when cloud_provider = "azure"
-  public_gateway_name    = "your-public-gateway-name"  # Required when cloud_provider = "azure"
-  tags_selectors         = "your-tags-selectors"
+  cluster_name           = module.aks.cluster_name
+  image_tag              = "2.29.2"
+  nrn                    = "organization=${var.organization_id}:account=${var.account_id}"
+  private_gateway_name   = var.private_gateway_name
+  private_hosted_zone_rg = var.private_hosted_zone_rg
+  public_gateway_name    = var.public_gateway_name
+  tags_selectors         = var.tags_selectors
 }
 ```
 
@@ -89,22 +91,20 @@ module "agent" {
 module "agent" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.42.0"
 
-  api_key        = "your-api-key"
+  api_key        = var.np_api_key
   cloud_provider = "oci"
-  cluster_name   = "your-cluster-name"
-  image_tag      = "your-image-tag"
-  nrn            = "your-nrn"
-  tags_selectors = "your-tags-selectors"
+  cluster_name   = module.oke.cluster_id
+  image_tag      = "2.29.2"
+  nrn            = "organization=${var.organization_id}:account=${var.account_id}"
+  tags_selectors = var.tags_selectors
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.agent.id
-}
+# This module has no outputs. The agent connects to Nullplatform
+# automatically once deployed using the provided api_key and nrn.
 ```
 
 <!-- BEGIN_TF_DOCS -->

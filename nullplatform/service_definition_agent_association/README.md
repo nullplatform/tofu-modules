@@ -20,18 +20,16 @@ Creates a Nullplatform notification channel with agent configuration and service
 module "service_definition_agent_association" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v1.42.0"
 
-  api_key        = "your-api-key"
-  tags_selectors = "your-tags-selectors"
+  api_key        = var.np_api_key
+  tags_selectors = var.tags_selectors
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.service_definition_agent_association.id
-}
+# This module associates a service definition with agents.
+# No downstream Terraform consumers — configuration is applied via the Nullplatform API.
 ```
 
 <!-- BEGIN_TF_DOCS -->

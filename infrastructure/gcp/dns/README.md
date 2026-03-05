@@ -19,17 +19,25 @@ Creates and manages a Google Cloud DNS managed zone with support for both public
 module "dns" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/dns?ref=v1.42.0"
 
-  domain_name = "your-domain-name"
-  project_id  = "your-project-id"
+  domain_name = local.domain_name
+  project_id  = var.gcp_project_id
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.dns.dns_zone_name
+module "cert_manager" {
+  source           = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.42.0"
+
+  hosted_zone_name = module.dns.dns_zone_name
+  cloud_provider   = "gcp"
+}
+
+module "external_dns" {
+  source         = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v1.42.0"
+
+  domain_filters = local.domain_name
 }
 ```
 

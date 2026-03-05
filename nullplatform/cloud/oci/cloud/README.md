@@ -20,23 +20,21 @@ Configures Oracle Cloud Infrastructure (OCI) provider settings in Nullplatform w
 module "cloud" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/oci/cloud?ref=v1.42.0"
 
-  account_id       = "your-account-id"
-  account_name     = "your-account-name"
-  account_region   = "your-account-region"
-  compartment_id   = "your-compartment-id"
-  compartment_name = "your-compartment-name"
-  domain_name      = "your-domain-name"
-  nrn              = "your-nrn"
+  account_id       = var.account_id
+  account_name     = var.account_name
+  account_region   = var.region
+  compartment_id   = var.compartment_id
+  compartment_name = var.compartment_name
+  domain_name      = local.domain_name
+  nrn              = var.nrn
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.cloud.id
-}
+# This module registers the OCI cloud provider in Nullplatform.
+# No downstream Terraform consumers — configuration is applied via the Nullplatform API.
 ```
 
 <!-- BEGIN_TF_DOCS -->

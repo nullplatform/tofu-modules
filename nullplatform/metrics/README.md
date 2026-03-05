@@ -19,18 +19,16 @@ Configures a Prometheus provider in nullplatform with customizable server URL an
 module "metrics" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/metrics?ref=v1.42.0"
 
-  np_api_key = "your-np-api-key"
-  nrn        = "your-nrn"
+  np_api_key = var.np_api_key
+  nrn        = var.nrn
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.metrics.id
-}
+# This module registers Prometheus metrics in Nullplatform.
+# No downstream Terraform consumers — configuration is applied via the Nullplatform API.
 ```
 
 <!-- BEGIN_TF_DOCS -->

@@ -25,9 +25,11 @@ module "vcn" {
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.vcn.vcn_id
+module "oke" {
+  existing_vcn_id        = module.vcn.vcn_id
+  api_endpoint_subnet_id = module.vcn.api_endpoint_subnet_id
+  node_pool_subnet_id    = module.vcn.node_pool_subnet_id
+  service_lb_subnet_id   = module.vcn.service_lb_subnet_id
 }
 ```
 
