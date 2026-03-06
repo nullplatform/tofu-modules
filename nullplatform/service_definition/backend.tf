@@ -6,6 +6,9 @@ terraform {
     github = {
       source = "integrations/github"
     }
+    gitlab = {
+      source = "gitlabhq/gitlab"
+    }
     external = {
       source = "hashicorp/external"
     }

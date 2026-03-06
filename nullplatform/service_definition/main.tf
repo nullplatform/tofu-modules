@@ -1,13 +1,33 @@
 
 ################################################################################
+# Locals: Git provider selection
+################################################################################
+
+locals {
+  is_github = var.git_provider == "github"
+  is_gitlab = var.git_provider == "gitlab"
+
+  service_spec_file = "${var.git_service_path}/specs/service-spec.json${var.use_tpl_files ? ".tpl" : ""}"
+}
+
+################################################################################
 # Step 1: Fetch Templates
 ################################################################################
 
-# Fetch service specification template
+# GitHub: Fetch service specification template
 data "github_repository_file" "service_spec_template" {
+  count      = local.is_github ? 1 : 0
   repository = var.git_repo
   branch     = var.git_ref
-  file       = "${var.git_service_path}/specs/service-spec.json${var.use_tpl_files ? ".tpl" : ""}"
+  file       = local.service_spec_file
+}
+
+# GitLab: Fetch service specification template
+data "gitlab_repository_file" "service_spec_template" {
+  count     = local.is_gitlab ? 1 : 0
+  project   = var.git_repo
+  ref       = var.git_ref
+  file_path = local.service_spec_file
 }
 
 ################################################################################
@@ -15,33 +35,56 @@ data "github_repository_file" "service_spec_template" {
 ################################################################################
 
 locals {
+  # Unify content from either provider (GitLab returns base64-encoded content)
+  service_spec_raw = (
+    local.is_github
+    ? data.github_repository_file.service_spec_template[0].content
+    : base64decode(data.gitlab_repository_file.service_spec_template[0].content)
+  )
+
   # Process the service spec template first to know what actions/links are available
   # replace is done because some old templates contain gomplate placeholders
   service_spec_rendered = var.use_tpl_files ? replace(
-    data.github_repository_file.service_spec_template.content,
+    local.service_spec_raw,
     "/\"{{\\s+env.Getenv\\s+\".*\"\\s+}}\"/",
     "\"${var.nrn}\""
-  ) : data.github_repository_file.service_spec_template.content
+  ) : local.service_spec_raw
   service_spec_parsed = jsondecode(local.service_spec_rendered)
   available_actions   = try(local.service_spec_parsed.available_actions, [])
   available_links     = try(local.service_spec_parsed.available_links, [])
   visible_to_nrns     = concat([var.nrn], var.extra_visibile_to_nrns)
 }
 
-# Fetch action specification templates
+# GitHub: Fetch action specification templates
 data "github_repository_file" "action_templates" {
-  for_each   = toset(local.available_actions)
+  for_each   = local.is_github ? toset(local.available_actions) : toset([])
   repository = var.git_repo
   branch     = var.git_ref
   file       = "${var.git_service_path}/specs/actions/${each.key}.json${var.use_tpl_files ? ".tpl" : ""}"
 }
 
-# Fetch link specification templates from links/ directory (based on available_links)
+# GitLab: Fetch action specification templates
+data "gitlab_repository_file" "action_templates" {
+  for_each  = local.is_gitlab ? toset(local.available_actions) : toset([])
+  project   = var.git_repo
+  ref       = var.git_ref
+  file_path = "${var.git_service_path}/specs/actions/${each.key}.json${var.use_tpl_files ? ".tpl" : ""}"
+}
+
+# GitHub: Fetch link specification templates
 data "github_repository_file" "link_templates" {
-  for_each   = toset(local.available_links)
+  for_each   = local.is_github ? toset(local.available_links) : toset([])
   repository = var.git_repo
   branch     = var.git_ref
   file       = "${var.git_service_path}/specs/links/${each.key}.json${var.use_tpl_files ? ".tpl" : ""}"
+}
+
+# GitLab: Fetch link specification templates
+data "gitlab_repository_file" "link_templates" {
+  for_each  = local.is_gitlab ? toset(local.available_links) : toset([])
+  project   = var.git_repo
+  ref       = var.git_ref
+  file_path = "${var.git_service_path}/specs/links/${each.key}.json${var.use_tpl_files ? ".tpl" : ""}"
 }
 
 # Create service specification
@@ -77,13 +120,23 @@ locals {
 # Process action templates - conditional processing based on file type
 # replace is done because some old templates contain gomplate placeholders
 locals {
+  # Unify action template content from either provider
+  action_template_contents = {
+    for name in local.available_actions :
+    name => (
+      local.is_github
+      ? data.github_repository_file.action_templates[name].content
+      : base64decode(data.gitlab_repository_file.action_templates[name].content)
+    )
+  }
+
   action_specs_parsed = {
     for name in local.available_actions :
     name => jsondecode(var.use_tpl_files ? replace(
-      data.github_repository_file.action_templates[name].content,
+      local.action_template_contents[name],
       "/\"{{\\s+env.Getenv\\s+\".*\"\\s+}}\"/",
       "\"\""
-    ) : data.github_repository_file.action_templates[name].content)
+    ) : local.action_template_contents[name])
   }
 }
 
@@ -103,13 +156,23 @@ resource "nullplatform_action_specification" "from_templates" {
 
 
 locals {
+  # Unify link template content from either provider
+  link_template_contents = {
+    for name in local.available_links :
+    name => (
+      local.is_github
+      ? data.github_repository_file.link_templates[name].content
+      : base64decode(data.gitlab_repository_file.link_templates[name].content)
+    )
+  }
+
   link_specs_parsed = {
     for name in local.available_links :
     name => jsondecode(var.use_tpl_files ? replace(
-      data.github_repository_file.link_templates[name].content,
+      local.link_template_contents[name],
       "/\"{{\\s+env.Getenv\\s+\".*\"\\s+}}\"/",
       "\"\""
-    ) : data.github_repository_file.link_templates[name].content)
+    ) : local.link_template_contents[name])
   }
 }
 

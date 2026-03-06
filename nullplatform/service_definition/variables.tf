@@ -10,6 +10,11 @@ variable "git_provider" {
   type        = string
   default     = "github"
   description = "Git provider (e.g., github, gitlab)"
+
+  validation {
+    condition     = contains(["github", "gitlab"], var.git_provider)
+    error_message = "git_provider must be 'github' or 'gitlab'."
+  }
 }
 variable "git_user" {
   type        = string
@@ -25,7 +30,7 @@ variable "git_password" {
 variable "git_repo" {
   type        = string
   default     = "nullplatform/services"
-  description = "GitHub repository URL containing templates"
+  description = "Repository containing templates. For GitHub: 'org/repo'. For GitLab: project ID or 'group/project' path."
 }
 
 variable "workflow_override_path" {
