@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.43.0](https://github.com/nullplatform/tofu-modules/compare/v1.42.0...v1.43.0) (2026-03-09)
+
+
+### Features
+
+* **backend:** add optional KMS encryption and IAM bucket policy ([#246](https://github.com/nullplatform/tofu-modules/issues/246)) ([1af61bd](https://github.com/nullplatform/tofu-modules/commit/1af61bd8f2c47c70d0261184d91648c31d9103a8))
+
 ## [1.42.0](https://github.com/nullplatform/tofu-modules/compare/v1.41.1...v1.42.0) (2026-03-04)
 
 

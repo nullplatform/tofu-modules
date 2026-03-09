@@ -16,7 +16,7 @@ Creates and manages Nullplatform users with their profile information and role-b
 
 ```hcl
 module "users" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/users?ref=v1.42.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/users?ref=v1.43.0"
 
   np_api_key         = "your-np-api-key"
   nullplatform_users = "your-nullplatform-users"

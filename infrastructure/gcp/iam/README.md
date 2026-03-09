@@ -17,7 +17,7 @@ Creates and manages Google Cloud Platform service accounts with IAM roles and Wo
 
 ```hcl
 module "iam" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/iam?ref=v1.42.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/iam?ref=v1.43.0"
 
   project_id = "your-project-id"
 }

@@ -17,7 +17,7 @@ Deploys Istio service mesh components (base, istiod, and ingress gateway) to a K
 
 ```hcl
 module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v1.42.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v1.43.0"
 }
 ```
 

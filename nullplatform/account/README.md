@@ -16,7 +16,7 @@ Creates and manages Nullplatform accounts with configurable repository settings
 
 ```hcl
 module "account" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/account?ref=v1.42.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/account?ref=v1.43.0"
 
   np_api_key            = "your-np-api-key"
   nullplatform_accounts = "your-nullplatform-accounts"

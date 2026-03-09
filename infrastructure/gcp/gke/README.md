@@ -18,7 +18,7 @@ Creates a private Google Kubernetes Engine (GKE) cluster with public endpoint ac
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/gke?ref=v1.42.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/gke?ref=v1.43.0"
 
   cluster_name      = "your-cluster-name"
   ip_range_pods     = "your-ip-range-pods"
