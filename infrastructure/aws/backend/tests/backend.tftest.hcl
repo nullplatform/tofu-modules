@@ -124,6 +124,88 @@ run "sse_with_kms" {
   }
 }
 
+# --- KMS key ---
+
+run "no_kms_key_by_default" {
+  command = plan
+
+  assert {
+    condition     = length(aws_kms_key.s3) == 0
+    error_message = "KMS key should not be created by default"
+  }
+}
+
+run "kms_key_created_when_enabled" {
+  command = plan
+
+  variables {
+    create_kms_key = true
+  }
+
+  assert {
+    condition     = length(aws_kms_key.s3) == 1
+    error_message = "KMS key should be created when create_kms_key is true"
+  }
+
+  assert {
+    condition     = aws_kms_key.s3[0].enable_key_rotation == true
+    error_message = "KMS key should have key rotation enabled"
+  }
+
+  assert {
+    condition     = one(aws_s3_bucket_server_side_encryption_configuration.tf_state_sse.rule).apply_server_side_encryption_by_default[0].sse_algorithm == "aws:kms"
+    error_message = "SSE should switch to aws:kms when create_kms_key is true"
+  }
+}
+
+# --- Bucket policy ---
+
+run "no_bucket_policy_by_default" {
+  command = plan
+
+  assert {
+    condition     = length(aws_s3_bucket_policy.tf_state) == 0
+    error_message = "Bucket policy should not be created when allowed_iam_arns is empty"
+  }
+}
+
+run "bucket_policy_created_with_iam_arns" {
+  command = plan
+
+  variables {
+    allowed_iam_arns = ["arn:aws:iam::123456789012:role/terraform-role"]
+  }
+
+  assert {
+    condition     = length(aws_s3_bucket_policy.tf_state) == 1
+    error_message = "Bucket policy should be created when allowed_iam_arns is specified"
+  }
+}
+
+run "kms_and_iam_together" {
+  command = plan
+
+  variables {
+    create_kms_key   = true
+    allowed_iam_arns = ["arn:aws:iam::123456789012:role/terraform-role"]
+  }
+
+  assert {
+    condition     = length(aws_kms_key.s3) == 1
+    error_message = "KMS key should be created"
+  }
+
+  assert {
+    condition     = length(aws_s3_bucket_policy.tf_state) == 1
+    error_message = "Bucket policy should be created"
+  }
+
+  assert {
+    condition     = length(aws_kms_alias.s3) == 1
+    error_message = "KMS alias should be created"
+  }
+}
+
 # --- Output validation ---
 
 run "outputs" {
@@ -132,5 +214,10 @@ run "outputs" {
   assert {
     condition     = output.aws_region == "us-east-1"
     error_message = "aws_region output should match the default region"
+  }
+
+  assert {
+    condition     = output.kms_key_arn == null
+    error_message = "kms_key_arn should be null when create_kms_key is false"
   }
 }

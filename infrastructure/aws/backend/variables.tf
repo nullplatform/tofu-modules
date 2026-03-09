@@ -23,7 +23,19 @@ variable "sse_algorithm" {
 }
 
 variable "kms_key_id" {
-  description = "KMS key ARN for S3 bucket encryption. Required when sse_algorithm is aws:kms"
+  description = "KMS key ARN for S3 bucket encryption. Required when sse_algorithm is aws:kms and create_kms_key is false"
   type        = string
   default     = null
+}
+
+variable "create_kms_key" {
+  description = "Create a dedicated KMS key for S3 bucket encryption. Overrides sse_algorithm to aws:kms"
+  type        = bool
+  default     = false
+}
+
+variable "allowed_iam_arns" {
+  description = "List of IAM ARNs allowed to access the S3 bucket and KMS key. When empty, no bucket policy is created and access is unrestricted"
+  type        = list(string)
+  default     = []
 }
