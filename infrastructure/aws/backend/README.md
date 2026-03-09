@@ -2,23 +2,23 @@
 
 ## Description
 
-Creates a secure S3 bucket for storing Terraform state with versioning, encryption, and public access blocking
+Creates a secure S3 bucket configured as a Terraform remote state backend with versioning, encryption, and optional KMS key management
 
 ## Features
 
-- Creates an S3 bucket with a random suffix for unique naming
-- Enables versioning to maintain state file history
-- Configures server-side encryption with AES256 or KMS
-- Blocks all public access to ensure state file security
-- Enforces bucket owner object ownership controls
-- Supports force destroy option for bucket cleanup
-- Outputs bucket name, ARN, and region for backend configuration
+- Creates an S3 bucket with a randomly generated suffix for Terraform state storage
+- Enables versioning on the S3 bucket to track state file changes
+- Configures server-side encryption with support for AES256 or KMS encryption
+- Blocks all public access to the S3 bucket using AWS public access block settings
+- Optionally creates a dedicated KMS key with automatic rotation for bucket encryption
+- Supports IAM-based access control with optional bucket policies for specific ARNs
+- Enforces SSL/TLS for all bucket access through bucket policy conditions
 
 ## Basic Usage
 
 ```hcl
 module "backend" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/backend?ref=v1.42.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/backend?ref=v1.43.0"
 }
 ```
 

@@ -18,7 +18,7 @@ Deploys the AWS Load Balancer Controller to an Amazon EKS cluster using Helm
 
 ```hcl
 module "alb_controller" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/alb_controller?ref=v1.42.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/alb_controller?ref=v1.43.0"
 
   cluster_name = "your-cluster-name"
   vpc_id       = "your-vpc-id"
