@@ -10,15 +10,15 @@ module "aws_load_balancer_controller_role" {
   oidc_providers = {
     main = {
       provider_arn               = var.aws_iam_openid_connect_provider_arn
-      namespace_service_accounts = ["kube-system:aws-load-balancer-controller"]
+      namespace_service_accounts = ["${var.service_account_namespace}:${var.service_account_name}"]
     }
   }
 }
 
 resource "kubernetes_service_account_v1" "aws_load_balancer_controller_sa" {
   metadata {
-    name      = "aws-load-balancer-controller"
-    namespace = "kube-system"
+    name      = var.service_account_name
+    namespace = var.service_account_namespace
     labels = {
       "app.kubernetes.io/name"      = "aws-load-balancer-controller"
       "app.kubernetes.io/component" = "controller"
