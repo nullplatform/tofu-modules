@@ -61,6 +61,12 @@ variable "worker_pools" {
   }
 }
 
+variable "cni_type" {
+  type        = string
+  default     = "flannel"
+  description = "CNI type for the OKE cluster. Valid values: 'flannel' or 'native'"
+}
+
 variable "worker_cloud_init" {
   description = "Cloud init configuration for worker nodes. See: https://cloudinit.readthedocs.io/en/latest/reference/modules.html"
   type        = list(map(string))

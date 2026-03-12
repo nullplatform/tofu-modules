@@ -51,7 +51,7 @@ module "oke" {
     }
   }
 
-  cni_type = "flannel"
+  cni_type = var.cni_type
 
   # ---------------------------------------------------------
   # WORKER POOLS
