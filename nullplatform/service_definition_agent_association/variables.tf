@@ -33,18 +33,26 @@ variable "service_specification_slug" {
   default     = null
 }
 
+variable "repository_service_spec_repo" {
+  type        = string
+  description = "GitHub repository name containing the service specs (used to build the agent cmdline path)"
+}
+
+variable "base_clone_path" {
+  type        = string
+  default     = "/root/.np"
+  description = "Base path where the service repository is cloned inside the agent pod"
+}
+
 variable "service_path" {
   type        = string
-  description = "Path to the service configuration"
+  description = "Path to the service directory within the repository (e.g., databases/postgres/k8s)"
 }
 
 variable "agent_command" {
   type = object({
-    type = string
-    data = object({
-      cmdline     = string
-      arguments   = optional(list(string), [])
-      environment = optional(map(string), {})
-    })
+    type        = string
+    arguments   = optional(list(string), [])
+    environment = optional(map(string), {})
   })
 }
