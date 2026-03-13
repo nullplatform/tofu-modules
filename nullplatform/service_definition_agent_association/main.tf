@@ -15,7 +15,7 @@ resource "nullplatform_notification_channel" "channel_from_template" {
       command {
         type = var.agent_command.type
         data = {
-          cmdline     = "${var.base_clone_path}/${var.repository_service_spec_repo}/${var.service_path}/handle-service-agent"
+          cmdline     = "${var.base_clone_path}/${var.repository_service_spec_repo}/${var.service_path}/entrypoint/entrypoint"
           arguments   = jsonencode(try(var.agent_command.arguments, []))
           environment = jsonencode(try(var.agent_command.environment, {}))
         }
