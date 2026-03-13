@@ -49,10 +49,8 @@ variable "service_path" {
   description = "Path to the service directory within the repository (e.g., databases/postgres/k8s)"
 }
 
-variable "agent_command" {
-  type = object({
-    type        = string
-    arguments   = optional(list(string), [])
-    environment = optional(map(string), {})
-  })
+variable "agent_arguments" {
+  type        = list(string)
+  default     = []
+  description = "Arguments to pass to the agent entrypoint command"
 }

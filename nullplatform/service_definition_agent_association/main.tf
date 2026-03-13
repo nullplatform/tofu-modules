@@ -13,11 +13,11 @@ resource "nullplatform_notification_channel" "channel_from_template" {
     agent {
       api_key = var.api_key
       command {
-        type = var.agent_command.type
+        type = "exec"
         data = {
           cmdline     = "${var.base_clone_path}/${var.repository_service_spec_repo}/${var.service_path}/entrypoint/entrypoint"
-          arguments   = jsonencode(try(var.agent_command.arguments, []))
-          environment = jsonencode(try(var.agent_command.environment, {}))
+          arguments   = jsonencode(var.agent_arguments)
+          environment = jsonencode({ NP_ACTION_CONTEXT = "'$${NOTIFICATION_CONTEXT}'" })
         }
       }
 
