@@ -43,6 +43,13 @@ variable "available_links" {
   description = "List of link template names to fetch from the service spec repository"
 }
 
+variable "github_token" {
+  type        = string
+  default     = null
+  sensitive   = true
+  description = "GitHub token for private repository access. If null, the repository is assumed to be public."
+}
+
 variable "extra_visibile_to_nrns" {
   type        = list(string)
   default     = []

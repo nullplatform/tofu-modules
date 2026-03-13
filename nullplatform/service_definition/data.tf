@@ -1,13 +1,16 @@
 data "http" "service_spec_template" {
-  url = "${local.raw_base_url}/specs/service-spec.json.tpl"
+  url             = "${local.raw_base_url}/specs/service-spec.json.tpl"
+  request_headers = local.auth_headers
 }
 
 data "http" "action_templates" {
-  for_each = toset(local.available_actions)
-  url      = "${local.raw_base_url}/specs/actions/${each.key}.json.tpl"
+  for_each        = toset(local.available_actions)
+  url             = "${local.raw_base_url}/specs/actions/${each.key}.json.tpl"
+  request_headers = local.auth_headers
 }
 
 data "http" "link_templates" {
-  for_each = toset(local.available_links)
-  url      = "${local.raw_base_url}/specs/links/${each.key}.json.tpl"
+  for_each        = toset(local.available_links)
+  url             = "${local.raw_base_url}/specs/links/${each.key}.json.tpl"
+  request_headers = local.auth_headers
 }
