@@ -2,16 +2,17 @@
 # RDS IAM policy
 ################################################################################
 
-resource "aws_iam_policy" "rds_policy" {
+# Grant permissions to manage RDS instances and subnet groups
+resource "aws_iam_policy" "nullplatform_rds_policy" {
   name        = "nullplatform_${var.name}_rds_policy"
   description = "Policy for managing RDS instances and subnet groups"
 
   policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        Effect = "Allow"
-        Action = [
+        "Effect" : "Allow",
+        "Action" : [
           "rds:CreateDBInstance",
           "rds:DeleteDBInstance",
           "rds:ModifyDBInstance",
@@ -28,8 +29,8 @@ resource "aws_iam_policy" "rds_policy" {
           "rds:DescribeDBEngineVersions",
           "rds:DescribeOrderableDBInstanceOptions",
           "rds:DescribeOptionGroups"
-        ]
-        Resource = "*"
+        ],
+        "Resource" : "*"
       }
     ]
   })
@@ -39,16 +40,17 @@ resource "aws_iam_policy" "rds_policy" {
 # EC2 Security Group IAM policy
 ################################################################################
 
-resource "aws_iam_policy" "rds_sg_policy" {
+# Grant permissions to manage EC2 security groups for RDS
+resource "aws_iam_policy" "nullplatform_rds_sg_policy" {
   name        = "nullplatform_${var.name}_rds_sg_policy"
   description = "Policy for managing EC2 security groups for RDS"
 
   policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        Effect = "Allow"
-        Action = [
+        "Effect" : "Allow",
+        "Action" : [
           "ec2:CreateSecurityGroup",
           "ec2:DeleteSecurityGroup",
           "ec2:DescribeSecurityGroups",
@@ -61,8 +63,8 @@ resource "aws_iam_policy" "rds_sg_policy" {
           "ec2:CreateTags",
           "ec2:DescribeNetworkInterfaces",
           "ec2:DescribeSecurityGroupRules"
-        ]
-        Resource = "*"
+        ],
+        "Resource" : "*"
       }
     ]
   })
@@ -72,16 +74,17 @@ resource "aws_iam_policy" "rds_sg_policy" {
 # Secrets Manager IAM policy
 ################################################################################
 
-resource "aws_iam_policy" "rds_secretsmanager_policy" {
+# Grant permissions to manage Secrets Manager secrets for RDS master password
+resource "aws_iam_policy" "nullplatform_rds_secretsmanager_policy" {
   name        = "nullplatform_${var.name}_rds_secretsmanager_policy"
   description = "Policy for managing Secrets Manager secrets for RDS master password"
 
   policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        Effect = "Allow"
-        Action = [
+        "Effect" : "Allow",
+        "Action" : [
           "secretsmanager:CreateSecret",
           "secretsmanager:DeleteSecret",
           "secretsmanager:DescribeSecret",
@@ -92,8 +95,8 @@ resource "aws_iam_policy" "rds_secretsmanager_policy" {
           "secretsmanager:UntagResource",
           "secretsmanager:GetResourcePolicy",
           "secretsmanager:ListSecretVersionIds"
-        ]
-        Resource = "*"
+        ],
+        "Resource" : "*"
       }
     ]
   })
