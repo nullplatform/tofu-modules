@@ -48,7 +48,7 @@ Other options considered and rejected:
 | `repository_name` | `string` | `"service"` | Repository name |
 | `repository_branch` | `string` | `"main"` | Branch to fetch specs from |
 | `repository_token` | `string` | `null` (sensitive) | Access token. GitHub: Bearer token. GitLab: Personal Access Token (PAT). |
-| `gitlab_host` | `string` | `"gitlab.com"` | GitLab host. Only used when `git_provider = "gitlab"`. Enables self-hosted GitLab support. |
+| `gitlab_host` | `string` | `"gitlab.com"` | GitLab host. Only used when `git_provider = "gitlab"`. Enables self-hosted GitLab support. Validated to reject empty string. |
 
 ### Unchanged
 
@@ -76,7 +76,15 @@ locals {
 }
 ```
 
-`data.tf` requires **no changes** — it already references `local.raw_base_url` and `local.auth_headers`.
+`data.tf` consumes `local.raw_base_url` and `local.auth_headers` unchanged, so **no modifications needed there**. Only `locals.tf` needs to be rewritten to derive those locals from the new variables.
+
+### GitLab URL format — `/-/raw/` vs. API endpoint
+
+The GitLab URL uses the web-style raw path (`/-/raw/{branch}/{path}`) rather than the REST API endpoint (`/api/v4/projects/{encoded}/repository/files/{encoded}/raw?ref={branch}`). This is intentional:
+
+- `/-/raw/` accepts `PRIVATE-TOKEN` headers and works for both public and private repos on GitLab.com and self-hosted instances running GitLab 13+.
+- The API endpoint requires percent-encoding the project path and file path separately, adding complexity with no practical benefit for this use case.
+- `repository_branch` should be a short branch name (e.g., `"main"`), not a full ref like `refs/heads/main`. The GitHub URL uses `refs/heads/` explicitly; the GitLab URL does not — passing a full ref to the GitLab URL would break it. This is an implicit contract on the `repository_branch` variable.
 
 ---
 
@@ -84,7 +92,7 @@ locals {
 
 | File | Change |
 |---|---|
-| `nullplatform/service_definition/variables.tf` | Remove 4 old variables, add 6 new ones with validation on `git_provider` |
+| `nullplatform/service_definition/variables.tf` | Remove 4 old variables, add 6 replacements: `git_provider` (with validation), `repository_org`, `repository_name`, `repository_branch`, `repository_token`, `gitlab_host` (with non-empty validation) |
 | `nullplatform/service_definition/locals.tf` | Update `raw_base_url` and `auth_headers` logic |
 | `nullplatform/service_definition/README.md` | Update variable documentation |
 

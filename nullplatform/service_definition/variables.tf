@@ -3,22 +3,32 @@ variable "nrn" {
   description = "Nullplatform Resource Name (organization:account format)"
 }
 
-variable "repository_service_spec_org" {
+variable "git_provider" {
+  type        = string
+  default     = "github"
+  description = "Git provider to fetch service specs from. Supported values: \"github\", \"gitlab\"."
+  validation {
+    condition     = contains(["github", "gitlab"], var.git_provider)
+    error_message = "git_provider must be \"github\" or \"gitlab\"."
+  }
+}
+
+variable "repository_org" {
   type        = string
   default     = "nullplatform"
-  description = "GitHub organization owning the service spec repository"
+  description = "GitHub organization or GitLab group owning the service spec repository."
 }
 
-variable "repository_service_spec_repo" {
+variable "repository_name" {
   type        = string
   default     = "service"
-  description = "GitHub repository name containing service spec templates"
+  description = "Repository name containing the service spec templates."
 }
 
-variable "repository_service_spec_branch" {
+variable "repository_branch" {
   type        = string
   default     = "main"
-  description = "Branch of the service spec repository to use"
+  description = "Branch of the service spec repository to use. Must be a short branch name (e.g. \"main\"), not a full ref."
 }
 
 variable "service_path" {
@@ -43,11 +53,17 @@ variable "available_links" {
   description = "List of link template names to fetch from the service spec repository"
 }
 
-variable "github_token" {
+variable "repository_token" {
   type        = string
   default     = null
   sensitive   = true
-  description = "GitHub token for private repository access. If null, the repository is assumed to be public."
+  description = "Access token for private repositories. GitHub: personal access token or fine-grained token. GitLab: Personal Access Token (PAT) with read_api scope."
+}
+
+variable "gitlab_host" {
+  type        = string
+  default     = "gitlab.com"
+  description = "GitLab host. Only used when git_provider = \"gitlab\". Override for self-hosted instances (e.g. \"gitlab.mycompany.com\")."
 }
 
 variable "extra_visibile_to_nrns" {

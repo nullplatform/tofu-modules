@@ -1,6 +1,17 @@
 locals {
-  raw_base_url = "https://raw.githubusercontent.com/${var.repository_service_spec_org}/${var.repository_service_spec_repo}/refs/heads/${var.repository_service_spec_branch}/${var.service_path}"
-  auth_headers = var.github_token != null ? { Authorization = "Bearer ${var.github_token}" } : {}
+  raw_base_url = var.git_provider == "github" ? (
+    "https://raw.githubusercontent.com/${var.repository_org}/${var.repository_name}/refs/heads/${var.repository_branch}/${var.service_path}"
+  ) : (
+    "https://${var.gitlab_host}/${var.repository_org}/${var.repository_name}/-/raw/${var.repository_branch}/${var.service_path}"
+  )
+
+  auth_headers = var.repository_token == null ? {} : (
+    var.git_provider == "github" ? (
+      { Authorization = "Bearer ${var.repository_token}" }
+    ) : (
+      { PRIVATE-TOKEN = var.repository_token }
+    )
+  )
 }
 
 locals {
