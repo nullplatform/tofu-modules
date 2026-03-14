@@ -26,7 +26,7 @@ infrastructure/aws/iam/rds/
 ├── main.tf        # Three aws_iam_policy resources
 ├── variables.tf   # Input variables
 ├── outputs.tf     # Three policy ARN outputs
-└── providers.tf   # AWS provider constraint ~> 6.0
+└── providers.tf   # terraform { required_providers { aws = { source = "hashicorp/aws", version = "~> 6.0" } } }
 ```
 
 No upstream module dependency. No IAM role is created — only policies. Role attachment is the caller's responsibility.
@@ -35,7 +35,7 @@ No upstream module dependency. No IAM role is created — only policies. Role at
 
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
-| `name` | `string` | yes | Unique identifier used as part of policy names (e.g., cluster or environment name) |
+| `name` | `string` | yes | Unique identifier used as part of policy names (e.g., `prod-us-east-1`). **Must be unique per AWS account** — IAM policy names are account-global, so passing the same `name` in two deployments in the same account will cause a name collision. |
 
 Policy names follow the convention `nullplatform_<name>_<suffix>_policy`, matching the existing `iam/agent` naming pattern.
 
@@ -44,14 +44,20 @@ Policy names follow the convention `nullplatform_<name>_<suffix>_policy`, matchi
 ### `aws_iam_policy.rds_policy`
 
 Name: `nullplatform_<name>_rds_policy`
-Grants permissions to manage RDS instances and subnet groups.
+Grants permissions to manage RDS instances and subnet groups. Includes describe actions required by the AWS provider during plan/refresh.
 
 Actions:
 - `rds:CreateDBInstance`, `rds:DeleteDBInstance`, `rds:ModifyDBInstance`, `rds:DescribeDBInstances`
 - `rds:CreateDBSubnetGroup`, `rds:DeleteDBSubnetGroup`, `rds:DescribeDBSubnetGroups`, `rds:ModifyDBSubnetGroup`
 - `rds:AddTagsToResource`, `rds:ListTagsForResource`, `rds:RemoveTagsFromResource`
+- `rds:DescribeDBParameterGroups`, `rds:DescribeDBParameters` — required by provider on plan/refresh
+- `rds:DescribeDBEngineVersions` — required by provider to validate engine/version during plan
+- `rds:DescribeOrderableDBInstanceOptions` — required by provider to validate instance class during plan
+- `rds:DescribeOptionGroups` — required by provider during refresh
 
 Resource: `*`
+
+Out of scope (not supported by the `rds-postgres` service): `rds:CreateDBInstanceReadReplica`, `rds:RestoreDBInstanceFromDBSnapshot`, `rds:RestoreDBInstanceToPointInTime`.
 
 ---
 
@@ -65,6 +71,7 @@ Actions:
 - `ec2:AuthorizeSecurityGroupIngress`, `ec2:RevokeSecurityGroupIngress`
 - `ec2:AuthorizeSecurityGroupEgress`, `ec2:RevokeSecurityGroupEgress`
 - `ec2:DescribeVpcs`, `ec2:DescribeSubnets`, `ec2:CreateTags`, `ec2:DescribeNetworkInterfaces`
+- `ec2:DescribeSecurityGroupRules` — required by AWS provider v6 during state refresh
 
 Resource: `*`
 
@@ -77,8 +84,10 @@ Grants permissions to create and manage the master password secret in Secrets Ma
 
 Actions:
 - `secretsmanager:CreateSecret`, `secretsmanager:DeleteSecret`, `secretsmanager:DescribeSecret`
-- `secretsmanager:GetSecretValue`, `secretsmanager:PutSecretValue`
+- `secretsmanager:GetSecretValue`, `secretsmanager:PutSecretValue`, `secretsmanager:UpdateSecret`
 - `secretsmanager:TagResource`, `secretsmanager:UntagResource`
+- `secretsmanager:GetResourcePolicy` — required by provider during state refresh
+- `secretsmanager:ListSecretVersionIds` — required by provider to enumerate secret versions on refresh
 
 Resource: `*`
 
