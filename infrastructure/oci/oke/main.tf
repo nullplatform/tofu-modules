@@ -19,7 +19,7 @@ module "oke" {
   region         = var.region
   cluster_name   = var.cluster_name
 
-  kubernetes_version = "v1.34.1"
+  kubernetes_version = var.kubernetes_version
   cluster_type       = "enhanced"
 
   # ---------------------------------------------------------
@@ -57,7 +57,7 @@ module "oke" {
   # WORKER POOLS
   # ---------------------------------------------------------
   worker_pool_mode = "node-pool"
-  worker_pool_size = 2
+  worker_pool_size = var.worker_pool_size
 
   worker_pools = var.worker_pools
 
