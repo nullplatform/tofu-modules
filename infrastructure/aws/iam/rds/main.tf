@@ -28,7 +28,8 @@ resource "aws_iam_policy" "nullplatform_rds_policy" {
           "rds:DescribeDBParameters",
           "rds:DescribeDBEngineVersions",
           "rds:DescribeOrderableDBInstanceOptions",
-          "rds:DescribeOptionGroups"
+          "rds:DescribeOptionGroups",
+          "iam:CreateServiceLinkedRole"
         ],
         "Resource" : "*"
       }
