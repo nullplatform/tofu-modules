@@ -81,6 +81,30 @@ variable "subnet_public_display_name" {
   description = "value"
 }
 
+##### Pod Subnet (NPN)
+
+variable "cni_type" {
+  type        = string
+  default     = "flannel"
+  description = "CNI type. When set to 'npn', a dedicated pod subnet is created."
+  validation {
+    condition     = contains(["flannel", "npn"], var.cni_type)
+    error_message = "Accepted values are 'flannel' or 'npn'."
+  }
+}
+
+variable "subnet_pod_cidr_block" {
+  type        = string
+  default     = ""
+  description = "CIDR block for the pod subnet. Required when cni_type = 'npn'."
+}
+
+variable "subnet_pod_display_name" {
+  type        = string
+  default     = "pod-subnet"
+  description = "Display name for the pod subnet."
+}
+
 ##### OKE Control Plane NSG
 variable "create_oke_control_plane_nsg" {
   type        = bool
