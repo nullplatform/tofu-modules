@@ -59,6 +59,7 @@ resource "aws_iam_policy" "nullplatform_rds_sg_policy" {
           "ec2:AuthorizeSecurityGroupEgress",
           "ec2:RevokeSecurityGroupEgress",
           "ec2:DescribeVpcs",
+          "ec2:DescribeVpcAttribute",
           "ec2:DescribeSubnets",
           "ec2:CreateTags",
           "ec2:DescribeNetworkInterfaces",
