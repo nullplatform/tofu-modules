@@ -76,7 +76,17 @@ variable "kubernetes_version" {
 variable "cni_type" {
   type        = string
   default     = "flannel"
-  description = "CNI type for the OKE cluster. Valid values: 'flannel' or 'native'"
+  description = "CNI type for the OKE cluster. Valid values: 'flannel' or 'npn' (Native Pod Networking)."
+  validation {
+    condition     = contains(["flannel", "npn"], var.cni_type)
+    error_message = "Accepted values are 'flannel' or 'npn'."
+  }
+}
+
+variable "pod_subnet_id" {
+  type        = string
+  default     = ""
+  description = "Subnet ID for pod networking (required when cni_type = 'npn')."
 }
 
 variable "worker_cloud_init" {
