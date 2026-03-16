@@ -1,4 +1,26 @@
 ################################################################################
+# Policy attachments (only when role_name is provided)
+################################################################################
+
+resource "aws_iam_role_policy_attachment" "rds" {
+  count      = var.role_name != null ? 1 : 0
+  role       = var.role_name
+  policy_arn = aws_iam_policy.nullplatform_rds_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "rds_sg" {
+  count      = var.role_name != null ? 1 : 0
+  role       = var.role_name
+  policy_arn = aws_iam_policy.nullplatform_rds_sg_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "rds_secretsmanager" {
+  count      = var.role_name != null ? 1 : 0
+  role       = var.role_name
+  policy_arn = aws_iam_policy.nullplatform_rds_secretsmanager_policy.arn
+}
+
+################################################################################
 # RDS IAM policy
 ################################################################################
 
