@@ -90,6 +90,19 @@ output "private_subnet_display_name" {
 }
 
 # -----------------------------------------------------------------------
+# Pod Subnet Outputs
+# -----------------------------------------------------------------------
+output "pod_subnet_id" {
+  description = "The OCID of the pod subnet (only when cni_type = 'npn')"
+  value       = var.cni_type == "npn" ? oci_core_subnet.pod_subnet[0].id : null
+}
+
+output "pod_subnet_cidr_block" {
+  description = "The CIDR block of the pod subnet (only when cni_type = 'npn')"
+  value       = var.cni_type == "npn" ? oci_core_subnet.pod_subnet[0].cidr_block : null
+}
+
+# -----------------------------------------------------------------------
 # OKE Control Plane NSG Outputs
 # -----------------------------------------------------------------------
 output "oke_control_plane_nsg_id" {
