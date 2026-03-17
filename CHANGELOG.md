@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.44.0](https://github.com/nullplatform/tofu-modules/compare/v1.43.0...v1.44.0) (2026-03-17)
+
+
+### Features
+
+* support to different cni of oke ([#250](https://github.com/nullplatform/tofu-modules/issues/250)) ([9905b57](https://github.com/nullplatform/tofu-modules/commit/9905b57ab87ba05dc8ba2f7980eea337d36885db))
+
 ## [1.43.0](https://github.com/nullplatform/tofu-modules/compare/v1.42.0...v1.43.0) (2026-03-09)
 
 

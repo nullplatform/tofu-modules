@@ -19,7 +19,7 @@ module "oke" {
   region         = var.region
   cluster_name   = var.cluster_name
 
-  kubernetes_version = "v1.34.1"
+  kubernetes_version = var.kubernetes_version
   cluster_type       = "enhanced"
 
   # ---------------------------------------------------------
@@ -36,28 +36,36 @@ module "oke" {
   control_plane_nsg_ids             = var.control_plane_nsg_ids
 
   # Subnets existentes
-  subnets = {
-    cp = {
-      create = "never"
-      id     = var.api_endpoint_subnet_id
-    }
-    workers = {
-      create = "never"
-      id     = var.node_pool_subnet_id
-    }
-    pub_lb = {
-      create = "never"
-      id     = var.service_lb_subnet_id
-    }
-  }
+  subnets = merge(
+    {
+      cp = {
+        create = "never"
+        id     = var.api_endpoint_subnet_id
+      }
+      workers = {
+        create = "never"
+        id     = var.node_pool_subnet_id
+      }
+      pub_lb = {
+        create = "never"
+        id     = var.service_lb_subnet_id
+      }
+    },
+    var.cni_type == "npn" ? {
+      pods = {
+        create = "never"
+        id     = var.pod_subnet_id
+      }
+    } : {}
+  )
 
-  cni_type = "flannel"
+  cni_type = var.cni_type
 
   # ---------------------------------------------------------
   # WORKER POOLS
   # ---------------------------------------------------------
   worker_pool_mode = "node-pool"
-  worker_pool_size = 2
+  worker_pool_size = var.worker_pool_size
 
   worker_pools = var.worker_pools
 
