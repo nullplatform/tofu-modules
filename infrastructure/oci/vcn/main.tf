@@ -44,6 +44,19 @@ resource "oci_core_subnet" "private_subnet" {
   security_list_ids = [module.vcn.default_security_list_id]
 }
 
+# Pod Subnet
+resource "oci_core_subnet" "pod_subnet" {
+  count                      = var.cni_type == "npn" ? 1 : 0
+  compartment_id             = var.compartment_id
+  vcn_id                     = module.vcn.vcn_id
+  cidr_block                 = var.subnet_pod_cidr_block
+  display_name               = var.subnet_pod_display_name
+  dns_label                  = "pods"
+  prohibit_public_ip_on_vnic = true
+  route_table_id             = module.vcn.nat_route_id
+  security_list_ids          = [module.vcn.default_security_list_id]
+}
+
 # -----------------------------------------------------------------------
 # 3. OKE Control Plane NSG
 # -----------------------------------------------------------------------

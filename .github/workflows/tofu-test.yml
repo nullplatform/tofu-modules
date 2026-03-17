@@ -20,6 +20,7 @@ jobs:
     uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
     with:
       modules: '["infrastructure/aws/vpc", "infrastructure/aws/acm", "infrastructure/aws/dns", "infrastructure/aws/aws_load_balancer_controller", "infrastructure/aws/ingress", "infrastructure/aws/iam/cert_manager", "infrastructure/aws/iam/external_dns", "infrastructure/aws/iam/agent", "infrastructure/aws/iam/aws_load_balancer_controller_iam", "infrastructure/aws/backend"]'
+      tofu_version: '1.11.4'
 
   test-gcp-modules:
     uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
