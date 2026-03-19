@@ -16,4 +16,11 @@ locals {
   scope_type_def = jsondecode(data.external.scope_type.result.json)
 
   static_action_specs = toset(var.action_spec_names)
+
+  scope_configuration_rendered = var.create_scope_configuration ? replace(
+    data.http.scope_configuration_template[0].response_body,
+    "/\"{{\\s+env.Getenv\\s+\".*\"\\s+}}\"/",
+    "\"${var.organization_nrn}\""
+  ) : "{}"
+  scope_configuration = var.create_scope_configuration ? jsondecode(local.scope_configuration_rendered) : null
 }

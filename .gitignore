@@ -168,3 +168,6 @@ terraform.tfstate.backup
 
 # Claude Code
 .claude/
+
+# Local examples (for testing only, not part of the module distribution)
+nullplatform/scope_definition/examples/

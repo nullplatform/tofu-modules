@@ -97,3 +97,14 @@ resource "null_resource" "nrn_patch" {
     }
   }
 }
+
+resource "nullplatform_provider_specification" "from_scope_configuration" {
+  count = var.create_scope_configuration ? 1 : 0
+
+  name             = local.scope_configuration.name
+  description      = local.scope_configuration.description
+  category         = local.scope_configuration.category
+  allow_dimensions = local.scope_configuration.allow_dimensions
+  visible_to       = [var.organization_nrn]
+  schema           = jsonencode(local.scope_configuration.schema)
+}

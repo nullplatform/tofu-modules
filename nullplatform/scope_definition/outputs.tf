@@ -47,3 +47,17 @@ output "actions_created" {
 
 # ------------------------------------------------------------------------------
 # Repository Ref
+output "scope_configuration" {
+  value       = local.scope_configuration
+  description = "Parsed scope configuration from scope-configuration.json.tpl, or null if not fetched"
+}
+
+output "provider_specification_id" {
+  value       = var.create_scope_configuration ? nullplatform_provider_specification.from_scope_configuration[0].id : null
+  description = "The ID of the created provider specification, or null if scope configuration was not fetched"
+}
+
+output "provider_specification_slug" {
+  value       = var.create_scope_configuration ? nullplatform_provider_specification.from_scope_configuration[0].slug : null
+  description = "The slug of the created provider specification, or null if scope configuration was not fetched"
+}
