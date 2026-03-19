@@ -1,53 +1,37 @@
-################################################################################
-# Scope Definition Module Variables
-################################################################################
-
 variable "nrn" {
   type        = string
   description = "Nullplatform Resource Name (organization:account format)"
 }
+
 variable "git_provider" {
   type        = string
   default     = "github"
-  description = "Git provider (e.g., github, gitlab)"
-}
-variable "git_user" {
-  type        = string
-  default     = null
-  description = "Git provider (e.g., github, gitlab)"
-}
-variable "git_password" {
-  type        = string
-  default     = null
-  sensitive   = true
-  description = "Git provider (e.g., github, gitlab)"
-}
-variable "git_repo" {
-  type        = string
-  default     = "nullplatform/services"
-  description = "GitHub repository URL containing templates"
+  description = "Git provider to fetch service specs from. Supported values: \"github\", \"gitlab\"."
+  validation {
+    condition     = contains(["github", "gitlab"], var.git_provider)
+    error_message = "git_provider must be \"github\" or \"gitlab\"."
+  }
 }
 
-variable "workflow_override_path" {
+variable "repository_org" {
   type        = string
-  default     = null
-  description = "Path to a custom workflow file to override the default one"
+  default     = "nullplatform"
+  description = "GitHub organization or GitLab group owning the service spec repository."
 }
 
-variable "workflow_override_values" {
+variable "repository_name" {
   type        = string
-  default     = null
-  description = "Values to override in the workflow file"
-
+  default     = "service"
+  description = "Repository name containing the service spec templates."
 }
 
-variable "git_ref" {
+variable "repository_branch" {
   type        = string
   default     = "main"
-  description = "Git reference (branch, tag, or commit)"
+  description = "Branch of the service spec repository to use. Must be a short branch name (e.g. \"main\"), not a full ref."
 }
 
-variable "git_service_path" {
+variable "service_path" {
   type        = string
   description = "Path within the repository for the specific service (e.g., databases/postgres/k8s)"
 }
@@ -56,22 +40,30 @@ variable "service_name" {
   type        = string
   description = "Name of the scope type to be created"
 }
-variable "service_description" {
-  type        = string
-  description = "Description of the scope type to be created"
+
+variable "available_actions" {
+  type        = list(string)
+  default     = []
+  description = "List of action template names to fetch from the service spec repository"
 }
 
-variable "use_tpl_files" {
-  type        = bool
-  default     = false
-  description = "Whether to use .tpl files (true) or .json files (false) for templates"
+variable "available_links" {
+  type        = list(string)
+  default     = ["connect"]
+  description = "List of link template names to fetch from the service spec repository"
 }
 
-# NRN Patch Configuration
-variable "np_api_key" {
+variable "repository_token" {
   type        = string
+  default     = null
   sensitive   = true
-  description = "Nullplatform API key for authentication"
+  description = "Access token for private repositories. GitHub: personal access token or fine-grained token. GitLab: Personal Access Token (PAT) with read_api scope."
+}
+
+variable "gitlab_host" {
+  type        = string
+  default     = "gitlab.com"
+  description = "GitLab host. Only used when git_provider = \"gitlab\". Override for self-hosted instances (e.g. \"gitlab.mycompany.com\")."
 }
 
 variable "extra_visibile_to_nrns" {
@@ -79,15 +71,9 @@ variable "extra_visibile_to_nrns" {
   default     = []
   description = "Additional NRNs that should have visibility to the created service specification"
 }
+
 variable "dimensions" {
   type        = map(string)
   default     = {}
   description = "Key-value pairs for dimensions to be associated with the service specification"
-
-}
-
-variable "tags_selectors" {
-  description = "Map of tags used to select and filter agents"
-  type        = map(string)
-  default     = {}
 }
