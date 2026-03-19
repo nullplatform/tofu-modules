@@ -18,7 +18,7 @@ Configures Nullplatform provider settings for Amazon EKS cluster integration wit
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v1.45.0"
 
   cluster_name = "your-cluster-name"
   nrn          = "your-nrn"

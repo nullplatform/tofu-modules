@@ -18,7 +18,7 @@ Configures a Nullplatform provider for Google Cloud Platform with networking and
 
 ```hcl
 module "cloud" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/gcp/cloud?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/gcp/cloud?ref=v1.45.0"
 
   domain_name = "your-domain-name"
   location    = "your-location"

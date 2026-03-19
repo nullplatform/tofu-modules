@@ -18,7 +18,7 @@ Configures a Nullplatform provider for Google Kubernetes Engine (GKE) with clust
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v1.45.0"
 
   cluster_name        = "your-cluster-name"
   location            = "your-location"

@@ -16,7 +16,7 @@ Creates an Azure Private DNS Zone with configurable virtual network links for pr
 
 ```hcl
 module "private_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/private_dns?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/private_dns?ref=v1.45.0"
 
   domain_name           = "your-domain-name"
   resource_group_name   = "your-resource-group-name"

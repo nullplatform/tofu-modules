@@ -16,7 +16,7 @@ Creates both public and private AWS Route 53 hosted zones for a specified domain
 
 ```hcl
 module "dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/dns?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/dns?ref=v1.45.0"
 
   domain_name = "your-domain-name"
   vpc_id      = "your-vpc-id"

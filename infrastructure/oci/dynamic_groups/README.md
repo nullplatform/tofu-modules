@@ -18,7 +18,7 @@ Creates OCI dynamic groups and IAM policies for OKE Enhanced Workload Identity, 
 
 ```hcl
 module "dynamic_groups" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/dynamic_groups?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/dynamic_groups?ref=v1.45.0"
 
   cluster_id      = "your-cluster-id"
   compartment_id  = "your-compartment-id"
