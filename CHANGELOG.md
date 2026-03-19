@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.45.0](https://github.com/nullplatform/tofu-modules/compare/v1.44.0...v1.45.0) (2026-03-19)
+
+
+### Features
+
+* **service:** add support to gitlab ([#249](https://github.com/nullplatform/tofu-modules/issues/249)) ([1d41de6](https://github.com/nullplatform/tofu-modules/commit/1d41de6c312008f82a77bc51b4d27962d9c825d0))
+
 ## [1.44.0](https://github.com/nullplatform/tofu-modules/compare/v1.43.0...v1.44.0) (2026-03-17)
 
 

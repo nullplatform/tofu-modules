@@ -2,29 +2,50 @@
 
 ## Description
 
-Creates a Nullplatform service specification with associated action and link specifications from a remote git repository (GitHub or GitLab)
+Creates a Nullplatform service specification from Git-hosted templates with support for actions and links
 
 ## Features
 
-- Fetches service specification templates from a GitHub or GitLab repository
-- Creates service specifications with customizable selectors and dimensions
-- Generates action specifications dynamically based on available actions in the service spec
-- Creates link specifications from template definitions
-- Supports both .json and .tpl template file formats
-- Manages visibility and access control through NRN configuration
-- Provides comprehensive outputs for service, action, and link specification IDs
+- Fetches service specification templates from GitHub or GitLab repositories
+- Creates service specifications with customizable dimensions and visibility
+- Supports dynamic action specifications from template files
+- Configures link specifications for service connections
+- Handles authentication for private repositories using tokens
+- Supports both GitHub and self-hosted GitLab instances
 
 ## Basic Usage
 
 ```hcl
 module "service_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v1.45.0"
 
-  git_service_path    = "your-git-service-path"
-  np_api_key          = "your-np-api-key"
-  nrn                 = "your-nrn"
-  service_description = "your-service-description"
-  service_name        = "your-service-name"
+  nrn          = "your-nrn"
+  service_name = "your-service-name"
+  service_path = "your-service-path"
+}
+```
+
+### Usage with GitHub Provider
+
+```hcl
+module "service_definition" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v1.45.0"
+
+  nrn          = "your-nrn"
+  service_name = "your-service-name"
+  service_path = "your-service-path"
+}
+```
+
+### Usage with GitLab Provider
+
+```hcl
+module "service_definition" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v1.45.0"
+
+  nrn          = "your-nrn"
+  service_name = "your-service-name"
+  service_path = "your-service-path"
 }
 ```
 

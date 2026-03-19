@@ -17,7 +17,7 @@ Configures AWS ECR integration with Nullplatform by creating IAM roles, policies
 
 ```hcl
 module "ecr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v1.45.0"
 
   cluster_name = "your-cluster-name"
   np_api_key   = "your-np-api-key"

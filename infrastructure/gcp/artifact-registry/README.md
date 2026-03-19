@@ -17,7 +17,7 @@ Creates a Google Artifact Registry repository with a dedicated service account f
 
 ```hcl
 module "artifact-registry" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/artifact-registry?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/artifact-registry?ref=v1.45.0"
 
   location      = "your-location"
   project_id    = "your-project-id"
