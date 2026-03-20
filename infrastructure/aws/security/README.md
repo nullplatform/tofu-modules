@@ -17,7 +17,7 @@ Creates AWS security groups for Istio gateways on EKS with configurable public a
 
 ```hcl
 module "security" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/security?ref=v1.45.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/security?ref=v1.46.0"
 
   cluster_name = "your-cluster-name"
 }

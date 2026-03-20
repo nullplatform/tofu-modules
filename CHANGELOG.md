@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.46.0](https://github.com/nullplatform/tofu-modules/compare/v1.45.0...v1.46.0) (2026-03-20)
+
+
+### Features
+
+* **nullplatform/cloud/aws/vpc:** implement aws-networking-configuration provider config ([#255](https://github.com/nullplatform/tofu-modules/issues/255)) ([3c3439b](https://github.com/nullplatform/tofu-modules/commit/3c3439b5ddde154636b696404169d0a0117e3262))
+
 ## [1.45.0](https://github.com/nullplatform/tofu-modules/compare/v1.44.0...v1.45.0) (2026-03-19)
 
 

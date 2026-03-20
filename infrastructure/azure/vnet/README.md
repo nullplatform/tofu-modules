@@ -17,7 +17,7 @@ Creates an Azure Virtual Network with configurable address space and subnets usi
 
 ```hcl
 module "vnet" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/vnet?ref=v1.45.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/vnet?ref=v1.46.0"
 
   address_space       = "your-address-space"
   location            = "your-location"

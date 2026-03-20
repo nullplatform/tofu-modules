@@ -17,7 +17,7 @@ Configures a Prometheus provider in nullplatform with customizable server URL an
 
 ```hcl
 module "metrics" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/metrics?ref=v1.45.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/metrics?ref=v1.46.0"
 
   np_api_key = "your-np-api-key"
   nrn        = "your-nrn"
