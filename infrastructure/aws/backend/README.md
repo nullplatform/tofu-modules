@@ -18,7 +18,7 @@ Creates a secure S3 bucket configured as a Terraform remote state backend with v
 
 ```hcl
 module "backend" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/backend?ref=v1.45.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/backend?ref=v1.46.0"
 }
 ```
 

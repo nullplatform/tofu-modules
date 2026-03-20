@@ -16,7 +16,7 @@ Creates a Google Cloud Router and Cloud NAT gateway for enabling outbound intern
 
 ```hcl
 module "nat" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/nat?ref=v1.45.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/nat?ref=v1.46.0"
 
   location    = "your-location"
   nat_name    = "your-nat-name"

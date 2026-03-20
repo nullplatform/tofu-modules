@@ -17,7 +17,7 @@ Creates IAM roles and Kubernetes service accounts for the AWS Load Balancer Cont
 
 ```hcl
 module "aws_loadbalancer_controller_iam" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/aws_loadbalancer_controller_iam?ref=v1.45.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/aws_loadbalancer_controller_iam?ref=v1.46.0"
 
   aws_iam_openid_connect_provider_arn = module.eks.eks_oidc_provider_arn
   cluster_name                        = module.eks.eks_cluster_name
