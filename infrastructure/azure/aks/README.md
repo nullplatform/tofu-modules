@@ -2,17 +2,19 @@
 
 ## Description
 
-Provisions an Azure Kubernetes Service (AKS) cluster with configurable node pools, networking, and RBAC settings
+Deploys an Azure Kubernetes Service cluster with customizable node pools and networking configurations
+
+## Architecture
+
+The module creates an AKS cluster using the Azure/aks/azurerm Terraform module, which provisions an azurerm_kubernetes_cluster resource. The cluster is configured with a system node pool and a user node pool, each with customizable VM sizes and scaling settings. The module also sets up networking and security configurations, including authorized IP ranges and private cluster mode. Additionally, the module enables workload identity and OIDC issuer for the cluster.
 
 ## Features
 
-- Creates an AKS cluster with system and user node pools
-- Configures workload identity and OIDC issuer support
-- Supports private cluster configuration with authorized IP ranges
-- Enables Azure Container Registry integration with AcrPull role assignment
-- Configures auto-scaling for user node pools across availability zones
-- Implements role-based access control with Azure AD integration
-- Supports custom VM sizes for system and user node pools
+- Creates AKS cluster with customizable node pools
+- Configures networking and security settings for the cluster
+- Enables workload identity and OIDC issuer for the cluster
+- Supports integration with Azure Container Registry
+- Deploys cluster with customizable Kubernetes version and upgrades
 
 ## Basic Usage
 
@@ -96,3 +98,107 @@ resource "example_resource" "this" {
 | <a name="output_host"></a> [host](#output\_host) | The API server endpoint |
 | <a name="output_oidc_issuer_url"></a> [oidc\_issuer\_url](#output\_oidc\_issuer\_url) | The URL of the cluster's OIDC issuer |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "aks",
+  "description": "Deploys an Azure Kubernetes Service cluster with customizable node pools and networking configurations",
+  "architecture": "The module creates an AKS cluster using the Azure/aks/azurerm Terraform module, which provisions an azurerm_kubernetes_cluster resource. The cluster is configured with a system node pool and a user node pool, each with customizable VM sizes and scaling settings. The module also sets up networking and security configurations, including authorized IP ranges and private cluster mode. Additionally, the module enables workload identity and OIDC issuer for the cluster.",
+  "features": [
+    "Creates AKS cluster with customizable node pools",
+    "Configures networking and security settings for the cluster",
+    "Enables workload identity and OIDC issuer for the cluster",
+    "Supports integration with Azure Container Registry",
+    "Deploys cluster with customizable Kubernetes version and upgrades"
+  ],
+  "inputs": [
+    {
+      "name": "subscription_id",
+      "description": "The ID of the Azure subscription",
+      "required": true
+    },
+    {
+      "name": "resource_group_name",
+      "description": "The name of the resource group where the AKS cluster will be created",
+      "required": true
+    },
+    {
+      "name": "location",
+      "description": "The Azure region where the AKS cluster will be deployed (e.g., eastus, westus2)",
+      "required": true
+    },
+    {
+      "name": "cluster_name",
+      "description": "The name of the AKS cluster",
+      "required": true
+    },
+    {
+      "name": "vnet_subnet_id",
+      "description": "The ID of the subnet where AKS nodes will be deployed",
+      "required": true
+    },
+    {
+      "name": "kubernetes_version",
+      "description": "The version of Kubernetes to use for the AKS cluster",
+      "required": false
+    },
+    {
+      "name": "prefix",
+      "description": "The prefix for resources created by the AKS module",
+      "required": false
+    },
+    {
+      "name": "system_pool_vm_size",
+      "description": "The VM size for the system node pool (e.g., Standard_D2s_v4, Standard_D4s_v4)",
+      "required": false
+    },
+    {
+      "name": "user_pool_vm_size",
+      "description": "The VM size for the user node pool (e.g., Standard_D2s_v5, Standard_D4s_v5)",
+      "required": false
+    },
+    {
+      "name": "authorized_ip_ranges",
+      "description": "The set of authorized IP ranges allowed to access the Kubernetes API server",
+      "required": false
+    },
+    {
+      "name": "private_cluster_enabled",
+      "description": "Whether to enable private cluster mode (API server accessible only via the private network)",
+      "required": false
+    },
+    {
+      "name": "oidc_issuer_enabled",
+      "description": "Whether to enable the OIDC issuer for workload identity",
+      "required": false
+    },
+    {
+      "name": "tags",
+      "description": "A mapping of tags to assign to the AKS cluster and related resources",
+      "required": false
+    },
+    {
+      "name": "environment",
+      "description": "The environment name used for tagging and naming purposes",
+      "required": false
+    },
+    {
+      "name": "acr_id",
+      "description": "The ID of the Azure Container Registry. If provided, AKS will be granted AcrPull role to pull images.",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "cluster_name",
+    "host",
+    "cluster_ca_certificate",
+    "client_certificate",
+    "client_key",
+    "admin_client_certificate",
+    "admin_client_key",
+    "admin_cluster_ca_certificate",
+    "oidc_issuer_url"
+  ],
+  "hash": "f5bf055ea47426fa1b0e1f74cda6c09e"
+}
+END_AI_METADATA -->

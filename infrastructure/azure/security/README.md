@@ -2,17 +2,18 @@
 
 ## Description
 
-Creates Azure Network Security Groups with security rules for Istio gateway traffic on AKS clusters
+Configures Azure network security groups for Istio gateways in an AKS cluster
+
+## Architecture
+
+This module uses Terraform to create Azure network security groups for public and private Istio gateways in an AKS cluster, deriving VNet and location information from the cluster name and resource group, and configuring security rules to restrict traffic to the gateways, it creates azurerm_network_security_group and azurerm_network_security_rule resources, and uses data sources like azurerm_kubernetes_cluster and azurerm_virtual_network to derive necessary information, the module also uses locals to parse and derive values from the data sources
 
 ## Features
 
-- Creates Network Security Group for public Istio gateway with HTTPS internet access and VNet-restricted health checks
-- Creates Network Security Group for private Istio gateway with VNet-only access for both HTTPS and health checks
-- Automatically derives VNet CIDR and Azure location from AKS cluster configuration
-- Configures port 443 security rules for gateway HTTPS traffic with appropriate source restrictions
-- Configures port 15021 security rules for Istio health check endpoints restricted to VNet CIDR
-- Supports optional override of Azure location and network CIDR for custom configurations
-- Tags all resources with cluster name and managed-by metadata for resource tracking
+- Creates network security groups for public and private Istio gateways
+- Configures security rules to restrict traffic to the gateways
+- Derives VNet and location information from the cluster name and resource group
+- Supports overriding Azure location and network CIDR block
 
 ## Basic Usage
 
@@ -78,3 +79,54 @@ resource "example_resource" "this" {
 | <a name="output_private_gateway_nsg_id"></a> [private\_gateway\_nsg\_id](#output\_private\_gateway\_nsg\_id) | The ID of the private gateway NSG. |
 | <a name="output_public_gateway_nsg_id"></a> [public\_gateway\_nsg\_id](#output\_public\_gateway\_nsg\_id) | The ID of the public gateway NSG. |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "security",
+  "description": "Configures Azure network security groups for Istio gateways in an AKS cluster",
+  "architecture": "This module uses Terraform to create Azure network security groups for public and private Istio gateways in an AKS cluster, deriving VNet and location information from the cluster name and resource group, and configuring security rules to restrict traffic to the gateways, it creates azurerm_network_security_group and azurerm_network_security_rule resources, and uses data sources like azurerm_kubernetes_cluster and azurerm_virtual_network to derive necessary information, the module also uses locals to parse and derive values from the data sources",
+  "features": [
+    "Creates network security groups for public and private Istio gateways",
+    "Configures security rules to restrict traffic to the gateways",
+    "Derives VNet and location information from the cluster name and resource group",
+    "Supports overriding Azure location and network CIDR block"
+  ],
+  "inputs": [
+    {
+      "name": "cluster_name",
+      "description": "The AKS cluster name, used for naming security resources and deriving VNet.",
+      "required": true
+    },
+    {
+      "name": "resource_group_name",
+      "description": "The resource group name for NSG resources.",
+      "required": true
+    },
+    {
+      "name": "gateways_enabled",
+      "description": "Whether public gateways are enabled.",
+      "required": false
+    },
+    {
+      "name": "gateway_internal_enabled",
+      "description": "Whether the internal (private) gateway is enabled.",
+      "required": false
+    },
+    {
+      "name": "azure_location",
+      "description": "Override: The Azure region. If empty, derived automatically from cluster.",
+      "required": false
+    },
+    {
+      "name": "network_cidr",
+      "description": "Override: The network CIDR block. If empty, derived automatically from VNet.",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "public_gateway_nsg_id",
+    "private_gateway_nsg_id"
+  ],
+  "hash": "84577797d05f41a06009839dab1c6d03"
+}
+END_AI_METADATA -->

@@ -2,16 +2,17 @@
 
 ## Description
 
-Configures a Prometheus provider in nullplatform with customizable server URL and dimensions
+Configures a Prometheus provider in the Nullplatform with server URL and dimensions
+
+## Architecture
+
+The module creates a single nullplatform_provider_config resource of type prometheus, wiring the computed prometheus_server_url from locals into its attributes. Inputs flow through var.prometheus_url and var.prometheus_namespace to build the server URL, while var.nrn and var.np_api_key authenticate and scope the provider configuration. Outputs are not exposed; the resource is marked to ignore future attribute changes.
 
 ## Features
 
-- Creates a nullplatform provider configuration for Prometheus monitoring
-- Supports custom Prometheus server URL or defaults to in-cluster service
-- Configures Prometheus server endpoint with automatic namespace-based URL generation
-- Manages provider attributes with lifecycle ignore changes for stability
-- Supports custom dimensions for provider configuration
-- Integrates with Kubernetes-based Prometheus deployments
+- Creates a Prometheus provider configuration in Nullplatform
+- Derives server URL from optional custom URL or namespace-based service DNS
+- Attaches dimension metadata to the provider for filtering and grouping
 
 ## Basic Usage
 
@@ -62,3 +63,45 @@ resource "example_resource" "this" {
 | <a name="input_prometheus_namespace"></a> [prometheus\_namespace](#input\_prometheus\_namespace) | Kubernetes namespace where Prometheus will be deployed | `string` | `"prometheus"` | no |
 | <a name="input_prometheus_url"></a> [prometheus\_url](#input\_prometheus\_url) | n/a | `string` | `""` | no |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "metrics",
+  "description": "Configures a Prometheus provider in the Nullplatform with server URL and dimensions",
+  "architecture": "The module creates a single nullplatform_provider_config resource of type prometheus, wiring the computed prometheus_server_url from locals into its attributes. Inputs flow through var.prometheus_url and var.prometheus_namespace to build the server URL, while var.nrn and var.np_api_key authenticate and scope the provider configuration. Outputs are not exposed; the resource is marked to ignore future attribute changes.",
+  "features": [
+    "Creates a Prometheus provider configuration in Nullplatform",
+    "Derives server URL from optional custom URL or namespace-based service DNS",
+    "Attaches dimension metadata to the provider for filtering and grouping"
+  ],
+  "inputs": [
+    {
+      "name": "nrn",
+      "description": "nullplatform Resource Name — unique identifier for resources",
+      "required": true
+    },
+    {
+      "name": "np_api_key",
+      "description": "nullplatform API key for authentication",
+      "required": true
+    },
+    {
+      "name": "prometheus_url",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "dimensions",
+      "description": "name of the dimensions",
+      "required": false
+    },
+    {
+      "name": "prometheus_namespace",
+      "description": "Kubernetes namespace where Prometheus will be deployed",
+      "required": false
+    }
+  ],
+  "outputs": [],
+  "hash": "0fb52160b3f6655113caba2acb7dac2a"
+}
+END_AI_METADATA -->

@@ -2,15 +2,17 @@
 
 ## Description
 
-Creates an Azure public DNS zone with configurable tags and outputs name servers for domain delegation
+Creates an Azure DNS zone with a specified domain name in a given resource group
+
+## Architecture
+
+This module creates an azurerm_dns_zone resource and configures it with the provided domain name and resource group name. The azurerm_dns_zone resource is then used to generate various output values, including the DNS zone name, ID, and name servers. The module also accepts optional tags that can be applied to the DNS zone. The internal data flow involves passing the input variables to the azurerm_dns_zone resource and then extracting the relevant output values from the created resource.
 
 ## Features
 
-- Creates an Azure public DNS zone in a specified resource group
-- Configures custom domain name for DNS hosting
-- Supports optional tagging for resource organization
-- Outputs DNS zone name servers for domain delegation
-- Provides DNS zone ID and name for integration with other resources
+- Creates Azure DNS zone with specified domain name
+- Configures DNS zone with provided resource group name
+- Generates output values for DNS zone name, ID, and name servers
 
 ## Basic Usage
 
@@ -72,3 +74,46 @@ resource "example_resource" "this" {
 | <a name="output_private_dns_zone_id"></a> [private\_dns\_zone\_id](#output\_private\_dns\_zone\_id) | The ID of the created private DNS zone |
 | <a name="output_private_dns_zone_name"></a> [private\_dns\_zone\_name](#output\_private\_dns\_zone\_name) | The name of the created private DNS zone |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "dns",
+  "description": "Creates an Azure DNS zone with a specified domain name in a given resource group",
+  "architecture": "This module creates an azurerm_dns_zone resource and configures it with the provided domain name and resource group name. The azurerm_dns_zone resource is then used to generate various output values, including the DNS zone name, ID, and name servers. The module also accepts optional tags that can be applied to the DNS zone. The internal data flow involves passing the input variables to the azurerm_dns_zone resource and then extracting the relevant output values from the created resource.",
+  "features": [
+    "Creates Azure DNS zone with specified domain name",
+    "Configures DNS zone with provided resource group name",
+    "Generates output values for DNS zone name, ID, and name servers"
+  ],
+  "inputs": [
+    {
+      "name": "resource_group_name",
+      "description": "The name of the resource group where the DNS zone will be created",
+      "required": true
+    },
+    {
+      "name": "domain_name",
+      "description": "The domain name to use for the DNS zone (e.g., example.com)",
+      "required": true
+    },
+    {
+      "name": "subscription_id",
+      "description": "The ID of the Azure subscription",
+      "required": true
+    },
+    {
+      "name": "tags",
+      "description": "A mapping of tags to assign to the DNS zone",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "dns_zone_name",
+    "dns_zone_id",
+    "private_dns_zone_name",
+    "private_dns_zone_id",
+    "name_servers"
+  ],
+  "hash": "cc9e028f7cd35862044d66cf477be8ae"
+}
+END_AI_METADATA -->

@@ -2,16 +2,17 @@
 
 ## Description
 
-Creates IAM roles and policies for external-dns to manage Route53 DNS records in both public and private hosted zones using IRSA (IAM Roles for Service Accounts)
+Manages Route 53 DNS records for Kubernetes service discovery
+
+## Architecture
+
+This module creates an IAM role with OIDC provider trust for a Kubernetes service account using the terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts module, and grants permissions to manage Route 53 DNS records for service discovery using an aws_iam_policy resource. The IAM role is connected to the OIDC provider using the aws_iam_openid_connect_provider_arn variable, and the policy is attached to the role using the policies attribute of the iam-role-for-service-accounts module. The hosted zone IDs are used to restrict the permissions of the policy to the specified public and private hosted zones. The module also outputs the ARN of the created IAM role using an output resource.
 
 ## Features
 
-- Creates IAM role with OIDC provider trust for Kubernetes service accounts
-- Configures IAM policies for managing Route53 DNS records
-- Supports both public and private hosted zones for DNS management
-- Enables external-dns to automatically update DNS records for Kubernetes services
-- Implements least-privilege access with scoped Route53 permissions
-- Integrates with EKS IRSA for secure authentication without static credentials
+- Creates IAM role with OIDC provider trust for Kubernetes service account
+- Configures IAM policy for managing Route 53 DNS records
+- Supports service discovery using Route 53 hosted zones
 
 ## Basic Usage
 
@@ -71,3 +72,42 @@ resource "example_resource" "this" {
 |------|-------------|
 | <a name="output_nullplatform_external_dns_role_arn"></a> [nullplatform\_external\_dns\_role\_arn](#output\_nullplatform\_external\_dns\_role\_arn) | ARN of the external-dns role |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "external_dns",
+  "description": "Manages Route 53 DNS records for Kubernetes service discovery",
+  "architecture": "This module creates an IAM role with OIDC provider trust for a Kubernetes service account using the terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts module, and grants permissions to manage Route 53 DNS records for service discovery using an aws_iam_policy resource. The IAM role is connected to the OIDC provider using the aws_iam_openid_connect_provider_arn variable, and the policy is attached to the role using the policies attribute of the iam-role-for-service-accounts module. The hosted zone IDs are used to restrict the permissions of the policy to the specified public and private hosted zones. The module also outputs the ARN of the created IAM role using an output resource.",
+  "features": [
+    "Creates IAM role with OIDC provider trust for Kubernetes service account",
+    "Configures IAM policy for managing Route 53 DNS records",
+    "Supports service discovery using Route 53 hosted zones"
+  ],
+  "inputs": [
+    {
+      "name": "hosted_zone_public_id",
+      "description": "ID of the public Route53 hosted zone for DNS management",
+      "required": true
+    },
+    {
+      "name": "hosted_zone_private_id",
+      "description": "ID of the private Route53 hosted zone for DNS management",
+      "required": true
+    },
+    {
+      "name": "aws_iam_openid_connect_provider_arn",
+      "description": "ARN of the AWS IAM OIDC provider for EKS service account authentication",
+      "required": true
+    },
+    {
+      "name": "cluster_name",
+      "description": "Name of the cluster where the policy runs",
+      "required": true
+    }
+  ],
+  "outputs": [
+    "nullplatform_external_dns_role_arn"
+  ],
+  "hash": "daf411ed2a298b8afefaace481244f6e"
+}
+END_AI_METADATA -->

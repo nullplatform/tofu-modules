@@ -2,16 +2,17 @@
 
 ## Description
 
-Deploys Istio service mesh components (base, istiod, and ingress gateway) to a Kubernetes cluster using Helm
+Deploys Istio with Helm charts to create an ingress gateway
+
+## Architecture
+
+The module creates three Helm releases: istio-base, istiod, and istio-ingressgateway, which are connected through dependencies. The istio-ingressgateway release uses values from the locals.tf file, which are templated from the istio_ingressgateway.tmpl.yaml file. The Helm releases are configured with various options, such as create_namespace, disable_webhooks, and force_update. The module also uses variables from the variables.tf file to customize the deployment, such as the service type, status port, and HTTPS port.
 
 ## Features
 
-- Deploys istio-base, istiod, and istio-ingressgateway Helm charts in sequence with dependencies
-- Configures customizable service ports for HTTPS and optional HTTP2 traffic
-- Supports configurable Kubernetes service types for the ingress gateway
-- Manages Helm release lifecycle with atomic deployments and automatic cleanup on failure
-- Allows version pinning for each Istio component independently
-- Provides templated Helm values for ingress gateway service configuration
+- Creates Helm releases for Istio base, Istiod, and ingress gateway
+- Configures Istio ingress gateway with customizable service type and ports
+- Supports HTTP2 protocol with customizable port and target port
 
 ## Basic Usage
 
@@ -68,3 +69,80 @@ resource "example_resource" "this" {
 | <a name="input_service_type"></a> [service\_type](#input\_service\_type) | The Kubernetes service type for the Istio ingress gateway | `string` | `"LoadBalancer"` | no |
 | <a name="input_status_port"></a> [status\_port](#input\_status\_port) | The status port used (status-port) | `number` | `15021` | no |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "istio",
+  "description": "Deploys Istio with Helm charts to create an ingress gateway",
+  "architecture": "The module creates three Helm releases: istio-base, istiod, and istio-ingressgateway, which are connected through dependencies. The istio-ingressgateway release uses values from the locals.tf file, which are templated from the istio_ingressgateway.tmpl.yaml file. The Helm releases are configured with various options, such as create_namespace, disable_webhooks, and force_update. The module also uses variables from the variables.tf file to customize the deployment, such as the service type, status port, and HTTPS port.",
+  "features": [
+    "Creates Helm releases for Istio base, Istiod, and ingress gateway",
+    "Configures Istio ingress gateway with customizable service type and ports",
+    "Supports HTTP2 protocol with customizable port and target port"
+  ],
+  "inputs": [
+    {
+      "name": "istio_base_version",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "istio_ingressgateway_version",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "istiod_version",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "service_type",
+      "description": "The Kubernetes service type for the Istio ingress gateway",
+      "required": false
+    },
+    {
+      "name": "status_port",
+      "description": "The status port used (status-port)",
+      "required": false
+    },
+    {
+      "name": "https_port",
+      "description": "The external HTTPS service port",
+      "required": false
+    },
+    {
+      "name": "https_target_port",
+      "description": "The container target port for HTTPS",
+      "required": false
+    },
+    {
+      "name": "repository",
+      "description": "The Helm repository URL (e.g., https://istio-release.storage.googleapis.com/charts).",
+      "required": false
+    },
+    {
+      "name": "namespace",
+      "description": "The Kubernetes namespace where gateway will be installed.",
+      "required": false
+    },
+    {
+      "name": "enable_http2",
+      "description": "Whether to expose the HTTP2 (port 80) service",
+      "required": false
+    },
+    {
+      "name": "http2_port",
+      "description": "The external service port for HTTP2 when enabled.",
+      "required": false
+    },
+    {
+      "name": "http2_target_port",
+      "description": "The container target port for HTTP2 when enabled",
+      "required": false
+    }
+  ],
+  "outputs": [],
+  "hash": "e04845dd33391c1391743d1060704bd1"
+}
+END_AI_METADATA -->

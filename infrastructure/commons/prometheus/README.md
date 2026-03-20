@@ -2,17 +2,17 @@
 
 ## Description
 
-Deploys Prometheus monitoring system to a Kubernetes cluster using Helm with configurable namespace and nullplatform integration
+Deploys Prometheus using Helm chart in a specified Kubernetes namespace
+
+## Architecture
+
+This module creates a helm_release resource to deploy the Prometheus chart from the prometheus-community repository, and uses a templatefile to populate the prometheus_values template with the nullplatform_port variable, the resulting values are then passed to the helm_release resource, which creates the necessary Kubernetes resources, including deployments, services, and pods, in the specified namespace
 
 ## Features
 
-- Deploys Prometheus using the official prometheus-community Helm chart
-- Configures automatic namespace creation for Prometheus deployment
-- Integrates with nullplatform service through configurable port settings
-- Implements comprehensive Helm release management with atomic updates and rollback capabilities
-- Applies templated configuration values for customized Prometheus setup
-- Enforces strict deployment practices with force updates and pod recreation
-- Maintains deployment history with configurable retention limit
+- Deploys Prometheus chart with customizable nullplatform port
+- Configures Kubernetes namespace for Prometheus deployment
+- Creates necessary Kubernetes resources for Prometheus
 
 ## Basic Usage
 
@@ -57,3 +57,30 @@ resource "example_resource" "this" {
 | <a name="input_nullplatform_port"></a> [nullplatform\_port](#input\_nullplatform\_port) | Port number for nullplatform service communication | `number` | `2021` | no |
 | <a name="input_prometheus_namespace"></a> [prometheus\_namespace](#input\_prometheus\_namespace) | Kubernetes namespace where Prometheus will be deployed | `string` | `"prometheus"` | no |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "prometheus",
+  "description": "Deploys Prometheus using Helm chart in a specified Kubernetes namespace",
+  "architecture": "This module creates a helm_release resource to deploy the Prometheus chart from the prometheus-community repository, and uses a templatefile to populate the prometheus_values template with the nullplatform_port variable, the resulting values are then passed to the helm_release resource, which creates the necessary Kubernetes resources, including deployments, services, and pods, in the specified namespace",
+  "features": [
+    "Deploys Prometheus chart with customizable nullplatform port",
+    "Configures Kubernetes namespace for Prometheus deployment",
+    "Creates necessary Kubernetes resources for Prometheus"
+  ],
+  "inputs": [
+    {
+      "name": "nullplatform_port",
+      "description": "Port number for nullplatform service communication",
+      "required": false
+    },
+    {
+      "name": "prometheus_namespace",
+      "description": "Kubernetes namespace where Prometheus will be deployed",
+      "required": false
+    }
+  ],
+  "outputs": [],
+  "hash": "6408be4cd45c3c9a4298efeaabd20612"
+}
+END_AI_METADATA -->

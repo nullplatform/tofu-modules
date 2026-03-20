@@ -2,16 +2,17 @@
 
 ## Description
 
-Creates an Oracle Cloud Infrastructure Object Storage bucket configured for storing OpenTofu/Terraform state files with S3-compatible backend support
+Creates an Oracle Cloud Infrastructure Object Storage bucket with configurable access type, storage tier, and versioning
+
+## Architecture
+
+The module creates an oci_objectstorage_bucket resource, which is configured with the provided compartment_id, namespace, access_type, storage_tier, and versioning variables. The bucket is then connected to the oci_identity_region_subscriptions data source to retrieve the region name, which is used to construct the bucket endpoint. The module also outputs the bucket name, ID, namespace, endpoint, and a suggested backend configuration for OpenTofu.
 
 ## Features
 
-- Creates an OCI Object Storage bucket with configurable access controls and storage tier
-- Configures bucket versioning to protect state file history
-- Supports S3-compatible backend configuration for OpenTofu/Terraform
-- Applies predefined and custom freeform tags for resource organization
-- Generates ready-to-use backend configuration with endpoint and bucket details
-- Retrieves regional endpoint information automatically from tenancy subscriptions
+- Creates an Oracle Cloud Infrastructure Object Storage bucket with custom access type
+- Configures the bucket with a specified storage tier and versioning settings
+- Generates a suggested backend configuration for OpenTofu with the created bucket
 
 ## Basic Usage
 
@@ -75,3 +76,61 @@ resource "example_resource" "this" {
 | <a name="output_bucket_name"></a> [bucket\_name](#output\_bucket\_name) | Nombre del bucket creado |
 | <a name="output_namespace"></a> [namespace](#output\_namespace) | Object Storage namespace |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "backend",
+  "description": "Creates an Oracle Cloud Infrastructure Object Storage bucket with configurable access type, storage tier, and versioning",
+  "architecture": "The module creates an oci_objectstorage_bucket resource, which is configured with the provided compartment_id, namespace, access_type, storage_tier, and versioning variables. The bucket is then connected to the oci_identity_region_subscriptions data source to retrieve the region name, which is used to construct the bucket endpoint. The module also outputs the bucket name, ID, namespace, endpoint, and a suggested backend configuration for OpenTofu.",
+  "features": [
+    "Creates an Oracle Cloud Infrastructure Object Storage bucket with custom access type",
+    "Configures the bucket with a specified storage tier and versioning settings",
+    "Generates a suggested backend configuration for OpenTofu with the created bucket"
+  ],
+  "inputs": [
+    {
+      "name": "compartment_id",
+      "description": "OCID del compartment donde se creará el bucket",
+      "required": true
+    },
+    {
+      "name": "namespace",
+      "description": "Object Storage namespace (generalmente el nombre del tenancy)",
+      "required": true
+    },
+    {
+      "name": "versioning",
+      "description": "Habilitar versionado de objetos para el bucket",
+      "required": false
+    },
+    {
+      "name": "bucket_name",
+      "description": "Nombre del bucket para almacenar el estado de OpenTofu",
+      "required": false
+    },
+    {
+      "name": "access_type",
+      "description": "Tipo de acceso al bucket (NoPublicAccess, ObjectRead, ObjectReadWithoutList)",
+      "required": false
+    },
+    {
+      "name": "storage_tier",
+      "description": "Tier de almacenamiento (Standard, Archive)",
+      "required": false
+    },
+    {
+      "name": "tags",
+      "description": "Tags de formato libre para el bucket",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "bucket_name",
+    "bucket_id",
+    "namespace",
+    "bucket_endpoint",
+    "backend_config"
+  ],
+  "hash": "ff5581d9726d997de8f1a74fbbfc14f0"
+}
+END_AI_METADATA -->

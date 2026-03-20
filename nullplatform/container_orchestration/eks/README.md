@@ -2,17 +2,19 @@
 
 ## Description
 
-Configures Nullplatform provider settings for Amazon EKS cluster integration with customizable networking, resource management, and security options
+Configures an EKS cluster in the Nullplatform provider with customizable load balancers, resource management, and security settings
+
+## Architecture
+
+The module creates a single nullplatform_provider_config resource of type eks-configuration, which receives a JSON-encoded attributes map built from local values. Local values merge cluster metadata, optional balancer configurations, network settings, resource management parameters, security configurations, traffic manager version, and object modifiers. All inputs flow through conditional local blocks that only include non-empty values in the final attributes payload.
 
 ## Features
 
-- Creates Nullplatform provider configuration for EKS clusters
-- Configures public and private load balancer names for traffic routing
-- Manages resource allocation ratios for CPU and memory
-- Supports custom Kubernetes namespace configuration or Nullplatform system namespace
-- Configures image pull secrets for private container registry access
-- Enables service account assignment for pod-level IAM permissions
-- Supports dynamic Kubernetes object modifications through configurable modifiers
+- Creates Nullplatform EKS provider configuration with cluster metadata and dimensions
+- Configures public and private load balancer names with optional group suffix for multi-cluster management
+- Sets memory-to-CPU ratios, request-to-limit ratios, and core multipliers for resource management
+- Supports image pull secrets and custom service account names for secure pod deployments
+- Enables dynamic Kubernetes object modifications via selector-based actions
 
 ## Basic Usage
 
@@ -74,3 +76,102 @@ resource "example_resource" "this" {
 | <a name="input_traffic_manager_version"></a> [traffic\_manager\_version](#input\_traffic\_manager\_version) | Tag for the traffic manager sidecar container | `string` | `"latest"` | no |
 | <a name="input_use_nullplatform_namespace"></a> [use\_nullplatform\_namespace](#input\_use\_nullplatform\_namespace) | When enabled, uses the nullplatform system namespace instead of a custom namespace | `bool` | `false` | no |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "eks",
+  "description": "Configures an EKS cluster in the Nullplatform provider with customizable load balancers, resource management, and security settings",
+  "architecture": "The module creates a single nullplatform_provider_config resource of type eks-configuration, which receives a JSON-encoded attributes map built from local values. Local values merge cluster metadata, optional balancer configurations, network settings, resource management parameters, security configurations, traffic manager version, and object modifiers. All inputs flow through conditional local blocks that only include non-empty values in the final attributes payload.",
+  "features": [
+    "Creates Nullplatform EKS provider configuration with cluster metadata and dimensions",
+    "Configures public and private load balancer names with optional group suffix for multi-cluster management",
+    "Sets memory-to-CPU ratios, request-to-limit ratios, and core multipliers for resource management",
+    "Supports image pull secrets and custom service account names for secure pod deployments",
+    "Enables dynamic Kubernetes object modifications via selector-based actions"
+  ],
+  "inputs": [
+    {
+      "name": "nrn",
+      "description": "Nullplatform NRN (e.g., organization=X:account=Y:namespace=Z)",
+      "required": true
+    },
+    {
+      "name": "cluster_name",
+      "description": "The name of the Amazon EKS cluster",
+      "required": true
+    },
+    {
+      "name": "dimensions",
+      "description": "Dimensions for the provider configuration",
+      "required": false
+    },
+    {
+      "name": "namespace_application_default",
+      "description": "Default Kubernetes namespace for applications",
+      "required": false
+    },
+    {
+      "name": "use_nullplatform_namespace",
+      "description": "When enabled, uses the nullplatform system namespace instead of a custom namespace",
+      "required": false
+    },
+    {
+      "name": "public_balancer_name",
+      "description": "The name of the public-facing load balancer for external traffic routing",
+      "required": false
+    },
+    {
+      "name": "private_balancer_name",
+      "description": "The name of the private load balancer for internal traffic routing",
+      "required": false
+    },
+    {
+      "name": "balancer_group_suffix",
+      "description": "Suffix added to the ALB name, enabling management across multiple clusters in the same account",
+      "required": false
+    },
+    {
+      "name": "memory_cpu_ratio",
+      "description": "Amount of MiB of ram per CPU. Default value is 2048, it means 1 core for every 2 GiB of RAM",
+      "required": false
+    },
+    {
+      "name": "memory_request_to_limit_ratio",
+      "description": "Sets the ratio between requested and limit memory. Default value is 1, must be a number greater than or equal to 1",
+      "required": false
+    },
+    {
+      "name": "max_cores_multiplier",
+      "description": "Sets the ratio between requested and limit CPU. Default value is 3, must be a number greater than or equal to 1",
+      "required": false
+    },
+    {
+      "name": "max_milicores",
+      "description": "Sets the maximum amount of CPU mili cores a pod can use",
+      "required": false
+    },
+    {
+      "name": "image_pull_secrets",
+      "description": "List of secret names to use image pull secrets for secure access to private container images",
+      "required": false
+    },
+    {
+      "name": "service_account_name",
+      "description": "The name of the Kubernetes service account used for deployments",
+      "required": false
+    },
+    {
+      "name": "traffic_manager_version",
+      "description": "Tag for the traffic manager sidecar container",
+      "required": false
+    },
+    {
+      "name": "object_modifiers",
+      "description": "List of modifications to dynamically modify k8s objects",
+      "required": false
+    }
+  ],
+  "outputs": [],
+  "hash": "92682b2510f488e61ef8aac2143db071"
+}
+END_AI_METADATA -->
