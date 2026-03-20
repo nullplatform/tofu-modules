@@ -16,7 +16,7 @@ Creates a Google Cloud Router with NAT configuration for enabling outbound inter
 
 ```hcl
 module "cloud-nat" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/cloud-nat?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/cloud-nat?ref=v1.46.0"
 
   nat_name    = "your-nat-name"
   network_id  = "your-network-id"

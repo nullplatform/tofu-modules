@@ -61,6 +61,34 @@ variable "worker_pools" {
   }
 }
 
+variable "worker_pool_size" {
+  type        = number
+  default     = 2
+  description = "Default number of worker nodes per pool"
+}
+
+variable "kubernetes_version" {
+  type        = string
+  default     = "v1.34.1"
+  description = "Kubernetes version for the OKE cluster"
+}
+
+variable "cni_type" {
+  type        = string
+  default     = "flannel"
+  description = "CNI type for the OKE cluster. Valid values: 'flannel' or 'npn' (Native Pod Networking)."
+  validation {
+    condition     = contains(["flannel", "npn"], var.cni_type)
+    error_message = "Accepted values are 'flannel' or 'npn'."
+  }
+}
+
+variable "pod_subnet_id" {
+  type        = string
+  default     = ""
+  description = "Subnet ID for pod networking (required when cni_type = 'npn')."
+}
+
 variable "worker_cloud_init" {
   description = "Cloud init configuration for worker nodes. See: https://cloudinit.readthedocs.io/en/latest/reference/modules.html"
   type        = list(map(string))

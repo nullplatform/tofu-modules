@@ -18,14 +18,14 @@ Deploys the AWS Load Balancer Controller to an Amazon EKS cluster using Helm
 
 ```hcl
 module "aws_loadbalancer_controller_iam" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/aws_loadbalancer_controller_iam?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/aws_loadbalancer_controller_iam?ref=v1.46.0"
 
   aws_iam_openid_connect_provider_arn = module.eks.eks_oidc_provider_arn
   cluster_name                        = module.eks.eks_cluster_name
 }
 
 module "aws_load_balancer_controller" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/aws_load_balancer_controller?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/aws_load_balancer_controller?ref=v1.46.0"
 
   cluster_name         = module.eks.eks_cluster_name
   vpc_id               = module.vpc.vpc_id

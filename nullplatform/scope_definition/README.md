@@ -18,7 +18,7 @@ Creates and configures Nullplatform service specifications, scope types, and act
 
 ```hcl
 module "scope_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v1.46.0"
 
   np_api_key = "your-np-api-key"
   nrn        = "your-nrn"
