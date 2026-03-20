@@ -2,16 +2,17 @@
 
 ## Description
 
-Creates and manages a Google Cloud DNS managed zone with support for both public and private visibility configurations
+Creates a Google Cloud DNS managed zone with specified visibility and networks
+
+## Architecture
+
+This module creates a google_dns_managed_zone resource with the specified project ID, zone name, and domain name. The zone's visibility is set based on the provided visibility variable, and if set to private, it configures the private_visibility_config block with the specified private_zone_networks. The module also outputs the zone's name and name servers. The visibility variable controls the creation of the private_visibility_config block, which in turn depends on the private_zone_networks variable.
 
 ## Features
 
-- Creates a Google Cloud DNS managed zone with configurable visibility
-- Supports both public and private DNS zone configurations
-- Configures private zone visibility with VPC network associations
-- Manages DNS zone naming and domain configuration
-- Outputs zone name and name servers for delegation
-- Provides dynamic configuration for private zone network access
+- Creates Google Cloud DNS managed zone with public or private visibility
+- Configures private zone networks using VPC self-links
+- Outputs zone name and name servers
 
 ## Basic Usage
 
@@ -71,3 +72,48 @@ resource "example_resource" "this" {
 | <a name="output_name_servers"></a> [name\_servers](#output\_name\_servers) | n/a |
 | <a name="output_zone_name"></a> [zone\_name](#output\_zone\_name) | n/a |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "cloud-dns",
+  "description": "Creates a Google Cloud DNS managed zone with specified visibility and networks",
+  "architecture": "This module creates a google_dns_managed_zone resource with the specified project ID, zone name, and domain name. The zone's visibility is set based on the provided visibility variable, and if set to private, it configures the private_visibility_config block with the specified private_zone_networks. The module also outputs the zone's name and name servers. The visibility variable controls the creation of the private_visibility_config block, which in turn depends on the private_zone_networks variable.",
+  "features": [
+    "Creates Google Cloud DNS managed zone with public or private visibility",
+    "Configures private zone networks using VPC self-links",
+    "Outputs zone name and name servers"
+  ],
+  "inputs": [
+    {
+      "name": "project_id",
+      "description": "The GCP project ID",
+      "required": true
+    },
+    {
+      "name": "zone_name",
+      "description": "The name of the DNS zone resource",
+      "required": true
+    },
+    {
+      "name": "domain_name",
+      "description": "The domain name (without trailing dot)",
+      "required": true
+    },
+    {
+      "name": "visibility",
+      "description": "Zone visibility: public or private",
+      "required": false
+    },
+    {
+      "name": "private_zone_networks",
+      "description": "VPC network self-links for private zones",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "zone_name",
+    "name_servers"
+  ],
+  "hash": "2fc3540a628ef019623822f1d4473bfa"
+}
+END_AI_METADATA -->

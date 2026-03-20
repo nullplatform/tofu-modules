@@ -2,17 +2,19 @@
 
 ## Description
 
-Deploys and configures the Nullplatform agent on Kubernetes clusters across AWS, GCP, Azure, or OCI using Helm
+Deploys the nullplatform agent to a Kubernetes cluster via Helm chart with cloud-specific configuration
+
+## Architecture
+
+The module creates a single helm_release resource that deploys the nullplatform-agent chart from a GitHub Helm repository. Local values merge default and cloud-specific environment variables into a YAML values template (nullplatform_agent_values.tmpl.yaml) which is passed to the Helm release. Inputs like api_key, cluster_name, and tags_selectors flow through locals into the template, while cloud_provider determines which cloud-specific variables (AWS IAM role, Azure credentials, etc.) are injected into the agent's environment.
 
 ## Features
 
-- Deploys Nullplatform agent via Helm chart to Kubernetes clusters
-- Supports multi-cloud environments including AWS, GCP, Azure, and OCI
-- Configures cloud-specific authentication and networking settings
-- Manages Git repository scopes for agent configuration
-- Provides customizable tag selectors for channel and agent filtering
-- Supports initialization scripts and extra environment variables
-- Implements automatic recreation on API key changes
+- Deploys nullplatform agent using Helm release with configurable chart version
+- Injects cloud-specific credentials and networking settings into agent pods
+- Parses NRN strings into organization, account, and namespace tags for agent filtering
+- Supports multiple Git repositories for agent scope and extended configuration
+- Triggers Helm release recreation when API key changes via terraform_data resource
 
 ## Basic Usage
 
@@ -29,7 +31,7 @@ module "agent" {
 }
 ```
 
-### Usage with AWS Configuration
+### Usage with AWS Cloud Provider
 
 ```hcl
 module "agent" {
@@ -45,22 +47,7 @@ module "agent" {
 }
 ```
 
-### Usage with GCP Configuration
-
-```hcl
-module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.46.0"
-
-  api_key        = "your-api-key"
-  cloud_provider = "gcp"
-  cluster_name   = "your-cluster-name"
-  image_tag      = "your-image-tag"
-  nrn            = "your-nrn"
-  tags_selectors = "your-tags-selectors"
-}
-```
-
-### Usage with Azure Configuration
+### Usage with Azure Cloud Provider
 
 ```hcl
 module "agent" {
@@ -83,7 +70,22 @@ module "agent" {
 }
 ```
 
-### Usage with OCI Configuration
+### Usage with GCP Cloud Provider
+
+```hcl
+module "agent" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.46.0"
+
+  api_key        = "your-api-key"
+  cloud_provider = "gcp"
+  cluster_name   = "your-cluster-name"
+  image_tag      = "your-image-tag"
+  nrn            = "your-nrn"
+  tags_selectors = "your-tags-selectors"
+}
+```
+
+### Usage with OCI Cloud Provider
 
 ```hcl
 module "agent" {
@@ -162,3 +164,167 @@ resource "example_resource" "this" {
 | <a name="input_tags_selectors"></a> [tags\_selectors](#input\_tags\_selectors) | Map of tags used to select and filter channels and agents | `map(string)` | n/a | yes |
 | <a name="input_use_account_slug"></a> [use\_account\_slug](#input\_use\_account\_slug) | Flag to determine whether to use account slug in resource naming | `string` | `""` | no |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "agent",
+  "description": "Deploys the nullplatform agent to a Kubernetes cluster via Helm chart with cloud-specific configuration",
+  "architecture": "The module creates a single helm_release resource that deploys the nullplatform-agent chart from a GitHub Helm repository. Local values merge default and cloud-specific environment variables into a YAML values template (nullplatform_agent_values.tmpl.yaml) which is passed to the Helm release. Inputs like api_key, cluster_name, and tags_selectors flow through locals into the template, while cloud_provider determines which cloud-specific variables (AWS IAM role, Azure credentials, etc.) are injected into the agent's environment.",
+  "features": [
+    "Deploys nullplatform agent using Helm release with configurable chart version",
+    "Injects cloud-specific credentials and networking settings into agent pods",
+    "Parses NRN strings into organization, account, and namespace tags for agent filtering",
+    "Supports multiple Git repositories for agent scope and extended configuration",
+    "Triggers Helm release recreation when API key changes via terraform_data resource"
+  ],
+  "inputs": [
+    {
+      "name": "api_key",
+      "description": "API key for authenticating with the nullplatform API",
+      "required": true
+    },
+    {
+      "name": "cluster_name",
+      "description": "Name of the EKS cluster where the nullplatform agent will be deployed",
+      "required": true
+    },
+    {
+      "name": "nrn",
+      "description": "Nullplatform Resource Name - unique identifier for nullplatform resources",
+      "required": true
+    },
+    {
+      "name": "tags_selectors",
+      "description": "Map of tags used to select and filter channels and agents",
+      "required": true
+    },
+    {
+      "name": "image_tag",
+      "description": "Image tag for the agent container image",
+      "required": true
+    },
+    {
+      "name": "cloud_provider",
+      "description": "Cloud provider to use (aws, gcp, or azure)",
+      "required": true
+    },
+    {
+      "name": "aws_iam_role_arn",
+      "description": "ARN of the AWS IAM role assigned to the agent",
+      "required": false
+    },
+    {
+      "name": "azure_client_id",
+      "description": "Azure client ID for authentication",
+      "required": false
+    },
+    {
+      "name": "azure_client_secret",
+      "description": "Azure client secret for authentication",
+      "required": false
+    },
+    {
+      "name": "azure_subscription_id",
+      "description": "Azure subscription ID",
+      "required": false
+    },
+    {
+      "name": "azure_resource_group",
+      "description": "Azure resource group name",
+      "required": false
+    },
+    {
+      "name": "private_gateway_name",
+      "description": "Private gateway name for Azure networking",
+      "required": false
+    },
+    {
+      "name": "private_hosted_zone_rg",
+      "description": "Resource group for private hosted zone",
+      "required": false
+    },
+    {
+      "name": "public_gateway_name",
+      "description": "Public gateway name for Azure networking",
+      "required": false
+    },
+    {
+      "name": "azure_tenant_id",
+      "description": "Azure tenant ID",
+      "required": false
+    },
+    {
+      "name": "nullplatform_agent_helm_version",
+      "description": "Version of the nullplatform agent Helm chart to deploy",
+      "required": false
+    },
+    {
+      "name": "namespace",
+      "description": "Kubernetes namespace where the nullplatform agent will run",
+      "required": false
+    },
+    {
+      "name": "agent_repos_scope",
+      "description": "Git repository URL containing agent scope configurations (format: repo#branch)",
+      "required": false
+    },
+    {
+      "name": "agent_repos_extra",
+      "description": "List of additional Git repositories used for extended agent configuration",
+      "required": false
+    },
+    {
+      "name": "init_scripts",
+      "description": "List of initialization scripts to execute during agent startup",
+      "required": false
+    },
+    {
+      "name": "dns_type",
+      "description": "Type of DNS Provider, ej: azure, route53, or external_dns",
+      "required": false
+    },
+    {
+      "name": "domain",
+      "description": "Base domain name used across resources",
+      "required": false
+    },
+    {
+      "name": "private_domain",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "use_account_slug",
+      "description": "Flag to determine whether to use account slug in resource naming",
+      "required": false
+    },
+    {
+      "name": "image_pull_secrets",
+      "description": "Image pull secrets configuration",
+      "required": false
+    },
+    {
+      "name": "service_template",
+      "description": "Specifies the name or reference of the scope service template to be used for deployment.",
+      "required": false
+    },
+    {
+      "name": "initial_ingress_path",
+      "description": "Defines the initial ingress path used when deploying the application for the first time.",
+      "required": false
+    },
+    {
+      "name": "blue_green_ingress_path",
+      "description": "Specifies the ingress path used for blue-green deployments to route traffic to the new version.",
+      "required": false
+    },
+    {
+      "name": "extra_envs",
+      "description": "Additional environment variables to pass to the agent",
+      "required": false
+    }
+  ],
+  "outputs": [],
+  "hash": "b8a71b4042c9eb1faa041d2469bdd868"
+}
+END_AI_METADATA -->

@@ -2,17 +2,18 @@
 
 ## Description
 
-Deploys and configures ExternalDNS on Kubernetes to automatically manage DNS records across multiple cloud providers including Cloudflare, AWS Route53, and Oracle Cloud Infrastructure
+Deploys ExternalDNS to manage DNS records for specific domains with various DNS providers
+
+## Architecture
+
+The module creates a Kubernetes namespace and deploys ExternalDNS using Helm, configuring it with the specified DNS provider and other parameters, it uses Terraform resources such as kubernetes_namespace_v1 and helm_release to manage the deployment, and it also uses locals to configure the provider-specific settings, the module also depends on kubernetes_secret_v1 resources for Cloudflare and OCI configurations
 
 ## Features
 
-- Deploys ExternalDNS via Helm chart to Kubernetes clusters
-- Supports multiple DNS providers including Cloudflare, AWS Route53, and Oracle Cloud Infrastructure
-- Configures provider-specific authentication using Kubernetes secrets and service accounts
-- Manages DNS record synchronization policies including create-only, sync, and upsert-only modes
-- Supports both public and private DNS zone management
-- Integrates with AWS IAM roles for Route53 access via service account annotations
-- Configures OCI Workload Identity for secure DNS management in Oracle Cloud
+- Creates ExternalDNS deployment with specified DNS provider
+- Configures ExternalDNS with domain filters and policy
+- Supports Cloudflare, AWS, and OCI as DNS providers
+- Manages DNS records for specific domains
 
 ## Basic Usage
 
@@ -25,7 +26,7 @@ module "external_dns" {
 }
 ```
 
-### Usage with Cloudflare DNS Provider
+### Usage with Cloudflare Configuration
 
 ```hcl
 module "external_dns" {
@@ -37,7 +38,7 @@ module "external_dns" {
 }
 ```
 
-### Usage with AWS Route53 DNS Provider
+### Usage with AWS Configuration
 
 ```hcl
 module "external_dns" {
@@ -52,7 +53,7 @@ module "external_dns" {
 }
 ```
 
-### Usage with Oracle Cloud Infrastructure DNS Provider
+### Usage with OCI Configuration
 
 ```hcl
 module "external_dns" {
@@ -62,6 +63,7 @@ module "external_dns" {
   domain_filters       = "your-domain-filters"
   oci_compartment_ocid = "your-oci-compartment-ocid"  # Required when dns_provider_name = "oci"
   oci_region           = "your-oci-region"  # Required when dns_provider_name = "oci"
+  oci_zone_scope       = "your-oci-zone-scope"  # Required when dns_provider_name = "oci"
 }
 ```
 
@@ -121,3 +123,116 @@ resource "example_resource" "this" {
 | <a name="input_zone_id_filter"></a> [zone\_id\_filter](#input\_zone\_id\_filter) | The Route53 public or private hosted zone ID for ExternalDNS to manage (required when dns\_provider\_name is 'aws') | `string` | `""` | no |
 | <a name="input_zone_type"></a> [zone\_type](#input\_zone\_type) | The Route53 hosted zone type for ExternalDNS to manage (public or private) | `string` | `""` | no |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "external_dns",
+  "description": "Deploys ExternalDNS to manage DNS records for specific domains with various DNS providers",
+  "architecture": "The module creates a Kubernetes namespace and deploys ExternalDNS using Helm, configuring it with the specified DNS provider and other parameters, it uses Terraform resources such as kubernetes_namespace_v1 and helm_release to manage the deployment, and it also uses locals to configure the provider-specific settings, the module also depends on kubernetes_secret_v1 resources for Cloudflare and OCI configurations",
+  "features": [
+    "Creates ExternalDNS deployment with specified DNS provider",
+    "Configures ExternalDNS with domain filters and policy",
+    "Supports Cloudflare, AWS, and OCI as DNS providers",
+    "Manages DNS records for specific domains"
+  ],
+  "inputs": [
+    {
+      "name": "domain_filters",
+      "description": "The domain filter to limit ExternalDNS to manage DNS records only for specific domains",
+      "required": true
+    },
+    {
+      "name": "dns_provider_name",
+      "description": "The DNS provider to use with ExternalDNS ",
+      "required": true
+    },
+    {
+      "name": "policy",
+      "description": "The policy to external dns manage the DNS records",
+      "required": false
+    },
+    {
+      "name": "type",
+      "description": "Determines whether the external-dns deployment is public or private",
+      "required": false
+    },
+    {
+      "name": "cloudflare_token",
+      "description": "The Cloudflare API token for DNS management (required when dns_provider_name is 'cloudflare')",
+      "required": false
+    },
+    {
+      "name": "aws_region",
+      "description": "The AWS region where the Route53 hosted zones are located",
+      "required": false
+    },
+    {
+      "name": "aws_iam_role_arn",
+      "description": "The IAM role ARN for ExternalDNS to assume for Route53 access (required when dns_provider_name is 'aws')",
+      "required": false
+    },
+    {
+      "name": "zone_id_filter",
+      "description": "The Route53 public or private hosted zone ID for ExternalDNS to manage (required when dns_provider_name is 'aws')",
+      "required": false
+    },
+    {
+      "name": "zone_type",
+      "description": "The Route53 hosted zone type for ExternalDNS to manage (public or private)",
+      "required": false
+    },
+    {
+      "name": "oci_compartment_ocid",
+      "description": "The OCI compartment OCID where the DNS zones are located (required when dns_provider_name is 'oci')",
+      "required": false
+    },
+    {
+      "name": "oci_region",
+      "description": "The OCI region for workload identity configuration (required when dns_provider_name is 'oci')",
+      "required": false
+    },
+    {
+      "name": "oci_zone_scope",
+      "description": "The scope of the DNS zones in OCI (GLOBAL or PRIVATE)",
+      "required": false
+    },
+    {
+      "name": "external_dns_version",
+      "description": "The version of ExternalDNS Helm chart to deploy",
+      "required": false
+    },
+    {
+      "name": "external_dns_namespace",
+      "description": "The Kubernetes namespace where ExternalDNS will be deployed",
+      "required": false
+    },
+    {
+      "name": "create_namespace",
+      "description": "Whether to create the Kubernetes namespace. Set to false if the namespace already exists (e.g., when deploying multiple instances)",
+      "required": false
+    },
+    {
+      "name": "txt_owner_id",
+      "description": "The TXT owner ID used by ExternalDNS to identify DNS records it manages",
+      "required": false
+    },
+    {
+      "name": "sources",
+      "description": "Array contents the sources to external dns work",
+      "required": false
+    },
+    {
+      "name": "oci_service_account_name",
+      "description": "The Kubernetes service account name for OCI Workload Identity",
+      "required": false
+    },
+    {
+      "name": "oci_zones_cache_duration",
+      "description": "The duration to cache OCI DNS zones (e.g., '30s', '1m'). Set to '0s' to disable caching.",
+      "required": false
+    }
+  ],
+  "outputs": [],
+  "hash": "dc5f0b5fd765b71004c66fb4eb229625"
+}
+END_AI_METADATA -->

@@ -2,17 +2,18 @@
 
 ## Description
 
-Configures Nullplatform provider settings for Oracle Kubernetes Engine (OKE) clusters
+Configures an Oracle Container Engine for Kubernetes (OKE) provider in Nullplatform
+
+## Architecture
+
+Creates a single nullplatform_provider_config resource of type 'oke' that stores cluster metadata including cluster name, region, and gateway configuration. The module accepts required inputs for NRN, cluster name, and region, while providing defaults for Kubernetes namespaces and gateway names. All configuration is encoded as JSON attributes within the provider config resource.
 
 ## Features
 
-- Creates a Nullplatform provider configuration for OKE clusters
-- Configures cluster identification and location attributes
-- Defines gateway settings for public and private access
-- Supports custom dimensions for provider configuration
-- Maps OCI region to cluster location
-- Configures default Kubernetes namespace for applications
-- Manages gateway namespace and naming conventions
+- Registers OKE cluster with Nullplatform using provider configuration
+- Stores cluster location and namespace mappings in centralized configuration
+- Configures public and private gateway references for traffic routing
+- Supports custom dimensions for provider-level tagging and organization
 
 ## Basic Usage
 
@@ -67,3 +68,61 @@ resource "example_resource" "this" {
 | <a name="input_public_gateway_name"></a> [public\_gateway\_name](#input\_public\_gateway\_name) | Name of the public gateway | `string` | `"public-gateway"` | no |
 | <a name="input_region"></a> [region](#input\_region) | OCI region where the OKE cluster is deployed | `string` | n/a | yes |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "oke",
+  "description": "Configures an Oracle Container Engine for Kubernetes (OKE) provider in Nullplatform",
+  "architecture": "Creates a single nullplatform_provider_config resource of type 'oke' that stores cluster metadata including cluster name, region, and gateway configuration. The module accepts required inputs for NRN, cluster name, and region, while providing defaults for Kubernetes namespaces and gateway names. All configuration is encoded as JSON attributes within the provider config resource.",
+  "features": [
+    "Registers OKE cluster with Nullplatform using provider configuration",
+    "Stores cluster location and namespace mappings in centralized configuration",
+    "Configures public and private gateway references for traffic routing",
+    "Supports custom dimensions for provider-level tagging and organization"
+  ],
+  "inputs": [
+    {
+      "name": "nrn",
+      "description": "Nullplatform NRN (e.g., organization=X:account=Y:namespace=Z)",
+      "required": true
+    },
+    {
+      "name": "cluster_name",
+      "description": "OKE cluster name",
+      "required": true
+    },
+    {
+      "name": "region",
+      "description": "OCI region where the OKE cluster is deployed",
+      "required": true
+    },
+    {
+      "name": "dimensions",
+      "description": "Dimensions for the provider configuration",
+      "required": false
+    },
+    {
+      "name": "namespace_application_default",
+      "description": "Default Kubernetes namespace for applications",
+      "required": false
+    },
+    {
+      "name": "gateway_namespace",
+      "description": "Kubernetes namespace where the gateway is deployed",
+      "required": false
+    },
+    {
+      "name": "public_gateway_name",
+      "description": "Name of the public gateway",
+      "required": false
+    },
+    {
+      "name": "private_gateway_name",
+      "description": "Name of the private gateway",
+      "required": false
+    }
+  ],
+  "outputs": [],
+  "hash": "060984ac5758589ac80ed5c25e610c35"
+}
+END_AI_METADATA -->

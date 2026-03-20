@@ -2,17 +2,20 @@
 
 ## Description
 
-Configures Nullplatform provider settings for Azure Kubernetes Service (AKS) cluster integration
+Configures an AKS cluster in the Nullplatform by creating a provider configuration resource that encapsulates cluster settings, gateway configuration, resource management policies, and security parameters
+
+## Architecture
+
+The module builds a local.attributes map that aggregates cluster metadata, gateway specs, resource limits, and security settings, then passes this JSON-encoded structure to the nullplatform_provider_config resource of type aks-configuration. Inputs like cluster_name, resource_group, and gateway names flow into the attributes map, while optional blocks for resource_management and security are conditionally included based on non-empty variables. The resulting provider configuration is registered against the given NRN in the Nullplatform.
 
 ## Features
 
-- Creates Nullplatform provider configuration for AKS cluster connectivity
-- Configures cluster authentication modes and resource group settings
-- Manages public and private Application Gateway configurations
-- Supports custom resource management ratios for CPU and memory allocation
-- Configures security settings including image pull secrets and service accounts
-- Enables traffic manager version specification for sidecar containers
-- Supports dynamic Kubernetes object modifications through object modifiers
+- Creates Nullplatform provider configuration for AKS clusters
+- Configures public and optional private Application Gateway references
+- Supports resource quotas for CPU/memory ratios and core limits
+- Manages image pull secrets and service account mappings
+- Enables traffic manager sidecar version specification
+- Applies dynamic object modifiers for Kubernetes resources
 
 ## Basic Usage
 
@@ -77,3 +80,108 @@ resource "example_resource" "this" {
 | <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | The name of the Kubernetes service account used for deployments | `string` | `""` | no |
 | <a name="input_traffic_manager_version"></a> [traffic\_manager\_version](#input\_traffic\_manager\_version) | Tag for the traffic manager sidecar container | `string` | `""` | no |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "aks",
+  "description": "Configures an AKS cluster in the Nullplatform by creating a provider configuration resource that encapsulates cluster settings, gateway configuration, resource management policies, and security parameters",
+  "architecture": "The module builds a local.attributes map that aggregates cluster metadata, gateway specs, resource limits, and security settings, then passes this JSON-encoded structure to the nullplatform_provider_config resource of type aks-configuration. Inputs like cluster_name, resource_group, and gateway names flow into the attributes map, while optional blocks for resource_management and security are conditionally included based on non-empty variables. The resulting provider configuration is registered against the given NRN in the Nullplatform.",
+  "features": [
+    "Creates Nullplatform provider configuration for AKS clusters",
+    "Configures public and optional private Application Gateway references",
+    "Supports resource quotas for CPU/memory ratios and core limits",
+    "Manages image pull secrets and service account mappings",
+    "Enables traffic manager sidecar version specification",
+    "Applies dynamic object modifiers for Kubernetes resources"
+  ],
+  "inputs": [
+    {
+      "name": "nrn",
+      "description": "Nullplatform NRN (e.g., organization=X:account=Y:namespace=Z)",
+      "required": true
+    },
+    {
+      "name": "cluster_name",
+      "description": "The name of the AKS cluster",
+      "required": true
+    },
+    {
+      "name": "resource_group",
+      "description": "Name of the resource group containing the AKS cluster",
+      "required": true
+    },
+    {
+      "name": "public_gateway_name",
+      "description": "Name of the public Application Gateway in AKS",
+      "required": true
+    },
+    {
+      "name": "dimensions",
+      "description": "Dimensions for the provider configuration",
+      "required": false
+    },
+    {
+      "name": "namespace_application_default",
+      "description": "Default Kubernetes namespace for applications",
+      "required": false
+    },
+    {
+      "name": "authentication_mode",
+      "description": "The type of authentication used to connect the cluster (localAccounts, azureActiveDirectory, localandAAD)",
+      "required": false
+    },
+    {
+      "name": "gateway_namespace",
+      "description": "Kubernetes namespace where the gateway is deployed",
+      "required": false
+    },
+    {
+      "name": "private_gateway_name",
+      "description": "Name of the private Application Gateway in AKS",
+      "required": false
+    },
+    {
+      "name": "memory_cpu_ratio",
+      "description": "Amount of MiB of ram per CPU. Default value is 2048, it means 1 core for every 2 GiB of RAM",
+      "required": false
+    },
+    {
+      "name": "memory_request_to_limit_ratio",
+      "description": "Sets the ratio between requested and limit memory. Default value is 1, must be a number greater than or equal to 1",
+      "required": false
+    },
+    {
+      "name": "max_cores_multiplier",
+      "description": "Sets the ratio between requested and limit CPU. Default value is 3, must be a number greater than or equal to 1",
+      "required": false
+    },
+    {
+      "name": "max_milicores",
+      "description": "Sets the maximum amount of CPU mili cores a pod can use",
+      "required": false
+    },
+    {
+      "name": "image_pull_secrets",
+      "description": "List of secret names to use image pull secrets",
+      "required": false
+    },
+    {
+      "name": "service_account_name",
+      "description": "The name of the Kubernetes service account used for deployments",
+      "required": false
+    },
+    {
+      "name": "traffic_manager_version",
+      "description": "Tag for the traffic manager sidecar container",
+      "required": false
+    },
+    {
+      "name": "object_modifiers",
+      "description": "List of modifications to dynamically modify k8s objects",
+      "required": false
+    }
+  ],
+  "outputs": [],
+  "hash": "2168cb7d36e77d4e500f63cf042628ee"
+}
+END_AI_METADATA -->

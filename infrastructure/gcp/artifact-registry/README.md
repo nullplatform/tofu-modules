@@ -2,16 +2,17 @@
 
 ## Description
 
-Creates a Google Artifact Registry repository with a dedicated service account for push/pull operations
+This module creates a Google Artifact Registry repository with a service account and IAM role for writing to the repository
+
+## Architecture
+
+The module creates a google_artifact_registry_repository resource, a google_service_account resource for Artifact Registry, a google_project_iam_member resource to assign the artifactregistry.writer role to the service account, and a google_service_account_key resource to generate a private key for the service account. The repository_id, location, and project_id variables are used to configure the repository and service account. The format variable determines the type of repository created, with DOCKER being the default. The module outputs the repository ID, repository URL, and service account key JSON.
 
 ## Features
 
-- Creates a Google Artifact Registry repository with configurable format
-- Provisions a dedicated service account for repository access
-- Assigns Artifact Registry writer role to the service account
-- Generates service account key for authentication
-- Outputs repository URL and service account credentials
-- Supports multiple artifact formats including Docker, NPM, and Python
+- Creates Artifact Registry repository with specified format
+- Configures service account with artifactregistry.writer role
+- Generates private key for service account
 
 ## Basic Usage
 
@@ -74,3 +75,44 @@ resource "example_resource" "this" {
 | <a name="output_repository_url"></a> [repository\_url](#output\_repository\_url) | n/a |
 | <a name="output_service_account_key_json"></a> [service\_account\_key\_json](#output\_service\_account\_key\_json) | Service Account key |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "artifact-registry",
+  "description": "This module creates a Google Artifact Registry repository with a service account and IAM role for writing to the repository",
+  "architecture": "The module creates a google_artifact_registry_repository resource, a google_service_account resource for Artifact Registry, a google_project_iam_member resource to assign the artifactregistry.writer role to the service account, and a google_service_account_key resource to generate a private key for the service account. The repository_id, location, and project_id variables are used to configure the repository and service account. The format variable determines the type of repository created, with DOCKER being the default. The module outputs the repository ID, repository URL, and service account key JSON.",
+  "features": [
+    "Creates Artifact Registry repository with specified format",
+    "Configures service account with artifactregistry.writer role",
+    "Generates private key for service account"
+  ],
+  "inputs": [
+    {
+      "name": "project_id",
+      "description": "The GCP project ID",
+      "required": true
+    },
+    {
+      "name": "location",
+      "description": "The location for the repository",
+      "required": true
+    },
+    {
+      "name": "repository_id",
+      "description": "The repository ID (name)",
+      "required": true
+    },
+    {
+      "name": "format",
+      "description": "The format (DOCKER, NPM, PYTHON, etc)",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "repository_id",
+    "repository_url",
+    "service_account_key_json"
+  ],
+  "hash": "f6a763650a3f28f9f48e46f7b721ce8b"
+}
+END_AI_METADATA -->

@@ -2,17 +2,19 @@
 
 ## Description
 
-Configures a Nullplatform provider for Google Kubernetes Engine (GKE) with cluster connectivity, gateway, resource management, and security settings
+Configures a GKE cluster on the nullplatform by creating a provider configuration resource
+
+## Architecture
+
+The module builds a local.attributes map that merges cluster metadata, gateway settings, optional resource management rules, security settings, traffic manager version, and object modifiers. A nullplatform_provider_config resource of type gke-configuration is created, receiving the JSON-encoded attributes and the provided NRN and dimensions. Outputs are not defined; the resource ID is implicit via the provider.
 
 ## Features
 
-- Configures GKE cluster connection with location and namespace settings
-- Manages public and optional private gateway configurations
-- Supports resource management settings including memory-to-CPU ratios and core limits
-- Configures security settings with image pull secrets and service account customization
-- Allows traffic manager version specification for sidecar containers
-- Enables dynamic Kubernetes object modifications through configurable modifiers
-- Supports flexible dimensioning through custom dimension mapping
+- Creates nullplatform_provider_config resource for GKE clusters
+- Configures public and optional private gateway names with namespace support
+- Supports resource management parameters like memory CPU ratio and max cores
+- Allows custom image pull secrets and service account names for security
+- Enables traffic manager version and object modifiers injection
 
 ## Basic Usage
 
@@ -76,3 +78,102 @@ resource "example_resource" "this" {
 | <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | The name of the Kubernetes service account used for deployments | `string` | `""` | no |
 | <a name="input_traffic_manager_version"></a> [traffic\_manager\_version](#input\_traffic\_manager\_version) | Tag for the traffic manager sidecar container | `string` | `""` | no |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "gke",
+  "description": "Configures a GKE cluster on the nullplatform by creating a provider configuration resource",
+  "architecture": "The module builds a local.attributes map that merges cluster metadata, gateway settings, optional resource management rules, security settings, traffic manager version, and object modifiers. A nullplatform_provider_config resource of type gke-configuration is created, receiving the JSON-encoded attributes and the provided NRN and dimensions. Outputs are not defined; the resource ID is implicit via the provider.",
+  "features": [
+    "Creates nullplatform_provider_config resource for GKE clusters",
+    "Configures public and optional private gateway names with namespace support",
+    "Supports resource management parameters like memory CPU ratio and max cores",
+    "Allows custom image pull secrets and service account names for security",
+    "Enables traffic manager version and object modifiers injection"
+  ],
+  "inputs": [
+    {
+      "name": "nrn",
+      "description": "Nullplatform NRN (e.g., organization=X:account=Y:namespace=Z)",
+      "required": true
+    },
+    {
+      "name": "cluster_name",
+      "description": "The name of the GKE cluster",
+      "required": true
+    },
+    {
+      "name": "location",
+      "description": "The location where the GKE cluster is deployed (zone or region, e.g., 'us-central1-a', 'us-west1')",
+      "required": true
+    },
+    {
+      "name": "public_gateway_name",
+      "description": "Name of the public gateway",
+      "required": true
+    },
+    {
+      "name": "dimensions",
+      "description": "Dimensions for the provider configuration",
+      "required": false
+    },
+    {
+      "name": "namespace_application_default",
+      "description": "Default Kubernetes namespace for applications",
+      "required": false
+    },
+    {
+      "name": "gateway_namespace",
+      "description": "Kubernetes namespace where the gateway is deployed",
+      "required": false
+    },
+    {
+      "name": "private_gateway_name",
+      "description": "Name of the private gateway",
+      "required": false
+    },
+    {
+      "name": "memory_cpu_ratio",
+      "description": "Amount of MiB of ram per CPU. Default value is 2048, it means 1 core for every 2 GiB of RAM",
+      "required": false
+    },
+    {
+      "name": "memory_request_to_limit_ratio",
+      "description": "Sets the ratio between requested and limit memory. Default value is 1, must be a number greater than or equal to 1",
+      "required": false
+    },
+    {
+      "name": "max_cores_multiplier",
+      "description": "Sets the ratio between requested and limit CPU. Default value is 3, must be a number greater than or equal to 1",
+      "required": false
+    },
+    {
+      "name": "max_milicores",
+      "description": "Sets the maximum amount of CPU mili cores a pod can use",
+      "required": false
+    },
+    {
+      "name": "image_pull_secrets",
+      "description": "List of secret names to use image pull secrets for secure access to private container images",
+      "required": false
+    },
+    {
+      "name": "service_account_name",
+      "description": "The name of the Kubernetes service account used for deployments",
+      "required": false
+    },
+    {
+      "name": "traffic_manager_version",
+      "description": "Tag for the traffic manager sidecar container",
+      "required": false
+    },
+    {
+      "name": "object_modifiers",
+      "description": "List of modifications to dynamically modify k8s objects",
+      "required": false
+    }
+  ],
+  "outputs": [],
+  "hash": "e51ad949f1a69cf1bd619d29f7e1fd59"
+}
+END_AI_METADATA -->

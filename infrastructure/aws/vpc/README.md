@@ -2,16 +2,17 @@
 
 ## Description
 
-Creates and configures an AWS VPC with public and private subnets, NAT gateway, and Kubernetes-ready subnet tagging
+This module creates a VPC with public and private subnets and enables DNS hostnames
+
+## Architecture
+
+The module uses the terraform-aws-modules/vpc/aws module to create a VPC with the specified CIDR block, availability zones, and subnets. It enables DNS hostnames and creates a NAT gateway. The module also configures public and private subnet tags for Kubernetes. The inputs from the variables are used to configure the VPC and subnets. The module outputs the VPC ID, private subnets, and public subnets.
 
 ## Features
 
-- Creates a VPC with configurable CIDR block across multiple availability zones
-- Provisions public and private subnets with automatic routing configuration
-- Configures a single NAT gateway for private subnet internet access
-- Enables DNS hostnames for internal name resolution
-- Tags subnets for Kubernetes ELB integration and nullplatform compatibility
-- Supports optional VPC block public access configuration for enhanced security
+- Creates VPC with specified CIDR block and availability zones
+- Configures public and private subnets with Kubernetes tags
+- Enables DNS hostnames and creates a NAT gateway
 
 ## Basic Usage
 
@@ -63,3 +64,39 @@ resource "example_resource" "this" {
 | <a name="output_public_subnets"></a> [public\_subnets](#output\_public\_subnets) | The public subnets |
 | <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | The ID of the VPC |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "vpc",
+  "description": "This module creates a VPC with public and private subnets and enables DNS hostnames",
+  "architecture": "The module uses the terraform-aws-modules/vpc/aws module to create a VPC with the specified CIDR block, availability zones, and subnets. It enables DNS hostnames and creates a NAT gateway. The module also configures public and private subnet tags for Kubernetes. The inputs from the variables are used to configure the VPC and subnets. The module outputs the VPC ID, private subnets, and public subnets.",
+  "features": [
+    "Creates VPC with specified CIDR block and availability zones",
+    "Configures public and private subnets with Kubernetes tags",
+    "Enables DNS hostnames and creates a NAT gateway"
+  ],
+  "inputs": [
+    {
+      "name": "vpc",
+      "description": "The VPC configuration settings",
+      "required": true
+    },
+    {
+      "name": "organization",
+      "description": "The nullplatform organization name",
+      "required": true
+    },
+    {
+      "name": "account",
+      "description": "The nullplatform account name",
+      "required": true
+    }
+  ],
+  "outputs": [
+    "vpc_id",
+    "private_subnets",
+    "public_subnets"
+  ],
+  "hash": "2eda3ededa6b4def2954f9707d6a8515"
+}
+END_AI_METADATA -->

@@ -2,15 +2,17 @@
 
 ## Description
 
-Creates a GCP VPC network with configurable subnets and secondary IP ranges for GKE workloads
+This module creates a Google Cloud VPC network with subnets and optional secondary ranges
+
+## Architecture
+
+The module uses the google_network Terraform resource to create a VPC network, and then uses a for loop to create subnets based on the input subnets variable. The subnets are configured with private access enabled. The module also supports the creation of secondary ranges for GKE pods and services. The outputs of the module include the network name, self link, subnets names, and subnets self links.
 
 ## Features
 
-- Creates a VPC network in Google Cloud Platform using the official terraform-google-modules/network module
-- Configures multiple subnets with customizable IP ranges and regions
-- Enables private Google access on all subnets by default
-- Supports secondary IP ranges for GKE pod and service networking
-- Outputs network and subnet identifiers for use in other modules
+- Creates VPC network with subnets
+- Configures subnets with private access
+- Supports secondary ranges for GKE pods and services
 
 ## Basic Usage
 
@@ -65,3 +67,45 @@ resource "example_resource" "this" {
 | <a name="output_subnets_names"></a> [subnets\_names](#output\_subnets\_names) | n/a |
 | <a name="output_subnets_self_links"></a> [subnets\_self\_links](#output\_subnets\_self\_links) | n/a |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "vpc",
+  "description": "This module creates a Google Cloud VPC network with subnets and optional secondary ranges",
+  "architecture": "The module uses the google_network Terraform resource to create a VPC network, and then uses a for loop to create subnets based on the input subnets variable. The subnets are configured with private access enabled. The module also supports the creation of secondary ranges for GKE pods and services. The outputs of the module include the network name, self link, subnets names, and subnets self links.",
+  "features": [
+    "Creates VPC network with subnets",
+    "Configures subnets with private access",
+    "Supports secondary ranges for GKE pods and services"
+  ],
+  "inputs": [
+    {
+      "name": "project_id",
+      "description": "The GCP project ID",
+      "required": true
+    },
+    {
+      "name": "network_name",
+      "description": "The name of the VPC network",
+      "required": true
+    },
+    {
+      "name": "subnets",
+      "description": "List of subnets to create",
+      "required": true
+    },
+    {
+      "name": "secondary_ranges",
+      "description": "Secondary ranges for GKE pods and services",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "network_name",
+    "network_self_link",
+    "subnets_names",
+    "subnets_self_links"
+  ],
+  "hash": "b87ef91251f78cceb4125ce4babf01d3"
+}
+END_AI_METADATA -->

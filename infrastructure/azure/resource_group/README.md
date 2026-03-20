@@ -2,15 +2,17 @@
 
 ## Description
 
-Creates an Azure Resource Group with configurable location and tags
+Creates an Azure resource group with specified name and location
+
+## Architecture
+
+This module creates an azurerm_resource_group resource and outputs its name and location. The resource group is created with the specified name and location, and any provided tags are applied. The module uses the azurerm_resource_group Terraform resource type to create the resource group. The inputs for the resource group name, location, and tags flow into the azurerm_resource_group resource, and the outputs are exposed as resource_group_name and resource_group_location.
 
 ## Features
 
-- Creates a new Azure Resource Group in a specified region
-- Configures resource group with custom name and location
-- Supports optional tagging for resource organization
-- Outputs resource group name and location for reference
-- Integrates with Azure CLI authentication
+- Creates Azure resource group with custom name
+- Configures resource group with specified location
+- Supports custom tags for resource group
 
 ## Basic Usage
 
@@ -69,3 +71,43 @@ resource "example_resource" "this" {
 | <a name="output_resource_group_location"></a> [resource\_group\_location](#output\_resource\_group\_location) | The location of the created resource group |
 | <a name="output_resource_group_name"></a> [resource\_group\_name](#output\_resource\_group\_name) | The name of the created resource group |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "resource_group",
+  "description": "Creates an Azure resource group with specified name and location",
+  "architecture": "This module creates an azurerm_resource_group resource and outputs its name and location. The resource group is created with the specified name and location, and any provided tags are applied. The module uses the azurerm_resource_group Terraform resource type to create the resource group. The inputs for the resource group name, location, and tags flow into the azurerm_resource_group resource, and the outputs are exposed as resource_group_name and resource_group_location.",
+  "features": [
+    "Creates Azure resource group with custom name",
+    "Configures resource group with specified location",
+    "Supports custom tags for resource group"
+  ],
+  "inputs": [
+    {
+      "name": "resource_group_name",
+      "description": "The name of the resource group to create",
+      "required": true
+    },
+    {
+      "name": "location",
+      "description": "The Azure region where the resource group should be created (e.g., eastus, westus2)",
+      "required": true
+    },
+    {
+      "name": "subscription_id",
+      "description": "The ID of your Azure subscription",
+      "required": true
+    },
+    {
+      "name": "tags",
+      "description": "A mapping of tags to assign to the resource group",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "resource_group_name",
+    "resource_group_location"
+  ],
+  "hash": "76f7d8d9701e695b55ef2e2b52c13100"
+}
+END_AI_METADATA -->

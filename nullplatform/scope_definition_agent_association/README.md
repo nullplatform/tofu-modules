@@ -2,16 +2,18 @@
 
 ## Description
 
-Creates a Nullplatform notification channel with dynamic configuration from templates and optional override support
+Creates a nullplatform notification channel from a remote JSON template with dynamic agent configuration and optional override support
+
+## Architecture
+
+The module fetches a notification-channel.json.tpl template via data.http, processes it with data.external using gomplate to inject NRN, API key, and service metadata, then creates a nullplatform_notification_channel resource. When type is agent, it dynamically builds an agent block with command data, optionally appending an overrides flag if enabled_override is true. The api_key change triggers replacement through terraform_data.api_key_trigger.
 
 ## Features
 
-- Fetches notification channel template from a remote repository
-- Processes templates with service and API context using gomplate
-- Configures agent-based notification channels with command execution
-- Supports optional configuration overrides via command line flags
-- Manages channel lifecycle with API key change detection
-- Injects environment variables and custom tags for channel selection
+- Fetches and renders remote JSON templates with gomplate variable substitution
+- Configures agent-based channels with injected NP_ACTION_CONTEXT environment and conditional cmdline overrides
+- Supports lifecycle ignore for filters, source, and type to preserve external changes
+- Enables optional command-line overrides via enabled_override flag and local.overrides_flag injection
 
 ## Basic Usage
 
@@ -76,3 +78,91 @@ resource "example_resource" "this" {
 | <a name="input_service_path"></a> [service\_path](#input\_service\_path) | Path to the service directory within the repository structure | `string` | `"k8s"` | no |
 | <a name="input_tags_selectors"></a> [tags\_selectors](#input\_tags\_selectors) | Map of tags used to select and filter channels and agents | `map(string)` | n/a | yes |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "scope_definition_agent_association",
+  "description": "Creates a nullplatform notification channel from a remote JSON template with dynamic agent configuration and optional override support",
+  "architecture": "The module fetches a notification-channel.json.tpl template via data.http, processes it with data.external using gomplate to inject NRN, API key, and service metadata, then creates a nullplatform_notification_channel resource. When type is agent, it dynamically builds an agent block with command data, optionally appending an overrides flag if enabled_override is true. The api_key change triggers replacement through terraform_data.api_key_trigger.",
+  "features": [
+    "Fetches and renders remote JSON templates with gomplate variable substitution",
+    "Configures agent-based channels with injected NP_ACTION_CONTEXT environment and conditional cmdline overrides",
+    "Supports lifecycle ignore for filters, source, and type to preserve external changes",
+    "Enables optional command-line overrides via enabled_override flag and local.overrides_flag injection"
+  ],
+  "inputs": [
+    {
+      "name": "nrn",
+      "description": "",
+      "required": true
+    },
+    {
+      "name": "api_key",
+      "description": "API key for authenticating with the nullplatform API",
+      "required": true
+    },
+    {
+      "name": "scope_specification_id",
+      "description": "",
+      "required": true
+    },
+    {
+      "name": "scope_specification_slug",
+      "description": "",
+      "required": true
+    },
+    {
+      "name": "tags_selectors",
+      "description": "Map of tags used to select and filter channels and agents",
+      "required": true
+    },
+    {
+      "name": "enabled_override",
+      "description": "Enable custom overrides for scope configurations via command line",
+      "required": false
+    },
+    {
+      "name": "overrides_service_path",
+      "description": "Local filesystem path to the directory containing override configurations",
+      "required": false
+    },
+    {
+      "name": "override_repo_path",
+      "description": "Local filesystem path where the scope repository will be cloned",
+      "required": false
+    },
+    {
+      "name": "github_repo_url",
+      "description": "GitHub repository URL containing scope and action templates",
+      "required": false
+    },
+    {
+      "name": "github_ref",
+      "description": "Git reference to use (branch name, tag, or commit SHA)",
+      "required": false
+    },
+    {
+      "name": "repository_notification_channel",
+      "description": "repository of notification channel template",
+      "required": false
+    },
+    {
+      "name": "repository_notification_channel_branch",
+      "description": "branch reference of notification channel template",
+      "required": false
+    },
+    {
+      "name": "service_path",
+      "description": "Path to the service directory within the repository structure",
+      "required": false
+    },
+    {
+      "name": "repo_path",
+      "description": "Local filesystem path where the scope repository will be cloned",
+      "required": false
+    }
+  ],
+  "outputs": [],
+  "hash": "35662763a1ad494fa9d5afe0b000dc98"
+}
+END_AI_METADATA -->

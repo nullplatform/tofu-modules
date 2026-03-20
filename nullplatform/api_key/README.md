@@ -2,16 +2,18 @@
 
 ## Description
 
-Creates a Nullplatform API key with pre-configured or custom role grants and tags based on the specified type
+Creates a Nullplatform API key with pre-configured grants and tags based on type
+
+## Architecture
+
+The module parses the input NRN to extract organization, account, and namespace tags. It selects a configuration from locals.configs based on var.type, which defines the API key name and role slugs. The nullplatform_api_key resource is created with dynamic grants blocks for each role slug and dynamic tags blocks for NRN-derived and custom tags. Outputs expose the generated API key, its ID, and name.
 
 ## Features
 
-- Creates Nullplatform API keys with type-based configurations
-- Supports agent, scope notification, service notification, and custom API key types
-- Configures role-based grants automatically for pre-configured types
-- Applies tags based on NRN structure and custom requirements
-- Manages lifecycle with create-before-destroy strategy
-- Validates custom type requirements for name and role assignments
+- Creates API keys with pre-defined roles for agent, scope_notification, service_notification, or custom types
+- Parses NRN to auto-generate organization, account, and namespace tags
+- Supports custom API key names, role slugs, and additional tags via custom type
+- Enforces lifecycle preconditions for custom type requiring name and at least one role slug
 
 ## Basic Usage
 
@@ -117,3 +119,55 @@ resource "example_resource" "this" {
 | <a name="output_id"></a> [id](#output\_id) | The ID of the API key resource |
 | <a name="output_name"></a> [name](#output\_name) | The name of the API key |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "api_key",
+  "description": "Creates a Nullplatform API key with pre-configured grants and tags based on type",
+  "architecture": "The module parses the input NRN to extract organization, account, and namespace tags. It selects a configuration from locals.configs based on var.type, which defines the API key name and role slugs. The nullplatform_api_key resource is created with dynamic grants blocks for each role slug and dynamic tags blocks for NRN-derived and custom tags. Outputs expose the generated API key, its ID, and name.",
+  "features": [
+    "Creates API keys with pre-defined roles for agent, scope_notification, service_notification, or custom types",
+    "Parses NRN to auto-generate organization, account, and namespace tags",
+    "Supports custom API key names, role slugs, and additional tags via custom type",
+    "Enforces lifecycle preconditions for custom type requiring name and at least one role slug"
+  ],
+  "inputs": [
+    {
+      "name": "nrn",
+      "description": "Nullplatform Resource Name (e.g., organization=123:account=456:namespace=789)",
+      "required": true
+    },
+    {
+      "name": "type",
+      "description": "Type of API key to create. Determines the pre-configured grants and tags. Use 'custom' to define your own roles and tags.",
+      "required": true
+    },
+    {
+      "name": "specification_slug",
+      "description": "Specification slug used for the usedBy tag (required for scope_notification and service_notification types)",
+      "required": false
+    },
+    {
+      "name": "custom_name",
+      "description": "Name for the API key (required when type is 'custom')",
+      "required": false
+    },
+    {
+      "name": "custom_role_slugs",
+      "description": "List of role slugs to assign (required when type is 'custom', must have at least 1)",
+      "required": false
+    },
+    {
+      "name": "custom_tags",
+      "description": "Additional tags to apply to the API key (optional, only used when type is 'custom')",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "api_key",
+    "id",
+    "name"
+  ],
+  "hash": "bf22a95593b6d59a638a86009702b787"
+}
+END_AI_METADATA -->
