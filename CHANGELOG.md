@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.47.0](https://github.com/nullplatform/tofu-modules/compare/v1.46.0...v1.47.0) (2026-03-26)
+
+
+### Features
+
+* **vpc:** export security group IDs as output ([#258](https://github.com/nullplatform/tofu-modules/issues/258)) ([7509399](https://github.com/nullplatform/tofu-modules/commit/750939944c9c13b2e4e6447587173e10a86d5f27))
+
 ## [1.46.0](https://github.com/nullplatform/tofu-modules/compare/v1.45.0...v1.46.0) (2026-03-20)
 
 
