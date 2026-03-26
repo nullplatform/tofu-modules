@@ -18,7 +18,7 @@ The module loops over var.nullplatform_users to create nullplatform_user resourc
 
 ```hcl
 module "users" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/users?ref=v1.46.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/users?ref=v1.47.0"
 
   np_api_key         = "your-np-api-key"
   nullplatform_users = "your-nullplatform-users"

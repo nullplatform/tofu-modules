@@ -2,23 +2,27 @@
 
 ## Description
 
-This module creates a VPC with public and private subnets and enables DNS hostnames
+Creates an AWS VPC with public and private subnets across multiple availability zones, configured for Kubernetes workloads with NAT gateway for private subnet internet access
 
 ## Architecture
 
-The module uses the terraform-aws-modules/vpc/aws module to create a VPC with the specified CIDR block, availability zones, and subnets. It enables DNS hostnames and creates a NAT gateway. The module also configures public and private subnet tags for Kubernetes. The inputs from the variables are used to configure the VPC and subnets. The module outputs the VPC ID, private subnets, and public subnets.
+This module creates a terraform-aws-modules/vpc/aws module resource with DNS hostnames enabled. It provisions public subnets tagged for external load balancers and private subnets tagged for internal load balancers, both tagged for Kubernetes integration. A single NAT gateway is created in a public subnet to enable outbound internet access for resources in private subnets. The VPC name is derived from organization and account variables, and outputs include the VPC ID, subnet IDs, and default security group ID.
 
 ## Features
 
-- Creates VPC with specified CIDR block and availability zones
-- Configures public and private subnets with Kubernetes tags
-- Enables DNS hostnames and creates a NAT gateway
+- Creates VPC with configurable CIDR block and availability zones
+- Provisions public subnets with Kubernetes external load balancer tags
+- Provisions private subnets with Kubernetes internal load balancer tags
+- Configures single NAT gateway for private subnet internet egress
+- Enables DNS hostnames for VPC resources
+- Tags subnets with nullplatform identifiers for infrastructure management
+- Outputs VPC ID, subnet IDs, and default security group for downstream resource integration
 
 ## Basic Usage
 
 ```hcl
 module "vpc" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v1.46.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v1.47.0"
 
   account      = "your-account"
   organization = "your-organization"
@@ -68,12 +72,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "vpc",
-  "description": "This module creates a VPC with public and private subnets and enables DNS hostnames",
-  "architecture": "The module uses the terraform-aws-modules/vpc/aws module to create a VPC with the specified CIDR block, availability zones, and subnets. It enables DNS hostnames and creates a NAT gateway. The module also configures public and private subnet tags for Kubernetes. The inputs from the variables are used to configure the VPC and subnets. The module outputs the VPC ID, private subnets, and public subnets.",
+  "description": "Creates an AWS VPC with public and private subnets across multiple availability zones, configured for Kubernetes workloads with NAT gateway for private subnet internet access",
+  "architecture": "This module creates a terraform-aws-modules/vpc/aws module resource with DNS hostnames enabled. It provisions public subnets tagged for external load balancers and private subnets tagged for internal load balancers, both tagged for Kubernetes integration. A single NAT gateway is created in a public subnet to enable outbound internet access for resources in private subnets. The VPC name is derived from organization and account variables, and outputs include the VPC ID, subnet IDs, and default security group ID.",
   "features": [
-    "Creates VPC with specified CIDR block and availability zones",
-    "Configures public and private subnets with Kubernetes tags",
-    "Enables DNS hostnames and creates a NAT gateway"
+    "Creates VPC with configurable CIDR block and availability zones",
+    "Provisions public subnets with Kubernetes external load balancer tags",
+    "Provisions private subnets with Kubernetes internal load balancer tags",
+    "Configures single NAT gateway for private subnet internet egress",
+    "Enables DNS hostnames for VPC resources",
+    "Tags subnets with nullplatform identifiers for infrastructure management",
+    "Outputs VPC ID, subnet IDs, and default security group for downstream resource integration"
   ],
   "inputs": [
     {
@@ -95,8 +103,9 @@ resource "example_resource" "this" {
   "outputs": [
     "vpc_id",
     "private_subnets",
-    "public_subnets"
+    "public_subnets",
+    "security_group_ids"
   ],
-  "hash": "2eda3ededa6b4def2954f9707d6a8515"
+  "hash": "c0c6e91682b6bb694696874d8f69aed6"
 }
 END_AI_METADATA -->
