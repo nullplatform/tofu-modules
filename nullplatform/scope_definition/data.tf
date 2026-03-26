@@ -14,6 +14,11 @@ data "http" "action_templates" {
   url      = "${var.repository_action_templates}/${var.repository_action_templates_branch}/${var.service_path}/specs/actions/${each.key}.json.tpl"
 }
 
+data "http" "scope_configuration_template" {
+  count = var.create_scope_configuration ? 1 : 0
+  url   = "${var.repository_scope_template}/${var.repository_scope_template_branch}/${var.service_path}/specs/scope-configuration.json.tpl"
+}
+
 # Process service specification template using gomplate with NRN variable
 data "external" "service_spec" {
   depends_on = [data.http.service_spec_template]
