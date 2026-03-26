@@ -2,23 +2,25 @@
 
 ## Description
 
-Creates a private Google Kubernetes Engine (GKE) cluster with public endpoint access and configurable node pools
+Deploys a private GKE cluster with a public endpoint and configures node pools and security defaults
+
+## Architecture
+
+The module uses the google-modules/kubernetes-engine/google//modules/private-cluster Terraform module to create a GKE cluster with a private endpoint and public access, and configures node pools and security defaults using variables such as node_pools, authorized_ip_ranges, and deletion_protection_enabled, the module also creates a service account with Artifact Registry access and sets up logging and monitoring
 
 ## Features
 
-- Creates a private GKE cluster with public API endpoint access
-- Configures VPC-native networking with secondary IP ranges for pods and services
-- Manages node pools with auto-scaling capabilities
-- Provisions a service account with Artifact Registry access
-- Supports master authorized networks for API server access control
-- Enables deletion protection for production environments
-- Configures private nodes with custom master CIDR block
+- Creates GKE cluster with private endpoint and public access
+- Configures node pools with machine type, min and max count, and disk size
+- Sets up security defaults including deletion protection and authorized IP ranges
+- Creates service account with Artifact Registry access
+- Configures logging and monitoring for the GKE cluster
 
 ## Basic Usage
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/gke?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/gke?ref=v1.47.0"
 
   cluster_name      = "your-cluster-name"
   ip_range_pods     = "your-ip-range-pods"
@@ -78,3 +80,86 @@ resource "example_resource" "this" {
 | <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | The name of the GKE cluster |
 | <a name="output_host"></a> [host](#output\_host) | The API server endpoint |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "gke",
+  "description": "Deploys a private GKE cluster with a public endpoint and configures node pools and security defaults",
+  "architecture": "The module uses the google-modules/kubernetes-engine/google//modules/private-cluster Terraform module to create a GKE cluster with a private endpoint and public access, and configures node pools and security defaults using variables such as node_pools, authorized_ip_ranges, and deletion_protection_enabled, the module also creates a service account with Artifact Registry access and sets up logging and monitoring",
+  "features": [
+    "Creates GKE cluster with private endpoint and public access",
+    "Configures node pools with machine type, min and max count, and disk size",
+    "Sets up security defaults including deletion protection and authorized IP ranges",
+    "Creates service account with Artifact Registry access",
+    "Configures logging and monitoring for the GKE cluster"
+  ],
+  "inputs": [
+    {
+      "name": "project_id",
+      "description": "The GCP project ID",
+      "required": true
+    },
+    {
+      "name": "cluster_name",
+      "description": "The name of the GKE cluster",
+      "required": true
+    },
+    {
+      "name": "location",
+      "description": "The GCP region where the GKE cluster will be deployed (e.g., us-central1, europe-west1)",
+      "required": true
+    },
+    {
+      "name": "vpc_name",
+      "description": "The name of the virtual private network",
+      "required": true
+    },
+    {
+      "name": "vpc_subnet_name",
+      "description": "The name of the subnet where GKE nodes will be deployed",
+      "required": true
+    },
+    {
+      "name": "ip_range_pods",
+      "description": "The name of the secondary IP range for pods",
+      "required": true
+    },
+    {
+      "name": "ip_range_services",
+      "description": "The name of the secondary IP range for services",
+      "required": true
+    },
+    {
+      "name": "node_pools",
+      "description": "List of node pools to create in the GKE cluster",
+      "required": false
+    },
+    {
+      "name": "authorized_ip_ranges",
+      "description": "List of authorized IP ranges allowed to access the Kubernetes API server",
+      "required": false
+    },
+    {
+      "name": "master_ipv4_cidr_block",
+      "description": "The IP range in CIDR notation for the hosted master network (e.g., 172.16.0.0/28)",
+      "required": false
+    },
+    {
+      "name": "deletion_protection_enabled",
+      "description": "Whether to enable deletion protection for the GKE cluster",
+      "required": false
+    },
+    {
+      "name": "tags",
+      "description": "A mapping of labels to assign to the GKE cluster and related resources",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "cluster_name",
+    "host",
+    "cluster_ca_certificate"
+  ],
+  "hash": "3a8f88496f630d3a62f596c796484df5"
+}
+END_AI_METADATA -->

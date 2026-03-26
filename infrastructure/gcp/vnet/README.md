@@ -2,21 +2,24 @@
 
 ## Description
 
-Creates a Google Cloud VPC network with configurable subnets and optional secondary IP ranges for GKE
+This module creates a virtual private network with subnets in Google Cloud Platform
+
+## Architecture
+
+The module uses the google network module to create a virtual private network and subnets, and outputs the network and subnet names and IDs. The module also supports secondary IP ranges for GKE pods and services, and allows for custom tags to be applied to the virtual network resources. The subnets are created with private access enabled. The module uses a for loop to iterate over the subnets definition and create each subnet with the specified name, IP address prefix, and location.
 
 ## Features
 
-- Creates a Google Cloud VPC network using the official Google network module
-- Configures multiple subnets with custom IP ranges and regions
-- Enables private Google access on all subnets by default
-- Supports secondary IP ranges for GKE pod and service networking
-- Outputs network and subnet identifiers for downstream module integration
+- Creates virtual private network with subnets
+- Configures subnets with private access
+- Supports secondary IP ranges for GKE pods and services
+- Applies custom tags to virtual network resources
 
 ## Basic Usage
 
 ```hcl
 module "vnet" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/vnet?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/vnet?ref=v1.47.0"
 
   project_id         = "your-project-id"
   subnets_definition = "your-subnets-definition"
@@ -66,3 +69,51 @@ resource "example_resource" "this" {
 | <a name="output_vnet_id"></a> [vnet\_id](#output\_vnet\_id) | The self-link of the virtual network |
 | <a name="output_vnet_name"></a> [vnet\_name](#output\_vnet\_name) | The name of the virtual network |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "vnet",
+  "description": "This module creates a virtual private network with subnets in Google Cloud Platform",
+  "architecture": "The module uses the google network module to create a virtual private network and subnets, and outputs the network and subnet names and IDs. The module also supports secondary IP ranges for GKE pods and services, and allows for custom tags to be applied to the virtual network resources. The subnets are created with private access enabled. The module uses a for loop to iterate over the subnets definition and create each subnet with the specified name, IP address prefix, and location.",
+  "features": [
+    "Creates virtual private network with subnets",
+    "Configures subnets with private access",
+    "Supports secondary IP ranges for GKE pods and services",
+    "Applies custom tags to virtual network resources"
+  ],
+  "inputs": [
+    {
+      "name": "project_id",
+      "description": "The GCP project ID",
+      "required": true
+    },
+    {
+      "name": "vpc_name",
+      "description": "The name of the virtual private network",
+      "required": true
+    },
+    {
+      "name": "subnets_definition",
+      "description": "List of subnets to create within the virtual network",
+      "required": true
+    },
+    {
+      "name": "secondary_ranges",
+      "description": "Secondary IP ranges for GKE pods and services",
+      "required": false
+    },
+    {
+      "name": "tags",
+      "description": "A mapping of labels to assign to the virtual network resources",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "vnet_name",
+    "vnet_id",
+    "subnet_names",
+    "subnet_ids"
+  ],
+  "hash": "f4f14441c333548fd4f5e66e0f7d833b"
+}
+END_AI_METADATA -->

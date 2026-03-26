@@ -2,23 +2,23 @@
 
 ## Description
 
-Creates initial Kubernetes ingress resources for nullplatform with internal and internet-facing AWS Application Load Balancers
+Configures Kubernetes ingress resources with ALB annotations for internal and public load balancers
+
+## Architecture
+
+This module creates two Kubernetes ingress resources, `kubernetes_ingress_v1`, one for internal and one for public load balancers, with annotations for ALB configuration, including certificate ARN, load balancer name, and target group attributes. The ingress resources are configured with a single rule for the host `setup.nullapps.io` and a fixed-response backend for 404 errors. The module uses the `alb` ingress class and sets up the load balancers with deletion protection disabled and a deregistration delay of 10 seconds.
 
 ## Features
 
-- Creates a dedicated Kubernetes namespace for nullplatform resources
-- Configures internal ALB ingress with SSL/TLS certificate support
-- Configures internet-facing ALB ingress with SSL/TLS certificate support
-- Implements automatic HTTP to HTTPS redirection on port 443
-- Provides custom 404 error responses for non-existent scopes
-- Configures target group deregistration delays for faster deployments
-- Supports IP-based target type for ALB routing
+- Creates Kubernetes ingress resources with ALB annotations
+- Configures internal and public load balancers with certificate ARN and target group attributes
+- Sets up fixed-response backend for 404 errors
 
 ## Basic Usage
 
 ```hcl
 module "ingress" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/ingress?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/ingress?ref=v1.47.0"
 
   certificate_arn = "your-certificate-arn"
 }
@@ -56,3 +56,25 @@ resource "example_resource" "this" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_certificate_arn"></a> [certificate\_arn](#input\_certificate\_arn) | ARN of the SSL/TLS certificate for the network configuration | `string` | n/a | yes |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "ingress",
+  "description": "Configures Kubernetes ingress resources with ALB annotations for internal and public load balancers",
+  "architecture": "This module creates two Kubernetes ingress resources, `kubernetes_ingress_v1`, one for internal and one for public load balancers, with annotations for ALB configuration, including certificate ARN, load balancer name, and target group attributes. The ingress resources are configured with a single rule for the host `setup.nullapps.io` and a fixed-response backend for 404 errors. The module uses the `alb` ingress class and sets up the load balancers with deletion protection disabled and a deregistration delay of 10 seconds.",
+  "features": [
+    "Creates Kubernetes ingress resources with ALB annotations",
+    "Configures internal and public load balancers with certificate ARN and target group attributes",
+    "Sets up fixed-response backend for 404 errors"
+  ],
+  "inputs": [
+    {
+      "name": "certificate_arn",
+      "description": "ARN of the SSL/TLS certificate for the network configuration",
+      "required": true
+    }
+  ],
+  "outputs": [],
+  "hash": "8a335c44fe70c7c4c31a4aca90e97e2f"
+}
+END_AI_METADATA -->

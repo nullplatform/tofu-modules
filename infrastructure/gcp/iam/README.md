@@ -2,22 +2,24 @@
 
 ## Description
 
-Creates and manages Google Cloud Platform service accounts with IAM roles and Workload Identity bindings for Kubernetes integration
+This module creates and configures Google Cloud service accounts with IAM roles and workload identity bindings
+
+## Architecture
+
+The module creates google_service_account resources for each service account specified in the service_accounts variable, and google_project_iam_member resources to assign IAM roles to these service accounts. It also creates google_service_account_iam_member resources to establish workload identity bindings between GCP service accounts and Kubernetes service accounts. The module uses Terraform's for_each argument to iterate over the service_accounts and workload_identity_bindings variables, creating the necessary resources and bindings. The module outputs a map of service account names to their email addresses.
 
 ## Features
 
-- Creates multiple GCP service accounts with customizable display names
-- Assigns IAM roles to service accounts at the project level
-- Configures Workload Identity bindings for Kubernetes service account integration
-- Supports batch creation of service accounts with role assignments
-- Outputs service account email addresses for reference in other modules
-- Enables secure authentication between GKE workloads and GCP services
+- Creates Google Cloud service accounts with custom display names
+- Assigns IAM roles to service accounts using google_project_iam_member resources
+- Establishes workload identity bindings between GCP service accounts and Kubernetes service accounts
+- Outputs a map of service account names to their email addresses
 
 ## Basic Usage
 
 ```hcl
 module "iam" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/iam?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/iam?ref=v1.47.0"
 
   project_id = "your-project-id"
 }
@@ -68,3 +70,38 @@ resource "example_resource" "this" {
 |------|-------------|
 | <a name="output_service_accounts"></a> [service\_accounts](#output\_service\_accounts) | A map of service account names to their email addresses |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "iam",
+  "description": "This module creates and configures Google Cloud service accounts with IAM roles and workload identity bindings",
+  "architecture": "The module creates google_service_account resources for each service account specified in the service_accounts variable, and google_project_iam_member resources to assign IAM roles to these service accounts. It also creates google_service_account_iam_member resources to establish workload identity bindings between GCP service accounts and Kubernetes service accounts. The module uses Terraform's for_each argument to iterate over the service_accounts and workload_identity_bindings variables, creating the necessary resources and bindings. The module outputs a map of service account names to their email addresses.",
+  "features": [
+    "Creates Google Cloud service accounts with custom display names",
+    "Assigns IAM roles to service accounts using google_project_iam_member resources",
+    "Establishes workload identity bindings between GCP service accounts and Kubernetes service accounts",
+    "Outputs a map of service account names to their email addresses"
+  ],
+  "inputs": [
+    {
+      "name": "project_id",
+      "description": "The GCP project ID",
+      "required": true
+    },
+    {
+      "name": "service_accounts",
+      "description": "List of service accounts to create with their roles",
+      "required": false
+    },
+    {
+      "name": "workload_identity_bindings",
+      "description": "Workload Identity bindings (GCP Service Account -> Kubernetes Service Account)",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "service_accounts"
+  ],
+  "hash": "b8d10842d75bfb787da9e0ca0df44a53"
+}
+END_AI_METADATA -->

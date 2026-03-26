@@ -2,26 +2,30 @@
 
 ## Description
 
-Creates a Nullplatform notification channel with agent configuration and service filtering capabilities
+Creates a nullplatform notification channel configured with an agent that executes a repository-based entrypoint for handling notifications
+
+## Architecture
+
+The module creates a nullplatform_notification_channel resource wired to an agent configuration that executes a cmdline path built from repository_service_spec_repo and service_path. A terraform_data resource monitors api_key changes to trigger replacement of the channel. The agent selector uses tags_selectors to filter targets, and the channel applies filters based on service.specification.slug.
 
 ## Features
 
-- Creates a Nullplatform notification channel with configurable type and sources
-- Configures agent commands with dynamic command-line arguments and environment variables
-- Supports tag-based selector filtering for agent targeting
-- Filters notifications based on service specification slug
-- Manages workflow override paths and service paths for custom configurations
-- Implements lifecycle management with API key-triggered replacement
-- Provides flexible command execution with optional arguments and environment settings
+- Creates nullplatform notification channel with agent-based execution
+- Configures agent command with dynamic path from repository and service path
+- Supports tag-based agent selection via selector map
+- Applies service specification slug filters to incoming notifications
+- Triggers channel replacement on API key rotation
 
 ## Basic Usage
 
 ```hcl
 module "service_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v1.47.0"
 
-  api_key        = "your-api-key"
-  tags_selectors = "your-tags-selectors"
+  api_key                      = "your-api-key"
+  repository_service_spec_repo = "your-repository-service-spec-repo"
+  service_path                 = "your-service-path"
+  tags_selectors               = "your-tags-selectors"
 }
 ```
 
@@ -73,3 +77,74 @@ resource "example_resource" "this" {
 |------|-------------|
 | <a name="output_id"></a> [id](#output\_id) | The ID of the created notification channel |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "service_definition_agent_association",
+  "description": "Creates a nullplatform notification channel configured with an agent that executes a repository-based entrypoint for handling notifications",
+  "architecture": "The module creates a nullplatform_notification_channel resource wired to an agent configuration that executes a cmdline path built from repository_service_spec_repo and service_path. A terraform_data resource monitors api_key changes to trigger replacement of the channel. The agent selector uses tags_selectors to filter targets, and the channel applies filters based on service.specification.slug.",
+  "features": [
+    "Creates nullplatform notification channel with agent-based execution",
+    "Configures agent command with dynamic path from repository and service path",
+    "Supports tag-based agent selection via selector map",
+    "Applies service specification slug filters to incoming notifications",
+    "Triggers channel replacement on API key rotation"
+  ],
+  "inputs": [
+    {
+      "name": "api_key",
+      "description": "API key for authenticating with the nullplatform API",
+      "required": true
+    },
+    {
+      "name": "tags_selectors",
+      "description": "Map of tags used to select and filter agents",
+      "required": true
+    },
+    {
+      "name": "repository_service_spec_repo",
+      "description": "GitHub repository name containing the service specs (used to build the agent cmdline path)",
+      "required": true
+    },
+    {
+      "name": "service_path",
+      "description": "Path to the service directory within the repository (e.g., databases/postgres/k8s)",
+      "required": true
+    },
+    {
+      "name": "nrn",
+      "description": "Nullplatform Resource Name (organization:account format)",
+      "required": false
+    },
+    {
+      "name": "channel_sources",
+      "description": "List of sources for the notification channel (e.g., ['monitoring', 'alerts'])",
+      "required": false
+    },
+    {
+      "name": "channel_type",
+      "description": "Type of the notification channel (e.g., 'agent')",
+      "required": false
+    },
+    {
+      "name": "service_specification_slug",
+      "description": "The slug of the service definition",
+      "required": false
+    },
+    {
+      "name": "base_clone_path",
+      "description": "Base path where the service repository is cloned inside the agent pod",
+      "required": false
+    },
+    {
+      "name": "agent_arguments",
+      "description": "Arguments to pass to the agent entrypoint command",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "id"
+  ],
+  "hash": "2261d6bc1c700912722065e90d68238a"
+}
+END_AI_METADATA -->

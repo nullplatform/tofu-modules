@@ -2,23 +2,25 @@
 
 ## Description
 
-Provisions an Oracle Container Engine for Kubernetes (OKE) cluster with enhanced networking, optional OCIR integration, and workload identity support
+Creates an Oracle Container Engine for Kubernetes (OKE) cluster on OCI using existing VCN and subnets
+
+## Architecture
+
+The module instantiates oracle-terraform-modules/oke/oci to create oci_containerengine_cluster and oci_containerengine_node_pool resources. Inputs flow into the module's compartment_id, region, cluster_name, and subnet mappings for control plane, workers, and load balancers. Outputs expose cluster_id, cluster_endpoints, and cluster_ca_cert. When enable_ocir_pull is true, oci_identity_policy and oci_identity_dynamic_group resources are created to allow pods and nodes to pull images from OCIR.
 
 ## Features
 
-- Creates an enhanced OKE cluster with Kubernetes v1.34.1 and Flannel CNI
-- Configures cluster networking using existing VCN and subnets for control plane, workers, and load balancers
-- Supports flexible worker pool configuration with customizable shapes, sizes, and boot volumes
-- Enables OIDC discovery for Workload Identity authentication
-- Provides optional OCIR pull access with dual authentication methods (Instance Principal and Workload Identity)
-- Deploys OKE credential provider for seamless private container image pulls from OCIR
-- Creates IAM policies and dynamic groups for worker node and pod-level OCIR access
+- Creates OKE cluster with enhanced control plane and configurable CNI type
+- Configures worker pools with flexible shapes and custom cloud-init scripts
+- Supports OCIR credential provider for private image pulls via IAM policies
+- Enables OIDC discovery for workload identity integration
+- Maps existing subnets for API endpoint, node pools, and load balancers
 
 ## Basic Usage
 
 ```hcl
 module "oke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/oke?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/oke?ref=v1.47.0"
 
   api_endpoint_subnet_id = "your-api-endpoint-subnet-id"
   cluster_name           = "your-cluster-name"
@@ -102,3 +104,132 @@ resource "example_resource" "this" {
 | <a name="output_ocir_policy_statements"></a> [ocir\_policy\_statements](#output\_ocir\_policy\_statements) | All OCIR policy statements (if enabled) |
 | <a name="output_ocir_workload_policy_id"></a> [ocir\_workload\_policy\_id](#output\_ocir\_workload\_policy\_id) | The OCID of the OCIR workload identity policy (if enabled) |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "oke",
+  "description": "Creates an Oracle Container Engine for Kubernetes (OKE) cluster on OCI using existing VCN and subnets",
+  "architecture": "The module instantiates oracle-terraform-modules/oke/oci to create oci_containerengine_cluster and oci_containerengine_node_pool resources. Inputs flow into the module's compartment_id, region, cluster_name, and subnet mappings for control plane, workers, and load balancers. Outputs expose cluster_id, cluster_endpoints, and cluster_ca_cert. When enable_ocir_pull is true, oci_identity_policy and oci_identity_dynamic_group resources are created to allow pods and nodes to pull images from OCIR.",
+  "features": [
+    "Creates OKE cluster with enhanced control plane and configurable CNI type",
+    "Configures worker pools with flexible shapes and custom cloud-init scripts",
+    "Supports OCIR credential provider for private image pulls via IAM policies",
+    "Enables OIDC discovery for workload identity integration",
+    "Maps existing subnets for API endpoint, node pools, and load balancers"
+  ],
+  "inputs": [
+    {
+      "name": "compartment_id",
+      "description": "",
+      "required": true
+    },
+    {
+      "name": "region",
+      "description": "",
+      "required": true
+    },
+    {
+      "name": "existing_vcn_id",
+      "description": "",
+      "required": true
+    },
+    {
+      "name": "api_endpoint_subnet_id",
+      "description": "",
+      "required": true
+    },
+    {
+      "name": "node_pool_subnet_id",
+      "description": "",
+      "required": true
+    },
+    {
+      "name": "home_region",
+      "description": "The tenancy's home region",
+      "required": true
+    },
+    {
+      "name": "cluster_name",
+      "description": "",
+      "required": true
+    },
+    {
+      "name": "service_lb_subnet_id",
+      "description": "Subnet ID for service load balancers (typically public subnet)",
+      "required": true
+    },
+    {
+      "name": "cni_type",
+      "description": "CNI type for the OKE cluster. Valid values: 'flannel' or 'npn' (Native Pod Networking).",
+      "required": false
+    },
+    {
+      "name": "assign_public_ip_to_control_plane",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "control_plane_is_public",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "control_plane_nsg_ids",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "worker_pools",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "worker_pool_size",
+      "description": "Default number of worker nodes per pool",
+      "required": false
+    },
+    {
+      "name": "kubernetes_version",
+      "description": "Kubernetes version for the OKE cluster",
+      "required": false
+    },
+    {
+      "name": "pod_subnet_id",
+      "description": "Subnet ID for pod networking (required when cni_type = 'npn').",
+      "required": false
+    },
+    {
+      "name": "worker_cloud_init",
+      "description": "Cloud init configuration for worker nodes. See: https://cloudinit.readthedocs.io/en/latest/reference/modules.html",
+      "required": false
+    },
+    {
+      "name": "enable_ocir_pull",
+      "description": "Enable IAM policy to allow workloads to pull images from OCIR",
+      "required": false
+    },
+    {
+      "name": "ocir_pull_namespaces",
+      "description": "List of Kubernetes namespaces allowed to pull from OCIR. If empty, all namespaces in the cluster are allowed.",
+      "required": false
+    },
+    {
+      "name": "tenancy_id",
+      "description": "The tenancy OCID (required when enable_ocir_pull is true)",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "cluster_id",
+    "cluster_endpoints",
+    "cluster_ca_cert",
+    "ocir_workload_policy_id",
+    "ocir_nodes_policy_id",
+    "ocir_policy_statements",
+    "ocir_dynamic_group_id",
+    "ocir_credential_provider_cloud_init",
+    "ocir_kubelet_extra_args"
+  ],
+  "hash": "1be37a237ac8bd4310c43efcb73e34df"
+}
+END_AI_METADATA -->

@@ -2,23 +2,27 @@
 
 ## Description
 
-Creates an AWS VPC with public and private subnets, NAT gateway, and Kubernetes-ready subnet tags
+Creates an AWS VPC with public and private subnets across multiple availability zones, configured for Kubernetes workloads with NAT gateway for private subnet internet access
+
+## Architecture
+
+This module creates a terraform-aws-modules/vpc/aws module resource with DNS hostnames enabled. It provisions public subnets tagged for external load balancers and private subnets tagged for internal load balancers, both tagged for Kubernetes integration. A single NAT gateway is created in a public subnet to enable outbound internet access for resources in private subnets. The VPC name is derived from organization and account variables, and outputs include the VPC ID, subnet IDs, and default security group ID.
 
 ## Features
 
-- Creates a VPC with configurable CIDR block across multiple availability zones
-- Provisions public and private subnets with separate routing tables
-- Configures a single NAT gateway for private subnet internet access
-- Enables DNS hostnames for proper service discovery
-- Tags subnets for Kubernetes ELB and internal load balancer integration
-- Supports VPC block public access configuration for enhanced security
-- Names resources using organization and account identifiers
+- Creates VPC with configurable CIDR block and availability zones
+- Provisions public subnets with Kubernetes external load balancer tags
+- Provisions private subnets with Kubernetes internal load balancer tags
+- Configures single NAT gateway for private subnet internet egress
+- Enables DNS hostnames for VPC resources
+- Tags subnets with nullplatform identifiers for infrastructure management
+- Outputs VPC ID, subnet IDs, and default security group for downstream resource integration
 
 ## Basic Usage
 
 ```hcl
 module "vpc" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v1.47.0"
 
   account      = "your-account"
   organization = "your-organization"
@@ -64,3 +68,44 @@ resource "example_resource" "this" {
 | <a name="output_public_subnets"></a> [public\_subnets](#output\_public\_subnets) | The public subnets |
 | <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | The ID of the VPC |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "vpc",
+  "description": "Creates an AWS VPC with public and private subnets across multiple availability zones, configured for Kubernetes workloads with NAT gateway for private subnet internet access",
+  "architecture": "This module creates a terraform-aws-modules/vpc/aws module resource with DNS hostnames enabled. It provisions public subnets tagged for external load balancers and private subnets tagged for internal load balancers, both tagged for Kubernetes integration. A single NAT gateway is created in a public subnet to enable outbound internet access for resources in private subnets. The VPC name is derived from organization and account variables, and outputs include the VPC ID, subnet IDs, and default security group ID.",
+  "features": [
+    "Creates VPC with configurable CIDR block and availability zones",
+    "Provisions public subnets with Kubernetes external load balancer tags",
+    "Provisions private subnets with Kubernetes internal load balancer tags",
+    "Configures single NAT gateway for private subnet internet egress",
+    "Enables DNS hostnames for VPC resources",
+    "Tags subnets with nullplatform identifiers for infrastructure management",
+    "Outputs VPC ID, subnet IDs, and default security group for downstream resource integration"
+  ],
+  "inputs": [
+    {
+      "name": "vpc",
+      "description": "The VPC configuration settings",
+      "required": true
+    },
+    {
+      "name": "organization",
+      "description": "The nullplatform organization name",
+      "required": true
+    },
+    {
+      "name": "account",
+      "description": "The nullplatform account name",
+      "required": true
+    }
+  ],
+  "outputs": [
+    "vpc_id",
+    "private_subnets",
+    "public_subnets",
+    "security_group_ids"
+  ],
+  "hash": "c0c6e91682b6bb694696874d8f69aed6"
+}
+END_AI_METADATA -->

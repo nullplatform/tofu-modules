@@ -2,23 +2,24 @@
 
 ## Description
 
-Configures Oracle Cloud Infrastructure (OCI) provider settings in Nullplatform with account, compartment, and networking configuration
+Creates a Nullplatform provider configuration for Oracle Cloud Infrastructure (OCI) with account, compartment, and networking details
+
+## Architecture
+
+The module creates a single nullplatform_provider_config resource of type 'oci-configuration'. It passes the NRN identifier and dimensions map directly to the resource. The OCI account details (id, region, name), compartment information (id, name), and networking configuration (domain_name, application_domain, private_domain_name) are encoded as JSON attributes. The lifecycle block ensures these attributes are ignored after initial creation.
 
 ## Features
 
-- Creates Nullplatform provider configuration for OCI integration
-- Configures OCI account and tenancy details including region
-- Manages compartment settings for resource organization
-- Supports custom domain name configuration for networking
-- Enables application domain and private domain name settings
-- Supports flexible dimensions for provider configuration customization
-- Implements lifecycle management to ignore authentication attribute changes
+- Configures OCI provider settings for Nullplatform integration
+- Supports custom dimensions for provider configuration
+- Manages networking domain settings including private domains
+- Ignores attribute changes after initial creation
 
 ## Basic Usage
 
 ```hcl
 module "cloud" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/oci/cloud?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/oci/cloud?ref=v1.47.0"
 
   account_id       = "your-account-id"
   account_name     = "your-account-name"
@@ -73,3 +74,71 @@ resource "example_resource" "this" {
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Identifier Nullplatform Resources Name | `string` | n/a | yes |
 | <a name="input_private_domain_name"></a> [private\_domain\_name](#input\_private\_domain\_name) | Private domain name | `string` | `""` | no |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "cloud",
+  "description": "Creates a Nullplatform provider configuration for Oracle Cloud Infrastructure (OCI) with account, compartment, and networking details",
+  "architecture": "The module creates a single nullplatform_provider_config resource of type 'oci-configuration'. It passes the NRN identifier and dimensions map directly to the resource. The OCI account details (id, region, name), compartment information (id, name), and networking configuration (domain_name, application_domain, private_domain_name) are encoded as JSON attributes. The lifecycle block ensures these attributes are ignored after initial creation.",
+  "features": [
+    "Configures OCI provider settings for Nullplatform integration",
+    "Supports custom dimensions for provider configuration",
+    "Manages networking domain settings including private domains",
+    "Ignores attribute changes after initial creation"
+  ],
+  "inputs": [
+    {
+      "name": "nrn",
+      "description": "Identifier Nullplatform Resources Name",
+      "required": true
+    },
+    {
+      "name": "account_id",
+      "description": "OCI tenancy/account OCID",
+      "required": true
+    },
+    {
+      "name": "account_name",
+      "description": "OCI account/tenancy name",
+      "required": true
+    },
+    {
+      "name": "account_region",
+      "description": "OCI region where resources will be deployed",
+      "required": true
+    },
+    {
+      "name": "compartment_id",
+      "description": "OCI compartment OCID where resources will be created",
+      "required": true
+    },
+    {
+      "name": "compartment_name",
+      "description": "OCI compartment name",
+      "required": true
+    },
+    {
+      "name": "domain_name",
+      "description": "Domain name for the configuration",
+      "required": true
+    },
+    {
+      "name": "dimensions",
+      "description": "Dimensions for the provider configuration",
+      "required": false
+    },
+    {
+      "name": "application_domain",
+      "description": "Whether to apply application domain",
+      "required": false
+    },
+    {
+      "name": "private_domain_name",
+      "description": "Private domain name",
+      "required": false
+    }
+  ],
+  "outputs": [],
+  "hash": "dac717dbe17fc2aafba2e42361d71690"
+}
+END_AI_METADATA -->

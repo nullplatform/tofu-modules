@@ -2,22 +2,23 @@
 
 ## Description
 
-Creates an AWS ACM wildcard certificate with DNS validation via Route53
+This module creates an ACM certificate with DNS validation in Route53
+
+## Architecture
+
+The module creates an aws_acm_certificate resource with DNS validation, which is then validated using an aws_acm_certificate_validation resource. The validation is performed by creating aws_route53_record resources for each domain validation option. The zone_id and domain_name variables are used to configure the aws_route53_record resources and the aws_acm_certificate resource, respectively. The subject_alternative_names variable is used to configure the subject alternative names for the ACM certificate.
 
 ## Features
 
-- Creates a wildcard ACM certificate for the specified domain
-- Configures DNS validation using Route53 records
-- Supports subject alternative names for additional domain coverage
-- Automatically creates and manages validation records in Route53
-- Implements lifecycle policy for safe certificate replacement
-- Waits for certificate validation to complete before marking as ready
+- Creates ACM certificate with DNS validation in Route53
+- Configures DNS validation records in Route53
+- Supports wildcard certificates via subject alternative names
 
 ## Basic Usage
 
 ```hcl
 module "acm" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/acm?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/acm?ref=v1.47.0"
 
   domain_name = "your-domain-name"
   zone_id     = "your-zone-id"
@@ -69,3 +70,38 @@ resource "example_resource" "this" {
 | <a name="output_acm_certificate_arn"></a> [acm\_certificate\_arn](#output\_acm\_certificate\_arn) | The ARN of the ACM certificate |
 | <a name="output_acm_certificate_domain_name"></a> [acm\_certificate\_domain\_name](#output\_acm\_certificate\_domain\_name) | The domain name for which the ACM certificate is issued |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "acm",
+  "description": "This module creates an ACM certificate with DNS validation in Route53",
+  "architecture": "The module creates an aws_acm_certificate resource with DNS validation, which is then validated using an aws_acm_certificate_validation resource. The validation is performed by creating aws_route53_record resources for each domain validation option. The zone_id and domain_name variables are used to configure the aws_route53_record resources and the aws_acm_certificate resource, respectively. The subject_alternative_names variable is used to configure the subject alternative names for the ACM certificate.",
+  "features": [
+    "Creates ACM certificate with DNS validation in Route53",
+    "Configures DNS validation records in Route53",
+    "Supports wildcard certificates via subject alternative names"
+  ],
+  "inputs": [
+    {
+      "name": "zone_id",
+      "description": "Route53 Zone ID where certificate will be validated",
+      "required": true
+    },
+    {
+      "name": "domain_name",
+      "description": "The domain name for which to request the SSL certificate",
+      "required": true
+    },
+    {
+      "name": "subject_alternative_names",
+      "description": "Alternative DNS to add",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "acm_certificate_arn",
+    "acm_certificate_domain_name"
+  ],
+  "hash": "10bfabad3403adb463c8d774069a1d04"
+}
+END_AI_METADATA -->

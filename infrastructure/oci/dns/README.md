@@ -2,23 +2,23 @@
 
 ## Description
 
-Creates and manages OCI DNS zones with support for primary and secondary zone types
+Creates and manages DNS zones in Oracle Cloud Infrastructure
+
+## Architecture
+
+This module creates oci_dns_zone resources for each DNS zone defined in the dns_zones variable, connecting them to the specified compartment and applying defined and freeform tags. The oci_dns_zone resources are configured with the provided zone type, scope, and view ID, and are connected to external masters if specified. The module also outputs the created DNS zones, their IDs, and their nameservers.
 
 ## Features
 
-- Creates multiple DNS zones in OCI with configurable zone types
-- Supports both PRIMARY and SECONDARY DNS zone configurations
-- Configures external masters for SECONDARY zones with TSIG authentication
-- Manages DNS zone scope settings (GLOBAL or PRIVATE)
+- Creates DNS zones with primary and secondary zone types
+- Configures DNS zones with custom scopes and view IDs
 - Applies defined and freeform tags to DNS zones
-- Outputs zone details including nameservers and OCIDs
-- Supports DNS views for private DNS zones
 
 ## Basic Usage
 
 ```hcl
 module "dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/dns?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/dns?ref=v1.47.0"
 
   compartment_id = "your-compartment-id"
 }
@@ -69,3 +69,44 @@ resource "example_resource" "this" {
 | <a name="output_dns_zone_nameservers"></a> [dns\_zone\_nameservers](#output\_dns\_zone\_nameservers) | Map of DNS zone names to their nameservers |
 | <a name="output_dns_zones"></a> [dns\_zones](#output\_dns\_zones) | Map of created DNS zones with their details |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "dns",
+  "description": "Creates and manages DNS zones in Oracle Cloud Infrastructure",
+  "architecture": "This module creates oci_dns_zone resources for each DNS zone defined in the dns_zones variable, connecting them to the specified compartment and applying defined and freeform tags. The oci_dns_zone resources are configured with the provided zone type, scope, and view ID, and are connected to external masters if specified. The module also outputs the created DNS zones, their IDs, and their nameservers.",
+  "features": [
+    "Creates DNS zones with primary and secondary zone types",
+    "Configures DNS zones with custom scopes and view IDs",
+    "Applies defined and freeform tags to DNS zones"
+  ],
+  "inputs": [
+    {
+      "name": "compartment_id",
+      "description": "The OCID of the compartment where the DNS zone will be created",
+      "required": true
+    },
+    {
+      "name": "dns_zones",
+      "description": "Map of DNS zones to create. Key is used as identifier.",
+      "required": false
+    },
+    {
+      "name": "defined_tags",
+      "description": "Defined tags to apply to all DNS zones",
+      "required": false
+    },
+    {
+      "name": "freeform_tags",
+      "description": "Freeform tags to apply to all DNS zones",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "dns_zones",
+    "dns_zone_ids",
+    "dns_zone_nameservers"
+  ],
+  "hash": "ec0cdc9b17236b8f372078036b6d3a5b"
+}
+END_AI_METADATA -->

@@ -2,22 +2,23 @@
 
 ## Description
 
-Creates a Google Artifact Registry repository with a service account for push/pull access and IAM bindings
+Creates a Google Artifact Registry repository with a service account and IAM role for writing to the registry
+
+## Architecture
+
+The module creates a google_artifact_registry_repository resource, a google_service_account for accessing the registry, a google_project_iam_member to assign the artifactregistry.writer role to the service account, and a google_service_account_key for the service account. The google_artifact_registry_repository resource is configured with the provided project_id, location, and containerregistry_name. The google_service_account and google_project_iam_member resources are used to grant access to the registry. The google_service_account_key resource is used to generate a private key for the service account. The module also outputs the ID of the container registry, the URL of the container registry, and the service account key for container registry access.
 
 ## Features
 
-- Creates a Google Artifact Registry repository with configurable format
-- Provisions a dedicated service account for artifact registry operations
-- Configures IAM permissions with artifactregistry.writer role
-- Generates service account key for authentication
-- Supports custom labels/tags for resource organization
-- Outputs registry URL and secure service account credentials
+- Creates a Google Artifact Registry repository with a specified format
+- Configures a service account with the artifactregistry.writer role for writing to the registry
+- Supports custom labels for the container registry via the tags variable
 
 ## Basic Usage
 
 ```hcl
 module "acr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/acr?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/acr?ref=v1.47.0"
 
   containerregistry_name = "your-containerregistry-name"
   location               = "your-location"
@@ -75,3 +76,49 @@ resource "example_resource" "this" {
 | <a name="output_acr_login_server"></a> [acr\_login\_server](#output\_acr\_login\_server) | The URL of the container registry |
 | <a name="output_service_account_key_json"></a> [service\_account\_key\_json](#output\_service\_account\_key\_json) | The Service Account key for container registry access |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "acr",
+  "description": "Creates a Google Artifact Registry repository with a service account and IAM role for writing to the registry",
+  "architecture": "The module creates a google_artifact_registry_repository resource, a google_service_account for accessing the registry, a google_project_iam_member to assign the artifactregistry.writer role to the service account, and a google_service_account_key for the service account. The google_artifact_registry_repository resource is configured with the provided project_id, location, and containerregistry_name. The google_service_account and google_project_iam_member resources are used to grant access to the registry. The google_service_account_key resource is used to generate a private key for the service account. The module also outputs the ID of the container registry, the URL of the container registry, and the service account key for container registry access.",
+  "features": [
+    "Creates a Google Artifact Registry repository with a specified format",
+    "Configures a service account with the artifactregistry.writer role for writing to the registry",
+    "Supports custom labels for the container registry via the tags variable"
+  ],
+  "inputs": [
+    {
+      "name": "project_id",
+      "description": "The GCP project ID",
+      "required": true
+    },
+    {
+      "name": "location",
+      "description": "The GCP region where the container registry will be created (e.g., us-central1, europe-west1)",
+      "required": true
+    },
+    {
+      "name": "containerregistry_name",
+      "description": "The name of the container registry (repository ID)",
+      "required": true
+    },
+    {
+      "name": "format",
+      "description": "The format of the repository (DOCKER, NPM, PYTHON, etc)",
+      "required": false
+    },
+    {
+      "name": "tags",
+      "description": "A mapping of labels to assign to the container registry",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "acr_id",
+    "acr_login_server",
+    "service_account_key_json"
+  ],
+  "hash": "38472f798a5b4c7a56e630a15ccc98fd"
+}
+END_AI_METADATA -->

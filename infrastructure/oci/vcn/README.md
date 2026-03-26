@@ -2,23 +2,24 @@
 
 ## Description
 
-Creates an Oracle Cloud Infrastructure (OCI) Virtual Cloud Network (VCN) with public and private subnets, gateways, and optional OKE control plane network security group
+Provisions an OCI VCN with public, private, and optional pod subnets plus gateways and security groups for OKE clusters
+
+## Architecture
+
+The module instantiates oci_core_subnet resources for public and private subnets, and conditionally creates a pod subnet when cni_type equals npn. It wires these subnets to route tables from the VCN module (oci_core_route_table) for internet, NAT, and service gateway traffic. oci_core_network_security_group and oci_core_network_security_group_security_rule resources define ingress rules for Kubernetes API access on port 6443 and allow cluster-internal traffic. Outputs expose subnet and gateway OCIDs for downstream OKE or workload modules.
 
 ## Features
 
-- Creates a VCN with configurable CIDR blocks and DNS label
-- Provisions public and private subnets with dedicated route tables
-- Configures Internet Gateway, NAT Gateway, and Service Gateway for network connectivity
-- Creates optional Network Security Group for OKE control plane with configurable API endpoint access
-- Implements security rules for Kubernetes API access on port 6443
-- Supports custom CIDR block allowlists for OKE API endpoint access
-- Outputs all resource OCIDs and network configuration details for downstream module integration
+- Creates public and private subnets with separate route tables for internet and NAT gateways
+- Conditionally provisions a dedicated pod subnet when CNI type is set to npn
+- Configures NSG rules allowing Kubernetes API access from specified CIDR blocks
+- Exposes all VCN, subnet, and gateway IDs as outputs for cluster integration
 
 ## Basic Usage
 
 ```hcl
 module "vcn" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/vcn?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/vcn?ref=v1.47.0"
 }
 ```
 
@@ -102,3 +103,130 @@ resource "example_resource" "this" {
 | <a name="output_vcn_all_attributes"></a> [vcn\_all\_attributes](#output\_vcn\_all\_attributes) | All attributes of the VCN |
 | <a name="output_vcn_id"></a> [vcn\_id](#output\_vcn\_id) | The OCID of the VCN |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "vcn",
+  "description": "Provisions an OCI VCN with public, private, and optional pod subnets plus gateways and security groups for OKE clusters",
+  "architecture": "The module instantiates oci_core_subnet resources for public and private subnets, and conditionally creates a pod subnet when cni_type equals npn. It wires these subnets to route tables from the VCN module (oci_core_route_table) for internet, NAT, and service gateway traffic. oci_core_network_security_group and oci_core_network_security_group_security_rule resources define ingress rules for Kubernetes API access on port 6443 and allow cluster-internal traffic. Outputs expose subnet and gateway OCIDs for downstream OKE or workload modules.",
+  "features": [
+    "Creates public and private subnets with separate route tables for internet and NAT gateways",
+    "Conditionally provisions a dedicated pod subnet when CNI type is set to npn",
+    "Configures NSG rules allowing Kubernetes API access from specified CIDR blocks",
+    "Exposes all VCN, subnet, and gateway IDs as outputs for cluster integration"
+  ],
+  "inputs": [
+    {
+      "name": "cni_type",
+      "description": "CNI type. When set to 'npn', a dedicated pod subnet is created.",
+      "required": false
+    },
+    {
+      "name": "compartment_id",
+      "description": "value",
+      "required": false
+    },
+    {
+      "name": "region",
+      "description": "value",
+      "required": false
+    },
+    {
+      "name": "vcn_cidrs",
+      "description": "value",
+      "required": false
+    },
+    {
+      "name": "vcn_name",
+      "description": "value",
+      "required": false
+    },
+    {
+      "name": "vcn_dns_label",
+      "description": "value",
+      "required": false
+    },
+    {
+      "name": "create_internet_gateway",
+      "description": "value",
+      "required": false
+    },
+    {
+      "name": "create_nat_gateway",
+      "description": "value",
+      "required": false
+    },
+    {
+      "name": "create_service_gateway",
+      "description": "value",
+      "required": false
+    },
+    {
+      "name": "subnet_private_cidr_block",
+      "description": "value",
+      "required": false
+    },
+    {
+      "name": "subnet_private_display_name",
+      "description": "value",
+      "required": false
+    },
+    {
+      "name": "subnet_private_prohibit_public_ip_on_vnic",
+      "description": "value",
+      "required": false
+    },
+    {
+      "name": "subnet_public_cidr_block",
+      "description": "value",
+      "required": false
+    },
+    {
+      "name": "subnet_public_display_name",
+      "description": "value",
+      "required": false
+    },
+    {
+      "name": "subnet_pod_cidr_block",
+      "description": "CIDR block for the pod subnet. Required when cni_type = 'npn'.",
+      "required": false
+    },
+    {
+      "name": "subnet_pod_display_name",
+      "description": "Display name for the pod subnet.",
+      "required": false
+    },
+    {
+      "name": "create_oke_control_plane_nsg",
+      "description": "Whether to create an NSG for OKE control plane access",
+      "required": false
+    },
+    {
+      "name": "oke_api_endpoint_allowed_cidrs",
+      "description": "List of CIDR blocks allowed to access the Kubernetes API endpoint (port 6443)",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "vcn_id",
+    "vcn_all_attributes",
+    "default_security_list_id",
+    "internet_gateway_id",
+    "nat_gateway_id",
+    "service_gateway_id",
+    "ig_route_id",
+    "nat_route_id",
+    "sgw_route_id",
+    "public_subnet_id",
+    "public_subnet_cidr_block",
+    "public_subnet_display_name",
+    "private_subnet_id",
+    "private_subnet_cidr_block",
+    "private_subnet_display_name",
+    "pod_subnet_id",
+    "pod_subnet_cidr_block",
+    "oke_control_plane_nsg_id"
+  ],
+  "hash": "4b0741cc8b24b23bc494a3572a9c7bb0"
+}
+END_AI_METADATA -->

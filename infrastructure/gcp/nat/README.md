@@ -2,21 +2,23 @@
 
 ## Description
 
-Creates a Google Cloud Router and Cloud NAT gateway for enabling outbound internet connectivity from private resources
+Creates a Cloud Router and Cloud NAT in Google Cloud Platform
+
+## Architecture
+
+This module creates a google_compute_router resource and a google_compute_router_nat resource, connecting them internally by setting the router attribute of the nat resource to the name of the router resource. The inputs for project_id, location, vpc_id, router_name, and nat_name are used to configure these resources. The module also outputs the names of the created router and nat resources.
 
 ## Features
 
-- Creates a Google Cloud Router in a specified region and VPC network
-- Configures Cloud NAT with automatic IP allocation for outbound connectivity
-- Enables all subnetworks and IP ranges to use NAT for internet access
-- Supports custom naming for both router and NAT gateway resources
-- Provides outputs for router and NAT gateway names for reference
+- Creates Cloud Router with specified name and region
+- Configures Cloud NAT with auto-allocated IP addresses
+- Supports all subnetworks and IP ranges for NAT
 
 ## Basic Usage
 
 ```hcl
 module "nat" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/nat?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/nat?ref=v1.47.0"
 
   location    = "your-location"
   nat_name    = "your-nat-name"
@@ -74,3 +76,53 @@ resource "example_resource" "this" {
 | <a name="output_nat_name"></a> [nat\_name](#output\_nat\_name) | The name of the Cloud NAT |
 | <a name="output_router_name"></a> [router\_name](#output\_router\_name) | The name of the Cloud Router |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "nat",
+  "description": "Creates a Cloud Router and Cloud NAT in Google Cloud Platform",
+  "architecture": "This module creates a google_compute_router resource and a google_compute_router_nat resource, connecting them internally by setting the router attribute of the nat resource to the name of the router resource. The inputs for project_id, location, vpc_id, router_name, and nat_name are used to configure these resources. The module also outputs the names of the created router and nat resources.",
+  "features": [
+    "Creates Cloud Router with specified name and region",
+    "Configures Cloud NAT with auto-allocated IP addresses",
+    "Supports all subnetworks and IP ranges for NAT"
+  ],
+  "inputs": [
+    {
+      "name": "project_id",
+      "description": "The GCP project ID",
+      "required": true
+    },
+    {
+      "name": "location",
+      "description": "The GCP region where Cloud NAT will be created (e.g., us-central1, europe-west1)",
+      "required": true
+    },
+    {
+      "name": "vpc_id",
+      "description": "The self-link of the virtual network",
+      "required": true
+    },
+    {
+      "name": "router_name",
+      "description": "The name of the Cloud Router",
+      "required": true
+    },
+    {
+      "name": "nat_name",
+      "description": "The name of the Cloud NAT",
+      "required": true
+    },
+    {
+      "name": "tags",
+      "description": "A mapping of labels to assign to the NAT resources",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "router_name",
+    "nat_name"
+  ],
+  "hash": "0af2ba4aec45e4861c95264eb2ab48af"
+}
+END_AI_METADATA -->

@@ -2,21 +2,23 @@
 
 ## Description
 
-Creates an Azure Private DNS Zone with configurable virtual network links for private endpoint DNS resolution
+Creates a private DNS zone in Azure with optional virtual network links and tags
+
+## Architecture
+
+This module creates an azurerm_private_dns_zone resource and optionally multiple azurerm_private_dns_zone_virtual_network_link resources, which are connected to the private DNS zone. The virtual network links are created based on the virtual_network_links input variable, which is a list of objects containing the virtual network ID and an optional registration enabled flag. The module also supports assigning tags to the private DNS zone using the tags input variable. The module outputs the name, ID, and virtual network link IDs of the created resources.
 
 ## Features
 
-- Creates an Azure Private DNS Zone with a specified domain name
-- Configures virtual network links to connect VNets to the private DNS zone
-- Supports optional VM auto-registration per virtual network link
-- Manages multiple virtual network links through a list configuration
-- Applies custom tags to the private DNS zone and network links
+- Creates a private DNS zone with a specified domain name
+- Configures virtual network links to the private DNS zone with optional registration enabled
+- Supports assigning tags to the private DNS zone
 
 ## Basic Usage
 
 ```hcl
 module "private_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/private_dns?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/private_dns?ref=v1.47.0"
 
   domain_name           = "your-domain-name"
   resource_group_name   = "your-resource-group-name"
@@ -73,3 +75,49 @@ resource "example_resource" "this" {
 | <a name="output_private_dns_zone_name"></a> [private\_dns\_zone\_name](#output\_private\_dns\_zone\_name) | The name of the created private DNS zone |
 | <a name="output_virtual_network_link_ids"></a> [virtual\_network\_link\_ids](#output\_virtual\_network\_link\_ids) | The IDs of the virtual network links |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "private_dns",
+  "description": "Creates a private DNS zone in Azure with optional virtual network links and tags",
+  "architecture": "This module creates an azurerm_private_dns_zone resource and optionally multiple azurerm_private_dns_zone_virtual_network_link resources, which are connected to the private DNS zone. The virtual network links are created based on the virtual_network_links input variable, which is a list of objects containing the virtual network ID and an optional registration enabled flag. The module also supports assigning tags to the private DNS zone using the tags input variable. The module outputs the name, ID, and virtual network link IDs of the created resources.",
+  "features": [
+    "Creates a private DNS zone with a specified domain name",
+    "Configures virtual network links to the private DNS zone with optional registration enabled",
+    "Supports assigning tags to the private DNS zone"
+  ],
+  "inputs": [
+    {
+      "name": "resource_group_name",
+      "description": "The name of the resource group where the private DNS zone will be created",
+      "required": true
+    },
+    {
+      "name": "domain_name",
+      "description": "The domain name to use for the private DNS zone (e.g., privatelink.database.windows.net)",
+      "required": true
+    },
+    {
+      "name": "subscription_id",
+      "description": "The ID of the Azure subscription",
+      "required": true
+    },
+    {
+      "name": "virtual_network_links",
+      "description": "List of virtual networks to link to the private DNS zone. Each object requires vnet_id and optionally registration_enabled (false for AKS/Private Link, true for VMs auto-registration)",
+      "required": true
+    },
+    {
+      "name": "tags",
+      "description": "A mapping of tags to assign to the private DNS zone",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "private_dns_zone_name",
+    "private_dns_zone_id",
+    "virtual_network_link_ids"
+  ],
+  "hash": "9ed5400246581dbf42bec26262b81e0c"
+}
+END_AI_METADATA -->

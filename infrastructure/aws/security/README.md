@@ -2,22 +2,24 @@
 
 ## Description
 
-Creates AWS security groups for Istio gateways on EKS with configurable public and private gateway access controls
+This module creates security groups for Istio gateways in an EKS cluster
+
+## Architecture
+
+The module uses Terraform to create AWS security groups for public and private Istio gateways, deriving the VPC ID and CIDR block from the provided EKS cluster name. It configures ingress and egress rules for the security groups, allowing traffic from the internet or VPC CIDR block as needed. The module also creates ingress rules on the cluster's primary security group to allow traffic from the gateway security groups when the cluster security group ID is provided.
 
 ## Features
 
-- Creates security groups for Istio public and private gateways with VPC-aware ingress rules
-- Derives VPC ID and CIDR block automatically from EKS cluster name
-- Configures HTTPS (443) access with internet exposure for public gateways and VPC-only for private gateways
-- Restricts Istio health check port (15021) to VPC CIDR and optional additional network CIDRs
-- Supports optional cluster security group ingress rules for ALB-to-pod traffic patterns
-- Enables flexible overrides for VPC ID and network CIDR when automatic derivation is not suitable
+- Creates security groups for public and private Istio gateways
+- Configures ingress and egress rules for the security groups
+- Derives VPC ID and CIDR block from the provided EKS cluster name
+- Creates ingress rules on the cluster's primary security group to allow traffic from the gateway security groups
 
 ## Basic Usage
 
 ```hcl
 module "security" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/security?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/security?ref=v1.47.0"
 
   cluster_name = "your-cluster-name"
 }
@@ -75,3 +77,69 @@ resource "example_resource" "this" {
 | <a name="output_private_gateway_security_group_id"></a> [private\_gateway\_security\_group\_id](#output\_private\_gateway\_security\_group\_id) | The ID of the private gateway security group. |
 | <a name="output_public_gateway_security_group_id"></a> [public\_gateway\_security\_group\_id](#output\_public\_gateway\_security\_group\_id) | The ID of the public gateway security group. |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "security",
+  "description": "This module creates security groups for Istio gateways in an EKS cluster",
+  "architecture": "The module uses Terraform to create AWS security groups for public and private Istio gateways, deriving the VPC ID and CIDR block from the provided EKS cluster name. It configures ingress and egress rules for the security groups, allowing traffic from the internet or VPC CIDR block as needed. The module also creates ingress rules on the cluster's primary security group to allow traffic from the gateway security groups when the cluster security group ID is provided.",
+  "features": [
+    "Creates security groups for public and private Istio gateways",
+    "Configures ingress and egress rules for the security groups",
+    "Derives VPC ID and CIDR block from the provided EKS cluster name",
+    "Creates ingress rules on the cluster's primary security group to allow traffic from the gateway security groups"
+  ],
+  "inputs": [
+    {
+      "name": "cluster_name",
+      "description": "The EKS cluster name, used for naming security resources and deriving VPC.",
+      "required": true
+    },
+    {
+      "name": "gateways_enabled",
+      "description": "Whether public gateways are enabled.",
+      "required": false
+    },
+    {
+      "name": "gateway_internal_enabled",
+      "description": "Whether the internal (private) gateway is enabled.",
+      "required": false
+    },
+    {
+      "name": "vpc_id",
+      "description": "Override: The VPC ID. If empty, derived automatically from cluster name.",
+      "required": false
+    },
+    {
+      "name": "network_cidr",
+      "description": "Override: The network CIDR block. If empty, derived automatically from VPC.",
+      "required": false
+    },
+    {
+      "name": "additional_network_cidrs",
+      "description": "Additional CIDR blocks to allow in security group rules (e.g., peered VPC, on-premises network).",
+      "required": false
+    },
+    {
+      "name": "health_check_rules_enabled",
+      "description": "Whether to create port 15021 (Istio health check) inbound rules on the gateway SGs. Set to false when using ALB (health checks are outbound from ALB, not inbound). Only needed for NLB/direct access patterns.",
+      "required": false
+    },
+    {
+      "name": "cluster_security_group_id",
+      "description": "The EKS cluster primary security group ID. When set, ingress rules are created on this SG to allow traffic from the gateway SGs on the gateway and health check ports. Required for ALB setups where the ALB needs to reach pods.",
+      "required": false
+    },
+    {
+      "name": "gateway_port",
+      "description": "The port used by Istio gateway pods for traffic (e.g., 8443 for Gateway API). Used for cluster SG ingress rules when cluster_security_group_id is set.",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "public_gateway_security_group_id",
+    "private_gateway_security_group_id"
+  ],
+  "hash": "0c1052c11358ee84e8f79205e8a551e8"
+}
+END_AI_METADATA -->

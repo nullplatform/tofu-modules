@@ -2,22 +2,24 @@
 
 ## Description
 
-Creates GCP firewall rules for Istio gateways with health check port restrictions and HTTPS traffic management
+Configures GCP firewall rules for Istio gateways in a GKE cluster
+
+## Architecture
+
+This module uses Terraform to create GCP firewall rules for public and private Istio gateways in a GKE cluster. It utilizes the google_compute_firewall resource to define ingress rules for HTTPS and health check traffic. The module also derives the network and CIDR block from the GKE cluster information using data sources like google_container_cluster and google_compute_subnetwork. The firewall rules are then created based on the derived network and CIDR block, with specific rules for public and private gateways. The module also outputs the names of the created firewall rules for public and private gateways.
 
 ## Features
 
-- Creates firewall rules for Istio public gateway allowing HTTPS traffic from internet
-- Restricts health check port (15021) to VPC CIDR and GCP health check ranges
-- Supports optional private/internal gateway with VPC-only HTTPS access
-- Derives network and CIDR configuration automatically from GKE cluster
-- Implements deny rules to prevent unauthorized health check access from internet
-- Configures target tags for gateway-specific traffic routing
+- Creates GCP firewall rules for public and private Istio gateways
+- Configures ingress rules for HTTPS and health check traffic
+- Derives network and CIDR block from GKE cluster information
+- Outputs firewall rule names for public and private gateways
 
 ## Basic Usage
 
 ```hcl
 module "security" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/security?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/security?ref=v1.47.0"
 
   cluster_name   = "your-cluster-name"
   gcp_project_id = "your-gcp-project-id"
@@ -76,3 +78,59 @@ resource "example_resource" "this" {
 | <a name="output_private_gateway_firewall_name"></a> [private\_gateway\_firewall\_name](#output\_private\_gateway\_firewall\_name) | The name of the private gateway HTTPS firewall rule. |
 | <a name="output_public_gateway_firewall_name"></a> [public\_gateway\_firewall\_name](#output\_public\_gateway\_firewall\_name) | The name of the public gateway HTTPS firewall rule. |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "security",
+  "description": "Configures GCP firewall rules for Istio gateways in a GKE cluster",
+  "architecture": "This module uses Terraform to create GCP firewall rules for public and private Istio gateways in a GKE cluster. It utilizes the google_compute_firewall resource to define ingress rules for HTTPS and health check traffic. The module also derives the network and CIDR block from the GKE cluster information using data sources like google_container_cluster and google_compute_subnetwork. The firewall rules are then created based on the derived network and CIDR block, with specific rules for public and private gateways. The module also outputs the names of the created firewall rules for public and private gateways.",
+  "features": [
+    "Creates GCP firewall rules for public and private Istio gateways",
+    "Configures ingress rules for HTTPS and health check traffic",
+    "Derives network and CIDR block from GKE cluster information",
+    "Outputs firewall rule names for public and private gateways"
+  ],
+  "inputs": [
+    {
+      "name": "cluster_name",
+      "description": "The GKE cluster name, used for naming firewall rules and deriving network.",
+      "required": true
+    },
+    {
+      "name": "gcp_project_id",
+      "description": "The GCP project ID.",
+      "required": true
+    },
+    {
+      "name": "gcp_region",
+      "description": "The GCP region where the GKE cluster is located.",
+      "required": true
+    },
+    {
+      "name": "gateways_enabled",
+      "description": "Whether public gateways are enabled.",
+      "required": false
+    },
+    {
+      "name": "gateway_internal_enabled",
+      "description": "Whether the internal (private) gateway is enabled.",
+      "required": false
+    },
+    {
+      "name": "gcp_network_name",
+      "description": "Override: The VPC network name. If empty, derived from cluster.",
+      "required": false
+    },
+    {
+      "name": "network_cidr",
+      "description": "Override: The network CIDR block. If empty, derived from subnet.",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "public_gateway_firewall_name",
+    "private_gateway_firewall_name"
+  ],
+  "hash": "d5bafc8ca7f3fae8b7757228f1d8b9d2"
+}
+END_AI_METADATA -->

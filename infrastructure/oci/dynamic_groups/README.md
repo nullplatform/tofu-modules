@@ -2,23 +2,24 @@
 
 ## Description
 
-Creates OCI dynamic groups and IAM policies for OKE Enhanced Workload Identity, enabling Kubernetes workloads to authenticate and access OCI resources
+Creates and configures OCI resources for OKE workload identity
+
+## Architecture
+
+This module creates an OCI dynamic group and an OCI identity policy, connecting them internally through the dynamic group's matching rule and the policy's statements. The dynamic group is created at the tenancy level, while the policy is created in the specified compartment. The module uses Terraform resources such as oci_identity_dynamic_group and oci_identity_policy to manage these OCI resources. The inputs, such as tenancy ID, compartment ID, cluster ID, workload name, namespace, and service account, flow into these resources to configure them correctly.
 
 ## Features
 
-- Creates dynamic groups at tenancy level for OKE workload identity matching rules
-- Generates IAM policies scoped to tenancy or compartment based on the compartment configuration
-- Supports automatic DNS permissions for dns-zones and dns-records management
-- Allows custom additional IAM policy statements for flexible resource access control
-- Configures workload identity conditions based on cluster ID, namespace, and service account
-- Automatically detects tenancy root compartment for proper policy scope configuration
-- Provides reusable workload identity conditions output for custom policy creation
+- Creates OCI dynamic group for workload identity
+- Configures OCI identity policy with custom statements
+- Supports automatic DNS policy statements for workload identity
+- Manages OCI resources with defined and freeform tags
 
 ## Basic Usage
 
 ```hcl
 module "dynamic_groups" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/dynamic_groups?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/dynamic_groups?ref=v1.47.0"
 
   cluster_id      = "your-cluster-id"
   compartment_id  = "your-compartment-id"
@@ -87,3 +88,84 @@ resource "example_resource" "this" {
 | <a name="output_policy_statements"></a> [policy\_statements](#output\_policy\_statements) | The policy statements applied |
 | <a name="output_workload_identity_conditions"></a> [workload\_identity\_conditions](#output\_workload\_identity\_conditions) | The workload identity conditions for use in custom policies |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "dynamic_groups",
+  "description": "Creates and configures OCI resources for OKE workload identity",
+  "architecture": "This module creates an OCI dynamic group and an OCI identity policy, connecting them internally through the dynamic group's matching rule and the policy's statements. The dynamic group is created at the tenancy level, while the policy is created in the specified compartment. The module uses Terraform resources such as oci_identity_dynamic_group and oci_identity_policy to manage these OCI resources. The inputs, such as tenancy ID, compartment ID, cluster ID, workload name, namespace, and service account, flow into these resources to configure them correctly.",
+  "features": [
+    "Creates OCI dynamic group for workload identity",
+    "Configures OCI identity policy with custom statements",
+    "Supports automatic DNS policy statements for workload identity",
+    "Manages OCI resources with defined and freeform tags"
+  ],
+  "inputs": [
+    {
+      "name": "tenancy_id",
+      "description": "OCID of the tenancy (dynamic groups are created at tenancy level)",
+      "required": true
+    },
+    {
+      "name": "compartment_id",
+      "description": "OCID of the compartment where resources are located",
+      "required": true
+    },
+    {
+      "name": "cluster_id",
+      "description": "OCID of the OKE cluster",
+      "required": true
+    },
+    {
+      "name": "workload_name",
+      "description": "Name of the workload (e.g., external-dns, cert-manager)",
+      "required": true
+    },
+    {
+      "name": "namespace",
+      "description": "Kubernetes namespace where the workload runs",
+      "required": true
+    },
+    {
+      "name": "service_account",
+      "description": "Name of the Kubernetes service account",
+      "required": true
+    },
+    {
+      "name": "enable_dns_permissions",
+      "description": "Enable automatic DNS policy statements (inspect, read, use dns-zones and manage dns-records)",
+      "required": false
+    },
+    {
+      "name": "additional_policy_statements",
+      "description": "Additional custom OCI IAM policy statements to apply",
+      "required": false
+    },
+    {
+      "name": "name_prefix",
+      "description": "Prefix for resource names",
+      "required": false
+    },
+    {
+      "name": "defined_tags",
+      "description": "Defined tags for resources",
+      "required": false
+    },
+    {
+      "name": "freeform_tags",
+      "description": "Freeform tags for resources",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "dynamic_group_id",
+    "dynamic_group_name",
+    "policy_id",
+    "policy_name",
+    "policy_statements",
+    "policy_scope",
+    "workload_identity_conditions"
+  ],
+  "hash": "096e324935eddde4906185f61174b43d"
+}
+END_AI_METADATA -->

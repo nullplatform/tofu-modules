@@ -2,21 +2,23 @@
 
 ## Description
 
-Creates both public and private AWS Route 53 hosted zones for a specified domain name with VPC association
+Creates public and private Route 53 zones for a given domain name and VPC ID
+
+## Architecture
+
+This module creates two aws_route53_zone resources, one for a public zone and one for a private zone, with the private zone associated with the provided VPC ID. The domain name is used to configure both zones. The module also outputs the IDs and names of both zones, as well as the nameservers for the public zone. The internal data flow involves creating the zones and then outputting their properties.
 
 ## Features
 
-- Creates a public Route 53 hosted zone for external DNS resolution
-- Creates a private Route 53 hosted zone associated with a VPC for internal DNS resolution
-- Configures force_destroy on both zones to allow deletion when DNS records exist
-- Outputs zone IDs, names, and nameservers for integration with other resources
-- Supports dual-zone configuration for split-horizon DNS architecture
+- Creates public Route 53 zone with DNS validation
+- Configures private Route 53 zone with VPC association
+- Outputs zone IDs and names for further use
 
 ## Basic Usage
 
 ```hcl
 module "dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/dns?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/dns?ref=v1.47.0"
 
   domain_name = "your-domain-name"
   vpc_id      = "your-vpc-id"
@@ -69,3 +71,37 @@ resource "example_resource" "this" {
 | <a name="output_public_zone_id"></a> [public\_zone\_id](#output\_public\_zone\_id) | The ID of the public Route 53 hosted zone |
 | <a name="output_public_zone_name"></a> [public\_zone\_name](#output\_public\_zone\_name) | The domain name of the public Route 53 hosted zone |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "dns",
+  "description": "Creates public and private Route 53 zones for a given domain name and VPC ID",
+  "architecture": "This module creates two aws_route53_zone resources, one for a public zone and one for a private zone, with the private zone associated with the provided VPC ID. The domain name is used to configure both zones. The module also outputs the IDs and names of both zones, as well as the nameservers for the public zone. The internal data flow involves creating the zones and then outputting their properties.",
+  "features": [
+    "Creates public Route 53 zone with DNS validation",
+    "Configures private Route 53 zone with VPC association",
+    "Outputs zone IDs and names for further use"
+  ],
+  "inputs": [
+    {
+      "name": "vpc_id",
+      "description": "The ID of the VPC",
+      "required": true
+    },
+    {
+      "name": "domain_name",
+      "description": "The domain name to be managed",
+      "required": true
+    }
+  ],
+  "outputs": [
+    "public_zone_id",
+    "public_zone_name",
+    "private_zone_id",
+    "private_zone_name",
+    "acm_certificate_arn",
+    "nameservers"
+  ],
+  "hash": "c3e8245ecf0fd53ae95cc03303b5bf9b"
+}
+END_AI_METADATA -->

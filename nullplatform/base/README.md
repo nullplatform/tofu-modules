@@ -2,23 +2,25 @@
 
 ## Description
 
-Deploys the Nullplatform base infrastructure components including gateways, logging, monitoring, and ingress controllers on Kubernetes clusters across multiple cloud providers
+Deploys the Nullplatform base Helm chart into a Kubernetes cluster with cloud-provider-specific gateway and security configurations
+
+## Architecture
+
+The module creates two kubernetes_namespace_v1 resources (nullplatform-tools and nullplatform) and a helm_release for the nullplatform-base chart.  A templatefile renders values from locals.nullplatform_base_values, which merges provider-specific gateway settings, ingress controller configs, observability endpoints (Prometheus, Loki, Dynatrace, Datadog, New Relic, CloudWatch), and security group/NSG/firewall IDs.  Outputs expose the created AWS security-group IDs and Azure NSG IDs as well as GCP firewall names so that external security modules can reference them.
 
 ## Features
 
-- Deploys Nullplatform base Helm chart to Kubernetes clusters
-- Creates and manages nullplatform-tools and nullplatform namespaces
-- Configures public and private HTTP gateways with cloud-specific security settings
-- Supports multiple cloud providers including AWS (EKS), Azure (AKS), GCP (GKE), Oracle (OKE), and OpenShift (ARO)
-- Integrates with multiple logging and monitoring solutions including Prometheus, Loki, Datadog, Dynatrace, New Relic, and CloudWatch
-- Manages ingress controllers for external and internal traffic routing
-- Configures image pull secrets for private container registries
+- Creates Kubernetes namespaces for tools and applications with OpenShift monitoring labels
+- Deploys Nullplatform base Helm chart with configurable gateway, ingress, and observability integrations
+- Supports cloud-native load balancer security controls for AWS security groups, Azure NSGs, GCP firewalls, and OCI security lists
+- Enables optional telemetry exporters for Prometheus, Loki, GELF, Dynatrace, Datadog, New Relic, and CloudWatch
+- Exposes security resource identifiers as outputs for cross-module wiring
 
 ## Basic Usage
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.47.0"
 
   k8s_provider = "your-k8s-provider"
   np_api_key   = "your-np-api-key"
@@ -26,11 +28,11 @@ module "base" {
 }
 ```
 
-### Usage with Amazon EKS
+### Usage with EKS Provider
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.47.0"
 
   k8s_provider = "eks"
   np_api_key   = "your-np-api-key"
@@ -38,11 +40,11 @@ module "base" {
 }
 ```
 
-### Usage with Google GKE
+### Usage with GKE Provider
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.47.0"
 
   k8s_provider = "gke"
   np_api_key   = "your-np-api-key"
@@ -50,11 +52,11 @@ module "base" {
 }
 ```
 
-### Usage with Azure AKS
+### Usage with AKS Provider
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.47.0"
 
   k8s_provider = "aks"
   np_api_key   = "your-np-api-key"
@@ -62,11 +64,11 @@ module "base" {
 }
 ```
 
-### Usage with Oracle OKE
+### Usage with OKE Provider
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.47.0"
 
   k8s_provider = "oke"
   np_api_key   = "your-np-api-key"
@@ -74,11 +76,11 @@ module "base" {
 }
 ```
 
-### Usage with Azure Red Hat OpenShift
+### Usage with ARO Provider
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.47.0"
 
   k8s_provider = "aro"
   np_api_key   = "your-np-api-key"
@@ -186,3 +188,334 @@ resource "example_resource" "this" {
 | <a name="output_public_gateway_nsg_id"></a> [public\_gateway\_nsg\_id](#output\_public\_gateway\_nsg\_id) | The ID of the public gateway NSG (Azure) |
 | <a name="output_public_gateway_security_group_id"></a> [public\_gateway\_security\_group\_id](#output\_public\_gateway\_security\_group\_id) | The ID of the public gateway security group (AWS) |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "base",
+  "description": "Deploys the Nullplatform base Helm chart into a Kubernetes cluster with cloud-provider-specific gateway and security configurations",
+  "architecture": "The module creates two kubernetes_namespace_v1 resources (nullplatform-tools and nullplatform) and a helm_release for the nullplatform-base chart.  A templatefile renders values from locals.nullplatform_base_values, which merges provider-specific gateway settings, ingress controller configs, observability endpoints (Prometheus, Loki, Dynatrace, Datadog, New Relic, CloudWatch), and security group/NSG/firewall IDs.  Outputs expose the created AWS security-group IDs and Azure NSG IDs as well as GCP firewall names so that external security modules can reference them.",
+  "features": [
+    "Creates Kubernetes namespaces for tools and applications with OpenShift monitoring labels",
+    "Deploys Nullplatform base Helm chart with configurable gateway, ingress, and observability integrations",
+    "Supports cloud-native load balancer security controls for AWS security groups, Azure NSGs, GCP firewalls, and OCI security lists",
+    "Enables optional telemetry exporters for Prometheus, Loki, GELF, Dynatrace, Datadog, New Relic, and CloudWatch",
+    "Exposes security resource identifiers as outputs for cross-module wiring"
+  ],
+  "inputs": [
+    {
+      "name": "nrn",
+      "description": "The Nullplatform Resource Name (NRN).",
+      "required": true
+    },
+    {
+      "name": "np_api_key",
+      "description": "Nullplatform API key for authentication (account level).",
+      "required": true
+    },
+    {
+      "name": "k8s_provider",
+      "description": "Cloud provider (eks, gke, aks, oke and aro).",
+      "required": true
+    },
+    {
+      "name": "nullplatform_base_helm_version",
+      "description": "Helm chart version for the nullplatform base.",
+      "required": false
+    },
+    {
+      "name": "namespace",
+      "description": "Kubernetes namespace where the agent runs.",
+      "required": false
+    },
+    {
+      "name": "aws_region",
+      "description": "AWS region where resources will be deployed.",
+      "required": false
+    },
+    {
+      "name": "install_gateway_v2_crd",
+      "description": "Install Gateway API v2 CRDs.",
+      "required": false
+    },
+    {
+      "name": "tls_required",
+      "description": "Whether TLS is required.",
+      "required": false
+    },
+    {
+      "name": "gateway_enabled",
+      "description": "Enable the HTTP gateway.",
+      "required": false
+    },
+    {
+      "name": "gateway_internal_enabled",
+      "description": "Enable the internal (private) gateway.",
+      "required": false
+    },
+    {
+      "name": "gateway_public_enabled",
+      "description": "Enable the public gateway.",
+      "required": false
+    },
+    {
+      "name": "internal_azure_load_balancer_subnet",
+      "description": "The name of the subnet to use in azure private load balancer",
+      "required": false
+    },
+    {
+      "name": "gateway_use_cluster_ip",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "gateway_public_aws_dns_name",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "gateway_private_aws_dns_name",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "control_plane_enabled",
+      "description": "Enable the control plane.",
+      "required": false
+    },
+    {
+      "name": "logging_enabled",
+      "description": "Enable the logging layer.",
+      "required": false
+    },
+    {
+      "name": "prometheus_enabled",
+      "description": "Enable the Prometheus exporter.",
+      "required": false
+    },
+    {
+      "name": "exporter_prometheus_port",
+      "description": "Port Number to Prometheus exporter.",
+      "required": false
+    },
+    {
+      "name": "gelf_enabled",
+      "description": "Enable GELF output.",
+      "required": false
+    },
+    {
+      "name": "gelf_host",
+      "description": "GELF host.",
+      "required": false
+    },
+    {
+      "name": "gelf_port",
+      "description": "GELF port.",
+      "required": false
+    },
+    {
+      "name": "loki_enabled",
+      "description": "Enable Loki output.",
+      "required": false
+    },
+    {
+      "name": "loki_host",
+      "description": "Loki host.",
+      "required": false
+    },
+    {
+      "name": "loki_port",
+      "description": "Loki port.",
+      "required": false
+    },
+    {
+      "name": "loki_user",
+      "description": "Loki username (if applicable).",
+      "required": false
+    },
+    {
+      "name": "loki_password",
+      "description": "Loki password (if applicable).",
+      "required": false
+    },
+    {
+      "name": "loki_bearer_token",
+      "description": "Loki bearer token (if applicable).",
+      "required": false
+    },
+    {
+      "name": "dynatrace_enabled",
+      "description": "Enable Dynatrace integration.",
+      "required": false
+    },
+    {
+      "name": "dynatrace_api_key",
+      "description": "Dynatrace API key.",
+      "required": false
+    },
+    {
+      "name": "dynatrace_environment_id",
+      "description": "Dynatrace environment ID.",
+      "required": false
+    },
+    {
+      "name": "datadog_enabled",
+      "description": "Enable Datadog integration.",
+      "required": false
+    },
+    {
+      "name": "datadog_api_key",
+      "description": "Datadog API key.",
+      "required": false
+    },
+    {
+      "name": "datadog_region",
+      "description": "Datadog region (e.g., us, eu).",
+      "required": false
+    },
+    {
+      "name": "newrelic_enabled",
+      "description": "Enable New Relic integration.",
+      "required": false
+    },
+    {
+      "name": "newrelic_license_key",
+      "description": "New Relic license key.",
+      "required": false
+    },
+    {
+      "name": "newrelic_region",
+      "description": "New Relic region (e.g., US, EU).",
+      "required": false
+    },
+    {
+      "name": "cloudwatch_enabled",
+      "description": "Enable CloudWatch (global switch).",
+      "required": false
+    },
+    {
+      "name": "cloudwatch_logs_enabled",
+      "description": "Enable log forwarding to CloudWatch.",
+      "required": false
+    },
+    {
+      "name": "cloudwatch_performance_metrics_enabled",
+      "description": "Enable performance metrics in CloudWatch.",
+      "required": false
+    },
+    {
+      "name": "cloudwatch_custom_metrics_enabled",
+      "description": "Enable custom metrics in CloudWatch.",
+      "required": false
+    },
+    {
+      "name": "cloudwatch_access_logs_enabled",
+      "description": "Enable access logs in CloudWatch.",
+      "required": false
+    },
+    {
+      "name": "metrics_server_enabled",
+      "description": "Enable the metrics server.",
+      "required": false
+    },
+    {
+      "name": "gateways_enabled",
+      "description": "Enable gateway resources (Helm chart).",
+      "required": false
+    },
+    {
+      "name": "gateway_api_enabled",
+      "description": "Enable the Gateway API.",
+      "required": false
+    },
+    {
+      "name": "gateway_api_crds_install",
+      "description": "Install Gateway API CRDs.",
+      "required": false
+    },
+    {
+      "name": "gateway_public_aws_name",
+      "description": "Name of public gateway in AWS.",
+      "required": false
+    },
+    {
+      "name": "gateway_internal_aws_name",
+      "description": "Name of private gateway in AWS.",
+      "required": false
+    },
+    {
+      "name": "gateway_public_aws_security_group_id",
+      "description": "The ID of the AWS security group for the public gateway. Output from infrastructure/aws/security module.",
+      "required": false
+    },
+    {
+      "name": "gateway_private_aws_security_group_id",
+      "description": "The ID of the AWS security group for the private gateway. Output from infrastructure/aws/security module.",
+      "required": false
+    },
+    {
+      "name": "gateway_public_azure_nsg_id",
+      "description": "The ID of the Azure NSG for the public gateway. Output from infrastructure/azure/security module.",
+      "required": false
+    },
+    {
+      "name": "gateway_private_azure_nsg_id",
+      "description": "The ID of the Azure NSG for the private gateway. Output from infrastructure/azure/security module.",
+      "required": false
+    },
+    {
+      "name": "gateway_public_gcp_firewall_name",
+      "description": "The name of the GCP firewall rule for the public gateway. Output from infrastructure/gcp/security module.",
+      "required": false
+    },
+    {
+      "name": "gateway_private_gcp_firewall_name",
+      "description": "The name of the GCP firewall rule for the private gateway. Output from infrastructure/gcp/security module.",
+      "required": false
+    },
+    {
+      "name": "gateway_public_oci_security_list_management_mode",
+      "description": "OCI Load Balancer security list management mode for the public gateway. Options: 'All' (recommended - auto-manages security lists), 'Frontend' (only frontend rules), 'None' (manual management).",
+      "required": false
+    },
+    {
+      "name": "gateway_private_oci_security_list_management_mode",
+      "description": "OCI Load Balancer security list management mode for the private gateway. Options: 'All' (recommended - auto-manages security lists), 'Frontend' (only frontend rules), 'None' (manual management).",
+      "required": false
+    },
+    {
+      "name": "image_pull_secrets_enabled",
+      "description": "Create and use an image pull secret.",
+      "required": false
+    },
+    {
+      "name": "image_pull_secrets_registry",
+      "description": "Registry URL for the image pull secret.",
+      "required": false
+    },
+    {
+      "name": "image_pull_secrets_username",
+      "description": "Registry username.",
+      "required": false
+    },
+    {
+      "name": "image_pull_secrets_password",
+      "description": "Registry password or token.",
+      "required": false
+    },
+    {
+      "name": "ingressControllers",
+      "description": "Configuración de los IngressControllers públicos y privados",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "public_gateway_security_group_id",
+    "private_gateway_security_group_id",
+    "public_gateway_nsg_id",
+    "private_gateway_nsg_id",
+    "public_gateway_firewall_name",
+    "private_gateway_firewall_name"
+  ],
+  "hash": "5bbd35714875f38b794ffafe1aebf0c7"
+}
+END_AI_METADATA -->

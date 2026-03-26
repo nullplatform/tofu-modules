@@ -2,23 +2,23 @@
 
 ## Description
 
-Creates and configures an Azure Container Registry (ACR) with admin access enabled and customizable SKU options
+This module creates an Azure Container Registry with a specified name and configuration
+
+## Architecture
+
+The module uses the azurerm_container_registry resource to create the container registry, and the data.azurerm_container_registry data source to retrieve the registry's details. The module also uses the module.containerregistry module to create the registry. The inputs flow into the resources through variables, and the outputs are exposed through the output.tf file. The registry is created in the specified location and resource group, with the specified SKU and configuration.
 
 ## Features
 
-- Creates an Azure Container Registry with globally unique naming validation
-- Enables admin authentication with username and password credentials
-- Supports Basic, Standard, and Premium SKU tiers
-- Configures optional zone redundancy for high availability (Premium SKU)
-- Manages retention policies for untagged manifests (Premium SKU)
-- Outputs ACR login server URL and admin credentials for container access
-- Applies custom tags for resource organization and management
+- Creates an Azure Container Registry with a specified name and configuration
+- Configures the registry with a specified SKU and zone redundancy
+- Supports retention policies for untagged manifests
 
 ## Basic Usage
 
 ```hcl
 module "acr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/acr?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/acr?ref=v1.47.0"
 
   containerregistry_name = "your-containerregistry-name"
   location               = "your-location"
@@ -83,3 +83,65 @@ resource "example_resource" "this" {
 | <a name="output_acr_id"></a> [acr\_id](#output\_acr\_id) | The ID of the Azure Container Registry |
 | <a name="output_acr_login_server"></a> [acr\_login\_server](#output\_acr\_login\_server) | The FQDN of the ACR login server |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "acr",
+  "description": "This module creates an Azure Container Registry with a specified name and configuration",
+  "architecture": "The module uses the azurerm_container_registry resource to create the container registry, and the data.azurerm_container_registry data source to retrieve the registry's details. The module also uses the module.containerregistry module to create the registry. The inputs flow into the resources through variables, and the outputs are exposed through the output.tf file. The registry is created in the specified location and resource group, with the specified SKU and configuration.",
+  "features": [
+    "Creates an Azure Container Registry with a specified name and configuration",
+    "Configures the registry with a specified SKU and zone redundancy",
+    "Supports retention policies for untagged manifests"
+  ],
+  "inputs": [
+    {
+      "name": "location",
+      "description": "The Azure region where the container registry will be created (e.g., eastus, westus2)",
+      "required": true
+    },
+    {
+      "name": "resource_group_name",
+      "description": "The name of the resource group where the container registry will be created",
+      "required": true
+    },
+    {
+      "name": "subscription_id",
+      "description": "The ID of the Azure subscription",
+      "required": true
+    },
+    {
+      "name": "containerregistry_name",
+      "description": "The name of the container registry (must be globally unique, lowercase alphanumeric only, 5-50 characters)",
+      "required": true
+    },
+    {
+      "name": "sku",
+      "description": "The SKU of the container registry (Basic, Standard, Premium)",
+      "required": false
+    },
+    {
+      "name": "zone_redundancy_enabled",
+      "description": "Whether to enable zone redundancy for the container registry (requires Premium SKU)",
+      "required": false
+    },
+    {
+      "name": "retention_policy_in_days",
+      "description": "The number of days to retain untagged manifests (requires Premium SKU)",
+      "required": false
+    },
+    {
+      "name": "tags",
+      "description": "A mapping of tags to assign to the container registry",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "acr_id",
+    "acr_login_server",
+    "acr_admin_username",
+    "acr_admin_password"
+  ],
+  "hash": "54e9b4f479061680b81b29246e7f6bc5"
+}
+END_AI_METADATA -->

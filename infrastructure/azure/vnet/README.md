@@ -2,22 +2,23 @@
 
 ## Description
 
-Creates an Azure Virtual Network with configurable address space and subnets using the Azure Verified Module for networking
+Creates an Azure virtual network with specified address space and subnets
+
+## Architecture
+
+This module creates an Azure virtual network using the azurerm provider and configures it with the specified address space and subnets. The virtual network is created in the specified resource group and location. The module uses the avm_res_network_virtualnetwork module from the azure registry to create the virtual network and its subnets. The module also outputs the resource ID of the virtual network, its name, and a map of subnet names to their resource IDs.
 
 ## Features
 
-- Creates an Azure Virtual Network with specified address space and location
-- Configures multiple subnets with custom address prefixes within the virtual network
-- Supports custom tagging for resource organization and management
-- Outputs virtual network ID, name, and subnet resource IDs for integration
-- Uses Azure Verified Module (AVM) for network virtual network resources
-- Provides flexible subnet definition through map-based configuration
+- Creates Azure virtual network with specified address space
+- Configures subnets within the virtual network
+- Supports custom tagging of virtual network resources
 
 ## Basic Usage
 
 ```hcl
 module "vnet" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/vnet?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/vnet?ref=v1.47.0"
 
   address_space       = "your-address-space"
   location            = "your-location"
@@ -71,3 +72,59 @@ resource "example_resource" "this" {
 | <a name="output_vnet_id"></a> [vnet\_id](#output\_vnet\_id) | The resource ID of the virtual network |
 | <a name="output_vnet_name"></a> [vnet\_name](#output\_vnet\_name) | The name of the virtual network |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "vnet",
+  "description": "Creates an Azure virtual network with specified address space and subnets",
+  "architecture": "This module creates an Azure virtual network using the azurerm provider and configures it with the specified address space and subnets. The virtual network is created in the specified resource group and location. The module uses the avm_res_network_virtualnetwork module from the azure registry to create the virtual network and its subnets. The module also outputs the resource ID of the virtual network, its name, and a map of subnet names to their resource IDs.",
+  "features": [
+    "Creates Azure virtual network with specified address space",
+    "Configures subnets within the virtual network",
+    "Supports custom tagging of virtual network resources"
+  ],
+  "inputs": [
+    {
+      "name": "vnet_name",
+      "description": "The name of the virtual network",
+      "required": true
+    },
+    {
+      "name": "resource_group_name",
+      "description": "The name of the resource group where the virtual network will be created",
+      "required": true
+    },
+    {
+      "name": "location",
+      "description": "The Azure region where the virtual network will be created (e.g., eastus, westus2)",
+      "required": true
+    },
+    {
+      "name": "address_space",
+      "description": "The address space (CIDR blocks) for the virtual network (e.g., [\\",
+      "required": true
+    },
+    {
+      "name": "subnets_definition",
+      "description": "A map of subnets to create within the virtual network. Each subnet requires a name and address_prefixes.",
+      "required": true
+    },
+    {
+      "name": "subscription_id",
+      "description": "The ID of the Azure subscription",
+      "required": true
+    },
+    {
+      "name": "tags",
+      "description": "A mapping of tags to assign to the virtual network resources",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "vnet_id",
+    "vnet_name",
+    "subnet_ids"
+  ],
+  "hash": "fd524b5a584382c1be860e9b6871644c"
+}
+END_AI_METADATA -->

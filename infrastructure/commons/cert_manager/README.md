@@ -2,23 +2,26 @@
 
 ## Description
 
-Deploys and configures cert-manager on Kubernetes with multi-cloud DNS provider support for automated TLS certificate management
+Deploys cert-manager with cloud provider specific configurations
+
+## Architecture
+
+The module creates a helm_release resource for cert-manager and another for cert-manager configuration, with values templated based on the cloud provider, it also creates a helm_release for cert-manager-webhook-oci when the cloud provider is oci, the module uses locals to merge and template values for the helm releases, and it uses variables to configure the cloud provider specific settings
 
 ## Features
 
-- Deploys cert-manager Helm chart with CRDs and service account configuration
-- Configures DNS01 challenge solvers for multiple cloud providers (GCP, AWS, Azure, Cloudflare, OCI)
-- Creates provider-specific IAM role annotations and workload identity bindings
-- Deploys cert-manager configuration chart with custom cluster issuers
-- Installs OCI webhook for cert-manager when using Oracle Cloud Infrastructure
-- Supports both public and private domain certificate issuance
-- Configures recursive DNS nameservers for DNS01 challenge resolution
+- Creates cert-manager Helm release with cloud provider specific configurations
+- Configures cert-manager with DNS01 solver for the specified cloud provider
+- Supports wildcard certificates via subject alternative names
+- Deploys cert-manager-webhook-oci for OCI cloud provider
+- Manages Kubernetes service accounts and annotations for cert-manager
+- Creates namespace for cert-manager and cert-manager configuration
 
 ## Basic Usage
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.47.0"
 
   account_slug        = "your-account-slug"
   cloud_provider      = "your-cloud-provider"
@@ -27,11 +30,11 @@ module "cert_manager" {
 }
 ```
 
-### Usage with GCP Provider
+### Usage with Google Cloud Platform
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.47.0"
 
   account_slug        = "your-account-slug"
   cloud_provider      = "gcp"
@@ -42,11 +45,11 @@ module "cert_manager" {
 }
 ```
 
-### Usage with Azure Provider
+### Usage with Azure
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.47.0"
 
   account_slug              = "your-account-slug"
   azure_client_id           = "your-azure-client-id"  # Required when cloud_provider = "azure"
@@ -60,11 +63,11 @@ module "cert_manager" {
 }
 ```
 
-### Usage with Cloudflare Provider
+### Usage with Cloudflare
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.47.0"
 
   account_slug        = "your-account-slug"
   cloud_provider      = "cloudflare"
@@ -74,11 +77,11 @@ module "cert_manager" {
 }
 ```
 
-### Usage with AWS Provider
+### Usage with Amazon Web Services
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.47.0"
 
   account_slug        = "your-account-slug"
   aws_region          = "your-aws-region"  # Required when cloud_provider = "aws"
@@ -89,11 +92,11 @@ module "cert_manager" {
 }
 ```
 
-### Usage with OCI Provider
+### Usage with Oracle Cloud Infrastructure
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.47.0"
 
   account_slug         = "your-account-slug"
   cloud_provider       = "oci"
@@ -162,3 +165,138 @@ resource "example_resource" "this" {
 | <a name="input_private_domain_name"></a> [private\_domain\_name](#input\_private\_domain\_name) | The private domain name for internal certificate issuance | `string` | n/a | yes |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | The GCP project ID for cert-manager DNS01 solver | `string` | `""` | no |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "cert_manager",
+  "description": "Deploys cert-manager with cloud provider specific configurations",
+  "architecture": "The module creates a helm_release resource for cert-manager and another for cert-manager configuration, with values templated based on the cloud provider, it also creates a helm_release for cert-manager-webhook-oci when the cloud provider is oci, the module uses locals to merge and template values for the helm releases, and it uses variables to configure the cloud provider specific settings",
+  "features": [
+    "Creates cert-manager Helm release with cloud provider specific configurations",
+    "Configures cert-manager with DNS01 solver for the specified cloud provider",
+    "Supports wildcard certificates via subject alternative names",
+    "Deploys cert-manager-webhook-oci for OCI cloud provider",
+    "Manages Kubernetes service accounts and annotations for cert-manager",
+    "Creates namespace for cert-manager and cert-manager configuration"
+  ],
+  "inputs": [
+    {
+      "name": "private_domain_name",
+      "description": "The private domain name for internal certificate issuance",
+      "required": true
+    },
+    {
+      "name": "hosted_zone_name",
+      "description": "The hosted zone name (if applicable).",
+      "required": true
+    },
+    {
+      "name": "account_slug",
+      "description": "The nullplatform account slug.",
+      "required": true
+    },
+    {
+      "name": "cloud_provider",
+      "description": "The cloud provider to use: gcp, azure, aws, cloudflare, or oci",
+      "required": true
+    },
+    {
+      "name": "gcp_sa_email",
+      "description": "The GCP service account email for cert-manager",
+      "required": false
+    },
+    {
+      "name": "project_id",
+      "description": "The GCP project ID for cert-manager DNS01 solver",
+      "required": false
+    },
+    {
+      "name": "aws_sa_arn",
+      "description": "The AWS IAM role ARN for cert-manager.",
+      "required": false
+    },
+    {
+      "name": "azure_client_id",
+      "description": "The Azure client ID for cert-manager.",
+      "required": false
+    },
+    {
+      "name": "azure_subscription_id",
+      "description": "The Azure subscription ID.",
+      "required": false
+    },
+    {
+      "name": "azure_resource_group_name",
+      "description": "The name of the Azure resource group that contains the DNS zone.",
+      "required": false
+    },
+    {
+      "name": "azure_tenant_id",
+      "description": "The Azure tenant ID.",
+      "required": false
+    },
+    {
+      "name": "azure_hosted_zone_name",
+      "description": "The hosted zone name in Azure DNS.",
+      "required": false
+    },
+    {
+      "name": "cloudflare_token",
+      "description": "The Cloudflare API token (minimum permissions: Zone:DNS:Edit and Zone:Read).",
+      "required": false
+    },
+    {
+      "name": "aws_region",
+      "description": "The AWS region.",
+      "required": false
+    },
+    {
+      "name": "oci_compartment_ocid",
+      "description": "The OCID of the OCI compartment where the DNS zone is located.",
+      "required": false
+    },
+    {
+      "name": "oci_region",
+      "description": "The OCI region for DNS operations (e.g., us-ashburn-1).",
+      "required": false
+    },
+    {
+      "name": "cert_manager_version",
+      "description": "The version of cert-manager Helm chart to deploy",
+      "required": false
+    },
+    {
+      "name": "cert_manager_namespace",
+      "description": "The Kubernetes namespace where cert-manager will be deployed",
+      "required": false
+    },
+    {
+      "name": "cert_manager_config_version",
+      "description": "The version of the cert-manager configuration Helm chart",
+      "required": false
+    },
+    {
+      "name": "cloudflare_secret_name",
+      "description": "The name of the Kubernetes secret that stores the Cloudflare API token.",
+      "required": false
+    },
+    {
+      "name": "oci_sa_ocid",
+      "description": "The OCID of the OCI workload identity principal for cert-manager. Optional when using Dynamic Groups with Workload Identity.",
+      "required": false
+    },
+    {
+      "name": "cert_manager_webhook_oci_version",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "cert_manager_webhook_oci_namespace",
+      "description": "",
+      "required": false
+    }
+  ],
+  "outputs": [],
+  "hash": "635e55f9899b49f3e73b8e4191f3db27"
+}
+END_AI_METADATA -->

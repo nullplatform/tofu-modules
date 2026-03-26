@@ -2,23 +2,25 @@
 
 ## Description
 
-Creates and configures an AWS EKS cluster with support for both Auto Mode and Managed Node Groups, including VPC integration, access control, and optional control plane logging
+Deploys an EKS cluster with optional Auto Mode and Managed Node Groups
+
+## Architecture
+
+The module creates an EKS cluster using the terraform-aws-modules/eks/aws module, which provisions the necessary AWS resources, including the EKS cluster, node groups, and security groups. The module also configures the cluster's logging and access settings. The EKS cluster is connected to the provided VPC and subnets, and the module creates the necessary security group rules for NLB health checks and HTTPS traffic. The module also supports Auto Mode, which allows for the creation of node pools with specific instance types and sizes.
 
 ## Features
 
-- Creates an AWS EKS cluster with configurable Kubernetes version and networking
-- Supports both EKS Auto Mode and traditional Managed Node Groups deployment modes
-- Configures VPC CNI, CoreDNS, kube-proxy, and pod identity agent add-ons
-- Manages cluster access entries and IRSA (IAM Roles for Service Accounts)
-- Provides configurable API server endpoint access with public and private options
-- Implements security group rules for NLB health checks and Istio gateway traffic
-- Enables optional CloudWatch logging for control plane components with configurable retention
+- Creates EKS cluster with Auto Mode and Managed Node Groups
+- Configures cluster logging and access settings
+- Provisions necessary AWS resources, including security groups and node groups
+- Supports NLB health checks and HTTPS traffic
+- Allows for customization of node pool instance types and sizes
 
 ## Basic Usage
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/eks?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/eks?ref=v1.47.0"
 
   aws_subnets_private_ids = "your-aws-subnets-private-ids"
   aws_vpc_vpc_id          = "your-aws-vpc-vpc-id"
@@ -93,3 +95,136 @@ resource "example_resource" "this" {
 | <a name="output_eks_node_iam_role_name"></a> [eks\_node\_iam\_role\_name](#output\_eks\_node\_iam\_role\_name) | Name of the IAM role for EKS nodes |
 | <a name="output_eks_oidc_provider_arn"></a> [eks\_oidc\_provider\_arn](#output\_eks\_oidc\_provider\_arn) | ARN of the cluster's OIDC provider |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "eks",
+  "description": "Deploys an EKS cluster with optional Auto Mode and Managed Node Groups",
+  "architecture": "The module creates an EKS cluster using the terraform-aws-modules/eks/aws module, which provisions the necessary AWS resources, including the EKS cluster, node groups, and security groups. The module also configures the cluster's logging and access settings. The EKS cluster is connected to the provided VPC and subnets, and the module creates the necessary security group rules for NLB health checks and HTTPS traffic. The module also supports Auto Mode, which allows for the creation of node pools with specific instance types and sizes.",
+  "features": [
+    "Creates EKS cluster with Auto Mode and Managed Node Groups",
+    "Configures cluster logging and access settings",
+    "Provisions necessary AWS resources, including security groups and node groups",
+    "Supports NLB health checks and HTTPS traffic",
+    "Allows for customization of node pool instance types and sizes"
+  ],
+  "inputs": [
+    {
+      "name": "name",
+      "description": "Cluster name",
+      "required": true
+    },
+    {
+      "name": "aws_vpc_vpc_id",
+      "description": "VPC ID where the EKS cluster will be deployed",
+      "required": true
+    },
+    {
+      "name": "aws_subnets_private_ids",
+      "description": "List of private subnet IDs for the EKS cluster and node groups",
+      "required": true
+    },
+    {
+      "name": "auto_mode_node_pools",
+      "description": "Node pools for Auto Mode. Valid values are 'general-purpose' and 'system'.",
+      "required": false
+    },
+    {
+      "name": "endpoint_public_access_cidrs",
+      "description": "List of CIDR blocks allowed to access the public EKS API server endpoint",
+      "required": false
+    },
+    {
+      "name": "ami_type",
+      "description": "AMI type to use with the node",
+      "required": false
+    },
+    {
+      "name": "instance_types",
+      "description": "Instance type to use",
+      "required": false
+    },
+    {
+      "name": "kubernetes_version",
+      "description": "K8s version to use",
+      "required": false
+    },
+    {
+      "name": "access_entries",
+      "description": "Map of access entries for the EKS cluster",
+      "required": false
+    },
+    {
+      "name": "use_auto_mode",
+      "description": "Use EKS Auto Mode (true) or Managed Node Groups (false)",
+      "required": false
+    },
+    {
+      "name": "attach_cluster_primary_security_group",
+      "description": "Attach cluster primary security group to node groups",
+      "required": false
+    },
+    {
+      "name": "node_group_min_size",
+      "description": "Minimum number of nodes in the managed node group",
+      "required": false
+    },
+    {
+      "name": "node_group_max_size",
+      "description": "Maximum number of nodes in the managed node group",
+      "required": false
+    },
+    {
+      "name": "node_group_desired_size",
+      "description": "Desired number of nodes in the managed node group",
+      "required": false
+    },
+    {
+      "name": "endpoint_public_access",
+      "description": "Whether the Amazon EKS public API server endpoint is enabled",
+      "required": false
+    },
+    {
+      "name": "endpoint_private_access",
+      "description": "Whether the Amazon EKS private API server endpoint is enabled",
+      "required": false
+    },
+    {
+      "name": "security_group_additional_rules",
+      "description": "Whether to create additional security group rules for NLB health checks and HTTPS traffic",
+      "required": false
+    },
+    {
+      "name": "additional_network_cidrs",
+      "description": "Additional CIDR blocks to allow in security group rules (e.g., peered VPC, on-premises network).",
+      "required": false
+    },
+    {
+      "name": "enabled_log_types",
+      "description": "List of EKS control plane log types to enable. Valid values: api, audit, authenticator, controllerManager, scheduler",
+      "required": false
+    },
+    {
+      "name": "create_cloudwatch_log_group",
+      "description": "Whether to create a CloudWatch log group for cluster logs. If false and logging is enabled, AWS creates it automatically but outside of Terraform management.",
+      "required": false
+    },
+    {
+      "name": "cloudwatch_log_group_retention_in_days",
+      "description": "Number of days to retain log events in the CloudWatch log group",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "eks_cluster_name",
+    "eks_cluster_endpoint",
+    "eks_cluster_ca",
+    "eks_oidc_provider_arn",
+    "eks_node_iam_role_arn",
+    "eks_node_iam_role_name",
+    "eks_cluster_security_group_id",
+    "eks_cluster_primary_security_group_id"
+  ],
+  "hash": "f3e8532d2e647a1ae01576d448e15ff5"
+}
+END_AI_METADATA -->

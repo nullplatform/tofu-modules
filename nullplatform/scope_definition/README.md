@@ -2,23 +2,25 @@
 
 ## Description
 
-Creates and configures Nullplatform service specifications, scope types, and action specifications from templates with external provider integrations
+This module provisions a nullplatform service specification with linked scope types and action specifications from remote JSON templates
+
+## Architecture
+
+data.http resources fetch JSON templates from GitHub, data.external resources render them with gomplate, nullplatform_service_specification creates the service spec, nullplatform_scope_type links a scope type to that spec, nullplatform_action_specification resources create multiple actions, and a null_resource patches the NRN with provider metadata via local-exec
 
 ## Features
 
-- Fetches service specification, scope type, and action templates from remote repositories
-- Processes templates using gomplate with dynamic variable substitution
-- Creates Nullplatform service specifications with customizable attributes and selectors
-- Generates scope type definitions linked to service specifications
-- Deploys multiple action specifications for scope lifecycle operations
-- Configures external metrics and logging providers via NRN patching
-- Supports customizable repository branches and service paths for template sourcing
+- Fetches and renders remote JSON templates using gomplate with NRN context
+- Creates service specification with selectors and lifecycle policies
+- Links scope type to service specification for environment scoping
+- Generates multiple action specifications for deployment and scaling operations
+- Patches NRN with external metrics and logging provider configuration
 
 ## Basic Usage
 
 ```hcl
 module "scope_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v1.43.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v1.47.0"
 
   np_api_key = "your-np-api-key"
   nrn        = "your-nrn"
@@ -90,3 +92,102 @@ resource "example_resource" "this" {
 | <a name="output_service_slug"></a> [service\_slug](#output\_service\_slug) | Slug (unique name) of the service specification created in nullplatform. |
 | <a name="output_service_specification_id"></a> [service\_specification\_id](#output\_service\_specification\_id) | ID of the service specification created in nullplatform. |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "scope_definition",
+  "description": "This module provisions a nullplatform service specification with linked scope types and action specifications from remote JSON templates",
+  "architecture": "data.http resources fetch JSON templates from GitHub, data.external resources render them with gomplate, nullplatform_service_specification creates the service spec, nullplatform_scope_type links a scope type to that spec, nullplatform_action_specification resources create multiple actions, and a null_resource patches the NRN with provider metadata via local-exec",
+  "features": [
+    "Fetches and renders remote JSON templates using gomplate with NRN context",
+    "Creates service specification with selectors and lifecycle policies",
+    "Links scope type to service specification for environment scoping",
+    "Generates multiple action specifications for deployment and scaling operations",
+    "Patches NRN with external metrics and logging provider configuration"
+  ],
+  "inputs": [
+    {
+      "name": "nrn",
+      "description": "Unique NRN identifier of the environment or resource in nullplatform",
+      "required": true
+    },
+    {
+      "name": "np_api_key",
+      "description": "Nullplatform API key used for executing local commands (e.g., 'np nrn patch')",
+      "required": true
+    },
+    {
+      "name": "repository_service_spec",
+      "description": "repository of service spec",
+      "required": false
+    },
+    {
+      "name": "repository_service_spec_branch",
+      "description": "branch reference of service spec",
+      "required": false
+    },
+    {
+      "name": "repository_scope_template",
+      "description": "repository of scope template",
+      "required": false
+    },
+    {
+      "name": "repository_scope_template_branch",
+      "description": "branch reference of scope template",
+      "required": false
+    },
+    {
+      "name": "repository_action_templates",
+      "description": "repository of action template",
+      "required": false
+    },
+    {
+      "name": "repository_action_templates_branch",
+      "description": "branch reference of action template",
+      "required": false
+    },
+    {
+      "name": "service_path",
+      "description": "Path within the repository where the service specification files are stored (e.g., 'services/api')",
+      "required": false
+    },
+    {
+      "name": "repo_path",
+      "description": "Base path to the repository used as context for gomplate template rendering",
+      "required": false
+    },
+    {
+      "name": "action_spec_names",
+      "description": "List of action specification template names to fetch and create for scope operations",
+      "required": false
+    },
+    {
+      "name": "service_spec_name",
+      "description": "Name of the service that will be created from the specification template",
+      "required": false
+    },
+    {
+      "name": "service_spec_description",
+      "description": "Description of the created service or associated scope type",
+      "required": false
+    },
+    {
+      "name": "external_metrics_provider",
+      "description": "Name of the external metrics provider for monitoring integration",
+      "required": false
+    },
+    {
+      "name": "external_logging_provider",
+      "description": "Name of the external log provider",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "service_specification_id",
+    "service_slug",
+    "scope_type_id",
+    "actions_created"
+  ],
+  "hash": "ae918374b3413dc51f7bad3784707086"
+}
+END_AI_METADATA -->

@@ -1,7 +1,3 @@
-################################################################################
-# Scope Definition Module Variables
-################################################################################
-
 variable "nrn" {
   type        = string
   description = "Nullplatform Resource Name (organization:account format)"
@@ -19,7 +15,6 @@ variable "tags_selectors" {
   type        = map(string)
 }
 
-
 variable "channel_sources" {
   type        = list(string)
   description = "List of sources for the notification channel (e.g., ['monitoring', 'alerts'])"
@@ -30,7 +25,6 @@ variable "channel_type" {
   type        = string
   description = "Type of the notification channel (e.g., 'agent')"
   default     = "agent"
-
 }
 
 variable "service_specification_slug" {
@@ -38,41 +32,25 @@ variable "service_specification_slug" {
   description = "The slug of the service definition"
   default     = null
 }
-variable "workflow_override_path" {
-  type        = string
-  default     = null
-  description = "Path to a custom workflow file to override the default one"
 
+variable "repository_service_spec_repo" {
+  type        = string
+  description = "GitHub repository name containing the service specs (used to build the agent cmdline path)"
+}
+
+variable "base_clone_path" {
+  type        = string
+  default     = "/root/.np"
+  description = "Base path where the service repository is cloned inside the agent pod"
 }
 
 variable "service_path" {
   type        = string
-  default     = null
-  description = "Path to the service configuration"
-
-}
-variable "agent_command" {
-  type = object({
-    type = string
-    data = object({
-      cmdline     = string
-      arguments   = optional(list(string), [])
-      environment = optional(map(string), {})
-    })
-  })
-  default = null
-
+  description = "Path to the service directory within the repository (e.g., databases/postgres/k8s)"
 }
 
-variable "workflow_override_values" {
-  type        = string
-  default     = "null"
-  description = "Values to override in the workflow file"
-
-}
-
-variable "service_specification_id" {
-  type        = string
-  description = "The ID of the service definition associated with the agent"
-  default     = null
+variable "agent_arguments" {
+  type        = list(string)
+  default     = []
+  description = "Arguments to pass to the agent entrypoint command"
 }
