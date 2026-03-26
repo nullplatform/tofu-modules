@@ -126,12 +126,6 @@ variable "external_logging_provider" {
   default     = "external"
 }
 
-variable "organization_nrn" {
-  type        = string
-  description = "Organization NRN used to replace the NRN placeholder in scope-configuration.json.tpl"
-  default     = ""
-}
-
 variable "create_scope_configuration" {
   type        = bool
   default     = false
