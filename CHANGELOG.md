@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.48.0](https://github.com/nullplatform/tofu-modules/compare/v1.47.0...v1.48.0) (2026-03-26)
+
+
+### Features
+
+* do not require org nrn ([#261](https://github.com/nullplatform/tofu-modules/issues/261)) ([25d5a5b](https://github.com/nullplatform/tofu-modules/commit/25d5a5befe31ca27dcc86d2000281e339e44adbc))
+* **scope-definition:** add optional scope configuration support ([#254](https://github.com/nullplatform/tofu-modules/issues/254)) ([b585706](https://github.com/nullplatform/tofu-modules/commit/b585706f43007d0467d9ab2f3fac7976283d6ca8))
+
+
+### Bug Fixes
+
+* add terraform-docs step to release PR generation flow ([#262](https://github.com/nullplatform/tofu-modules/issues/262)) ([5a35267](https://github.com/nullplatform/tofu-modules/commit/5a35267bf7c503b8a73c83ab1d3d2ac7904f1d6c))
+
 ## [1.47.0](https://github.com/nullplatform/tofu-modules/compare/v1.46.0...v1.47.0) (2026-03-26)
 
 
