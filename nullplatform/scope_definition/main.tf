@@ -105,6 +105,6 @@ resource "nullplatform_provider_specification" "from_scope_configuration" {
   description      = local.scope_configuration.description
   category         = local.scope_configuration.category
   allow_dimensions = local.scope_configuration.allow_dimensions
-  visible_to       = [var.organization_nrn]
+  visible_to       = [var.nrn]
   schema           = jsonencode(local.scope_configuration.schema)
 }
