@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.48.3](https://github.com/nullplatform/tofu-modules/compare/v1.48.2...v1.48.3) (2026-03-27)
+
+
+### Bug Fixes
+
+* add missing description and type fields to module variables ([#268](https://github.com/nullplatform/tofu-modules/issues/268)) ([36faf96](https://github.com/nullplatform/tofu-modules/commit/36faf96018e4ce5fc618761fc1b41e55f0537754))
+
 ## [1.48.2](https://github.com/nullplatform/tofu-modules/compare/v1.48.1...v1.48.2) (2026-03-27)
 
 
