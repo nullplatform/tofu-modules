@@ -3,21 +3,21 @@
 ###############################################################################
 
 variable "istio_base_version" {
-  type    = string
-  default = "1.27.1"
-
+  description = "Helm chart version for the istio-base component"
+  type        = string
+  default     = "1.27.1"
 }
 
 variable "istio_ingressgateway_version" {
-  type    = string
-  default = "1.27.1"
-
+  description = "Helm chart version for the Istio ingress gateway"
+  type        = string
+  default     = "1.27.1"
 }
 
 variable "istiod_version" {
-  type    = string
-  default = "1.27.1"
-
+  description = "Helm chart version for istiod (Istio control plane)"
+  type        = string
+  default     = "1.27.1"
 }
 
 ###############################################################################

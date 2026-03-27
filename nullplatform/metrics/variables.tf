@@ -1,6 +1,7 @@
 variable "prometheus_url" {
-  type    = string
-  default = ""
+  description = "URL of the Prometheus instance used for metrics scraping"
+  type        = string
+  default     = ""
 }
 variable "dimensions" {
   default     = {}
