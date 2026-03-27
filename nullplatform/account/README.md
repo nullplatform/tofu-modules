@@ -18,7 +18,7 @@ The module utilizes the nullplatform_account Terraform resource to create accoun
 
 ```hcl
 module "account" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/account?ref=v1.48.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/account?ref=v1.48.3"
 
   np_api_key            = "your-np-api-key"
   nullplatform_accounts = "your-nullplatform-accounts"

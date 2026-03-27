@@ -2,23 +2,26 @@
 
 ## Description
 
-Deploys Istio with Helm charts to create an ingress gateway
+Deploys Istio service mesh components (base, istiod control plane, and ingress gateway) to a Kubernetes cluster using Helm charts
 
 ## Architecture
 
-The module creates three Helm releases: istio-base, istiod, and istio-ingressgateway, which are connected through dependencies. The istio-ingressgateway release uses values from the locals.tf file, which are templated from the istio_ingressgateway.tmpl.yaml file. The Helm releases are configured with various options, such as create_namespace, disable_webhooks, and force_update. The module also uses variables from the variables.tf file to customize the deployment, such as the service type, status port, and HTTPS port.
+The module creates three helm_release resources in sequence: istio-base for CRDs and foundational resources, istiod for the Istio control plane, and istio-ingressgateway for ingress traffic management. The helm_release resources use explicit dependencies (depends_on) to ensure proper installation order, with istiod depending on istio-base and the gateway depending on istiod. The ingress gateway is configured via a templated values file that translates input variables into Helm chart values for service type, port mappings (status, HTTPS, and optional HTTP2), creating a Kubernetes service and deployment that routes external traffic into the mesh.
 
 ## Features
 
-- Creates Helm releases for Istio base, Istiod, and ingress gateway
-- Configures Istio ingress gateway with customizable service type and ports
-- Supports HTTP2 protocol with customizable port and target port
+- Creates Istio base installation with CRDs and cluster-scoped resources
+- Deploys istiod control plane for service mesh management and configuration distribution
+- Provisions Istio ingress gateway with configurable LoadBalancer service type
+- Configures HTTPS ingress on port 443 with customizable target port for TLS termination
+- Supports optional HTTP2 port exposure on port 80 for non-TLS traffic
+- Implements atomic Helm deployments with automatic rollback on failure and pod recreation
 
 ## Basic Usage
 
 ```hcl
 module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v1.48.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v1.48.3"
 }
 ```
 
@@ -61,9 +64,9 @@ resource "example_resource" "this" {
 | <a name="input_http2_target_port"></a> [http2\_target\_port](#input\_http2\_target\_port) | The container target port for HTTP2 when enabled | `number` | `80` | no |
 | <a name="input_https_port"></a> [https\_port](#input\_https\_port) | The external HTTPS service port | `number` | `443` | no |
 | <a name="input_https_target_port"></a> [https\_target\_port](#input\_https\_target\_port) | The container target port for HTTPS | `number` | `8443` | no |
-| <a name="input_istio_base_version"></a> [istio\_base\_version](#input\_istio\_base\_version) | n/a | `string` | `"1.27.1"` | no |
-| <a name="input_istio_ingressgateway_version"></a> [istio\_ingressgateway\_version](#input\_istio\_ingressgateway\_version) | n/a | `string` | `"1.27.1"` | no |
-| <a name="input_istiod_version"></a> [istiod\_version](#input\_istiod\_version) | n/a | `string` | `"1.27.1"` | no |
+| <a name="input_istio_base_version"></a> [istio\_base\_version](#input\_istio\_base\_version) | Helm chart version for the istio-base component | `string` | `"1.27.1"` | no |
+| <a name="input_istio_ingressgateway_version"></a> [istio\_ingressgateway\_version](#input\_istio\_ingressgateway\_version) | Helm chart version for the Istio ingress gateway | `string` | `"1.27.1"` | no |
+| <a name="input_istiod_version"></a> [istiod\_version](#input\_istiod\_version) | Helm chart version for istiod (Istio control plane) | `string` | `"1.27.1"` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | The Kubernetes namespace where gateway will be installed. | `string` | `"istio-system"` | no |
 | <a name="input_repository"></a> [repository](#input\_repository) | The Helm repository URL (e.g., https://istio-release.storage.googleapis.com/charts). | `string` | `"https://istio-release.storage.googleapis.com/charts"` | no |
 | <a name="input_service_type"></a> [service\_type](#input\_service\_type) | The Kubernetes service type for the Istio ingress gateway | `string` | `"LoadBalancer"` | no |
@@ -73,27 +76,30 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "istio",
-  "description": "Deploys Istio with Helm charts to create an ingress gateway",
-  "architecture": "The module creates three Helm releases: istio-base, istiod, and istio-ingressgateway, which are connected through dependencies. The istio-ingressgateway release uses values from the locals.tf file, which are templated from the istio_ingressgateway.tmpl.yaml file. The Helm releases are configured with various options, such as create_namespace, disable_webhooks, and force_update. The module also uses variables from the variables.tf file to customize the deployment, such as the service type, status port, and HTTPS port.",
+  "description": "Deploys Istio service mesh components (base, istiod control plane, and ingress gateway) to a Kubernetes cluster using Helm charts",
+  "architecture": "The module creates three helm_release resources in sequence: istio-base for CRDs and foundational resources, istiod for the Istio control plane, and istio-ingressgateway for ingress traffic management. The helm_release resources use explicit dependencies (depends_on) to ensure proper installation order, with istiod depending on istio-base and the gateway depending on istiod. The ingress gateway is configured via a templated values file that translates input variables into Helm chart values for service type, port mappings (status, HTTPS, and optional HTTP2), creating a Kubernetes service and deployment that routes external traffic into the mesh.",
   "features": [
-    "Creates Helm releases for Istio base, Istiod, and ingress gateway",
-    "Configures Istio ingress gateway with customizable service type and ports",
-    "Supports HTTP2 protocol with customizable port and target port"
+    "Creates Istio base installation with CRDs and cluster-scoped resources",
+    "Deploys istiod control plane for service mesh management and configuration distribution",
+    "Provisions Istio ingress gateway with configurable LoadBalancer service type",
+    "Configures HTTPS ingress on port 443 with customizable target port for TLS termination",
+    "Supports optional HTTP2 port exposure on port 80 for non-TLS traffic",
+    "Implements atomic Helm deployments with automatic rollback on failure and pod recreation"
   ],
   "inputs": [
     {
       "name": "istio_base_version",
-      "description": "",
+      "description": "Helm chart version for the istio-base component",
       "required": false
     },
     {
       "name": "istio_ingressgateway_version",
-      "description": "",
+      "description": "Helm chart version for the Istio ingress gateway",
       "required": false
     },
     {
       "name": "istiod_version",
-      "description": "",
+      "description": "Helm chart version for istiod (Istio control plane)",
       "required": false
     },
     {
@@ -143,6 +149,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "e04845dd33391c1391743d1060704bd1"
+  "hash": "aceae57fe7cee43c75864347dae6a3d5"
 }
 END_AI_METADATA -->

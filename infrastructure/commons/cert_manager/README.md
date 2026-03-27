@@ -2,26 +2,27 @@
 
 ## Description
 
-Deploys cert-manager with cloud provider specific configurations
+Deploys cert-manager and cloud-specific DNS solver configuration for automated certificate management across multiple cloud providers
 
 ## Architecture
 
-The module creates a helm_release resource for cert-manager and another for cert-manager configuration, with values templated based on the cloud provider, it also creates a helm_release for cert-manager-webhook-oci when the cloud provider is oci, the module uses locals to merge and template values for the helm releases, and it uses variables to configure the cloud provider specific settings
+This module creates three helm_release resources to deploy cert-manager: the core cert-manager chart from jetstack.io with a kubernetes_service_account annotated with cloud-specific IAM identities (GCP service account, AWS IAM role ARN, Azure client ID, or OCI principal), a nullplatform-cert-manager-config chart that configures ClusterIssuer and Certificate resources using templated values based on cloud_provider selection, and conditionally creates a cert-manager-webhook-oci helm_release for OCI DNS validation. The common_context and provider_context locals merge cloud-specific variables into template files that configure DNS01 solvers, with each cloud provider's credentials flowing through serviceAccount annotations to enable DNS challenge validation for ACME certificates.
 
 ## Features
 
-- Creates cert-manager Helm release with cloud provider specific configurations
-- Configures cert-manager with DNS01 solver for the specified cloud provider
-- Supports wildcard certificates via subject alternative names
-- Deploys cert-manager-webhook-oci for OCI cloud provider
-- Manages Kubernetes service accounts and annotations for cert-manager
-- Creates namespace for cert-manager and cert-manager configuration
+- Deploys cert-manager with CRDs enabled and DNS01 recursive nameservers configured for ACME challenges
+- Configures cloud-specific IAM authentication via Kubernetes service account annotations (GKE Workload Identity, EKS IRSA, Azure Workload Identity, OCI Workload Identity)
+- Creates ClusterIssuer and Certificate resources through nullplatform-cert-manager-config chart with DNS01 solver configuration
+- Supports multi-cloud DNS validation across GCP Cloud DNS, AWS Route53, Azure DNS, Cloudflare, and OCI DNS
+- Deploys cert-manager-webhook-oci extension for Oracle Cloud Infrastructure DNS challenges
+- Manages both public and private domain certificate issuance with configurable hosted zones
+- Enforces cloud-provider-specific variable validation to ensure required credentials are provided
 
 ## Basic Usage
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.48.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.48.3"
 
   account_slug        = "your-account-slug"
   cloud_provider      = "your-cloud-provider"
@@ -30,11 +31,11 @@ module "cert_manager" {
 }
 ```
 
-### Usage with Google Cloud Platform
+### Usage with GCP Configuration
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.48.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.48.3"
 
   account_slug        = "your-account-slug"
   cloud_provider      = "gcp"
@@ -45,11 +46,11 @@ module "cert_manager" {
 }
 ```
 
-### Usage with Azure
+### Usage with Azure Configuration
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.48.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.48.3"
 
   account_slug              = "your-account-slug"
   azure_client_id           = "your-azure-client-id"  # Required when cloud_provider = "azure"
@@ -63,11 +64,11 @@ module "cert_manager" {
 }
 ```
 
-### Usage with Cloudflare
+### Usage with Cloudflare Configuration
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.48.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.48.3"
 
   account_slug        = "your-account-slug"
   cloud_provider      = "cloudflare"
@@ -77,11 +78,11 @@ module "cert_manager" {
 }
 ```
 
-### Usage with Amazon Web Services
+### Usage with AWS Configuration
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.48.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.48.3"
 
   account_slug        = "your-account-slug"
   aws_region          = "your-aws-region"  # Required when cloud_provider = "aws"
@@ -92,11 +93,11 @@ module "cert_manager" {
 }
 ```
 
-### Usage with Oracle Cloud Infrastructure
+### Usage with OCI Configuration
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.48.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.48.3"
 
   account_slug         = "your-account-slug"
   cloud_provider       = "oci"
@@ -152,8 +153,8 @@ resource "example_resource" "this" {
 | <a name="input_cert_manager_config_version"></a> [cert\_manager\_config\_version](#input\_cert\_manager\_config\_version) | The version of the cert-manager configuration Helm chart | `string` | `"2.34.0"` | no |
 | <a name="input_cert_manager_namespace"></a> [cert\_manager\_namespace](#input\_cert\_manager\_namespace) | The Kubernetes namespace where cert-manager will be deployed | `string` | `"cert-manager"` | no |
 | <a name="input_cert_manager_version"></a> [cert\_manager\_version](#input\_cert\_manager\_version) | The version of cert-manager Helm chart to deploy | `string` | `"1.18.2"` | no |
-| <a name="input_cert_manager_webhook_oci_namespace"></a> [cert\_manager\_webhook\_oci\_namespace](#input\_cert\_manager\_webhook\_oci\_namespace) | n/a | `string` | `"cert-manager"` | no |
-| <a name="input_cert_manager_webhook_oci_version"></a> [cert\_manager\_webhook\_oci\_version](#input\_cert\_manager\_webhook\_oci\_version) | #########web hook | `string` | `"1.4.1"` | no |
+| <a name="input_cert_manager_webhook_oci_namespace"></a> [cert\_manager\_webhook\_oci\_namespace](#input\_cert\_manager\_webhook\_oci\_namespace) | Kubernetes namespace where the cert-manager OCI webhook is deployed | `string` | `"cert-manager"` | no |
+| <a name="input_cert_manager_webhook_oci_version"></a> [cert\_manager\_webhook\_oci\_version](#input\_cert\_manager\_webhook\_oci\_version) | Helm chart version for the cert-manager OCI webhook | `string` | `"1.4.1"` | no |
 | <a name="input_cloud_provider"></a> [cloud\_provider](#input\_cloud\_provider) | The cloud provider to use: gcp, azure, aws, cloudflare, or oci | `string` | n/a | yes |
 | <a name="input_cloudflare_secret_name"></a> [cloudflare\_secret\_name](#input\_cloudflare\_secret\_name) | The name of the Kubernetes secret that stores the Cloudflare API token. | `string` | `"cloudflare-api-token-secret"` | no |
 | <a name="input_cloudflare_token"></a> [cloudflare\_token](#input\_cloudflare\_token) | The Cloudflare API token (minimum permissions: Zone:DNS:Edit and Zone:Read). | `string` | `""` | no |
@@ -169,15 +170,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "cert_manager",
-  "description": "Deploys cert-manager with cloud provider specific configurations",
-  "architecture": "The module creates a helm_release resource for cert-manager and another for cert-manager configuration, with values templated based on the cloud provider, it also creates a helm_release for cert-manager-webhook-oci when the cloud provider is oci, the module uses locals to merge and template values for the helm releases, and it uses variables to configure the cloud provider specific settings",
+  "description": "Deploys cert-manager and cloud-specific DNS solver configuration for automated certificate management across multiple cloud providers",
+  "architecture": "This module creates three helm_release resources to deploy cert-manager: the core cert-manager chart from jetstack.io with a kubernetes_service_account annotated with cloud-specific IAM identities (GCP service account, AWS IAM role ARN, Azure client ID, or OCI principal), a nullplatform-cert-manager-config chart that configures ClusterIssuer and Certificate resources using templated values based on cloud_provider selection, and conditionally creates a cert-manager-webhook-oci helm_release for OCI DNS validation. The common_context and provider_context locals merge cloud-specific variables into template files that configure DNS01 solvers, with each cloud provider's credentials flowing through serviceAccount annotations to enable DNS challenge validation for ACME certificates.",
   "features": [
-    "Creates cert-manager Helm release with cloud provider specific configurations",
-    "Configures cert-manager with DNS01 solver for the specified cloud provider",
-    "Supports wildcard certificates via subject alternative names",
-    "Deploys cert-manager-webhook-oci for OCI cloud provider",
-    "Manages Kubernetes service accounts and annotations for cert-manager",
-    "Creates namespace for cert-manager and cert-manager configuration"
+    "Deploys cert-manager with CRDs enabled and DNS01 recursive nameservers configured for ACME challenges",
+    "Configures cloud-specific IAM authentication via Kubernetes service account annotations (GKE Workload Identity, EKS IRSA, Azure Workload Identity, OCI Workload Identity)",
+    "Creates ClusterIssuer and Certificate resources through nullplatform-cert-manager-config chart with DNS01 solver configuration",
+    "Supports multi-cloud DNS validation across GCP Cloud DNS, AWS Route53, Azure DNS, Cloudflare, and OCI DNS",
+    "Deploys cert-manager-webhook-oci extension for Oracle Cloud Infrastructure DNS challenges",
+    "Manages both public and private domain certificate issuance with configurable hosted zones",
+    "Enforces cloud-provider-specific variable validation to ensure required credentials are provided"
   ],
   "inputs": [
     {
@@ -287,16 +289,16 @@ resource "example_resource" "this" {
     },
     {
       "name": "cert_manager_webhook_oci_version",
-      "description": "",
+      "description": "Helm chart version for the cert-manager OCI webhook",
       "required": false
     },
     {
       "name": "cert_manager_webhook_oci_namespace",
-      "description": "",
+      "description": "Kubernetes namespace where the cert-manager OCI webhook is deployed",
       "required": false
     }
   ],
   "outputs": [],
-  "hash": "635e55f9899b49f3e73b8e4191f3db27"
+  "hash": "4d4b02dec5434b12d5e9199ec00c190e"
 }
 END_AI_METADATA -->

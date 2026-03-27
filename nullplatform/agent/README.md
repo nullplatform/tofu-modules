@@ -2,25 +2,27 @@
 
 ## Description
 
-Deploys the nullplatform agent to a Kubernetes cluster via Helm chart with cloud-specific configuration
+Deploys the Nullplatform agent to a Kubernetes cluster via Helm chart with cloud provider-specific configurations for AWS, GCP, Azure, or OCI
 
 ## Architecture
 
-The module creates a single helm_release resource that deploys the nullplatform-agent chart from a GitHub Helm repository. Local values merge default and cloud-specific environment variables into a YAML values template (nullplatform_agent_values.tmpl.yaml) which is passed to the Helm release. Inputs like api_key, cluster_name, and tags_selectors flow through locals into the template, while cloud_provider determines which cloud-specific variables (AWS IAM role, Azure credentials, etc.) are injected into the agent's environment.
+Creates a helm_release resource that deploys the nullplatform-agent chart to a Kubernetes namespace. A terraform_data resource tracks API key changes to trigger helm_release replacement. Local values compute cloud-specific environment variables and command arguments that are templated into Helm chart values. The module merges default configuration (NRN tags, agent repositories, cluster name) with cloud provider-specific settings (AWS IAM role ARN, Azure credentials and networking, GCP/OCI gateway names) before passing them to the Helm chart. The agent container receives these values as environment variables and command-line arguments for runtime configuration.
 
 ## Features
 
-- Deploys nullplatform agent using Helm release with configurable chart version
-- Injects cloud-specific credentials and networking settings into agent pods
-- Parses NRN strings into organization, account, and namespace tags for agent filtering
-- Supports multiple Git repositories for agent scope and extended configuration
-- Triggers Helm release recreation when API key changes via terraform_data resource
+- Deploys Nullplatform agent as a Helm release with configurable version and namespace
+- Configures cloud provider-specific authentication using AWS IAM roles, Azure service principal credentials, or GCP/OCI gateway settings
+- Parses NRN (Nullplatform Resource Name) into organization, account, and namespace tags for resource identification
+- Merges multiple Git repositories for agent scope configurations with deduplication
+- Supports custom initialization scripts executed during agent startup
+- Automatically replaces Helm release when API key changes via terraform_data trigger
+- Configures DNS and domain settings for Azure, AWS Route53, or external DNS providers
 
 ## Basic Usage
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.48.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.48.3"
 
   api_key        = "your-api-key"
   cloud_provider = "your-cloud-provider"
@@ -31,11 +33,11 @@ module "agent" {
 }
 ```
 
-### Usage with AWS Cloud Provider
+### Usage with AWS Configuration
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.48.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.48.3"
 
   api_key          = "your-api-key"
   aws_iam_role_arn = "your-aws-iam-role-arn"  # Required when cloud_provider = "aws"
@@ -47,11 +49,26 @@ module "agent" {
 }
 ```
 
-### Usage with Azure Cloud Provider
+### Usage with GCP Configuration
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.48.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.48.3"
+
+  api_key        = "your-api-key"
+  cloud_provider = "gcp"
+  cluster_name   = "your-cluster-name"
+  image_tag      = "your-image-tag"
+  nrn            = "your-nrn"
+  tags_selectors = "your-tags-selectors"
+}
+```
+
+### Usage with Azure Configuration
+
+```hcl
+module "agent" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.48.3"
 
   api_key                = "your-api-key"
   azure_client_id        = "your-azure-client-id"  # Required when cloud_provider = "azure"
@@ -70,26 +87,11 @@ module "agent" {
 }
 ```
 
-### Usage with GCP Cloud Provider
+### Usage with OCI Configuration
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.48.2"
-
-  api_key        = "your-api-key"
-  cloud_provider = "gcp"
-  cluster_name   = "your-cluster-name"
-  image_tag      = "your-image-tag"
-  nrn            = "your-nrn"
-  tags_selectors = "your-tags-selectors"
-}
-```
-
-### Usage with OCI Cloud Provider
-
-```hcl
-module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.48.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.48.3"
 
   api_key        = "your-api-key"
   cloud_provider = "oci"
@@ -157,7 +159,7 @@ resource "example_resource" "this" {
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Kubernetes namespace where the nullplatform agent will run | `string` | `"nullplatform-tools"` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name - unique identifier for nullplatform resources | `string` | n/a | yes |
 | <a name="input_nullplatform_agent_helm_version"></a> [nullplatform\_agent\_helm\_version](#input\_nullplatform\_agent\_helm\_version) | Version of the nullplatform agent Helm chart to deploy | `string` | `"2.29.2"` | no |
-| <a name="input_private_domain"></a> [private\_domain](#input\_private\_domain) | n/a | `string` | `""` | no |
+| <a name="input_private_domain"></a> [private\_domain](#input\_private\_domain) | Private domain name used for internal agent routing | `string` | `""` | no |
 | <a name="input_private_gateway_name"></a> [private\_gateway\_name](#input\_private\_gateway\_name) | Private gateway name for Azure networking | `string` | `null` | no |
 | <a name="input_private_hosted_zone_rg"></a> [private\_hosted\_zone\_rg](#input\_private\_hosted\_zone\_rg) | Resource group for private hosted zone | `string` | `null` | no |
 | <a name="input_public_gateway_name"></a> [public\_gateway\_name](#input\_public\_gateway\_name) | Public gateway name for Azure networking | `string` | `null` | no |
@@ -169,14 +171,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "agent",
-  "description": "Deploys the nullplatform agent to a Kubernetes cluster via Helm chart with cloud-specific configuration",
-  "architecture": "The module creates a single helm_release resource that deploys the nullplatform-agent chart from a GitHub Helm repository. Local values merge default and cloud-specific environment variables into a YAML values template (nullplatform_agent_values.tmpl.yaml) which is passed to the Helm release. Inputs like api_key, cluster_name, and tags_selectors flow through locals into the template, while cloud_provider determines which cloud-specific variables (AWS IAM role, Azure credentials, etc.) are injected into the agent's environment.",
+  "description": "Deploys the Nullplatform agent to a Kubernetes cluster via Helm chart with cloud provider-specific configurations for AWS, GCP, Azure, or OCI",
+  "architecture": "Creates a helm_release resource that deploys the nullplatform-agent chart to a Kubernetes namespace. A terraform_data resource tracks API key changes to trigger helm_release replacement. Local values compute cloud-specific environment variables and command arguments that are templated into Helm chart values. The module merges default configuration (NRN tags, agent repositories, cluster name) with cloud provider-specific settings (AWS IAM role ARN, Azure credentials and networking, GCP/OCI gateway names) before passing them to the Helm chart. The agent container receives these values as environment variables and command-line arguments for runtime configuration.",
   "features": [
-    "Deploys nullplatform agent using Helm release with configurable chart version",
-    "Injects cloud-specific credentials and networking settings into agent pods",
-    "Parses NRN strings into organization, account, and namespace tags for agent filtering",
-    "Supports multiple Git repositories for agent scope and extended configuration",
-    "Triggers Helm release recreation when API key changes via terraform_data resource"
+    "Deploys Nullplatform agent as a Helm release with configurable version and namespace",
+    "Configures cloud provider-specific authentication using AWS IAM roles, Azure service principal credentials, or GCP/OCI gateway settings",
+    "Parses NRN (Nullplatform Resource Name) into organization, account, and namespace tags for resource identification",
+    "Merges multiple Git repositories for agent scope configurations with deduplication",
+    "Supports custom initialization scripts executed during agent startup",
+    "Automatically replaces Helm release when API key changes via terraform_data trigger",
+    "Configures DNS and domain settings for Azure, AWS Route53, or external DNS providers"
   ],
   "inputs": [
     {
@@ -291,7 +295,7 @@ resource "example_resource" "this" {
     },
     {
       "name": "private_domain",
-      "description": "",
+      "description": "Private domain name used for internal agent routing",
       "required": false
     },
     {
@@ -326,6 +330,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "b8a71b4042c9eb1faa041d2469bdd868"
+  "hash": "eb0bf3d17425b827ddcdd6489c78a6d2"
 }
 END_AI_METADATA -->
