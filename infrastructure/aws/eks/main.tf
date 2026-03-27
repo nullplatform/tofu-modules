@@ -50,6 +50,8 @@ module "eks" {
   endpoint_private_access      = var.endpoint_private_access
   endpoint_public_access_cidrs = var.endpoint_public_access_cidrs
 
+  authentication_mode = var.authentication_mode
+
   # Optional: Adds the current caller identity as an administrator via cluster access entry
   enable_cluster_creator_admin_permissions = true
 

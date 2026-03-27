@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.48.2](https://github.com/nullplatform/tofu-modules/compare/v1.48.1...v1.48.2) (2026-03-27)
+
+
+### Bug Fixes
+
+* **eks:** auth mode validation and s3 secure transport policy ([#266](https://github.com/nullplatform/tofu-modules/issues/266)) ([3a96b54](https://github.com/nullplatform/tofu-modules/commit/3a96b549d1d771c9c289d96aaf039261695ab92f))
+
 ## [1.48.1](https://github.com/nullplatform/tofu-modules/compare/v1.48.0...v1.48.1) (2026-03-27)
 
 

@@ -20,7 +20,7 @@ The module creates a single helm_release resource that deploys the nullplatform-
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.48.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.48.2"
 
   api_key        = "your-api-key"
   cloud_provider = "your-cloud-provider"
@@ -35,7 +35,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.48.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.48.2"
 
   api_key          = "your-api-key"
   aws_iam_role_arn = "your-aws-iam-role-arn"  # Required when cloud_provider = "aws"
@@ -51,7 +51,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.48.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.48.2"
 
   api_key                = "your-api-key"
   azure_client_id        = "your-azure-client-id"  # Required when cloud_provider = "azure"
@@ -74,7 +74,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.48.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.48.2"
 
   api_key        = "your-api-key"
   cloud_provider = "gcp"
@@ -89,7 +89,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.48.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v1.48.2"
 
   api_key        = "your-api-key"
   cloud_provider = "oci"
@@ -149,6 +149,7 @@ resource "example_resource" "this" {
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the EKS cluster where the nullplatform agent will be deployed | `string` | n/a | yes |
 | <a name="input_dns_type"></a> [dns\_type](#input\_dns\_type) | Type of DNS Provider, ej: azure, route53, or external\_dns | `string` | `""` | no |
 | <a name="input_domain"></a> [domain](#input\_domain) | Base domain name used across resources | `string` | `""` | no |
+| <a name="input_extra_envs"></a> [extra\_envs](#input\_extra\_envs) | Additional environment variables to pass to the agent | `map(string)` | `{}` | no |
 | <a name="input_image_pull_secrets"></a> [image\_pull\_secrets](#input\_image\_pull\_secrets) | Image pull secrets configuration | `string` | `""` | no |
 | <a name="input_image_tag"></a> [image\_tag](#input\_image\_tag) | Image tag for the agent container image | `string` | n/a | yes |
 | <a name="input_init_scripts"></a> [init\_scripts](#input\_init\_scripts) | List of initialization scripts to execute during agent startup | `list(string)` | `[]` | no |

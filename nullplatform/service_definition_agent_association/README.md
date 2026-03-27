@@ -20,7 +20,7 @@ The module creates a nullplatform_notification_channel resource wired to an agen
 
 ```hcl
 module "service_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v1.48.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v1.48.2"
 
   api_key                      = "your-api-key"
   repository_service_spec_repo = "your-repository-service-spec-repo"
@@ -39,13 +39,17 @@ resource "example_resource" "this" {
 ```
 
 <!-- BEGIN_TF_DOCS -->
+## Requirements
 
+| Name | Version |
+|------|---------|
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.67 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | n/a |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | ~> 0.0.67 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Resources
@@ -59,17 +63,16 @@ resource "example_resource" "this" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_agent_command"></a> [agent\_command](#input\_agent\_command) | n/a | <pre>object({<br/>    type = string<br/>    data = object({<br/>      cmdline     = string<br/>      arguments   = optional(list(string), [])<br/>      environment = optional(map(string), {})<br/>    })<br/>  })</pre> | `null` | no |
+| <a name="input_agent_arguments"></a> [agent\_arguments](#input\_agent\_arguments) | Arguments to pass to the agent entrypoint command | `list(string)` | `[]` | no |
 | <a name="input_api_key"></a> [api\_key](#input\_api\_key) | API key for authenticating with the nullplatform API | `string` | n/a | yes |
+| <a name="input_base_clone_path"></a> [base\_clone\_path](#input\_base\_clone\_path) | Base path where the service repository is cloned inside the agent pod | `string` | `"/root/.np"` | no |
 | <a name="input_channel_sources"></a> [channel\_sources](#input\_channel\_sources) | List of sources for the notification channel (e.g., ['monitoring', 'alerts']) | `list(string)` | <pre>[<br/>  "telemetry",<br/>  "service"<br/>]</pre> | no |
 | <a name="input_channel_type"></a> [channel\_type](#input\_channel\_type) | Type of the notification channel (e.g., 'agent') | `string` | `"agent"` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name (organization:account format) | `string` | `null` | no |
-| <a name="input_service_path"></a> [service\_path](#input\_service\_path) | Path to the service configuration | `string` | `null` | no |
-| <a name="input_service_specification_id"></a> [service\_specification\_id](#input\_service\_specification\_id) | The ID of the service definition associated with the agent | `string` | `null` | no |
+| <a name="input_repository_service_spec_repo"></a> [repository\_service\_spec\_repo](#input\_repository\_service\_spec\_repo) | GitHub repository name containing the service specs (used to build the agent cmdline path) | `string` | n/a | yes |
+| <a name="input_service_path"></a> [service\_path](#input\_service\_path) | Path to the service directory within the repository (e.g., databases/postgres/k8s) | `string` | n/a | yes |
 | <a name="input_service_specification_slug"></a> [service\_specification\_slug](#input\_service\_specification\_slug) | The slug of the service definition | `string` | `null` | no |
 | <a name="input_tags_selectors"></a> [tags\_selectors](#input\_tags\_selectors) | Map of tags used to select and filter agents | `map(string)` | n/a | yes |
-| <a name="input_workflow_override_path"></a> [workflow\_override\_path](#input\_workflow\_override\_path) | Path to a custom workflow file to override the default one | `string` | `null` | no |
-| <a name="input_workflow_override_values"></a> [workflow\_override\_values](#input\_workflow\_override\_values) | Values to override in the workflow file | `string` | `"null"` | no |
 
 ## Outputs
 

@@ -18,7 +18,7 @@ The module creates three Helm releases: istio-base, istiod, and istio-ingressgat
 
 ```hcl
 module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v1.48.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v1.48.2"
 }
 ```
 
