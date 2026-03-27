@@ -18,7 +18,7 @@ The module creates a nullplatform_provider_config resource of type 'ecr' that st
 
 ```hcl
 module "ecr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v1.47.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v1.48.1"
 
   cluster_name = "your-cluster-name"
   np_api_key   = "your-np-api-key"

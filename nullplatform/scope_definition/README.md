@@ -20,7 +20,7 @@ data.http resources fetch JSON templates from GitHub, data.external resources re
 
 ```hcl
 module "scope_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v1.47.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v1.48.1"
 
   np_api_key = "your-np-api-key"
   nrn        = "your-nrn"
