@@ -18,7 +18,7 @@ This module creates two aws_route53_zone resources, one for a public zone and on
 
 ```hcl
 module "dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/dns?ref=v1.47.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/dns?ref=v1.48.1"
 
   domain_name = "your-domain-name"
   vpc_id      = "your-vpc-id"
