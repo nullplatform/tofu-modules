@@ -145,6 +145,10 @@ jobs:
             fi
           done
 
+      - name: Fix git permissions
+        if: steps.check_pr.outputs.pr_exists == 'true'
+        run: sudo chown -R $(stat -c '%u:%g' .) .git
+
       - name: Commit and push
         if: steps.check_pr.outputs.pr_exists == 'true'
         run: |
