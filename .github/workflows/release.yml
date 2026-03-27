@@ -106,6 +106,16 @@ jobs:
           AI_PROVIDER: anthropic
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
+      - name: Run terraform-docs
+        if: steps.check_pr.outputs.pr_exists == 'true' && steps.changed.outputs.has_changes == 'true'
+        uses: terraform-docs/gh-actions@v1.4.1
+        with:
+          find-dir: .
+          output-file: README.md
+          config-file: ./.terraform-docs.yml
+          output-method: inject
+          git-push: "false"
+
       - name: Restore root README
         if: steps.check_pr.outputs.pr_exists == 'true'
         run: |
@@ -134,6 +144,10 @@ jobs:
               echo "  Updated: $README"
             fi
           done
+
+      - name: Fix git permissions
+        if: steps.check_pr.outputs.pr_exists == 'true'
+        run: sudo chown -R $(stat -c '%u:%g' .) .git
 
       - name: Commit and push
         if: steps.check_pr.outputs.pr_exists == 'true'
