@@ -20,7 +20,7 @@ The module creates two kubernetes_namespace_v1 resources (nullplatform-tools and
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.48.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.48.2"
 
   k8s_provider = "your-k8s-provider"
   np_api_key   = "your-np-api-key"
@@ -32,7 +32,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.48.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.48.2"
 
   k8s_provider = "eks"
   np_api_key   = "your-np-api-key"
@@ -44,7 +44,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.48.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.48.2"
 
   k8s_provider = "gke"
   np_api_key   = "your-np-api-key"
@@ -56,7 +56,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.48.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.48.2"
 
   k8s_provider = "aks"
   np_api_key   = "your-np-api-key"
@@ -68,7 +68,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.48.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.48.2"
 
   k8s_provider = "oke"
   np_api_key   = "your-np-api-key"
@@ -80,7 +80,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.48.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.48.2"
 
   k8s_provider = "aro"
   np_api_key   = "your-np-api-key"
@@ -110,12 +110,15 @@ resource "example_resource" "this" {
 | Name | Version |
 |------|---------|
 | <a name="provider_helm"></a> [helm](#provider\_helm) | ~> 3.0 |
+| <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | n/a |
 
 ## Resources
 
 | Name | Type |
 |------|------|
 | [helm_release.base](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
+| [kubernetes_namespace_v1.nullplatform_applications](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace_v1) | resource |
+| [kubernetes_namespace_v1.nullplatform_tools](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace_v1) | resource |
 
 ## Inputs
 
@@ -139,14 +142,20 @@ resource "example_resource" "this" {
 | <a name="input_gateway_api_enabled"></a> [gateway\_api\_enabled](#input\_gateway\_api\_enabled) | Enable the Gateway API. | `bool` | `false` | no |
 | <a name="input_gateway_enabled"></a> [gateway\_enabled](#input\_gateway\_enabled) | Enable the HTTP gateway. | `bool` | `false` | no |
 | <a name="input_gateway_internal_aws_name"></a> [gateway\_internal\_aws\_name](#input\_gateway\_internal\_aws\_name) | Name of private gateway in AWS. | `string` | `"k8s-nullplatform-internal"` | no |
-| <a name="input_gateway_internal_enabled"></a> [gateway\_internal\_enabled](#input\_gateway\_internal\_enabled) | Enable the internal (private) gateway. | `bool` | `false` | no |
+| <a name="input_gateway_internal_enabled"></a> [gateway\_internal\_enabled](#input\_gateway\_internal\_enabled) | Enable the internal (private) gateway. | `bool` | `true` | no |
+| <a name="input_gateway_private_aws_dns_name"></a> [gateway\_private\_aws\_dns\_name](#input\_gateway\_private\_aws\_dns\_name) | n/a | `string` | `""` | no |
 | <a name="input_gateway_private_aws_security_group_id"></a> [gateway\_private\_aws\_security\_group\_id](#input\_gateway\_private\_aws\_security\_group\_id) | The ID of the AWS security group for the private gateway. Output from infrastructure/aws/security module. | `string` | `""` | no |
 | <a name="input_gateway_private_azure_nsg_id"></a> [gateway\_private\_azure\_nsg\_id](#input\_gateway\_private\_azure\_nsg\_id) | The ID of the Azure NSG for the private gateway. Output from infrastructure/azure/security module. | `string` | `""` | no |
 | <a name="input_gateway_private_gcp_firewall_name"></a> [gateway\_private\_gcp\_firewall\_name](#input\_gateway\_private\_gcp\_firewall\_name) | The name of the GCP firewall rule for the private gateway. Output from infrastructure/gcp/security module. | `string` | `""` | no |
+| <a name="input_gateway_private_oci_security_list_management_mode"></a> [gateway\_private\_oci\_security\_list\_management\_mode](#input\_gateway\_private\_oci\_security\_list\_management\_mode) | OCI Load Balancer security list management mode for the private gateway. Options: 'All' (recommended - auto-manages security lists), 'Frontend' (only frontend rules), 'None' (manual management). | `string` | `"All"` | no |
+| <a name="input_gateway_public_aws_dns_name"></a> [gateway\_public\_aws\_dns\_name](#input\_gateway\_public\_aws\_dns\_name) | n/a | `string` | `""` | no |
 | <a name="input_gateway_public_aws_name"></a> [gateway\_public\_aws\_name](#input\_gateway\_public\_aws\_name) | Name of public gateway in AWS. | `string` | `"k8s-nullplatform-internet-facing"` | no |
 | <a name="input_gateway_public_aws_security_group_id"></a> [gateway\_public\_aws\_security\_group\_id](#input\_gateway\_public\_aws\_security\_group\_id) | The ID of the AWS security group for the public gateway. Output from infrastructure/aws/security module. | `string` | `""` | no |
 | <a name="input_gateway_public_azure_nsg_id"></a> [gateway\_public\_azure\_nsg\_id](#input\_gateway\_public\_azure\_nsg\_id) | The ID of the Azure NSG for the public gateway. Output from infrastructure/azure/security module. | `string` | `""` | no |
+| <a name="input_gateway_public_enabled"></a> [gateway\_public\_enabled](#input\_gateway\_public\_enabled) | Enable the public gateway. | `bool` | `true` | no |
 | <a name="input_gateway_public_gcp_firewall_name"></a> [gateway\_public\_gcp\_firewall\_name](#input\_gateway\_public\_gcp\_firewall\_name) | The name of the GCP firewall rule for the public gateway. Output from infrastructure/gcp/security module. | `string` | `""` | no |
+| <a name="input_gateway_public_oci_security_list_management_mode"></a> [gateway\_public\_oci\_security\_list\_management\_mode](#input\_gateway\_public\_oci\_security\_list\_management\_mode) | OCI Load Balancer security list management mode for the public gateway. Options: 'All' (recommended - auto-manages security lists), 'Frontend' (only frontend rules), 'None' (manual management). | `string` | `"All"` | no |
+| <a name="input_gateway_use_cluster_ip"></a> [gateway\_use\_cluster\_ip](#input\_gateway\_use\_cluster\_ip) | n/a | `bool` | `false` | no |
 | <a name="input_gateways_enabled"></a> [gateways\_enabled](#input\_gateways\_enabled) | Enable gateway resources (Helm chart). | `bool` | `true` | no |
 | <a name="input_gelf_enabled"></a> [gelf\_enabled](#input\_gelf\_enabled) | Enable GELF output. | `bool` | `false` | no |
 | <a name="input_gelf_host"></a> [gelf\_host](#input\_gelf\_host) | GELF host. | `string` | `""` | no |
@@ -173,7 +182,7 @@ resource "example_resource" "this" {
 | <a name="input_newrelic_region"></a> [newrelic\_region](#input\_newrelic\_region) | New Relic region (e.g., US, EU). | `string` | `""` | no |
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication (account level). | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | The Nullplatform Resource Name (NRN). | `string` | n/a | yes |
-| <a name="input_nullplatform_base_helm_version"></a> [nullplatform\_base\_helm\_version](#input\_nullplatform\_base\_helm\_version) | Helm chart version for the nullplatform base. | `string` | `"2.36.0"` | no |
+| <a name="input_nullplatform_base_helm_version"></a> [nullplatform\_base\_helm\_version](#input\_nullplatform\_base\_helm\_version) | Helm chart version for the nullplatform base. | `string` | `"2.38.0"` | no |
 | <a name="input_prometheus_enabled"></a> [prometheus\_enabled](#input\_prometheus\_enabled) | Enable the Prometheus exporter. | `bool` | `true` | no |
 | <a name="input_tls_required"></a> [tls\_required](#input\_tls\_required) | Whether TLS is required. | `bool` | `true` | no |
 

@@ -20,7 +20,7 @@ The module instantiates oracle-terraform-modules/oke/oci to create oci_container
 
 ```hcl
 module "oke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/oke?ref=v1.48.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/oke?ref=v1.48.2"
 
   api_endpoint_subnet_id = "your-api-endpoint-subnet-id"
   cluster_name           = "your-cluster-name"
@@ -76,18 +76,22 @@ resource "example_resource" "this" {
 | <a name="input_api_endpoint_subnet_id"></a> [api\_endpoint\_subnet\_id](#input\_api\_endpoint\_subnet\_id) | n/a | `string` | n/a | yes |
 | <a name="input_assign_public_ip_to_control_plane"></a> [assign\_public\_ip\_to\_control\_plane](#input\_assign\_public\_ip\_to\_control\_plane) | n/a | `bool` | `false` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | n/a | `string` | n/a | yes |
+| <a name="input_cni_type"></a> [cni\_type](#input\_cni\_type) | CNI type for the OKE cluster. Valid values: 'flannel' or 'npn' (Native Pod Networking). | `string` | `"flannel"` | no |
 | <a name="input_compartment_id"></a> [compartment\_id](#input\_compartment\_id) | n/a | `string` | n/a | yes |
 | <a name="input_control_plane_is_public"></a> [control\_plane\_is\_public](#input\_control\_plane\_is\_public) | n/a | `bool` | `false` | no |
 | <a name="input_control_plane_nsg_ids"></a> [control\_plane\_nsg\_ids](#input\_control\_plane\_nsg\_ids) | n/a | `set(string)` | <pre>[<br/>  "0.0.0.0/0"<br/>]</pre> | no |
 | <a name="input_enable_ocir_pull"></a> [enable\_ocir\_pull](#input\_enable\_ocir\_pull) | Enable IAM policy to allow workloads to pull images from OCIR | `bool` | `false` | no |
 | <a name="input_existing_vcn_id"></a> [existing\_vcn\_id](#input\_existing\_vcn\_id) | n/a | `string` | n/a | yes |
 | <a name="input_home_region"></a> [home\_region](#input\_home\_region) | The tenancy's home region | `string` | n/a | yes |
+| <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | Kubernetes version for the OKE cluster | `string` | `"v1.34.1"` | no |
 | <a name="input_node_pool_subnet_id"></a> [node\_pool\_subnet\_id](#input\_node\_pool\_subnet\_id) | n/a | `string` | n/a | yes |
 | <a name="input_ocir_pull_namespaces"></a> [ocir\_pull\_namespaces](#input\_ocir\_pull\_namespaces) | List of Kubernetes namespaces allowed to pull from OCIR. If empty, all namespaces in the cluster are allowed. | `list(string)` | `[]` | no |
+| <a name="input_pod_subnet_id"></a> [pod\_subnet\_id](#input\_pod\_subnet\_id) | Subnet ID for pod networking (required when cni\_type = 'npn'). | `string` | `""` | no |
 | <a name="input_region"></a> [region](#input\_region) | n/a | `string` | n/a | yes |
 | <a name="input_service_lb_subnet_id"></a> [service\_lb\_subnet\_id](#input\_service\_lb\_subnet\_id) | Subnet ID for service load balancers (typically public subnet) | `string` | n/a | yes |
 | <a name="input_tenancy_id"></a> [tenancy\_id](#input\_tenancy\_id) | The tenancy OCID (required when enable\_ocir\_pull is true) | `string` | `null` | no |
 | <a name="input_worker_cloud_init"></a> [worker\_cloud\_init](#input\_worker\_cloud\_init) | Cloud init configuration for worker nodes. See: https://cloudinit.readthedocs.io/en/latest/reference/modules.html | `list(map(string))` | `[]` | no |
+| <a name="input_worker_pool_size"></a> [worker\_pool\_size](#input\_worker\_pool\_size) | Default number of worker nodes per pool | `number` | `2` | no |
 | <a name="input_worker_pools"></a> [worker\_pools](#input\_worker\_pools) | n/a | `any` | <pre>{<br/>  "pool_principal": {<br/>    "boot_volume_size": 50,<br/>    "image_type": "platform",<br/>    "memory": 16,<br/>    "mode": "node-pool",<br/>    "ocpus": 2,<br/>    "os": "Oracle Linux",<br/>    "os_version": "8",<br/>    "shape": "VM.Standard.E4.Flex",<br/>    "size": 2<br/>  }<br/>}</pre> | no |
 
 ## Outputs
