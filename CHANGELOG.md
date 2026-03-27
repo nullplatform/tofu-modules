@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.48.1](https://github.com/nullplatform/tofu-modules/compare/v1.48.0...v1.48.1) (2026-03-27)
+
+
+### Bug Fixes
+
+* **ci:** restore git permissions after secondary checkout ([#264](https://github.com/nullplatform/tofu-modules/issues/264)) ([a1d81a5](https://github.com/nullplatform/tofu-modules/commit/a1d81a5a8d4ece8f8082e0eb9f60c1617c926b9c))
+
 ## [1.48.0](https://github.com/nullplatform/tofu-modules/compare/v1.47.0...v1.48.0) (2026-03-26)
 
 
