@@ -18,7 +18,7 @@ The module creates a single nullplatform_provider_config resource of type promet
 
 ```hcl
 module "metrics" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/metrics?ref=v1.48.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/metrics?ref=v1.48.2"
 
   np_api_key = "your-np-api-key"
   nrn        = "your-nrn"

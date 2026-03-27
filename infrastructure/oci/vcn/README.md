@@ -19,7 +19,7 @@ The module instantiates oci_core_subnet resources for public and private subnets
 
 ```hcl
 module "vcn" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/vcn?ref=v1.48.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/vcn?ref=v1.48.2"
 }
 ```
 
@@ -59,6 +59,7 @@ resource "example_resource" "this" {
 | [oci_core_network_security_group_security_rule.oke_api_ingress](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_network_security_group_security_rule) | resource |
 | [oci_core_network_security_group_security_rule.oke_control_plane_egress](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_network_security_group_security_rule) | resource |
 | [oci_core_network_security_group_security_rule.oke_vcn_ingress](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_network_security_group_security_rule) | resource |
+| [oci_core_subnet.pod_subnet](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_subnet) | resource |
 | [oci_core_subnet.private_subnet](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_subnet) | resource |
 | [oci_core_subnet.public_subnet](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_subnet) | resource |
 
@@ -66,6 +67,7 @@ resource "example_resource" "this" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_cni_type"></a> [cni\_type](#input\_cni\_type) | CNI type. When set to 'npn', a dedicated pod subnet is created. | `string` | `"flannel"` | no |
 | <a name="input_compartment_id"></a> [compartment\_id](#input\_compartment\_id) | value | `string` | `"value"` | no |
 | <a name="input_create_internet_gateway"></a> [create\_internet\_gateway](#input\_create\_internet\_gateway) | value | `bool` | `true` | no |
 | <a name="input_create_nat_gateway"></a> [create\_nat\_gateway](#input\_create\_nat\_gateway) | value | `bool` | `true` | no |
@@ -73,6 +75,8 @@ resource "example_resource" "this" {
 | <a name="input_create_service_gateway"></a> [create\_service\_gateway](#input\_create\_service\_gateway) | value | `bool` | `true` | no |
 | <a name="input_oke_api_endpoint_allowed_cidrs"></a> [oke\_api\_endpoint\_allowed\_cidrs](#input\_oke\_api\_endpoint\_allowed\_cidrs) | List of CIDR blocks allowed to access the Kubernetes API endpoint (port 6443) | `list(string)` | <pre>[<br/>  "0.0.0.0/0"<br/>]</pre> | no |
 | <a name="input_region"></a> [region](#input\_region) | value | `string` | `"value"` | no |
+| <a name="input_subnet_pod_cidr_block"></a> [subnet\_pod\_cidr\_block](#input\_subnet\_pod\_cidr\_block) | CIDR block for the pod subnet. Required when cni\_type = 'npn'. | `string` | `""` | no |
+| <a name="input_subnet_pod_display_name"></a> [subnet\_pod\_display\_name](#input\_subnet\_pod\_display\_name) | Display name for the pod subnet. | `string` | `"pod-subnet"` | no |
 | <a name="input_subnet_private_cidr_block"></a> [subnet\_private\_cidr\_block](#input\_subnet\_private\_cidr\_block) | value | `string` | `""` | no |
 | <a name="input_subnet_private_display_name"></a> [subnet\_private\_display\_name](#input\_subnet\_private\_display\_name) | value | `string` | `"private-subnet"` | no |
 | <a name="input_subnet_private_prohibit_public_ip_on_vnic"></a> [subnet\_private\_prohibit\_public\_ip\_on\_vnic](#input\_subnet\_private\_prohibit\_public\_ip\_on\_vnic) | value | `bool` | `true` | no |
@@ -92,6 +96,8 @@ resource "example_resource" "this" {
 | <a name="output_nat_gateway_id"></a> [nat\_gateway\_id](#output\_nat\_gateway\_id) | The OCID of the NAT Gateway |
 | <a name="output_nat_route_id"></a> [nat\_route\_id](#output\_nat\_route\_id) | The OCID of the NAT Gateway route table |
 | <a name="output_oke_control_plane_nsg_id"></a> [oke\_control\_plane\_nsg\_id](#output\_oke\_control\_plane\_nsg\_id) | The OCID of the OKE control plane NSG |
+| <a name="output_pod_subnet_cidr_block"></a> [pod\_subnet\_cidr\_block](#output\_pod\_subnet\_cidr\_block) | The CIDR block of the pod subnet (only when cni\_type = 'npn') |
+| <a name="output_pod_subnet_id"></a> [pod\_subnet\_id](#output\_pod\_subnet\_id) | The OCID of the pod subnet (only when cni\_type = 'npn') |
 | <a name="output_private_subnet_cidr_block"></a> [private\_subnet\_cidr\_block](#output\_private\_subnet\_cidr\_block) | The CIDR block of the private subnet |
 | <a name="output_private_subnet_display_name"></a> [private\_subnet\_display\_name](#output\_private\_subnet\_display\_name) | The display name of the private subnet |
 | <a name="output_private_subnet_id"></a> [private\_subnet\_id](#output\_private\_subnet\_id) | The OCID of the private subnet |

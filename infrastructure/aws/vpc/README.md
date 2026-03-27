@@ -22,7 +22,7 @@ This module creates a terraform-aws-modules/vpc/aws module resource with DNS hos
 
 ```hcl
 module "vpc" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v1.48.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v1.48.2"
 
   account      = "your-account"
   organization = "your-organization"
@@ -56,8 +56,8 @@ resource "example_resource" "this" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_account"></a> [account](#input\_account) | The account name | `string` | n/a | yes |
-| <a name="input_organization"></a> [organization](#input\_organization) | The organization name | `string` | n/a | yes |
+| <a name="input_account"></a> [account](#input\_account) | The nullplatform account name | `string` | n/a | yes |
+| <a name="input_organization"></a> [organization](#input\_organization) | The nullplatform organization name | `string` | n/a | yes |
 | <a name="input_vpc"></a> [vpc](#input\_vpc) | The VPC configuration settings | <pre>object({<br/>    cidr_block      = string<br/>    azs             = list(string)<br/>    private_subnets = list(string)<br/>    public_subnets  = list(string)<br/>  })</pre> | n/a | yes |
 
 ## Outputs
@@ -66,6 +66,7 @@ resource "example_resource" "this" {
 |------|-------------|
 | <a name="output_private_subnets"></a> [private\_subnets](#output\_private\_subnets) | The private subnets |
 | <a name="output_public_subnets"></a> [public\_subnets](#output\_public\_subnets) | The public subnets |
+| <a name="output_security_group_ids"></a> [security\_group\_ids](#output\_security\_group\_ids) | The security group IDs associated with the VPC |
 | <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | The ID of the VPC |
 <!-- END_TF_DOCS -->
 

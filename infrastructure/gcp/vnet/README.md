@@ -19,7 +19,7 @@ The module uses the google network module to create a virtual private network an
 
 ```hcl
 module "vnet" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/vnet?ref=v1.48.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/vnet?ref=v1.48.2"
 
   project_id         = "your-project-id"
   subnets_definition = "your-subnets-definition"
