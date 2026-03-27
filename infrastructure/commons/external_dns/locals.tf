@@ -88,10 +88,39 @@ locals {
     ]
   }
 
+  azure_config = {
+    provider = { name = "azure" }
+    serviceAccount = {
+      create = true
+      annotations = {
+        "azure.workload.identity/client-id" = var.azure_client_id
+      }
+    }
+    podLabels = {
+      "azure.workload.identity/use" = "true"
+    }
+    extraVolumes = [
+      {
+        name = "azure-config"
+        secret = {
+          secretName = "external-dns-azure-config"
+        }
+      }
+    ]
+    extraVolumeMounts = [
+      {
+        name      = "azure-config"
+        mountPath = "/etc/kubernetes"
+        readOnly  = true
+      }
+    ]
+  }
+
   provider_configs = {
     cloudflare = local.cloudflare_config
     aws        = local.route53_config
     oci        = local.oci_config
+    azure      = local.azure_config
   }
 
   external_dns_values = merge(local.base_config, local.provider_configs[var.dns_provider_name])

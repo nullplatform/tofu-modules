@@ -10,6 +10,26 @@ resource "kubernetes_secret_v1" "external_dns_cloudflare" {
   }
 }
 
+resource "kubernetes_secret_v1" "external_dns_azure_config" {
+  count = var.dns_provider_name == "azure" ? 1 : 0
+
+  metadata {
+    name      = "external-dns-azure-config"
+    namespace = var.external_dns_namespace
+  }
+
+  data = {
+    "azure.json" = jsonencode({
+      tenantId                     = var.azure_tenant_id
+      subscriptionId               = var.azure_subscription_id
+      resourceGroup                = var.azure_resource_group
+      useWorkloadIdentityExtension = true
+    })
+  }
+
+  depends_on = [kubernetes_namespace_v1.external_dns]
+}
+
 resource "kubernetes_secret_v1" "external_dns_oci_config" {
   count = var.dns_provider_name == "oci" ? 1 : 0
 
