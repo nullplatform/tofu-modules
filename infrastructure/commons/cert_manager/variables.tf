@@ -200,12 +200,13 @@ variable "oci_sa_ocid" {
 }
 ##########web hook
 variable "cert_manager_webhook_oci_version" {
-  type    = string
-  default = "1.4.1"
+  description = "Helm chart version for the cert-manager OCI webhook"
+  type        = string
+  default     = "1.4.1"
 }
 
 variable "cert_manager_webhook_oci_namespace" {
-  type    = string
-  default = "cert-manager"
-
+  description = "Kubernetes namespace where the cert-manager OCI webhook is deployed"
+  type        = string
+  default     = "cert-manager"
 }

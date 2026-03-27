@@ -1,18 +1,23 @@
 variable "compartment_id" {
-  type = string
+  description = "OCI compartment ID where the OKE cluster will be created"
+  type        = string
 }
 variable "region" {
-  type = string
+  description = "OCI region where the cluster is deployed"
+  type        = string
 }
 variable "existing_vcn_id" {
-  type = string
+  description = "ID of the existing VCN to use for the OKE cluster"
+  type        = string
 }
 variable "api_endpoint_subnet_id" {
-  type = string
-} # Subred Pública
+  description = "Subnet ID for the Kubernetes API endpoint (public subnet)"
+  type        = string
+}
 variable "node_pool_subnet_id" {
-  type = string
-} # Subred Privada
+  description = "Subnet ID for the worker node pool (private subnet)"
+  type        = string
+}
 
 variable "home_region" {
   type        = string
@@ -20,8 +25,8 @@ variable "home_region" {
 }
 
 variable "cluster_name" {
-  type = string
-
+  description = "Name of the OKE cluster"
+  type        = string
 }
 
 variable "service_lb_subnet_id" {
@@ -30,22 +35,26 @@ variable "service_lb_subnet_id" {
 }
 
 variable "assign_public_ip_to_control_plane" {
-  default = false
-
+  description = "Whether to assign a public IP to the control plane endpoint"
+  type        = bool
+  default     = false
 }
 
 variable "control_plane_is_public" {
-  default = false
-
+  description = "Whether the control plane endpoint is publicly accessible"
+  type        = bool
+  default     = false
 }
-variable "control_plane_nsg_ids" {
-  type    = set(string)
-  default = ["0.0.0.0/0"]
 
+variable "control_plane_nsg_ids" {
+  description = "Set of NSG IDs to associate with the control plane"
+  type        = set(string)
+  default     = ["0.0.0.0/0"]
 }
 
 variable "worker_pools" {
-  type = any
+  description = "Map of worker pool configurations for the OKE cluster"
+  type        = any
   default = {
     pool_principal = {
       mode             = "node-pool"
