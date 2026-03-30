@@ -92,7 +92,7 @@ variable "service_spec_name" {
 variable "service_spec_description" {
   description = "Description of the created service or associated scope type"
   type        = string
-  default     = "Docker containers on pods"
+  default     = ""
 }
 
 ################################################################################
