@@ -7,7 +7,6 @@ resource "nullplatform_service_specification" "from_template" {
     data.external.service_spec
   ]
   name                = var.service_spec_name
-  description         = var.service_spec_description
   visible_to          = local.service_spec_parsed.visible_to
   assignable_to       = local.service_spec_parsed.assignable_to
   type                = local.service_spec_parsed.type
