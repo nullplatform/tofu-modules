@@ -9,8 +9,8 @@ variable "nrn" {
   type        = string
 }
 
-variable "provider_specification_id" {
-  description = "ID of the provider specification (scope configuration type) to associate with."
+variable "provider_specification_slug" {
+  description = "Slug of the provider specification (scope configuration type) to associate with."
   type        = string
 }
 
