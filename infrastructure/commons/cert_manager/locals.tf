@@ -87,6 +87,9 @@ locals {
         lookup(local.annotations_by_provider, var.cloud_provider, {})
       )
     }
+    podLabels = var.cloud_provider == "azure" ? {
+      "azure.workload.identity/use" = "true"
+    } : {}
     dns01RecursiveNameservers     = "8.8.8.8:53,1.1.1.1:53"
     dns01RecursiveNameserversOnly = true
   }
