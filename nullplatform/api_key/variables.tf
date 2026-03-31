@@ -13,8 +13,9 @@ variable "type" {
 }
 
 variable "nrn" {
-  description = "Nullplatform Resource Name (e.g., organization=123:account=456:namespace=789)"
+  description = "Nullplatform Resource Name (e.g., organization=123:account=456:namespace=789). Required for predefined types (agent, scope_notification, service_notification). Optional for custom type when using custom_grants."
   type        = string
+  default     = null
 }
 
 variable "specification_slug" {
@@ -34,9 +35,18 @@ variable "custom_name" {
 }
 
 variable "custom_role_slugs" {
-  description = "List of role slugs to assign (required when type is 'custom', must have at least 1)"
+  description = "List of role slugs to assign using the module-level NRN (used when type is 'custom' and custom_grants is empty)"
   type        = list(string)
   default     = []
+}
+
+variable "custom_grants" {
+  description = "List of grants with explicit NRN and role_slug pairs. Allows assigning different NRNs per grant (used when type is 'custom')."
+  type = list(object({
+    nrn       = string
+    role_slug = string
+  }))
+  default = []
 }
 
 variable "custom_tags" {
