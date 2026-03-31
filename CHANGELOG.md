@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.50.0](https://github.com/nullplatform/tofu-modules/compare/v1.49.0...v1.50.0) (2026-03-31)
+
+
+### Features
+
+* **api-key:** add custom_grants support for multi-NRN grants ([#276](https://github.com/nullplatform/tofu-modules/issues/276)) ([ce70c59](https://github.com/nullplatform/tofu-modules/commit/ce70c59cec7aaa3f072a6c54d1e82f238df00928))
+* eks version ([#270](https://github.com/nullplatform/tofu-modules/issues/270)) ([8bf801e](https://github.com/nullplatform/tofu-modules/commit/8bf801e2edaee0e0c6b3ed70197342831b192623))
+
 ## [1.49.0](https://github.com/nullplatform/tofu-modules/compare/v1.48.3...v1.49.0) (2026-03-30)
 
 
