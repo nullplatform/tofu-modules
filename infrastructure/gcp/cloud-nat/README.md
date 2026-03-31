@@ -18,7 +18,7 @@ The module uses the google_compute_router and google_compute_router_nat Terrafor
 
 ```hcl
 module "cloud-nat" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/cloud-nat?ref=v1.48.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/cloud-nat?ref=v1.49.0"
 
   nat_name    = "your-nat-name"
   network_id  = "your-network-id"

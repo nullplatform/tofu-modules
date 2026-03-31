@@ -19,7 +19,7 @@ This module creates an IAM role for a Kubernetes service account using the terra
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/agent?ref=v1.48.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/agent?ref=v1.49.0"
 
   agent_namespace                     = "your-agent-namespace"
   aws_iam_openid_connect_provider_arn = "your-aws-iam-openid-connect-provider-arn"
