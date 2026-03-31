@@ -14,12 +14,6 @@ variable "nrn" {
   type        = string
 }
 
-variable "np_api_key" {
-  description = "nullplatform API key for authentication"
-  type        = string
-  sensitive   = true
-}
-
 variable "prometheus_namespace" {
   description = "Kubernetes namespace where Prometheus will be deployed"
   type        = string

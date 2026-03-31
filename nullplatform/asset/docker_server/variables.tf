@@ -24,9 +24,3 @@ variable "password" {
   type        = string
   sensitive   = false
 }
-
-variable "np_api_key" {
-  description = "Nullplatform API key for authentication"
-  type        = string
-  sensitive   = true
-}
