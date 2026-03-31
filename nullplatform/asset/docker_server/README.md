@@ -18,7 +18,7 @@ The module creates a nullplatform_provider_config resource of type docker-server
 
 ```hcl
 module "docker_server" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/docker_server?ref=v1.48.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/docker_server?ref=v1.49.0"
 
   login_server = "your-login-server"
   np_api_key   = "your-np-api-key"
