@@ -3,12 +3,6 @@ variable "nrn" {
   type        = string
 }
 
-variable "np_api_key" {
-  type        = string
-  sensitive   = true
-  description = "Nullplatform API key for authentication"
-}
-
 variable "application_manager_assume_role" {
   description = "ARN of the IAM role assumed by the application manager"
   type        = string

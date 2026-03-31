@@ -8,9 +8,3 @@ variable "nullplatform_users" {
     nrn        = string
   }))
 }
-
-variable "np_api_key" {
-  description = "Nullplatform API key for authentication"
-  type        = string
-  sensitive   = true
-}

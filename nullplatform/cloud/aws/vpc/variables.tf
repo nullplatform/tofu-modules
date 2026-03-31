@@ -3,12 +3,6 @@ variable "nrn" {
   type        = string
 }
 
-variable "np_api_key" {
-  type        = string
-  sensitive   = true
-  description = "Nullplatform API key for authentication"
-}
-
 variable "vpc_id" {
   description = "The ID of the VPC"
   type        = string
