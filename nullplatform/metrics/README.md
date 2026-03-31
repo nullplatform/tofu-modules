@@ -2,29 +2,28 @@
 
 ## Description
 
-Creates a nullplatform provider configuration for Prometheus metrics scraping integration
+Configures a Prometheus provider in Nullplatform with automatic server URL resolution from Kubernetes service discovery or custom endpoint
 
 ## Architecture
 
-The module creates a single nullplatform_provider_config resource of type 'prometheus' that stores the Prometheus server connection details. It uses a local variable to determine the server URL, either from the prometheus_url input variable or by constructing a default Kubernetes service URL using the prometheus_namespace variable. The configuration attributes are JSON-encoded and include the server URL, while the lifecycle block ignores changes to attributes to prevent configuration drift.
+The module creates a nullplatform_provider_config resource of type prometheus that stores connection configuration in a JSON-encoded attributes block. It uses a local value to determine the Prometheus server URL, either accepting a custom var.prometheus_url or auto-generating a Kubernetes cluster-internal service URL using the format http://prometheus-server.<namespace>.svc.cluster.local:80. The resource accepts dimensions metadata and includes lifecycle rules to ignore changes to attributes after initial creation.
 
 ## Features
 
-- Creates nullplatform provider configuration for Prometheus integration
-- Configures Prometheus server URL either from custom input or default Kubernetes service discovery
-- Constructs default URL using Kubernetes DNS pattern for in-cluster Prometheus access
-- Supports custom dimensions for provider configuration scoping
-- Implements lifecycle management to ignore external attribute changes
-- Stores configuration as JSON-encoded attributes within the provider config resource
+- Creates Nullplatform provider configuration for Prometheus integration
+- Auto-generates Kubernetes service discovery URL for Prometheus server when custom URL not provided
+- Supports custom Prometheus endpoint URL for external or non-standard deployments
+- Configures namespace-aware internal cluster service URLs using Kubernetes DNS naming
+- Applies lifecycle ignore_changes to prevent attribute drift on subsequent applies
+- Associates provider configuration with dimensions for multi-tenant or environment-specific setups
 
 ## Basic Usage
 
 ```hcl
 module "metrics" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/metrics?ref=v1.49.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/metrics?ref=v1.50.0"
 
-  np_api_key = "your-np-api-key"
-  nrn        = "your-nrn"
+  nrn = "your-nrn"
 }
 ```
 
@@ -61,7 +60,6 @@ resource "example_resource" "this" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | name of the dimensions | `map` | `{}` | no |
-| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | nullplatform API key for authentication | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | nullplatform Resource Name — unique identifier for resources | `string` | n/a | yes |
 | <a name="input_prometheus_namespace"></a> [prometheus\_namespace](#input\_prometheus\_namespace) | Kubernetes namespace where Prometheus will be deployed | `string` | `"prometheus"` | no |
 | <a name="input_prometheus_url"></a> [prometheus\_url](#input\_prometheus\_url) | URL of the Prometheus instance used for metrics scraping | `string` | `""` | no |
@@ -70,25 +68,20 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "metrics",
-  "description": "Creates a nullplatform provider configuration for Prometheus metrics scraping integration",
-  "architecture": "The module creates a single nullplatform_provider_config resource of type 'prometheus' that stores the Prometheus server connection details. It uses a local variable to determine the server URL, either from the prometheus_url input variable or by constructing a default Kubernetes service URL using the prometheus_namespace variable. The configuration attributes are JSON-encoded and include the server URL, while the lifecycle block ignores changes to attributes to prevent configuration drift.",
+  "description": "Configures a Prometheus provider in Nullplatform with automatic server URL resolution from Kubernetes service discovery or custom endpoint",
+  "architecture": "The module creates a nullplatform_provider_config resource of type prometheus that stores connection configuration in a JSON-encoded attributes block. It uses a local value to determine the Prometheus server URL, either accepting a custom var.prometheus_url or auto-generating a Kubernetes cluster-internal service URL using the format http://prometheus-server.<namespace>.svc.cluster.local:80. The resource accepts dimensions metadata and includes lifecycle rules to ignore changes to attributes after initial creation.",
   "features": [
-    "Creates nullplatform provider configuration for Prometheus integration",
-    "Configures Prometheus server URL either from custom input or default Kubernetes service discovery",
-    "Constructs default URL using Kubernetes DNS pattern for in-cluster Prometheus access",
-    "Supports custom dimensions for provider configuration scoping",
-    "Implements lifecycle management to ignore external attribute changes",
-    "Stores configuration as JSON-encoded attributes within the provider config resource"
+    "Creates Nullplatform provider configuration for Prometheus integration",
+    "Auto-generates Kubernetes service discovery URL for Prometheus server when custom URL not provided",
+    "Supports custom Prometheus endpoint URL for external or non-standard deployments",
+    "Configures namespace-aware internal cluster service URLs using Kubernetes DNS naming",
+    "Applies lifecycle ignore_changes to prevent attribute drift on subsequent applies",
+    "Associates provider configuration with dimensions for multi-tenant or environment-specific setups"
   ],
   "inputs": [
     {
       "name": "nrn",
       "description": "nullplatform Resource Name — unique identifier for resources",
-      "required": true
-    },
-    {
-      "name": "np_api_key",
-      "description": "nullplatform API key for authentication",
       "required": true
     },
     {
@@ -108,6 +101,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "781694146ee8f048b9a4318fe6631c82"
+  "hash": "53cef1f8ff4770b8ec9cfa0b736eef61"
 }
 END_AI_METADATA -->

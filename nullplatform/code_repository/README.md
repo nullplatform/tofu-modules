@@ -2,50 +2,49 @@
 
 ## Description
 
-Configures Nullplatform provider integrations for GitHub, GitLab, or Azure DevOps
+Configures Git provider integrations for Nullplatform by creating provider-specific configuration resources for GitHub, GitLab, or Azure DevOps
 
 ## Architecture
 
-The module creates nullplatform_provider_config resources based on the git_provider selection. When git_provider is 'github', it creates a github-configuration resource with organization and installation_id attributes. When git_provider is 'gitlab', it creates a gitlab-configuration resource with group_path, access_token, installation_url, and collaborators_config attributes. When git_provider is 'azure', it creates an azure-devops-configuration resource with project, access_token, and agent_pool attributes. The NRN input is processed to extract the namespace identifier for each provider configuration.
+Based on the git_provider trigger variable, this module conditionally creates one of three nullplatform_provider_config resources (gitlab, github, or azure). Each resource uses the input nrn (with regex transformations for namespace handling), sets a provider-specific type attribute, and encodes provider credentials and configuration into a JSON attributes field. The module uses local boolean flags (is_gitlab, is_github, is_azure) derived from git_provider to control which single provider configuration resource gets created with count = 1, while others remain uncreated with count = 0.
 
 ## Features
 
-- Creates provider-specific configurations in Nullplatform for GitHub, GitLab, or Azure DevOps
-- Configures GitHub App integration with organization and installation ID
-- Sets up GitLab group integration with access tokens and collaborator permissions
-- Establishes Azure DevOps project integration with personal access tokens and agent pools
+- Creates nullplatform_provider_config resource for GitLab with group path, access token, installation URL, and collaborator configurations
+- Creates nullplatform_provider_config resource for GitHub with organization name and App installation ID
+- Creates nullplatform_provider_config resource for Azure DevOps with project name, access token, and CI agent pool settings
+- Transforms NRN using regex patterns to extract namespace information or strip namespace suffixes based on provider type
+- Implements lifecycle ignore_changes for attributes field to prevent configuration drift after initial creation
 
 ## Basic Usage
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.49.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.50.0"
 
   git_provider = "your-git-provider"
-  np_api_key   = "your-np-api-key"
   nrn          = "your-nrn"
 }
 ```
 
-### Usage with GitHub Configuration
+### Usage with GitHub Provider
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.49.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.50.0"
 
   git_provider           = "github"
   github_installation_id = "your-github-installation-id"  # Required when git_provider = "github"
   github_organization    = "your-github-organization"  # Required when git_provider = "github"
-  np_api_key             = "your-np-api-key"
   nrn                    = "your-nrn"
 }
 ```
 
-### Usage with GitLab Configuration
+### Usage with GitLab Provider
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.49.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.50.0"
 
   git_provider                = "gitlab"
   gitlab_access_token         = "your-gitlab-access-token"  # Required when git_provider = "gitlab"
@@ -54,23 +53,7 @@ module "code_repository" {
   gitlab_installation_url     = "your-gitlab-installation-url"  # Required when git_provider = "gitlab"
   gitlab_repository_prefix    = "your-gitlab-repository-prefix"  # Required when git_provider = "gitlab"
   gitlab_slug                 = "your-gitlab-slug"  # Required when git_provider = "gitlab"
-  np_api_key                  = "your-np-api-key"
   nrn                         = "your-nrn"
-}
-```
-
-### Usage with Azure DevOps Configuration
-
-```hcl
-module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.49.0"
-
-  azure_access_token = "your-azure-access-token"  # Required when git_provider = "azure"
-  azure_agent_pool   = "your-azure-agent-pool"  # Required when git_provider = "azure"
-  azure_project      = "your-azure-project"  # Required when git_provider = "azure"
-  git_provider       = "azure"
-  np_api_key         = "your-np-api-key"
-  nrn                = "your-nrn"
 }
 ```
 
@@ -120,27 +103,22 @@ resource "example_resource" "this" {
 | <a name="input_gitlab_installation_url"></a> [gitlab\_installation\_url](#input\_gitlab\_installation\_url) | Installation URL for the Git provider integration. | `string` | `null` | no |
 | <a name="input_gitlab_repository_prefix"></a> [gitlab\_repository\_prefix](#input\_gitlab\_repository\_prefix) | Prefix to use for GitLab repository names. | `string` | `null` | no |
 | <a name="input_gitlab_slug"></a> [gitlab\_slug](#input\_gitlab\_slug) | GitLab project slug identifier. | `string` | `null` | no |
-| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication. | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name (NRN) — unique identifier for resources. | `string` | n/a | yes |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
 {
   "name": "code_repository",
-  "description": "Configures Nullplatform provider integrations for GitHub, GitLab, or Azure DevOps",
-  "architecture": "The module creates nullplatform_provider_config resources based on the git_provider selection. When git_provider is 'github', it creates a github-configuration resource with organization and installation_id attributes. When git_provider is 'gitlab', it creates a gitlab-configuration resource with group_path, access_token, installation_url, and collaborators_config attributes. When git_provider is 'azure', it creates an azure-devops-configuration resource with project, access_token, and agent_pool attributes. The NRN input is processed to extract the namespace identifier for each provider configuration.",
+  "description": "Configures Git provider integrations for Nullplatform by creating provider-specific configuration resources for GitHub, GitLab, or Azure DevOps",
+  "architecture": "Based on the git_provider trigger variable, this module conditionally creates one of three nullplatform_provider_config resources (gitlab, github, or azure). Each resource uses the input nrn (with regex transformations for namespace handling), sets a provider-specific type attribute, and encodes provider credentials and configuration into a JSON attributes field. The module uses local boolean flags (is_gitlab, is_github, is_azure) derived from git_provider to control which single provider configuration resource gets created with count = 1, while others remain uncreated with count = 0.",
   "features": [
-    "Creates provider-specific configurations in Nullplatform for GitHub, GitLab, or Azure DevOps",
-    "Configures GitHub App integration with organization and installation ID",
-    "Sets up GitLab group integration with access tokens and collaborator permissions",
-    "Establishes Azure DevOps project integration with personal access tokens and agent pools"
+    "Creates nullplatform_provider_config resource for GitLab with group path, access token, installation URL, and collaborator configurations",
+    "Creates nullplatform_provider_config resource for GitHub with organization name and App installation ID",
+    "Creates nullplatform_provider_config resource for Azure DevOps with project name, access token, and CI agent pool settings",
+    "Transforms NRN using regex patterns to extract namespace information or strip namespace suffixes based on provider type",
+    "Implements lifecycle ignore_changes for attributes field to prevent configuration drift after initial creation"
   ],
   "inputs": [
-    {
-      "name": "np_api_key",
-      "description": "Nullplatform API key for authentication.",
-      "required": true
-    },
     {
       "name": "nrn",
       "description": "Nullplatform Resource Name (NRN) — unique identifier for resources.",
@@ -208,6 +186,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "8cdff4b9c171af15f9839c9a87b148ea"
+  "hash": "ec3c4900d37e8adacc8cf071bc8f62bf"
 }
 END_AI_METADATA -->

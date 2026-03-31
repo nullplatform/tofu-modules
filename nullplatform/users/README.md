@@ -2,25 +2,26 @@
 
 ## Description
 
-Creates Nullplatform users and assigns them roles through authorization grants
+Creates and manages Nullplatform users with their profile information and role-based authorization grants
 
 ## Architecture
 
-The module loops over var.nullplatform_users to create nullplatform_user resources, then flattens the user-role pairs into nullplatform_authz_grant resources that bind each user to their specified roles on the given NRN. The np_api_key authenticates all provider operations. Outputs expose the generated user IDs.
+The module creates nullplatform_user resources from a map of user configurations, then flattens the user-to-role relationships into individual nullplatform_authz_grant resources. Each user can have multiple role assignments, which are expanded through a nested for_each loop that merges all user-role combinations into a single flat map. The authorization grants reference the created user IDs and associate them with role slugs and NRN (Nullplatform Resource Name) identifiers for access control.
 
 ## Features
 
-- Creates multiple Nullplatform users with email, first name, and last name
-- Assigns each user one or more role slugs via authorization grants
-- Supports per-user NRN scoping for fine-grained permissions
+- Creates Nullplatform user accounts with email, first name, and last name attributes
+- Supports multiple role assignments per user through a list of role slugs
+- Generates individual authorization grants for each user-role combination
+- Associates role grants with Nullplatform Resource Names (NRN) for resource-level access control
+- Manages user-role relationships through a flattened resource mapping pattern
 
 ## Basic Usage
 
 ```hcl
 module "users" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/users?ref=v1.49.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/users?ref=v1.50.0"
 
-  np_api_key         = "your-np-api-key"
   nullplatform_users = "your-nullplatform-users"
 }
 ```
@@ -58,33 +59,29 @@ resource "example_resource" "this" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication | `string` | n/a | yes |
 | <a name="input_nullplatform_users"></a> [nullplatform\_users](#input\_nullplatform\_users) | Map of nullplatform users to create with their profile information and role assignments | <pre>map(object({<br/>    email      = string<br/>    first_name = string<br/>    last_name  = string<br/>    role_slug  = list(string)<br/>    nrn        = string<br/>  }))</pre> | n/a | yes |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
 {
   "name": "users",
-  "description": "Creates Nullplatform users and assigns them roles through authorization grants",
-  "architecture": "The module loops over var.nullplatform_users to create nullplatform_user resources, then flattens the user-role pairs into nullplatform_authz_grant resources that bind each user to their specified roles on the given NRN. The np_api_key authenticates all provider operations. Outputs expose the generated user IDs.",
+  "description": "Creates and manages Nullplatform users with their profile information and role-based authorization grants",
+  "architecture": "The module creates nullplatform_user resources from a map of user configurations, then flattens the user-to-role relationships into individual nullplatform_authz_grant resources. Each user can have multiple role assignments, which are expanded through a nested for_each loop that merges all user-role combinations into a single flat map. The authorization grants reference the created user IDs and associate them with role slugs and NRN (Nullplatform Resource Name) identifiers for access control.",
   "features": [
-    "Creates multiple Nullplatform users with email, first name, and last name",
-    "Assigns each user one or more role slugs via authorization grants",
-    "Supports per-user NRN scoping for fine-grained permissions"
+    "Creates Nullplatform user accounts with email, first name, and last name attributes",
+    "Supports multiple role assignments per user through a list of role slugs",
+    "Generates individual authorization grants for each user-role combination",
+    "Associates role grants with Nullplatform Resource Names (NRN) for resource-level access control",
+    "Manages user-role relationships through a flattened resource mapping pattern"
   ],
   "inputs": [
     {
       "name": "nullplatform_users",
       "description": "Map of nullplatform users to create with their profile information and role assignments",
       "required": true
-    },
-    {
-      "name": "np_api_key",
-      "description": "Nullplatform API key for authentication",
-      "required": true
     }
   ],
   "outputs": [],
-  "hash": "6863fdf400c277edc8848d4b93db156f"
+  "hash": "4ae90811c4ec5e5eedf7feff500c1f44"
 }
 END_AI_METADATA -->

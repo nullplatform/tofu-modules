@@ -2,26 +2,27 @@
 
 ## Description
 
-Creates Nullplatform dimension and dimension values for environment management
+Creates a Nullplatform dimension for environments with configurable dimension values
 
 ## Architecture
 
-The module creates a nullplatform_dimension resource named 'Environment' with order 1, then creates nullplatform_dimension_value resources for each environment specified in the environments list. The dimension is linked to the provided NRN, and each dimension value is associated with the created dimension through its dimension_id.
+This module provisions a nullplatform_dimension resource representing an environment dimension with a fixed order of 1. It then creates multiple nullplatform_dimension_value resources using for_each iteration over the environments list, where each value is associated with the parent dimension via dimension_id. The nrn input flows into both the dimension and dimension value resources to establish the Nullplatform resource hierarchy.
 
 ## Features
 
-- Creates environment dimension with configurable ordering
-- Generates dimension values for each specified environment
-- Supports custom environment names beyond the default set
+- Creates a Nullplatform dimension resource named 'Environment' with configurable ordering
+- Generates dimension values dynamically from a configurable list of environment names
+- Associates all dimension values with the parent dimension through dimension_id linkage
+- Supports custom environment lists including development, staging, and production by default
+- Links all resources to a Nullplatform organization through the NRN identifier
 
 ## Basic Usage
 
 ```hcl
 module "dimensions" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimensions?ref=v1.49.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimensions?ref=v1.50.0"
 
-  np_api_key = "your-np-api-key"
-  nrn        = "your-nrn"
+  nrn = "your-nrn"
 }
 ```
 
@@ -59,29 +60,25 @@ resource "example_resource" "this" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_environments"></a> [environments](#input\_environments) | The list of environments | `list(string)` | <pre>[<br/>  "development",<br/>  "staging",<br/>  "production"<br/>]</pre> | no |
-| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Identifier Nullplatform Resources Name (NRN) | `string` | n/a | yes |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
 {
   "name": "dimensions",
-  "description": "Creates Nullplatform dimension and dimension values for environment management",
-  "architecture": "The module creates a nullplatform_dimension resource named 'Environment' with order 1, then creates nullplatform_dimension_value resources for each environment specified in the environments list. The dimension is linked to the provided NRN, and each dimension value is associated with the created dimension through its dimension_id.",
+  "description": "Creates a Nullplatform dimension for environments with configurable dimension values",
+  "architecture": "This module provisions a nullplatform_dimension resource representing an environment dimension with a fixed order of 1. It then creates multiple nullplatform_dimension_value resources using for_each iteration over the environments list, where each value is associated with the parent dimension via dimension_id. The nrn input flows into both the dimension and dimension value resources to establish the Nullplatform resource hierarchy.",
   "features": [
-    "Creates environment dimension with configurable ordering",
-    "Generates dimension values for each specified environment",
-    "Supports custom environment names beyond the default set"
+    "Creates a Nullplatform dimension resource named 'Environment' with configurable ordering",
+    "Generates dimension values dynamically from a configurable list of environment names",
+    "Associates all dimension values with the parent dimension through dimension_id linkage",
+    "Supports custom environment lists including development, staging, and production by default",
+    "Links all resources to a Nullplatform organization through the NRN identifier"
   ],
   "inputs": [
     {
       "name": "nrn",
       "description": "Identifier Nullplatform Resources Name (NRN)",
-      "required": true
-    },
-    {
-      "name": "np_api_key",
-      "description": "Nullplatform API key for authentication",
       "required": true
     },
     {
@@ -91,6 +88,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "eca98722933c67fbb1b3d43a67952bd8"
+  "hash": "d6b86979ceeaba18550f4966bf233b20"
 }
 END_AI_METADATA -->

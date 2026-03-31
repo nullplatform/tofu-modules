@@ -2,27 +2,27 @@
 
 ## Description
 
-Creates and configures Nullplatform service specifications, scope types, and action specifications from templated definitions stored in a remote Git repository
+Creates and configures nullplatform service specifications, scope types, and action specifications from remote template files with gomplate-based rendering
 
 ## Architecture
 
-The module fetches JSON templates from a remote repository using data.http resources, processes them using external data sources that invoke gomplate for variable substitution, and creates nullplatform_service_specification, nullplatform_scope_type, and nullplatform_action_specification resources. It uses a null_resource with local-exec provisioner to patch the NRN with metrics and logging provider configurations via the np CLI. Optionally creates a nullplatform_provider_specification resource when scope configuration is enabled. Template processing flows through external data sources that inject context variables (NRN, service IDs, slugs) into templates before resource creation.
+The module fetches JSON templates via data.http from a remote repository, processes them using external data sources with gomplate and jq for variable substitution, then creates nullplatform_service_specification resources with associated selectors and attributes. It creates nullplatform_scope_type resources linked to the service specification via provider_id, and generates multiple nullplatform_action_specification resources for each action defined in action_spec_names. A null_resource with local-exec provisioner patches the NRN configuration using the nullplatform CLI to set metrics and logging providers. Optionally creates nullplatform_provider_specification resources from scope configuration templates when create_scope_configuration is true.
 
 ## Features
 
-- Fetches service specification, scope type, and action templates from configurable GitHub repository branches
-- Processes templates using gomplate with environment-specific variables (NRN, service IDs, paths)
-- Creates nullplatform service specifications with selectors, attributes, and default actions
+- Fetches and processes service specification templates from remote GitHub repositories using gomplate
+- Creates nullplatform service specifications with selectors for category, provider, and sub-category
 - Generates scope types linked to service specifications with provider type definitions
-- Creates multiple action specifications for scope operations (create, delete, deploy, scale, diagnose)
-- Patches NRN configuration with external metrics and logging provider settings via np CLI
-- Optionally creates provider specifications from scope configuration templates
+- Creates multiple action specifications for scope lifecycle operations including deployment and scaling actions
+- Patches NRN configuration with external metrics and logging provider settings via nullplatform CLI
+- Supports optional provider specification creation from scope configuration templates
+- Processes templates with dynamic variable substitution using NRN, service IDs, and path context
 
 ## Basic Usage
 
 ```hcl
 module "scope_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v1.49.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v1.50.0"
 
   np_api_key = "your-np-api-key"
   nrn        = "your-nrn"
@@ -84,7 +84,7 @@ resource "example_resource" "this" {
 | <a name="input_repository_service_spec"></a> [repository\_service\_spec](#input\_repository\_service\_spec) | repository of service spec | `string` | `"https://raw.githubusercontent.com/nullplatform/scopes/refs/heads"` | no |
 | <a name="input_repository_service_spec_branch"></a> [repository\_service\_spec\_branch](#input\_repository\_service\_spec\_branch) | branch reference of service spec | `string` | `"main"` | no |
 | <a name="input_service_path"></a> [service\_path](#input\_service\_path) | Path within the repository where the service specification files are stored (e.g., 'services/api') | `string` | `"k8s"` | no |
-| <a name="input_service_spec_description"></a> [service\_spec\_description](#input\_service\_spec\_description) | Description of the created service or associated scope type | `string` | `""` | no |
+| <a name="input_service_spec_description"></a> [service\_spec\_description](#input\_service\_spec\_description) | Description of the created service or associated scope type | `string` | `"Docker containers on pods"` | no |
 | <a name="input_service_spec_name"></a> [service\_spec\_name](#input\_service\_spec\_name) | Name of the service that will be created from the specification template | `string` | `"Containers"` | no |
 
 ## Outputs
@@ -103,16 +103,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "scope_definition",
-  "description": "Creates and configures Nullplatform service specifications, scope types, and action specifications from templated definitions stored in a remote Git repository",
-  "architecture": "The module fetches JSON templates from a remote repository using data.http resources, processes them using external data sources that invoke gomplate for variable substitution, and creates nullplatform_service_specification, nullplatform_scope_type, and nullplatform_action_specification resources. It uses a null_resource with local-exec provisioner to patch the NRN with metrics and logging provider configurations via the np CLI. Optionally creates a nullplatform_provider_specification resource when scope configuration is enabled. Template processing flows through external data sources that inject context variables (NRN, service IDs, slugs) into templates before resource creation.",
+  "description": "Creates and configures nullplatform service specifications, scope types, and action specifications from remote template files with gomplate-based rendering",
+  "architecture": "The module fetches JSON templates via data.http from a remote repository, processes them using external data sources with gomplate and jq for variable substitution, then creates nullplatform_service_specification resources with associated selectors and attributes. It creates nullplatform_scope_type resources linked to the service specification via provider_id, and generates multiple nullplatform_action_specification resources for each action defined in action_spec_names. A null_resource with local-exec provisioner patches the NRN configuration using the nullplatform CLI to set metrics and logging providers. Optionally creates nullplatform_provider_specification resources from scope configuration templates when create_scope_configuration is true.",
   "features": [
-    "Fetches service specification, scope type, and action templates from configurable GitHub repository branches",
-    "Processes templates using gomplate with environment-specific variables (NRN, service IDs, paths)",
-    "Creates nullplatform service specifications with selectors, attributes, and default actions",
+    "Fetches and processes service specification templates from remote GitHub repositories using gomplate",
+    "Creates nullplatform service specifications with selectors for category, provider, and sub-category",
     "Generates scope types linked to service specifications with provider type definitions",
-    "Creates multiple action specifications for scope operations (create, delete, deploy, scale, diagnose)",
-    "Patches NRN configuration with external metrics and logging provider settings via np CLI",
-    "Optionally creates provider specifications from scope configuration templates"
+    "Creates multiple action specifications for scope lifecycle operations including deployment and scaling actions",
+    "Patches NRN configuration with external metrics and logging provider settings via nullplatform CLI",
+    "Supports optional provider specification creation from scope configuration templates",
+    "Processes templates with dynamic variable substitution using NRN, service IDs, and path context"
   ],
   "inputs": [
     {
@@ -205,6 +205,6 @@ resource "example_resource" "this" {
     "provider_specification_id",
     "provider_specification_slug"
   ],
-  "hash": "5c62b5904d62b5a02f70e3a5873cfeaa"
+  "hash": "38143399d1ff91a802e0a4a9b39a99e7"
 }
 END_AI_METADATA -->
