@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.49.0](https://github.com/nullplatform/tofu-modules/compare/v1.48.3...v1.49.0) (2026-03-30)
+
+
+### Features
+
+* **scope-definition:** add description field to nullplatform_service_specification ([#273](https://github.com/nullplatform/tofu-modules/issues/273)) ([f9ee6ea](https://github.com/nullplatform/tofu-modules/commit/f9ee6ea670260874899aa0620eaf0ef19fb04389))
+
 ## [1.48.3](https://github.com/nullplatform/tofu-modules/compare/v1.48.2...v1.48.3) (2026-03-27)
 
 

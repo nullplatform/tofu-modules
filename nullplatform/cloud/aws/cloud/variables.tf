@@ -41,10 +41,3 @@ variable "application_domain" {
   description = "Add account name in domain"
   default     = false
 }
-
-# NRN Patch Configuration
-variable "np_api_key" {
-  type        = string
-  sensitive   = true
-  description = "Nullplatform API key for authentication"
-}

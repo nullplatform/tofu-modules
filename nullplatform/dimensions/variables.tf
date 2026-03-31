@@ -7,9 +7,3 @@ variable "nrn" {
   description = "Identifier Nullplatform Resources Name (NRN)"
   type        = string
 }
-
-variable "np_api_key" {
-  type        = string
-  sensitive   = true
-  description = "Nullplatform API key for authentication"
-}
