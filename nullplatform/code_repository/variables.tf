@@ -127,12 +127,6 @@ variable "azure_agent_pool" {
   }
 }
 
-# Common variables (always required)
-variable "np_api_key" {
-  description = "Nullplatform API key for authentication."
-  type        = string
-  sensitive   = true
-}
 
 variable "nrn" {
   description = "Nullplatform Resource Name (NRN) — unique identifier for resources."
