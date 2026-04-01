@@ -2,27 +2,27 @@
 
 ## Description
 
-Provisions an Amazon EKS cluster with support for both Auto Mode and Managed Node Groups, integrated with VPC networking, IRSA, and optional control plane logging
+Creates an Amazon EKS cluster with support for both Auto Mode and Managed Node Groups, including IRSA, Pod Identity Agent, and configurable control plane logging
 
 ## Architecture
 
-Creates an aws_eks_cluster resource via the terraform-aws-modules/eks/aws module, configuring it with aws_iam_role resources for cluster and node IAM permissions, aws_security_group and aws_security_group_rule resources for network access control including optional NLB health check and HTTPS ingress rules, and aws_cloudwatch_log_group for control plane logging. Enables IRSA by creating an aws_iam_openid_connect_provider linked to the cluster's OIDC issuer. Conditionally provisions either Auto Mode compute resources with specified node pools or aws_eks_node_group managed node groups based on the use_auto_mode variable. Installs core EKS add-ons including coredns, eks-pod-identity-agent, kube-proxy, and vpc-cni as aws_eks_addon resources. Outputs include cluster endpoint, OIDC provider ARN, node IAM role details, and security group IDs for downstream resource integration.
+The module creates an EKS cluster using the terraform-aws-modules/eks/aws module, which provisions aws_eks_cluster, aws_iam_role resources for both the control plane and nodes, and aws_security_group resources for cluster networking. It installs core EKS addons (coredns, kube-proxy, vpc-cni, eks-pod-identity-agent) and configures an OIDC provider for IRSA. When Auto Mode is disabled, it creates aws_eks_node_group resources for managed node groups; when enabled, it configures EKS compute_config with specified node pools. Security group rules are conditionally added for NLB health checks on port 15021 and HTTPS traffic on port 443. CloudWatch log groups are optionally created for control plane logging with configurable retention periods.
 
 ## Features
 
 - Creates EKS cluster with configurable Kubernetes version and authentication modes (CONFIG_MAP, API, API_AND_CONFIG_MAP)
-- Provisions Auto Mode compute with selectable node pools (general-purpose, system) or traditional managed node groups with configurable instance types and scaling parameters
-- Configures IRSA via OIDC provider for pod-level IAM permissions and installs core EKS add-ons (CoreDNS, VPC CNI, kube-proxy, pod identity agent)
-- Creates security group rules for NLB health checks on port 15021 and HTTPS traffic on port 443 with support for additional CIDR blocks
-- Configures CloudWatch log group with retention policies for control plane logging (api, audit, authenticator, controllerManager, scheduler)
-- Supports flexible cluster access control via access entries map with principal ARNs, Kubernetes groups, and policy associations
-- Exposes OIDC provider ARN, node IAM role details, and security group IDs for integration with external Kubernetes resources and IAM policies
+- Provisions IRSA with OIDC provider and Pod Identity Agent addon for workload IAM authentication
+- Configures Auto Mode with general-purpose and system node pools or traditional Managed Node Groups with customizable instance types and scaling
+- Deploys core EKS addons including CoreDNS, kube-proxy, and VPC CNI with before_compute lifecycle configuration
+- Creates security group rules for NLB health checks on Istio status port 15021 and HTTPS traffic
+- Configures control plane logging to CloudWatch with selectable log types (api, audit, authenticator, controllerManager, scheduler) and retention policies
+- Supports cluster access entries for IAM principal authorization with policy associations and namespace scoping
 
 ## Basic Usage
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/eks?ref=v1.49.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/eks?ref=v1.50.0"
 
   aws_subnets_private_ids = "your-aws-subnets-private-ids"
   aws_vpc_vpc_id          = "your-aws-vpc-vpc-id"
@@ -82,7 +82,7 @@ resource "example_resource" "this" {
 | <a name="input_endpoint_public_access"></a> [endpoint\_public\_access](#input\_endpoint\_public\_access) | Whether the Amazon EKS public API server endpoint is enabled | `bool` | `true` | no |
 | <a name="input_endpoint_public_access_cidrs"></a> [endpoint\_public\_access\_cidrs](#input\_endpoint\_public\_access\_cidrs) | List of CIDR blocks allowed to access the public EKS API server endpoint | `list(string)` | `[]` | no |
 | <a name="input_instance_types"></a> [instance\_types](#input\_instance\_types) | Instance type to use | `string` | `"t3.medium"` | no |
-| <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | K8s version to use | `string` | `"1.32"` | no |
+| <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | K8s version to use | `string` | `"1.34"` | no |
 | <a name="input_name"></a> [name](#input\_name) | Cluster name | `string` | n/a | yes |
 | <a name="input_node_group_desired_size"></a> [node\_group\_desired\_size](#input\_node\_group\_desired\_size) | Desired number of nodes in the managed node group | `number` | `2` | no |
 | <a name="input_node_group_max_size"></a> [node\_group\_max\_size](#input\_node\_group\_max\_size) | Maximum number of nodes in the managed node group | `number` | `10` | no |
@@ -107,16 +107,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "eks",
-  "description": "Provisions an Amazon EKS cluster with support for both Auto Mode and Managed Node Groups, integrated with VPC networking, IRSA, and optional control plane logging",
-  "architecture": "Creates an aws_eks_cluster resource via the terraform-aws-modules/eks/aws module, configuring it with aws_iam_role resources for cluster and node IAM permissions, aws_security_group and aws_security_group_rule resources for network access control including optional NLB health check and HTTPS ingress rules, and aws_cloudwatch_log_group for control plane logging. Enables IRSA by creating an aws_iam_openid_connect_provider linked to the cluster's OIDC issuer. Conditionally provisions either Auto Mode compute resources with specified node pools or aws_eks_node_group managed node groups based on the use_auto_mode variable. Installs core EKS add-ons including coredns, eks-pod-identity-agent, kube-proxy, and vpc-cni as aws_eks_addon resources. Outputs include cluster endpoint, OIDC provider ARN, node IAM role details, and security group IDs for downstream resource integration.",
+  "description": "Creates an Amazon EKS cluster with support for both Auto Mode and Managed Node Groups, including IRSA, Pod Identity Agent, and configurable control plane logging",
+  "architecture": "The module creates an EKS cluster using the terraform-aws-modules/eks/aws module, which provisions aws_eks_cluster, aws_iam_role resources for both the control plane and nodes, and aws_security_group resources for cluster networking. It installs core EKS addons (coredns, kube-proxy, vpc-cni, eks-pod-identity-agent) and configures an OIDC provider for IRSA. When Auto Mode is disabled, it creates aws_eks_node_group resources for managed node groups; when enabled, it configures EKS compute_config with specified node pools. Security group rules are conditionally added for NLB health checks on port 15021 and HTTPS traffic on port 443. CloudWatch log groups are optionally created for control plane logging with configurable retention periods.",
   "features": [
     "Creates EKS cluster with configurable Kubernetes version and authentication modes (CONFIG_MAP, API, API_AND_CONFIG_MAP)",
-    "Provisions Auto Mode compute with selectable node pools (general-purpose, system) or traditional managed node groups with configurable instance types and scaling parameters",
-    "Configures IRSA via OIDC provider for pod-level IAM permissions and installs core EKS add-ons (CoreDNS, VPC CNI, kube-proxy, pod identity agent)",
-    "Creates security group rules for NLB health checks on port 15021 and HTTPS traffic on port 443 with support for additional CIDR blocks",
-    "Configures CloudWatch log group with retention policies for control plane logging (api, audit, authenticator, controllerManager, scheduler)",
-    "Supports flexible cluster access control via access entries map with principal ARNs, Kubernetes groups, and policy associations",
-    "Exposes OIDC provider ARN, node IAM role details, and security group IDs for integration with external Kubernetes resources and IAM policies"
+    "Provisions IRSA with OIDC provider and Pod Identity Agent addon for workload IAM authentication",
+    "Configures Auto Mode with general-purpose and system node pools or traditional Managed Node Groups with customizable instance types and scaling",
+    "Deploys core EKS addons including CoreDNS, kube-proxy, and VPC CNI with before_compute lifecycle configuration",
+    "Creates security group rules for NLB health checks on Istio status port 15021 and HTTPS traffic",
+    "Configures control plane logging to CloudWatch with selectable log types (api, audit, authenticator, controllerManager, scheduler) and retention policies",
+    "Supports cluster access entries for IAM principal authorization with policy associations and namespace scoping"
   ],
   "inputs": [
     {
@@ -240,6 +240,6 @@ resource "example_resource" "this" {
     "eks_cluster_security_group_id",
     "eks_cluster_primary_security_group_id"
   ],
-  "hash": "27924a5742981018396b4212ad7cc5e2"
+  "hash": "fa16f9da6d771577dd97087a4e186819"
 }
 END_AI_METADATA -->

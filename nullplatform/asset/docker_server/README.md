@@ -2,26 +2,28 @@
 
 ## Description
 
-Configures a nullplatform provider with a Docker server setup
+Creates a nullplatform Docker server provider configuration with authentication credentials for container registry access
 
 ## Architecture
 
-The module creates a nullplatform_provider_config resource of type docker-server, which is configured with the provided login server, path, username, and password. The nullplatform_provider_config resource is then used to set up the Docker server. The module uses the nullplatform API key for authentication. The username is set to _json_key_base64 by default, but can be overridden by the user.
+The module creates a single nullplatform_provider_config resource of type 'docker-server'. Input variables for NRN, login server, path, username, and password flow directly into the resource's attributes as a JSON-encoded setup configuration. The attributes define server connection details including the registry server URL, repository path, authentication credentials, and namespace usage settings.
 
 ## Features
 
-- Configures a nullplatform provider with a Docker server setup
-- Sets up a Docker login server with the provided credentials
-- Authenticates with the nullplatform API using the provided API key
+- Creates nullplatform provider configuration for Docker server integration
+- Configures Docker registry authentication with username and password credentials
+- Sets registry path for container image storage location
+- Supports custom login server endpoints for different registry providers
+- Defaults username to '_json_key_base64' for service account JSON key authentication
+- Disables namespace usage in the Docker server setup
 
 ## Basic Usage
 
 ```hcl
 module "docker_server" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/docker_server?ref=v1.49.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/docker_server?ref=v1.50.0"
 
   login_server = "your-login-server"
-  np_api_key   = "your-np-api-key"
   nrn          = "your-nrn"
   password     = "your-password"
   path         = "your-path"
@@ -61,7 +63,6 @@ resource "example_resource" "this" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_login_server"></a> [login\_server](#input\_login\_server) | Docker login server name | `string` | n/a | yes |
-| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | The nullplatform resource name (NRN) | `string` | n/a | yes |
 | <a name="input_password"></a> [password](#input\_password) | Docker password | `string` | n/a | yes |
 | <a name="input_path"></a> [path](#input\_path) | Path to the created registry | `string` | n/a | yes |
@@ -71,12 +72,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "docker_server",
-  "description": "Configures a nullplatform provider with a Docker server setup",
-  "architecture": "The module creates a nullplatform_provider_config resource of type docker-server, which is configured with the provided login server, path, username, and password. The nullplatform_provider_config resource is then used to set up the Docker server. The module uses the nullplatform API key for authentication. The username is set to _json_key_base64 by default, but can be overridden by the user.",
+  "description": "Creates a nullplatform Docker server provider configuration with authentication credentials for container registry access",
+  "architecture": "The module creates a single nullplatform_provider_config resource of type 'docker-server'. Input variables for NRN, login server, path, username, and password flow directly into the resource's attributes as a JSON-encoded setup configuration. The attributes define server connection details including the registry server URL, repository path, authentication credentials, and namespace usage settings.",
   "features": [
-    "Configures a nullplatform provider with a Docker server setup",
-    "Sets up a Docker login server with the provided credentials",
-    "Authenticates with the nullplatform API using the provided API key"
+    "Creates nullplatform provider configuration for Docker server integration",
+    "Configures Docker registry authentication with username and password credentials",
+    "Sets registry path for container image storage location",
+    "Supports custom login server endpoints for different registry providers",
+    "Defaults username to '_json_key_base64' for service account JSON key authentication",
+    "Disables namespace usage in the Docker server setup"
   ],
   "inputs": [
     {
@@ -100,17 +104,12 @@ resource "example_resource" "this" {
       "required": true
     },
     {
-      "name": "np_api_key",
-      "description": "Nullplatform API key for authentication",
-      "required": true
-    },
-    {
       "name": "username",
       "description": "Docker username",
       "required": false
     }
   ],
   "outputs": [],
-  "hash": "a92e12e0d84ac068abae3f9a954ba240"
+  "hash": "84c1caf9b48feba0e0aeb2a64d869d5c"
 }
 END_AI_METADATA -->

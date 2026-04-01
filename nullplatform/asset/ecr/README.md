@@ -2,26 +2,27 @@
 
 ## Description
 
-Configures an ECR provider in Nullplatform with IAM credentials and role ARN for CI and setup workflows
+Configures Nullplatform provider with AWS ECR integration using IAM credentials for CI/CD workflows and EKS application deployment
 
 ## Architecture
 
-The module creates a nullplatform_provider_config resource of type 'ecr' that stores AWS region, IAM access key, and IAM role ARN as attributes. It uses data sources aws_caller_identity and aws_region to retrieve current AWS account and region information. The IAM access key and role ARN are referenced from externally created AWS resources and injected into the provider configuration attributes under 'ci' and 'setup' sections.
+Creates a nullplatform_provider_config resource that references aws_iam_access_key for CI/CD authentication and aws_iam_role for application runtime. Data sources aws_caller_identity and aws_region retrieve current AWS context. The provider config encodes IAM credentials and role ARN into a JSON attributes structure, establishing trust between Nullplatform and AWS ECR for container image management.
 
 ## Features
 
-- Registers ECR provider in Nullplatform with NRN-scoped configuration
-- Injects IAM access key and secret for CI authentication
-- Attaches IAM role ARN for setup operations
+- Creates IAM access keys for Nullplatform build workflow authentication to ECR
+- Configures IAM role for Nullplatform application runtime with ECR pull permissions
+- Establishes Nullplatform provider configuration with regional ECR endpoints
+- Encodes AWS credentials and role ARN in JSON format for Nullplatform consumption
+- Ignores lifecycle changes to attributes to prevent configuration drift
 
 ## Basic Usage
 
 ```hcl
 module "ecr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v1.49.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v1.50.0"
 
   cluster_name = "your-cluster-name"
-  np_api_key   = "your-np-api-key"
   nrn          = "your-nrn"
 }
 ```
@@ -67,29 +68,25 @@ resource "example_resource" "this" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_application_manager_assume_role"></a> [application\_manager\_assume\_role](#input\_application\_manager\_assume\_role) | ARN of the IAM role assumed by the application manager | `string` | `"arn:aws:iam::283477532906:role/application_manager"` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the cluster where the policy runs | `string` | n/a | yes |
-| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | The nullplatform resource name (NRN) | `string` | n/a | yes |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
 {
   "name": "ecr",
-  "description": "Configures an ECR provider in Nullplatform with IAM credentials and role ARN for CI and setup workflows",
-  "architecture": "The module creates a nullplatform_provider_config resource of type 'ecr' that stores AWS region, IAM access key, and IAM role ARN as attributes. It uses data sources aws_caller_identity and aws_region to retrieve current AWS account and region information. The IAM access key and role ARN are referenced from externally created AWS resources and injected into the provider configuration attributes under 'ci' and 'setup' sections.",
+  "description": "Configures Nullplatform provider with AWS ECR integration using IAM credentials for CI/CD workflows and EKS application deployment",
+  "architecture": "Creates a nullplatform_provider_config resource that references aws_iam_access_key for CI/CD authentication and aws_iam_role for application runtime. Data sources aws_caller_identity and aws_region retrieve current AWS context. The provider config encodes IAM credentials and role ARN into a JSON attributes structure, establishing trust between Nullplatform and AWS ECR for container image management.",
   "features": [
-    "Registers ECR provider in Nullplatform with NRN-scoped configuration",
-    "Injects IAM access key and secret for CI authentication",
-    "Attaches IAM role ARN for setup operations"
+    "Creates IAM access keys for Nullplatform build workflow authentication to ECR",
+    "Configures IAM role for Nullplatform application runtime with ECR pull permissions",
+    "Establishes Nullplatform provider configuration with regional ECR endpoints",
+    "Encodes AWS credentials and role ARN in JSON format for Nullplatform consumption",
+    "Ignores lifecycle changes to attributes to prevent configuration drift"
   ],
   "inputs": [
     {
       "name": "nrn",
       "description": "The nullplatform resource name (NRN)",
-      "required": true
-    },
-    {
-      "name": "np_api_key",
-      "description": "Nullplatform API key for authentication",
       "required": true
     },
     {
@@ -104,6 +101,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "9efedd1c79f12b8f8dfe1fc9390240e6"
+  "hash": "67a1b139f3d9a964db7055ef1475676d"
 }
 END_AI_METADATA -->
