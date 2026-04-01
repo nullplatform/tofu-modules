@@ -18,7 +18,7 @@ variable "instance_types" {
 variable "kubernetes_version" {
   type        = string
   description = "K8s version to use"
-  default     = "1.32"
+  default     = "1.34"
 }
 
 variable "aws_vpc_vpc_id" {

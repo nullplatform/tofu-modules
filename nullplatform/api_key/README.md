@@ -2,26 +2,28 @@
 
 ## Description
 
-Creates a Nullplatform API key with pre-configured grants and tags based on type
+Creates a Nullplatform API key with configurable grants and tags based on predefined types or custom configurations
 
 ## Architecture
 
-The module parses the input NRN to extract organization, account, and namespace tags. It selects a configuration from locals.configs based on var.type, which defines the API key name and role slugs. The nullplatform_api_key resource is created with dynamic grants blocks for each role slug and dynamic tags blocks for NRN-derived and custom tags. Outputs expose the generated API key, its ID, and name.
+The module creates a nullplatform_api_key resource with dynamically generated grants and tags. For predefined types (agent, scope_notification, service_notification), it extracts NRN components (organization, account, namespace) from the input NRN string and maps them to role slugs defined in local configurations. For custom type, it accepts either custom_role_slugs paired with a module-level NRN or custom_grants with per-grant NRN definitions. Tags are automatically generated from NRN components and merged with custom tags. Lifecycle preconditions enforce validation rules ensuring required variables are provided based on the selected type.
 
 ## Features
 
-- Creates API keys with pre-defined roles for agent, scope_notification, service_notification, or custom types
-- Parses NRN to auto-generate organization, account, and namespace tags
-- Supports custom API key names, role slugs, and additional tags via custom type
-- Enforces lifecycle preconditions for custom type requiring name and at least one role slug
+- Creates nullplatform_api_key resource with configurable grants based on role slugs
+- Generates automatic tags from NRN components (organization, account, namespace)
+- Supports predefined API key types with pre-configured role mappings for agents and notifications
+- Enables custom API key configuration with user-defined role slugs and grants
+- Allows per-grant NRN specification for multi-resource access patterns
+- Validates required fields using lifecycle preconditions based on selected type
+- Outputs sensitive API key value along with resource ID and name
 
 ## Basic Usage
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.49.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.50.0"
 
-  nrn  = "your-nrn"
   type = "your-type"
 }
 ```
@@ -30,9 +32,9 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.49.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.50.0"
 
-  nrn  = "your-nrn"
+  nrn  = "your-nrn"  # Required when type = "agent"
   type = "agent"
 }
 ```
@@ -41,10 +43,11 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.49.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.50.0"
 
-  nrn  = "your-nrn"
-  type = "scope_notification"
+  nrn                = "your-nrn"  # Required when type = "scope_notification"
+  specification_slug = "your-specification-slug"  # Required when type = "scope_notification"
+  type               = "scope_notification"
 }
 ```
 
@@ -52,10 +55,11 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.49.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.50.0"
 
-  nrn  = "your-nrn"
-  type = "service_notification"
+  nrn                = "your-nrn"  # Required when type = "service_notification"
+  specification_slug = "your-specification-slug"  # Required when type = "service_notification"
+  type               = "service_notification"
 }
 ```
 
@@ -63,12 +67,10 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.49.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v1.50.0"
 
-  custom_name       = "your-custom-name"  # Required when type = "custom"
-  custom_role_slugs = "your-custom-role-slugs"  # Required when type = "custom"
-  nrn               = "your-nrn"
-  type              = "custom"
+  custom_name = "your-custom-name"  # Required when type = "custom"
+  type        = "custom"
 }
 ```
 
@@ -104,10 +106,11 @@ resource "example_resource" "this" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_custom_grants"></a> [custom\_grants](#input\_custom\_grants) | List of grants with explicit NRN and role\_slug pairs. Allows assigning different NRNs per grant (used when type is 'custom'). | <pre>list(object({<br/>    nrn       = string<br/>    role_slug = string<br/>  }))</pre> | `[]` | no |
 | <a name="input_custom_name"></a> [custom\_name](#input\_custom\_name) | Name for the API key (required when type is 'custom') | `string` | `null` | no |
-| <a name="input_custom_role_slugs"></a> [custom\_role\_slugs](#input\_custom\_role\_slugs) | List of role slugs to assign (required when type is 'custom', must have at least 1) | `list(string)` | `[]` | no |
+| <a name="input_custom_role_slugs"></a> [custom\_role\_slugs](#input\_custom\_role\_slugs) | List of role slugs to assign using the module-level NRN (used when type is 'custom' and custom\_grants is empty) | `list(string)` | `[]` | no |
 | <a name="input_custom_tags"></a> [custom\_tags](#input\_custom\_tags) | Additional tags to apply to the API key (optional, only used when type is 'custom') | <pre>list(object({<br/>    key   = string<br/>    value = string<br/>  }))</pre> | `[]` | no |
-| <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name (e.g., organization=123:account=456:namespace=789) | `string` | n/a | yes |
+| <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name (e.g., organization=123:account=456:namespace=789). Required for predefined types (agent, scope\_notification, service\_notification). Optional for custom type when using custom\_grants. | `string` | `null` | no |
 | <a name="input_specification_slug"></a> [specification\_slug](#input\_specification\_slug) | Specification slug used for the usedBy tag (required for scope\_notification and service\_notification types) | `string` | `null` | no |
 | <a name="input_type"></a> [type](#input\_type) | Type of API key to create. Determines the pre-configured grants and tags. Use 'custom' to define your own roles and tags. | `string` | n/a | yes |
 
@@ -123,24 +126,27 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "api_key",
-  "description": "Creates a Nullplatform API key with pre-configured grants and tags based on type",
-  "architecture": "The module parses the input NRN to extract organization, account, and namespace tags. It selects a configuration from locals.configs based on var.type, which defines the API key name and role slugs. The nullplatform_api_key resource is created with dynamic grants blocks for each role slug and dynamic tags blocks for NRN-derived and custom tags. Outputs expose the generated API key, its ID, and name.",
+  "description": "Creates a Nullplatform API key with configurable grants and tags based on predefined types or custom configurations",
+  "architecture": "The module creates a nullplatform_api_key resource with dynamically generated grants and tags. For predefined types (agent, scope_notification, service_notification), it extracts NRN components (organization, account, namespace) from the input NRN string and maps them to role slugs defined in local configurations. For custom type, it accepts either custom_role_slugs paired with a module-level NRN or custom_grants with per-grant NRN definitions. Tags are automatically generated from NRN components and merged with custom tags. Lifecycle preconditions enforce validation rules ensuring required variables are provided based on the selected type.",
   "features": [
-    "Creates API keys with pre-defined roles for agent, scope_notification, service_notification, or custom types",
-    "Parses NRN to auto-generate organization, account, and namespace tags",
-    "Supports custom API key names, role slugs, and additional tags via custom type",
-    "Enforces lifecycle preconditions for custom type requiring name and at least one role slug"
+    "Creates nullplatform_api_key resource with configurable grants based on role slugs",
+    "Generates automatic tags from NRN components (organization, account, namespace)",
+    "Supports predefined API key types with pre-configured role mappings for agents and notifications",
+    "Enables custom API key configuration with user-defined role slugs and grants",
+    "Allows per-grant NRN specification for multi-resource access patterns",
+    "Validates required fields using lifecycle preconditions based on selected type",
+    "Outputs sensitive API key value along with resource ID and name"
   ],
   "inputs": [
-    {
-      "name": "nrn",
-      "description": "Nullplatform Resource Name (e.g., organization=123:account=456:namespace=789)",
-      "required": true
-    },
     {
       "name": "type",
       "description": "Type of API key to create. Determines the pre-configured grants and tags. Use 'custom' to define your own roles and tags.",
       "required": true
+    },
+    {
+      "name": "nrn",
+      "description": "Nullplatform Resource Name (e.g., organization=123:account=456:namespace=789). Required for predefined types (agent, scope_notification, service_notification). Optional for custom type when using custom_grants.",
+      "required": false
     },
     {
       "name": "specification_slug",
@@ -154,7 +160,12 @@ resource "example_resource" "this" {
     },
     {
       "name": "custom_role_slugs",
-      "description": "List of role slugs to assign (required when type is 'custom', must have at least 1)",
+      "description": "List of role slugs to assign using the module-level NRN (used when type is 'custom' and custom_grants is empty)",
+      "required": false
+    },
+    {
+      "name": "custom_grants",
+      "description": "List of grants with explicit NRN and role_slug pairs. Allows assigning different NRNs per grant (used when type is 'custom').",
       "required": false
     },
     {
@@ -168,6 +179,6 @@ resource "example_resource" "this" {
     "id",
     "name"
   ],
-  "hash": "bf22a95593b6d59a638a86009702b787"
+  "hash": "ffaaca797785e4d60e00662b7a70c089"
 }
 END_AI_METADATA -->

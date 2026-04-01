@@ -18,7 +18,7 @@ The module uses the google_network Terraform resource to create a VPC network, a
 
 ```hcl
 module "vpc" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/vpc?ref=v1.49.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/vpc?ref=v1.50.0"
 
   network_name = "your-network-name"
   project_id   = "your-project-id"

@@ -30,8 +30,28 @@ resource "nullplatform_api_key" "this" {
     }
 
     precondition {
-      condition     = var.type != "custom" || length(var.custom_role_slugs) > 0
-      error_message = "custom_role_slugs must have at least 1 role when type is 'custom'"
+      condition     = var.type != "custom" || length(var.custom_role_slugs) > 0 || length(var.custom_grants) > 0
+      error_message = "custom_role_slugs or custom_grants must have at least 1 entry when type is 'custom'"
+    }
+
+    precondition {
+      condition     = var.type == "custom" || var.nrn != null
+      error_message = "nrn is required for predefined types (agent, scope_notification, service_notification)"
+    }
+
+    precondition {
+      condition     = var.type != "custom" || length(var.custom_grants) == 0 || var.nrn == null
+      error_message = "when using custom_grants, do not set nrn — define the NRN per grant entry instead"
+    }
+
+    precondition {
+      condition     = var.type != "custom" || length(var.custom_grants) == 0 || length(var.custom_role_slugs) == 0
+      error_message = "use either custom_role_slugs or custom_grants, not both"
+    }
+
+    precondition {
+      condition     = !contains(["scope_notification", "service_notification"], var.type) || (var.specification_slug != null && var.specification_slug != "")
+      error_message = "specification_slug is required for scope_notification and service_notification types"
     }
   }
 }

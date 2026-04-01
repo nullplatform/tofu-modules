@@ -1,6 +1,6 @@
 locals {
-  nrn_without_namespace = join(":", slice(split(":", var.nrn), 0, 2))
-  nrn_parts             = { for part in split(":", var.nrn) : split("=", part)[0] => split("=", part)[1] }
+  nrn_without_namespace = var.nrn != null ? join(":", slice(split(":", var.nrn), 0, 2)) : null
+  nrn_parts             = var.nrn != null ? { for part in split(":", var.nrn) : split("=", part)[0] => split("=", part)[1] } : {}
   nrn_tags = [
     for key in ["organization", "account", "namespace"] : {
       key   = key
@@ -44,7 +44,7 @@ locals {
 
   config = local.configs[var.type]
 
-  grants = [
+  grants = length(var.custom_grants) > 0 ? var.custom_grants : [
     for slug in local.config.role_slugs : {
       nrn       = local.nrn_without_namespace
       role_slug = slug
