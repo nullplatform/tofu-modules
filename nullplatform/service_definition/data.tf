@@ -1,4 +1,5 @@
 data "http" "service_spec_template" {
+  count = var.git_provider != "local" ? 1 : 0
   url = var.git_provider == "github" ? (
     "${local.raw_base_url}/specs/service-spec.json.tpl"
   ) : (
@@ -8,7 +9,7 @@ data "http" "service_spec_template" {
 }
 
 data "http" "action_templates" {
-  for_each = toset(local.available_actions)
+  for_each        = var.git_provider != "local" ? toset(local.available_actions) : toset([])
   url = var.git_provider == "github" ? (
     "${local.raw_base_url}/specs/actions/${each.key}.json.tpl"
   ) : (
@@ -18,7 +19,7 @@ data "http" "action_templates" {
 }
 
 data "http" "link_templates" {
-  for_each = toset(local.available_links)
+  for_each        = var.git_provider != "local" ? toset(local.available_links) : toset([])
   url = var.git_provider == "github" ? (
     "${local.raw_base_url}/specs/links/${each.key}.json.tpl"
   ) : (
