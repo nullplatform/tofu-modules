@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.51.0](https://github.com/nullplatform/tofu-modules/compare/v1.50.0...v1.51.0) (2026-04-05)
+
+
+### Features
+
+* **service-definition:** add local filesystem provider for spec loading ([#278](https://github.com/nullplatform/tofu-modules/issues/278)) ([f24d7c9](https://github.com/nullplatform/tofu-modules/commit/f24d7c93be4415d9fd38bb8975fed08fcf538ee0))
+
 ## [1.50.0](https://github.com/nullplatform/tofu-modules/compare/v1.49.0...v1.50.0) (2026-03-31)
 
 
