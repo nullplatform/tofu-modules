@@ -10,7 +10,7 @@ run "rejects_invalid_provider" {
   command = plan
 
   variables {
-    dns_provider_name      = "azure"
+    dns_provider_name      = "invalid-provider"
     domain_filters         = "myorg.example.com"
     external_dns_namespace = "external-dns"
   }

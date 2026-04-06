@@ -172,7 +172,52 @@ variable "dns_provider_name" {
   type        = string
   description = "The DNS provider to use with ExternalDNS "
   validation {
-    condition     = contains(["cloudflare", "aws", "oci"], var.dns_provider_name)
-    error_message = "dns_provider_name must be either 'cloudflare', 'aws', or 'oci'."
+    condition     = contains(["cloudflare", "aws", "oci", "azure"], var.dns_provider_name)
+    error_message = "dns_provider_name must be either 'cloudflare', 'aws', 'oci', or 'azure'."
   }
 }
+
+###############################################################################
+# AZURE CONFIGURATION
+###############################################################################
+
+variable "azure_client_id" {
+  description = "Client ID of the Azure Managed Identity for Workload Identity (required when dns_provider_name is 'azure')"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.dns_provider_name != "azure" || var.azure_client_id != null
+    error_message = "azure_client_id is required when dns_provider_name is 'azure'."
+  }
+}
+
+variable "azure_subscription_id" {
+  description = "Azure subscription ID where the DNS zone is located (required when dns_provider_name is 'azure')"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.dns_provider_name != "azure" || var.azure_subscription_id != null
+    error_message = "azure_subscription_id is required when dns_provider_name is 'azure'."
+  }
+}
+
+variable "azure_resource_group" {
+  description = "Azure resource group containing the DNS zone (required when dns_provider_name is 'azure')"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.dns_provider_name != "azure" || var.azure_resource_group != null
+    error_message = "azure_resource_group is required when dns_provider_name is 'azure'."
+  }
+}
+
+variable "azure_tenant_id" {
+  description = "Azure tenant ID (required when dns_provider_name is 'azure')"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.dns_provider_name != "azure" || var.azure_tenant_id != null
+    error_message = "azure_tenant_id is required when dns_provider_name is 'azure'."
+  }
+}
+
