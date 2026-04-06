@@ -18,27 +18,41 @@ locals {
 }
 
 locals {
+  # Parse specs from local filesystem or HTTP depending on git_provider
+  service_spec_parsed = var.git_provider == "local" ? (
+    jsondecode(file("${var.local_specs_path}/specs/service-spec.json.tpl"))
+  ) : (
+    jsondecode(data.http.service_spec_template[0].response_body)
+  )
+
+  available_actions = var.available_actions
+  available_links   = var.available_links
+  visible_to_nrns   = concat([var.nrn], var.extra_visibile_to_nrns)
+}
+
+locals {
   link_specs_parsed = {
     for name in local.available_links :
-    name => jsondecode(data.http.link_templates[name].response_body)
+    name => var.git_provider == "local" ? (
+      jsondecode(file("${var.local_specs_path}/specs/links/${name}.json.tpl"))
+    ) : (
+      jsondecode(data.http.link_templates[name].response_body)
+    )
   }
 }
 
 locals {
   action_specs_parsed = {
     for name in local.available_actions :
-    name => jsondecode(data.http.action_templates[name].response_body)
+    name => var.git_provider == "local" ? (
+      jsondecode(file("${var.local_specs_path}/specs/actions/${name}.json.tpl"))
+    ) : (
+      jsondecode(data.http.action_templates[name].response_body)
+    )
   }
 }
 
 locals {
   service_specification_id = nullplatform_service_specification.from_template.id
   service_slug             = nullplatform_service_specification.from_template.slug
-}
-
-locals {
-  service_spec_parsed = jsondecode(data.http.service_spec_template.response_body)
-  available_actions   = var.available_actions
-  available_links     = var.available_links
-  visible_to_nrns     = concat([var.nrn], var.extra_visibile_to_nrns)
 }

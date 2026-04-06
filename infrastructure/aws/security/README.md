@@ -19,7 +19,7 @@ The module uses Terraform to create AWS security groups for public and private I
 
 ```hcl
 module "security" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/security?ref=v1.50.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/security?ref=v1.51.0"
 
   cluster_name = "your-cluster-name"
 }

@@ -2,24 +2,27 @@
 
 ## Description
 
-Creates Nullplatform service specifications from JSON templates hosted in GitHub or GitLab repositories
+Creates a Nullplatform service specification by fetching and parsing service spec templates from GitHub, GitLab, or local filesystem, along with associated action and link specifications
 
 ## Architecture
 
-The module uses data.http resources to fetch service, action, and link JSON templates from the configured Git provider. These templates are parsed into local values and used to create nullplatform_service_specification, nullplatform_action_specification, and nullplatform_link_specification resources. The service specification acts as the parent resource, with actions and links created as dependent child resources. Outputs return the generated service specification ID and slug.
+The module creates a nullplatform_service_specification resource as the primary entity, parsing JSON template files either via data.http resources (for GitHub/GitLab) or local file() calls. For each action in available_actions, it creates a nullplatform_action_specification resource linked to the service specification. For each link in available_links, it creates a nullplatform_link_specification resource, also linked to the service specification. The git_provider variable controls the data source path: GitHub uses raw.githubusercontent.com URLs, GitLab uses API v4 file endpoints to bypass Cloudflare protection, and local reads directly from the filesystem using local_specs_path.
 
 ## Features
 
-- Fetches service specs from GitHub or GitLab repositories with authentication support
-- Creates action specifications from JSON templates with retryable and annotation support
-- Creates link specifications with unique and use_default_actions configuration
-- Supports custom dimensions and visibility controls via NRN lists
+- Creates Nullplatform service specifications from templated JSON files stored in Git repositories or local filesystem
+- Fetches action specification templates via HTTP from GitHub/GitLab or reads from local files and creates corresponding action resources
+- Generates link specification resources from templates with configurable uniqueness and default action settings
+- Supports both public and private repositories through token-based authentication with provider-specific headers
+- Configures service visibility and access control using Nullplatform Resource Names (NRNs)
+- Associates custom dimensions as key-value metadata with service specifications
+- Handles GitLab self-hosted instances with configurable host parameter
 
 ## Basic Usage
 
 ```hcl
 module "service_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v1.50.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v1.51.0"
 
   nrn          = "your-nrn"
   service_name = "your-service-name"
@@ -67,8 +70,9 @@ resource "example_resource" "this" {
 | <a name="input_available_links"></a> [available\_links](#input\_available\_links) | List of link template names to fetch from the service spec repository | `list(string)` | <pre>[<br/>  "connect"<br/>]</pre> | no |
 | <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Key-value pairs for dimensions to be associated with the service specification | `map(string)` | `{}` | no |
 | <a name="input_extra_visibile_to_nrns"></a> [extra\_visibile\_to\_nrns](#input\_extra\_visibile\_to\_nrns) | Additional NRNs that should have visibility to the created service specification | `list(string)` | `[]` | no |
-| <a name="input_git_provider"></a> [git\_provider](#input\_git\_provider) | Git provider to fetch service specs from. Supported values: "github", "gitlab". | `string` | `"github"` | no |
+| <a name="input_git_provider"></a> [git\_provider](#input\_git\_provider) | Git provider to fetch service specs from. Supported values: "github", "gitlab", "local". | `string` | `"github"` | no |
 | <a name="input_gitlab_host"></a> [gitlab\_host](#input\_gitlab\_host) | GitLab host. Only used when git\_provider = "gitlab". Override for self-hosted instances (e.g. "gitlab.mycompany.com"). | `string` | `"gitlab.com"` | no |
+| <a name="input_local_specs_path"></a> [local\_specs\_path](#input\_local\_specs\_path) | Absolute path to the local service directory containing specs/. Required when git\_provider = "local". The directory must contain specs/service-spec.json.tpl and optionally specs/links/*.json.tpl and specs/actions/*.json.tpl. | `string` | `null` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name (organization:account format) | `string` | n/a | yes |
 | <a name="input_repository_branch"></a> [repository\_branch](#input\_repository\_branch) | Branch of the service spec repository to use. Must be a short branch name (e.g. "main"), not a full ref. | `string` | `"main"` | no |
 | <a name="input_repository_name"></a> [repository\_name](#input\_repository\_name) | Repository name containing the service spec templates. | `string` | `"service"` | no |
@@ -88,13 +92,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "service_definition",
-  "description": "Creates Nullplatform service specifications from JSON templates hosted in GitHub or GitLab repositories",
-  "architecture": "The module uses data.http resources to fetch service, action, and link JSON templates from the configured Git provider. These templates are parsed into local values and used to create nullplatform_service_specification, nullplatform_action_specification, and nullplatform_link_specification resources. The service specification acts as the parent resource, with actions and links created as dependent child resources. Outputs return the generated service specification ID and slug.",
+  "description": "Creates a Nullplatform service specification by fetching and parsing service spec templates from GitHub, GitLab, or local filesystem, along with associated action and link specifications",
+  "architecture": "The module creates a nullplatform_service_specification resource as the primary entity, parsing JSON template files either via data.http resources (for GitHub/GitLab) or local file() calls. For each action in available_actions, it creates a nullplatform_action_specification resource linked to the service specification. For each link in available_links, it creates a nullplatform_link_specification resource, also linked to the service specification. The git_provider variable controls the data source path: GitHub uses raw.githubusercontent.com URLs, GitLab uses API v4 file endpoints to bypass Cloudflare protection, and local reads directly from the filesystem using local_specs_path.",
   "features": [
-    "Fetches service specs from GitHub or GitLab repositories with authentication support",
-    "Creates action specifications from JSON templates with retryable and annotation support",
-    "Creates link specifications with unique and use_default_actions configuration",
-    "Supports custom dimensions and visibility controls via NRN lists"
+    "Creates Nullplatform service specifications from templated JSON files stored in Git repositories or local filesystem",
+    "Fetches action specification templates via HTTP from GitHub/GitLab or reads from local files and creates corresponding action resources",
+    "Generates link specification resources from templates with configurable uniqueness and default action settings",
+    "Supports both public and private repositories through token-based authentication with provider-specific headers",
+    "Configures service visibility and access control using Nullplatform Resource Names (NRNs)",
+    "Associates custom dimensions as key-value metadata with service specifications",
+    "Handles GitLab self-hosted instances with configurable host parameter"
   ],
   "inputs": [
     {
@@ -115,6 +122,11 @@ resource "example_resource" "this" {
     {
       "name": "git_provider",
       "description": "Git provider to fetch service specs from. Supported values: \\",
+      "required": false
+    },
+    {
+      "name": "local_specs_path",
+      "description": "Absolute path to the local service directory containing specs/. Required when git_provider = \\",
       "required": false
     },
     {
@@ -167,6 +179,6 @@ resource "example_resource" "this" {
     "service_specification_id",
     "service_specification_slug"
   ],
-  "hash": "f05a574420bb20f83fb9e0ee075154e1"
+  "hash": "e1c56bb0086c19cff46e8fbfaf41771d"
 }
 END_AI_METADATA -->

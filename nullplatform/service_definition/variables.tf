@@ -6,11 +6,17 @@ variable "nrn" {
 variable "git_provider" {
   type        = string
   default     = "github"
-  description = "Git provider to fetch service specs from. Supported values: \"github\", \"gitlab\"."
+  description = "Git provider to fetch service specs from. Supported values: \"github\", \"gitlab\", \"local\"."
   validation {
-    condition     = contains(["github", "gitlab"], var.git_provider)
-    error_message = "git_provider must be \"github\" or \"gitlab\"."
+    condition     = contains(["github", "gitlab", "local"], var.git_provider)
+    error_message = "git_provider must be \"github\", \"gitlab\", or \"local\"."
   }
+}
+
+variable "local_specs_path" {
+  type        = string
+  default     = null
+  description = "Absolute path to the local service directory containing specs/. Required when git_provider = \"local\". The directory must contain specs/service-spec.json.tpl and optionally specs/links/*.json.tpl and specs/actions/*.json.tpl."
 }
 
 variable "repository_org" {
