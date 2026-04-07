@@ -34,9 +34,13 @@ locals {
   aws_vpc_id   = var.cluster_name != "" ? data.aws_vpc.this[0].id : ""
   aws_vpc_cidr = var.cluster_name != "" ? data.aws_vpc.this[0].cidr_block : ""
 
+  # Derive cluster primary SG from data source
+  aws_cluster_security_group_id = var.cluster_name != "" ? data.aws_eks_cluster.this[0].vpc_config[0].cluster_security_group_id : ""
+
   # Use override if provided, otherwise use derived value
-  effective_vpc_id       = var.vpc_id != "" ? var.vpc_id : local.aws_vpc_id
-  effective_network_cidr = var.network_cidr != "" ? var.network_cidr : local.aws_vpc_cidr
+  effective_vpc_id                  = var.vpc_id != "" ? var.vpc_id : local.aws_vpc_id
+  effective_network_cidr            = var.network_cidr != "" ? var.network_cidr : local.aws_vpc_cidr
+  effective_cluster_security_group_id = var.cluster_security_group_id != "" ? var.cluster_security_group_id : local.aws_cluster_security_group_id
 }
 
 ###############################################################################
@@ -206,9 +210,9 @@ resource "aws_vpc_security_group_ingress_rule" "private_gateway_health_check_add
 ###############################################################################
 
 resource "aws_vpc_security_group_ingress_rule" "cluster_from_public_gateway_traffic" {
-  count = var.gateways_enabled && var.cluster_security_group_id != "" ? 1 : 0
+  count = var.gateways_enabled && local.effective_cluster_security_group_id != "" ? 1 : 0
 
-  security_group_id            = var.cluster_security_group_id
+  security_group_id            = local.effective_cluster_security_group_id
   description                  = "Traffic from public ALB to Istio gateway"
   from_port                    = var.gateway_port
   to_port                      = var.gateway_port
@@ -221,9 +225,9 @@ resource "aws_vpc_security_group_ingress_rule" "cluster_from_public_gateway_traf
 }
 
 resource "aws_vpc_security_group_ingress_rule" "cluster_from_public_gateway_health" {
-  count = var.gateways_enabled && var.cluster_security_group_id != "" ? 1 : 0
+  count = var.gateways_enabled && local.effective_cluster_security_group_id != "" ? 1 : 0
 
-  security_group_id            = var.cluster_security_group_id
+  security_group_id            = local.effective_cluster_security_group_id
   description                  = "Health check from public ALB to Istio gateway"
   from_port                    = 15021
   to_port                      = 15021
@@ -236,9 +240,9 @@ resource "aws_vpc_security_group_ingress_rule" "cluster_from_public_gateway_heal
 }
 
 resource "aws_vpc_security_group_ingress_rule" "cluster_from_private_gateway_traffic" {
-  count = var.gateway_internal_enabled && var.cluster_security_group_id != "" ? 1 : 0
+  count = var.gateway_internal_enabled && local.effective_cluster_security_group_id != "" ? 1 : 0
 
-  security_group_id            = var.cluster_security_group_id
+  security_group_id            = local.effective_cluster_security_group_id
   description                  = "Traffic from private ALB to Istio gateway"
   from_port                    = var.gateway_port
   to_port                      = var.gateway_port
@@ -251,9 +255,9 @@ resource "aws_vpc_security_group_ingress_rule" "cluster_from_private_gateway_tra
 }
 
 resource "aws_vpc_security_group_ingress_rule" "cluster_from_private_gateway_health" {
-  count = var.gateway_internal_enabled && var.cluster_security_group_id != "" ? 1 : 0
+  count = var.gateway_internal_enabled && local.effective_cluster_security_group_id != "" ? 1 : 0
 
-  security_group_id            = var.cluster_security_group_id
+  security_group_id            = local.effective_cluster_security_group_id
   description                  = "Health check from private ALB to Istio gateway"
   from_port                    = 15021
   to_port                      = 15021
