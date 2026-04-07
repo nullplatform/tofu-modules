@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.52.0](https://github.com/nullplatform/tofu-modules/compare/v1.51.0...v1.52.0) (2026-04-07)
+
+
+### Features
+
+* **cert-manager:** add Azure Workload Identity support ([#272](https://github.com/nullplatform/tofu-modules/issues/272)) ([800249c](https://github.com/nullplatform/tofu-modules/commit/800249caad39e4728d293cd70ecf612b3a1c8cc5))
+
+
+### Bug Fixes
+
+* **security:** change gateway_port default from 8443 to 443 ([#281](https://github.com/nullplatform/tofu-modules/issues/281)) ([6c5fc5c](https://github.com/nullplatform/tofu-modules/commit/6c5fc5c7a755ece4bb4befe040d33028ec761d3a))
+
 ## [1.51.0](https://github.com/nullplatform/tofu-modules/compare/v1.50.0...v1.51.0) (2026-04-05)
 
 
