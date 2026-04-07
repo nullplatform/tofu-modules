@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.52.1](https://github.com/nullplatform/tofu-modules/compare/v1.52.0...v1.52.1) (2026-04-07)
+
+
+### Bug Fixes
+
+* **external_dns:** change default sources and policy ([#282](https://github.com/nullplatform/tofu-modules/issues/282)) ([50e8cde](https://github.com/nullplatform/tofu-modules/commit/50e8cded7ae466aebb8894c6efce656bb00667f5))
+* **security:** resolve cluster SG from data source instead of variable ([#284](https://github.com/nullplatform/tofu-modules/issues/284)) ([a816f55](https://github.com/nullplatform/tofu-modules/commit/a816f550620506e9b489ac1593e4de87a2a536f2))
+
 ## [1.52.0](https://github.com/nullplatform/tofu-modules/compare/v1.51.0...v1.52.0) (2026-04-07)
 
 
