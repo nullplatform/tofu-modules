@@ -47,6 +47,6 @@ variable "cluster_security_group_id" {
 
 variable "gateway_port" {
   type        = number
-  description = "The port used by Istio gateway pods for traffic (e.g., 8443 for Gateway API). Used for cluster SG ingress rules when cluster_security_group_id is set."
-  default     = 8443
+  description = "The port used by Istio gateway pods for traffic. Used for cluster SG ingress rules when cluster_security_group_id is set."
+  default     = 443
 }

@@ -75,7 +75,7 @@ resource "example_resource" "this" {
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The EKS cluster name, used for naming security resources and deriving VPC. | `string` | n/a | yes |
 | <a name="input_cluster_security_group_id"></a> [cluster\_security\_group\_id](#input\_cluster\_security\_group\_id) | The EKS cluster primary security group ID. When set, ingress rules are created on this SG to allow traffic from the gateway SGs on the gateway and health check ports. Required for ALB setups where the ALB needs to reach pods. | `string` | `""` | no |
 | <a name="input_gateway_internal_enabled"></a> [gateway\_internal\_enabled](#input\_gateway\_internal\_enabled) | Whether the internal (private) gateway is enabled. | `bool` | `false` | no |
-| <a name="input_gateway_port"></a> [gateway\_port](#input\_gateway\_port) | The port used by Istio gateway pods for traffic (e.g., 8443 for Gateway API). Used for cluster SG ingress rules when cluster\_security\_group\_id is set. | `number` | `8443` | no |
+| <a name="input_gateway_port"></a> [gateway\_port](#input\_gateway\_port) | The port used by Istio gateway pods for traffic. Used for cluster SG ingress rules when cluster\_security\_group\_id is set. | `number` | `443` | no |
 | <a name="input_gateways_enabled"></a> [gateways\_enabled](#input\_gateways\_enabled) | Whether public gateways are enabled. | `bool` | `true` | no |
 | <a name="input_health_check_rules_enabled"></a> [health\_check\_rules\_enabled](#input\_health\_check\_rules\_enabled) | Whether to create port 15021 (Istio health check) inbound rules on the gateway SGs. Set to false when using ALB (health checks are outbound from ALB, not inbound). Only needed for NLB/direct access patterns. | `bool` | `true` | no |
 | <a name="input_network_cidr"></a> [network\_cidr](#input\_network\_cidr) | Override: The network CIDR block. If empty, derived automatically from VPC. | `string` | `""` | no |
@@ -143,7 +143,7 @@ resource "example_resource" "this" {
     },
     {
       "name": "gateway_port",
-      "description": "The port used by Istio gateway pods for traffic (e.g., 8443 for Gateway API). Used for cluster SG ingress rules when cluster_security_group_id is set.",
+      "description": "The port used by Istio gateway pods for traffic. Used for cluster SG ingress rules when cluster_security_group_id is set.",
       "required": false
     }
   ],
