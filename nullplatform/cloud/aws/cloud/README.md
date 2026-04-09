@@ -20,7 +20,7 @@ The module creates a nullplatform_provider_config resource that stores AWS confi
 
 ```hcl
 module "cloud" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/cloud?ref=v1.52.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/cloud?ref=v1.52.2"
 
   domain_name            = "your-domain-name"
   hosted_private_zone_id = "your-hosted-private-zone-id"
