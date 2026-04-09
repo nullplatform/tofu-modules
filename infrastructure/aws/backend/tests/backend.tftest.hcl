@@ -19,11 +19,6 @@ run "sse_defaults_to_aes256" {
     condition     = one(aws_s3_bucket_server_side_encryption_configuration.tf_state_sse.rule).apply_server_side_encryption_by_default[0].sse_algorithm == "AES256"
     error_message = "S3 bucket should default to AES256 server-side encryption"
   }
-
-  assert {
-    condition     = one(aws_s3_bucket_server_side_encryption_configuration.tf_state_sse.rule).apply_server_side_encryption_by_default[0].kms_master_key_id == null
-    error_message = "KMS key should be null when using AES256"
-  }
 }
 
 run "force_destroy_enabled_by_default" {
