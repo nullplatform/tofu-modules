@@ -20,7 +20,7 @@ Based on the git_provider trigger variable, this module conditionally creates on
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.52.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.52.3"
 
   git_provider = "your-git-provider"
   nrn          = "your-nrn"
@@ -31,7 +31,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.52.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.52.3"
 
   git_provider           = "github"
   github_installation_id = "your-github-installation-id"  # Required when git_provider = "github"
@@ -44,7 +44,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.52.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.52.3"
 
   git_provider                = "gitlab"
   gitlab_access_token         = "your-gitlab-access-token"  # Required when git_provider = "gitlab"

@@ -20,7 +20,7 @@ Creates a nullplatform_provider_config resource that references aws_iam_access_k
 
 ```hcl
 module "ecr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v1.52.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v1.52.3"
 
   cluster_name = "your-cluster-name"
   nrn          = "your-nrn"
