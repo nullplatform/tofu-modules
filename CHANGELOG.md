@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.52.3](https://github.com/nullplatform/tofu-modules/compare/v1.52.2...v1.52.3) (2026-04-10)
+
+
+### Bug Fixes
+
+* remove provider ([#287](https://github.com/nullplatform/tofu-modules/issues/287)) ([6cd6ef0](https://github.com/nullplatform/tofu-modules/commit/6cd6ef0d5a60b6ec56d3561a51e803a37b4e8a1c))
+
 ## [1.52.2](https://github.com/nullplatform/tofu-modules/compare/v1.52.1...v1.52.2) (2026-04-09)
 
 
