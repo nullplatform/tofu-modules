@@ -1,6 +1,6 @@
 # Local .terraform directories
 .terraform/
-.terraform.lock.hcl
+
 **/.terraform/
 # .tfstate files
 *.tfstate
@@ -27,7 +27,7 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
-**/**/.terraform.lock.hcl
+
 **/**/.terraform
 **/**/*.state
 # Diagnostic reports (https://nodejs.org/api/report.html)
@@ -158,7 +158,7 @@ dist
 # Terraform
 *.tfstate
 *.tfstate.*
-.terraform/
+#.terraform/
 terraform.tfstate
 terraform.tfstate.backup
 *.tfvars
