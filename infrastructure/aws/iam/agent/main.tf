@@ -56,6 +56,16 @@ resource "aws_iam_policy" "nullplatform_route53_policy" {
         #     ]
         #   }
         # }
+      },
+      {
+        "Sid" : "Route53GetChange",
+        "Effect" : "Allow",
+        "Action" : [
+          "route53:GetChange"
+        ],
+        "Resource" : [
+          "arn:aws:route53:::change/*"
+        ]
       }
     ]
   })
