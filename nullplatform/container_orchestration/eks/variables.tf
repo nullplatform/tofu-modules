@@ -36,6 +36,10 @@ variable "additional_public_balancer_names" {
   description = "Additional public-facing load balancers to support scope deployments beyond the 100-rule ALB limit"
   type        = list(string)
   default     = []
+  validation {
+    condition     = alltrue([for name in var.additional_public_balancer_names : can(regex("^[a-zA-Z0-9][a-zA-Z0-9-]{0,30}[a-zA-Z0-9]$|^[a-zA-Z0-9]$", name))])
+    error_message = "ALB names must be 1-32 characters, only alphanumeric and hyphens, and cannot start or end with a hyphen."
+  }
 }
 
 variable "private_balancer_name" {
@@ -48,6 +52,10 @@ variable "additional_private_balancer_names" {
   description = "Additional private load balancers to support scope deployments beyond the 100-rule ALB limit"
   type        = list(string)
   default     = []
+  validation {
+    condition     = alltrue([for name in var.additional_private_balancer_names : can(regex("^[a-zA-Z0-9][a-zA-Z0-9-]{0,30}[a-zA-Z0-9]$|^[a-zA-Z0-9]$", name))])
+    error_message = "ALB names must be 1-32 characters, only alphanumeric and hyphens, and cannot start or end with a hyphen."
+  }
 }
 
 variable "alb_capacity_threshold" {
@@ -55,6 +63,10 @@ variable "alb_capacity_threshold" {
   type        = number
   default     = null
   nullable    = true
+  validation {
+    condition     = var.alb_capacity_threshold == null || (var.alb_capacity_threshold >= 50 && var.alb_capacity_threshold <= 99)
+    error_message = "alb_capacity_threshold must be between 50 and 99."
+  }
 }
 
 variable "balancer_group_suffix" {
