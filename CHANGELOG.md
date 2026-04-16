@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.52.4](https://github.com/nullplatform/tofu-modules/compare/v1.52.3...v1.52.4) (2026-04-16)
+
+
+### Bug Fixes
+
+* **nullplatform:** add dimensions variable and eks balancer improvements ([#290](https://github.com/nullplatform/tofu-modules/issues/290)) ([e38d07e](https://github.com/nullplatform/tofu-modules/commit/e38d07ef2515867747518d43a86af1550e91d5e9))
+
 ## [1.52.3](https://github.com/nullplatform/tofu-modules/compare/v1.52.2...v1.52.3) (2026-04-10)
 
 
