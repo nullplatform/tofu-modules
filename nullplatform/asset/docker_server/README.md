@@ -2,26 +2,26 @@
 
 ## Description
 
-Creates a nullplatform Docker server provider configuration with authentication credentials for container registry access
+Configures a Docker registry provider in nullplatform with server credentials and path settings
 
 ## Architecture
 
-The module creates a single nullplatform_provider_config resource of type 'docker-server'. Input variables for NRN, login server, path, username, and password flow directly into the resource's attributes as a JSON-encoded setup configuration. The attributes define server connection details including the registry server URL, repository path, authentication credentials, and namespace usage settings.
+Creates a nullplatform_provider_config resource of type 'docker-server' with encoded JSON attributes containing Docker registry connection details. The module accepts credentials (login_server, username, password), path configuration, and optional dimensions for multi-tenant segmentation, then encodes these into a JSON attributes block that nullplatform uses to authenticate and route container image operations. The NRN (nullplatform resource name) links this provider configuration to specific nullplatform resources.
 
 ## Features
 
-- Creates nullplatform provider configuration for Docker server integration
+- Creates Docker server provider configuration in nullplatform
 - Configures Docker registry authentication with username and password credentials
-- Sets registry path for container image storage location
-- Supports custom login server endpoints for different registry providers
-- Defaults username to '_json_key_base64' for service account JSON key authentication
-- Disables namespace usage in the Docker server setup
+- Sets registry path and login server endpoint for container image operations
+- Supports multi-dimensional segmentation through optional dimensions map
+- Defaults username to '_json_key_base64' for GCP service account authentication patterns
+- Disables namespace usage in Docker registry configuration
 
 ## Basic Usage
 
 ```hcl
 module "docker_server" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/docker_server?ref=v1.52.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/docker_server?ref=v1.52.4"
 
   login_server = "your-login-server"
   nrn          = "your-nrn"
@@ -62,6 +62,7 @@ resource "example_resource" "this" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Dimensions to segment the nullplatform provider config (e.g. by region, environment) | `map(string)` | `{}` | no |
 | <a name="input_login_server"></a> [login\_server](#input\_login\_server) | Docker login server name | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | The nullplatform resource name (NRN) | `string` | n/a | yes |
 | <a name="input_password"></a> [password](#input\_password) | Docker password | `string` | n/a | yes |
@@ -72,15 +73,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "docker_server",
-  "description": "Creates a nullplatform Docker server provider configuration with authentication credentials for container registry access",
-  "architecture": "The module creates a single nullplatform_provider_config resource of type 'docker-server'. Input variables for NRN, login server, path, username, and password flow directly into the resource's attributes as a JSON-encoded setup configuration. The attributes define server connection details including the registry server URL, repository path, authentication credentials, and namespace usage settings.",
+  "description": "Configures a Docker registry provider in nullplatform with server credentials and path settings",
+  "architecture": "Creates a nullplatform_provider_config resource of type 'docker-server' with encoded JSON attributes containing Docker registry connection details. The module accepts credentials (login_server, username, password), path configuration, and optional dimensions for multi-tenant segmentation, then encodes these into a JSON attributes block that nullplatform uses to authenticate and route container image operations. The NRN (nullplatform resource name) links this provider configuration to specific nullplatform resources.",
   "features": [
-    "Creates nullplatform provider configuration for Docker server integration",
+    "Creates Docker server provider configuration in nullplatform",
     "Configures Docker registry authentication with username and password credentials",
-    "Sets registry path for container image storage location",
-    "Supports custom login server endpoints for different registry providers",
-    "Defaults username to '_json_key_base64' for service account JSON key authentication",
-    "Disables namespace usage in the Docker server setup"
+    "Sets registry path and login server endpoint for container image operations",
+    "Supports multi-dimensional segmentation through optional dimensions map",
+    "Defaults username to '_json_key_base64' for GCP service account authentication patterns",
+    "Disables namespace usage in Docker registry configuration"
   ],
   "inputs": [
     {
@@ -107,9 +108,14 @@ resource "example_resource" "this" {
       "name": "username",
       "description": "Docker username",
       "required": false
+    },
+    {
+      "name": "dimensions",
+      "description": "Dimensions to segment the nullplatform provider config (e.g. by region, environment)",
+      "required": false
     }
   ],
   "outputs": [],
-  "hash": "84c1caf9b48feba0e0aeb2a64d869d5c"
+  "hash": "9c245562b5f4aedbe4403b0150ec33c5"
 }
 END_AI_METADATA -->
