@@ -20,7 +20,7 @@ variable "format" {
 }
 
 variable "workload_identity_bindings" {
-  description = "List of Kubernetes service accounts to bind via Workload Identity"
+  description = "Kubernetes ServiceAccounts allowed to impersonate the GCP Service Account via Workload Identity. Each entry grants roles/iam.workloadIdentityUser on the GSA to the KSA identified by namespace/ksa_name."
   type = list(object({
     namespace = string
     ksa_name  = string
