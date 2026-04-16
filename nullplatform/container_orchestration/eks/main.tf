@@ -7,10 +7,15 @@ locals {
     var.use_nullplatform_namespace ? { use_nullplatform_namespace = var.use_nullplatform_namespace } : {},
   )
 
-  balancer = { for k, v in {
-    public_name  = var.public_balancer_name
-    private_name = var.private_balancer_name
-  } : k => v if v != "" }
+  balancer = merge(
+    { for k, v in {
+      public_name  = var.public_balancer_name
+      private_name = var.private_balancer_name
+    } : k => v if v != "" },
+    var.alb_capacity_threshold != null ? { alb_capacity_threshold = var.alb_capacity_threshold } : {},
+    length(var.additional_public_balancer_names) > 0 ? { additional_public_names = var.additional_public_balancer_names } : {},
+    length(var.additional_private_balancer_names) > 0 ? { additional_private_names = var.additional_private_balancer_names } : {},
+  )
 
   network = { for k, v in {
     balancer_group_suffix = var.balancer_group_suffix
