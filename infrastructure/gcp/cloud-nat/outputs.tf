@@ -1,7 +1,9 @@
 output "router_name" {
-  value = google_compute_router.router.name
+  description = "The name of the created Cloud Router"
+  value       = google_compute_router.router.name
 }
 
 output "nat_name" {
-  value = google_compute_router_nat.nat.name
+  description = "The name of the created Cloud NAT gateway"
+  value       = google_compute_router_nat.nat.name
 }
