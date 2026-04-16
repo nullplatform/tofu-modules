@@ -32,10 +32,29 @@ variable "public_balancer_name" {
   default     = ""
 }
 
+variable "additional_public_balancer_names" {
+  description = "Additional public-facing load balancers to support scope deployments beyond the 100-rule ALB limit"
+  type        = list(string)
+  default     = []
+}
+
 variable "private_balancer_name" {
   description = "The name of the private load balancer for internal traffic routing"
   type        = string
   default     = ""
+}
+
+variable "additional_private_balancer_names" {
+  description = "Additional private load balancers to support scope deployments beyond the 100-rule ALB limit"
+  type        = list(string)
+  default     = []
+}
+
+variable "alb_capacity_threshold" {
+  description = "Maximum ALB rule usage percentage (50-99). The remaining capacity reserves slots for concurrent deployments. Higher values maximize ALB utilization but increase the risk of hitting the rule limit"
+  type        = number
+  default     = null
+  nullable    = true
 }
 
 variable "balancer_group_suffix" {
