@@ -18,7 +18,7 @@ The module creates a google_artifact_registry_repository resource, a google_serv
 
 ```hcl
 module "acr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/acr?ref=v1.52.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/acr?ref=v1.52.4"
 
   containerregistry_name = "your-containerregistry-name"
   location               = "your-location"
