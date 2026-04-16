@@ -8,8 +8,7 @@ output "acr_login_server" {
   value       = "${var.location}-docker.pkg.dev/${var.project_id}/${var.containerregistry_name}"
 }
 
-output "service_account_key_json" {
-  description = "The Service Account key for container registry access"
-  value       = google_service_account_key.artifact_sa_key.private_key
-  sensitive   = true
+output "service_account_email" {
+  description = "Service Account email to use with Workload Identity"
+  value       = google_service_account.artifact_sa.email
 }

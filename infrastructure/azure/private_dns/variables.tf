@@ -12,11 +12,6 @@ variable "domain_name" {
   description = "The domain name to use for the private DNS zone (e.g., privatelink.database.windows.net)"
 }
 
-variable "subscription_id" {
-  type        = string
-  description = "The ID of the Azure subscription"
-}
-
 ###############################################################################
 # VNET LINK
 ###############################################################################

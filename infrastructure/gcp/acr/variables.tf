@@ -36,3 +36,12 @@ variable "tags" {
   description = "A mapping of labels to assign to the container registry"
   default     = {}
 }
+
+variable "workload_identity_bindings" {
+  description = "List of Kubernetes service accounts to bind via Workload Identity"
+  type = list(object({
+    namespace = string
+    ksa_name  = string
+  }))
+  default = []
+}

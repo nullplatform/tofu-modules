@@ -157,23 +157,33 @@ resource "aws_iam_policy" "nullplatform_eks_policy" {
 # Grant permissions to describe and list EKS cluster resources
 resource "aws_iam_policy" "nullplatform_avp_policy" {
   name        = "nullplatform_${var.cluster_name}_avp_policy"
-  description = "Policy for managing AVP resources"
+  description = "Policy for reading and evaluating AVP policy stores"
   policy = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : [
       {
         "Effect" : "Allow",
         "Action" : [
-          "verifiedpermissions:*"
+          "verifiedpermissions:IsAuthorized",
+          "verifiedpermissions:IsAuthorizedWithToken",
+          "verifiedpermissions:BatchIsAuthorized",
+          "verifiedpermissions:BatchIsAuthorizedWithToken",
+          "verifiedpermissions:GetPolicyStore",
+          "verifiedpermissions:ListPolicyStores",
+          "verifiedpermissions:GetPolicy",
+          "verifiedpermissions:ListPolicies",
+          "verifiedpermissions:GetPolicyTemplate",
+          "verifiedpermissions:ListPolicyTemplates",
+          "verifiedpermissions:GetSchema"
         ],
         "Resource" : "*",
-        # "Condition" : {
-        #   "StringEquals" : {
-        #     "aws:RequestedRegion" : [
-        #       data.aws_region.current.region
-        #     ]
-        #   }
-        # }
+        "Condition" : {
+          "StringEquals" : {
+            "aws:RequestedRegion" : [
+              data.aws_region.current.region
+            ]
+          }
+        }
       }
     ]
   })
