@@ -50,15 +50,16 @@ resource "helm_release" "istiod" {
   # autoscaleMin=1, so setting only replicaCount is not enough — the HPA
   # would scale it back to 1 and re-block any node drain (istiod PDB has
   # minAvailable=1). Setting autoscaleMin locks in the floor.
-  set {
-    name  = "pilot.replicaCount"
-    value = var.istiod_replicas
-  }
-
-  set {
-    name  = "pilot.autoscaleMin"
-    value = var.istiod_replicas
-  }
+  set = [
+    {
+      name  = "pilot.replicaCount"
+      value = var.istiod_replicas
+    },
+    {
+      name  = "pilot.autoscaleMin"
+      value = var.istiod_replicas
+    },
+  ]
 }
 
 # Setup Istio Gateway using Helm
