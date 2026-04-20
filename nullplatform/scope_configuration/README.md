@@ -2,88 +2,39 @@
 
 ## Description
 
-Creates a Nullplatform provider configuration for a scope definition, linking a provider specification (identified by slug) with concrete attribute values such as cloud provider, region, state backend, distribution, and network settings.
+Creates a Nullplatform provider configuration resource with JSON-encoded attributes and optional dimensions
 
 ## Architecture
 
-The module creates a single `nullplatform_provider_config` resource that associates a provider specification (e.g., "static-files") with a target NRN. The `type` field receives the provider specification slug, and `attributes` contains the JSON-encoded configuration values that match the specification's schema. Dimensions can optionally be provided to scope the configuration to specific environments or other dimension values.
+The module creates a single nullplatform_provider_config resource that associates a provider specification (identified by slug) with a target NRN. Input attributes are JSON-encoded and passed to the resource along with optional dimension mappings. The resource lifecycle is configured to ignore changes to attributes after initial creation. The provider configuration ID is exposed as an output for reference by dependent resources.
 
 ## Features
 
-- Creates provider configurations for any scope definition that exposes a provider specification
-- Supports arbitrary attribute schemas defined by the provider specification
-- Optional dimension support for environment-specific configurations
-- Uses `ignore_changes` on attributes to prevent drift after initial creation
+- Creates a Nullplatform provider configuration resource linked to a specific NRN
+- JSON-encodes arbitrary configuration attributes matching provider specification schema
+- Associates provider specification via slug identifier
+- Supports optional dimension key-value mappings for scoped configurations
+- Ignores attribute changes in lifecycle to prevent drift after initial deployment
 
 ## Basic Usage
 
 ```hcl
 module "scope_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v1.48.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v1.53.0"
 
-  nrn                         = "organization=123:account=456"
-  np_api_key                  = var.np_api_key
-  provider_specification_slug = module.scope_definition.provider_specification_slug
-  attributes = {
-    cloud_provider = "aws"
-  }
-}
-```
-
-### Usage with AWS Static Files
-
-```hcl
-module "scope_configuration_static_scope" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v1.48.3"
-
-  nrn                         = var.nrn
-  np_api_key                  = var.np_api_key
-  provider_specification_slug = module.scope_definition_static_scope.provider_specification_slug
-  attributes = {
-    cloud_provider = "aws"
-    provider = {
-      aws_region       = "us-east-1"
-      aws_state_bucket = "my-tfstate-bucket"
-    }
-    distribution = {
-      aws_distribution = "cloudfront"
-    }
-    network = {
-      aws_network               = "route53"
-      aws_hosted_public_zone_id = "Z0123456789ABC"
-    }
-  }
-}
-```
-
-### Usage with Dimensions
-
-```hcl
-module "scope_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v1.48.3"
-
-  nrn                         = var.nrn
-  np_api_key                  = var.np_api_key
-  provider_specification_slug = module.scope_definition.provider_specification_slug
-  dimensions = {
-    environment = "production"
-  }
-  attributes = {
-    cloud_provider = "aws"
-    provider = {
-      aws_region       = "eu-west-1"
-      aws_state_bucket = "prod-tfstate-bucket"
-    }
-  }
+  attributes                  = "your-attributes"
+  np_api_key                  = "your-np-api-key"
+  nrn                         = "your-nrn"
+  provider_specification_slug = "your-provider-specification-slug"
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-# Reference the provider config ID in other resources
+# Reference outputs in other resources
 resource "example_resource" "this" {
-  provider_config_id = module.scope_configuration.provider_config_id
+  example_attribute = module.scope_configuration.provider_config_id
 }
 ```
 
@@ -110,11 +61,11 @@ resource "example_resource" "this" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_attributes"></a> [attributes](#input\_attributes) | Configuration attributes matching the provider specification schema. | `any` | n/a | yes |
+| <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Dimension values for this configuration. | `map(string)` | `{}` | no |
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication. | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name (NRN) — unique identifier for the target resource. | `string` | n/a | yes |
 | <a name="input_provider_specification_slug"></a> [provider\_specification\_slug](#input\_provider\_specification\_slug) | Slug of the provider specification (scope configuration type) to associate with. | `string` | n/a | yes |
-| <a name="input_attributes"></a> [attributes](#input\_attributes) | Configuration attributes matching the provider specification schema. | `any` | n/a | yes |
-| <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Dimension values for this configuration. | `map(string)` | `{}` | no |
 
 ## Outputs
 
@@ -122,3 +73,49 @@ resource "example_resource" "this" {
 |------|-------------|
 | <a name="output_provider_config_id"></a> [provider\_config\_id](#output\_provider\_config\_id) | ID of the created provider config. |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "scope_configuration",
+  "description": "Creates a Nullplatform provider configuration resource with JSON-encoded attributes and optional dimensions",
+  "architecture": "The module creates a single nullplatform_provider_config resource that associates a provider specification (identified by slug) with a target NRN. Input attributes are JSON-encoded and passed to the resource along with optional dimension mappings. The resource lifecycle is configured to ignore changes to attributes after initial creation. The provider configuration ID is exposed as an output for reference by dependent resources.",
+  "features": [
+    "Creates a Nullplatform provider configuration resource linked to a specific NRN",
+    "JSON-encodes arbitrary configuration attributes matching provider specification schema",
+    "Associates provider specification via slug identifier",
+    "Supports optional dimension key-value mappings for scoped configurations",
+    "Ignores attribute changes in lifecycle to prevent drift after initial deployment"
+  ],
+  "inputs": [
+    {
+      "name": "np_api_key",
+      "description": "Nullplatform API key for authentication.",
+      "required": true
+    },
+    {
+      "name": "nrn",
+      "description": "Nullplatform Resource Name (NRN) — unique identifier for the target resource.",
+      "required": true
+    },
+    {
+      "name": "provider_specification_slug",
+      "description": "Slug of the provider specification (scope configuration type) to associate with.",
+      "required": true
+    },
+    {
+      "name": "attributes",
+      "description": "Configuration attributes matching the provider specification schema.",
+      "required": true
+    },
+    {
+      "name": "dimensions",
+      "description": "Dimension values for this configuration.",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "provider_config_id"
+  ],
+  "hash": "78fb31d42df72b1ddeff84e1886f6c9c"
+}
+END_AI_METADATA -->
