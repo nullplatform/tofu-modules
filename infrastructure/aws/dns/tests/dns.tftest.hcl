@@ -27,12 +27,12 @@ run "both_zones_are_destroy_protected" {
   command = plan
 
   assert {
-    condition     = aws_route53_zone.public_zone.force_destroy != true
+    condition     = aws_route53_zone.public_zone.force_destroy == false
     error_message = "Public zone must not have force_destroy enabled (protects records against accidental deletion)"
   }
 
   assert {
-    condition     = aws_route53_zone.private_zone.force_destroy != true
+    condition     = aws_route53_zone.private_zone.force_destroy == false
     error_message = "Private zone must not have force_destroy enabled (protects records against accidental deletion)"
   }
 }
