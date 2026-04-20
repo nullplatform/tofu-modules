@@ -22,11 +22,6 @@ variable "containerregistry_name" {
   }
 }
 
-variable "subscription_id" {
-  type        = string
-  description = "The ID of the Azure subscription"
-}
-
 ###############################################################################
 # OPTIONAL VARIABLES - REGISTRY CONFIGURATION
 ###############################################################################

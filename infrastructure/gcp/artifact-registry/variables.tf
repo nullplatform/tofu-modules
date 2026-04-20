@@ -18,3 +18,12 @@ variable "format" {
   description = "The format (DOCKER, NPM, PYTHON, etc)"
   default     = "DOCKER"
 }
+
+variable "workload_identity_bindings" {
+  description = "Kubernetes ServiceAccounts allowed to impersonate the GCP Service Account via Workload Identity. Each entry grants roles/iam.workloadIdentityUser on the GSA to the KSA identified by namespace/ksa_name."
+  type = list(object({
+    namespace = string
+    ksa_name  = string
+  }))
+  default = []
+}
