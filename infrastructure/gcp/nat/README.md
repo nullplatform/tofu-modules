@@ -18,7 +18,7 @@ This module creates a google_compute_router resource and a google_compute_router
 
 ```hcl
 module "nat" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/nat?ref=v1.52.4"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/nat?ref=v1.53.0"
 
   location    = "your-location"
   nat_name    = "your-nat-name"
