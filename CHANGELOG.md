@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.53.0](https://github.com/nullplatform/tofu-modules/compare/v1.52.4...v1.53.0) (2026-04-20)
+
+
+### Features
+
+* add scope_configuration module ([#271](https://github.com/nullplatform/tofu-modules/issues/271)) ([a49e943](https://github.com/nullplatform/tofu-modules/commit/a49e943f0159e5b0808cd616f892252f32402183))
+
 ## [1.52.4](https://github.com/nullplatform/tofu-modules/compare/v1.52.3...v1.52.4) (2026-04-16)
 
 
