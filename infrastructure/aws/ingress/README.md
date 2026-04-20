@@ -18,7 +18,7 @@ This module creates two Kubernetes ingress resources, `kubernetes_ingress_v1`, o
 
 ```hcl
 module "ingress" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/ingress?ref=v1.52.4"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/ingress?ref=v1.53.0"
 
   certificate_arn = "your-certificate-arn"
 }
