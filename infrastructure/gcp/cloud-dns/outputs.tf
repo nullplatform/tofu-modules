@@ -1,7 +1,14 @@
 output "zone_name" {
-  value = google_dns_managed_zone.zone.name
+  description = "The name of the created DNS managed zone"
+  value       = google_dns_managed_zone.zone.name
+}
+
+output "zone_id" {
+  description = "The ID of the created DNS managed zone"
+  value       = google_dns_managed_zone.zone.id
 }
 
 output "name_servers" {
-  value = google_dns_managed_zone.zone.name_servers
+  description = "The list of name servers for the DNS managed zone"
+  value       = google_dns_managed_zone.zone.name_servers
 }
