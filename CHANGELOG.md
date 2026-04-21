@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.53.1](https://github.com/nullplatform/tofu-modules/compare/v1.53.0...v1.53.1) (2026-04-21)
+
+
+### Bug Fixes
+
+* **infra:** security hardening, DNS test fixes, WI docs and AVP revert ([#295](https://github.com/nullplatform/tofu-modules/issues/295)) ([d5982fe](https://github.com/nullplatform/tofu-modules/commit/d5982fe6abe9cf687cb1abb0e778d9c53535ab8c))
+
 ## [1.53.0](https://github.com/nullplatform/tofu-modules/compare/v1.52.4...v1.53.0) (2026-04-20)
 
 
