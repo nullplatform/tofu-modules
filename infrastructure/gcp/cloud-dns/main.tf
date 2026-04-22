@@ -1,6 +1,10 @@
+locals {
+  zone_name = var.zone_name != null ? var.zone_name : replace(var.domain_name, ".", "-")
+}
+
 resource "google_dns_managed_zone" "zone" {
   project    = var.project_id
-  name       = var.zone_name
+  name       = local.zone_name
   dns_name   = "${var.domain_name}."
   visibility = var.visibility
 
@@ -15,4 +19,6 @@ resource "google_dns_managed_zone" "zone" {
       }
     }
   }
+
+  labels = var.tags
 }

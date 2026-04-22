@@ -23,16 +23,16 @@ run "private_zone_uses_same_domain" {
   }
 }
 
-run "both_zones_force_destroy" {
+run "both_zones_are_destroy_protected" {
   command = plan
 
   assert {
-    condition     = aws_route53_zone.public_zone.force_destroy == true
-    error_message = "Public zone should have force_destroy enabled"
+    condition     = aws_route53_zone.public_zone.force_destroy == false
+    error_message = "Public zone must not have force_destroy enabled (protects records against accidental deletion)"
   }
 
   assert {
-    condition     = aws_route53_zone.private_zone.force_destroy == true
-    error_message = "Private zone should have force_destroy enabled"
+    condition     = aws_route53_zone.private_zone.force_destroy == false
+    error_message = "Private zone must not have force_destroy enabled (protects records against accidental deletion)"
   }
 }

@@ -2,25 +2,26 @@
 
 ## Description
 
-Configures an EKS cluster in the Nullplatform provider with customizable load balancers, resource management, and security settings
+Configures Nullplatform provider settings for Amazon EKS clusters with application deployment, load balancing, and resource management capabilities
 
 ## Architecture
 
-The module creates a single nullplatform_provider_config resource of type eks-configuration, which receives a JSON-encoded attributes map built from local values. Local values merge cluster metadata, optional balancer configurations, network settings, resource management parameters, security configurations, traffic manager version, and object modifiers. All inputs flow through conditional local blocks that only include non-empty values in the final attributes payload.
+Creates a nullplatform_provider_config resource with type 'eks-configuration' that aggregates cluster, balancer, network, resource management, and security settings. The module accepts EKS cluster configuration through input variables, constructs nested attribute maps using conditional logic to filter empty values, and encodes them as JSON attributes for the provider configuration. Internal locals merge cluster identity, load balancer names (public/private with additional balancers), namespace settings, resource quotas, and security configurations before passing them to the provider resource.
 
 ## Features
 
-- Creates Nullplatform EKS provider configuration with cluster metadata and dimensions
-- Configures public and private load balancer names with optional group suffix for multi-cluster management
-- Sets memory-to-CPU ratios, request-to-limit ratios, and core multipliers for resource management
-- Supports image pull secrets and custom service account names for secure pod deployments
-- Enables dynamic Kubernetes object modifications via selector-based actions
+- Configures EKS cluster identity and default Kubernetes namespace for application deployments
+- Manages public and private Application Load Balancer naming with support for additional balancers beyond the 100-rule limit
+- Sets ALB capacity thresholds (50-99%) to reserve slots for concurrent deployments
+- Controls resource allocation ratios for memory-to-CPU, memory request-to-limit, and CPU multipliers
+- Configures image pull secrets and service account associations for secure container image access
+- Supports traffic manager sidecar versioning and dynamic Kubernetes object modifications
 
 ## Basic Usage
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v1.52.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v1.53.0"
 
   cluster_name = "your-cluster-name"
   nrn          = "your-nrn"
@@ -59,6 +60,9 @@ resource "example_resource" "this" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_additional_private_balancer_names"></a> [additional\_private\_balancer\_names](#input\_additional\_private\_balancer\_names) | Additional private load balancers to support scope deployments beyond the 100-rule ALB limit | `list(string)` | `[]` | no |
+| <a name="input_additional_public_balancer_names"></a> [additional\_public\_balancer\_names](#input\_additional\_public\_balancer\_names) | Additional public-facing load balancers to support scope deployments beyond the 100-rule ALB limit | `list(string)` | `[]` | no |
+| <a name="input_alb_capacity_threshold"></a> [alb\_capacity\_threshold](#input\_alb\_capacity\_threshold) | Maximum ALB rule usage percentage (50-99). The remaining capacity reserves slots for concurrent deployments. Higher values maximize ALB utilization but increase the risk of hitting the rule limit | `number` | `null` | no |
 | <a name="input_balancer_group_suffix"></a> [balancer\_group\_suffix](#input\_balancer\_group\_suffix) | Suffix added to the ALB name, enabling management across multiple clusters in the same account | `string` | `""` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The name of the Amazon EKS cluster | `string` | n/a | yes |
 | <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Dimensions for the provider configuration | `map(any)` | `{}` | no |
@@ -80,14 +84,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "eks",
-  "description": "Configures an EKS cluster in the Nullplatform provider with customizable load balancers, resource management, and security settings",
-  "architecture": "The module creates a single nullplatform_provider_config resource of type eks-configuration, which receives a JSON-encoded attributes map built from local values. Local values merge cluster metadata, optional balancer configurations, network settings, resource management parameters, security configurations, traffic manager version, and object modifiers. All inputs flow through conditional local blocks that only include non-empty values in the final attributes payload.",
+  "description": "Configures Nullplatform provider settings for Amazon EKS clusters with application deployment, load balancing, and resource management capabilities",
+  "architecture": "Creates a nullplatform_provider_config resource with type 'eks-configuration' that aggregates cluster, balancer, network, resource management, and security settings. The module accepts EKS cluster configuration through input variables, constructs nested attribute maps using conditional logic to filter empty values, and encodes them as JSON attributes for the provider configuration. Internal locals merge cluster identity, load balancer names (public/private with additional balancers), namespace settings, resource quotas, and security configurations before passing them to the provider resource.",
   "features": [
-    "Creates Nullplatform EKS provider configuration with cluster metadata and dimensions",
-    "Configures public and private load balancer names with optional group suffix for multi-cluster management",
-    "Sets memory-to-CPU ratios, request-to-limit ratios, and core multipliers for resource management",
-    "Supports image pull secrets and custom service account names for secure pod deployments",
-    "Enables dynamic Kubernetes object modifications via selector-based actions"
+    "Configures EKS cluster identity and default Kubernetes namespace for application deployments",
+    "Manages public and private Application Load Balancer naming with support for additional balancers beyond the 100-rule limit",
+    "Sets ALB capacity thresholds (50-99%) to reserve slots for concurrent deployments",
+    "Controls resource allocation ratios for memory-to-CPU, memory request-to-limit, and CPU multipliers",
+    "Configures image pull secrets and service account associations for secure container image access",
+    "Supports traffic manager sidecar versioning and dynamic Kubernetes object modifications"
   ],
   "inputs": [
     {
@@ -99,6 +104,21 @@ resource "example_resource" "this" {
       "name": "cluster_name",
       "description": "The name of the Amazon EKS cluster",
       "required": true
+    },
+    {
+      "name": "additional_public_balancer_names",
+      "description": "Additional public-facing load balancers to support scope deployments beyond the 100-rule ALB limit",
+      "required": false
+    },
+    {
+      "name": "additional_private_balancer_names",
+      "description": "Additional private load balancers to support scope deployments beyond the 100-rule ALB limit",
+      "required": false
+    },
+    {
+      "name": "alb_capacity_threshold",
+      "description": "Maximum ALB rule usage percentage (50-99). The remaining capacity reserves slots for concurrent deployments. Higher values maximize ALB utilization but increase the risk of hitting the rule limit",
+      "required": false
     },
     {
       "name": "dimensions",
@@ -172,6 +192,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "92682b2510f488e61ef8aac2143db071"
+  "hash": "c7a281d93492ea563b142d1bedd94b38"
 }
 END_AI_METADATA -->

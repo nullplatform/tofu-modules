@@ -12,11 +12,6 @@ variable "domain_name" {
   description = "The domain name to use for the DNS zone (e.g., example.com)"
 }
 
-variable "subscription_id" {
-  type        = string
-  description = "The ID of the Azure subscription"
-}
-
 ###############################################################################
 # OPTIONAL VARIABLES - TAGS
 ###############################################################################

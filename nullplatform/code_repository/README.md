@@ -2,36 +2,37 @@
 
 ## Description
 
-Configures Git provider integrations for Nullplatform by creating provider-specific configuration resources for GitHub, GitLab, or Azure DevOps
+Configures Git provider integration for Nullplatform with support for GitHub, GitLab, and Azure DevOps
 
 ## Architecture
 
-Based on the git_provider trigger variable, this module conditionally creates one of three nullplatform_provider_config resources (gitlab, github, or azure). Each resource uses the input nrn (with regex transformations for namespace handling), sets a provider-specific type attribute, and encodes provider credentials and configuration into a JSON attributes field. The module uses local boolean flags (is_gitlab, is_github, is_azure) derived from git_provider to control which single provider configuration resource gets created with count = 1, while others remain uncreated with count = 0.
+The module creates a nullplatform_provider_config resource conditionally based on the git_provider variable. For GitLab, it provisions a gitlab-configuration resource with group path, access token, installation URL, and collaborators. For GitHub, it creates a github-configuration resource with organization name and installation ID. For Azure DevOps, it provisions an azure-devops-configuration resource with project name, access token, and agent pool. The nrn variable flows into each resource after regex transformation or replacement to remove namespace suffixes, while dimensions map directly to resource attributes.
 
 ## Features
 
-- Creates nullplatform_provider_config resource for GitLab with group path, access token, installation URL, and collaborator configurations
-- Creates nullplatform_provider_config resource for GitHub with organization name and App installation ID
-- Creates nullplatform_provider_config resource for Azure DevOps with project name, access token, and CI agent pool settings
-- Transforms NRN using regex patterns to extract namespace information or strip namespace suffixes based on provider type
-- Implements lifecycle ignore_changes for attributes field to prevent configuration drift after initial creation
+- Creates nullplatform_provider_config resource for GitHub with organization and installation ID
+- Creates nullplatform_provider_config resource for GitLab with group path, access tokens, and collaborator configuration
+- Creates nullplatform_provider_config resource for Azure DevOps with project, access token, and agent pool settings
+- Supports dimensional segmentation of provider configurations by region or environment
+- Manages NRN transformation with regex-based namespace extraction for GitLab and replacement for other providers
+- Implements lifecycle ignore_changes for attributes to prevent drift detection on external modifications
 
 ## Basic Usage
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.52.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.53.0"
 
   git_provider = "your-git-provider"
   nrn          = "your-nrn"
 }
 ```
 
-### Usage with GitHub Provider
+### Usage with GitHub Configuration
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.52.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.53.0"
 
   git_provider           = "github"
   github_installation_id = "your-github-installation-id"  # Required when git_provider = "github"
@@ -40,11 +41,11 @@ module "code_repository" {
 }
 ```
 
-### Usage with GitLab Provider
+### Usage with GitLab Configuration
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.52.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v1.53.0"
 
   git_provider                = "gitlab"
   gitlab_access_token         = "your-gitlab-access-token"  # Required when git_provider = "gitlab"
@@ -94,6 +95,7 @@ resource "example_resource" "this" {
 | <a name="input_azure_access_token"></a> [azure\_access\_token](#input\_azure\_access\_token) | Azure devops personal access token | `string` | `null` | no |
 | <a name="input_azure_agent_pool"></a> [azure\_agent\_pool](#input\_azure\_agent\_pool) | Azure devops CI agent pool | `string` | `"Default"` | no |
 | <a name="input_azure_project"></a> [azure\_project](#input\_azure\_project) | Azure devops project name | `string` | `null` | no |
+| <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Dimensions to segment the nullplatform provider config (e.g. by region, environment) | `map(string)` | `{}` | no |
 | <a name="input_git_provider"></a> [git\_provider](#input\_git\_provider) | Git provider to use (GitHub or GitLab). | `string` | n/a | yes |
 | <a name="input_github_installation_id"></a> [github\_installation\_id](#input\_github\_installation\_id) | GitHub App installation ID for the organization. | `string` | `null` | no |
 | <a name="input_github_organization"></a> [github\_organization](#input\_github\_organization) | GitHub organization name for repository creation. | `string` | `null` | no |
@@ -109,14 +111,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "code_repository",
-  "description": "Configures Git provider integrations for Nullplatform by creating provider-specific configuration resources for GitHub, GitLab, or Azure DevOps",
-  "architecture": "Based on the git_provider trigger variable, this module conditionally creates one of three nullplatform_provider_config resources (gitlab, github, or azure). Each resource uses the input nrn (with regex transformations for namespace handling), sets a provider-specific type attribute, and encodes provider credentials and configuration into a JSON attributes field. The module uses local boolean flags (is_gitlab, is_github, is_azure) derived from git_provider to control which single provider configuration resource gets created with count = 1, while others remain uncreated with count = 0.",
+  "description": "Configures Git provider integration for Nullplatform with support for GitHub, GitLab, and Azure DevOps",
+  "architecture": "The module creates a nullplatform_provider_config resource conditionally based on the git_provider variable. For GitLab, it provisions a gitlab-configuration resource with group path, access token, installation URL, and collaborators. For GitHub, it creates a github-configuration resource with organization name and installation ID. For Azure DevOps, it provisions an azure-devops-configuration resource with project name, access token, and agent pool. The nrn variable flows into each resource after regex transformation or replacement to remove namespace suffixes, while dimensions map directly to resource attributes.",
   "features": [
-    "Creates nullplatform_provider_config resource for GitLab with group path, access token, installation URL, and collaborator configurations",
-    "Creates nullplatform_provider_config resource for GitHub with organization name and App installation ID",
-    "Creates nullplatform_provider_config resource for Azure DevOps with project name, access token, and CI agent pool settings",
-    "Transforms NRN using regex patterns to extract namespace information or strip namespace suffixes based on provider type",
-    "Implements lifecycle ignore_changes for attributes field to prevent configuration drift after initial creation"
+    "Creates nullplatform_provider_config resource for GitHub with organization and installation ID",
+    "Creates nullplatform_provider_config resource for GitLab with group path, access tokens, and collaborator configuration",
+    "Creates nullplatform_provider_config resource for Azure DevOps with project, access token, and agent pool settings",
+    "Supports dimensional segmentation of provider configurations by region or environment",
+    "Manages NRN transformation with regex-based namespace extraction for GitLab and replacement for other providers",
+    "Implements lifecycle ignore_changes for attributes to prevent drift detection on external modifications"
   ],
   "inputs": [
     {
@@ -183,9 +186,14 @@ resource "example_resource" "this" {
       "name": "azure_agent_pool",
       "description": "Azure devops CI agent pool",
       "required": false
+    },
+    {
+      "name": "dimensions",
+      "description": "Dimensions to segment the nullplatform provider config (e.g. by region, environment)",
+      "required": false
     }
   ],
   "outputs": [],
-  "hash": "ec3c4900d37e8adacc8cf071bc8f62bf"
+  "hash": "71216d11bb52f82d8d85bc7cede9a7da"
 }
 END_AI_METADATA -->

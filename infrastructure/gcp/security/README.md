@@ -19,7 +19,7 @@ This module uses Terraform to create GCP firewall rules for public and private I
 
 ```hcl
 module "security" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/security?ref=v1.52.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/security?ref=v1.53.0"
 
   cluster_name   = "your-cluster-name"
   gcp_project_id = "your-gcp-project-id"

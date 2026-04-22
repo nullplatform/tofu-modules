@@ -10,11 +10,6 @@ variable "namespace" {
   default     = "nullplatform-tools"
 }
 
-variable "nrn" {
-  description = "The Nullplatform Resource Name (NRN)."
-  type        = string
-}
-
 variable "np_api_key" {
   type        = string
   sensitive   = true
