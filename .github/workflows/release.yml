@@ -66,10 +66,11 @@ jobs:
             exit 0
           fi
 
-          CHANGED_DIRS=$(git diff --name-only "$LAST_TAG"..HEAD -- '*.tf' \
+          CHANGED_DIRS=$(git diff --name-only --diff-filter=d "$LAST_TAG"..HEAD -- '*.tf' \
             | grep -v '\.terraform/' \
             | xargs -I{} dirname {} \
             | sort -u \
+            | while read -r d; do [ -d "$d" ] && echo "$d"; done \
             | tr '\n' ' ')
 
           if [ -z "$CHANGED_DIRS" ]; then
