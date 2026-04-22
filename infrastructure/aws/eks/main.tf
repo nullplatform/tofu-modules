@@ -33,6 +33,9 @@ module "eks" {
   } : {}
 
   addons = {
+    aws-ebs-csi-driver = {
+      service_account_role_arn = aws_iam_role.ebs_csi_driver.arn
+    }
     coredns = {}
     eks-pod-identity-agent = {
       before_compute = true
