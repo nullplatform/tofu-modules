@@ -20,7 +20,7 @@ The module creates two kubernetes_namespace_v1 resources (nullplatform-tools and
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.53.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.54.0"
 
   k8s_provider = "your-k8s-provider"
   np_api_key   = "your-np-api-key"
@@ -32,7 +32,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.53.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.54.0"
 
   k8s_provider = "eks"
   np_api_key   = "your-np-api-key"
@@ -44,7 +44,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.53.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.54.0"
 
   k8s_provider = "gke"
   np_api_key   = "your-np-api-key"
@@ -56,7 +56,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.53.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.54.0"
 
   k8s_provider = "aks"
   np_api_key   = "your-np-api-key"
@@ -68,7 +68,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.53.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.54.0"
 
   k8s_provider = "oke"
   np_api_key   = "your-np-api-key"
@@ -80,7 +80,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.53.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v1.54.0"
 
   k8s_provider = "aro"
   np_api_key   = "your-np-api-key"
@@ -109,7 +109,7 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_helm"></a> [helm](#provider\_helm) | ~> 3.0 |
+| <a name="provider_helm"></a> [helm](#provider\_helm) | 3.1.1 |
 | <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | n/a |
 
 ## Resources
@@ -181,7 +181,6 @@ resource "example_resource" "this" {
 | <a name="input_newrelic_license_key"></a> [newrelic\_license\_key](#input\_newrelic\_license\_key) | New Relic license key. | `string` | `""` | no |
 | <a name="input_newrelic_region"></a> [newrelic\_region](#input\_newrelic\_region) | New Relic region (e.g., US, EU). | `string` | `""` | no |
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication (account level). | `string` | n/a | yes |
-| <a name="input_nrn"></a> [nrn](#input\_nrn) | The Nullplatform Resource Name (NRN). | `string` | n/a | yes |
 | <a name="input_nullplatform_base_helm_version"></a> [nullplatform\_base\_helm\_version](#input\_nullplatform\_base\_helm\_version) | Helm chart version for the nullplatform base. | `string` | `"2.38.0"` | no |
 | <a name="input_prometheus_enabled"></a> [prometheus\_enabled](#input\_prometheus\_enabled) | Enable the Prometheus exporter. | `bool` | `true` | no |
 | <a name="input_tls_required"></a> [tls\_required](#input\_tls\_required) | Whether TLS is required. | `bool` | `true` | no |

@@ -19,7 +19,7 @@ This module creates an OCI dynamic group and an OCI identity policy, connecting 
 
 ```hcl
 module "dynamic_groups" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/dynamic_groups?ref=v1.53.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/dynamic_groups?ref=v1.54.0"
 
   cluster_id      = "your-cluster-id"
   compartment_id  = "your-compartment-id"
@@ -51,7 +51,7 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_oci"></a> [oci](#provider\_oci) | >= 5.0.0 |
+| <a name="provider_oci"></a> [oci](#provider\_oci) | 7.30.0 |
 
 ## Resources
 
