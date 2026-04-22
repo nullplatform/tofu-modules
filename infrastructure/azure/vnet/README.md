@@ -18,7 +18,7 @@ This module creates an Azure virtual network using the azurerm provider and conf
 
 ```hcl
 module "vnet" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/vnet?ref=v1.53.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/vnet?ref=v1.54.0"
 
   address_space       = "your-address-space"
   location            = "your-location"

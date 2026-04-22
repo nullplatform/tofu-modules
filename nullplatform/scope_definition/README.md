@@ -22,7 +22,7 @@ The module fetches JSON templates via data.http from a remote repository, proces
 
 ```hcl
 module "scope_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v1.53.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v1.54.0"
 
   np_api_key = "your-np-api-key"
   nrn        = "your-nrn"
@@ -51,10 +51,10 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_external"></a> [external](#provider\_external) | ~> 2.3.5 |
-| <a name="provider_http"></a> [http](#provider\_http) | n/a |
-| <a name="provider_null"></a> [null](#provider\_null) | ~> 3.2.4 |
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | ~> 0.0.63 |
+| <a name="provider_external"></a> [external](#provider\_external) | 2.3.5 |
+| <a name="provider_http"></a> [http](#provider\_http) | 3.5.0 |
+| <a name="provider_null"></a> [null](#provider\_null) | 3.2.4 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.75 |
 
 ## Resources
 
