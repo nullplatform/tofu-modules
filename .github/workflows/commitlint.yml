@@ -7,7 +7,9 @@ on:
 
 jobs:
   branch-name:
+    if: ${{ !startsWith(github.head_ref, 'release-please--') }}
     uses: nullplatform/actions-nullplatform/.github/workflows/branch-validation.yml@main
 
   commitlint:
+    if: ${{ !startsWith(github.head_ref, 'release-please--') }}
     uses: nullplatform/actions-nullplatform/.github/workflows/conventional-commit.yml@main
