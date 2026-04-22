@@ -18,7 +18,7 @@ The module uses the azurerm_container_registry resource to create the container 
 
 ```hcl
 module "acr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/acr?ref=v1.52.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/acr?ref=v1.54.0"
 
   containerregistry_name = "your-containerregistry-name"
   location               = "your-location"
@@ -48,7 +48,7 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | ~> 4.0 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.68.0 |
 
 ## Modules
 
@@ -70,7 +70,6 @@ resource "example_resource" "this" {
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | The name of the resource group where the container registry will be created | `string` | n/a | yes |
 | <a name="input_retention_policy_in_days"></a> [retention\_policy\_in\_days](#input\_retention\_policy\_in\_days) | The number of days to retain untagged manifests (requires Premium SKU) | `number` | `null` | no |
 | <a name="input_sku"></a> [sku](#input\_sku) | The SKU of the container registry (Basic, Standard, Premium) | `string` | `"Basic"` | no |
-| <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | The ID of the Azure subscription | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to the container registry | `map(string)` | `{}` | no |
 | <a name="input_zone_redundancy_enabled"></a> [zone\_redundancy\_enabled](#input\_zone\_redundancy\_enabled) | Whether to enable zone redundancy for the container registry (requires Premium SKU) | `bool` | `false` | no |
 

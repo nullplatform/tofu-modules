@@ -2,23 +2,25 @@
 
 ## Description
 
-This module creates a Google Cloud VPC network with subnets and optional secondary ranges
+Creates a Google Cloud VPC network with configurable subnets and secondary IP ranges using the terraform-google-modules/network module
 
 ## Architecture
 
-The module uses the google_network Terraform resource to create a VPC network, and then uses a for loop to create subnets based on the input subnets variable. The subnets are configured with private access enabled. The module also supports the creation of secondary ranges for GKE pods and services. The outputs of the module include the network name, self link, subnets names, and subnets self links.
+The module invokes the terraform-google-modules/network/google module to create VPC network resources. It transforms the input subnets list by enforcing subnet_private_access = true on all subnets before passing them to the underlying module. The module.vpc resource creates the google_compute_network and google_compute_subnetwork resources internally, with optional secondary_ranges for GKE pod and service networking. Outputs expose the network and subnet identifiers via self-links and names from the underlying module.
 
 ## Features
 
-- Creates VPC network with subnets
-- Configures subnets with private access
-- Supports secondary ranges for GKE pods and services
+- Creates GCP VPC network with custom subnet configurations across multiple regions
+- Enforces private Google access on all subnets automatically
+- Supports secondary IP ranges for GKE pod and service CIDR blocks
+- Outputs network and subnet self-links for resource referencing
+- Leverages community-maintained terraform-google-modules for standardized network creation
 
 ## Basic Usage
 
 ```hcl
 module "vpc" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/vpc?ref=v1.52.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/vpc?ref=v1.54.0"
 
   network_name = "your-network-name"
   project_id   = "your-project-id"
@@ -62,21 +64,23 @@ resource "example_resource" "this" {
 
 | Name | Description |
 |------|-------------|
-| <a name="output_network_name"></a> [network\_name](#output\_network\_name) | n/a |
-| <a name="output_network_self_link"></a> [network\_self\_link](#output\_network\_self\_link) | n/a |
-| <a name="output_subnets_names"></a> [subnets\_names](#output\_subnets\_names) | n/a |
-| <a name="output_subnets_self_links"></a> [subnets\_self\_links](#output\_subnets\_self\_links) | n/a |
+| <a name="output_network_name"></a> [network\_name](#output\_network\_name) | The name of the VPC network |
+| <a name="output_network_self_link"></a> [network\_self\_link](#output\_network\_self\_link) | The self-link of the VPC network |
+| <a name="output_subnets_names"></a> [subnets\_names](#output\_subnets\_names) | The names of the subnets created in the VPC |
+| <a name="output_subnets_self_links"></a> [subnets\_self\_links](#output\_subnets\_self\_links) | The self-links of the subnets created in the VPC |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
 {
   "name": "vpc",
-  "description": "This module creates a Google Cloud VPC network with subnets and optional secondary ranges",
-  "architecture": "The module uses the google_network Terraform resource to create a VPC network, and then uses a for loop to create subnets based on the input subnets variable. The subnets are configured with private access enabled. The module also supports the creation of secondary ranges for GKE pods and services. The outputs of the module include the network name, self link, subnets names, and subnets self links.",
+  "description": "Creates a Google Cloud VPC network with configurable subnets and secondary IP ranges using the terraform-google-modules/network module",
+  "architecture": "The module invokes the terraform-google-modules/network/google module to create VPC network resources. It transforms the input subnets list by enforcing subnet_private_access = true on all subnets before passing them to the underlying module. The module.vpc resource creates the google_compute_network and google_compute_subnetwork resources internally, with optional secondary_ranges for GKE pod and service networking. Outputs expose the network and subnet identifiers via self-links and names from the underlying module.",
   "features": [
-    "Creates VPC network with subnets",
-    "Configures subnets with private access",
-    "Supports secondary ranges for GKE pods and services"
+    "Creates GCP VPC network with custom subnet configurations across multiple regions",
+    "Enforces private Google access on all subnets automatically",
+    "Supports secondary IP ranges for GKE pod and service CIDR blocks",
+    "Outputs network and subnet self-links for resource referencing",
+    "Leverages community-maintained terraform-google-modules for standardized network creation"
   ],
   "inputs": [
     {
@@ -106,6 +110,6 @@ resource "example_resource" "this" {
     "subnets_names",
     "subnets_self_links"
   ],
-  "hash": "b87ef91251f78cceb4125ce4babf01d3"
+  "hash": "f6fdda5903c55bac3cef73815ddd4bf7"
 }
 END_AI_METADATA -->

@@ -1,0 +1,25 @@
+# This file is maintained automatically by "tofu init".
+# Manual edits may be lost in future updates.
+
+provider "registry.opentofu.org/hashicorp/azurerm" {
+  version     = "4.68.0"
+  constraints = "~> 4.0"
+  hashes = [
+    "h1:Yvhz+1iLsolWDU3Z24Od6U1yalequYMNJIq0BYf/bvc=",
+    "zh:0aa7a23914cef0ffe178d018e535fc7fbc8d92a344e747e1f3674c9cb1907658",
+    "zh:0ade5ea7b91aa536edbb26576da615a513985e7dabf3971381534132d87a1100",
+    "zh:104c94c630382964274438323d2ca462c42f6fee9c1910833fb462c84f22b2e2",
+    "zh:134748cde4af8015aec20c7fbf960ea7b7912a831f836d92471ce7dc95837a16",
+    "zh:3165401110d781c43bf552dfc598cd532b17e76ffb2d39fb5e0e8db2f65a839e",
+    "zh:3b7ca1704e7a309e5ab37e6eb2cca421d85078af07372371d9be02341fabe0c4",
+    "zh:40385a164cb12be8e9f399b399e0d402ba7c2c96e8fc617690114ba7898dd183",
+    "zh:59379431fb826a499d18429e6b29871ffe97784f9f9b8f7c1d8e6e281d6fced9",
+    "zh:60b594aca90f2033d842c2698cde4419b755c3692b1eab484f4d56c68ac58ebb",
+    "zh:75c3ac69c420a204b5665383796eb612f291d0a633f6a6f5dd6d430e27a230bc",
+    "zh:8401d7c2bd2c093e9d4f8b2e45350c138743839040e7624d80e509085f874326",
+    "zh:904da656c31cf607d4c9bc96085aa8c7854c2e3195a79f994e15a39eb95c8bfb",
+    "zh:aa475ffe79425bbb8337d9748463b0b612f1459ea609ca145110227d8fda6679",
+    "zh:d86d7162e24077fcba2caae7e91c85755edc2d3dc4c6f8247ef0d8b755bd2b56",
+    "zh:f0e5daaaddac413c00dd7e6e82bad888837c2811d55ab0fb3f3bad721b51e80b",
+  ]
+}

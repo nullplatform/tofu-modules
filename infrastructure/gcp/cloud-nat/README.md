@@ -2,23 +2,24 @@
 
 ## Description
 
-This module creates a Google Cloud Router and a Cloud NAT in a specified GCP project and region
+Creates a Google Cloud Router with a Cloud NAT gateway for egress traffic from private instances in a VPC network
 
 ## Architecture
 
-The module uses the google_compute_router and google_compute_router_nat Terraform resource types to create a Cloud Router and a Cloud NAT, respectively. The Cloud Router is created with the specified name, project, region, and network, and the Cloud NAT is created with the specified name, project, region, and router. The module outputs the names of the created Cloud Router and Cloud NAT. The inputs to the module, such as project ID, region, network ID, router name, and NAT name, are used to configure the created resources.
+This module creates a google_compute_router resource in a specified region and network, then provisions a google_compute_router_nat resource attached to that router. The router acts as the control plane for the NAT gateway, while the NAT resource handles automatic IP allocation and configures source NAT for all subnetworks in the VPC. The nat_ip_allocate_option is set to AUTO_ONLY, allowing Google Cloud to automatically provision ephemeral external IPs, and source_subnetwork_ip_ranges_to_nat is set to ALL_SUBNETWORKS_ALL_IP_RANGES to enable NAT for all private instances across all subnets.
 
 ## Features
 
-- Creates Cloud Router with specified name and network
-- Configures Cloud NAT with specified name and router
-- Supports automatic IP allocation for Cloud NAT
+- Creates Cloud Router as a regional routing control plane for dynamic routing and NAT services
+- Provisions Cloud NAT gateway with automatic external IP allocation for egress traffic
+- Configures NAT to cover all subnetworks and IP ranges within the specified VPC network
+- Outputs router and NAT gateway names for reference by dependent resources
 
 ## Basic Usage
 
 ```hcl
 module "cloud-nat" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/cloud-nat?ref=v1.52.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/cloud-nat?ref=v1.54.0"
 
   nat_name    = "your-nat-name"
   network_id  = "your-network-id"
@@ -72,19 +73,20 @@ resource "example_resource" "this" {
 
 | Name | Description |
 |------|-------------|
-| <a name="output_nat_name"></a> [nat\_name](#output\_nat\_name) | n/a |
-| <a name="output_router_name"></a> [router\_name](#output\_router\_name) | n/a |
+| <a name="output_nat_name"></a> [nat\_name](#output\_nat\_name) | The name of the created Cloud NAT gateway |
+| <a name="output_router_name"></a> [router\_name](#output\_router\_name) | The name of the created Cloud Router |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
 {
   "name": "cloud-nat",
-  "description": "This module creates a Google Cloud Router and a Cloud NAT in a specified GCP project and region",
-  "architecture": "The module uses the google_compute_router and google_compute_router_nat Terraform resource types to create a Cloud Router and a Cloud NAT, respectively. The Cloud Router is created with the specified name, project, region, and network, and the Cloud NAT is created with the specified name, project, region, and router. The module outputs the names of the created Cloud Router and Cloud NAT. The inputs to the module, such as project ID, region, network ID, router name, and NAT name, are used to configure the created resources.",
+  "description": "Creates a Google Cloud Router with a Cloud NAT gateway for egress traffic from private instances in a VPC network",
+  "architecture": "This module creates a google_compute_router resource in a specified region and network, then provisions a google_compute_router_nat resource attached to that router. The router acts as the control plane for the NAT gateway, while the NAT resource handles automatic IP allocation and configures source NAT for all subnetworks in the VPC. The nat_ip_allocate_option is set to AUTO_ONLY, allowing Google Cloud to automatically provision ephemeral external IPs, and source_subnetwork_ip_ranges_to_nat is set to ALL_SUBNETWORKS_ALL_IP_RANGES to enable NAT for all private instances across all subnets.",
   "features": [
-    "Creates Cloud Router with specified name and network",
-    "Configures Cloud NAT with specified name and router",
-    "Supports automatic IP allocation for Cloud NAT"
+    "Creates Cloud Router as a regional routing control plane for dynamic routing and NAT services",
+    "Provisions Cloud NAT gateway with automatic external IP allocation for egress traffic",
+    "Configures NAT to cover all subnetworks and IP ranges within the specified VPC network",
+    "Outputs router and NAT gateway names for reference by dependent resources"
   ],
   "inputs": [
     {
@@ -117,6 +119,6 @@ resource "example_resource" "this" {
     "router_name",
     "nat_name"
   ],
-  "hash": "7d89a9d1483cd139ea9ac7ac1d2389f6"
+  "hash": "512f5d9fa3c38d66897af79e28151867"
 }
 END_AI_METADATA -->

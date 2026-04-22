@@ -2,25 +2,26 @@
 
 ## Description
 
-Configures Nullplatform provider with AWS account details, networking configuration, and Route53 hosted zone information
+Configures Nullplatform provider with AWS account, region, and networking settings including domain and hosted zone information
 
 ## Architecture
 
-The module creates a nullplatform_provider_config resource that stores AWS configuration as JSON-encoded attributes. It uses data.aws_caller_identity and data.aws_region to fetch current AWS account ID and region, then combines these with user-provided Route53 hosted zone IDs and domain names. The configuration flows into the nullplatform_provider_config resource which stores networking (domain name, hosted zone IDs, application domain flag) and account information (ID, region) as structured attributes.
+The module creates a nullplatform_provider_config resource that aggregates AWS account information from data.aws_caller_identity and data.aws_region data sources. It constructs a JSON configuration containing IAM, account, and networking attributes, combining the AWS metadata with user-provided domain and hosted zone IDs. The configuration supports custom dimensions and includes lifecycle management to ignore attribute changes after creation.
 
 ## Features
 
-- Creates Nullplatform provider configuration with AWS account integration
-- Configures networking settings with Route53 private and public hosted zone IDs
-- Automatically retrieves current AWS account ID and region using data sources
-- Supports custom domain configuration with optional application domain prefix
-- Manages provider configuration with lifecycle ignore_changes for attributes stability
+- Creates Nullplatform provider configuration resource with AWS integration
+- Retrieves current AWS account ID and region dynamically via data sources
+- Configures networking attributes with domain name and Route53 hosted zone IDs
+- Supports custom dimensions mapping for flexible provider configuration
+- Implements lifecycle ignore_changes for attributes to prevent drift detection
+- Enables application domain prefix based on account name configuration
 
 ## Basic Usage
 
 ```hcl
 module "cloud" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/cloud?ref=v1.52.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/cloud?ref=v1.54.0"
 
   domain_name            = "your-domain-name"
   hosted_private_zone_id = "your-hosted-private-zone-id"
@@ -75,14 +76,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "cloud",
-  "description": "Configures Nullplatform provider with AWS account details, networking configuration, and Route53 hosted zone information",
-  "architecture": "The module creates a nullplatform_provider_config resource that stores AWS configuration as JSON-encoded attributes. It uses data.aws_caller_identity and data.aws_region to fetch current AWS account ID and region, then combines these with user-provided Route53 hosted zone IDs and domain names. The configuration flows into the nullplatform_provider_config resource which stores networking (domain name, hosted zone IDs, application domain flag) and account information (ID, region) as structured attributes.",
+  "description": "Configures Nullplatform provider with AWS account, region, and networking settings including domain and hosted zone information",
+  "architecture": "The module creates a nullplatform_provider_config resource that aggregates AWS account information from data.aws_caller_identity and data.aws_region data sources. It constructs a JSON configuration containing IAM, account, and networking attributes, combining the AWS metadata with user-provided domain and hosted zone IDs. The configuration supports custom dimensions and includes lifecycle management to ignore attribute changes after creation.",
   "features": [
-    "Creates Nullplatform provider configuration with AWS account integration",
-    "Configures networking settings with Route53 private and public hosted zone IDs",
-    "Automatically retrieves current AWS account ID and region using data sources",
-    "Supports custom domain configuration with optional application domain prefix",
-    "Manages provider configuration with lifecycle ignore_changes for attributes stability"
+    "Creates Nullplatform provider configuration resource with AWS integration",
+    "Retrieves current AWS account ID and region dynamically via data sources",
+    "Configures networking attributes with domain name and Route53 hosted zone IDs",
+    "Supports custom dimensions mapping for flexible provider configuration",
+    "Implements lifecycle ignore_changes for attributes to prevent drift detection",
+    "Enables application domain prefix based on account name configuration"
   ],
   "inputs": [
     {
@@ -127,6 +129,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "62d0fe22f50b046efadd187404878c41"
+  "hash": "caad485091b4028f5be2077f631523db"
 }
 END_AI_METADATA -->

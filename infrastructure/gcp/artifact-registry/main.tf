@@ -3,8 +3,9 @@ resource "google_artifact_registry_repository" "registry" {
   location      = var.location
   repository_id = var.repository_id
   format        = var.format
-}
 
+  labels = var.tags
+}
 
 resource "google_service_account" "artifact_sa" {
   account_id   = "artifact-registry-sa"
@@ -18,7 +19,12 @@ resource "google_project_iam_member" "artifact_sa_role" {
   member  = "serviceAccount:${google_service_account.artifact_sa.email}"
 }
 
-resource "google_service_account_key" "artifact_sa_key" {
+resource "google_service_account_iam_member" "workload_identity" {
+  for_each = {
+    for wi in var.workload_identity_bindings : "${wi.namespace}-${wi.ksa_name}" => wi
+  }
+
   service_account_id = google_service_account.artifact_sa.name
-  public_key_type    = "TYPE_X509_PEM_FILE"
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[${each.value.namespace}/${each.value.ksa_name}]"
 }

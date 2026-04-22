@@ -45,3 +45,32 @@ run "zone_uses_provided_name" {
     error_message = "Zone name should match zone_name variable"
   }
 }
+
+run "zone_name_derived_from_domain_when_omitted" {
+  command = plan
+
+  variables {
+    zone_name = null
+  }
+
+  assert {
+    condition     = google_dns_managed_zone.zone.name == "myorg-example-com"
+    error_message = "Zone name should derive from domain_name by replacing dots with dashes when zone_name is null"
+  }
+}
+
+run "labels_applied_from_tags" {
+  command = plan
+
+  variables {
+    tags = {
+      env  = "test"
+      team = "platform"
+    }
+  }
+
+  assert {
+    condition     = google_dns_managed_zone.zone.labels["env"] == "test"
+    error_message = "Labels should be applied from tags variable"
+  }
+}

@@ -3,7 +3,7 @@ resource "nullplatform_provider_config" "gitlab" {
   count      = local.is_gitlab ? 1 : 0
   nrn        = try(regex("(.*):namespace.*", var.nrn)[0], var.nrn)
   type       = "gitlab-configuration"
-  dimensions = {}
+  dimensions = var.dimensions
   attributes = jsonencode({
     "setup" : {
       "group_path" : var.gitlab_group_path,
@@ -23,7 +23,7 @@ resource "nullplatform_provider_config" "github" {
   count      = local.is_github ? 1 : 0
   nrn        = replace(var.nrn, ":namespace=.*$", "")
   type       = "github-configuration"
-  dimensions = {}
+  dimensions = var.dimensions
   attributes = jsonencode({
     "setup" : {
       "organization" : var.github_organization,
@@ -41,7 +41,7 @@ resource "nullplatform_provider_config" "azure" {
   count      = local.is_azure ? 1 : 0
   nrn        = replace(var.nrn, ":namespace=.*$", "")
   type       = "azure-devops-configuration"
-  dimensions = {}
+  dimensions = var.dimensions
   attributes = jsonencode({
     "setup" : {
       "project" : var.azure_project,

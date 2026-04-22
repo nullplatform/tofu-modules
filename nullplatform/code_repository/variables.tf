@@ -132,3 +132,9 @@ variable "nrn" {
   description = "Nullplatform Resource Name (NRN) — unique identifier for resources."
   type        = string
 }
+
+variable "dimensions" {
+  description = "Dimensions to segment the nullplatform provider config (e.g. by region, environment)"
+  type        = map(string)
+  default     = {}
+}

@@ -21,7 +21,7 @@ The module instantiates the oracle-terraform-modules/oke/oci module to create an
 
 ```hcl
 module "oke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/oke?ref=v1.52.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/oke?ref=v1.54.0"
 
   api_endpoint_subnet_id = "your-api-endpoint-subnet-id"
   cluster_name           = "your-cluster-name"
@@ -54,7 +54,7 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_oci.home"></a> [oci.home](#provider\_oci.home) | >= 5.0.0 |
+| <a name="provider_oci.home"></a> [oci.home](#provider\_oci.home) | 7.29.0 |
 
 ## Modules
 

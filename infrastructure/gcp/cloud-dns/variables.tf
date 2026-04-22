@@ -3,14 +3,15 @@ variable "project_id" {
   description = "The GCP project ID"
 }
 
-variable "zone_name" {
-  type        = string
-  description = "The name of the DNS zone resource"
-}
-
 variable "domain_name" {
   type        = string
-  description = "The domain name (without trailing dot)"
+  description = "The domain name for the DNS zone (without trailing dot, e.g. example.com)"
+}
+
+variable "zone_name" {
+  type        = string
+  description = "The name of the DNS zone resource. Defaults to domain_name with dots replaced by dashes."
+  default     = null
 }
 
 variable "visibility" {
@@ -23,4 +24,10 @@ variable "private_zone_networks" {
   type        = list(string)
   description = "VPC network self-links for private zones"
   default     = []
+}
+
+variable "tags" {
+  type        = map(string)
+  description = "A mapping of labels to assign to the DNS managed zone"
+  default     = {}
 }

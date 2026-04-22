@@ -1,5 +1,46 @@
 # Changelog
 
+## [1.54.0](https://github.com/nullplatform/tofu-modules/compare/v1.53.1...v1.54.0) (2026-04-22)
+
+
+### Features
+
+* add ebs and storage class for eks ([#298](https://github.com/nullplatform/tofu-modules/issues/298)) ([8c00ba3](https://github.com/nullplatform/tofu-modules/commit/8c00ba3b67a6ca1960a70c04c9108c5df2edd3f3))
+
+
+### Bug Fixes
+
+* **ci:** skip branch validation and commitlint for release-please branches ([#300](https://github.com/nullplatform/tofu-modules/issues/300)) ([ce771a5](https://github.com/nullplatform/tofu-modules/commit/ce771a53de110a837d8c9fb47a671e172145a0cf))
+* **ci:** skip deleted modules in readme generation ([#301](https://github.com/nullplatform/tofu-modules/issues/301)) ([5f74c38](https://github.com/nullplatform/tofu-modules/commit/5f74c382add33acc33b5e8d143d837f1ebd1e902))
+
+## [1.53.1](https://github.com/nullplatform/tofu-modules/compare/v1.53.0...v1.53.1) (2026-04-21)
+
+
+### Bug Fixes
+
+* **infra:** security hardening, DNS test fixes, WI docs and AVP revert ([#295](https://github.com/nullplatform/tofu-modules/issues/295)) ([d5982fe](https://github.com/nullplatform/tofu-modules/commit/d5982fe6abe9cf687cb1abb0e778d9c53535ab8c))
+
+## [1.53.0](https://github.com/nullplatform/tofu-modules/compare/v1.52.4...v1.53.0) (2026-04-20)
+
+
+### Features
+
+* add scope_configuration module ([#271](https://github.com/nullplatform/tofu-modules/issues/271)) ([a49e943](https://github.com/nullplatform/tofu-modules/commit/a49e943f0159e5b0808cd616f892252f32402183))
+
+## [1.52.4](https://github.com/nullplatform/tofu-modules/compare/v1.52.3...v1.52.4) (2026-04-16)
+
+
+### Bug Fixes
+
+* **nullplatform:** add dimensions variable and eks balancer improvements ([#290](https://github.com/nullplatform/tofu-modules/issues/290)) ([e38d07e](https://github.com/nullplatform/tofu-modules/commit/e38d07ef2515867747518d43a86af1550e91d5e9))
+
+## [1.52.3](https://github.com/nullplatform/tofu-modules/compare/v1.52.2...v1.52.3) (2026-04-10)
+
+
+### Bug Fixes
+
+* remove provider ([#287](https://github.com/nullplatform/tofu-modules/issues/287)) ([6cd6ef0](https://github.com/nullplatform/tofu-modules/commit/6cd6ef0d5a60b6ec56d3561a51e803a37b4e8a1c))
+
 ## [1.52.2](https://github.com/nullplatform/tofu-modules/compare/v1.52.1...v1.52.2) (2026-04-09)
 
 

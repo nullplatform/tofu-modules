@@ -2,7 +2,7 @@ resource "nullplatform_provider_config" "aws" {
   provider   = nullplatform
   nrn        = var.nrn
   type       = "aws-configuration"
-  dimensions = {}
+  dimensions = var.dimensions
   attributes = jsonencode({
     iam = {
       #scope_workflow_role = aws_iam_role.nullplatform_scope_workflow_role.arn
@@ -22,4 +22,3 @@ resource "nullplatform_provider_config" "aws" {
     ignore_changes = [attributes]
   }
 }
-

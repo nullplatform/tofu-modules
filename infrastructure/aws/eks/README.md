@@ -2,27 +2,27 @@
 
 ## Description
 
-Creates an Amazon EKS cluster with support for both Auto Mode and Managed Node Groups, including IRSA, Pod Identity Agent, and configurable control plane logging
+Creates an AWS EKS cluster with configurable Auto Mode or Managed Node Groups, IRSA support, and integrated EBS CSI driver
 
 ## Architecture
 
-The module creates an EKS cluster using the terraform-aws-modules/eks/aws module, which provisions aws_eks_cluster, aws_iam_role resources for both the control plane and nodes, and aws_security_group resources for cluster networking. It installs core EKS addons (coredns, kube-proxy, vpc-cni, eks-pod-identity-agent) and configures an OIDC provider for IRSA. When Auto Mode is disabled, it creates aws_eks_node_group resources for managed node groups; when enabled, it configures EKS compute_config with specified node pools. Security group rules are conditionally added for NLB health checks on port 15021 and HTTPS traffic on port 443. CloudWatch log groups are optionally created for control plane logging with configurable retention periods.
+The module instantiates a terraform-aws-modules/eks/aws module to create an aws_eks_cluster resource with associated aws_iam_role and aws_security_group resources. It configures IRSA by enabling the OIDC provider, creates an aws_iam_role for the EBS CSI driver with pod identity agent support, and provisions either Auto Mode compute resources or aws_eks_node_group managed node groups based on the use_auto_mode flag. Security group rules are conditionally added to allow NLB health checks on port 15021 and HTTPS traffic on port 443 from the VPC CIDR and additional networks. Outputs expose the cluster endpoint, OIDC provider ARN, node IAM role details, and security group IDs for integration with other resources.
 
 ## Features
 
-- Creates EKS cluster with configurable Kubernetes version and authentication modes (CONFIG_MAP, API, API_AND_CONFIG_MAP)
-- Provisions IRSA with OIDC provider and Pod Identity Agent addon for workload IAM authentication
-- Configures Auto Mode with general-purpose and system node pools or traditional Managed Node Groups with customizable instance types and scaling
-- Deploys core EKS addons including CoreDNS, kube-proxy, and VPC CNI with before_compute lifecycle configuration
-- Creates security group rules for NLB health checks on Istio status port 15021 and HTTPS traffic
-- Configures control plane logging to CloudWatch with selectable log types (api, audit, authenticator, controllerManager, scheduler) and retention policies
-- Supports cluster access entries for IAM principal authorization with policy associations and namespace scoping
+- Creates EKS cluster with configurable Kubernetes version and authentication modes (CONFIG_MAP, API, or API_AND_CONFIG_MAP)
+- Provisions either Auto Mode compute with configurable node pools (general-purpose, system) or traditional Managed Node Groups with customizable instance types and scaling parameters
+- Configures IRSA with OIDC provider and creates IAM role for EBS CSI driver with pod identity agent support
+- Deploys EKS add-ons including aws-ebs-csi-driver, coredns, eks-pod-identity-agent, kube-proxy, and vpc-cni
+- Creates security group rules for NLB health checks on Istio status port (15021) and HTTPS ingress (443) from VPC and additional network CIDRs
+- Manages CloudWatch log groups for control plane logging with configurable retention and log types (api, audit, authenticator, controllerManager, scheduler)
+- Supports cluster access entries for IAM principal to Kubernetes RBAC mapping with policy associations
 
 ## Basic Usage
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/eks?ref=v1.52.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/eks?ref=v1.54.0"
 
   aws_subnets_private_ids = "your-aws-subnets-private-ids"
   aws_vpc_vpc_id          = "your-aws-vpc-vpc-id"
@@ -45,12 +45,14 @@ resource "example_resource" "this" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.0 |
+| <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | >= 2.16, < 3.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 6.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.41.0 |
+| <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | 2.38.0 |
 
 ## Modules
 
@@ -62,6 +64,10 @@ resource "example_resource" "this" {
 
 | Name | Type |
 |------|------|
+| [aws_iam_role.ebs_csi_driver](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy_attachment.ebs_csi_driver](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [kubernetes_annotations.gp2_not_default](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/annotations) | resource |
+| [kubernetes_storage_class_v1.gp3](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/storage_class_v1) | resource |
 
 ## Inputs
 
@@ -107,16 +113,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "eks",
-  "description": "Creates an Amazon EKS cluster with support for both Auto Mode and Managed Node Groups, including IRSA, Pod Identity Agent, and configurable control plane logging",
-  "architecture": "The module creates an EKS cluster using the terraform-aws-modules/eks/aws module, which provisions aws_eks_cluster, aws_iam_role resources for both the control plane and nodes, and aws_security_group resources for cluster networking. It installs core EKS addons (coredns, kube-proxy, vpc-cni, eks-pod-identity-agent) and configures an OIDC provider for IRSA. When Auto Mode is disabled, it creates aws_eks_node_group resources for managed node groups; when enabled, it configures EKS compute_config with specified node pools. Security group rules are conditionally added for NLB health checks on port 15021 and HTTPS traffic on port 443. CloudWatch log groups are optionally created for control plane logging with configurable retention periods.",
+  "description": "Creates an AWS EKS cluster with configurable Auto Mode or Managed Node Groups, IRSA support, and integrated EBS CSI driver",
+  "architecture": "The module instantiates a terraform-aws-modules/eks/aws module to create an aws_eks_cluster resource with associated aws_iam_role and aws_security_group resources. It configures IRSA by enabling the OIDC provider, creates an aws_iam_role for the EBS CSI driver with pod identity agent support, and provisions either Auto Mode compute resources or aws_eks_node_group managed node groups based on the use_auto_mode flag. Security group rules are conditionally added to allow NLB health checks on port 15021 and HTTPS traffic on port 443 from the VPC CIDR and additional networks. Outputs expose the cluster endpoint, OIDC provider ARN, node IAM role details, and security group IDs for integration with other resources.",
   "features": [
-    "Creates EKS cluster with configurable Kubernetes version and authentication modes (CONFIG_MAP, API, API_AND_CONFIG_MAP)",
-    "Provisions IRSA with OIDC provider and Pod Identity Agent addon for workload IAM authentication",
-    "Configures Auto Mode with general-purpose and system node pools or traditional Managed Node Groups with customizable instance types and scaling",
-    "Deploys core EKS addons including CoreDNS, kube-proxy, and VPC CNI with before_compute lifecycle configuration",
-    "Creates security group rules for NLB health checks on Istio status port 15021 and HTTPS traffic",
-    "Configures control plane logging to CloudWatch with selectable log types (api, audit, authenticator, controllerManager, scheduler) and retention policies",
-    "Supports cluster access entries for IAM principal authorization with policy associations and namespace scoping"
+    "Creates EKS cluster with configurable Kubernetes version and authentication modes (CONFIG_MAP, API, or API_AND_CONFIG_MAP)",
+    "Provisions either Auto Mode compute with configurable node pools (general-purpose, system) or traditional Managed Node Groups with customizable instance types and scaling parameters",
+    "Configures IRSA with OIDC provider and creates IAM role for EBS CSI driver with pod identity agent support",
+    "Deploys EKS add-ons including aws-ebs-csi-driver, coredns, eks-pod-identity-agent, kube-proxy, and vpc-cni",
+    "Creates security group rules for NLB health checks on Istio status port (15021) and HTTPS ingress (443) from VPC and additional network CIDRs",
+    "Manages CloudWatch log groups for control plane logging with configurable retention and log types (api, audit, authenticator, controllerManager, scheduler)",
+    "Supports cluster access entries for IAM principal to Kubernetes RBAC mapping with policy associations"
   ],
   "inputs": [
     {
@@ -240,6 +246,6 @@ resource "example_resource" "this" {
     "eks_cluster_security_group_id",
     "eks_cluster_primary_security_group_id"
   ],
-  "hash": "fa16f9da6d771577dd97087a4e186819"
+  "hash": "6378d3bdacb32294176705bfc2a50efa"
 }
 END_AI_METADATA -->
