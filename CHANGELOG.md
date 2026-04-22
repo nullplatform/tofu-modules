@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.54.0](https://github.com/nullplatform/tofu-modules/compare/v1.53.1...v1.54.0) (2026-04-22)
+
+
+### Features
+
+* add ebs and storage class for eks ([#298](https://github.com/nullplatform/tofu-modules/issues/298)) ([8c00ba3](https://github.com/nullplatform/tofu-modules/commit/8c00ba3b67a6ca1960a70c04c9108c5df2edd3f3))
+
+
+### Bug Fixes
+
+* **ci:** skip branch validation and commitlint for release-please branches ([#300](https://github.com/nullplatform/tofu-modules/issues/300)) ([ce771a5](https://github.com/nullplatform/tofu-modules/commit/ce771a53de110a837d8c9fb47a671e172145a0cf))
+* **ci:** skip deleted modules in readme generation ([#301](https://github.com/nullplatform/tofu-modules/issues/301)) ([5f74c38](https://github.com/nullplatform/tofu-modules/commit/5f74c382add33acc33b5e8d143d837f1ebd1e902))
+
 ## [1.53.1](https://github.com/nullplatform/tofu-modules/compare/v1.53.0...v1.53.1) (2026-04-21)
 
 
