@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.54.1](https://github.com/nullplatform/tofu-modules/compare/v1.54.0...v1.54.1) (2026-04-23)
+
+
+### Bug Fixes
+
+* **base:** remove dangerous helm release options ([#302](https://github.com/nullplatform/tofu-modules/issues/302)) ([66cdd18](https://github.com/nullplatform/tofu-modules/commit/66cdd180c6f253990891c82aa2c675b2846072a0))
+
 ## [1.54.0](https://github.com/nullplatform/tofu-modules/compare/v1.53.1...v1.54.0) (2026-04-22)
 
 
