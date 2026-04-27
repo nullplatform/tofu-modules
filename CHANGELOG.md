@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.55.0](https://github.com/nullplatform/tofu-modules/compare/v1.54.1...v1.55.0) (2026-04-27)
+
+
+### Features
+
+* **nullplatform/scope_definition:** add extra_visible_to_nrns for org-wide sharing ([#304](https://github.com/nullplatform/tofu-modules/issues/304)) ([b52d0f0](https://github.com/nullplatform/tofu-modules/commit/b52d0f0139f8877262ea4fee3475239a93dd1bc3))
+
+
+### Bug Fixes
+
+* **nullplatform/scope_definition:** ignore_changes on scope_type provider_type and status ([#305](https://github.com/nullplatform/tofu-modules/issues/305)) ([895ced0](https://github.com/nullplatform/tofu-modules/commit/895ced0eb58fa7972cbc942e236f4e601d7d69fc))
+
 ## [1.54.1](https://github.com/nullplatform/tofu-modules/compare/v1.54.0...v1.54.1) (2026-04-23)
 
 

@@ -20,7 +20,7 @@ This module provisions a nullplatform_dimension resource representing an environ
 
 ```hcl
 module "dimensions" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimensions?ref=v1.54.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimensions?ref=v1.55.0"
 
   nrn = "your-nrn"
 }
