@@ -2,27 +2,27 @@
 
 ## Description
 
-Creates and configures nullplatform service specifications, scope types, and action specifications from remote template files with gomplate-based rendering
+Provisions a Nullplatform service specification, scope type, action specifications, and optional provider configuration by rendering and applying external JSON templates with gomplate
 
 ## Architecture
 
-The module fetches JSON templates via data.http from a remote repository, processes them using external data sources with gomplate and jq for variable substitution, then creates nullplatform_service_specification resources with associated selectors and attributes. It creates nullplatform_scope_type resources linked to the service specification via provider_id, and generates multiple nullplatform_action_specification resources for each action defined in action_spec_names. A null_resource with local-exec provisioner patches the NRN configuration using the nullplatform CLI to set metrics and logging providers. Optionally creates nullplatform_provider_specification resources from scope configuration templates when create_scope_configuration is true.
+The module fetches JSON templates from GitHub via data.http, processes them using data.external with gomplate shell commands, then creates nullplatform_service_specification, nullplatform_scope_type, and multiple nullplatform_action_specification resources. Template processing flows through locals that parse external data blocks and inject environment variables (NRN, service IDs, paths) into subsequent template renderings. A null_resource provisioner patches the NRN configuration using the np CLI, and optionally creates a nullplatform_provider_specification resource when create_scope_configuration is enabled. Outputs expose resource IDs and slugs for downstream module consumption.
 
 ## Features
 
-- Fetches and processes service specification templates from remote GitHub repositories using gomplate
-- Creates nullplatform service specifications with selectors for category, provider, and sub-category
-- Generates scope types linked to service specifications with provider type definitions
-- Creates multiple action specifications for scope lifecycle operations including deployment and scaling actions
-- Patches NRN configuration with external metrics and logging provider settings via nullplatform CLI
-- Supports optional provider specification creation from scope configuration templates
-- Processes templates with dynamic variable substitution using NRN, service IDs, and path context
+- Fetches and renders service specification, scope type, and action templates from GitHub using gomplate with environment variable substitution
+- Creates a nullplatform service specification with configurable visibility, assignability, selectors, and attributes from rendered templates
+- Generates a nullplatform scope type linked to the service specification with provider type definition
+- Provisions multiple action specifications for scope lifecycle operations including create, delete, deploy, scale, and diagnostics actions
+- Patches NRN configuration with external metrics and logging provider settings via np CLI local-exec provisioner
+- Conditionally creates provider specification from scope-configuration template when enabled
+- Supports cross-account visibility by appending extra NRNs to visible_to lists for service and provider specifications
 
 ## Basic Usage
 
 ```hcl
 module "scope_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v1.54.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v1.55.0"
 
   np_api_key = "your-np-api-key"
   nrn        = "your-nrn"
@@ -74,6 +74,7 @@ resource "example_resource" "this" {
 | <a name="input_create_scope_configuration"></a> [create\_scope\_configuration](#input\_create\_scope\_configuration) | Whether to fetch and apply scope-configuration.json.tpl from the template repo. Set to true only if the file exists for this scope. | `bool` | `false` | no |
 | <a name="input_external_logging_provider"></a> [external\_logging\_provider](#input\_external\_logging\_provider) | Name of the external log provider | `string` | `"external"` | no |
 | <a name="input_external_metrics_provider"></a> [external\_metrics\_provider](#input\_external\_metrics\_provider) | Name of the external metrics provider for monitoring integration | `string` | `"externalmetrics"` | no |
+| <a name="input_extra_visible_to_nrns"></a> [extra\_visible\_to\_nrns](#input\_extra\_visible\_to\_nrns) | Additional NRNs to add to `visible_to` of the `nullplatform_service_specification`<br/>and `nullplatform_provider_specification` created by this module. The base<br/>visible\_to (the spec template's value for the service\_spec, and `[var.nrn]`<br/>for the provider\_spec) is preserved; this list is appended.<br/><br/>Use case: share a scope\_definition with sibling accounts in the same<br/>organization without duplicating it per account. Example:<br/><br/>  extra\_visible\_to\_nrns = ["organization=1636958496"]<br/><br/>makes the spec consumable by every account under that organization.<br/>Default = [] (no extra visibility, backwards compatible). | `list(string)` | `[]` | no |
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key used for executing local commands (e.g., 'np nrn patch') | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Unique NRN identifier of the environment or resource in nullplatform | `string` | n/a | yes |
 | <a name="input_repo_path"></a> [repo\_path](#input\_repo\_path) | Base path to the repository used as context for gomplate template rendering | `string` | `"/root/.np/nullplatform/scopes"` | no |
@@ -103,16 +104,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "scope_definition",
-  "description": "Creates and configures nullplatform service specifications, scope types, and action specifications from remote template files with gomplate-based rendering",
-  "architecture": "The module fetches JSON templates via data.http from a remote repository, processes them using external data sources with gomplate and jq for variable substitution, then creates nullplatform_service_specification resources with associated selectors and attributes. It creates nullplatform_scope_type resources linked to the service specification via provider_id, and generates multiple nullplatform_action_specification resources for each action defined in action_spec_names. A null_resource with local-exec provisioner patches the NRN configuration using the nullplatform CLI to set metrics and logging providers. Optionally creates nullplatform_provider_specification resources from scope configuration templates when create_scope_configuration is true.",
+  "description": "Provisions a Nullplatform service specification, scope type, action specifications, and optional provider configuration by rendering and applying external JSON templates with gomplate",
+  "architecture": "The module fetches JSON templates from GitHub via data.http, processes them using data.external with gomplate shell commands, then creates nullplatform_service_specification, nullplatform_scope_type, and multiple nullplatform_action_specification resources. Template processing flows through locals that parse external data blocks and inject environment variables (NRN, service IDs, paths) into subsequent template renderings. A null_resource provisioner patches the NRN configuration using the np CLI, and optionally creates a nullplatform_provider_specification resource when create_scope_configuration is enabled. Outputs expose resource IDs and slugs for downstream module consumption.",
   "features": [
-    "Fetches and processes service specification templates from remote GitHub repositories using gomplate",
-    "Creates nullplatform service specifications with selectors for category, provider, and sub-category",
-    "Generates scope types linked to service specifications with provider type definitions",
-    "Creates multiple action specifications for scope lifecycle operations including deployment and scaling actions",
-    "Patches NRN configuration with external metrics and logging provider settings via nullplatform CLI",
-    "Supports optional provider specification creation from scope configuration templates",
-    "Processes templates with dynamic variable substitution using NRN, service IDs, and path context"
+    "Fetches and renders service specification, scope type, and action templates from GitHub using gomplate with environment variable substitution",
+    "Creates a nullplatform service specification with configurable visibility, assignability, selectors, and attributes from rendered templates",
+    "Generates a nullplatform scope type linked to the service specification with provider type definition",
+    "Provisions multiple action specifications for scope lifecycle operations including create, delete, deploy, scale, and diagnostics actions",
+    "Patches NRN configuration with external metrics and logging provider settings via np CLI local-exec provisioner",
+    "Conditionally creates provider specification from scope-configuration template when enabled",
+    "Supports cross-account visibility by appending extra NRNs to visible_to lists for service and provider specifications"
   ],
   "inputs": [
     {
@@ -194,6 +195,11 @@ resource "example_resource" "this" {
       "name": "create_scope_configuration",
       "description": "Whether to fetch and apply scope-configuration.json.tpl from the template repo. Set to true only if the file exists for this scope.",
       "required": false
+    },
+    {
+      "name": "extra_visible_to_nrns",
+      "description": "",
+      "required": false
     }
   ],
   "outputs": [
@@ -205,6 +211,6 @@ resource "example_resource" "this" {
     "provider_specification_id",
     "provider_specification_slug"
   ],
-  "hash": "38143399d1ff91a802e0a4a9b39a99e7"
+  "hash": "6ebd76d001c47acdae5ada46dcaeda00"
 }
 END_AI_METADATA -->
