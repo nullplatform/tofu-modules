@@ -43,6 +43,18 @@ resource "nullplatform_scope_type" "from_template" {
   description   = var.service_spec_description
   provider_id   = local.service_specification_id
   provider_type = local.scope_type_def.provider_type
+
+  # `provider_type` is read from a `data.external` (gomplate-rendered template)
+  # which Terraform plans as `(known after apply)`. Combined with the provider
+  # marking `provider_type` as ForceNew, every plan triggers a phantom replace
+  # even when the upstream template value is unchanged. `status` is server-
+  # managed (not user-set). Ignoring both is safe — neither field can be
+  # mutated after create in any meaningful way — and prevents the false
+  # `must be replaced` diff that would otherwise destroy and re-create the
+  # scope_type on every apply.
+  lifecycle {
+    ignore_changes = [provider_type, status]
+  }
 }
 
 ################################################################################
