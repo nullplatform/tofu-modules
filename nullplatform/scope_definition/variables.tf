@@ -131,3 +131,26 @@ variable "create_scope_configuration" {
   default     = false
   description = "Whether to fetch and apply scope-configuration.json.tpl from the template repo. Set to true only if the file exists for this scope."
 }
+
+################################################################################
+# Visibility (cross-account sharing)
+################################################################################
+
+variable "extra_visible_to_nrns" {
+  description = <<-EOT
+    Additional NRNs to add to `visible_to` of the `nullplatform_service_specification`
+    and `nullplatform_provider_specification` created by this module. The base
+    visible_to (the spec template's value for the service_spec, and `[var.nrn]`
+    for the provider_spec) is preserved; this list is appended.
+
+    Use case: share a scope_definition with sibling accounts in the same
+    organization without duplicating it per account. Example:
+
+      extra_visible_to_nrns = ["organization=1636958496"]
+
+    makes the spec consumable by every account under that organization.
+    Default = [] (no extra visibility, backwards compatible).
+  EOT
+  type        = list(string)
+  default     = []
+}

@@ -8,7 +8,7 @@ resource "nullplatform_service_specification" "from_template" {
   ]
   name                = var.service_spec_name
   description         = var.service_spec_description
-  visible_to          = local.service_spec_parsed.visible_to
+  visible_to          = concat(local.service_spec_parsed.visible_to, var.extra_visible_to_nrns)
   assignable_to       = local.service_spec_parsed.assignable_to
   type                = local.service_spec_parsed.type
   attributes          = jsonencode(local.service_spec_parsed.attributes)
@@ -21,8 +21,11 @@ resource "nullplatform_service_specification" "from_template" {
     sub_category = local.service_spec_parsed.selectors.sub_category
   }
 
+  # `visible_to` deliberately NOT in ignore_changes so updates from
+  # `var.extra_visible_to_nrns` flow via `tofu apply`. The other ignored
+  # attributes (name, attributes, type) are server-enriched after create.
   lifecycle {
-    ignore_changes = [name, attributes, type, visible_to]
+    ignore_changes = [name, attributes, type]
   }
 }
 
@@ -106,6 +109,6 @@ resource "nullplatform_provider_specification" "from_scope_configuration" {
   description      = local.scope_configuration.description
   category         = local.scope_configuration.category
   allow_dimensions = local.scope_configuration.allow_dimensions
-  visible_to       = [var.nrn]
+  visible_to       = concat([var.nrn], var.extra_visible_to_nrns)
   schema           = jsonencode(local.scope_configuration.schema)
 }
