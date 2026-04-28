@@ -13,9 +13,3 @@ variable "cluster_name" {
   description = "Name of the cluster where the policy runs"
   type        = string
 }
-
-variable "dimensions" {
-  description = "Dimensions to segment the nullplatform provider config (e.g. by region, environment)"
-  type        = map(string)
-  default     = {}
-}
