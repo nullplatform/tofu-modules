@@ -9,7 +9,7 @@
 ###############################################################################
 
 resource "aws_vpc_security_group_ingress_rule" "cluster_from_public_gateway_traffic" {
-  count = var.public_gateway_security_group_id != "" ? 1 : 0
+  count = var.gateways_enabled ? 1 : 0
 
   security_group_id            = var.cluster_security_group_id
   description                  = "Traffic from public ALB to Istio gateway"
@@ -24,7 +24,7 @@ resource "aws_vpc_security_group_ingress_rule" "cluster_from_public_gateway_traf
 }
 
 resource "aws_vpc_security_group_ingress_rule" "cluster_from_public_gateway_health" {
-  count = var.public_gateway_security_group_id != "" ? 1 : 0
+  count = var.gateways_enabled ? 1 : 0
 
   security_group_id            = var.cluster_security_group_id
   description                  = "Health check from public ALB to Istio gateway"
@@ -39,7 +39,7 @@ resource "aws_vpc_security_group_ingress_rule" "cluster_from_public_gateway_heal
 }
 
 resource "aws_vpc_security_group_ingress_rule" "cluster_from_private_gateway_traffic" {
-  count = var.private_gateway_security_group_id != "" ? 1 : 0
+  count = var.gateway_internal_enabled ? 1 : 0
 
   security_group_id            = var.cluster_security_group_id
   description                  = "Traffic from private ALB to Istio gateway"
@@ -54,7 +54,7 @@ resource "aws_vpc_security_group_ingress_rule" "cluster_from_private_gateway_tra
 }
 
 resource "aws_vpc_security_group_ingress_rule" "cluster_from_private_gateway_health" {
-  count = var.private_gateway_security_group_id != "" ? 1 : 0
+  count = var.gateway_internal_enabled ? 1 : 0
 
   security_group_id            = var.cluster_security_group_id
   description                  = "Health check from private ALB to Istio gateway"

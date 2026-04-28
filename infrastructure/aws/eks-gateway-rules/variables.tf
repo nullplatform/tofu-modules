@@ -11,14 +11,26 @@ variable "cluster_security_group_id" {
 
 variable "public_gateway_security_group_id" {
   type        = string
-  description = "Security group ID of the public Istio gateway (from the security module). Leave empty to skip public gateway rules."
+  description = "Security group ID of the public Istio gateway (from the security module)."
   default     = ""
 }
 
 variable "private_gateway_security_group_id" {
   type        = string
-  description = "Security group ID of the private Istio gateway (from the security module). Leave empty to skip private gateway rules."
+  description = "Security group ID of the private Istio gateway (from the security module)."
   default     = ""
+}
+
+variable "gateways_enabled" {
+  type        = bool
+  description = "Whether to create ingress rules for the public gateway."
+  default     = true
+}
+
+variable "gateway_internal_enabled" {
+  type        = bool
+  description = "Whether to create ingress rules for the private gateway."
+  default     = false
 }
 
 variable "gateway_port" {
