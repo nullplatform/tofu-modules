@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.56.0](https://github.com/nullplatform/tofu-modules/compare/v1.55.0...v1.56.0) (2026-04-28)
+
+
+### Features
+
+* **nullplatform/asset/ecr:** add ecr:SetRepositoryPolicy to manager policy ([#307](https://github.com/nullplatform/tofu-modules/issues/307)) ([a0520b5](https://github.com/nullplatform/tofu-modules/commit/a0520b574b7fede83ea4bc98f067fa3db32b17d9))
+
+
+### Bug Fixes
+
+* **nullplatform/asset/ecr:** remove unsupported dimensions variable ([#308](https://github.com/nullplatform/tofu-modules/issues/308)) ([6caa947](https://github.com/nullplatform/tofu-modules/commit/6caa947128a691aeb2d3ebb5e41467ec8322b13e))
+
 ## [1.55.0](https://github.com/nullplatform/tofu-modules/compare/v1.54.1...v1.55.0) (2026-04-27)
 
 
