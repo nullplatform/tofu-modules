@@ -44,7 +44,8 @@ resource "aws_iam_policy" "nullplatform_ecr_manager_policy" {
           "ecr:CreateRepository",
           "ecr:DeleteRepository",
           "ecr:DescribeRepositories",
-          "ecr:TagResource"
+          "ecr:TagResource",
+          "ecr:SetRepositoryPolicy"
         ],
         Resource = [
           "arn:aws:ecr:*:*:repository/*"
