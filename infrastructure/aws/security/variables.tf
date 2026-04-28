@@ -1,6 +1,6 @@
-variable "cluster_name" {
+variable "name" {
   type        = string
-  description = "The EKS cluster name, used for naming security resources and deriving VPC."
+  description = "Name prefix for security group resources and tags. When vpc_id is not provided, also used as the EKS cluster name to derive VPC and CIDR."
 }
 
 variable "gateways_enabled" {

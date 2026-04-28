@@ -19,7 +19,7 @@ resource "aws_vpc_security_group_ingress_rule" "cluster_from_public_gateway_traf
   referenced_security_group_id = var.public_gateway_security_group_id
 
   tags = {
-    Name = "${var.cluster_name}-cluster-from-public-alb-traffic"
+    Name = "${var.name}-cluster-from-public-alb-traffic"
   }
 }
 
@@ -34,7 +34,7 @@ resource "aws_vpc_security_group_ingress_rule" "cluster_from_public_gateway_heal
   referenced_security_group_id = var.public_gateway_security_group_id
 
   tags = {
-    Name = "${var.cluster_name}-cluster-from-public-alb-health"
+    Name = "${var.name}-cluster-from-public-alb-health"
   }
 }
 
@@ -49,7 +49,7 @@ resource "aws_vpc_security_group_ingress_rule" "cluster_from_private_gateway_tra
   referenced_security_group_id = var.private_gateway_security_group_id
 
   tags = {
-    Name = "${var.cluster_name}-cluster-from-private-alb-traffic"
+    Name = "${var.name}-cluster-from-private-alb-traffic"
   }
 }
 
@@ -64,6 +64,6 @@ resource "aws_vpc_security_group_ingress_rule" "cluster_from_private_gateway_hea
   referenced_security_group_id = var.private_gateway_security_group_id
 
   tags = {
-    Name = "${var.cluster_name}-cluster-from-private-alb-health"
+    Name = "${var.name}-cluster-from-private-alb-health"
   }
 }

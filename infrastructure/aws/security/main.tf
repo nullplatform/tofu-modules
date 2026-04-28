@@ -5,18 +5,18 @@
 ###############################################################################
 
 ###############################################################################
-# DATA SOURCES - Derive VPC and CIDR from cluster name
+# DATA SOURCES - Derive VPC and CIDR from EKS cluster (only when vpc_id is not provided)
 ###############################################################################
 
 # Get EKS cluster info to derive VPC ID — only when vpc_id is not provided directly
 data "aws_eks_cluster" "this" {
-  count = var.cluster_name != "" && var.vpc_id == "" ? 1 : 0
-  name  = var.cluster_name
+  count = var.name != "" && var.vpc_id == "" ? 1 : 0
+  name  = var.name
 }
 
 # Get VPC info to derive CIDR block — only when vpc_id is not provided directly
 data "aws_vpc" "this" {
-  count = var.cluster_name != "" && var.vpc_id == "" ? 1 : 0
+  count = var.name != "" && var.vpc_id == "" ? 1 : 0
   id    = data.aws_eks_cluster.this[0].vpc_config[0].vpc_id
 }
 
@@ -40,12 +40,12 @@ locals {
 resource "aws_security_group" "public_gateway" {
   count = var.gateways_enabled ? 1 : 0
 
-  name        = "${var.cluster_name}-istio-public-gateway"
+  name        = "${var.name}-istio-public-gateway"
   description = "Security group for Istio public gateway - HTTPS open, health check restricted to VPC"
   vpc_id      = local.effective_vpc_id
 
   tags = {
-    Name      = "${var.cluster_name}-istio-public-gateway"
+    Name      = "${var.name}-istio-public-gateway"
     ManagedBy = "terraform"
   }
 }
@@ -61,7 +61,7 @@ resource "aws_vpc_security_group_ingress_rule" "public_gateway_https" {
   cidr_ipv4         = "0.0.0.0/0"
 
   tags = {
-    Name = "${var.cluster_name}-istio-public-https"
+    Name = "${var.name}-istio-public-https"
   }
 }
 
@@ -76,7 +76,7 @@ resource "aws_vpc_security_group_ingress_rule" "public_gateway_health_check" {
   cidr_ipv4         = local.effective_network_cidr
 
   tags = {
-    Name = "${var.cluster_name}-istio-public-health-check"
+    Name = "${var.name}-istio-public-health-check"
   }
 }
 
@@ -91,7 +91,7 @@ resource "aws_vpc_security_group_ingress_rule" "public_gateway_health_check_addi
   cidr_ipv4         = each.value
 
   tags = {
-    Name = "${var.cluster_name}-istio-public-health-check-additional"
+    Name = "${var.name}-istio-public-health-check-additional"
   }
 }
 
@@ -104,7 +104,7 @@ resource "aws_vpc_security_group_egress_rule" "public_gateway_all" {
   cidr_ipv4         = "0.0.0.0/0"
 
   tags = {
-    Name = "${var.cluster_name}-istio-public-egress"
+    Name = "${var.name}-istio-public-egress"
   }
 }
 
@@ -118,12 +118,12 @@ resource "aws_vpc_security_group_egress_rule" "public_gateway_all" {
 resource "aws_security_group" "private_gateway" {
   count = var.gateway_internal_enabled ? 1 : 0
 
-  name        = "${var.cluster_name}-istio-private-gateway"
+  name        = "${var.name}-istio-private-gateway"
   description = "Security group for Istio private gateway - All traffic restricted to VPC"
   vpc_id      = local.effective_vpc_id
 
   tags = {
-    Name      = "${var.cluster_name}-istio-private-gateway"
+    Name      = "${var.name}-istio-private-gateway"
     ManagedBy = "terraform"
   }
 }
@@ -139,7 +139,7 @@ resource "aws_vpc_security_group_ingress_rule" "private_gateway_https" {
   cidr_ipv4         = local.effective_network_cidr
 
   tags = {
-    Name = "${var.cluster_name}-istio-private-https"
+    Name = "${var.name}-istio-private-https"
   }
 }
 
@@ -154,7 +154,7 @@ resource "aws_vpc_security_group_ingress_rule" "private_gateway_health_check" {
   cidr_ipv4         = local.effective_network_cidr
 
   tags = {
-    Name = "${var.cluster_name}-istio-private-health-check"
+    Name = "${var.name}-istio-private-health-check"
   }
 }
 
@@ -169,7 +169,7 @@ resource "aws_vpc_security_group_ingress_rule" "private_gateway_https_additional
   cidr_ipv4         = each.value
 
   tags = {
-    Name = "${var.cluster_name}-istio-private-https-additional"
+    Name = "${var.name}-istio-private-https-additional"
   }
 }
 
@@ -184,7 +184,7 @@ resource "aws_vpc_security_group_ingress_rule" "private_gateway_health_check_add
   cidr_ipv4         = each.value
 
   tags = {
-    Name = "${var.cluster_name}-istio-private-health-check-additional"
+    Name = "${var.name}-istio-private-health-check-additional"
   }
 }
 
@@ -197,6 +197,6 @@ resource "aws_vpc_security_group_egress_rule" "private_gateway_all" {
   cidr_ipv4         = "0.0.0.0/0"
 
   tags = {
-    Name = "${var.cluster_name}-istio-private-egress"
+    Name = "${var.name}-istio-private-egress"
   }
 }

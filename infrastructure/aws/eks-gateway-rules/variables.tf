@@ -1,6 +1,6 @@
-variable "cluster_name" {
+variable "name" {
   type        = string
-  description = "EKS cluster name, used for resource naming tags."
+  description = "Name prefix for resource tags."
   default     = ""
 }
 
