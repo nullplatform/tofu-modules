@@ -69,6 +69,12 @@ variable "auto_mode_node_pools" {
   }
 }
 
+variable "enable_cluster_creator_admin_permissions" {
+  description = "Grant the caller identity cluster-admin permissions via an EKS access entry. Set to false when using EKS Auto Mode, which creates this entry automatically and would cause a 409 conflict."
+  type        = bool
+  default     = false
+}
+
 
 variable "attach_cluster_primary_security_group" {
   description = "Attach cluster primary security group to node groups"
