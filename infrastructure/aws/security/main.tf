@@ -8,39 +8,26 @@
 # DATA SOURCES - Derive VPC and CIDR from cluster name
 ###############################################################################
 
-# Get EKS cluster info to derive VPC ID
+# Get EKS cluster info to derive VPC ID — only when vpc_id is not provided directly
 data "aws_eks_cluster" "this" {
-  count = var.cluster_name != "" ? 1 : 0
+  count = var.cluster_name != "" && var.vpc_id == "" ? 1 : 0
   name  = var.cluster_name
-
-  lifecycle {
-    precondition {
-      condition     = var.cluster_name != ""
-      error_message = "cluster_name is required."
-    }
-  }
 }
 
-# Get VPC info to derive CIDR block
+# Get VPC info to derive CIDR block — only when vpc_id is not provided directly
 data "aws_vpc" "this" {
-  count = var.cluster_name != "" ? 1 : 0
+  count = var.cluster_name != "" && var.vpc_id == "" ? 1 : 0
   id    = data.aws_eks_cluster.this[0].vpc_config[0].vpc_id
 }
 
 locals {
-  need_data = var.gateways_enabled || var.gateway_internal_enabled
-
-  # Derived values from data sources
-  aws_vpc_id   = var.cluster_name != "" ? data.aws_vpc.this[0].id : ""
-  aws_vpc_cidr = var.cluster_name != "" ? data.aws_vpc.this[0].cidr_block : ""
-
-  # Derive cluster primary SG from data source
-  aws_cluster_security_group_id = var.cluster_name != "" ? data.aws_eks_cluster.this[0].vpc_config[0].cluster_security_group_id : ""
+  # Derived values from data sources (only used when vpc_id / network_cidr are not directly provided)
+  aws_vpc_id   = length(data.aws_vpc.this) > 0 ? data.aws_vpc.this[0].id : ""
+  aws_vpc_cidr = length(data.aws_vpc.this) > 0 ? data.aws_vpc.this[0].cidr_block : ""
 
   # Use override if provided, otherwise use derived value
-  effective_vpc_id                  = var.vpc_id != "" ? var.vpc_id : local.aws_vpc_id
-  effective_network_cidr            = var.network_cidr != "" ? var.network_cidr : local.aws_vpc_cidr
-  effective_cluster_security_group_id = var.cluster_security_group_id != "" ? var.cluster_security_group_id : local.aws_cluster_security_group_id
+  effective_vpc_id       = var.vpc_id != "" ? var.vpc_id : local.aws_vpc_id
+  effective_network_cidr = var.network_cidr != "" ? var.network_cidr : local.aws_vpc_cidr
 }
 
 ###############################################################################
@@ -198,74 +185,6 @@ resource "aws_vpc_security_group_ingress_rule" "private_gateway_health_check_add
 
   tags = {
     Name = "${var.cluster_name}-istio-private-health-check-additional"
-  }
-}
-
-###############################################################################
-# CLUSTER SG RULES
-# When cluster_security_group_id is provided, allow traffic from the gateway
-# SGs to the cluster SG on the gateway port and health check port.
-# This is required for ALB setups where the ALB uses the gateway SGs and
-# needs to reach pods running in the cluster.
-###############################################################################
-
-resource "aws_vpc_security_group_ingress_rule" "cluster_from_public_gateway_traffic" {
-  count = var.gateways_enabled && local.effective_cluster_security_group_id != "" ? 1 : 0
-
-  security_group_id            = local.effective_cluster_security_group_id
-  description                  = "Traffic from public ALB to Istio gateway"
-  from_port                    = var.gateway_port
-  to_port                      = var.gateway_port
-  ip_protocol                  = "tcp"
-  referenced_security_group_id = aws_security_group.public_gateway[0].id
-
-  tags = {
-    Name = "${var.cluster_name}-cluster-from-public-alb-traffic"
-  }
-}
-
-resource "aws_vpc_security_group_ingress_rule" "cluster_from_public_gateway_health" {
-  count = var.gateways_enabled && local.effective_cluster_security_group_id != "" ? 1 : 0
-
-  security_group_id            = local.effective_cluster_security_group_id
-  description                  = "Health check from public ALB to Istio gateway"
-  from_port                    = 15021
-  to_port                      = 15021
-  ip_protocol                  = "tcp"
-  referenced_security_group_id = aws_security_group.public_gateway[0].id
-
-  tags = {
-    Name = "${var.cluster_name}-cluster-from-public-alb-health"
-  }
-}
-
-resource "aws_vpc_security_group_ingress_rule" "cluster_from_private_gateway_traffic" {
-  count = var.gateway_internal_enabled && local.effective_cluster_security_group_id != "" ? 1 : 0
-
-  security_group_id            = local.effective_cluster_security_group_id
-  description                  = "Traffic from private ALB to Istio gateway"
-  from_port                    = var.gateway_port
-  to_port                      = var.gateway_port
-  ip_protocol                  = "tcp"
-  referenced_security_group_id = aws_security_group.private_gateway[0].id
-
-  tags = {
-    Name = "${var.cluster_name}-cluster-from-private-alb-traffic"
-  }
-}
-
-resource "aws_vpc_security_group_ingress_rule" "cluster_from_private_gateway_health" {
-  count = var.gateway_internal_enabled && local.effective_cluster_security_group_id != "" ? 1 : 0
-
-  security_group_id            = local.effective_cluster_security_group_id
-  description                  = "Health check from private ALB to Istio gateway"
-  from_port                    = 15021
-  to_port                      = 15021
-  ip_protocol                  = "tcp"
-  referenced_security_group_id = aws_security_group.private_gateway[0].id
-
-  tags = {
-    Name = "${var.cluster_name}-cluster-from-private-alb-health"
   }
 }
 

@@ -39,14 +39,3 @@ variable "health_check_rules_enabled" {
   default     = true
 }
 
-variable "cluster_security_group_id" {
-  type        = string
-  description = "The EKS cluster primary security group ID. When set, ingress rules are created on this SG to allow traffic from the gateway SGs on the gateway and health check ports. Required for ALB setups where the ALB needs to reach pods."
-  default     = ""
-}
-
-variable "gateway_port" {
-  type        = number
-  description = "The port used by Istio gateway pods for traffic. Used for cluster SG ingress rules when cluster_security_group_id is set."
-  default     = 443
-}
