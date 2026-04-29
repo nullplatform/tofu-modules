@@ -48,6 +48,10 @@ resource "aws_security_group" "public_gateway" {
     Name      = "${var.name}-istio-public-gateway"
     ManagedBy = "terraform"
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_vpc_security_group_ingress_rule" "public_gateway_https" {
@@ -125,6 +129,10 @@ resource "aws_security_group" "private_gateway" {
   tags = {
     Name      = "${var.name}-istio-private-gateway"
     ManagedBy = "terraform"
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
