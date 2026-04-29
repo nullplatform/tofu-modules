@@ -1,4 +1,6 @@
 locals {
+  annotation_filter_arg = var.annotation_filter != "" ? ["--annotation-filter=${var.annotation_filter}"] : []
+
   base_config = {
     sources       = var.sources
     domainFilters = [var.domain_filters]
@@ -19,6 +21,7 @@ locals {
         }
       }
     }]
+    extraArgs = local.annotation_filter_arg
   }
 
   route53_config = {
@@ -48,10 +51,13 @@ locals {
         }
       ]
     }
-    extraArgs = compact([
-      "--aws-zone-type=${var.zone_type}",
-      "--zone-id-filter=${var.zone_id_filter}"
-    ])
+    extraArgs = concat(
+      compact([
+        "--aws-zone-type=${var.zone_type}",
+        "--zone-id-filter=${var.zone_id_filter}",
+      ]),
+      local.annotation_filter_arg
+    )
   }
 
   oci_config = {
@@ -66,11 +72,14 @@ locals {
         value = "info"
       }
     ]
-    extraArgs = [
-      "--oci-compartment-ocid=${var.oci_compartment_ocid}",
-      "--oci-zone-scope=${var.oci_zone_scope}",
-      "--oci-zones-cache-duration=${var.oci_zones_cache_duration}"
-    ]
+    extraArgs = concat(
+      [
+        "--oci-compartment-ocid=${var.oci_compartment_ocid}",
+        "--oci-zone-scope=${var.oci_zone_scope}",
+        "--oci-zones-cache-duration=${var.oci_zones_cache_duration}",
+      ],
+      local.annotation_filter_arg
+    )
     extraVolumes = [
       {
         name = "oci-config"
@@ -90,6 +99,7 @@ locals {
 
   azure_config = {
     provider = { name = "azure" }
+    extraArgs = local.annotation_filter_arg
     serviceAccount = {
       create = true
       annotations = {

@@ -57,6 +57,12 @@ variable "type" {
   }
 }
 
+variable "annotation_filter" {
+  description = "When set, restricts ExternalDNS to only process resources with this annotation key=value (e.g. 'external-dns.alpha.kubernetes.io/visibility=public'). Use when running multiple ExternalDNS instances targeting different DNS zones to prevent each instance from creating records in all zones."
+  type        = string
+  default     = ""
+}
+
 ###############################################################################
 # CLOUDFLARE CONFIGURATION
 ###############################################################################
