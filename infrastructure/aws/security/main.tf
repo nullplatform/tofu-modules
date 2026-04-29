@@ -99,18 +99,6 @@ resource "aws_vpc_security_group_ingress_rule" "public_gateway_health_check_addi
   }
 }
 
-resource "aws_vpc_security_group_egress_rule" "public_gateway_all" {
-  count = var.gateways_enabled ? 1 : 0
-
-  security_group_id = aws_security_group.public_gateway[0].id
-  description       = "Allow all outbound traffic"
-  ip_protocol       = "-1"
-  cidr_ipv4         = "0.0.0.0/0"
-
-  tags = {
-    Name = "${var.name}-istio-public-egress"
-  }
-}
 
 ###############################################################################
 # PRIVATE GATEWAY
@@ -196,15 +184,3 @@ resource "aws_vpc_security_group_ingress_rule" "private_gateway_health_check_add
   }
 }
 
-resource "aws_vpc_security_group_egress_rule" "private_gateway_all" {
-  count = var.gateway_internal_enabled ? 1 : 0
-
-  security_group_id = aws_security_group.private_gateway[0].id
-  description       = "Allow all outbound traffic"
-  ip_protocol       = "-1"
-  cidr_ipv4         = "0.0.0.0/0"
-
-  tags = {
-    Name = "${var.name}-istio-private-egress"
-  }
-}
