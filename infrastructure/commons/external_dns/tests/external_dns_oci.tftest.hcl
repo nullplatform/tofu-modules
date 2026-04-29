@@ -77,7 +77,7 @@ run "oci_requires_compartment" {
     oci_compartment_ocid = ""
   }
 
-  expect_failures = [var.oci_compartment_ocid]
+  expect_failures = [terraform_data.provider_validation]
 }
 
 # Validates OCI fails without region
@@ -88,7 +88,7 @@ run "oci_requires_region" {
     oci_region = ""
   }
 
-  expect_failures = [var.oci_region]
+  expect_failures = [terraform_data.provider_validation]
 }
 
 # Validates OCI zone scope PRIVATE is propagated
