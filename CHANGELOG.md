@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.56.0](https://github.com/nullplatform/tofu-modules/compare/v1.55.0...v1.56.0) (2026-04-28)
+
+
+### Features
+
+* **nullplatform/asset/ecr:** add ecr:SetRepositoryPolicy to manager policy ([#307](https://github.com/nullplatform/tofu-modules/issues/307)) ([a0520b5](https://github.com/nullplatform/tofu-modules/commit/a0520b574b7fede83ea4bc98f067fa3db32b17d9))
+
+
+### Bug Fixes
+
+* **nullplatform/asset/ecr:** remove unsupported dimensions variable ([#308](https://github.com/nullplatform/tofu-modules/issues/308)) ([6caa947](https://github.com/nullplatform/tofu-modules/commit/6caa947128a691aeb2d3ebb5e41467ec8322b13e))
+
+## [1.55.0](https://github.com/nullplatform/tofu-modules/compare/v1.54.1...v1.55.0) (2026-04-27)
+
+
+### Features
+
+* **nullplatform/scope_definition:** add extra_visible_to_nrns for org-wide sharing ([#304](https://github.com/nullplatform/tofu-modules/issues/304)) ([b52d0f0](https://github.com/nullplatform/tofu-modules/commit/b52d0f0139f8877262ea4fee3475239a93dd1bc3))
+
+
+### Bug Fixes
+
+* **nullplatform/scope_definition:** ignore_changes on scope_type provider_type and status ([#305](https://github.com/nullplatform/tofu-modules/issues/305)) ([895ced0](https://github.com/nullplatform/tofu-modules/commit/895ced0eb58fa7972cbc942e236f4e601d7d69fc))
+
+## [1.54.1](https://github.com/nullplatform/tofu-modules/compare/v1.54.0...v1.54.1) (2026-04-23)
+
+
+### Bug Fixes
+
+* **base:** remove dangerous helm release options ([#302](https://github.com/nullplatform/tofu-modules/issues/302)) ([66cdd18](https://github.com/nullplatform/tofu-modules/commit/66cdd180c6f253990891c82aa2c675b2846072a0))
+
 ## [1.54.0](https://github.com/nullplatform/tofu-modules/compare/v1.53.1...v1.54.0) (2026-04-22)
 
 

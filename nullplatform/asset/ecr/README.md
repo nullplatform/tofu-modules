@@ -13,7 +13,6 @@ Creates an aws_iam_access_key for build workflow authentication and an aws_iam_r
 - Creates IAM access key for Nullplatform build workflow CI authentication to ECR
 - Provisions IAM role for application runtime ECR access with assumable permissions
 - Configures Nullplatform ECR provider with region-specific AWS credentials
-- Segments provider configuration by custom dimensions for multi-environment support
 - Integrates with external application manager role for cross-account access patterns
 - Uses lifecycle ignore_changes on attributes to prevent configuration drift
 
@@ -21,7 +20,7 @@ Creates an aws_iam_access_key for build workflow authentication and an aws_iam_r
 
 ```hcl
 module "ecr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v1.54.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v1.55.0"
 
   cluster_name = "your-cluster-name"
   nrn          = "your-nrn"
@@ -69,7 +68,6 @@ resource "example_resource" "this" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_application_manager_assume_role"></a> [application\_manager\_assume\_role](#input\_application\_manager\_assume\_role) | ARN of the IAM role assumed by the application manager | `string` | `"arn:aws:iam::283477532906:role/application_manager"` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the cluster where the policy runs | `string` | n/a | yes |
-| <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Dimensions to segment the nullplatform provider config (e.g. by region, environment) | `map(string)` | `{}` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | The nullplatform resource name (NRN) | `string` | n/a | yes |
 <!-- END_TF_DOCS -->
 
@@ -82,7 +80,6 @@ resource "example_resource" "this" {
     "Creates IAM access key for Nullplatform build workflow CI authentication to ECR",
     "Provisions IAM role for application runtime ECR access with assumable permissions",
     "Configures Nullplatform ECR provider with region-specific AWS credentials",
-    "Segments provider configuration by custom dimensions for multi-environment support",
     "Integrates with external application manager role for cross-account access patterns",
     "Uses lifecycle ignore_changes on attributes to prevent configuration drift"
   ],
@@ -100,11 +97,6 @@ resource "example_resource" "this" {
     {
       "name": "application_manager_assume_role",
       "description": "ARN of the IAM role assumed by the application manager",
-      "required": false
-    },
-    {
-      "name": "dimensions",
-      "description": "Dimensions to segment the nullplatform provider config (e.g. by region, environment)",
       "required": false
     }
   ],
