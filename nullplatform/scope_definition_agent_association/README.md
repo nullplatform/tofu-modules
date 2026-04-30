@@ -19,7 +19,7 @@ The module fetches a notification-channel.json.tpl template via data.http, proce
 
 ```hcl
 module "scope_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=v1.56.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=v1.56.2"
 
   api_key                  = "your-api-key"
   nrn                      = "your-nrn"
