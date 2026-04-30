@@ -85,7 +85,7 @@ run "azure_requires_client_id" {
     azure_client_id = ""
   }
 
-  expect_failures = [var.azure_client_id]
+  expect_failures = [terraform_data.provider_validation]
 }
 
 # Validates Azure fails without subscription_id
@@ -96,7 +96,7 @@ run "azure_requires_subscription_id" {
     azure_subscription_id = ""
   }
 
-  expect_failures = [var.azure_subscription_id]
+  expect_failures = [terraform_data.provider_validation]
 }
 
 # Validates Azure fails without tenant_id
@@ -107,7 +107,7 @@ run "azure_requires_tenant_id" {
     azure_tenant_id = ""
   }
 
-  expect_failures = [var.azure_tenant_id]
+  expect_failures = [terraform_data.provider_validation]
 }
 
 # Validates Azure fails without resource_group_name
@@ -118,7 +118,7 @@ run "azure_requires_resource_group" {
     azure_resource_group_name = ""
   }
 
-  expect_failures = [var.azure_resource_group_name]
+  expect_failures = [terraform_data.provider_validation]
 }
 
 # Validates Azure fails without hosted_zone_name
@@ -129,5 +129,5 @@ run "azure_requires_hosted_zone" {
     azure_hosted_zone_name = ""
   }
 
-  expect_failures = [var.azure_hosted_zone_name]
+  expect_failures = [terraform_data.provider_validation]
 }

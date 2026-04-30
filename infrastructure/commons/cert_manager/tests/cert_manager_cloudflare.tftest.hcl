@@ -41,7 +41,7 @@ run "cloudflare_requires_token" {
     cloudflare_token = ""
   }
 
-  expect_failures = [var.cloudflare_token]
+  expect_failures = [terraform_data.provider_validation]
 }
 
 # Validates custom secret name is propagated
