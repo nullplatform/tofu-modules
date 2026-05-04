@@ -20,7 +20,7 @@ The module builds a local.attributes map that merges cluster metadata, gateway s
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v2.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v2.0.1"
 
   cluster_name        = "your-cluster-name"
   location            = "your-location"

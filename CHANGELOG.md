@@ -1,15 +1,11 @@
 # Changelog
 
-## [2.0.0](https://github.com/nullplatform/tofu-modules/compare/v1.56.2...v2.0.0) (2026-05-04)
+## [2.0.1](https://github.com/nullplatform/tofu-modules/compare/v2.0.0...v2.0.1) (2026-05-04)
 
 
-### ⚠ BREAKING CHANGES
+### Reverts
 
-* **security,eks:** cluster_security_group_id and gateway_port variables removed from infrastructure/aws/security. Callers must replace those inputs with a separate module eks_gateway_rules call using infrastructure/aws/eks-gateway-rules.
-
-### Features
-
-* **security,eks:** extract gateway SG rules into dedicated eks-gateway-rules module ([#314](https://github.com/nullplatform/tofu-modules/issues/314)) ([bb5a1dd](https://github.com/nullplatform/tofu-modules/commit/bb5a1ddd232fcc4fdc49cabe2ed2506d3814f3c1))
+* release 2.0.0 and feat eks-gateway-rules ([#318](https://github.com/nullplatform/tofu-modules/issues/318), [#314](https://github.com/nullplatform/tofu-modules/issues/314)) ([#319](https://github.com/nullplatform/tofu-modules/issues/319)) ([167304f](https://github.com/nullplatform/tofu-modules/commit/167304f6023dbfe886490743b019421c46707615))
 
 ## [1.56.2](https://github.com/nullplatform/tofu-modules/compare/v1.56.1...v1.56.2) (2026-04-30)
 
