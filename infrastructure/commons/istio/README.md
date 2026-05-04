@@ -69,6 +69,7 @@ resource "example_resource" "this" {
 | <a name="input_https_target_port"></a> [https\_target\_port](#input\_https\_target\_port) | The container target port for HTTPS | `number` | `8443` | no |
 | <a name="input_istio_base_version"></a> [istio\_base\_version](#input\_istio\_base\_version) | Helm chart version for the istio-base component | `string` | `"1.27.1"` | no |
 | <a name="input_istio_ingressgateway_version"></a> [istio\_ingressgateway\_version](#input\_istio\_ingressgateway\_version) | Helm chart version for the Istio ingress gateway | `string` | `"1.27.1"` | no |
+| <a name="input_istiod_replica_count"></a> [istiod\_replica\_count](#input\_istiod\_replica\_count) | Number of istiod replicas. When set, the value is forwarded to the Helm chart as `pilot.replicaCount`. When `null` (the default), the module does NOT pass `pilot.replicaCount` to the chart, preserving the chart's own default — this keeps the module backward-compatible for existing consumers, who see no behavior change after upgrading. Recommended value: `2`. The istiod chart bundles a PodDisruptionBudget with `minAvailable=1` and a chart-default `replicaCount=1`. That combination yields `allowedDisruptions=0` and blocks every node drain on the istiod pod's node — AMI bumps, K8s upgrades, and scale-downs all get stuck. Setting this variable to `2` (or higher) lets the PDB allow one disruption and keeps drains unblocked. Note: when `pilot.autoscaleEnabled=true` (chart default), the istiod HPA overrides `replicaCount` after deployment creation. If autoscaling is on you should also raise `pilot.autoscaleMin` to >=2; this module does not yet expose that value — set `replicaCount` here and override `autoscaleMin` separately if needed. | `number` | `null` | no |
 | <a name="input_istiod_version"></a> [istiod\_version](#input\_istiod\_version) | Helm chart version for istiod (Istio control plane) | `string` | `"1.27.1"` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | The Kubernetes namespace where gateway will be installed. | `string` | `"istio-system"` | no |
 | <a name="input_oci_load_balancer_subnet_ids"></a> [oci\_load\_balancer\_subnet\_ids](#input\_oci\_load\_balancer\_subnet\_ids) | List of OCI subnet OCIDs for the LoadBalancer Service (required when cloud\_provider is 'oci') | `list(string)` | `[]` | no |
@@ -104,6 +105,11 @@ resource "example_resource" "this" {
     {
       "name": "istio_ingressgateway_version",
       "description": "Helm chart version for the Istio ingress gateway",
+      "required": false
+    },
+    {
+      "name": "istiod_replica_count",
+      "description": "Number of istiod replicas. When set, forwarded to the Helm chart as pilot.replicaCount. Default null preserves the chart's own default (backward-compatible). Set to 2 to keep the istiod PodDisruptionBudget unblocked during node drains.",
       "required": false
     },
     {

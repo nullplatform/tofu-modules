@@ -123,3 +123,40 @@ run "custom_repository" {
     error_message = "All components should use custom repository"
   }
 }
+
+# Backward-compat: with the default (null), the module must NOT inject any
+# `pilot.replicaCount` override. Existing consumers see no behavior change
+# after upgrading.
+run "istiod_default_no_replica_count_override" {
+  command = plan
+
+  assert {
+    condition     = length(helm_release.istiod.set) == 0
+    error_message = "Default istiod_replica_count must be null and produce no `set` entries (backward-compat)"
+  }
+}
+
+# Opt-in: when the operator sets a value, it is forwarded to the Helm chart
+# as `pilot.replicaCount`.
+run "istiod_custom_replica_count" {
+  command = plan
+
+  variables {
+    istiod_replica_count = 2
+  }
+
+  assert {
+    condition     = length(helm_release.istiod.set) == 1
+    error_message = "Setting istiod_replica_count should produce exactly one `set` entry"
+  }
+
+  assert {
+    condition     = helm_release.istiod.set[0].name == "pilot.replicaCount"
+    error_message = "istiod helm release should set pilot.replicaCount"
+  }
+
+  assert {
+    condition     = helm_release.istiod.set[0].value == "2"
+    error_message = "Custom istiod_replica_count should be forwarded as pilot.replicaCount"
+  }
+}

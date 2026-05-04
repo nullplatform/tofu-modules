@@ -14,6 +14,31 @@ variable "istio_ingressgateway_version" {
   default     = "1.27.1"
 }
 
+variable "istiod_replica_count" {
+  description = <<-EOT
+    Number of istiod replicas. When set, the value is forwarded to the Helm
+    chart as `pilot.replicaCount`. When `null` (the default), the module
+    does NOT pass `pilot.replicaCount` to the chart, preserving the chart's
+    own default — this keeps the module backward-compatible for existing
+    consumers, who see no behavior change after upgrading.
+
+    Recommended value: `2`. The istiod chart bundles a PodDisruptionBudget
+    with `minAvailable=1` and a chart-default `replicaCount=1`. That
+    combination yields `allowedDisruptions=0` and blocks every node drain
+    on the istiod pod's node — AMI bumps, K8s upgrades, and scale-downs
+    all get stuck. Setting this variable to `2` (or higher) lets the PDB
+    allow one disruption and keeps drains unblocked.
+
+    Note: when `pilot.autoscaleEnabled=true` (chart default), the istiod
+    HPA overrides `replicaCount` after deployment creation. If autoscaling
+    is on you should also raise `pilot.autoscaleMin` to >=2; this module
+    does not yet expose that value — set `replicaCount` here and override
+    `autoscaleMin` separately if needed.
+  EOT
+  type        = number
+  default     = null
+}
+
 variable "istiod_version" {
   description = "Helm chart version for istiod (Istio control plane)"
   type        = string

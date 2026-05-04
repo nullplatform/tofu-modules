@@ -45,6 +45,17 @@ resource "helm_release" "istiod" {
   reuse_values      = false
   dependency_update = true
   max_history       = 10
+
+  # Only forward `pilot.replicaCount` when the operator opts in. With the
+  # default `null` we omit the override entirely, preserving the chart's
+  # own default and keeping the module backward-compatible for existing
+  # consumers. See `variables.tf` for the recommended value (2).
+  set = var.istiod_replica_count == null ? [] : [
+    {
+      name  = "pilot.replicaCount"
+      value = tostring(var.istiod_replica_count)
+    }
+  ]
 }
 
 # Setup Istio Gateway using Helm
