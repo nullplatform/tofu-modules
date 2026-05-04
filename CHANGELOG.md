@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.2](https://github.com/nullplatform/tofu-modules/compare/v2.0.1...v2.0.2) (2026-05-04)
+
+
+### Bug Fixes
+
+* **istio:** add OCI LoadBalancer subnet annotation support ([#317](https://github.com/nullplatform/tofu-modules/issues/317)) ([4427b61](https://github.com/nullplatform/tofu-modules/commit/4427b61229b4ca996c95d7dfb839a1fed9340e9d))
+
 ## [2.0.1](https://github.com/nullplatform/tofu-modules/compare/v2.0.0...v2.0.1) (2026-05-04)
 
 
