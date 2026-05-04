@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.56.2](https://github.com/nullplatform/tofu-modules/compare/v1.56.1...v1.56.2) (2026-04-30)
+
+
+### Bug Fixes
+
+* **cert_manager,external_dns:** move cross-variable validations to terraform_data preconditions ([#315](https://github.com/nullplatform/tofu-modules/issues/315)) ([a213e35](https://github.com/nullplatform/tofu-modules/commit/a213e357ddeef15d364e11e64ed5b4615efdd8f8))
+
+## [1.56.1](https://github.com/nullplatform/tofu-modules/compare/v1.56.0...v1.56.1) (2026-04-29)
+
+
+### Bug Fixes
+
+* **external_dns:** move cross-variable validations to terraform_data preconditions ([#310](https://github.com/nullplatform/tofu-modules/issues/310)) ([c4f010e](https://github.com/nullplatform/tofu-modules/commit/c4f010e118ac57f9a1c4247082f48d907de23f16))
+
 ## [1.56.0](https://github.com/nullplatform/tofu-modules/compare/v1.55.0...v1.56.0) (2026-04-28)
 
 
