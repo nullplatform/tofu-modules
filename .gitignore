@@ -165,6 +165,7 @@ terraform.tfstate.backup
 
 # VS Code
 .vscode/
+*.code-workspace
 
 # Claude Code
 .claude/
