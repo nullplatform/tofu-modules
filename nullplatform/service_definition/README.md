@@ -22,7 +22,7 @@ The module creates a nullplatform_service_specification resource as the primary 
 
 ```hcl
 module "service_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v1.56.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v2.0.2"
 
   nrn          = "your-nrn"
   service_name = "your-service-name"

@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.0.2](https://github.com/nullplatform/tofu-modules/compare/v2.0.1...v2.0.2) (2026-05-04)
+
+
+### Bug Fixes
+
+* **istio:** add OCI LoadBalancer subnet annotation support ([#317](https://github.com/nullplatform/tofu-modules/issues/317)) ([4427b61](https://github.com/nullplatform/tofu-modules/commit/4427b61229b4ca996c95d7dfb839a1fed9340e9d))
+
+## [2.0.1](https://github.com/nullplatform/tofu-modules/compare/v2.0.0...v2.0.1) (2026-05-04)
+
+
+### Reverts
+
+* release 2.0.0 and feat eks-gateway-rules ([#318](https://github.com/nullplatform/tofu-modules/issues/318), [#314](https://github.com/nullplatform/tofu-modules/issues/314)) ([#319](https://github.com/nullplatform/tofu-modules/issues/319)) ([167304f](https://github.com/nullplatform/tofu-modules/commit/167304f6023dbfe886490743b019421c46707615))
+
 ## [1.56.2](https://github.com/nullplatform/tofu-modules/compare/v1.56.1...v1.56.2) (2026-04-30)
 
 

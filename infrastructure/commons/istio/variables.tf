@@ -71,6 +71,30 @@ variable "namespace" {
 }
 
 ###############################################################################
+# CLOUD PROVIDER CONFIGURATION
+###############################################################################
+
+variable "cloud_provider" {
+  type        = string
+  description = "The cloud provider where the cluster is running. Used to inject provider-specific LoadBalancer annotations (e.g. oci). Leave empty for generic/on-prem clusters."
+  default     = ""
+  validation {
+    condition     = contains(["", "aws", "oci", "azure", "gcp"], var.cloud_provider)
+    error_message = "Value must be one of: '', 'aws', 'oci', 'azure', 'gcp'"
+  }
+}
+
+###############################################################################
+# OCI CONFIGURATION
+###############################################################################
+
+variable "oci_load_balancer_subnet_ids" {
+  type        = list(string)
+  description = "List of OCI subnet OCIDs for the LoadBalancer Service (required when cloud_provider is 'oci')"
+  default     = []
+}
+
+###############################################################################
 # HTTP2 CONFIGURATION
 ###############################################################################
 
