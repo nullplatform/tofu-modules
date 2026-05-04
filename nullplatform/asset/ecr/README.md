@@ -20,7 +20,7 @@ Creates an aws_iam_access_key for build workflow authentication and an aws_iam_r
 
 ```hcl
 module "ecr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v1.56.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v1.56.2"
 
   cluster_name = "your-cluster-name"
   nrn          = "your-nrn"

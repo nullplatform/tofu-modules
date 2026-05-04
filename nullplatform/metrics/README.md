@@ -21,7 +21,7 @@ The module creates a nullplatform_provider_config resource of type prometheus th
 
 ```hcl
 module "metrics" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/metrics?ref=v1.56.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/metrics?ref=v1.56.2"
 
   nrn = "your-nrn"
 }
