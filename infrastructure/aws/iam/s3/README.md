@@ -19,7 +19,7 @@ The module creates an aws_s3_bucket_policy resource attached to an existing S3 b
 
 ```hcl
 module "s3" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/s3?ref=v1.56.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/s3?ref=v2.0.1"
 
   bucket_arn = "your-bucket-arn"
   bucket_id  = "your-bucket-id"
