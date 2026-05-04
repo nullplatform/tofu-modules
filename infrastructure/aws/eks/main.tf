@@ -56,7 +56,7 @@ module "eks" {
   authentication_mode = var.authentication_mode
 
   # Optional: Adds the current caller identity as an administrator via cluster access entry
-  enable_cluster_creator_admin_permissions = true
+  enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
 
   vpc_id                   = var.aws_vpc_vpc_id
   subnet_ids               = var.aws_subnets_private_ids
