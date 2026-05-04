@@ -2,27 +2,27 @@
 
 ## Description
 
-Provisions an AWS EKS cluster with support for both Auto Mode and Managed Node Groups, including IAM roles, security groups, add-ons, and control plane logging
+Creates an AWS EKS cluster with configurable Auto Mode or Managed Node Groups, IRSA support, and integrated EBS CSI driver
 
 ## Architecture
 
-Creates an aws_eks_cluster via the terraform-aws-modules/eks/aws module, which provisions the EKS control plane, aws_iam_role resources for the EBS CSI driver and node groups, aws_security_group_rule resources for NLB health checks and HTTPS traffic, and aws_iam_openid_connect_provider for IRSA. The module configures aws_eks_addon resources (aws-ebs-csi-driver, coredns, eks-pod-identity-agent, kube-proxy, vpc-cni) with service account role ARNs linked to IAM roles via OIDC trust. Inputs flow through conditional logic to create either aws_eks_node_group resources (Managed Node Groups) or enable EKS Auto Mode compute configuration based on the use_auto_mode variable. Outputs expose cluster endpoint, OIDC provider ARN, node IAM role ARN, and security group IDs.
+The module instantiates a terraform-aws-modules/eks/aws module to create an aws_eks_cluster resource with associated aws_iam_role and aws_security_group resources. It configures IRSA by enabling the OIDC provider, creates an aws_iam_role for the EBS CSI driver with pod identity agent support, and provisions either Auto Mode compute resources or aws_eks_node_group managed node groups based on the use_auto_mode flag. Security group rules are conditionally added to allow NLB health checks on port 15021 and HTTPS traffic on port 443 from the VPC CIDR and additional networks. Outputs expose the cluster endpoint, OIDC provider ARN, node IAM role details, and security group IDs for integration with other resources.
 
 ## Features
 
-- Creates EKS cluster with configurable authentication modes (CONFIG_MAP, API, API_AND_CONFIG_MAP)
-- Provisions EBS CSI driver add-on with IAM role for service account (IRSA) integration
-- Configures security group rules for NLB health checks on Istio status port 15021 and HTTPS traffic on port 443
-- Supports EKS Auto Mode with general-purpose and system node pools or traditional Managed Node Groups
-- Enables CloudWatch log group for control plane logs (api, audit, authenticator, controllerManager, scheduler) with configurable retention
-- Configures cluster access entries with granular IAM principal mappings and Kubernetes RBAC integration
-- Provisions EKS add-ons including Pod Identity Agent, VPC CNI, CoreDNS, and Kube-proxy with automatic dependency ordering
+- Creates EKS cluster with configurable Kubernetes version and authentication modes (CONFIG_MAP, API, or API_AND_CONFIG_MAP)
+- Provisions either Auto Mode compute with configurable node pools (general-purpose, system) or traditional Managed Node Groups with customizable instance types and scaling parameters
+- Configures IRSA with OIDC provider and creates IAM role for EBS CSI driver with pod identity agent support
+- Deploys EKS add-ons including aws-ebs-csi-driver, coredns, eks-pod-identity-agent, kube-proxy, and vpc-cni
+- Creates security group rules for NLB health checks on Istio status port (15021) and HTTPS ingress (443) from VPC and additional network CIDRs
+- Manages CloudWatch log groups for control plane logging with configurable retention and log types (api, audit, authenticator, controllerManager, scheduler)
+- Supports cluster access entries for IAM principal to Kubernetes RBAC mapping with policy associations
 
 ## Basic Usage
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/eks?ref=v2.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/eks?ref=v1.56.2"
 
   aws_subnets_private_ids = "your-aws-subnets-private-ids"
   aws_vpc_vpc_id          = "your-aws-vpc-vpc-id"
@@ -83,7 +83,6 @@ resource "example_resource" "this" {
 | <a name="input_aws_vpc_vpc_id"></a> [aws\_vpc\_vpc\_id](#input\_aws\_vpc\_vpc\_id) | VPC ID where the EKS cluster will be deployed | `string` | n/a | yes |
 | <a name="input_cloudwatch_log_group_retention_in_days"></a> [cloudwatch\_log\_group\_retention\_in\_days](#input\_cloudwatch\_log\_group\_retention\_in\_days) | Number of days to retain log events in the CloudWatch log group | `number` | `90` | no |
 | <a name="input_create_cloudwatch_log_group"></a> [create\_cloudwatch\_log\_group](#input\_create\_cloudwatch\_log\_group) | Whether to create a CloudWatch log group for cluster logs. If false and logging is enabled, AWS creates it automatically but outside of Terraform management. | `bool` | `true` | no |
-| <a name="input_enable_cluster_creator_admin_permissions"></a> [enable\_cluster\_creator\_admin\_permissions](#input\_enable\_cluster\_creator\_admin\_permissions) | Grant the caller identity cluster-admin permissions via an EKS access entry. Set to false when using EKS Auto Mode, which creates this entry automatically and would cause a 409 conflict. | `bool` | `false` | no |
 | <a name="input_enabled_log_types"></a> [enabled\_log\_types](#input\_enabled\_log\_types) | List of EKS control plane log types to enable. Valid values: api, audit, authenticator, controllerManager, scheduler | `list(string)` | `[]` | no |
 | <a name="input_endpoint_private_access"></a> [endpoint\_private\_access](#input\_endpoint\_private\_access) | Whether the Amazon EKS private API server endpoint is enabled | `bool` | `false` | no |
 | <a name="input_endpoint_public_access"></a> [endpoint\_public\_access](#input\_endpoint\_public\_access) | Whether the Amazon EKS public API server endpoint is enabled | `bool` | `true` | no |
@@ -114,16 +113,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "eks",
-  "description": "Provisions an AWS EKS cluster with support for both Auto Mode and Managed Node Groups, including IAM roles, security groups, add-ons, and control plane logging",
-  "architecture": "Creates an aws_eks_cluster via the terraform-aws-modules/eks/aws module, which provisions the EKS control plane, aws_iam_role resources for the EBS CSI driver and node groups, aws_security_group_rule resources for NLB health checks and HTTPS traffic, and aws_iam_openid_connect_provider for IRSA. The module configures aws_eks_addon resources (aws-ebs-csi-driver, coredns, eks-pod-identity-agent, kube-proxy, vpc-cni) with service account role ARNs linked to IAM roles via OIDC trust. Inputs flow through conditional logic to create either aws_eks_node_group resources (Managed Node Groups) or enable EKS Auto Mode compute configuration based on the use_auto_mode variable. Outputs expose cluster endpoint, OIDC provider ARN, node IAM role ARN, and security group IDs.",
+  "description": "Creates an AWS EKS cluster with configurable Auto Mode or Managed Node Groups, IRSA support, and integrated EBS CSI driver",
+  "architecture": "The module instantiates a terraform-aws-modules/eks/aws module to create an aws_eks_cluster resource with associated aws_iam_role and aws_security_group resources. It configures IRSA by enabling the OIDC provider, creates an aws_iam_role for the EBS CSI driver with pod identity agent support, and provisions either Auto Mode compute resources or aws_eks_node_group managed node groups based on the use_auto_mode flag. Security group rules are conditionally added to allow NLB health checks on port 15021 and HTTPS traffic on port 443 from the VPC CIDR and additional networks. Outputs expose the cluster endpoint, OIDC provider ARN, node IAM role details, and security group IDs for integration with other resources.",
   "features": [
-    "Creates EKS cluster with configurable authentication modes (CONFIG_MAP, API, API_AND_CONFIG_MAP)",
-    "Provisions EBS CSI driver add-on with IAM role for service account (IRSA) integration",
-    "Configures security group rules for NLB health checks on Istio status port 15021 and HTTPS traffic on port 443",
-    "Supports EKS Auto Mode with general-purpose and system node pools or traditional Managed Node Groups",
-    "Enables CloudWatch log group for control plane logs (api, audit, authenticator, controllerManager, scheduler) with configurable retention",
-    "Configures cluster access entries with granular IAM principal mappings and Kubernetes RBAC integration",
-    "Provisions EKS add-ons including Pod Identity Agent, VPC CNI, CoreDNS, and Kube-proxy with automatic dependency ordering"
+    "Creates EKS cluster with configurable Kubernetes version and authentication modes (CONFIG_MAP, API, or API_AND_CONFIG_MAP)",
+    "Provisions either Auto Mode compute with configurable node pools (general-purpose, system) or traditional Managed Node Groups with customizable instance types and scaling parameters",
+    "Configures IRSA with OIDC provider and creates IAM role for EBS CSI driver with pod identity agent support",
+    "Deploys EKS add-ons including aws-ebs-csi-driver, coredns, eks-pod-identity-agent, kube-proxy, and vpc-cni",
+    "Creates security group rules for NLB health checks on Istio status port (15021) and HTTPS ingress (443) from VPC and additional network CIDRs",
+    "Manages CloudWatch log groups for control plane logging with configurable retention and log types (api, audit, authenticator, controllerManager, scheduler)",
+    "Supports cluster access entries for IAM principal to Kubernetes RBAC mapping with policy associations"
   ],
   "inputs": [
     {
@@ -179,11 +178,6 @@ resource "example_resource" "this" {
     {
       "name": "use_auto_mode",
       "description": "Use EKS Auto Mode (true) or Managed Node Groups (false)",
-      "required": false
-    },
-    {
-      "name": "enable_cluster_creator_admin_permissions",
-      "description": "Grant the caller identity cluster-admin permissions via an EKS access entry. Set to false when using EKS Auto Mode, which creates this entry automatically and would cause a 409 conflict.",
       "required": false
     },
     {
@@ -252,6 +246,6 @@ resource "example_resource" "this" {
     "eks_cluster_security_group_id",
     "eks_cluster_primary_security_group_id"
   ],
-  "hash": "0ead7617cfaca7d423a97a200f286d2e"
+  "hash": "6378d3bdacb32294176705bfc2a50efa"
 }
 END_AI_METADATA -->
