@@ -160,3 +160,45 @@ variable "cloudwatch_log_group_retention_in_days" {
   type        = number
   default     = 90
 }
+
+# ============================================================================
+# Encryption
+# ============================================================================
+
+variable "encryption_config" {
+  description = <<-EOT
+    Encryption config for the EKS control plane (KMS encryption of Kubernetes
+    secrets stored in etcd). Type matches the upstream
+    `terraform-aws-modules/eks/aws` variable of the same name.
+
+    Default `{}` (no `provider_key_arn`): the upstream module creates an
+    auto-managed KMS key and uses it to encrypt etcd secrets — this matches
+    the wrapper's pre-existing behavior and is what existing consumers
+    already get today (no change after upgrading).
+
+    Bring your own CMK (typically required by audit/compliance reviews):
+
+        encryption_config = {
+          provider_key_arn = aws_kms_key.eks_secrets.arn
+        }
+
+    When `provider_key_arn` is set, the wrapper automatically passes
+    `create_kms_key = false` to the upstream module so the supplied ARN is
+    used instead of an auto-generated key. (Without this, the upstream
+    default `create_kms_key = true` would silently override the operator's
+    ARN.)
+
+    `resources` defaults to `["secrets"]` (the only resource EKS supports
+    encrypting today) and rarely needs to be set explicitly.
+
+    Note: the EKS cluster's `encryption_config` block is ForceNew. Switching
+    a cluster from no-encryption to encryption (or changing `provider_key_arn`)
+    after initial creation triggers a cluster replacement. Decide on the
+    encryption strategy before the first `tofu apply`.
+  EOT
+  type = object({
+    provider_key_arn = optional(string)
+    resources        = optional(list(string), ["secrets"])
+  })
+  default = {}
+}

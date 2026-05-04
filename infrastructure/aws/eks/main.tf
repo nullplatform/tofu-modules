@@ -10,7 +10,18 @@ module "eks" {
   create_cloudwatch_log_group            = var.create_cloudwatch_log_group
   cloudwatch_log_group_retention_in_days = var.cloudwatch_log_group_retention_in_days
   enabled_log_types                      = var.enabled_log_types
-  create_node_security_group             = false
+  encryption_config                      = var.encryption_config
+  # Derive `create_kms_key` from `encryption_config.provider_key_arn`:
+  #   - When the operator passes a CMK ARN, force `create_kms_key = false` so
+  #     the upstream module uses the supplied ARN. (Otherwise upstream's
+  #     default `create_kms_key = true` would silently override the operator's
+  #     ARN with an auto-generated key — defeating the BYO-CMK use case.)
+  #   - When the operator does not pass a CMK ARN (default `{}`), leave
+  #     `create_kms_key = true` to match the upstream default and preserve
+  #     the wrapper's pre-existing behavior (an auto-managed KMS key is
+  #     created, encrypting etcd secrets out of the box).
+  create_kms_key             = var.encryption_config.provider_key_arn == null
+  create_node_security_group = false
 
   # Security group rules for NLB health checks and Istio gateway traffic
   security_group_additional_rules = var.security_group_additional_rules ? {

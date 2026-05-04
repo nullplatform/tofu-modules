@@ -84,6 +84,7 @@ resource "example_resource" "this" {
 | <a name="input_cloudwatch_log_group_retention_in_days"></a> [cloudwatch\_log\_group\_retention\_in\_days](#input\_cloudwatch\_log\_group\_retention\_in\_days) | Number of days to retain log events in the CloudWatch log group | `number` | `90` | no |
 | <a name="input_create_cloudwatch_log_group"></a> [create\_cloudwatch\_log\_group](#input\_create\_cloudwatch\_log\_group) | Whether to create a CloudWatch log group for cluster logs. If false and logging is enabled, AWS creates it automatically but outside of Terraform management. | `bool` | `true` | no |
 | <a name="input_enabled_log_types"></a> [enabled\_log\_types](#input\_enabled\_log\_types) | List of EKS control plane log types to enable. Valid values: api, audit, authenticator, controllerManager, scheduler | `list(string)` | `[]` | no |
+| <a name="input_encryption_config"></a> [encryption\_config](#input\_encryption\_config) | Encryption config for the EKS control plane (KMS encryption of Kubernetes secrets stored in etcd). Type matches the upstream `terraform-aws-modules/eks/aws` variable of the same name. Default `{}` (no `provider_key_arn`): the upstream module creates an auto-managed KMS key and uses it to encrypt etcd secrets — this matches the wrapper's pre-existing behavior. Set `provider_key_arn` to bring your own CMK; the wrapper then passes `create_kms_key = false` to the upstream module automatically so the supplied ARN is used instead of an auto-generated key. `resources` defaults to `["secrets"]` (the only resource EKS supports encrypting today). Note: the EKS cluster's `encryption_config` block is ForceNew — switching from no-encryption to encryption (or changing `provider_key_arn`) after creation triggers a cluster replacement. | <pre>object({<br/>    provider\_key\_arn = optional(string)<br/>    resources        = optional(list(string), ["secrets"])<br/>  })</pre> | `{}` | no |
 | <a name="input_endpoint_private_access"></a> [endpoint\_private\_access](#input\_endpoint\_private\_access) | Whether the Amazon EKS private API server endpoint is enabled | `bool` | `false` | no |
 | <a name="input_endpoint_public_access"></a> [endpoint\_public\_access](#input\_endpoint\_public\_access) | Whether the Amazon EKS public API server endpoint is enabled | `bool` | `true` | no |
 | <a name="input_endpoint_public_access_cidrs"></a> [endpoint\_public\_access\_cidrs](#input\_endpoint\_public\_access\_cidrs) | List of CIDR blocks allowed to access the public EKS API server endpoint | `list(string)` | `[]` | no |
@@ -233,6 +234,11 @@ resource "example_resource" "this" {
     {
       "name": "cloudwatch_log_group_retention_in_days",
       "description": "Number of days to retain log events in the CloudWatch log group",
+      "required": false
+    },
+    {
+      "name": "encryption_config",
+      "description": "Encryption config for the EKS control plane (KMS encryption of etcd secrets). Default {} preserves the wrapper's pre-existing behavior: the upstream module auto-creates a KMS key. Set provider_key_arn to bring your own CMK — the wrapper then auto-disables upstream's create_kms_key so the supplied ARN is honored.",
       "required": false
     }
   ],
