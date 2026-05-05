@@ -3,7 +3,7 @@
 
 provider "registry.opentofu.org/nullplatform/nullplatform" {
   version     = "0.0.86"
-  constraints = ">= 0.0.86"
+  constraints = "~> 0.0.63"
   hashes = [
     "h1:8qpueytbMpHBjbcR+SelMyOClp17cIoikxrHEyHwZjg=",
     "zh:13ae6146256732fe2039ce7b7e7f557111b0de3debbda1fa11b97fb960f0839d",
