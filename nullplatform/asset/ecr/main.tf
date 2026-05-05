@@ -2,6 +2,7 @@ resource "nullplatform_provider_config" "ecr" {
   provider   = nullplatform
   nrn        = var.nrn
   type       = "ecr"
+  dimensions = {}
   attributes = jsonencode({
     "ci" : {
       "region" : data.aws_region.current.region,
