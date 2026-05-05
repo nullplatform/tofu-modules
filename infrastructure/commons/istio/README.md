@@ -21,7 +21,7 @@ Creates three helm_release resources in sequence: istio-base (foundation CRDs), 
 
 ```hcl
 module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v2.0.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v2.1.0"
 }
 ```
 
