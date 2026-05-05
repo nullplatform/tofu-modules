@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/nullplatform/tofu-modules/compare/v2.0.2...v2.1.0) (2026-05-05)
+
+
+### Features
+
+* update nullplatform provider to &gt;= 0.0.86 across all modules ([#322](https://github.com/nullplatform/tofu-modules/issues/322)) ([6b5e5ce](https://github.com/nullplatform/tofu-modules/commit/6b5e5ce1649721eb7010903d2229004d0225f97f))
+
 ## [2.0.2](https://github.com/nullplatform/tofu-modules/compare/v2.0.1...v2.0.2) (2026-05-04)
 
 
