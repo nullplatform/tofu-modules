@@ -74,13 +74,13 @@ run "uses_default_values" {
   }
 
   assert {
-    condition     = nullplatform_account.nullplatform_account["minimal"].repository_prefix == "poc-account"
-    error_message = "Default repository_prefix should be 'poc-account'"
+    condition     = nullplatform_account.nullplatform_account["minimal"].repository_prefix == null
+    error_message = "repository_prefix should be null when not provided"
   }
 
   assert {
-    condition     = nullplatform_account.nullplatform_account["minimal"].repository_provider == "github"
-    error_message = "Default repository_provider should be 'github'"
+    condition     = nullplatform_account.nullplatform_account["minimal"].repository_provider == null
+    error_message = "repository_provider should be null when not provided"
   }
 
   assert {
