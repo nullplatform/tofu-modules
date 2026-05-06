@@ -117,7 +117,11 @@ resource "null_resource" "nrn_patch" {
 resource "nullplatform_provider_specification" "from_scope_configuration" {
   count = var.create_scope_configuration ? 1 : 0
 
-  name             = local.scope_configuration.name
+  # `name` defaults to the template value (`local.scope_configuration.name`)
+  # for backwards compatibility. Pass `var.scope_configuration_name_override`
+  # to override when the template's name would collide with an existing
+  # org-visible provider_specification (sibling-account isolation case).
+  name             = coalesce(var.scope_configuration_name_override, local.scope_configuration.name)
   description      = local.scope_configuration.description
   category         = local.scope_configuration.category
   allow_dimensions = local.scope_configuration.allow_dimensions
