@@ -3,6 +3,7 @@ service:
 %{ if cloud_provider == "oci" && length(oci_load_balancer_subnet_ids) > 0 ~}
   annotations:
     service.beta.kubernetes.io/oci-load-balancer-subnet1: "${join(",", oci_load_balancer_subnet_ids)}"
+    service.beta.kubernetes.io/oci-load-balancer-internal: "true"
 %{ endif ~}
   ports:
     - name: status-port
