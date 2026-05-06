@@ -22,15 +22,15 @@ locals {
       ingress_private_domain  = var.ingressControllers.private.domain
 
       # ---- gateway ----
-      gateway_use_cluster_ip                        = var.gateway_use_cluster_ip ? "true" : "false"
+      gateway_use_cluster_ip                      = var.gateway_use_cluster_ip ? "true" : "false"
       gateway_enabled                             = var.gateway_enabled ? "true" : "false"
       gateway_internal_enabled                    = var.gateway_internal_enabled ? "true" : "false"
       gateway_public_enabled                      = var.gateway_public_enabled ? "true" : "false"
       gateway_internal_azure_load_balancer_subnet = var.internal_azure_load_balancer_subnet
       gateway_public_aws_name                     = var.gateway_public_aws_name
       gateway_internal_aws_name                   = var.gateway_internal_aws_name
-      gateway_public_aws_dns_name         = var.gateway_public_aws_dns_name
-      gateway_private_aws_dns_name          = var.gateway_private_aws_dns_name
+      gateway_public_aws_dns_name                 = var.gateway_public_aws_dns_name
+      gateway_private_aws_dns_name                = var.gateway_private_aws_dns_name
 
       # ---- gateway security (AWS) ----
       gateway_public_aws_security_groups  = var.gateway_public_aws_security_group_id
@@ -47,6 +47,8 @@ locals {
       # ---- gateway security (OCI) ----
       gateway_public_oci_security_list_management_mode  = var.gateway_public_oci_security_list_management_mode
       gateway_private_oci_security_list_management_mode = var.gateway_private_oci_security_list_management_mode
+      gateway_public_oci_subnet                         = var.gateway_public_oci_subnet
+      gateway_private_oci_subnet                        = var.gateway_private_oci_subnet
 
       # ---- nullplatform ----
       np_api_key = var.np_api_key
