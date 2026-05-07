@@ -20,7 +20,7 @@ run "oci_annotation_present" {
   command = plan
 
   assert {
-    condition     = can(regex("oci\\.oraclecloud\\.com/subnet-ids", local.helm_values))
+    condition     = can(regex("service\\.beta\\.kubernetes\\.io/oci-load-balancer-subnet1", local.helm_values))
     error_message = "OCI subnet annotation should be present in helm values"
   }
 }
