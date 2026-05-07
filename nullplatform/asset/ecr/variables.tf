@@ -13,3 +13,15 @@ variable "cluster_name" {
   description = "Name of the cluster where the policy runs"
   type        = string
 }
+
+variable "dimensions" {
+  description = "Dimensions to segment the nullplatform provider config (e.g. by region, environment)"
+  type        = map(string)
+  default     = {}
+}
+
+variable "repository_policy_pull_accounts" {
+  description = "AWS account IDs allowed to pull images from ECR. The account where this module is deployed is always included."
+  type        = list(string)
+  default     = []
+}

@@ -2,15 +2,38 @@ resource "nullplatform_provider_config" "ecr" {
   provider   = nullplatform
   nrn        = var.nrn
   type       = "ecr"
+  dimensions = var.dimensions
   attributes = jsonencode({
     "ci" : {
-      "region" : data.aws_region.current.region,
-      "access_key" : aws_iam_access_key.nullplatform_build_workflow_user_key.id
+      "region"     : data.aws_region.current.region,
+      "access_key" : aws_iam_access_key.nullplatform_build_workflow_user_key.id,
       "secret_key" : aws_iam_access_key.nullplatform_build_workflow_user_key.secret
     },
     "setup" : {
-      "region" : data.aws_region.current.region,
-      "role_arn" : aws_iam_role.nullplatform_application_role.arn
+      "region"   : data.aws_region.current.region,
+      "role_arn" : aws_iam_role.nullplatform_application_role.arn,
+      "policy" : jsonencode({
+        Version = "2012-10-17"
+        Statement = [
+          {
+            Sid       = "AllowPull"
+            Effect    = "Allow"
+            Principal = "*"
+            Action = [
+              "ecr:BatchCheckLayerAvailability",
+              "ecr:BatchGetImage",
+              "ecr:DescribeImages",
+              "ecr:DescribeRepositories",
+              "ecr:GetDownloadUrlForLayer"
+            ]
+            Condition = {
+              StringEquals = {
+                "aws:PrincipalAccount" = local.pull_accounts
+              }
+            }
+          }
+        ]
+      })
     }
   })
   lifecycle {
