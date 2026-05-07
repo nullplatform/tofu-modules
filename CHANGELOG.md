@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/nullplatform/tofu-modules/compare/v2.1.1...v2.2.0) (2026-05-07)
+
+
+### Features
+
+* **nullplatform/asset/ecr:** add configurable cross-account pull policy ([#330](https://github.com/nullplatform/tofu-modules/issues/330)) ([6f4392f](https://github.com/nullplatform/tofu-modules/commit/6f4392f2761561567f6df5024b81815b110fe5ad))
+
 ## [2.1.1](https://github.com/nullplatform/tofu-modules/compare/v2.1.0...v2.1.1) (2026-05-07)
 
 
