@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/nullplatform/tofu-modules/compare/v2.1.0...v2.1.1) (2026-05-07)
+
+
+### Bug Fixes
+
+* istio subnet annotation ([#327](https://github.com/nullplatform/tofu-modules/issues/327)) ([57c2495](https://github.com/nullplatform/tofu-modules/commit/57c2495fd180057d4484b368d25d34adeb2378da))
+
 ## [2.1.0](https://github.com/nullplatform/tofu-modules/compare/v2.0.2...v2.1.0) (2026-05-05)
 
 
