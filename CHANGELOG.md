@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1](https://github.com/nullplatform/tofu-modules/compare/v2.2.0...v2.2.1) (2026-05-07)
+
+
+### Bug Fixes
+
+* **nullplatform/asset/ecr:** correct invalid provider version constraint operator ([#332](https://github.com/nullplatform/tofu-modules/issues/332)) ([8467496](https://github.com/nullplatform/tofu-modules/commit/8467496a52c2f20bbd1f715ce929fac32ff5874c))
+
 ## [2.2.0](https://github.com/nullplatform/tofu-modules/compare/v2.1.1...v2.2.0) (2026-05-07)
 
 
