@@ -77,20 +77,20 @@ variable "internal_azure_load_balancer_subnet" {
 
 variable "gateway_use_cluster_ip" {
   description = ""
-  type = bool
-  default = false
+  type        = bool
+  default     = false
 }
 
 
 variable "gateway_public_aws_dns_name" {
   description = ""
-  type = string
-  default = ""
+  type        = string
+  default     = ""
 }
 variable "gateway_private_aws_dns_name" {
   description = ""
-  type = string
-  default = ""
+  type        = string
+  default     = ""
 }
 ############################################
 # Control Plane
@@ -395,6 +395,18 @@ variable "gateway_private_oci_security_list_management_mode" {
   type        = string
   description = "OCI Load Balancer security list management mode for the private gateway. Options: 'All' (recommended - auto-manages security lists), 'Frontend' (only frontend rules), 'None' (manual management)."
   default     = "All"
+}
+
+variable "gateway_public_oci_subnet" {
+  type        = string
+  description = "OCI subnet OCID for the public gateway load balancer (sets service.beta.kubernetes.io/oci-load-balancer-subnet1)."
+  default     = ""
+}
+
+variable "gateway_private_oci_subnet" {
+  type        = string
+  description = "OCI subnet OCID for the private gateway load balancer (sets service.beta.kubernetes.io/oci-load-balancer-subnet1)."
+  default     = ""
 }
 
 ############################################

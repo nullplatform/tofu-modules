@@ -2,27 +2,27 @@
 
 ## Description
 
-Deploys cert-manager with multi-cloud DNS01 ACME challenge support and automated certificate management for Kubernetes clusters across GCP, AWS, Azure, Cloudflare, and OCI
+Deploys cert-manager with multi-cloud DNS provider support for automated TLS certificate management in Kubernetes
 
 ## Architecture
 
-Creates three helm_release resources: the core cert-manager chart with CRDs and service account annotations configured for cloud provider workload identity, a nullplatform-cert-manager-config chart for ClusterIssuer and Certificate resources using templated values for DNS01 solver configuration, and conditionally a cert-manager-webhook-oci chart when OCI is selected. Service account annotations are dynamically set based on cloud_provider using local.annotations_by_provider to enable IRSA (AWS), Workload Identity (GCP/Azure), or workload principal (OCI). Template files are rendered with common context (namespace, domain names, account slug) and provider-specific context (project IDs, regions, credentials) merged from conditional locals blocks.
+Creates three helm_release resources: the core cert-manager chart with CRDs and service account annotations, a nullplatform-cert-manager-config chart that templates provider-specific DNS01 solver configurations from locals, and conditionally an OCI webhook chart. The module merges cloud provider contexts (GCP project_id, Azure client_id/tenant_id, AWS region, Cloudflare token, OCI compartment_ocid) into templated YAML values that configure ClusterIssuer resources with appropriate RBAC annotations (iam.gke.io/gcp-service-account for GCP, eks.amazonaws.com/role-arn for AWS, azure.workload.identity/client-id for Azure, oci.oraclecloud.com/workload-identity-principal for OCI). Each helm_release includes atomic deployment settings with dependency chains ensuring cert-manager deploys before configuration and webhooks.
 
 ## Features
 
-- Deploys cert-manager with CRDs enabled and configures DNS01 recursive nameservers to 8.8.8.8 and 1.1.1.1
-- Configures cloud provider workload identity through service account annotations (GKE Workload Identity, EKS IRSA, AKS Workload Identity, or OCI workload principal)
-- Creates ClusterIssuer and Certificate resources via nullplatform-cert-manager-config Helm chart with provider-specific DNS01 solver configuration
-- Installs cert-manager-webhook-oci Helm chart for OCI DNS integration when OCI provider is selected
-- Supports multiple cloud DNS providers (GCP Cloud DNS, AWS Route53, Azure DNS, Cloudflare DNS, OCI DNS) through templated values
-- Manages private domain certificates using private_domain_name variable for internal certificate issuance
-- Configures Azure pod labels with azure.workload.identity/use when Azure provider is selected
+- Deploys cert-manager Helm chart with CRDs and configurable namespace isolation
+- Configures cloud-specific workload identity annotations for GCP, AWS, Azure, and OCI service accounts
+- Templates DNS01 solver configurations per cloud provider using hosted zone and account context
+- Deploys provider-specific configuration via nullplatform-cert-manager-config Helm chart
+- Installs OCI DNS webhook chart conditionally when cloud_provider is set to oci
+- Configures recursive DNS nameservers (8.8.8.8, 1.1.1.1) for DNS01 challenge validation
+- Supports private domain certificate issuance alongside public hosted zone certificates
 
 ## Basic Usage
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.56.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v2.1.0"
 
   account_slug        = "your-account-slug"
   cloud_provider      = "your-cloud-provider"
@@ -31,11 +31,11 @@ module "cert_manager" {
 }
 ```
 
-### Usage with GCP Cloud DNS
+### Usage with GCP Configuration
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.56.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v2.1.0"
 
   account_slug        = "your-account-slug"
   cloud_provider      = "gcp"
@@ -46,26 +46,11 @@ module "cert_manager" {
 }
 ```
 
-### Usage with AWS Route53
+### Usage with Azure Configuration
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.56.1"
-
-  account_slug        = "your-account-slug"
-  aws_region          = "your-aws-region"  # Required when cloud_provider = "aws"
-  aws_sa_arn          = "your-aws-sa-arn"  # Required when cloud_provider = "aws"
-  cloud_provider      = "aws"
-  hosted_zone_name    = "your-hosted-zone-name"
-  private_domain_name = "your-private-domain-name"
-}
-```
-
-### Usage with Azure DNS
-
-```hcl
-module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.56.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v2.1.0"
 
   account_slug              = "your-account-slug"
   azure_client_id           = "your-azure-client-id"  # Required when cloud_provider = "azure"
@@ -79,31 +64,48 @@ module "cert_manager" {
 }
 ```
 
-### Usage with Cloudflare DNS
+### Usage with Cloudflare Configuration
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.56.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v2.1.0"
+
+  account_slug           = "your-account-slug"
+  cloud_provider         = "cloudflare"
+  cloudflare_secret_name = "your-cloudflare-secret-name"  # Required when cloud_provider = "cloudflare"
+  cloudflare_token       = "your-cloudflare-token"  # Required when cloud_provider = "cloudflare"
+  hosted_zone_name       = "your-hosted-zone-name"
+  private_domain_name    = "your-private-domain-name"
+}
+```
+
+### Usage with AWS Configuration
+
+```hcl
+module "cert_manager" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v2.1.0"
 
   account_slug        = "your-account-slug"
-  cloud_provider      = "cloudflare"
-  cloudflare_token    = "your-cloudflare-token"  # Required when cloud_provider = "cloudflare"
+  aws_region          = "your-aws-region"  # Required when cloud_provider = "aws"
+  aws_sa_arn          = "your-aws-sa-arn"  # Required when cloud_provider = "aws"
+  cloud_provider      = "aws"
   hosted_zone_name    = "your-hosted-zone-name"
   private_domain_name = "your-private-domain-name"
 }
 ```
 
-### Usage with OCI DNS
+### Usage with OCI Configuration
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v1.56.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v2.1.0"
 
   account_slug         = "your-account-slug"
   cloud_provider       = "oci"
   hosted_zone_name     = "your-hosted-zone-name"
   oci_compartment_ocid = "your-oci-compartment-ocid"  # Required when cloud_provider = "oci"
   oci_region           = "your-oci-region"  # Required when cloud_provider = "oci"
+  oci_sa_ocid          = "your-oci-sa-ocid"  # Required when cloud_provider = "oci"
   private_domain_name  = "your-private-domain-name"
 }
 ```
@@ -129,6 +131,7 @@ resource "example_resource" "this" {
 | Name | Version |
 |------|---------|
 | <a name="provider_helm"></a> [helm](#provider\_helm) | 3.1.1 |
+| <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Resources
 
@@ -137,6 +140,7 @@ resource "example_resource" "this" {
 | [helm_release.cert_manager](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.cert_manager_config](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.cert_manager_webhook_oci](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
+| [terraform_data.provider_validation](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 
 ## Inputs
 
@@ -170,16 +174,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "cert_manager",
-  "description": "Deploys cert-manager with multi-cloud DNS01 ACME challenge support and automated certificate management for Kubernetes clusters across GCP, AWS, Azure, Cloudflare, and OCI",
-  "architecture": "Creates three helm_release resources: the core cert-manager chart with CRDs and service account annotations configured for cloud provider workload identity, a nullplatform-cert-manager-config chart for ClusterIssuer and Certificate resources using templated values for DNS01 solver configuration, and conditionally a cert-manager-webhook-oci chart when OCI is selected. Service account annotations are dynamically set based on cloud_provider using local.annotations_by_provider to enable IRSA (AWS), Workload Identity (GCP/Azure), or workload principal (OCI). Template files are rendered with common context (namespace, domain names, account slug) and provider-specific context (project IDs, regions, credentials) merged from conditional locals blocks.",
+  "description": "Deploys cert-manager with multi-cloud DNS provider support for automated TLS certificate management in Kubernetes",
+  "architecture": "Creates three helm_release resources: the core cert-manager chart with CRDs and service account annotations, a nullplatform-cert-manager-config chart that templates provider-specific DNS01 solver configurations from locals, and conditionally an OCI webhook chart. The module merges cloud provider contexts (GCP project_id, Azure client_id/tenant_id, AWS region, Cloudflare token, OCI compartment_ocid) into templated YAML values that configure ClusterIssuer resources with appropriate RBAC annotations (iam.gke.io/gcp-service-account for GCP, eks.amazonaws.com/role-arn for AWS, azure.workload.identity/client-id for Azure, oci.oraclecloud.com/workload-identity-principal for OCI). Each helm_release includes atomic deployment settings with dependency chains ensuring cert-manager deploys before configuration and webhooks.",
   "features": [
-    "Deploys cert-manager with CRDs enabled and configures DNS01 recursive nameservers to 8.8.8.8 and 1.1.1.1",
-    "Configures cloud provider workload identity through service account annotations (GKE Workload Identity, EKS IRSA, AKS Workload Identity, or OCI workload principal)",
-    "Creates ClusterIssuer and Certificate resources via nullplatform-cert-manager-config Helm chart with provider-specific DNS01 solver configuration",
-    "Installs cert-manager-webhook-oci Helm chart for OCI DNS integration when OCI provider is selected",
-    "Supports multiple cloud DNS providers (GCP Cloud DNS, AWS Route53, Azure DNS, Cloudflare DNS, OCI DNS) through templated values",
-    "Manages private domain certificates using private_domain_name variable for internal certificate issuance",
-    "Configures Azure pod labels with azure.workload.identity/use when Azure provider is selected"
+    "Deploys cert-manager Helm chart with CRDs and configurable namespace isolation",
+    "Configures cloud-specific workload identity annotations for GCP, AWS, Azure, and OCI service accounts",
+    "Templates DNS01 solver configurations per cloud provider using hosted zone and account context",
+    "Deploys provider-specific configuration via nullplatform-cert-manager-config Helm chart",
+    "Installs OCI DNS webhook chart conditionally when cloud_provider is set to oci",
+    "Configures recursive DNS nameservers (8.8.8.8, 1.1.1.1) for DNS01 challenge validation",
+    "Supports private domain certificate issuance alongside public hosted zone certificates"
   ],
   "inputs": [
     {
@@ -223,6 +227,21 @@ resource "example_resource" "this" {
       "required": false
     },
     {
+      "name": "cert_manager_version",
+      "description": "The version of cert-manager Helm chart to deploy",
+      "required": false
+    },
+    {
+      "name": "cert_manager_namespace",
+      "description": "The Kubernetes namespace where cert-manager will be deployed",
+      "required": false
+    },
+    {
+      "name": "cert_manager_config_version",
+      "description": "The version of the cert-manager configuration Helm chart",
+      "required": false
+    },
+    {
       "name": "azure_subscription_id",
       "description": "The Azure subscription ID.",
       "required": false
@@ -240,6 +259,11 @@ resource "example_resource" "this" {
     {
       "name": "azure_hosted_zone_name",
       "description": "The hosted zone name in Azure DNS.",
+      "required": false
+    },
+    {
+      "name": "cloudflare_secret_name",
+      "description": "The name of the Kubernetes secret that stores the Cloudflare API token.",
       "required": false
     },
     {
@@ -263,26 +287,6 @@ resource "example_resource" "this" {
       "required": false
     },
     {
-      "name": "cert_manager_version",
-      "description": "The version of cert-manager Helm chart to deploy",
-      "required": false
-    },
-    {
-      "name": "cert_manager_namespace",
-      "description": "The Kubernetes namespace where cert-manager will be deployed",
-      "required": false
-    },
-    {
-      "name": "cert_manager_config_version",
-      "description": "The version of the cert-manager configuration Helm chart",
-      "required": false
-    },
-    {
-      "name": "cloudflare_secret_name",
-      "description": "The name of the Kubernetes secret that stores the Cloudflare API token.",
-      "required": false
-    },
-    {
       "name": "oci_sa_ocid",
       "description": "The OCID of the OCI workload identity principal for cert-manager. Optional when using Dynamic Groups with Workload Identity.",
       "required": false
@@ -299,6 +303,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "8bde21baa5bd2cf0a30469297ef7331c"
+  "hash": "4ac3fa13fc1ecf081ce4182a81b4e3d3"
 }
 END_AI_METADATA -->

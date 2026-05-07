@@ -66,7 +66,7 @@ variable "cloudflare_token" {
   description = "The Cloudflare API token for DNS management (required when dns_provider_name is 'cloudflare')"
   type        = string
   sensitive   = true
-  default     = null
+  default     = ""
 }
 
 ###############################################################################
@@ -76,13 +76,13 @@ variable "cloudflare_token" {
 variable "aws_region" {
   description = "The AWS region where the Route53 hosted zones are located"
   type        = string
-  default     = null
+  default     = ""
 }
 
 variable "aws_iam_role_arn" {
   description = "The IAM role ARN for ExternalDNS to assume for Route53 access (required when dns_provider_name is 'aws')"
   type        = string
-  default     = null
+  default     = ""
 }
 
 variable "zone_id_filter" {
@@ -104,7 +104,7 @@ variable "zone_type" {
 variable "oci_compartment_ocid" {
   description = "The OCI compartment OCID where the DNS zones are located (required when dns_provider_name is 'oci')"
   type        = string
-  default     = " "
+  default     = ""
 }
 
 variable "oci_region" {
@@ -155,24 +155,24 @@ variable "dns_provider_name" {
 variable "azure_client_id" {
   description = "Client ID of the Azure Managed Identity for Workload Identity (required when dns_provider_name is 'azure')"
   type        = string
-  default     = null
+  default     = ""
 }
 
 variable "azure_subscription_id" {
   description = "Azure subscription ID where the DNS zone is located (required when dns_provider_name is 'azure')"
   type        = string
-  default     = null
+  default     = ""
 }
 
 variable "azure_resource_group" {
   description = "Azure resource group containing the DNS zone (required when dns_provider_name is 'azure')"
   type        = string
-  default     = null
+  default     = ""
 }
 
 variable "azure_tenant_id" {
   description = "Azure tenant ID (required when dns_provider_name is 'azure')"
   type        = string
-  default     = null
+  default     = ""
 }
 

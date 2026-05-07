@@ -52,7 +52,7 @@ run "aws_requires_sa_arn" {
     aws_sa_arn = ""
   }
 
-  expect_failures = [var.aws_sa_arn]
+  expect_failures = [terraform_data.provider_validation]
 }
 
 # Validates AWS fails without region
@@ -63,5 +63,5 @@ run "aws_requires_region" {
     aws_region = ""
   }
 
-  expect_failures = [var.aws_region]
+  expect_failures = [terraform_data.provider_validation]
 }

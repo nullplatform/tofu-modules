@@ -1,5 +1,40 @@
 # Changelog
 
+## [2.1.1](https://github.com/nullplatform/tofu-modules/compare/v2.1.0...v2.1.1) (2026-05-07)
+
+
+### Bug Fixes
+
+* istio subnet annotation ([#327](https://github.com/nullplatform/tofu-modules/issues/327)) ([57c2495](https://github.com/nullplatform/tofu-modules/commit/57c2495fd180057d4484b368d25d34adeb2378da))
+
+## [2.1.0](https://github.com/nullplatform/tofu-modules/compare/v2.0.2...v2.1.0) (2026-05-05)
+
+
+### Features
+
+* update nullplatform provider to &gt;= 0.0.86 across all modules ([#322](https://github.com/nullplatform/tofu-modules/issues/322)) ([6b5e5ce](https://github.com/nullplatform/tofu-modules/commit/6b5e5ce1649721eb7010903d2229004d0225f97f))
+
+## [2.0.2](https://github.com/nullplatform/tofu-modules/compare/v2.0.1...v2.0.2) (2026-05-04)
+
+
+### Bug Fixes
+
+* **istio:** add OCI LoadBalancer subnet annotation support ([#317](https://github.com/nullplatform/tofu-modules/issues/317)) ([4427b61](https://github.com/nullplatform/tofu-modules/commit/4427b61229b4ca996c95d7dfb839a1fed9340e9d))
+
+## [2.0.1](https://github.com/nullplatform/tofu-modules/compare/v2.0.0...v2.0.1) (2026-05-04)
+
+
+### Reverts
+
+* release 2.0.0 and feat eks-gateway-rules ([#318](https://github.com/nullplatform/tofu-modules/issues/318), [#314](https://github.com/nullplatform/tofu-modules/issues/314)) ([#319](https://github.com/nullplatform/tofu-modules/issues/319)) ([167304f](https://github.com/nullplatform/tofu-modules/commit/167304f6023dbfe886490743b019421c46707615))
+
+## [1.56.2](https://github.com/nullplatform/tofu-modules/compare/v1.56.1...v1.56.2) (2026-04-30)
+
+
+### Bug Fixes
+
+* **cert_manager,external_dns:** move cross-variable validations to terraform_data preconditions ([#315](https://github.com/nullplatform/tofu-modules/issues/315)) ([a213e35](https://github.com/nullplatform/tofu-modules/commit/a213e357ddeef15d364e11e64ed5b4615efdd8f8))
+
 ## [1.56.1](https://github.com/nullplatform/tofu-modules/compare/v1.56.0...v1.56.1) (2026-04-29)
 
 
