@@ -22,7 +22,7 @@ The module first creates two kubernetes_namespace_v1 resources ('nullplatform-to
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v2.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v2.3.0"
 
   k8s_provider = "your-k8s-provider"
   np_api_key   = "your-np-api-key"
@@ -33,7 +33,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v2.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v2.3.0"
 
   k8s_provider = "eks"
   np_api_key   = "your-np-api-key"
@@ -44,7 +44,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v2.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v2.3.0"
 
   k8s_provider = "gke"
   np_api_key   = "your-np-api-key"
@@ -55,7 +55,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v2.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v2.3.0"
 
   k8s_provider = "aks"
   np_api_key   = "your-np-api-key"
@@ -66,7 +66,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v2.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v2.3.0"
 
   k8s_provider = "oke"
   np_api_key   = "your-np-api-key"
@@ -77,7 +77,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v2.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v2.3.0"
 
   k8s_provider = "aro"
   np_api_key   = "your-np-api-key"
@@ -144,6 +144,7 @@ resource "example_resource" "this" {
 | <a name="input_gateway_private_azure_nsg_id"></a> [gateway\_private\_azure\_nsg\_id](#input\_gateway\_private\_azure\_nsg\_id) | The ID of the Azure NSG for the private gateway. Output from infrastructure/azure/security module. | `string` | `""` | no |
 | <a name="input_gateway_private_gcp_firewall_name"></a> [gateway\_private\_gcp\_firewall\_name](#input\_gateway\_private\_gcp\_firewall\_name) | The name of the GCP firewall rule for the private gateway. Output from infrastructure/gcp/security module. | `string` | `""` | no |
 | <a name="input_gateway_private_oci_security_list_management_mode"></a> [gateway\_private\_oci\_security\_list\_management\_mode](#input\_gateway\_private\_oci\_security\_list\_management\_mode) | OCI Load Balancer security list management mode for the private gateway. Options: 'All' (recommended - auto-manages security lists), 'Frontend' (only frontend rules), 'None' (manual management). | `string` | `"All"` | no |
+| <a name="input_gateway_private_oci_subnet"></a> [gateway\_private\_oci\_subnet](#input\_gateway\_private\_oci\_subnet) | OCI subnet OCID for the private gateway load balancer (sets service.beta.kubernetes.io/oci-load-balancer-subnet1). | `string` | `""` | no |
 | <a name="input_gateway_public_aws_dns_name"></a> [gateway\_public\_aws\_dns\_name](#input\_gateway\_public\_aws\_dns\_name) | n/a | `string` | `""` | no |
 | <a name="input_gateway_public_aws_name"></a> [gateway\_public\_aws\_name](#input\_gateway\_public\_aws\_name) | Name of public gateway in AWS. | `string` | `"k8s-nullplatform-internet-facing"` | no |
 | <a name="input_gateway_public_aws_security_group_id"></a> [gateway\_public\_aws\_security\_group\_id](#input\_gateway\_public\_aws\_security\_group\_id) | The ID of the AWS security group for the public gateway. Output from infrastructure/aws/security module. | `string` | `""` | no |
@@ -151,6 +152,7 @@ resource "example_resource" "this" {
 | <a name="input_gateway_public_enabled"></a> [gateway\_public\_enabled](#input\_gateway\_public\_enabled) | Enable the public gateway. | `bool` | `true` | no |
 | <a name="input_gateway_public_gcp_firewall_name"></a> [gateway\_public\_gcp\_firewall\_name](#input\_gateway\_public\_gcp\_firewall\_name) | The name of the GCP firewall rule for the public gateway. Output from infrastructure/gcp/security module. | `string` | `""` | no |
 | <a name="input_gateway_public_oci_security_list_management_mode"></a> [gateway\_public\_oci\_security\_list\_management\_mode](#input\_gateway\_public\_oci\_security\_list\_management\_mode) | OCI Load Balancer security list management mode for the public gateway. Options: 'All' (recommended - auto-manages security lists), 'Frontend' (only frontend rules), 'None' (manual management). | `string` | `"All"` | no |
+| <a name="input_gateway_public_oci_subnet"></a> [gateway\_public\_oci\_subnet](#input\_gateway\_public\_oci\_subnet) | OCI subnet OCID for the public gateway load balancer (sets service.beta.kubernetes.io/oci-load-balancer-subnet1). | `string` | `""` | no |
 | <a name="input_gateway_use_cluster_ip"></a> [gateway\_use\_cluster\_ip](#input\_gateway\_use\_cluster\_ip) | n/a | `bool` | `false` | no |
 | <a name="input_gateways_enabled"></a> [gateways\_enabled](#input\_gateways\_enabled) | Enable gateway resources (Helm chart). | `bool` | `true` | no |
 | <a name="input_gelf_enabled"></a> [gelf\_enabled](#input\_gelf\_enabled) | Enable GELF output. | `bool` | `false` | no |
