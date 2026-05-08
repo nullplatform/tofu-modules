@@ -132,6 +132,33 @@ variable "create_scope_configuration" {
   description = "Whether to fetch and apply scope-configuration.json.tpl from the template repo. Set to true only if the file exists for this scope."
 }
 
+variable "scope_configuration_name_override" {
+  description = <<-EOT
+    Optional override for the `name` of the `nullplatform_provider_specification`
+    created from `scope-configuration.json.tpl` (when `create_scope_configuration = true`).
+
+    Default `null` -> use the `name` field from the template, preserving
+    current behavior. Set to a string when consuming this module from a
+    setup where the template's name would collide with an existing
+    org-visible provider_specification (e.g., a hub/principal account
+    already registered the canonical "Static Files" / "AWS Lambda" name
+    org-wide, and a sibling spoke account needs an account-local copy
+    with a distinct name).
+
+    The `slug` is auto-derived server-side from the name; pass a name
+    that will produce a unique slug per the API uniqueness constraints
+    (name must be unique across `visible_to` overlaps in the same org).
+
+    Example:
+
+      scope_configuration_name_override = "Static Files Galicia 3"
+
+    Default = null (no override, backwards compatible).
+  EOT
+  type        = string
+  default     = null
+}
+
 ################################################################################
 # Visibility (cross-account sharing)
 ################################################################################
