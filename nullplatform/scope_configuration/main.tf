@@ -1,5 +1,6 @@
 resource "nullplatform_provider_config" "scope_configuration" {
   nrn        = var.nrn
+  icon       = var.icon
   type       = var.provider_specification_slug
   dimensions = var.dimensions
   attributes = jsonencode(var.attributes)
