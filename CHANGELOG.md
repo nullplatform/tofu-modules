@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.2.1](https://github.com/nullplatform/tofu-modules/compare/v2.2.0...v2.2.1) (2026-05-07)
+
+
+### Bug Fixes
+
+* **nullplatform/asset/ecr:** correct invalid provider version constraint operator ([#332](https://github.com/nullplatform/tofu-modules/issues/332)) ([8467496](https://github.com/nullplatform/tofu-modules/commit/8467496a52c2f20bbd1f715ce929fac32ff5874c))
+
+## [2.2.0](https://github.com/nullplatform/tofu-modules/compare/v2.1.1...v2.2.0) (2026-05-07)
+
+
+### Features
+
+* **nullplatform/asset/ecr:** add configurable cross-account pull policy ([#330](https://github.com/nullplatform/tofu-modules/issues/330)) ([6f4392f](https://github.com/nullplatform/tofu-modules/commit/6f4392f2761561567f6df5024b81815b110fe5ad))
+
+## [2.1.1](https://github.com/nullplatform/tofu-modules/compare/v2.1.0...v2.1.1) (2026-05-07)
+
+
+### Bug Fixes
+
+* istio subnet annotation ([#327](https://github.com/nullplatform/tofu-modules/issues/327)) ([57c2495](https://github.com/nullplatform/tofu-modules/commit/57c2495fd180057d4484b368d25d34adeb2378da))
+
 ## [2.1.0](https://github.com/nullplatform/tofu-modules/compare/v2.0.2...v2.1.0) (2026-05-05)
 
 
