@@ -122,6 +122,7 @@ resource "nullplatform_provider_specification" "from_scope_configuration" {
   # to override when the template's name would collide with an existing
   # org-visible provider_specification (sibling-account isolation case).
   name             = coalesce(var.scope_configuration_name_override, local.scope_configuration.name)
+  icon             = local.scope_configuration.icon
   description      = local.scope_configuration.description
   category         = local.scope_configuration.category
   allow_dimensions = local.scope_configuration.allow_dimensions
