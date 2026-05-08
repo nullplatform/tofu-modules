@@ -2,26 +2,26 @@
 
 ## Description
 
-Deploys Istio service mesh on Kubernetes with configurable ingress gateway and cloud provider-specific LoadBalancer annotations
+Deploys Istio service mesh components (istio-base, istiod, and istio-ingressgateway) onto a Kubernetes cluster using sequenced Helm releases with cloud-provider-specific ingress gateway configuration
 
 ## Architecture
 
-Creates three helm_release resources in sequence: istio-base (foundation CRDs), istiod (control plane), and istio-ingressgateway (data plane gateway). The istiod release depends on istio_base, and istio_ingressgateway depends on istiod to ensure proper installation order. The gateway helm_release uses a templatefile to render Kubernetes Service and Deployment configurations with cloud-specific annotations, service ports, and LoadBalancer settings. All resources are deployed to the same namespace with atomic upgrades and automatic cleanup enabled.
+The module creates three helm_release resources in a strict dependency chain: istio-base is installed first, followed by istiod (which depends on istio-base and configures pilot.replicaCount and pilot.autoscaleMin via set blocks), and finally istio-ingressgateway (which depends on istiod). The ingress gateway helm_release consumes a templatefile-rendered values YAML from locals.tf, which injects service type, port mappings, HTTP2 settings, cloud provider identity, and OCI subnet IDs into the gateway Helm chart. All three releases target the same Kubernetes namespace and are configured with atomic installs, cleanup on failure, and a 600-second timeout.
 
 ## Features
 
-- Deploys Istio base CRDs, control plane (istiod), and ingress gateway as separate Helm releases with dependency ordering
-- Configures Kubernetes LoadBalancer service with customizable HTTPS and optional HTTP2 ports and target ports
-- Injects cloud provider-specific annotations for AWS, OCI, Azure, and GCP LoadBalancers
-- Supports OCI-specific LoadBalancer configuration with subnet ID assignments
-- Enables atomic Helm deployments with automatic rollback, cleanup on failure, and 10-revision history retention
-- Provides configurable Istio component versions independently for base, istiod, and gateway charts
+- Deploys istio-base CRD foundation chart as the prerequisite for all other Istio components
+- Installs istiod control plane with configurable replica count and autoscale minimum to prevent HPA from collapsing HA deployments during node drains
+- Configures istio-ingressgateway with templated Helm values supporting HTTPS, optional HTTP2, and custom service types
+- Injects cloud-provider-specific LoadBalancer annotations (AWS, OCI, Azure, GCP) into the ingress gateway service via templatefile rendering
+- Supports OCI-specific LoadBalancer subnet assignment via oci_load_balancer_subnet_ids annotation injection
+- Enforces sequential Helm release ordering with dependency_on chaining to ensure stable Istio component installation
 
 ## Basic Usage
 
 ```hcl
 module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v2.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v2.3.0"
 }
 ```
 
@@ -45,7 +45,7 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_helm"></a> [helm](#provider\_helm) | ~> 3.0 |
+| <a name="provider_helm"></a> [helm](#provider\_helm) | 3.1.1 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Resources
@@ -69,6 +69,7 @@ resource "example_resource" "this" {
 | <a name="input_https_target_port"></a> [https\_target\_port](#input\_https\_target\_port) | The container target port for HTTPS | `number` | `8443` | no |
 | <a name="input_istio_base_version"></a> [istio\_base\_version](#input\_istio\_base\_version) | Helm chart version for the istio-base component | `string` | `"1.27.1"` | no |
 | <a name="input_istio_ingressgateway_version"></a> [istio\_ingressgateway\_version](#input\_istio\_ingressgateway\_version) | Helm chart version for the Istio ingress gateway | `string` | `"1.27.1"` | no |
+| <a name="input_istiod_replicas"></a> [istiod\_replicas](#input\_istiod\_replicas) | Number of istiod replicas. Default is 1 to preserve the previous behavior of this module for existing consumers; set to 2 (recommended) to let the pilot deployment tolerate node drains — the istiod chart installs a PodDisruptionBudget with minAvailable=1, and a single-replica istiod therefore blocks node rolling updates (e.g. EKS AMI bumps). This value is applied to both pilot.replicaCount and pilot.autoscaleMin; without the autoscaleMin override, the HPA (enabled by default with autoscaleMin=1) would scale back to 1 replica shortly after install. | `number` | `1` | no |
 | <a name="input_istiod_version"></a> [istiod\_version](#input\_istiod\_version) | Helm chart version for istiod (Istio control plane) | `string` | `"1.27.1"` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | The Kubernetes namespace where gateway will be installed. | `string` | `"istio-system"` | no |
 | <a name="input_oci_load_balancer_subnet_ids"></a> [oci\_load\_balancer\_subnet\_ids](#input\_oci\_load\_balancer\_subnet\_ids) | List of OCI subnet OCIDs for the LoadBalancer Service (required when cloud\_provider is 'oci') | `list(string)` | `[]` | no |
@@ -80,17 +81,22 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "istio",
-  "description": "Deploys Istio service mesh on Kubernetes with configurable ingress gateway and cloud provider-specific LoadBalancer annotations",
-  "architecture": "Creates three helm_release resources in sequence: istio-base (foundation CRDs), istiod (control plane), and istio-ingressgateway (data plane gateway). The istiod release depends on istio_base, and istio_ingressgateway depends on istiod to ensure proper installation order. The gateway helm_release uses a templatefile to render Kubernetes Service and Deployment configurations with cloud-specific annotations, service ports, and LoadBalancer settings. All resources are deployed to the same namespace with atomic upgrades and automatic cleanup enabled.",
+  "description": "Deploys Istio service mesh components (istio-base, istiod, and istio-ingressgateway) onto a Kubernetes cluster using sequenced Helm releases with cloud-provider-specific ingress gateway configuration",
+  "architecture": "The module creates three helm_release resources in a strict dependency chain: istio-base is installed first, followed by istiod (which depends on istio-base and configures pilot.replicaCount and pilot.autoscaleMin via set blocks), and finally istio-ingressgateway (which depends on istiod). The ingress gateway helm_release consumes a templatefile-rendered values YAML from locals.tf, which injects service type, port mappings, HTTP2 settings, cloud provider identity, and OCI subnet IDs into the gateway Helm chart. All three releases target the same Kubernetes namespace and are configured with atomic installs, cleanup on failure, and a 600-second timeout.",
   "features": [
-    "Deploys Istio base CRDs, control plane (istiod), and ingress gateway as separate Helm releases with dependency ordering",
-    "Configures Kubernetes LoadBalancer service with customizable HTTPS and optional HTTP2 ports and target ports",
-    "Injects cloud provider-specific annotations for AWS, OCI, Azure, and GCP LoadBalancers",
-    "Supports OCI-specific LoadBalancer configuration with subnet ID assignments",
-    "Enables atomic Helm deployments with automatic rollback, cleanup on failure, and 10-revision history retention",
-    "Provides configurable Istio component versions independently for base, istiod, and gateway charts"
+    "Deploys istio-base CRD foundation chart as the prerequisite for all other Istio components",
+    "Installs istiod control plane with configurable replica count and autoscale minimum to prevent HPA from collapsing HA deployments during node drains",
+    "Configures istio-ingressgateway with templated Helm values supporting HTTPS, optional HTTP2, and custom service types",
+    "Injects cloud-provider-specific LoadBalancer annotations (AWS, OCI, Azure, GCP) into the ingress gateway service via templatefile rendering",
+    "Supports OCI-specific LoadBalancer subnet assignment via oci_load_balancer_subnet_ids annotation injection",
+    "Enforces sequential Helm release ordering with dependency_on chaining to ensure stable Istio component installation"
   ],
   "inputs": [
+    {
+      "name": "istiod_replicas",
+      "description": "Number of istiod replicas. Default is 1 to preserve the previous behavior of this module for existing consumers; set to 2 (recommended) to let the pilot deployment tolerate node drains — the istiod chart installs a PodDisruptionBudget with minAvailable=1, and a single-replica istiod therefore blocks node rolling updates (e.g. EKS AMI bumps). This value is applied to both pilot.replicaCount and pilot.autoscaleMin; without the autoscaleMin override, the HPA (enabled by default with autoscaleMin=1) would scale back to 1 replica shortly after install.",
+      "required": false
+    },
     {
       "name": "cloud_provider",
       "description": "The cloud provider where the cluster is running. Used to inject provider-specific LoadBalancer annotations (e.g. oci). Leave empty for generic/on-prem clusters.",
@@ -163,6 +169,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "9a6017fe59b5c4ffae2fd5341cca0839"
+  "hash": "b03b4dc5a6c60bd77b4c20e4da00821b"
 }
 END_AI_METADATA -->

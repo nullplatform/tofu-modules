@@ -20,7 +20,7 @@ The module creates a nullplatform_notification_channel resource wired to an agen
 
 ```hcl
 module "service_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v2.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v2.3.0"
 
   api_key                      = "your-api-key"
   repository_service_spec_repo = "your-repository-service-spec-repo"
