@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.3.0](https://github.com/nullplatform/tofu-modules/compare/v2.2.1...v2.3.0) (2026-05-08)
+
+
+### Features
+
+* **eks:** expose ami_release_version and use_latest_ami_release_version ([#334](https://github.com/nullplatform/tofu-modules/issues/334)) ([1d88c1e](https://github.com/nullplatform/tofu-modules/commit/1d88c1e2b9197b1e893d2cc394ead7707b2ce3bf))
+* **istio:** expose istiod_replicas to guarantee HA for node drains ([#292](https://github.com/nullplatform/tofu-modules/issues/292)) ([05a081f](https://github.com/nullplatform/tofu-modules/commit/05a081f7e175b42280ffe40aa108a90281482857))
+* **nullplatform/scope_definition:** expose scope_configuration_name_override (backward-compatible) ([#328](https://github.com/nullplatform/tofu-modules/issues/328)) ([8ef0b0e](https://github.com/nullplatform/tofu-modules/commit/8ef0b0ef85a038fbf374d1ec959d7227b78e6c50))
+
 ## [2.2.1](https://github.com/nullplatform/tofu-modules/compare/v2.2.0...v2.2.1) (2026-05-07)
 
 
