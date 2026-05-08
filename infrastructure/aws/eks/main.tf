@@ -69,6 +69,9 @@ module "eks" {
       ami_type       = var.ami_type
       instance_types = [var.instance_types]
 
+      ami_release_version            = var.ami_release_version
+      use_latest_ami_release_version = var.use_latest_ami_release_version
+
       min_size                              = var.node_group_min_size
       max_size                              = var.node_group_max_size
       desired_size                          = var.node_group_desired_size
