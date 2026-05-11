@@ -6,7 +6,7 @@ resource "nullplatform_api_key" "this" {
   name = local.config.name
 
   dynamic "grants" {
-    for_each = local.grants
+    for_each = { for idx, grant in local.grants : tostring(idx) => grant }
     content {
       nrn       = grants.value.nrn
       role_slug = grants.value.role_slug
@@ -14,7 +14,7 @@ resource "nullplatform_api_key" "this" {
   }
 
   dynamic "tags" {
-    for_each = local.tags
+    for_each = { for tag in local.tags : tag.key => tag }
     content {
       key   = tags.value.key
       value = tags.value.value
