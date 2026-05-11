@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.1](https://github.com/nullplatform/tofu-modules/compare/v2.3.0...v2.3.1) (2026-05-11)
+
+
+### Bug Fixes
+
+* **security:** use static var.cluster_name in count to avoid unknown at plan time ([#338](https://github.com/nullplatform/tofu-modules/issues/338)) ([a2675f4](https://github.com/nullplatform/tofu-modules/commit/a2675f4548f8f3395517378825e2524485aea885))
+
 ## [2.3.0](https://github.com/nullplatform/tofu-modules/compare/v2.2.1...v2.3.0) (2026-05-08)
 
 
