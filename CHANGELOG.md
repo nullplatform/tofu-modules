@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.3](https://github.com/nullplatform/tofu-modules/compare/v2.4.2...v2.4.3) (2026-05-11)
+
+
+### Bug Fixes
+
+* **api_key:** replace concat with merge to produce map(string) for tags ([#346](https://github.com/nullplatform/tofu-modules/issues/346)) ([9cf26ea](https://github.com/nullplatform/tofu-modules/commit/9cf26eae330365eaded55c98b62497bc9b2f9b7b))
+
 ## [2.4.2](https://github.com/nullplatform/tofu-modules/compare/v2.4.1...v2.4.2) (2026-05-11)
 
 
