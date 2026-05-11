@@ -77,10 +77,6 @@ variable "aws_iam_role_arn" {
   description = "ARN of the AWS IAM role assigned to the agent"
   type        = string
   default     = ""
-  validation {
-    condition     = var.cloud_provider != "aws" || var.aws_iam_role_arn != ""
-    error_message = "aws_iam_role_arn is required when cloud_provider is 'aws'."
-  }
 }
 
 # Cloud provider to use (aws, gcp, or azure)
@@ -102,11 +98,6 @@ variable "azure_client_id" {
   description = "Azure client ID for authentication"
   type        = string
   default     = null
-
-  validation {
-    condition     = var.cloud_provider != "azure" || var.azure_client_id != null
-    error_message = "azure_client_id is required when cloud_provider is 'azure'"
-  }
 }
 
 # Azure client secret for authentication (required when cloud_provider is 'azure')
@@ -115,11 +106,6 @@ variable "azure_client_secret" {
   type        = string
   default     = null
   sensitive   = true
-
-  validation {
-    condition     = var.cloud_provider != "azure" || var.azure_client_secret != null
-    error_message = "azure_client_secret is required when cloud_provider is 'azure'"
-  }
 }
 
 # Azure subscription ID (required when cloud_provider is 'azure')
@@ -127,11 +113,6 @@ variable "azure_subscription_id" {
   description = "Azure subscription ID"
   type        = string
   default     = null
-
-  validation {
-    condition     = var.cloud_provider != "azure" || var.azure_subscription_id != null
-    error_message = "azure_subscription_id is required when cloud_provider is 'azure'"
-  }
 }
 
 # Azure resource group name (required when cloud_provider is 'azure')
@@ -139,11 +120,6 @@ variable "azure_resource_group" {
   description = "Azure resource group name"
   type        = string
   default     = null
-
-  validation {
-    condition     = var.cloud_provider != "azure" || var.azure_resource_group != null
-    error_message = "azure_resource_group is required when cloud_provider is 'azure'"
-  }
 }
 
 # Private gateway name for Azure networking (required when cloud_provider is 'azure')
@@ -151,11 +127,6 @@ variable "private_gateway_name" {
   description = "Private gateway name for Azure networking"
   type        = string
   default     = null
-
-  validation {
-    condition     = var.cloud_provider != "azure" || var.private_gateway_name != null
-    error_message = "private_gateway_name is required when cloud_provider is 'azure'"
-  }
 }
 
 # Resource group for private hosted zone (required when cloud_provider is 'azure')
@@ -163,11 +134,6 @@ variable "private_hosted_zone_rg" {
   description = "Resource group for private hosted zone"
   type        = string
   default     = null
-
-  validation {
-    condition     = var.cloud_provider != "azure" || var.private_hosted_zone_rg != null
-    error_message = "private_hosted_zone_rg is required when cloud_provider is 'azure'"
-  }
 }
 
 # Public gateway name for Azure networking (required when cloud_provider is 'azure')
@@ -175,11 +141,6 @@ variable "public_gateway_name" {
   description = "Public gateway name for Azure networking"
   type        = string
   default     = null
-
-  validation {
-    condition     = var.cloud_provider != "azure" || var.public_gateway_name != null
-    error_message = "public_gateway_name is required when cloud_provider is 'azure'"
-  }
 }
 
 # Azure tenant ID (required when cloud_provider is 'azure')
@@ -187,11 +148,6 @@ variable "azure_tenant_id" {
   description = "Azure tenant ID"
   type        = string
   default     = null
-
-  validation {
-    condition     = var.cloud_provider != "azure" || var.azure_tenant_id != null
-    error_message = "azure_tenant_id is required when cloud_provider is 'azure'"
-  }
 }
 
 ################################################################################
