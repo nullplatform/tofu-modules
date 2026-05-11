@@ -2,25 +2,26 @@
 
 ## Description
 
-Configures an AWS ECR provider integration for nullplatform by creating IAM resources and registering provider credentials
+Configures an AWS ECR provider integration for nullplatform by creating IAM users, roles, access keys, and optional cross-account repository policies
 
 ## Architecture
 
-The module creates an aws_iam_access_key for a build workflow IAM user and an aws_iam_role for application workloads, then registers both sets of credentials into a nullplatform_provider_config resource of type 'ecr'. The nullplatform_provider_config wires the current AWS region from aws_region data source, the access key credentials for CI workflows, and the role ARN for setup/deployment operations. The aws_caller_identity and aws_region data sources provide contextual AWS account and region values that flow into the IAM and provider config resources.
+The module creates an aws_iam_access_key for a build workflow IAM user and an aws_iam_role for application workloads, then wires their credentials and ARN into a nullplatform_provider_config resource of type 'ecr'. The provider config encodes both CI credentials (region, access key, secret key) and setup attributes (region, role ARN) as JSON attributes. When cross-account pull is enabled, a repository policy is generated in locals and merged into the setup attributes, allowing specified AWS account IDs to pull images from ECR.
 
 ## Features
 
-- Creates nullplatform ECR provider configuration with CI and setup credential sections
-- Registers IAM access key credentials for build workflow automation in CI pipelines
-- Configures IAM role ARN for application deployment and setup operations
-- Sources current AWS region dynamically for provider attribute configuration
-- Ignores downstream attribute drift on the provider config to prevent unintended updates
+- Creates nullplatform_provider_config of type ECR linking CI and setup credentials
+- Configures IAM access keys for build workflow automation with ECR push permissions
+- Creates IAM role for application workloads to pull images from ECR
+- Generates ECR repository policy allowing cross-account image pulls when enabled
+- Supports multiple additional AWS account IDs for cross-account ECR pull access
+- Supports dimension-based segmentation of the nullplatform provider config by region or environment
 
 ## Basic Usage
 
 ```hcl
 module "ecr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v2.3.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v2.3.1"
 
   cluster_name = "your-cluster-name"
   nrn          = "your-nrn"
@@ -41,14 +42,14 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.86 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.88 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | 6.44.0 |
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.86 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.88 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Resources
@@ -79,14 +80,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "ecr",
-  "description": "Configures an AWS ECR provider integration for nullplatform by creating IAM resources and registering provider credentials",
-  "architecture": "The module creates an aws_iam_access_key for a build workflow IAM user and an aws_iam_role for application workloads, then registers both sets of credentials into a nullplatform_provider_config resource of type 'ecr'. The nullplatform_provider_config wires the current AWS region from aws_region data source, the access key credentials for CI workflows, and the role ARN for setup/deployment operations. The aws_caller_identity and aws_region data sources provide contextual AWS account and region values that flow into the IAM and provider config resources.",
+  "description": "Configures an AWS ECR provider integration for nullplatform by creating IAM users, roles, access keys, and optional cross-account repository policies",
+  "architecture": "The module creates an aws_iam_access_key for a build workflow IAM user and an aws_iam_role for application workloads, then wires their credentials and ARN into a nullplatform_provider_config resource of type 'ecr'. The provider config encodes both CI credentials (region, access key, secret key) and setup attributes (region, role ARN) as JSON attributes. When cross-account pull is enabled, a repository policy is generated in locals and merged into the setup attributes, allowing specified AWS account IDs to pull images from ECR.",
   "features": [
-    "Creates nullplatform ECR provider configuration with CI and setup credential sections",
-    "Registers IAM access key credentials for build workflow automation in CI pipelines",
-    "Configures IAM role ARN for application deployment and setup operations",
-    "Sources current AWS region dynamically for provider attribute configuration",
-    "Ignores downstream attribute drift on the provider config to prevent unintended updates"
+    "Creates nullplatform_provider_config of type ECR linking CI and setup credentials",
+    "Configures IAM access keys for build workflow automation with ECR push permissions",
+    "Creates IAM role for application workloads to pull images from ECR",
+    "Generates ECR repository policy allowing cross-account image pulls when enabled",
+    "Supports multiple additional AWS account IDs for cross-account ECR pull access",
+    "Supports dimension-based segmentation of the nullplatform provider config by region or environment"
   ],
   "inputs": [
     {
@@ -103,9 +105,24 @@ resource "example_resource" "this" {
       "name": "application_manager_assume_role",
       "description": "ARN of the IAM role assumed by the application manager",
       "required": false
+    },
+    {
+      "name": "dimensions",
+      "description": "Dimensions to segment the nullplatform provider config (e.g. by region, environment)",
+      "required": false
+    },
+    {
+      "name": "enable_cross_account_pull",
+      "description": "Enable cross-account ECR pull access via a repository policy",
+      "required": false
+    },
+    {
+      "name": "repository_policy_pull_accounts",
+      "description": "AWS account IDs allowed to pull images from ECR. The account where this module is deployed is always included.",
+      "required": false
     }
   ],
   "outputs": [],
-  "hash": "67a1b139f3d9a964db7055ef1475676d"
+  "hash": "dfc7c1cda7f15d57bce971b0129fec6a"
 }
 END_AI_METADATA -->
