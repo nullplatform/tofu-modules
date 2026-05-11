@@ -21,7 +21,7 @@ The module creates a single google_dns_managed_zone resource in the specified GC
 
 ```hcl
 module "cloud-dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/cloud-dns?ref=v2.0.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/cloud-dns?ref=v2.3.0"
 
   domain_name = "your-domain-name"
   project_id  = "your-project-id"

@@ -45,6 +45,7 @@ gateway:
       firewallRule: "${gateway_private_gcp_firewall}"
     oci:
       securityListManagementMode: "${gateway_private_oci_security_list_management_mode}"
+      subnet: "${gateway_private_oci_subnet}"
     azure_load_balancer_subnet: ${gateway_internal_azure_load_balancer_subnet}
     loadBalancerSourceRanges: []
     addresses: {}
@@ -65,6 +66,7 @@ gateway:
       firewallRule: "${gateway_public_gcp_firewall}"
     oci:
       securityListManagementMode: "${gateway_public_oci_security_list_management_mode}"
+      subnet: "${gateway_public_oci_subnet}"
     loadBalancerSourceRanges: []
     addresses: {}
     autoscaling:

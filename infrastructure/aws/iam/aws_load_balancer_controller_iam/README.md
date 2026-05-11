@@ -19,7 +19,7 @@ This module creates an IAM role for the AWS Load Balancer Controller using the t
 
 ```hcl
 module "aws_load_balancer_controller_iam" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/aws_load_balancer_controller_iam?ref=v2.0.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/aws_load_balancer_controller_iam?ref=v2.3.0"
 
   aws_iam_openid_connect_provider_arn = "your-aws-iam-openid-connect-provider-arn"
   cluster_name                        = "your-cluster-name"

@@ -82,6 +82,29 @@ variable "node_group_min_size" {
   default     = 2
 }
 
+variable "ami_release_version" {
+  description = <<-EOT
+    Pin a specific AMI release version for the managed node group (e.g. "1.34.6-20260415").
+    When null, the upstream module resolves the AMI based on use_latest_ami_release_version.
+    Set this to a fixed value when reproducible AMIs are required (e.g. to avoid plan drift
+    every time AWS publishes a new optimized AMI).
+  EOT
+  type        = string
+  default     = null
+}
+
+variable "use_latest_ami_release_version" {
+  description = <<-EOT
+    If true, the upstream module looks up the latest AMI release version from the SSM
+    parameter `/aws/service/eks/optimized-ami/.../recommended/release_version` on every plan,
+    which surfaces drift whenever AWS publishes a new AMI. When null, defers to the upstream
+    default (true in terraform-aws-modules/eks v21+). Set to false together with
+    ami_release_version to pin the AMI to an explicit value.
+  EOT
+  type        = bool
+  default     = null
+}
+
 variable "node_group_max_size" {
   description = "Maximum number of nodes in the managed node group"
   type        = number

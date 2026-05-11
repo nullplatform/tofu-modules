@@ -22,7 +22,7 @@ The module creates a nullplatform_api_key resource with dynamically generated gr
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v2.0.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v2.3.0"
 
   type = "your-type"
 }
@@ -32,7 +32,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v2.0.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v2.3.0"
 
   nrn  = "your-nrn"  # Required when type = "agent"
   type = "agent"
@@ -43,7 +43,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v2.0.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v2.3.0"
 
   nrn                = "your-nrn"  # Required when type = "scope_notification"
   specification_slug = "your-specification-slug"  # Required when type = "scope_notification"
@@ -55,7 +55,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v2.0.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v2.3.0"
 
   nrn                = "your-nrn"  # Required when type = "service_notification"
   specification_slug = "your-specification-slug"  # Required when type = "service_notification"
@@ -67,7 +67,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v2.0.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v2.3.0"
 
   custom_name = "your-custom-name"  # Required when type = "custom"
   type        = "custom"
@@ -88,13 +88,13 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.76 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.86 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | ~> 0.0.76 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.86 |
 
 ## Resources
 
