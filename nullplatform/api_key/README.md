@@ -2,27 +2,26 @@
 
 ## Description
 
-Creates a Nullplatform API key with configurable grants and tags based on predefined types or custom configurations
+Creates a Nullplatform API key with pre-configured or custom role grants and tags based on the specified key type
 
 ## Architecture
 
-The module creates a nullplatform_api_key resource with dynamically generated grants and tags. For predefined types (agent, scope_notification, service_notification), it extracts NRN components (organization, account, namespace) from the input NRN string and maps them to role slugs defined in local configurations. For custom type, it accepts either custom_role_slugs paired with a module-level NRN or custom_grants with per-grant NRN definitions. Tags are automatically generated from NRN components and merged with custom tags. Lifecycle preconditions enforce validation rules ensuring required variables are provided based on the selected type.
+The module creates a single nullplatform_api_key resource whose name, grants, and tags are derived from a locals.tf configuration map keyed by var.type. For predefined types (agent, scope_notification, service_notification), role slugs are resolved against a module-level NRN to produce grant blocks, while the custom type accepts explicit grant pairs or role slugs with a custom name. Tags are assembled by merging a static managedBy tag, NRN-derived organization/account/namespace tags parsed from var.nrn, and any user-supplied custom_tags, all injected as dynamic blocks into the resource.
 
 ## Features
 
-- Creates nullplatform_api_key resource with configurable grants based on role slugs
-- Generates automatic tags from NRN components (organization, account, namespace)
-- Supports predefined API key types with pre-configured role mappings for agents and notifications
-- Enables custom API key configuration with user-defined role slugs and grants
-- Allows per-grant NRN specification for multi-resource access patterns
-- Validates required fields using lifecycle preconditions based on selected type
-- Outputs sensitive API key value along with resource ID and name
+- Creates nullplatform_api_key with pre-configured role grants for agent, scope_notification, and service_notification types
+- Supports fully custom API keys with user-defined name, role slugs, and explicit NRN-per-grant pairs
+- Automatically derives organization, account, and namespace tags from the Nullplatform Resource Name (NRN)
+- Enforces type-specific preconditions ensuring required variables are provided for each key type
+- Appends a managedBy=IaC tag alongside NRN-derived and custom tags on every created API key
+- Outputs the sensitive API key value, resource ID, and key name for downstream consumption
 
 ## Basic Usage
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v2.3.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v2.4.1"
 
   type = "your-type"
 }
@@ -32,7 +31,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v2.3.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v2.4.1"
 
   nrn  = "your-nrn"  # Required when type = "agent"
   type = "agent"
@@ -43,7 +42,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v2.3.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v2.4.1"
 
   nrn                = "your-nrn"  # Required when type = "scope_notification"
   specification_slug = "your-specification-slug"  # Required when type = "scope_notification"
@@ -55,7 +54,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v2.3.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v2.4.1"
 
   nrn                = "your-nrn"  # Required when type = "service_notification"
   specification_slug = "your-specification-slug"  # Required when type = "service_notification"
@@ -67,10 +66,11 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v2.3.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v2.4.1"
 
-  custom_name = "your-custom-name"  # Required when type = "custom"
-  type        = "custom"
+  custom_name       = "your-custom-name"  # Required when type = "custom"
+  custom_role_slugs = "your-custom-role-slugs"  # Required when type = "custom"
+  type              = "custom"
 }
 ```
 
@@ -126,16 +126,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "api_key",
-  "description": "Creates a Nullplatform API key with configurable grants and tags based on predefined types or custom configurations",
-  "architecture": "The module creates a nullplatform_api_key resource with dynamically generated grants and tags. For predefined types (agent, scope_notification, service_notification), it extracts NRN components (organization, account, namespace) from the input NRN string and maps them to role slugs defined in local configurations. For custom type, it accepts either custom_role_slugs paired with a module-level NRN or custom_grants with per-grant NRN definitions. Tags are automatically generated from NRN components and merged with custom tags. Lifecycle preconditions enforce validation rules ensuring required variables are provided based on the selected type.",
+  "description": "Creates a Nullplatform API key with pre-configured or custom role grants and tags based on the specified key type",
+  "architecture": "The module creates a single nullplatform_api_key resource whose name, grants, and tags are derived from a locals.tf configuration map keyed by var.type. For predefined types (agent, scope_notification, service_notification), role slugs are resolved against a module-level NRN to produce grant blocks, while the custom type accepts explicit grant pairs or role slugs with a custom name. Tags are assembled by merging a static managedBy tag, NRN-derived organization/account/namespace tags parsed from var.nrn, and any user-supplied custom_tags, all injected as dynamic blocks into the resource.",
   "features": [
-    "Creates nullplatform_api_key resource with configurable grants based on role slugs",
-    "Generates automatic tags from NRN components (organization, account, namespace)",
-    "Supports predefined API key types with pre-configured role mappings for agents and notifications",
-    "Enables custom API key configuration with user-defined role slugs and grants",
-    "Allows per-grant NRN specification for multi-resource access patterns",
-    "Validates required fields using lifecycle preconditions based on selected type",
-    "Outputs sensitive API key value along with resource ID and name"
+    "Creates nullplatform_api_key with pre-configured role grants for agent, scope_notification, and service_notification types",
+    "Supports fully custom API keys with user-defined name, role slugs, and explicit NRN-per-grant pairs",
+    "Automatically derives organization, account, and namespace tags from the Nullplatform Resource Name (NRN)",
+    "Enforces type-specific preconditions ensuring required variables are provided for each key type",
+    "Appends a managedBy=IaC tag alongside NRN-derived and custom tags on every created API key",
+    "Outputs the sensitive API key value, resource ID, and key name for downstream consumption"
   ],
   "inputs": [
     {
@@ -179,6 +178,6 @@ resource "example_resource" "this" {
     "id",
     "name"
   ],
-  "hash": "ffaaca797785e4d60e00662b7a70c089"
+  "hash": "a55eed4f1468e19d185469ff36f1ca72"
 }
 END_AI_METADATA -->

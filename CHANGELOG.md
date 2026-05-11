@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.1](https://github.com/nullplatform/tofu-modules/compare/v2.4.0...v2.4.1) (2026-05-11)
+
+
+### Bug Fixes
+
+* **api_key:** convert tuple to map in dynamic block for_each ([#342](https://github.com/nullplatform/tofu-modules/issues/342)) ([1d38bba](https://github.com/nullplatform/tofu-modules/commit/1d38bba2637f8dbc768f17c0e03c683fa7a6b567))
+
 ## [2.4.0](https://github.com/nullplatform/tofu-modules/compare/v2.3.1...v2.4.0) (2026-05-11)
 
 
