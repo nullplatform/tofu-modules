@@ -20,7 +20,7 @@ The module uses the google-modules/kubernetes-engine/google//modules/private-clu
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/gke?ref=v2.3.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/gke?ref=v2.4.1"
 
   cluster_name      = "your-cluster-name"
   ip_range_pods     = "your-ip-range-pods"
