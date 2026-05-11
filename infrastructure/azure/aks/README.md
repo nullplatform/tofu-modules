@@ -20,7 +20,7 @@ The module creates an AKS cluster using the Azure/aks/azurerm Terraform module, 
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v2.4.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v2.4.2"
 
   cluster_name        = "your-cluster-name"
   location            = "your-location"
