@@ -19,7 +19,7 @@ This module uses Terraform to create Azure network security groups for public an
 
 ```hcl
 module "security" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/security?ref=v2.0.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/security?ref=v2.3.1"
 
   cluster_name        = "your-cluster-name"
   resource_group_name = "your-resource-group-name"

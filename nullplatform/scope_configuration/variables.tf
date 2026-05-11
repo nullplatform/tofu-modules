@@ -24,3 +24,9 @@ variable "dimensions" {
   type        = map(string)
   default     = {}
 }
+
+variable "icon" {
+  description = "Icon for the provider specification"
+  type = string
+  default = ""
+}

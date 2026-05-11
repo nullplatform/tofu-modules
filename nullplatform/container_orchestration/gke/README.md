@@ -2,25 +2,27 @@
 
 ## Description
 
-Configures a GKE cluster on the nullplatform by creating a provider configuration resource
+Configures a GKE provider configuration resource in Nullplatform by encoding cluster, gateway, resource management, and security settings as a typed provider config
 
 ## Architecture
 
-The module builds a local.attributes map that merges cluster metadata, gateway settings, optional resource management rules, security settings, traffic manager version, and object modifiers. A nullplatform_provider_config resource of type gke-configuration is created, receiving the JSON-encoded attributes and the provided NRN and dimensions. Outputs are not defined; the resource ID is implicit via the provider.
+The module constructs a structured attributes object using locals that merge cluster identity, gateway configuration, optional resource management ratios, security settings, and object modifiers. A single nullplatform_provider_config resource of type 'gke-configuration' is created, binding the NRN and dimensions to the JSON-encoded attributes. Input variables flow into conditional merges within locals so that optional fields like private_gateway_name, service_account_name, and traffic_manager_version are only included when non-empty. The resulting resource acts as a configuration record in the Nullplatform platform for GKE cluster integration.
 
 ## Features
 
-- Creates nullplatform_provider_config resource for GKE clusters
-- Configures public and optional private gateway names with namespace support
-- Supports resource management parameters like memory CPU ratio and max cores
-- Allows custom image pull secrets and service account names for security
-- Enables traffic manager version and object modifiers injection
+- Creates a nullplatform_provider_config resource of type gke-configuration with cluster identity and location
+- Configures public and optional private gateway references with namespace support
+- Encodes resource management settings including memory/CPU ratios and max milicores when provided
+- Attaches image pull secrets and Kubernetes service account name for secure workload identity
+- Includes optional traffic manager sidecar version tagging
+- Supports dynamic Kubernetes object modifiers for patching deployed resources
+- Conditionally omits optional fields from the encoded attributes when left as empty defaults
 
 ## Basic Usage
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v2.0.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v2.3.1"
 
   cluster_name        = "your-cluster-name"
   location            = "your-location"
@@ -43,13 +45,13 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.63 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.86 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.77 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.86 |
 
 ## Resources
 
@@ -82,14 +84,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "gke",
-  "description": "Configures a GKE cluster on the nullplatform by creating a provider configuration resource",
-  "architecture": "The module builds a local.attributes map that merges cluster metadata, gateway settings, optional resource management rules, security settings, traffic manager version, and object modifiers. A nullplatform_provider_config resource of type gke-configuration is created, receiving the JSON-encoded attributes and the provided NRN and dimensions. Outputs are not defined; the resource ID is implicit via the provider.",
+  "description": "Configures a GKE provider configuration resource in Nullplatform by encoding cluster, gateway, resource management, and security settings as a typed provider config",
+  "architecture": "The module constructs a structured attributes object using locals that merge cluster identity, gateway configuration, optional resource management ratios, security settings, and object modifiers. A single nullplatform_provider_config resource of type 'gke-configuration' is created, binding the NRN and dimensions to the JSON-encoded attributes. Input variables flow into conditional merges within locals so that optional fields like private_gateway_name, service_account_name, and traffic_manager_version are only included when non-empty. The resulting resource acts as a configuration record in the Nullplatform platform for GKE cluster integration.",
   "features": [
-    "Creates nullplatform_provider_config resource for GKE clusters",
-    "Configures public and optional private gateway names with namespace support",
-    "Supports resource management parameters like memory CPU ratio and max cores",
-    "Allows custom image pull secrets and service account names for security",
-    "Enables traffic manager version and object modifiers injection"
+    "Creates a nullplatform_provider_config resource of type gke-configuration with cluster identity and location",
+    "Configures public and optional private gateway references with namespace support",
+    "Encodes resource management settings including memory/CPU ratios and max milicores when provided",
+    "Attaches image pull secrets and Kubernetes service account name for secure workload identity",
+    "Includes optional traffic manager sidecar version tagging",
+    "Supports dynamic Kubernetes object modifiers for patching deployed resources",
+    "Conditionally omits optional fields from the encoded attributes when left as empty defaults"
   ],
   "inputs": [
     {
@@ -174,6 +178,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "e51ad949f1a69cf1bd619d29f7e1fd59"
+  "hash": "3468ee6b8ab9a5b7883cd4c973373a2f"
 }
 END_AI_METADATA -->

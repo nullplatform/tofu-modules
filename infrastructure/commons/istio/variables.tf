@@ -20,6 +20,17 @@ variable "istiod_version" {
   default     = "1.27.1"
 }
 
+variable "istiod_replicas" {
+  description = "Number of istiod replicas. Default is 1 to preserve the previous behavior of this module for existing consumers; set to 2 (recommended) to let the pilot deployment tolerate node drains — the istiod chart installs a PodDisruptionBudget with minAvailable=1, and a single-replica istiod therefore blocks node rolling updates (e.g. EKS AMI bumps). This value is applied to both pilot.replicaCount and pilot.autoscaleMin; without the autoscaleMin override, the HPA (enabled by default with autoscaleMin=1) would scale back to 1 replica shortly after install."
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = var.istiod_replicas >= 1
+    error_message = "istiod_replicas must be at least 1."
+  }
+}
+
 ###############################################################################
 # SERVICE CONFIGURATION
 ###############################################################################
