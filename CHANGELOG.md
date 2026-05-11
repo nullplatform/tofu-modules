@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.2](https://github.com/nullplatform/tofu-modules/compare/v2.4.1...v2.4.2) (2026-05-11)
+
+
+### Bug Fixes
+
+* **api_key:** use tomap and map(string) to satisfy for_each type constraint ([#344](https://github.com/nullplatform/tofu-modules/issues/344)) ([bf02402](https://github.com/nullplatform/tofu-modules/commit/bf02402702f450c764eb73d5a8be0af591ef6949))
+
 ## [2.4.1](https://github.com/nullplatform/tofu-modules/compare/v2.4.0...v2.4.1) (2026-05-11)
 
 
