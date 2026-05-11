@@ -20,6 +20,8 @@ module "eks" {
   #     `create_kms_key = true` to match the upstream default and preserve
   #     the wrapper's pre-existing behavior (an auto-managed KMS key is
   #     created, encrypting etcd secrets out of the box).
+  # `var.encryption_config` is `nullable = false` so this expression is
+  # null-safe (consumers cannot pass an explicit `null`).
   create_kms_key             = var.encryption_config.provider_key_arn == null
   create_node_security_group = false
 

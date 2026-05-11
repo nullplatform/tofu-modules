@@ -201,4 +201,10 @@ variable "encryption_config" {
     resources        = optional(list(string), ["secrets"])
   })
   default = {}
+  # Reject explicit `null` (codegen/AI-generated callers sometimes emit it
+  # by accident, which would crash `create_kms_key = var.encryption_config
+  # .provider_key_arn == null` with "Cannot access attribute on null value"
+  # at plan time — a confusing error far from the cause). Omit the argument
+  # or pass `{}` to use defaults.
+  nullable = false
 }
