@@ -22,7 +22,7 @@ The module fetches JSON templates via `data.http` resources from a configurable 
 
 ```hcl
 module "scope_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v2.4.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v2.4.3"
 
   np_api_key = "your-np-api-key"
   nrn        = "your-nrn"
