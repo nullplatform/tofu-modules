@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.4.0](https://github.com/nullplatform/tofu-modules/compare/v2.3.1...v2.4.0) (2026-05-11)
+
+
+### Features
+
+* **infrastructure/aws/eks:** expose encryption_config (backward-compatible) ([#324](https://github.com/nullplatform/tofu-modules/issues/324)) ([f3294d6](https://github.com/nullplatform/tofu-modules/commit/f3294d69eb202bc13e9ad2889f45166370c2d550))
+
+
+### Bug Fixes
+
+* **agent:** move cross-variable validations to lifecycle preconditions ([#341](https://github.com/nullplatform/tofu-modules/issues/341)) ([799f26c](https://github.com/nullplatform/tofu-modules/commit/799f26cd80c319468a08ce1675cf94736ff25511))
+
 ## [2.3.1](https://github.com/nullplatform/tofu-modules/compare/v2.3.0...v2.3.1) (2026-05-11)
 
 
