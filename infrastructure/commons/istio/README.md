@@ -21,7 +21,7 @@ The module creates three helm_release resources in a strict dependency chain: is
 
 ```hcl
 module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v2.3.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v2.3.1"
 }
 ```
 
