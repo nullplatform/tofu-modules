@@ -1,12 +1,10 @@
 locals {
   nrn_without_namespace = var.nrn != null ? join(":", slice(split(":", var.nrn), 0, 2)) : null
   nrn_parts             = var.nrn != null ? { for part in split(":", var.nrn) : split("=", part)[0] => split("=", part)[1] } : {}
-  nrn_tags = [
-    for key in ["organization", "account", "namespace"] : {
-      key   = key
-      value = local.nrn_parts[key]
-    } if contains(keys(local.nrn_parts), key)
-  ]
+  nrn_tags = {
+    for key in ["organization", "account", "namespace"] : key => local.nrn_parts[key]
+    if contains(keys(local.nrn_parts), key)
+  }
 
   slug = var.specification_slug != null ? upper(var.specification_slug) : ""
 
@@ -51,9 +49,9 @@ locals {
     }
   ]
 
-  tags = concat(
-    [{ key = "managedBy", value = "IaC" }],
+  tags = merge(
+    { "managedBy" = "IaC" },
     local.nrn_tags,
-    var.custom_tags,
+    { for tag in var.custom_tags : tag.key => tag.value },
   )
 }

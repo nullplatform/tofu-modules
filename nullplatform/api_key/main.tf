@@ -14,7 +14,7 @@ resource "nullplatform_api_key" "this" {
   }
 
   dynamic "tags" {
-    for_each = { for tag in local.tags : tag.key => tag.value }
+    for_each = local.tags
     content {
       key   = tags.key
       value = tags.value
