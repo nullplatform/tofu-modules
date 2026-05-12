@@ -21,7 +21,7 @@ The module builds a local.attributes map that aggregates cluster metadata, gatew
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v2.4.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v2.5.0"
 
   cluster_name        = "your-cluster-name"
   nrn                 = "your-nrn"
