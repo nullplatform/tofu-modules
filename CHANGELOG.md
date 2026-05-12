@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.0](https://github.com/nullplatform/tofu-modules/compare/v2.4.3...v2.5.0) (2026-05-12)
+
+
+### Features
+
+* **scope_configuration:** support icon ([#348](https://github.com/nullplatform/tofu-modules/issues/348)) ([a4db9cf](https://github.com/nullplatform/tofu-modules/commit/a4db9cfa33c2dbe85d64dc2a3e77ddebaf9027a4))
+
 ## [2.4.3](https://github.com/nullplatform/tofu-modules/compare/v2.4.2...v2.4.3) (2026-05-11)
 
 
