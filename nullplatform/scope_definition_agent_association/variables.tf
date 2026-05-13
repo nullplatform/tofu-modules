@@ -56,13 +56,13 @@ variable "api_key" {
 }
 
 variable "scope_specification_id" {
-
-
+  description = "ID of the scope (service) specification to associate with the agent notification channel"
+  type        = string
 }
 
 variable "scope_specification_slug" {
-
-
+  description = "Slug of the scope (service) specification, used as a filter in the notification channel"
+  type        = string
 }
 
 variable "repo_path" {
@@ -76,7 +76,7 @@ variable "tags_selectors" {
 }
 
 variable "extra_filters" {
-  description = "Additional filter conditions to AND with the base template filters. Each element is a filter condition object (e.g. { \"dimensions.environment\" = { \"$eq\" = \"production\" } })."
+  description = "Additional filter conditions to AND with the base template filters. Each element is a filter condition object (e.g. { \"dimensions.environment\" = \"production\" })."
   type        = list(any)
   default     = []
 }
