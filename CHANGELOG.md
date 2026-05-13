@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.5.1](https://github.com/nullplatform/tofu-modules/compare/v2.5.0...v2.5.1) (2026-05-13)
+
+
+### Bug Fixes
+
+* **nullplatform/scope_definition:** ignore_changes on action_specification icon ([#350](https://github.com/nullplatform/tofu-modules/issues/350)) ([b895608](https://github.com/nullplatform/tofu-modules/commit/b895608300e896d91506e5a299b2b520f49639ce))
+* **scope_configuration:** remove icon attribute (not in nullplatform_provider_config schema) ([#351](https://github.com/nullplatform/tofu-modules/issues/351)) ([35b3d93](https://github.com/nullplatform/tofu-modules/commit/35b3d93e161c6c02fdfaa2921b0bac6f7ded4b15))
+
 ## [2.5.0](https://github.com/nullplatform/tofu-modules/compare/v2.4.3...v2.5.0) (2026-05-12)
 
 
