@@ -74,3 +74,9 @@ variable "tags_selectors" {
   description = "Map of tags used to select and filter channels and agents"
   type        = map(string)
 }
+
+variable "extra_filters" {
+  description = "Additional filter conditions to AND with the base template filters. Each element is a filter condition object (e.g. { \"dimensions.environment\" = { \"$eq\" = \"production\" } })."
+  type        = list(any)
+  default     = []
+}
