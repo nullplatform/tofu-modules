@@ -5,8 +5,12 @@ locals {
 
   base_filters = can(local.notification_channel_def.filters) ? local.notification_channel_def.filters : null
 
-  # If extra_filters provided, wrap base filters and extra conditions under $and
-  merged_filters = length(var.extra_filters) > 0 && local.base_filters != null ? {
-    "$and" = concat([local.base_filters], var.extra_filters)
-  } : local.base_filters
+  # Produce a JSON string to avoid Terraform's object-shape type-consistency constraint.
+  # If extra_filters are provided, wrap base filters and extras under $and; otherwise pass base as-is.
+  merged_filters_json = (
+    local.base_filters == null ? null :
+    length(var.extra_filters) > 0
+    ? jsonencode({ "$and" = concat([local.base_filters], var.extra_filters) })
+    : jsonencode(local.base_filters)
+  )
 }

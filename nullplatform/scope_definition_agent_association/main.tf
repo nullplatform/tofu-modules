@@ -39,7 +39,7 @@ resource "nullplatform_notification_channel" "from_template" {
       }
     }
   }
-  filters = local.merged_filters != null ? jsonencode(local.merged_filters) : null
+  filters = local.merged_filters_json
   lifecycle {
     ignore_changes = [
       source,
