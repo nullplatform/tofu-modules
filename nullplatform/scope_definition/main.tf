@@ -7,7 +7,6 @@ resource "nullplatform_service_specification" "from_template" {
     data.external.service_spec
   ]
   name                = var.service_spec_name
-  description         = var.service_spec_description
   visible_to          = concat(local.service_spec_parsed.visible_to, var.extra_visible_to_nrns)
   assignable_to       = local.service_spec_parsed.assignable_to
   type                = local.service_spec_parsed.type
@@ -77,7 +76,7 @@ resource "nullplatform_action_specification" "from_templates" {
   annotations              = jsonencode(try(jsondecode(base64decode(data.external.action_specs[each.key].result.json_b64)).annotations, {}))
 
   lifecycle {
-    ignore_changes = [name, annotations, parameters, results, type, retryable]
+    ignore_changes = [name, annotations, parameters, results, type, retryable, icon]
   }
 }
 
