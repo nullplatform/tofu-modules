@@ -77,7 +77,7 @@ resource "nullplatform_action_specification" "from_templates" {
   annotations              = jsonencode(try(jsondecode(base64decode(data.external.action_specs[each.key].result.json_b64)).annotations, {}))
 
   lifecycle {
-    ignore_changes = [name, annotations, parameters, results, type, retryable]
+    ignore_changes = [name, annotations, parameters, results, type, retryable, icon]
   }
 }
 
