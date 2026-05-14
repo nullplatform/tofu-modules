@@ -76,7 +76,19 @@ variable "tags_selectors" {
 }
 
 variable "extra_filters" {
-  description = "Additional filter conditions to AND with the base template filters. Each element is a filter condition object (e.g. { \"dimensions.environment\" = \"production\" })."
-  type        = list(any)
-  default     = []
+  description = <<-EOT
+    Additional filter expression to merge with the base template filters using $and.
+    Accepts any valid MongoDB-style filter expression, including logical operators
+    ($and, $or, $nor, $not) and comparison operators ($eq, $ne, $in, $nin, $gt,
+    $gte, $lt, $lte, $regex). If null, only the base template filters are applied.
+
+    Examples:
+      Simple equality:    { "dimensions.environment" = "production" }
+      Comparison:         { "action" = { "$in" = ["deployment:create", "deployment:update"] } }
+      Logical OR:         { "$or" = [{ "details.namespace.slug" = "prod" }, { "details.namespace.slug" = "staging" }] }
+      Negation:           { "$not" = { "entity_data.status" = "failed" } }
+      Combined:           { "$and" = [{ "action" = { "$regex" = "^deployment" } }, { "$or" = [...] }] }
+  EOT
+  type        = any
+  default     = null
 }
