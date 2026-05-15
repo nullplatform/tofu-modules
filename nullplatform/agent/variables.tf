@@ -214,3 +214,9 @@ variable "extra_envs" {
   type        = map(string)
   default     = {}
 }
+
+variable "create_namespace" {
+  description = "Whether Helm should create the namespace if it does not exist. Safe to leave true even when nullplatform/base already created it — Helm is idempotent on existing namespaces."
+  type        = bool
+  default     = true
+}

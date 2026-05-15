@@ -55,7 +55,11 @@ resource "helm_release" "agent" {
   namespace  = var.namespace
   version    = var.nullplatform_agent_helm_version
 
-  create_namespace  = true
+  # create_namespace = true is idempotent: if the namespace already exists
+  # (e.g., created by nullplatform/base), Helm skips creation without error.
+  # Set create_namespace = false only if namespace lifecycle is managed elsewhere
+  # and you want an explicit error when it is missing.
+  create_namespace  = var.create_namespace
   disable_webhooks  = false
   force_update      = true
   wait              = true
