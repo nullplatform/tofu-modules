@@ -2,75 +2,115 @@
 
 ## Description
 
-Creates a single Nullplatform dimension with a configurable name, order, and list of allowed values.
-
-Each `module` instance creates exactly one dimension. To declare multiple dimensions (e.g. `Environment` and `Region`), instantiate this module once per dimension.
+Creates a Nullplatform dimension with optional predefined values for organizing and categorizing resources within a given NRN scope
 
 ## Architecture
 
-This module provisions a `nullplatform_dimension` resource with the supplied `name` and `order`. It then creates one `nullplatform_dimension_value` resource per entry in `var.values` via `for_each`, each linked to the parent dimension through `dimension_id`. The `nrn` input flows into both resources to anchor them in the Nullplatform resource hierarchy.
+The module creates a nullplatform_dimension resource using the provided name, order, and NRN inputs to define a categorization axis. For each entry in the values list, a nullplatform_dimension_value resource is created via for_each, referencing the parent dimension's ID to associate values with it. The dimension ID, slug, and NRN are exposed as outputs to allow downstream modules or resources to reference the created dimension.
+
+## Features
+
+- Creates a nullplatform_dimension resource with configurable display name and sort order
+- Provisions multiple nullplatform_dimension_value resources dynamically from a list of string values
+- Links each dimension value to its parent dimension using the generated dimension ID
+- Outputs the dimension ID, slug, and NRN for use in downstream module compositions
 
 ## Basic Usage
 
 ```hcl
-module "environment_dimension" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimension?ref=v2.6.0"
+module "dimension" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimension?ref=v3.0.0"
 
-  nrn    = "organization=1234:account=5678"
-  name   = "Environment"
-  order  = 1
-  values = ["development", "staging", "production"]
-}
-
-module "region_dimension" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimension?ref=v2.6.0"
-
-  nrn    = "organization=1234:account=5678"
-  name   = "Region"
-  order  = 2
-  values = ["us-east-1", "sa-east-1"]
+  name = "your-name"
+  nrn  = "your-nrn"
 }
 ```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.dimension.id
+}
+```
+
+<!-- BEGIN_TF_DOCS -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.86 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | >= 0.0.86 |
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [nullplatform_dimension.this](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/dimension) | resource |
+| [nullplatform_dimension_value.this](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/dimension_value) | resource |
 
 ## Inputs
 
-| Name     | Description                                                       | Type           | Default | Required |
-|----------|-------------------------------------------------------------------|----------------|---------|----------|
-| `nrn`    | Identifier Nullplatform Resources Name (NRN)                      | `string`       | n/a     | yes      |
-| `name`   | Display name of the dimension (e.g. `Environment`, `Region`)      | `string`       | n/a     | yes      |
-| `order`  | Display order of the dimension                                    | `number`       | `1`     | no       |
-| `values` | List of valid values for this dimension                           | `list(string)` | `[]`    | no       |
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_name"></a> [name](#input\_name) | Display name of the dimension (e.g. 'Environment', 'Region') | `string` | n/a | yes |
+| <a name="input_nrn"></a> [nrn](#input\_nrn) | Identifier Nullplatform Resources Name (NRN) | `string` | n/a | yes |
+| <a name="input_order"></a> [order](#input\_order) | Display order of the dimension | `number` | `1` | no |
+| <a name="input_values"></a> [values](#input\_values) | List of valid values for this dimension | `list(string)` | `[]` | no |
 
-## Migration from the `dimensions` module
+## Outputs
 
-This module replaces the previous `nullplatform/dimensions` module. The old module was hardcoded to create a single dimension named `Environment` and accepted only the value list through `var.environments`.
+| Name | Description |
+|------|-------------|
+| <a name="output_id"></a> [id](#output\_id) | The ID of the created dimension. Use this to attach additional dimension values from a `dimension_value` module instance. |
+| <a name="output_nrn"></a> [nrn](#output\_nrn) | The NRN where the dimension was created. |
+| <a name="output_slug"></a> [slug](#output\_slug) | The slug of the created dimension. |
+<!-- END_TF_DOCS -->
 
-To migrate, replace each invocation of `dimensions` with `dimension` and translate the variables:
-
-```diff
--module "dimensions" {
--  source       = ".../nullplatform/dimensions?ref=v2.5.1"
--  nrn          = var.nrn
--  environments = ["development", "staging", "production"]
--}
-+module "environment_dimension" {
-+  source = ".../nullplatform/dimension?ref=v2.6.0"
-+  nrn    = var.nrn
-+  name   = "Environment"
-+  values = ["development", "staging", "production"]
-+}
-```
-
-Because the internal resource labels changed (`nullplatform_dimension.environment` → `nullplatform_dimension.this`), the state must be moved before the next apply to avoid Terraform recreating the dimension:
-
-```bash
-terraform state mv \
-  'module.dimensions.nullplatform_dimension.environment' \
-  'module.environment_dimension.nullplatform_dimension.this'
-
-for env in development staging production; do
-  terraform state mv \
-    "module.dimensions.nullplatform_dimension_value.environment_value[\"$env\"]" \
-    "module.environment_dimension.nullplatform_dimension_value.this[\"$env\"]"
-done
-```
+<!-- BEGIN_AI_METADATA
+{
+  "name": "dimension",
+  "description": "Creates a Nullplatform dimension with optional predefined values for organizing and categorizing resources within a given NRN scope",
+  "architecture": "The module creates a nullplatform_dimension resource using the provided name, order, and NRN inputs to define a categorization axis. For each entry in the values list, a nullplatform_dimension_value resource is created via for_each, referencing the parent dimension's ID to associate values with it. The dimension ID, slug, and NRN are exposed as outputs to allow downstream modules or resources to reference the created dimension.",
+  "features": [
+    "Creates a nullplatform_dimension resource with configurable display name and sort order",
+    "Provisions multiple nullplatform_dimension_value resources dynamically from a list of string values",
+    "Links each dimension value to its parent dimension using the generated dimension ID",
+    "Outputs the dimension ID, slug, and NRN for use in downstream module compositions"
+  ],
+  "inputs": [
+    {
+      "name": "nrn",
+      "description": "Identifier Nullplatform Resources Name (NRN)",
+      "required": true
+    },
+    {
+      "name": "name",
+      "description": "Display name of the dimension (e.g. 'Environment', 'Region')",
+      "required": true
+    },
+    {
+      "name": "order",
+      "description": "Display order of the dimension",
+      "required": false
+    },
+    {
+      "name": "values",
+      "description": "List of valid values for this dimension",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "id",
+    "slug",
+    "nrn"
+  ],
+  "hash": "5458060b7a0e0d8efd9ecc32eab8d197"
+}
+END_AI_METADATA -->

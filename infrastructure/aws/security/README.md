@@ -22,7 +22,7 @@ The module uses data sources (aws_eks_cluster, aws_vpc) to automatically derive 
 
 ```hcl
 module "security" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/security?ref=v2.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/security?ref=v3.0.0"
 
   cluster_name = "your-cluster-name"
 }
