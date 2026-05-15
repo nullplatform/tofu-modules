@@ -19,13 +19,7 @@ resource "kubernetes_secret_v1" "external_dns_azure_config" {
   }
 
   data = {
-    "azure.json" = var.azure_client_secret != "" ? jsonencode({
-      tenantId        = var.azure_tenant_id
-      subscriptionId  = var.azure_subscription_id
-      resourceGroup   = var.azure_resource_group
-      aadClientId     = var.azure_client_id
-      aadClientSecret = var.azure_client_secret
-      }) : jsonencode({
+    "azure.json" = jsonencode({
       tenantId                     = var.azure_tenant_id
       subscriptionId               = var.azure_subscription_id
       resourceGroup                = var.azure_resource_group
