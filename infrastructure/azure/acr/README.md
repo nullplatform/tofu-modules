@@ -18,7 +18,7 @@ The module uses the azurerm_container_registry resource to create the container 
 
 ```hcl
 module "acr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/acr?ref=v2.5.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/acr?ref=v2.6.0"
 
   containerregistry_name = "your-containerregistry-name"
   location               = "your-location"

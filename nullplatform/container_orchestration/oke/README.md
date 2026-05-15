@@ -19,7 +19,7 @@ Creates a single nullplatform_provider_config resource of type 'oke' that stores
 
 ```hcl
 module "oke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/oke?ref=v2.5.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/oke?ref=v2.6.0"
 
   cluster_name = "your-cluster-name"
   nrn          = "your-nrn"

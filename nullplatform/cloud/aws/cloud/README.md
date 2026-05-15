@@ -21,7 +21,7 @@ The module creates a nullplatform_provider_config resource that aggregates AWS a
 
 ```hcl
 module "cloud" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/cloud?ref=v2.5.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/cloud?ref=v2.6.0"
 
   domain_name            = "your-domain-name"
   hosted_private_zone_id = "your-hosted-private-zone-id"
