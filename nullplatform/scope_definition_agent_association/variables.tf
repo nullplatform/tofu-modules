@@ -73,6 +73,7 @@ variable "repo_path" {
 variable "tags_selectors" {
   description = "Map of tags used to select and filter channels and agents"
   type        = map(string)
+  default = { "environment": "{$context.service.dimensions.environment}" }
 }
 
 variable "extra_filters" {
