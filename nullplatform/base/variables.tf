@@ -4,6 +4,12 @@ variable "nullplatform_base_helm_version" {
   default     = "2.38.0"
 }
 
+variable "nullplatform_base_chart_path" {
+  description = "Local path or OCI URL to the nullplatform-base chart. When set, overrides the public registry (useful for testing unreleased chart versions)."
+  type        = string
+  default     = ""
+}
+
 variable "namespace" {
   description = "Kubernetes namespace where the agent runs."
   type        = string
@@ -45,6 +51,18 @@ variable "tls_required" {
   type        = bool
   description = "Whether TLS is required."
   default     = true
+}
+
+variable "tls_secret_name" {
+  type        = string
+  description = "Name of the Kubernetes secret containing the public TLS certificate."
+  default     = "wildcard-tls"
+}
+
+variable "tls_secret_private_name" {
+  type        = string
+  description = "Name of the Kubernetes secret containing the private TLS certificate."
+  default     = "wildcard-tls-internal"
 }
 
 ############################################
@@ -444,6 +462,34 @@ variable "image_pull_secrets_password" {
 # ============================================================
 # IngressControllers configuration
 # ============================================================
+
+############################################
+# Routing chart
+############################################
+
+variable "install_routing" {
+  type        = bool
+  description = "Install the nullplatform-routing helm chart alongside the base chart. Set to false only if routing is managed separately via the nullplatform/routing module."
+  default     = true
+}
+
+variable "nullplatform_routing_helm_version" {
+  type        = string
+  description = "Helm chart version for the nullplatform routing chart."
+  default     = "1.0.0"
+}
+
+variable "nullplatform_routing_chart_path" {
+  type        = string
+  description = "Local filesystem path to the nullplatform-routing chart. When set, overrides the Helm registry (use for local development/testing)."
+  default     = ""
+}
+
+variable "gateway_namespace" {
+  type        = string
+  description = "Kubernetes namespace for gateway resources."
+  default     = "gateways"
+}
 
 variable "ingressControllers" {
   description = "Configuración de los IngressControllers públicos y privados"
