@@ -2,69 +2,114 @@
 
 ## Description
 
-Adds one or more dimension values to an existing Nullplatform dimension, each scoped to its own NRN. The same value `name` (e.g. `"OCI"`) can be applied either to a single NRN (via `var.nrn`) or to multiple NRNs in a single module call (via `var.nrns`).
-
-This module is typically used as a sibling of the `nullplatform/dimension` module:
-
-1. `dimension` creates the parent dimension at one NRN level (e.g. account).
-2. `dimension_value` attaches additional values that live at narrower NRN levels (e.g. namespace, application), referencing the parent via its `id` output.
+Creates nullplatform dimension values across one or more NRNs (Null Resource Names) for a given parent dimension
 
 ## Architecture
 
-The module accepts either `var.nrn` (single string) or `var.nrns` (list of strings), normalizes both into a single list internally, and declares a `nullplatform_dimension_value` resource per NRN with `for_each`. The set key in state is the NRN itself. Preconditions enforce that exactly one of the two inputs is provided.
+The module uses a terraform_data resource to enforce mutual-exclusivity and presence preconditions on the nrn/nrns inputs before any dimension values are created. A local value resolves the effective list of NRNs from either the singular nrn or the nrns list input. The nullplatform_dimension_value resource is then instantiated via for_each over that resolved NRN set, binding each instance to the shared dimension_id and name inputs. Outputs expose maps of NRN-to-ID and NRN-to-slug for downstream consumption.
+
+## Features
+
+- Creates one nullplatform_dimension_value resource per NRN using for_each iteration
+- Supports both single-NRN and multi-NRN input patterns via mutually exclusive nrn and nrns variables
+- Enforces input mutual-exclusivity and presence validation via terraform_data lifecycle preconditions
+- Outputs NRN-keyed maps of dimension value IDs and slugs for downstream module composition
 
 ## Basic Usage
 
-### Single NRN
-
 ```hcl
-module "dimension_environment" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimension?ref=v2.6.0"
+module "dimension_value" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimension_value?ref=v3.0.0"
 
-  nrn    = "organization=1698562351:account=1372325109"
-  name   = "Environment"
-  order  = 1
-  values = ["development", "staging", "production"]
-}
-
-module "dimension_value_environment_oci" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimension_value?ref=v2.6.0"
-
-  dimension_id = module.dimension_environment.id
-  name         = "OCI"
-  nrn          = "organization=1698562351:account=1372325109:namespace=956240080"
+  dimension_id = "your-dimension-id"
+  name         = "your-name"
 }
 ```
 
-### Multiple NRNs
+## Using Outputs
 
 ```hcl
-module "dimension_value_environment_oci" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimension_value?ref=v2.6.0"
-
-  dimension_id = module.dimension_environment.id
-  name         = "OCI"
-  nrns = [
-    "organization=1698562351:account=1372325109:namespace=956240080",
-    "organization=1698562351:account=1372325109:namespace=999999999",
-  ]
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.dimension_value.ids
 }
 ```
+
+<!-- BEGIN_TF_DOCS -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.86 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | >= 0.0.86 |
+| <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [nullplatform_dimension_value.this](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/dimension_value) | resource |
+| [terraform_data.validation](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 
 ## Inputs
 
-| Name           | Description                                                                                                  | Type           | Default | Required |
-|----------------|--------------------------------------------------------------------------------------------------------------|----------------|---------|----------|
-| `dimension_id` | ID of the parent dimension. Typically the `id` output of a `dimension` module instance.                      | `number`       | n/a     | yes      |
-| `name`         | Name of the dimension value. The same name is applied to every NRN.                                          | `string`       | n/a     | yes      |
-| `nrn`          | Single NRN where this dimension value should be created. Mutually exclusive with `nrns`.                     | `string`       | `null`  | one of the two |
-| `nrns`         | List of NRNs where this dimension value should be created (one resource per NRN). Mutually exclusive with `nrn`. | `list(string)` | `[]`    | one of the two |
-
-A `precondition` enforces that exactly one of `nrn` / `nrns` is provided.
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_dimension_id"></a> [dimension\_id](#input\_dimension\_id) | ID of the parent dimension this value belongs to. Typically the `id` output of a `dimension` module instance. | `number` | n/a | yes |
+| <a name="input_name"></a> [name](#input\_name) | Name of the dimension value. The same name is applied to every NRN. | `string` | n/a | yes |
+| <a name="input_nrn"></a> [nrn](#input\_nrn) | Single NRN where this dimension value should be created. Use this for one NRN. Mutually exclusive with `nrns`. | `string` | `null` | no |
+| <a name="input_nrns"></a> [nrns](#input\_nrns) | List of NRNs where this dimension value should be created (one resource per NRN). Use this for multiple NRNs. Mutually exclusive with `nrn`. | `list(string)` | `[]` | no |
 
 ## Outputs
 
-| Name    | Description                                |
-|---------|--------------------------------------------|
-| `ids`   | Map of NRN to created dimension value ID.  |
-| `slugs` | Map of NRN to created dimension value slug.|
+| Name | Description |
+|------|-------------|
+| <a name="output_ids"></a> [ids](#output\_ids) | Map of NRN to created dimension value ID. |
+| <a name="output_slugs"></a> [slugs](#output\_slugs) | Map of NRN to created dimension value slug. |
+<!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "dimension_value",
+  "description": "Creates nullplatform dimension values across one or more NRNs (Null Resource Names) for a given parent dimension",
+  "architecture": "The module uses a terraform_data resource to enforce mutual-exclusivity and presence preconditions on the nrn/nrns inputs before any dimension values are created. A local value resolves the effective list of NRNs from either the singular nrn or the nrns list input. The nullplatform_dimension_value resource is then instantiated via for_each over that resolved NRN set, binding each instance to the shared dimension_id and name inputs. Outputs expose maps of NRN-to-ID and NRN-to-slug for downstream consumption.",
+  "features": [
+    "Creates one nullplatform_dimension_value resource per NRN using for_each iteration",
+    "Supports both single-NRN and multi-NRN input patterns via mutually exclusive nrn and nrns variables",
+    "Enforces input mutual-exclusivity and presence validation via terraform_data lifecycle preconditions",
+    "Outputs NRN-keyed maps of dimension value IDs and slugs for downstream module composition"
+  ],
+  "inputs": [
+    {
+      "name": "dimension_id",
+      "description": "ID of the parent dimension this value belongs to. Typically the `id` output of a `dimension` module instance.",
+      "required": true
+    },
+    {
+      "name": "name",
+      "description": "Name of the dimension value. The same name is applied to every NRN.",
+      "required": true
+    },
+    {
+      "name": "nrn",
+      "description": "Single NRN where this dimension value should be created. Use this for one NRN. Mutually exclusive with `nrns`.",
+      "required": false
+    },
+    {
+      "name": "nrns",
+      "description": "List of NRNs where this dimension value should be created (one resource per NRN). Use this for multiple NRNs. Mutually exclusive with `nrn`.",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "ids",
+    "slugs"
+  ],
+  "hash": "225f86e26959a50cdde435c24eff6b18"
+}
+END_AI_METADATA -->
