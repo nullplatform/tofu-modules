@@ -60,11 +60,9 @@ module "aks" {
       min_count            = 1
       max_count            = 5
       #node_count           = 3
-      availability_zones = ["1", "2", "3"]
-      #vnet_subnet_id       = var.vnet_subnet_id
-
-
-
+      availability_zones          = ["1", "2", "3"]
+      vnet_subnet                 = { id = var.vnet_subnet_id }
+      upgrade_settings            = { max_surge = "10%", drain_timeout_in_minutes = 0, node_soak_duration_in_minutes = 0 }
       temporary_name_for_rotation = "poolrot"
     }
 
