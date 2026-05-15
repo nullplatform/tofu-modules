@@ -30,7 +30,7 @@ jobs:
   test-nullplatform-modules:
     uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
     with:
-      modules: '["nullplatform/account", "nullplatform/api_key", "nullplatform/dimensions", "nullplatform/users", "nullplatform/metrics", "nullplatform/asset/docker_server", "nullplatform/cloud/azure/cloud", "nullplatform/cloud/gcp/cloud", "nullplatform/cloud/aws/cloud", "nullplatform/code_repository"]'
+      modules: '["nullplatform/account", "nullplatform/api_key", "nullplatform/dimension", "nullplatform/dimension_value", "nullplatform/users", "nullplatform/metrics", "nullplatform/asset/docker_server", "nullplatform/cloud/azure/cloud", "nullplatform/cloud/gcp/cloud", "nullplatform/cloud/aws/cloud", "nullplatform/code_repository"]'
 
   test-container-orchestration-modules:
     uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
