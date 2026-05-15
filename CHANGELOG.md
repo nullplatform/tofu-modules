@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/nullplatform/tofu-modules/compare/v2.6.0...v3.0.0) (2026-05-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* **nullplatform/dimension:** callers of `nullplatform/dimensions` must migrate to `nullplatform/dimension` and run a `terraform state mv` to preserve the existing dimension (resource labels changed from `environment` / `environment_value` to `this`). Migration steps are documented in the new module's README.
+
+### Code Refactoring
+
+* **nullplatform/dimension:** replace dimensions with parameterized single-dimension module ([#354](https://github.com/nullplatform/tofu-modules/issues/354)) ([319d962](https://github.com/nullplatform/tofu-modules/commit/319d9620335beee312d97256d6ecd483652d1c06))
+
 ## [2.6.0](https://github.com/nullplatform/tofu-modules/compare/v2.5.1...v2.6.0) (2026-05-15)
 
 
