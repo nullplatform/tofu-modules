@@ -48,3 +48,8 @@ output "oidc_issuer_url" {
   description = "The URL of the cluster's OIDC issuer"
   value       = module.aks.oidc_issuer_url
 }
+
+output "node_resource_group" {
+  description = "The name of the auto-generated resource group for AKS node resources"
+  value       = module.aks.node_resource_group
+}
