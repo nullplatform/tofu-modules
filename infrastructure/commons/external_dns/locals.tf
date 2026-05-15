@@ -92,13 +92,13 @@ locals {
     provider = { name = "azure" }
     serviceAccount = {
       create = true
-      annotations = var.azure_client_secret == "" ? {
+      annotations = {
         "azure.workload.identity/client-id" = var.azure_client_id
-      } : {}
+      }
     }
-    podLabels = var.azure_client_secret == "" ? {
+    podLabels = {
       "azure.workload.identity/use" = "true"
-    } : {}
+    }
     extraVolumes = [
       {
         name = "azure-config"
