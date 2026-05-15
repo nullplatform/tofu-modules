@@ -176,3 +176,10 @@ variable "azure_tenant_id" {
   default     = ""
 }
 
+variable "azure_client_secret" {
+  description = "Azure SP client secret. When set, uses service principal auth instead of workload identity."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
