@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.0](https://github.com/nullplatform/tofu-modules/compare/v2.5.1...v2.6.0) (2026-05-15)
+
+
+### Features
+
+* **scope-definition-agent-association:** add extra_filters support ([#353](https://github.com/nullplatform/tofu-modules/issues/353)) ([0b0191f](https://github.com/nullplatform/tofu-modules/commit/0b0191f1c326049afec456d3741292f0d2aed51b))
+
 ## [2.5.1](https://github.com/nullplatform/tofu-modules/compare/v2.5.0...v2.5.1) (2026-05-13)
 
 
