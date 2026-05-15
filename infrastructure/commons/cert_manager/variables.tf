@@ -34,6 +34,13 @@ variable "azure_client_id" {
   default     = ""
 }
 
+variable "azure_client_secret" {
+  description = "The Azure service principal client secret. When set, cert-manager uses SP auth (clientSecretSecretRef). When empty, workload identity (managedIdentity) is used."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 
 variable "private_domain_name" {
   description = "The private domain name for internal certificate issuance"

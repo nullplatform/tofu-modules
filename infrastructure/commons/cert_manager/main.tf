@@ -26,6 +26,18 @@ resource "helm_release" "cert_manager" {
 }
 
 
+resource "kubernetes_secret_v1" "azure_cert_manager_sp" {
+  count = var.cloud_provider == "azure" && var.azure_client_secret != "" ? 1 : 0
+  metadata {
+    name      = "azure-cert-manager-sp"
+    namespace = var.cert_manager_namespace
+  }
+  data = {
+    "client-secret" = var.azure_client_secret
+  }
+  depends_on = [helm_release.cert_manager]
+}
+
 resource "helm_release" "cert_manager_config" {
   name       = "cert-manager-config"
   repository = "https://nullplatform.github.io/helm-charts"
@@ -53,7 +65,7 @@ resource "helm_release" "cert_manager_config" {
     local.cert_manager_provider_values,
   ]
 
-  depends_on = [helm_release.cert_manager]
+  depends_on = [helm_release.cert_manager, kubernetes_secret_v1.azure_cert_manager_sp]
 }
 
 #########webhook oci############
