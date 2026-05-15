@@ -19,14 +19,12 @@ locals {
     } : {},
 
     var.cloud_provider == "azure" ? {
-      enabled                   = true
-      subscription_id           = var.azure_subscription_id
-      resource_group_name       = var.azure_resource_group_name
-      client_id                 = var.azure_client_id
-      tenant_id                 = var.azure_tenant_id
-      hosted_zone_name          = var.azure_hosted_zone_name
-      use_workload_identity     = var.azure_client_secret == ""
-      client_secret_secret_name = var.azure_client_secret != "" ? "azure-cert-manager-sp" : ""
+      enabled             = true
+      subscription_id     = var.azure_subscription_id
+      resource_group_name = var.azure_resource_group_name
+      client_id           = var.azure_client_id
+      tenant_id           = var.azure_tenant_id
+      hosted_zone_name    = var.azure_hosted_zone_name
     } : {},
 
     var.cloud_provider == "aws" ? {
@@ -69,9 +67,9 @@ locals {
       "eks.amazonaws.com/role-arn" = var.aws_sa_arn
     }
 
-    azure = var.azure_client_secret == "" ? {
+    azure = {
       "azure.workload.identity/client-id" = var.azure_client_id
-    } : {}
+    }
 
     oci = {
       "oci.oraclecloud.com/workload-identity-principal" = var.oci_sa_ocid
@@ -89,7 +87,7 @@ locals {
         lookup(local.annotations_by_provider, var.cloud_provider, {})
       )
     }
-    podLabels = var.cloud_provider == "azure" && var.azure_client_secret == "" ? {
+    podLabels = var.cloud_provider == "azure" ? {
       "azure.workload.identity/use" = "true"
     } : {}
     dns01RecursiveNameservers     = "8.8.8.8:53,1.1.1.1:53"
