@@ -79,12 +79,6 @@ variable "private_cluster_enabled" {
 # OPTIONAL VARIABLES - IDENTITY AND RBAC
 ###############################################################################
 
-variable "oidc_issuer_enabled" {
-  type        = bool
-  description = "Whether to enable the OIDC issuer for workload identity"
-  default     = true
-}
-
 ###############################################################################
 # OPTIONAL VARIABLES - TAGS AND METADATA
 ###############################################################################
