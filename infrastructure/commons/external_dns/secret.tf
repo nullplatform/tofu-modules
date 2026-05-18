@@ -23,7 +23,7 @@ resource "kubernetes_secret_v1" "external_dns_azure_config" {
       tenantId                     = var.azure_tenant_id
       subscriptionId               = var.azure_subscription_id
       resourceGroup                = var.azure_resource_group
-      useWorkloadIdentityExtension = true
+      useWorkloadIdentityExtension = var.azure_workload_identity_enabled
     })
   }
 

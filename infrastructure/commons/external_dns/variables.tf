@@ -152,8 +152,14 @@ variable "dns_provider_name" {
 # AZURE CONFIGURATION
 ###############################################################################
 
+variable "azure_workload_identity_enabled" {
+  description = "Enable Workload Identity for Azure DNS provider. When false, WI annotations and labels are omitted and azure_client_id is not required."
+  type        = bool
+  default     = true
+}
+
 variable "azure_client_id" {
-  description = "Client ID of the Azure Managed Identity for Workload Identity (required when dns_provider_name is 'azure')"
+  description = "Client ID of the Azure Managed Identity for Workload Identity (required when dns_provider_name is 'azure' and azure_workload_identity_enabled is true)"
   type        = string
   default     = ""
 }

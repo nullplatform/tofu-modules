@@ -17,8 +17,8 @@ resource "terraform_data" "provider_validation" {
       error_message = "aws_region is required when cloud_provider is 'aws'."
     }
     precondition {
-      condition     = var.cloud_provider != "azure" || length(var.azure_client_id) > 0
-      error_message = "azure_client_id is required when cloud_provider is 'azure'."
+      condition     = var.cloud_provider != "azure" || !var.azure_workload_identity_enabled || length(var.azure_client_id) > 0
+      error_message = "azure_client_id is required when cloud_provider is 'azure' and azure_workload_identity_enabled is true."
     }
     precondition {
       condition     = var.cloud_provider != "azure" || length(var.azure_subscription_id) > 0

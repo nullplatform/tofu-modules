@@ -34,6 +34,12 @@ variable "azure_client_id" {
   default     = ""
 }
 
+variable "azure_workload_identity_enabled" {
+  description = "Enable Workload Identity for Azure DNS solver. When false, WI annotations and labels are omitted and azure_client_id is not required."
+  type        = bool
+  default     = true
+}
+
 variable "private_domain_name" {
   description = "The private domain name for internal certificate issuance"
   type        = string

@@ -1,7 +1,9 @@
 azure:
   subscriptionID: "${subscription_id}"
   resourceGroupName: "${resource_group_name}"
-  clientID: "${client_id}"
   tenantID: "${tenant_id}"
   hostedZoneName: "${hosted_zone_name}"
+%{ if use_workload_identity ~}
+  clientID: "${client_id}"
   useWorkloadIdentity: true
+%{ endif ~}
