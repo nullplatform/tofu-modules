@@ -33,6 +33,10 @@ resource "terraform_data" "provider_validation" {
       error_message = "azure_client_id is required when dns_provider_name is 'azure'."
     }
     precondition {
+      condition     = var.dns_provider_name != "azure" || !var.azure_workload_identity_enabled || length(var.azure_federated_credential_id) > 0
+      error_message = "azure_federated_credential_id is required when dns_provider_name is 'azure' and azure_workload_identity_enabled is true. Use module.iam to create the federated identity credential and pass its id output."
+    }
+    precondition {
       condition     = var.dns_provider_name != "azure" || var.azure_workload_identity_enabled || length(var.azure_client_secret) > 0
       error_message = "azure_client_secret is required when dns_provider_name is 'azure' and azure_workload_identity_enabled is false."
     }

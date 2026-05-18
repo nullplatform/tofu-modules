@@ -40,6 +40,12 @@ variable "azure_workload_identity_enabled" {
   default     = true
 }
 
+variable "azure_federated_credential_id" {
+  description = "Resource ID of the Azure federated identity credential for cert-manager (required when cloud_provider is 'azure' and azure_workload_identity_enabled is true). Pass module.iam_cert_manager.id to enforce dependency ordering."
+  type        = string
+  default     = ""
+}
+
 variable "azure_client_secret" {
   description = "Azure AD client secret for Service Principal auth (required when cloud_provider is 'azure' and azure_workload_identity_enabled is false)."
   type        = string
