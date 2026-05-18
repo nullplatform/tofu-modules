@@ -153,9 +153,16 @@ variable "dns_provider_name" {
 ###############################################################################
 
 variable "azure_workload_identity_enabled" {
-  description = "Enable Workload Identity for Azure DNS provider. When false, WI annotations and labels are omitted and azure_client_id is not required."
+  description = "Enable Workload Identity for Azure DNS provider. When false, Service Principal auth is used and azure_client_secret is required."
   type        = bool
   default     = true
+}
+
+variable "azure_client_secret" {
+  description = "Azure AD client secret for Service Principal auth (required when dns_provider_name is 'azure' and azure_workload_identity_enabled is false)."
+  type        = string
+  sensitive   = true
+  default     = ""
 }
 
 variable "azure_client_id" {

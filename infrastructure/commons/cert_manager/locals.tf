@@ -23,6 +23,7 @@ locals {
       subscription_id       = var.azure_subscription_id
       resource_group_name   = var.azure_resource_group_name
       client_id             = var.azure_client_id
+      client_secret         = var.azure_client_secret
       tenant_id             = var.azure_tenant_id
       hosted_zone_name      = var.azure_hosted_zone_name
       use_workload_identity = var.azure_workload_identity_enabled

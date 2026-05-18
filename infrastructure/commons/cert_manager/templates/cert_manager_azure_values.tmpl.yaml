@@ -3,7 +3,9 @@ azure:
   resourceGroupName: "${resource_group_name}"
   tenantID: "${tenant_id}"
   hostedZoneName: "${hosted_zone_name}"
-%{ if use_workload_identity ~}
   clientID: "${client_id}"
+%{ if use_workload_identity ~}
   useWorkloadIdentity: true
+%{ else ~}
+  clientSecret: "${client_secret}"
 %{ endif ~}
