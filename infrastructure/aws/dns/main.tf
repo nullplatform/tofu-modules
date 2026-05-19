@@ -1,10 +1,3 @@
-check "deprecated_module" {
-  assert {
-    condition     = var.domain_name == ""
-    error_message = "DEPRECATED: infrastructure/aws/dns is deprecated and will be removed in a future release. Please migrate to the replacement module."
-  }
-}
-
 resource "aws_route53_zone" "public_zone" {
   name          = var.domain_name
   force_destroy = false
