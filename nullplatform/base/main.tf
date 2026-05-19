@@ -67,6 +67,7 @@ resource "terraform_data" "adopt_gateways_namespace" {
       CURRENT=$(kubectl get namespace "${var.gateway_namespace}" \
         -o jsonpath='{.metadata.annotations.meta\.helm\.sh/release-name}' 2>/dev/null || echo "")
       if [ -n "$CURRENT" ] && [ "$CURRENT" != "nullplatform-routing" ]; then
+        # Transfer namespace ownership
         kubectl annotate namespace "${var.gateway_namespace}" \
           "meta.helm.sh/release-name=nullplatform-routing" \
           "meta.helm.sh/release-namespace=${var.namespace}" \
@@ -74,6 +75,16 @@ resource "terraform_data" "adopt_gateways_namespace" {
         kubectl label namespace "${var.gateway_namespace}" \
           "app.kubernetes.io/managed-by=Helm" \
           --overwrite
+
+        # Delete resources that were owned by nullplatform-base so the routing
+        # chart can recreate them with correct ownership. Targets only known
+        # resource types created by the base chart in this namespace.
+        for RESOURCE_TYPE in deployment service poddisruptionbudget gateway horizontalpodautoscaler; do
+          kubectl get "$RESOURCE_TYPE" -n "${var.gateway_namespace}" \
+            -o json 2>/dev/null \
+          | jq -r '.items[]? | select(.metadata.annotations["meta.helm.sh/release-name"] == "nullplatform-base") | .metadata.name' \
+          | xargs -r kubectl delete "$RESOURCE_TYPE" -n "${var.gateway_namespace}" 2>/dev/null || true
+        done
       fi
     EOT
   }
