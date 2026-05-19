@@ -1,5 +1,7 @@
 # Module: dns
 
+> ⚠️ **DEPRECATED** — this module is deprecated and will be removed in a future release. Please migrate to the replacement module.
+
 ## Description
 
 Creates public and private Route 53 zones for a given domain name and VPC ID
