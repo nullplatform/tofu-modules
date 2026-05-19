@@ -76,14 +76,24 @@ resource "terraform_data" "adopt_gateways_namespace" {
           "app.kubernetes.io/managed-by=Helm" \
           --overwrite
 
-        # Delete resources that were owned by nullplatform-base so the routing
-        # chart can recreate them with correct ownership. Targets only known
-        # resource types created by the base chart in this namespace.
+        # Transfer ownership of all gateway resources so the routing chart can
+        # adopt them without recreating LoadBalancer Services (preserves Azure IP).
+        # The base chart must have helm.sh/resource-policy: keep on these resources
+        # so Helm does not delete them when gateways are disabled during upgrade.
         for RESOURCE_TYPE in deployment service poddisruptionbudget gateway horizontalpodautoscaler; do
           kubectl get "$RESOURCE_TYPE" -n "${var.gateway_namespace}" \
             -o json 2>/dev/null \
           | jq -r '.items[]? | select(.metadata.annotations["meta.helm.sh/release-name"] == "nullplatform-base") | .metadata.name' \
-          | xargs -r kubectl delete "$RESOURCE_TYPE" -n "${var.gateway_namespace}" 2>/dev/null || true
+          | while read -r NAME; do
+            [ -z "$NAME" ] && continue
+            kubectl annotate "$RESOURCE_TYPE" "$NAME" -n "${var.gateway_namespace}" \
+              "meta.helm.sh/release-name=nullplatform-routing" \
+              "meta.helm.sh/release-namespace=${var.namespace}" \
+              --overwrite 2>/dev/null || true
+            kubectl label "$RESOURCE_TYPE" "$NAME" -n "${var.gateway_namespace}" \
+              "app.kubernetes.io/managed-by=Helm" \
+              --overwrite 2>/dev/null || true
+          done
         done
       fi
     EOT
@@ -111,5 +121,6 @@ resource "helm_release" "routing" {
   depends_on = [
     terraform_data.adopt_gateways_namespace,
     kubernetes_namespace_v1.nullplatform_tools,
+    helm_release.base,
   ]
 }
