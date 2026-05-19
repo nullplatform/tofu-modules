@@ -89,6 +89,7 @@ resource "terraform_data" "adopt_gateways_namespace" {
             kubectl annotate "$RESOURCE_TYPE" "$NAME" -n "${var.gateway_namespace}" \
               "meta.helm.sh/release-name=nullplatform-routing" \
               "meta.helm.sh/release-namespace=${var.namespace}" \
+              "helm.sh/resource-policy=keep" \
               --overwrite 2>/dev/null || true
             kubectl label "$RESOURCE_TYPE" "$NAME" -n "${var.gateway_namespace}" \
               "app.kubernetes.io/managed-by=Helm" \
