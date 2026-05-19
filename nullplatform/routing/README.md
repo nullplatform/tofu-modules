@@ -8,14 +8,16 @@ This module is the counterpart of `nullplatform/base`. Base handles logging, obs
 
 ## What it installs
 
-### Namespaces (pre-created by Terraform)
+### Namespaces
 
-Two namespaces are created before the Helm release to avoid race conditions with the chart's `lookup` function:
+This module does NOT create namespaces directly. Instead:
 
-| Namespace | Purpose |
-|-----------|---------|
-| `nullplatform-tools` (configurable) | Helm release namespace; shared with `nullplatform/base` |
-| `gateways` (configurable) | Where Gateway and Service objects live |
+| Namespace | Created by |
+|-----------|------------|
+| `nullplatform-tools` (release namespace) | `nullplatform/base` module (`kubernetes_namespace_v1`) — must exist before this module runs |
+| `gateways` (gateway resources namespace) | The `nullplatform-routing` Helm chart itself — declared as a Namespace template with `helm.sh/resource-policy: keep` so it survives uninstalls and is adopted on re-installs |
+
+If you use this module without `nullplatform/base`, you must pre-create the `nullplatform-tools` namespace yourself (or set `create_namespace = true` on a wrapping `helm_release`).
 
 ### Helm chart: `nullplatform-routing`
 
@@ -65,7 +67,7 @@ module "routing" {
 }
 ```
 
-Both modules share the `nullplatform-tools` namespace. The routing module creates it independently via `kubernetes_manifest` with `force_conflicts = true`, so there is no ordering dependency between base and routing.
+Both modules share the `nullplatform-tools` namespace. The base module owns its creation; the routing module just installs into it. Make sure `module.routing` runs after `module.base` (via implicit dependency on shared inputs or explicit `depends_on`).
 
 ---
 

@@ -1,40 +1,11 @@
 ############################################
-# Namespaces
-# Pre-create namespaces to avoid race condition
-# with Helm chart's lookup function
-############################################
-
-resource "kubernetes_manifest" "nullplatform_tools" {
-  manifest = {
-    apiVersion = "v1"
-    kind       = "Namespace"
-    metadata = {
-      name        = var.namespace
-      labels      = { name = var.namespace }
-      annotations = { "openshift.io/cluster-monitoring" = "true" }
-    }
-  }
-  field_manager {
-    force_conflicts = true
-  }
-}
-
-resource "kubernetes_manifest" "gateways" {
-  manifest = {
-    apiVersion = "v1"
-    kind       = "Namespace"
-    metadata = {
-      name   = var.gateway_namespace
-      labels = { name = var.gateway_namespace }
-    }
-  }
-  field_manager {
-    force_conflicts = true
-  }
-}
-
-############################################
 # Helm Release
+#
+# Namespaces are NOT pre-created by Terraform:
+#   - `nullplatform-tools` (release namespace) is created by `nullplatform/base`
+#   - `gateways` is created by the chart itself (Namespace template with
+#      helm.sh/resource-policy: keep). Helm adopts the namespace on install if
+#      it already exists with matching ownership annotations.
 ############################################
 
 resource "helm_release" "routing" {
@@ -50,9 +21,4 @@ resource "helm_release" "routing" {
   dependency_update = true
   max_history       = 10
   values            = [local.nullplatform_routing_values]
-
-  depends_on = [
-    kubernetes_manifest.nullplatform_tools,
-    kubernetes_manifest.gateways,
-  ]
 }
