@@ -1,6 +1,6 @@
 check "deprecated_module" {
   assert {
-    condition     = false
+    condition     = var.domain_name == ""
     error_message = "DEPRECATED: infrastructure/aws/dns is deprecated and will be removed in a future release. Please migrate to the replacement module."
   }
 }
