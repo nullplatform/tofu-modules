@@ -54,6 +54,31 @@ resource "helm_release" "base" {
 # Routing Helm Release
 ############################################
 
+# Transparent migration: if the gateways namespace was previously managed by
+# nullplatform-base (before the routing chart existed), patch its Helm ownership
+# annotations before the routing chart tries to install. On fresh installs where
+# the namespace does not exist yet, this is a no-op.
+resource "terraform_data" "adopt_gateways_namespace" {
+  count = var.install_routing ? 1 : 0
+
+  provisioner "local-exec" {
+    when    = create
+    command = <<-EOT
+      CURRENT=$(kubectl get namespace "${var.gateway_namespace}" \
+        -o jsonpath='{.metadata.annotations.meta\.helm\.sh/release-name}' 2>/dev/null || echo "")
+      if [ -n "$CURRENT" ] && [ "$CURRENT" != "nullplatform-routing" ]; then
+        kubectl annotate namespace "${var.gateway_namespace}" \
+          "meta.helm.sh/release-name=nullplatform-routing" \
+          "meta.helm.sh/release-namespace=${var.namespace}" \
+          --overwrite
+        kubectl label namespace "${var.gateway_namespace}" \
+          "app.kubernetes.io/managed-by=Helm" \
+          --overwrite
+      fi
+    EOT
+  }
+}
+
 resource "helm_release" "routing" {
   count      = var.install_routing ? 1 : 0
   name       = "nullplatform-routing"
@@ -73,6 +98,7 @@ resource "helm_release" "routing" {
   values            = [local.nullplatform_routing_values]
 
   depends_on = [
+    terraform_data.adopt_gateways_namespace,
     kubernetes_namespace_v1.nullplatform_tools,
   ]
 }
