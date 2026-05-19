@@ -64,10 +64,10 @@ resource "terraform_data" "adopt_gateways_namespace" {
   provisioner "local-exec" {
     when    = create
     command = <<-EOT
-      CURRENT=$(kubectl get namespace "${var.gateway_namespace}" \
+      # Transfer namespace ownership if not already owned by nullplatform-routing
+      NS_OWNER=$(kubectl get namespace "${var.gateway_namespace}" \
         -o jsonpath='{.metadata.annotations.meta\.helm\.sh/release-name}' 2>/dev/null || echo "")
-      if [ -n "$CURRENT" ] && [ "$CURRENT" != "nullplatform-routing" ]; then
-        # Transfer namespace ownership
+      if [ -n "$NS_OWNER" ] && [ "$NS_OWNER" != "nullplatform-routing" ]; then
         kubectl annotate namespace "${var.gateway_namespace}" \
           "meta.helm.sh/release-name=nullplatform-routing" \
           "meta.helm.sh/release-namespace=${var.namespace}" \
@@ -75,28 +75,29 @@ resource "terraform_data" "adopt_gateways_namespace" {
         kubectl label namespace "${var.gateway_namespace}" \
           "app.kubernetes.io/managed-by=Helm" \
           --overwrite
-
-        # Transfer ownership of all gateway resources so the routing chart can
-        # adopt them without recreating LoadBalancer Services (preserves Azure IP).
-        # The base chart must have helm.sh/resource-policy: keep on these resources
-        # so Helm does not delete them when gateways are disabled during upgrade.
-        for RESOURCE_TYPE in deployment service poddisruptionbudget gateway horizontalpodautoscaler; do
-          kubectl get "$RESOURCE_TYPE" -n "${var.gateway_namespace}" \
-            -o json 2>/dev/null \
-          | jq -r '.items[]? | select(.metadata.annotations["meta.helm.sh/release-name"] == "nullplatform-base") | .metadata.name' \
-          | while read -r NAME; do
-            [ -z "$NAME" ] && continue
-            kubectl annotate "$RESOURCE_TYPE" "$NAME" -n "${var.gateway_namespace}" \
-              "meta.helm.sh/release-name=nullplatform-routing" \
-              "meta.helm.sh/release-namespace=${var.namespace}" \
-              "helm.sh/resource-policy=keep" \
-              --overwrite 2>/dev/null || true
-            kubectl label "$RESOURCE_TYPE" "$NAME" -n "${var.gateway_namespace}" \
-              "app.kubernetes.io/managed-by=Helm" \
-              --overwrite 2>/dev/null || true
-          done
-        done
       fi
+
+      # Always transfer ownership of resources owned by nullplatform-base regardless
+      # of namespace annotation — handles cases where the namespace was kept from a
+      # prior migration but resources were recreated by the base chart.
+      # Also adds helm.sh/resource-policy=keep so the base chart upgrade does not
+      # delete them, preserving LoadBalancer IPs.
+      for RESOURCE_TYPE in deployment service poddisruptionbudget gateway horizontalpodautoscaler; do
+        kubectl get "$RESOURCE_TYPE" -n "${var.gateway_namespace}" \
+          -o json 2>/dev/null \
+        | jq -r '.items[]? | select(.metadata.annotations["meta.helm.sh/release-name"] == "nullplatform-base") | .metadata.name' \
+        | while read -r NAME; do
+          [ -z "$NAME" ] && continue
+          kubectl annotate "$RESOURCE_TYPE" "$NAME" -n "${var.gateway_namespace}" \
+            "meta.helm.sh/release-name=nullplatform-routing" \
+            "meta.helm.sh/release-namespace=${var.namespace}" \
+            "helm.sh/resource-policy=keep" \
+            --overwrite 2>/dev/null || true
+          kubectl label "$RESOURCE_TYPE" "$NAME" -n "${var.gateway_namespace}" \
+            "app.kubernetes.io/managed-by=Helm" \
+            --overwrite 2>/dev/null || true
+        done
+      done
     EOT
   }
 }
