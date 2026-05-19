@@ -18,7 +18,7 @@ This module creates a helm_release resource to deploy the AWS Load Balancer Cont
 
 ```hcl
 module "aws_load_balancer_controller" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/aws_load_balancer_controller?ref=v2.3.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/aws_load_balancer_controller?ref=v3.0.0"
 
   cluster_name = "your-cluster-name"
   vpc_id       = "your-vpc-id"

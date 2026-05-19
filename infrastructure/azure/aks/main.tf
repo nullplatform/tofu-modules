@@ -33,7 +33,7 @@ module "aks" {
   rbac_aad_azure_rbac_enabled       = false
   rbac_aad_tenant_id                = data.azurerm_client_config.current.tenant_id
   workload_identity_enabled         = true
-  oidc_issuer_enabled               = var.oidc_issuer_enabled
+  oidc_issuer_enabled               = true
 
   ############################################
   # Virtual network

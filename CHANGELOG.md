@@ -1,5 +1,59 @@
 # Changelog
 
+## [3.0.0](https://github.com/nullplatform/tofu-modules/compare/v2.6.0...v3.0.0) (2026-05-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* **nullplatform/dimension:** callers of `nullplatform/dimensions` must migrate to `nullplatform/dimension` and run a `terraform state mv` to preserve the existing dimension (resource labels changed from `environment` / `environment_value` to `this`). Migration steps are documented in the new module's README.
+
+### Code Refactoring
+
+* **nullplatform/dimension:** replace dimensions with parameterized single-dimension module ([#354](https://github.com/nullplatform/tofu-modules/issues/354)) ([319d962](https://github.com/nullplatform/tofu-modules/commit/319d9620335beee312d97256d6ecd483652d1c06))
+
+## [2.6.0](https://github.com/nullplatform/tofu-modules/compare/v2.5.1...v2.6.0) (2026-05-15)
+
+
+### Features
+
+* **scope-definition-agent-association:** add extra_filters support ([#353](https://github.com/nullplatform/tofu-modules/issues/353)) ([0b0191f](https://github.com/nullplatform/tofu-modules/commit/0b0191f1c326049afec456d3741292f0d2aed51b))
+
+## [2.5.1](https://github.com/nullplatform/tofu-modules/compare/v2.5.0...v2.5.1) (2026-05-13)
+
+
+### Bug Fixes
+
+* **nullplatform/scope_definition:** ignore_changes on action_specification icon ([#350](https://github.com/nullplatform/tofu-modules/issues/350)) ([b895608](https://github.com/nullplatform/tofu-modules/commit/b895608300e896d91506e5a299b2b520f49639ce))
+* **scope_configuration:** remove icon attribute (not in nullplatform_provider_config schema) ([#351](https://github.com/nullplatform/tofu-modules/issues/351)) ([35b3d93](https://github.com/nullplatform/tofu-modules/commit/35b3d93e161c6c02fdfaa2921b0bac6f7ded4b15))
+
+## [2.5.0](https://github.com/nullplatform/tofu-modules/compare/v2.4.3...v2.5.0) (2026-05-12)
+
+
+### Features
+
+* **scope_configuration:** support icon ([#348](https://github.com/nullplatform/tofu-modules/issues/348)) ([a4db9cf](https://github.com/nullplatform/tofu-modules/commit/a4db9cfa33c2dbe85d64dc2a3e77ddebaf9027a4))
+
+## [2.4.3](https://github.com/nullplatform/tofu-modules/compare/v2.4.2...v2.4.3) (2026-05-11)
+
+
+### Bug Fixes
+
+* **api_key:** replace concat with merge to produce map(string) for tags ([#346](https://github.com/nullplatform/tofu-modules/issues/346)) ([9cf26ea](https://github.com/nullplatform/tofu-modules/commit/9cf26eae330365eaded55c98b62497bc9b2f9b7b))
+
+## [2.4.2](https://github.com/nullplatform/tofu-modules/compare/v2.4.1...v2.4.2) (2026-05-11)
+
+
+### Bug Fixes
+
+* **api_key:** use tomap and map(string) to satisfy for_each type constraint ([#344](https://github.com/nullplatform/tofu-modules/issues/344)) ([bf02402](https://github.com/nullplatform/tofu-modules/commit/bf02402702f450c764eb73d5a8be0af591ef6949))
+
+## [2.4.1](https://github.com/nullplatform/tofu-modules/compare/v2.4.0...v2.4.1) (2026-05-11)
+
+
+### Bug Fixes
+
+* **api_key:** convert tuple to map in dynamic block for_each ([#342](https://github.com/nullplatform/tofu-modules/issues/342)) ([1d38bba](https://github.com/nullplatform/tofu-modules/commit/1d38bba2637f8dbc768f17c0e03c683fa7a6b567))
+
 ## [2.4.0](https://github.com/nullplatform/tofu-modules/compare/v2.3.1...v2.4.0) (2026-05-11)
 
 
