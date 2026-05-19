@@ -11,13 +11,19 @@
 ############################################
 
 resource "terraform_data" "adopt_gateways_resources" {
+  # Store values in input so destroy provisioner can reference them via self.output.*
+  input = {
+    gateway_ns = var.gateway_namespace
+    release_ns = var.namespace
+  }
   triggers_replace = [var.gateway_namespace, var.namespace]
 
+  # On create: transfer Helm ownership of an existing gateways namespace to this release.
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command     = <<-EOT
-      GATEWAY_NS="${var.gateway_namespace}"
-      RELEASE_NS="${var.namespace}"
+      GATEWAY_NS="${self.output.gateway_ns}"
+      RELEASE_NS="${self.output.release_ns}"
 
       # Namespace does not exist — fresh install, nothing to adopt.
       kubectl get namespace "$GATEWAY_NS" &>/dev/null || exit 0
@@ -51,6 +57,31 @@ resource "terraform_data" "adopt_gateways_resources" {
             --overwrite
           kubectl label "$R" -n "$GATEWAY_NS" \
             "app.kubernetes.io/managed-by=Helm" --overwrite
+        done
+      done
+    EOT
+  }
+
+  # On destroy: transfer ownership back to nullplatform-base so the base chart
+  # can re-adopt the gateways namespace if this module is removed.
+  # Resources are preserved (helm.sh/resource-policy: keep) — LB IPs are not recycled.
+  provisioner "local-exec" {
+    when        = destroy
+    interpreter = ["/bin/bash", "-c"]
+    command     = <<-EOT
+      GATEWAY_NS="${self.output.gateway_ns}"
+
+      kubectl get namespace "$GATEWAY_NS" &>/dev/null || exit 0
+
+      kubectl annotate namespace "$GATEWAY_NS" \
+        "meta.helm.sh/release-name=nullplatform-base" \
+        --overwrite
+
+      for RT in deployment service poddisruptionbudget gateway horizontalpodautoscaler; do
+        kubectl get "$RT" -n "$GATEWAY_NS" -o name 2>/dev/null | while read R; do
+          kubectl annotate "$R" -n "$GATEWAY_NS" \
+            "meta.helm.sh/release-name=nullplatform-base" \
+            --overwrite
         done
       done
     EOT
