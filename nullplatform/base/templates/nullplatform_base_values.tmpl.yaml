@@ -1,78 +1,18 @@
 # Global settings
 global:
-  installGatewayV2Crd: ${installGatewayV2Crd}
+  installGatewayV2Crd: false
   # Kubernetes provider (options: "oke", "gke", "eks", "aks", "aro")
   provider: "${k8s_provider}"
   # AWS region (applicable for EKS provider)
   awsRegion: "${awsRegion}"
 # Namespace configurations
 namespaces:
-  # Namespace for Null platform resources
   nullplatformApplications: "nullplatform"
   nullplatformTools: "nullplatform-tools"
-  gateway: "gateways"
-ingressControllers:
-  public:
-    name: "${ingress_public_name}"
-    enabled: ${ingress_public_enabled}
-    scope: ${ingress_public_scope}
-    domain: "${ingress_public_domain}"
-  private:
-    name: "${ingress_private_name}"
-    enabled: ${ingress_private_enabled}
-    scope: ${ingress_private_scope}
-    domain: "${ingress_private_domain}"
 # TLS configuration
 tls:
   required: ${tls_required}
-  # Name of the TLS secret
   secretName: "wildcard-tls"
-  # Gateway configurations
-gateway:
-  useClusterIP: ${gateway_use_cluster_ip}
-  http:
-    enabled: ${gateway_enabled}
-  internal:
-    enabled: ${gateway_internal_enabled}
-    name: "gateway-private"
-    aws:
-      name: ${gateway_internal_aws_name}
-      securityGroups: "${gateway_private_aws_security_groups}"
-      dns_name: ${gateway_private_aws_dns_name}
-    azure:
-      networkSecurityGroup: "${gateway_private_azure_nsg}"
-    gcp:
-      firewallRule: "${gateway_private_gcp_firewall}"
-    oci:
-      securityListManagementMode: "${gateway_private_oci_security_list_management_mode}"
-      subnet: "${gateway_private_oci_subnet}"
-    azure_load_balancer_subnet: ${gateway_internal_azure_load_balancer_subnet}
-    loadBalancerSourceRanges: []
-    addresses: {}
-    autoscaling:
-      minReplicas: 2
-      maxReplicas: 10
-    loadBalancerType: "internal"  # internal, external
-  public:
-    name: "gateway-public"
-    enabled: ${gateway_public_enabled}
-    aws:
-      name: ${gateway_public_aws_name}
-      securityGroups: "${gateway_public_aws_security_groups}"
-      dns_name: ${gateway_public_aws_dns_name}
-    azure:
-      networkSecurityGroup: "${gateway_public_azure_nsg}"
-    gcp:
-      firewallRule: "${gateway_public_gcp_firewall}"
-    oci:
-      securityListManagementMode: "${gateway_public_oci_security_list_management_mode}"
-      subnet: "${gateway_public_oci_subnet}"
-    loadBalancerSourceRanges: []
-    addresses: {}
-    autoscaling:
-      minReplicas: 2
-      maxReplicas: 10
-    loadBalancerType: "external"  # internal, external
 # Nullplatform configurations
 nullplatform:
   apiKey: "${np_api_key}"
@@ -143,13 +83,13 @@ cloudwatch:
 # Metrics server configuration
 metricsServer:
   enabled: ${metricsserver_enabled}
-# Gateway API configuration
+# Gateway resources are managed exclusively by the nullplatform/routing module
 gateways:
-  enabled: ${gateways_enabled}
+  enabled: false
 gatewayAPI:
-  enabled: ${gatewayapi_enabled}
+  enabled: false
   crds:
-    install: ${gatewayapi_crds_install}
+    install: false
 # Image pull secret configuration
 imagePullSecrets:
   enabled: ${imagePullSecrets_enabled}

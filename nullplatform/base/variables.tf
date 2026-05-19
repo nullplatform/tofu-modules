@@ -37,12 +37,6 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
-variable "install_gateway_v2_crd" {
-  type        = bool
-  description = "Install Gateway API v2 CRDs."
-  default     = false
-}
-
 ############################################
 # TLS
 ############################################
@@ -65,51 +59,6 @@ variable "tls_secret_private_name" {
   default     = "wildcard-tls-internal"
 }
 
-############################################
-# Gateway
-############################################
-
-variable "gateway_enabled" {
-  type        = bool
-  description = "Enable the HTTP gateway."
-  default     = false
-}
-
-variable "gateway_internal_enabled" {
-  type        = bool
-  description = "Enable the internal (private) gateway."
-  default     = true
-}
-
-variable "gateway_public_enabled" {
-  type        = bool
-  description = "Enable the public gateway."
-  default     = true
-}
-
-variable "internal_azure_load_balancer_subnet" {
-  description = "The name of the subnet to use in azure private load balancer"
-  type        = string
-  default     = "load_balancer"
-}
-
-variable "gateway_use_cluster_ip" {
-  description = ""
-  type        = bool
-  default     = false
-}
-
-
-variable "gateway_public_aws_dns_name" {
-  description = ""
-  type        = string
-  default     = ""
-}
-variable "gateway_private_aws_dns_name" {
-  description = ""
-  type        = string
-  default     = ""
-}
 ############################################
 # Control Plane
 ############################################
@@ -324,110 +273,6 @@ variable "metrics_server_enabled" {
 }
 
 ############################################
-# Gateway API / Gateways
-############################################
-
-variable "gateways_enabled" {
-  type        = bool
-  description = "Enable gateway resources (Helm chart)."
-  default     = true
-}
-
-variable "gateway_api_enabled" {
-  type        = bool
-  description = "Enable the Gateway API."
-  default     = false
-}
-
-variable "gateway_api_crds_install" {
-  type        = bool
-  description = "Install Gateway API CRDs."
-  default     = false
-}
-
-
-variable "gateway_public_aws_name" {
-  type        = string
-  description = "Name of public gateway in AWS."
-  default     = "k8s-nullplatform-internet-facing"
-}
-
-variable "gateway_internal_aws_name" {
-  type        = string
-  description = "Name of private gateway in AWS."
-  default     = "k8s-nullplatform-internal"
-}
-
-############################################
-# Gateway Security Resource IDs
-# These are outputs from the security submodules:
-#   infrastructure/aws/security
-#   infrastructure/azure/security
-#   infrastructure/gcp/security
-############################################
-
-variable "gateway_public_aws_security_group_id" {
-  type        = string
-  description = "The ID of the AWS security group for the public gateway. Output from infrastructure/aws/security module."
-  default     = ""
-}
-
-variable "gateway_private_aws_security_group_id" {
-  type        = string
-  description = "The ID of the AWS security group for the private gateway. Output from infrastructure/aws/security module."
-  default     = ""
-}
-
-variable "gateway_public_azure_nsg_id" {
-  type        = string
-  description = "The ID of the Azure NSG for the public gateway. Output from infrastructure/azure/security module."
-  default     = ""
-}
-
-variable "gateway_private_azure_nsg_id" {
-  type        = string
-  description = "The ID of the Azure NSG for the private gateway. Output from infrastructure/azure/security module."
-  default     = ""
-}
-
-variable "gateway_public_gcp_firewall_name" {
-  type        = string
-  description = "The name of the GCP firewall rule for the public gateway. Output from infrastructure/gcp/security module."
-  default     = ""
-}
-
-variable "gateway_private_gcp_firewall_name" {
-  type        = string
-  description = "The name of the GCP firewall rule for the private gateway. Output from infrastructure/gcp/security module."
-  default     = ""
-}
-
-# OCI Gateway Security
-variable "gateway_public_oci_security_list_management_mode" {
-  type        = string
-  description = "OCI Load Balancer security list management mode for the public gateway. Options: 'All' (recommended - auto-manages security lists), 'Frontend' (only frontend rules), 'None' (manual management)."
-  default     = "All"
-}
-
-variable "gateway_private_oci_security_list_management_mode" {
-  type        = string
-  description = "OCI Load Balancer security list management mode for the private gateway. Options: 'All' (recommended - auto-manages security lists), 'Frontend' (only frontend rules), 'None' (manual management)."
-  default     = "All"
-}
-
-variable "gateway_public_oci_subnet" {
-  type        = string
-  description = "OCI subnet OCID for the public gateway load balancer (sets service.beta.kubernetes.io/oci-load-balancer-subnet1)."
-  default     = ""
-}
-
-variable "gateway_private_oci_subnet" {
-  type        = string
-  description = "OCI subnet OCID for the private gateway load balancer (sets service.beta.kubernetes.io/oci-load-balancer-subnet1)."
-  default     = ""
-}
-
-############################################
 # Image Pull Secrets
 ############################################
 
@@ -456,70 +301,3 @@ variable "image_pull_secrets_password" {
   default     = ""
 }
 
-############################################
-# Ingress Controller
-############################################
-# ============================================================
-# IngressControllers configuration
-# ============================================================
-
-############################################
-# Routing chart
-############################################
-
-variable "install_routing" {
-  type        = bool
-  description = "Install the nullplatform-routing helm chart alongside the base chart. Set to false only if routing is managed separately via the nullplatform/routing module."
-  default     = true
-}
-
-variable "nullplatform_routing_helm_version" {
-  type        = string
-  description = "Helm chart version for the nullplatform routing chart."
-  default     = "1.0.0"
-}
-
-variable "nullplatform_routing_chart_path" {
-  type        = string
-  description = "Local filesystem path to the nullplatform-routing chart. When set, overrides the Helm registry (use for local development/testing)."
-  default     = ""
-}
-
-variable "gateway_namespace" {
-  type        = string
-  description = "Kubernetes namespace for gateway resources."
-  default     = "gateways"
-}
-
-variable "ingressControllers" {
-  description = "Configuración de los IngressControllers públicos y privados"
-  type = object({
-    public = object({
-      name    = string
-      enabled = bool
-      scope   = string
-      domain  = string
-    })
-    private = object({
-      name    = string
-      enabled = bool
-      scope   = string
-      domain  = string
-    })
-  })
-
-  default = {
-    public = {
-      name    = "internet-facing"
-      enabled = false
-      scope   = "External"
-      domain  = ""
-    }
-    private = {
-      name    = "internal"
-      enabled = false
-      scope   = "Internal"
-      domain  = ""
-    }
-  }
-}
