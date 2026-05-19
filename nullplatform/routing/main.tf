@@ -19,8 +19,22 @@ resource "terraform_data" "adopt_gateways_resources" {
       GATEWAY_NS="${var.gateway_namespace}"
       RELEASE_NS="${var.namespace}"
 
+      # Namespace does not exist — fresh install, nothing to adopt.
       kubectl get namespace "$GATEWAY_NS" &>/dev/null || exit 0
 
+      # Namespace is Terminating (e.g. leftover from a prior destroy).
+      # Strip Gateway finalizers so Kubernetes can finish the deletion,
+      # then wait up to 60 s. The routing chart will re-create it cleanly.
+      if kubectl get namespace "$GATEWAY_NS" -o jsonpath='{.status.phase}' 2>/dev/null | grep -q "Terminating"; then
+        for R in $(kubectl get gateway.gateway.networking.k8s.io -n "$GATEWAY_NS" -o name 2>/dev/null); do
+          kubectl patch "$R" -n "$GATEWAY_NS" --type=merge \
+            -p '{"metadata":{"finalizers":null}}' 2>/dev/null || true
+        done
+        kubectl wait --for=delete namespace/"$GATEWAY_NS" --timeout=60s 2>/dev/null || true
+        exit 0
+      fi
+
+      # Namespace is Active — transfer Helm ownership to this release.
       kubectl annotate namespace "$GATEWAY_NS" \
         "meta.helm.sh/release-name=nullplatform-routing" \
         "meta.helm.sh/release-namespace=$RELEASE_NS" \
