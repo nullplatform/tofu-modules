@@ -112,6 +112,18 @@ variable "logging_enabled" {
   default     = true
 }
 
+variable "logging_application_logs_enabled" {
+  type        = bool
+  description = "Enable application log forwarding. Set to false to keep only http/sys metrics pipelines active across all providers."
+  default     = true
+}
+
+variable "logging_mount_docker_containers" {
+  type        = bool
+  description = "Mount Docker container log paths. Enable when using Docker container runtime (e.g. Minikube)."
+  default     = false
+}
+
 ############################################
 # Prometheus Exporter
 ############################################
@@ -202,6 +214,18 @@ variable "dynatrace_enabled" {
   default     = false
 }
 
+variable "dynatrace_logs_enabled" {
+  type        = bool
+  description = "Enable log forwarding to Dynatrace. Set to false to send only metrics."
+  default     = true
+}
+
+variable "dynatrace_metrics_enabled" {
+  type        = bool
+  description = "Enable metrics forwarding to Dynatrace. Set to false to send only logs."
+  default     = true
+}
+
 variable "dynatrace_api_key" {
   type        = string
   description = "Dynatrace API key."
@@ -225,6 +249,18 @@ variable "datadog_enabled" {
   default     = false
 }
 
+variable "datadog_logs_enabled" {
+  type        = bool
+  description = "Enable log forwarding to Datadog. Set to false to send only metrics."
+  default     = true
+}
+
+variable "datadog_metrics_enabled" {
+  type        = bool
+  description = "Enable metrics forwarding to Datadog. Set to false to send only logs."
+  default     = true
+}
+
 variable "datadog_api_key" {
   type        = string
   description = "Datadog API key."
@@ -246,6 +282,18 @@ variable "newrelic_enabled" {
   type        = bool
   description = "Enable New Relic integration."
   default     = false
+}
+
+variable "newrelic_logs_enabled" {
+  type        = bool
+  description = "Enable log forwarding to New Relic. Set to false to send only metrics."
+  default     = true
+}
+
+variable "newrelic_metrics_enabled" {
+  type        = bool
+  description = "Enable metrics forwarding to New Relic. Set to false to send only logs."
+  default     = true
 }
 
 variable "newrelic_license_key" {
