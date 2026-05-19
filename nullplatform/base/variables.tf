@@ -38,28 +38,6 @@ variable "aws_region" {
 }
 
 ############################################
-# TLS
-############################################
-
-variable "tls_required" {
-  type        = bool
-  description = "Whether TLS is required."
-  default     = true
-}
-
-variable "tls_secret_name" {
-  type        = string
-  description = "Name of the Kubernetes secret containing the public TLS certificate."
-  default     = "wildcard-tls"
-}
-
-variable "tls_secret_private_name" {
-  type        = string
-  description = "Name of the Kubernetes secret containing the private TLS certificate."
-  default     = "wildcard-tls-internal"
-}
-
-############################################
 # Control Plane
 ############################################
 

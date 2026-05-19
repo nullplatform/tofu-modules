@@ -9,10 +9,6 @@ global:
 namespaces:
   nullplatformApplications: "nullplatform"
   nullplatformTools: "nullplatform-tools"
-# TLS configuration
-tls:
-  required: ${tls_required}
-  secretName: "wildcard-tls"
 # Nullplatform configurations
 nullplatform:
   apiKey: "${np_api_key}"

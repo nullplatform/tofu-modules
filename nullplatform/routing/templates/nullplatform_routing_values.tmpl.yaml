@@ -71,3 +71,7 @@ gatewayAPI:
   enabled: ${gatewayapi_enabled}
   crds:
     install: ${gatewayapi_crds_install}
+tls:
+  required: ${tls_required}
+  secretName: "${tls_secret_name}"
+  secretPrivateName: "${tls_secret_private_name}"

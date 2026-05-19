@@ -6,9 +6,6 @@ locals {
       k8s_provider = var.k8s_provider
       awsRegion    = var.aws_region
 
-      # ---- tls ----
-      tls_required = var.tls_required ? "true" : "false"
-
       # ---- nullplatform ----
       np_api_key = var.np_api_key
 

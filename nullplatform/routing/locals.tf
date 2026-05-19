@@ -53,6 +53,11 @@ locals {
       gateways_enabled        = var.gateways_enabled ? "true" : "false"
       gatewayapi_enabled      = var.gateway_api_enabled ? "true" : "false"
       gatewayapi_crds_install = var.gateway_api_crds_install ? "true" : "false"
+
+      # ---- tls ----
+      tls_required            = var.tls_required ? "true" : "false"
+      tls_secret_name         = var.tls_secret_name
+      tls_secret_private_name = var.tls_secret_private_name
     }
   )
 }

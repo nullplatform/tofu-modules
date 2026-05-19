@@ -208,3 +208,25 @@ variable "gateway_api_crds_install" {
   description = "Install Gateway API CRDs."
   default     = false
 }
+
+############################################
+# TLS
+############################################
+
+variable "tls_required" {
+  type        = bool
+  description = "Whether TLS is required on gateway listeners."
+  default     = true
+}
+
+variable "tls_secret_name" {
+  type        = string
+  description = "Name of the Kubernetes secret containing the public TLS certificate."
+  default     = "wildcard-tls"
+}
+
+variable "tls_secret_private_name" {
+  type        = string
+  description = "Name of the Kubernetes secret containing the private TLS certificate."
+  default     = "wildcard-tls-internal"
+}
