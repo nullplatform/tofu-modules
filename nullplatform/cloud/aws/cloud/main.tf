@@ -4,9 +4,6 @@ resource "nullplatform_provider_config" "aws" {
   type       = "aws-configuration"
   dimensions = var.dimensions
   attributes = jsonencode({
-    iam = {
-      #scope_workflow_role = aws_iam_role.nullplatform_scope_workflow_role.arn
-    }
     account = {
       id     = data.aws_caller_identity.current.id
       region = data.aws_region.current.region
@@ -18,7 +15,4 @@ resource "nullplatform_provider_config" "aws" {
       hosted_public_zone_id = var.hosted_public_zone_id
     }
   })
-  lifecycle {
-    ignore_changes = [attributes]
-  }
 }
