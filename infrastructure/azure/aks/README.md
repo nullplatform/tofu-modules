@@ -2,25 +2,27 @@
 
 ## Description
 
-Deploys an Azure Kubernetes Service cluster with customizable node pools and networking configurations
+Deploys an Azure Kubernetes Service (AKS) cluster with system and user node pools, OIDC/Workload Identity, and optional ACR integration using the official Azure/aks/azurerm Terraform module
 
 ## Architecture
 
-The module creates an AKS cluster using the Azure/aks/azurerm Terraform module, which provisions an azurerm_kubernetes_cluster resource. The cluster is configured with a system node pool and a user node pool, each with customizable VM sizes and scaling settings. The module also sets up networking and security configurations, including authorized IP ranges and private cluster mode. Additionally, the module enables workload identity and OIDC issuer for the cluster.
+The module wraps the Azure/aks/azurerm community module (version 11.0.0) and uses azurerm_client_config data source to retrieve the current tenant ID for AAD RBAC configuration. It provisions an AKS cluster with a system node pool and a separate autoscaling user node pool (nodepool), both attached to the provided vnet_subnet_id. The cluster has OIDC issuer and Workload Identity enabled, and the module conditionally attaches an ACR pull role by passing acr_id into attached_acr_id_map when provided. Outputs expose the cluster endpoint, CA certificate, client credentials, OIDC issuer URL, and node resource group for downstream consumption.
 
 ## Features
 
-- Creates AKS cluster with customizable node pools
-- Configures networking and security settings for the cluster
-- Enables workload identity and OIDC issuer for the cluster
-- Supports integration with Azure Container Registry
-- Deploys cluster with customizable Kubernetes version and upgrades
+- Creates an AKS cluster with a dedicated system node pool and a separate autoscaling user node pool spanning three availability zones
+- Enables OIDC issuer and Workload Identity on the cluster for pod-level Azure identity federation
+- Configures Azure RBAC and AAD tenant integration using the current client tenant ID from azurerm_client_config
+- Assigns Network Contributor role to the AKS identity on the provided VNet subnet for CNI networking
+- Optionally attaches an Azure Container Registry by granting AcrPull role when acr_id is provided
+- Supports private cluster mode and API server authorized IP range restrictions for network security
+- Exposes cluster credentials, CA certificate, OIDC issuer URL, and node resource group as outputs
 
 ## Basic Usage
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v3.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v3.1.0"
 
   cluster_name        = "your-cluster-name"
   location            = "your-location"
@@ -74,7 +76,6 @@ resource "example_resource" "this" {
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment name used for tagging and naming purposes | `string` | `"nullplatform"` | no |
 | <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | The version of Kubernetes to use for the AKS cluster | `string` | `"1.32.7"` | no |
 | <a name="input_location"></a> [location](#input\_location) | The Azure region where the AKS cluster will be deployed (e.g., eastus, westus2) | `string` | n/a | yes |
-| <a name="input_oidc_issuer_enabled"></a> [oidc\_issuer\_enabled](#input\_oidc\_issuer\_enabled) | Whether to enable the OIDC issuer for workload identity | `bool` | `true` | no |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | The prefix for resources created by the AKS module | `string` | `"aks"` | no |
 | <a name="input_private_cluster_enabled"></a> [private\_cluster\_enabled](#input\_private\_cluster\_enabled) | Whether to enable private cluster mode (API server accessible only via the private network) | `bool` | `false` | no |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | The name of the resource group where the AKS cluster will be created | `string` | n/a | yes |
@@ -96,20 +97,23 @@ resource "example_resource" "this" {
 | <a name="output_cluster_ca_certificate"></a> [cluster\_ca\_certificate](#output\_cluster\_ca\_certificate) | The cluster CA certificate in base64 |
 | <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | The name of the AKS cluster |
 | <a name="output_host"></a> [host](#output\_host) | The API server endpoint |
+| <a name="output_node_resource_group"></a> [node\_resource\_group](#output\_node\_resource\_group) | The name of the auto-generated resource group for AKS node resources |
 | <a name="output_oidc_issuer_url"></a> [oidc\_issuer\_url](#output\_oidc\_issuer\_url) | The URL of the cluster's OIDC issuer |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
 {
   "name": "aks",
-  "description": "Deploys an Azure Kubernetes Service cluster with customizable node pools and networking configurations",
-  "architecture": "The module creates an AKS cluster using the Azure/aks/azurerm Terraform module, which provisions an azurerm_kubernetes_cluster resource. The cluster is configured with a system node pool and a user node pool, each with customizable VM sizes and scaling settings. The module also sets up networking and security configurations, including authorized IP ranges and private cluster mode. Additionally, the module enables workload identity and OIDC issuer for the cluster.",
+  "description": "Deploys an Azure Kubernetes Service (AKS) cluster with system and user node pools, OIDC/Workload Identity, and optional ACR integration using the official Azure/aks/azurerm Terraform module",
+  "architecture": "The module wraps the Azure/aks/azurerm community module (version 11.0.0) and uses azurerm_client_config data source to retrieve the current tenant ID for AAD RBAC configuration. It provisions an AKS cluster with a system node pool and a separate autoscaling user node pool (nodepool), both attached to the provided vnet_subnet_id. The cluster has OIDC issuer and Workload Identity enabled, and the module conditionally attaches an ACR pull role by passing acr_id into attached_acr_id_map when provided. Outputs expose the cluster endpoint, CA certificate, client credentials, OIDC issuer URL, and node resource group for downstream consumption.",
   "features": [
-    "Creates AKS cluster with customizable node pools",
-    "Configures networking and security settings for the cluster",
-    "Enables workload identity and OIDC issuer for the cluster",
-    "Supports integration with Azure Container Registry",
-    "Deploys cluster with customizable Kubernetes version and upgrades"
+    "Creates an AKS cluster with a dedicated system node pool and a separate autoscaling user node pool spanning three availability zones",
+    "Enables OIDC issuer and Workload Identity on the cluster for pod-level Azure identity federation",
+    "Configures Azure RBAC and AAD tenant integration using the current client tenant ID from azurerm_client_config",
+    "Assigns Network Contributor role to the AKS identity on the provided VNet subnet for CNI networking",
+    "Optionally attaches an Azure Container Registry by granting AcrPull role when acr_id is provided",
+    "Supports private cluster mode and API server authorized IP range restrictions for network security",
+    "Exposes cluster credentials, CA certificate, OIDC issuer URL, and node resource group as outputs"
   ],
   "inputs": [
     {
@@ -168,11 +172,6 @@ resource "example_resource" "this" {
       "required": false
     },
     {
-      "name": "oidc_issuer_enabled",
-      "description": "Whether to enable the OIDC issuer for workload identity",
-      "required": false
-    },
-    {
       "name": "tags",
       "description": "A mapping of tags to assign to the AKS cluster and related resources",
       "required": false
@@ -197,8 +196,9 @@ resource "example_resource" "this" {
     "admin_client_certificate",
     "admin_client_key",
     "admin_cluster_ca_certificate",
-    "oidc_issuer_url"
+    "oidc_issuer_url",
+    "node_resource_group"
   ],
-  "hash": "f5bf055ea47426fa1b0e1f74cda6c09e"
+  "hash": "f4688d492938b6f0d453f3cadb6bbc65"
 }
 END_AI_METADATA -->
