@@ -3,19 +3,18 @@ args:
 - "${arg}"
   %{ endfor }
 
-  %{ if length(service_account_annotations) > 0 }
+  %{ if aws_iam_role_arn != "" }
 serviceAccount:
   annotations:
-    %{ for k, v in service_account_annotations }
-    ${k}: "${v}"
-    %{ endfor }
+    eks.amazonaws.com/role-arn: "${aws_iam_role_arn}"
   %{ endif }
 
-  %{ if length(pod_labels) > 0 }
+  %{ if azure_workload_identity_active }
+serviceAccount:
+  annotations:
+    azure.workload.identity/client-id: "${azure_client_id}"
 podLabels:
-  %{ for k, v in pod_labels }
-  ${k}: "${v}"
-  %{ endfor }
+  azure.workload.identity/use: "true"
   %{ endif }
 
 configuration:
@@ -33,4 +32,3 @@ initScripts:
 - "${script}"
   %{ endfor }
   %{ endif }
-
