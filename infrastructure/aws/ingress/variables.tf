@@ -4,7 +4,7 @@ variable "certificate_arn" {
 }
 
 variable "internal_alb" {
-  description = "Configuration for the internal-scheme ALB ingress. Set `enabled = false` to skip creation. `ingress_name` is the Kubernetes Ingress resource name; `namespace` is the namespace it lives in; `alb_name` is used both as the AWS load balancer name and the ALB group name (consumers sharing the same group name land on the same ALB)."
+  description = "Configuration for the internal-scheme ALB ingress. Set `enabled = false` to skip creation. `ingress_name` is the Kubernetes Ingress resource name; `namespace` is the namespace it lives in; `alb_name` is used both as the AWS load balancer name and the ALB group name (consumers sharing the same group name land on the same ALB). At least one of internal_alb.enabled or internet_facing_alb.enabled must be true."
   type = object({
     enabled      = optional(bool, true)
     ingress_name = optional(string, "initial-ingress-setup-internal")
@@ -12,6 +12,11 @@ variable "internal_alb" {
     alb_name     = optional(string, "k8s-nullplatform-internal")
   })
   default = {}
+
+  validation {
+    condition     = var.internal_alb.enabled || var.internet_facing_alb.enabled
+    error_message = "At least one of internal_alb.enabled or internet_facing_alb.enabled must be true."
+  }
 }
 
 variable "internet_facing_alb" {

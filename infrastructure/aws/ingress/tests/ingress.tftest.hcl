@@ -132,7 +132,7 @@ run "public_alb_disabled_skips_creation" {
   }
 }
 
-run "both_albs_disabled_creates_nothing" {
+run "rejects_when_both_albs_disabled" {
   command = plan
 
   variables {
@@ -144,15 +144,7 @@ run "both_albs_disabled_creates_nothing" {
     }
   }
 
-  assert {
-    condition     = length(kubernetes_ingress_v1.internal) == 0
-    error_message = "Internal ingress must not be created when internal_alb.enabled is false"
-  }
-
-  assert {
-    condition     = length(kubernetes_ingress_v1.public) == 0
-    error_message = "Public ingress must not be created when internet_facing_alb.enabled is false"
-  }
+  expect_failures = [var.internal_alb]
 }
 
 run "custom_alb_overrides_propagate" {
