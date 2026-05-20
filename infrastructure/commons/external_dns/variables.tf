@@ -195,4 +195,3 @@ variable "azure_tenant_id" {
   default     = ""
 }
 
-
