@@ -75,7 +75,7 @@ run "private_zone_disabled_skips_creation" {
   }
 }
 
-run "both_zones_disabled_creates_nothing" {
+run "rejects_when_both_zones_disabled" {
   command = plan
 
   variables {
@@ -83,13 +83,5 @@ run "both_zones_disabled_creates_nothing" {
     enable_private_zone = false
   }
 
-  assert {
-    condition     = length(aws_route53_zone.public_zone) == 0
-    error_message = "Public zone must not be created when enable_public_zone is false"
-  }
-
-  assert {
-    condition     = length(aws_route53_zone.private_zone) == 0
-    error_message = "Private zone must not be created when enable_private_zone is false"
-  }
+  expect_failures = [var.enable_public_zone]
 }
