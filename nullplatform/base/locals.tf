@@ -58,7 +58,9 @@ locals {
       controlPlane_enabled = var.control_plane_enabled ? "true" : "false"
 
       # ---- logging ----
-      logging_enabled = var.logging_enabled ? "true" : "false"
+      logging_enabled                  = var.logging_enabled ? "true" : "false"
+      logging_application_logs_enabled = var.logging_application_logs_enabled ? "true" : "false"
+      logging_mount_docker_containers  = var.logging_mount_docker_containers ? "true" : "false"
 
       prometheus_enabled       = var.prometheus_enabled ? "true" : "false"
       exporter_prometheus_port = var.exporter_prometheus_port
@@ -74,17 +76,23 @@ locals {
       loki_password    = var.loki_password
       loki_bearerToken = var.loki_bearer_token
 
-      dynatrace_enabled       = var.dynatrace_enabled ? "true" : "false"
-      dynatrace_apiKey        = var.dynatrace_api_key
-      dynatrace_environmentid = var.dynatrace_environment_id
+      dynatrace_enabled         = var.dynatrace_enabled ? "true" : "false"
+      dynatrace_logs_enabled    = var.dynatrace_logs_enabled ? "true" : "false"
+      dynatrace_metrics_enabled = var.dynatrace_metrics_enabled ? "true" : "false"
+      dynatrace_apiKey          = var.dynatrace_api_key
+      dynatrace_environmentid   = var.dynatrace_environment_id
 
-      datadog_enabled = var.datadog_enabled ? "true" : "false"
-      datadog_apiKey  = var.datadog_api_key
-      datadog_region  = var.datadog_region
+      datadog_enabled         = var.datadog_enabled ? "true" : "false"
+      datadog_logs_enabled    = var.datadog_logs_enabled ? "true" : "false"
+      datadog_metrics_enabled = var.datadog_metrics_enabled ? "true" : "false"
+      datadog_apiKey          = var.datadog_api_key
+      datadog_region          = var.datadog_region
 
-      newrelic_enabled    = var.newrelic_enabled ? "true" : "false"
-      newrelic_licenseKey = var.newrelic_license_key
-      newrelic_region     = var.newrelic_region
+      newrelic_enabled         = var.newrelic_enabled ? "true" : "false"
+      newrelic_logs_enabled    = var.newrelic_logs_enabled ? "true" : "false"
+      newrelic_metrics_enabled = var.newrelic_metrics_enabled ? "true" : "false"
+      newrelic_licenseKey      = var.newrelic_license_key
+      newrelic_region          = var.newrelic_region
 
       # ---- cloudwatch ----
       cloudwatch_enabled                    = var.cloudwatch_enabled ? "true" : "false"
