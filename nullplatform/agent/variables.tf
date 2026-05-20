@@ -101,9 +101,9 @@ variable "azure_client_id" {
 }
 
 variable "azure_workload_identity_enabled" {
-  description = "Enable Workload Identity for the agent's Azure authentication. When true (default), the ServiceAccount is annotated with azure.workload.identity/client-id and the pod with azure.workload.identity/use=true; azure_client_secret is not required. When false, Service Principal auth is used and azure_client_secret is required."
+  description = "Enable Workload Identity for the agent's Azure authentication. Defaults to false to preserve the existing Service Principal behavior for current callers. Set to true to annotate the ServiceAccount with azure.workload.identity/client-id and the pod with azure.workload.identity/use=true; in that mode azure_federated_credential_id becomes required and azure_client_secret is no longer needed."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "azure_federated_credential_id" {
