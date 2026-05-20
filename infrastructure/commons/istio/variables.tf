@@ -21,9 +21,9 @@ variable "istiod_version" {
 }
 
 variable "istiod_replicas" {
-  description = "Number of istiod replicas. Default is 1 to preserve the previous behavior of this module for existing consumers; set to 2 (recommended) to let the pilot deployment tolerate node drains — the istiod chart installs a PodDisruptionBudget with minAvailable=1, and a single-replica istiod therefore blocks node rolling updates (e.g. EKS AMI bumps). This value is applied to both pilot.replicaCount and pilot.autoscaleMin; without the autoscaleMin override, the HPA (enabled by default with autoscaleMin=1) would scale back to 1 replica shortly after install."
+  description = "Number of istiod replicas. Set to 2+ to avoid PDB blocking node drains. Applied to both pilot.replicaCount and pilot.autoscaleMin to prevent the HPA from scaling back to 1."
   type        = number
-  default     = 1
+  default     = 2
 
   validation {
     condition     = var.istiod_replicas >= 1
