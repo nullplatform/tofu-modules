@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.0](https://github.com/nullplatform/tofu-modules/compare/v3.1.0...v3.2.0) (2026-05-20)
+
+
+### Features
+
+* **commons/azure:** Workload Identity for cert-manager and external-dns, with Service Principal fallback ([#361](https://github.com/nullplatform/tofu-modules/issues/361)) ([f11896e](https://github.com/nullplatform/tofu-modules/commit/f11896e3314e4661134a89002e5caaa1b1ff248f))
+
 ## [3.1.0](https://github.com/nullplatform/tofu-modules/compare/v3.0.0...v3.1.0) (2026-05-20)
 
 
