@@ -4,17 +4,17 @@ on:
   pull_request:
     branches:
       - main
+  push:
+    branches:
+      - main
     paths:
       - '**/*.tf'
 
 jobs:
-  tfsec:
-    uses: nullplatform/actions-nullplatform/.github/workflows/tfsec.yml@main
+  trivy:
+    uses: nullplatform/actions-nullplatform/.github/workflows/trivy-tofu-scan.yml@main
     permissions:
       contents: read
-      pull-requests: write
       security-events: write
     with:
-      minimum_severity: 'CRITICAL'
       upload_sarif: true
-      post_comment: true

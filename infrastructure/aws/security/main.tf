@@ -38,8 +38,8 @@ locals {
   aws_cluster_security_group_id = var.cluster_name != "" ? data.aws_eks_cluster.this[0].vpc_config[0].cluster_security_group_id : ""
 
   # Use override if provided, otherwise use derived value
-  effective_vpc_id                  = var.vpc_id != "" ? var.vpc_id : local.aws_vpc_id
-  effective_network_cidr            = var.network_cidr != "" ? var.network_cidr : local.aws_vpc_cidr
+  effective_vpc_id                    = var.vpc_id != "" ? var.vpc_id : local.aws_vpc_id
+  effective_network_cidr              = var.network_cidr != "" ? var.network_cidr : local.aws_vpc_cidr
   effective_cluster_security_group_id = var.cluster_security_group_id != "" ? var.cluster_security_group_id : local.aws_cluster_security_group_id
 }
 
@@ -112,9 +112,9 @@ resource "aws_vpc_security_group_egress_rule" "public_gateway_all" {
   count = var.gateways_enabled ? 1 : 0
 
   security_group_id = aws_security_group.public_gateway[0].id
-  description       = "Allow all outbound traffic"
+  description       = "Allow outbound traffic to VPC (gateway proxies to internal services only)"
   ip_protocol       = "-1"
-  cidr_ipv4         = "0.0.0.0/0"
+  cidr_ipv4         = local.effective_network_cidr
 
   tags = {
     Name = "${var.cluster_name}-istio-public-egress"
@@ -273,9 +273,9 @@ resource "aws_vpc_security_group_egress_rule" "private_gateway_all" {
   count = var.gateway_internal_enabled ? 1 : 0
 
   security_group_id = aws_security_group.private_gateway[0].id
-  description       = "Allow all outbound traffic"
+  description       = "Allow outbound traffic to VPC (gateway proxies to internal services only)"
   ip_protocol       = "-1"
-  cidr_ipv4         = "0.0.0.0/0"
+  cidr_ipv4         = local.effective_network_cidr
 
   tags = {
     Name = "${var.cluster_name}-istio-private-egress"
