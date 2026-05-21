@@ -62,6 +62,8 @@ locals {
     BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
   }
 
+  azure_workload_identity_active = var.cloud_provider == "azure" && var.azure_workload_identity_enabled
+
   cloud_config = {
     aws = {
       AWS_IAM_ROLE_ARN = var.aws_iam_role_arn
@@ -72,16 +74,23 @@ locals {
       PRIVATE_DOMAIN       = var.private_domain
     }
 
-    azure = {
-      PRIVATE_HOSTED_ZONE_RG = var.private_hosted_zone_rg
-      PRIVATE_GATEWAY_NAME   = var.private_gateway_name
-      PUBLIC_GATEWAY_NAME    = var.public_gateway_name
-      RESOURCE_GROUP         = var.azure_resource_group
-      AZURE_SUBSCRIPTION_ID  = var.azure_subscription_id
-      AZURE_CLIENT_SECRET    = var.azure_client_secret
-      AZURE_CLIENT_ID        = var.azure_client_id
-      AZURE_TENANT_ID        = var.azure_tenant_id
-    }
+    # Null-tolerant: cross_variable_validation preconditions are the source of
+    # truth. Locals coerce nulls to "" so templatefile never blocks on missing
+    # values before the precondition gets a chance to fire.
+    azure = merge(
+      {
+        PRIVATE_HOSTED_ZONE_RG = var.private_hosted_zone_rg == null ? "" : var.private_hosted_zone_rg
+        PRIVATE_GATEWAY_NAME   = var.private_gateway_name == null ? "" : var.private_gateway_name
+        PUBLIC_GATEWAY_NAME    = var.public_gateway_name == null ? "" : var.public_gateway_name
+        RESOURCE_GROUP         = var.azure_resource_group == null ? "" : var.azure_resource_group
+        AZURE_SUBSCRIPTION_ID  = var.azure_subscription_id == null ? "" : var.azure_subscription_id
+        AZURE_CLIENT_ID        = var.azure_client_id == null ? "" : var.azure_client_id
+        AZURE_TENANT_ID        = var.azure_tenant_id == null ? "" : var.azure_tenant_id
+      },
+      local.azure_workload_identity_active ? {} : {
+        AZURE_CLIENT_SECRET = var.azure_client_secret == null ? "" : var.azure_client_secret
+      }
+    )
 
     oci = {
       PRIVATE_GATEWAY_NAME = var.private_gateway_name
@@ -95,12 +104,26 @@ locals {
     var.extra_envs,
   )
 
+  service_account_annotations = merge(
+    var.cloud_provider == "aws" && var.aws_iam_role_arn != "" ? {
+      "eks.amazonaws.com/role-arn" = var.aws_iam_role_arn
+    } : {},
+    local.azure_workload_identity_active ? {
+      "azure.workload.identity/client-id" = var.azure_client_id == null ? "" : var.azure_client_id
+    } : {},
+  )
+
+  pod_labels = local.azure_workload_identity_active ? {
+    "azure.workload.identity/use" = "true"
+  } : {}
+
   # Template único y simple
   nullplatform_agent_values = templatefile("${path.module}/templates/nullplatform_agent_values.tmpl.yaml", {
-    args             = local.all_args
-    config_values    = local.all_config
-    image_tag        = var.image_tag
-    aws_iam_role_arn = var.cloud_provider == "aws" ? var.aws_iam_role_arn : ""
-    init_scripts     = var.init_scripts
+    args                        = local.all_args
+    config_values               = local.all_config
+    image_tag                   = var.image_tag
+    service_account_annotations = local.service_account_annotations
+    pod_labels                  = local.pod_labels
+    init_scripts                = var.init_scripts
   })
 }

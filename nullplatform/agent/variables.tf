@@ -95,14 +95,26 @@ variable "cloud_provider" {
 
 # Azure client ID for authentication (required when cloud_provider is 'azure')
 variable "azure_client_id" {
-  description = "Azure client ID for authentication"
+  description = "Azure client ID for authentication. With Workload Identity enabled this is the managed identity client ID; with Service Principal it is the application (client) ID."
   type        = string
   default     = null
 }
 
-# Azure client secret for authentication (required when cloud_provider is 'azure')
+variable "azure_workload_identity_enabled" {
+  description = "Enable Workload Identity for the agent's Azure authentication. When true (default), the ServiceAccount is annotated with azure.workload.identity/client-id and the pod with azure.workload.identity/use=true; azure_client_secret is not required. When false, Service Principal auth is used and azure_client_secret is required."
+  type        = bool
+  default     = true
+}
+
+variable "azure_federated_credential_id" {
+  description = "Resource ID of the Azure federated identity credential for the agent ServiceAccount (required when cloud_provider is 'azure' and azure_workload_identity_enabled is true). Pass the id output of an infrastructure/azure/iam module instance to enforce dependency ordering."
+  type        = string
+  default     = ""
+}
+
+# Azure client secret for authentication (required only when cloud_provider is 'azure' and azure_workload_identity_enabled is false)
 variable "azure_client_secret" {
-  description = "Azure client secret for authentication"
+  description = "Azure AD client secret for Service Principal auth (required when cloud_provider is 'azure' and azure_workload_identity_enabled is false)."
   type        = string
   default     = null
   sensitive   = true
