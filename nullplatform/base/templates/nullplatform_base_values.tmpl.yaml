@@ -91,6 +91,9 @@ controlPlane:
         memory: 150Mi
 logging:
   enabled: ${logging_enabled}
+  applicationLogs:
+    enabled: ${logging_application_logs_enabled}
+  mountDockerContainers: ${logging_mount_docker_containers}
   controller:
     image: "public.ecr.aws/nullplatform/k8s-logs-controller:latest"
     resources:
@@ -117,14 +120,20 @@ logging:
     matchRegex: "container.*.application"
   dynatrace:
     enabled: ${dynatrace_enabled}
+    logsEnabled: ${dynatrace_logs_enabled}
+    metricsEnabled: ${dynatrace_metrics_enabled}
     apiKey: "${dynatrace_apiKey}"
     environmentId: "${dynatrace_environmentid}"
   datadog:
     enabled: ${datadog_enabled}
+    logsEnabled: ${datadog_logs_enabled}
+    metricsEnabled: ${datadog_metrics_enabled}
     apiKey: "${datadog_apiKey}"
     region: "${datadog_region}"
   newrelic:
     enabled: ${newrelic_enabled}
+    logsEnabled: ${newrelic_logs_enabled}
+    metricsEnabled: ${newrelic_metrics_enabled}
     licenseKey: "${newrelic_licenseKey}"
     region: "${newrelic_region}"
 # CloudWatch configuration

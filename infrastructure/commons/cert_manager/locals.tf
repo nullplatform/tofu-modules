@@ -19,12 +19,14 @@ locals {
     } : {},
 
     var.cloud_provider == "azure" ? {
-      enabled             = true
-      subscription_id     = var.azure_subscription_id
-      resource_group_name = var.azure_resource_group_name
-      client_id           = var.azure_client_id
-      tenant_id           = var.azure_tenant_id
-      hosted_zone_name    = var.azure_hosted_zone_name
+      enabled               = true
+      subscription_id       = var.azure_subscription_id
+      resource_group_name   = var.azure_resource_group_name
+      client_id             = var.azure_client_id
+      client_secret         = var.azure_client_secret
+      tenant_id             = var.azure_tenant_id
+      hosted_zone_name      = var.azure_hosted_zone_name
+      use_workload_identity = var.azure_workload_identity_enabled
     } : {},
 
     var.cloud_provider == "aws" ? {
@@ -67,9 +69,9 @@ locals {
       "eks.amazonaws.com/role-arn" = var.aws_sa_arn
     }
 
-    azure = {
+    azure = var.azure_workload_identity_enabled ? {
       "azure.workload.identity/client-id" = var.azure_client_id
-    }
+    } : {}
 
     oci = {
       "oci.oraclecloud.com/workload-identity-principal" = var.oci_sa_ocid
@@ -87,7 +89,7 @@ locals {
         lookup(local.annotations_by_provider, var.cloud_provider, {})
       )
     }
-    podLabels = var.cloud_provider == "azure" ? {
+    podLabels = var.cloud_provider == "azure" && var.azure_workload_identity_enabled ? {
       "azure.workload.identity/use" = "true"
     } : {}
     dns01RecursiveNameservers     = "8.8.8.8:53,1.1.1.1:53"

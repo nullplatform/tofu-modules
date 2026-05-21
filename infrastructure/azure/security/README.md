@@ -2,24 +2,26 @@
 
 ## Description
 
-Configures Azure network security groups for Istio gateways in an AKS cluster
+Creates Azure Network Security Groups with security rules for Istio public and private gateway traffic control on AKS clusters
 
 ## Architecture
 
-This module uses Terraform to create Azure network security groups for public and private Istio gateways in an AKS cluster, deriving VNet and location information from the cluster name and resource group, and configuring security rules to restrict traffic to the gateways, it creates azurerm_network_security_group and azurerm_network_security_rule resources, and uses data sources like azurerm_kubernetes_cluster and azurerm_virtual_network to derive necessary information, the module also uses locals to parse and derive values from the data sources
+The module uses azurerm_kubernetes_cluster and azurerm_virtual_network data sources to automatically derive the Azure location and VNet CIDR from the AKS cluster when overrides are not provided. Two azurerm_network_security_group resources are conditionally created — one for the public gateway and one for the private/internal gateway — each controlled by boolean flags. Each NSG is populated with azurerm_network_security_rule resources that enforce port 443 and port 15021 access policies, with the public NSG allowing internet HTTPS while restricting health checks to VNet CIDR, and the private NSG restricting both ports to VNet CIDR only.
 
 ## Features
 
-- Creates network security groups for public and private Istio gateways
-- Configures security rules to restrict traffic to the gateways
-- Derives VNet and location information from the cluster name and resource group
-- Supports overriding Azure location and network CIDR block
+- Creates azurerm_network_security_group for public Istio gateway allowing internet HTTPS on port 443
+- Creates azurerm_network_security_group for private Istio gateway restricting all traffic to VNet CIDR only
+- Restricts Istio health check port 15021 to VNet CIDR on both public and private NSGs
+- Automatically derives Azure location and VNet CIDR from AKS cluster and VNet data sources when overrides are not supplied
+- Supports manual override of location and network CIDR to avoid bootstrap failures during initial AKS provisioning
+- Outputs NSG IDs for both public and private gateways for downstream resource association
 
 ## Basic Usage
 
 ```hcl
 module "security" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/security?ref=v3.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/security?ref=v3.2.0"
 
   cluster_name        = "your-cluster-name"
   resource_group_name = "your-resource-group-name"
@@ -46,7 +48,7 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | ~> 4.0 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.73.0 |
 
 ## Resources
 
@@ -83,13 +85,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "security",
-  "description": "Configures Azure network security groups for Istio gateways in an AKS cluster",
-  "architecture": "This module uses Terraform to create Azure network security groups for public and private Istio gateways in an AKS cluster, deriving VNet and location information from the cluster name and resource group, and configuring security rules to restrict traffic to the gateways, it creates azurerm_network_security_group and azurerm_network_security_rule resources, and uses data sources like azurerm_kubernetes_cluster and azurerm_virtual_network to derive necessary information, the module also uses locals to parse and derive values from the data sources",
+  "description": "Creates Azure Network Security Groups with security rules for Istio public and private gateway traffic control on AKS clusters",
+  "architecture": "The module uses azurerm_kubernetes_cluster and azurerm_virtual_network data sources to automatically derive the Azure location and VNet CIDR from the AKS cluster when overrides are not provided. Two azurerm_network_security_group resources are conditionally created — one for the public gateway and one for the private/internal gateway — each controlled by boolean flags. Each NSG is populated with azurerm_network_security_rule resources that enforce port 443 and port 15021 access policies, with the public NSG allowing internet HTTPS while restricting health checks to VNet CIDR, and the private NSG restricting both ports to VNet CIDR only.",
   "features": [
-    "Creates network security groups for public and private Istio gateways",
-    "Configures security rules to restrict traffic to the gateways",
-    "Derives VNet and location information from the cluster name and resource group",
-    "Supports overriding Azure location and network CIDR block"
+    "Creates azurerm_network_security_group for public Istio gateway allowing internet HTTPS on port 443",
+    "Creates azurerm_network_security_group for private Istio gateway restricting all traffic to VNet CIDR only",
+    "Restricts Istio health check port 15021 to VNet CIDR on both public and private NSGs",
+    "Automatically derives Azure location and VNet CIDR from AKS cluster and VNet data sources when overrides are not supplied",
+    "Supports manual override of location and network CIDR to avoid bootstrap failures during initial AKS provisioning",
+    "Outputs NSG IDs for both public and private gateways for downstream resource association"
   ],
   "inputs": [
     {
@@ -127,6 +131,6 @@ resource "example_resource" "this" {
     "public_gateway_nsg_id",
     "private_gateway_nsg_id"
   ],
-  "hash": "84577797d05f41a06009839dab1c6d03"
+  "hash": "6c675ce57f21cce103dd9e4647c12797"
 }
 END_AI_METADATA -->

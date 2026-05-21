@@ -10,11 +10,15 @@
 
 locals {
   need_data = var.gateways_enabled || var.gateway_internal_enabled
+  # Skip cluster/vnet lookups when overrides are provided — avoids bootstrap failures
+  # when base_security is applied in the same run as AKS creation.
+  need_cluster_lookup = var.cluster_name != "" && (var.network_cidr == "" || var.azure_location == "")
+  need_vnet_lookup    = local.need_cluster_lookup && var.network_cidr == ""
 }
 
 # Get AKS cluster info
 data "azurerm_kubernetes_cluster" "this" {
-  count               = var.cluster_name != "" ? 1 : 0
+  count               = local.need_cluster_lookup ? 1 : 0
   name                = var.cluster_name
   resource_group_name = var.resource_group_name
 
@@ -33,22 +37,22 @@ data "azurerm_kubernetes_cluster" "this" {
 locals {
   # Parse the subnet ID to extract VNet info
   # Format: /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet}/subnets/{subnet}
-  azure_subnet_id_parts = var.cluster_name != "" ? split("/", data.azurerm_kubernetes_cluster.this[0].agent_pool_profile[0].vnet_subnet_id) : []
-  azure_vnet_name       = var.cluster_name != "" ? local.azure_subnet_id_parts[8] : ""
-  azure_vnet_rg         = var.cluster_name != "" ? local.azure_subnet_id_parts[4] : ""
+  azure_subnet_id_parts = local.need_cluster_lookup ? split("/", data.azurerm_kubernetes_cluster.this[0].agent_pool_profile[0].vnet_subnet_id) : []
+  azure_vnet_name       = local.need_cluster_lookup ? local.azure_subnet_id_parts[8] : ""
+  azure_vnet_rg         = local.need_cluster_lookup ? local.azure_subnet_id_parts[4] : ""
 }
 
 # Get VNet info to derive address space
 data "azurerm_virtual_network" "this" {
-  count               = var.cluster_name != "" ? 1 : 0
+  count               = local.need_vnet_lookup ? 1 : 0
   name                = local.azure_vnet_name
   resource_group_name = local.azure_vnet_rg
 }
 
 locals {
   # Derived values from data sources
-  azure_location  = var.cluster_name != "" ? data.azurerm_kubernetes_cluster.this[0].location : ""
-  azure_vnet_cidr = var.cluster_name != "" ? data.azurerm_virtual_network.this[0].address_space[0] : ""
+  azure_location  = local.need_cluster_lookup ? data.azurerm_kubernetes_cluster.this[0].location : ""
+  azure_vnet_cidr = local.need_vnet_lookup ? data.azurerm_virtual_network.this[0].address_space[0] : ""
 
   # Use override if provided, otherwise use derived value
   effective_location     = var.azure_location != "" ? var.azure_location : local.azure_location

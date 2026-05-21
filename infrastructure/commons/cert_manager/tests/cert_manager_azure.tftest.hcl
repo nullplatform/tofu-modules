@@ -5,11 +5,12 @@ variables {
   hosted_zone_name          = "myorg.nullimplementation.com"
   account_slug              = "myorg"
   private_domain_name       = "myorg.nullimplementation.com"
-  azure_client_id           = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
-  azure_subscription_id     = "00000000-0000-0000-0000-000000000000"
-  azure_resource_group_name = "rg-test"
-  azure_tenant_id           = "11111111-2222-3333-4444-555555555555"
-  azure_hosted_zone_name    = "myorg.nullimplementation.com"
+  azure_client_id               = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+  azure_federated_credential_id = "/subscriptions/00000000/resourceGroups/rg-test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/cert-manager/federatedIdentityCredentials/cert-manager-federated"
+  azure_subscription_id         = "00000000-0000-0000-0000-000000000000"
+  azure_resource_group_name     = "rg-test"
+  azure_tenant_id               = "11111111-2222-3333-4444-555555555555"
+  azure_hosted_zone_name        = "myorg.nullimplementation.com"
 }
 
 # Validates Azure provider config plans successfully

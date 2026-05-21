@@ -1,0 +1,6 @@
+# GCP-0057 and GCP-0061 are findings in the terraform-google-modules/kubernetes-engine
+# third-party module. We cannot modify these files directly, and the GKE modules
+# handle these settings at a higher level (master_authorized_networks_config and
+# workload_metadata_config are configurable via module inputs in our wrappers).
+GCP-0057
+GCP-0061

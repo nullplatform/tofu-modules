@@ -4,7 +4,5 @@ terraform {
       source  = "nullplatform/nullplatform"
       version = ">= 0.0.86"
     }
-
   }
 }
-

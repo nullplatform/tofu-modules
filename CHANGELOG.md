@@ -1,5 +1,26 @@
 # Changelog
 
+## [3.2.0](https://github.com/nullplatform/tofu-modules/compare/v3.1.0...v3.2.0) (2026-05-20)
+
+
+### Features
+
+* **commons/azure:** Workload Identity for cert-manager and external-dns, with Service Principal fallback ([#361](https://github.com/nullplatform/tofu-modules/issues/361)) ([f11896e](https://github.com/nullplatform/tofu-modules/commit/f11896e3314e4661134a89002e5caaa1b1ff248f))
+
+## [3.1.0](https://github.com/nullplatform/tofu-modules/compare/v3.0.0...v3.1.0) (2026-05-20)
+
+
+### Features
+
+* **azure/aks:** enforce workload identity — hardcode oidc_issuer_enabled ([#358](https://github.com/nullplatform/tofu-modules/issues/358)) ([e542032](https://github.com/nullplatform/tofu-modules/commit/e5420325565a3099ebab6add83e3a0db508defb7))
+* **azure:** AKS routing infra — aks_route_table module, vnet drift fix, security improvements ([#360](https://github.com/nullplatform/tofu-modules/issues/360)) ([15c2372](https://github.com/nullplatform/tofu-modules/commit/15c2372bb7b9820834e31ad1517d5e624d5a37dd))
+* **nullplatform/base:** add per-provider log/metrics split and applicationLogs toggle ([#362](https://github.com/nullplatform/tofu-modules/issues/362)) ([b6fb844](https://github.com/nullplatform/tofu-modules/commit/b6fb84460882de589f6945bddc295b750e416397))
+
+
+### Bug Fixes
+
+* **aws/cloud:** allow to update attributes ([#363](https://github.com/nullplatform/tofu-modules/issues/363)) ([f99f9a1](https://github.com/nullplatform/tofu-modules/commit/f99f9a1d2471687ff7205c3b8f4ced833f612d8a))
+
 ## [3.0.0](https://github.com/nullplatform/tofu-modules/compare/v2.6.0...v3.0.0) (2026-05-15)
 
 
