@@ -19,12 +19,18 @@ resource "kubernetes_secret_v1" "external_dns_azure_config" {
   }
 
   data = {
-    "azure.json" = jsonencode({
-      tenantId                     = var.azure_tenant_id
-      subscriptionId               = var.azure_subscription_id
-      resourceGroup                = var.azure_resource_group
-      useWorkloadIdentityExtension = true
-    })
+    "azure.json" = jsonencode(merge(
+      {
+        tenantId                     = var.azure_tenant_id
+        subscriptionId               = var.azure_subscription_id
+        resourceGroup                = var.azure_resource_group
+        useWorkloadIdentityExtension = var.azure_workload_identity_enabled
+      },
+      var.azure_workload_identity_enabled ? {} : {
+        clientId     = var.azure_client_id
+        clientSecret = var.azure_client_secret
+      }
+    ))
   }
 
   depends_on = [kubernetes_namespace_v1.external_dns]

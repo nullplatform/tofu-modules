@@ -2,38 +2,38 @@
 
 ## Description
 
-Deploys ExternalDNS on Kubernetes via Helm to automatically manage DNS records across multiple cloud providers (Cloudflare, AWS Route53, OCI, Azure)
+Deploys ExternalDNS via Helm on Kubernetes with support for Cloudflare, AWS Route53, OCI, and Azure DNS providers
 
 ## Architecture
 
-Creates a kubernetes_namespace_v1 resource if requested, then deploys a helm_release for external-dns chart with provider-specific configuration. The module dynamically merges base configuration (sources, domain filters, policy) with provider-specific settings selected from local.provider_configs map based on dns_provider_name. For AWS, configures kubernetes service account with IRSA annotations for IAM role assumption; for OCI and Azure, mounts kubernetes_secret_v1 resources as volumes for authentication config; for Cloudflare, injects API token via secret environment variable. The helm_release depends on all kubernetes_secret_v1 resources to ensure proper creation order.
+The module creates an optional kubernetes_namespace_v1 resource and a helm_release resource for the external-dns chart from the kubernetes-sigs registry. Provider-specific configurations are assembled in locals.tf by merging a base_config with one of four provider config maps (cloudflare_config, route53_config, oci_config, azure_config) selected by dns_provider_name, then encoded as YAML values passed to the helm_release. Provider secrets (kubernetes_secret_v1 for Cloudflare tokens, OCI config, and Azure config) are created as dependencies that the helm_release waits on before deploying.
 
 ## Features
 
-- Deploys ExternalDNS Helm chart with configurable version and namespace management
-- Supports multiple DNS providers (Cloudflare, AWS Route53, OCI DNS, Azure DNS) with provider-specific authentication
-- Configures Kubernetes service accounts with IRSA for AWS or Workload Identity for Azure
-- Creates and mounts secrets for OCI and Azure authentication configuration files
-- Manages DNS record policies (create-only, sync, upsert-only) with TXT registry ownership tracking
-- Configures RBAC permissions for DNSEndpoint CRDs and Gateway API resources
-- Filters DNS zones by domain, zone ID, zone type, and compartment/resource group scope
+- Deploys ExternalDNS Helm chart with configurable version and namespace into a Kubernetes cluster
+- Supports four DNS providers: Cloudflare (API token via Kubernetes secret), AWS Route53 (IRSA with IAM role annotation), OCI (Workload Identity with compartment OCID and zone scope), and Azure (Workload Identity or Service Principal)
+- Configures AWS provider with RBAC permissions for DNSEndpoints, Gateways, and HTTPRoutes CRDs
+- Mounts OCI and Azure provider credentials as Kubernetes secrets into the ExternalDNS pod via extraVolumes and extraVolumeMounts
+- Controls DNS record management behavior via configurable policy (sync, create-only, upsert-only)
+- Supports deploying multiple ExternalDNS instances (public and private) in the same cluster via the type variable
+- Enables OCI DNS zone scope selection between GLOBAL and PRIVATE with configurable zones cache duration
 
 ## Basic Usage
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.2.0"
 
   dns_provider_name = "your-dns-provider-name"
   domain_filters    = "your-domain-filters"
 }
 ```
 
-### Usage with Cloudflare DNS Provider
+### Usage with Cloudflare DNS
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.2.0"
 
   cloudflare_token  = "your-cloudflare-token"  # Required when dns_provider_name = "cloudflare"
   dns_provider_name = "cloudflare"
@@ -41,11 +41,11 @@ module "external_dns" {
 }
 ```
 
-### Usage with AWS Route53 DNS Provider
+### Usage with AWS Route53 DNS
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.2.0"
 
   aws_iam_role_arn  = "your-aws-iam-role-arn"  # Required when dns_provider_name = "aws"
   aws_region        = "your-aws-region"  # Required when dns_provider_name = "aws"
@@ -56,31 +56,36 @@ module "external_dns" {
 }
 ```
 
-### Usage with OCI DNS Provider
+### Usage with OCI DNS
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.2.0"
 
-  dns_provider_name    = "oci"
-  domain_filters       = "your-domain-filters"
-  oci_compartment_ocid = "your-oci-compartment-ocid"  # Required when dns_provider_name = "oci"
-  oci_region           = "your-oci-region"  # Required when dns_provider_name = "oci"
+  dns_provider_name        = "oci"
+  domain_filters           = "your-domain-filters"
+  oci_compartment_ocid     = "your-oci-compartment-ocid"  # Required when dns_provider_name = "oci"
+  oci_region               = "your-oci-region"  # Required when dns_provider_name = "oci"
+  oci_service_account_name = "your-oci-service-account-name"  # Required when dns_provider_name = "oci"
+  oci_zone_scope           = "your-oci-zone-scope"  # Required when dns_provider_name = "oci"
+  oci_zones_cache_duration = "your-oci-zones-cache-duration"  # Required when dns_provider_name = "oci"
 }
 ```
 
-### Usage with Azure DNS Provider
+### Usage with Azure DNS
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.2.0"
 
-  azure_client_id       = "your-azure-client-id"  # Required when dns_provider_name = "azure"
-  azure_resource_group  = "your-azure-resource-group"  # Required when dns_provider_name = "azure"
-  azure_subscription_id = "your-azure-subscription-id"  # Required when dns_provider_name = "azure"
-  azure_tenant_id       = "your-azure-tenant-id"  # Required when dns_provider_name = "azure"
-  dns_provider_name     = "azure"
-  domain_filters        = "your-domain-filters"
+  azure_client_id                 = "your-azure-client-id"  # Required when dns_provider_name = "azure"
+  azure_federated_credential_id   = "your-azure-federated-credential-id"  # Required when dns_provider_name = "azure"
+  azure_resource_group            = "your-azure-resource-group"  # Required when dns_provider_name = "azure"
+  azure_subscription_id           = "your-azure-subscription-id"  # Required when dns_provider_name = "azure"
+  azure_tenant_id                 = "your-azure-tenant-id"  # Required when dns_provider_name = "azure"
+  azure_workload_identity_enabled = "your-azure-workload-identity-enabled"  # Required when dns_provider_name = "azure"
+  dns_provider_name               = "azure"
+  domain_filters                  = "your-domain-filters"
 }
 ```
 
@@ -125,10 +130,13 @@ resource "example_resource" "this" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_aws_iam_role_arn"></a> [aws\_iam\_role\_arn](#input\_aws\_iam\_role\_arn) | The IAM role ARN for ExternalDNS to assume for Route53 access (required when dns\_provider\_name is 'aws') | `string` | `""` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region where the Route53 hosted zones are located | `string` | `""` | no |
-| <a name="input_azure_client_id"></a> [azure\_client\_id](#input\_azure\_client\_id) | Client ID of the Azure Managed Identity for Workload Identity (required when dns\_provider\_name is 'azure') | `string` | `""` | no |
+| <a name="input_azure_client_id"></a> [azure\_client\_id](#input\_azure\_client\_id) | Client ID of the Azure Managed Identity for Workload Identity (required when dns\_provider\_name is 'azure' and azure\_workload\_identity\_enabled is true) | `string` | `""` | no |
+| <a name="input_azure_client_secret"></a> [azure\_client\_secret](#input\_azure\_client\_secret) | Azure AD client secret for Service Principal auth (required when dns\_provider\_name is 'azure' and azure\_workload\_identity\_enabled is false). | `string` | `""` | no |
+| <a name="input_azure_federated_credential_id"></a> [azure\_federated\_credential\_id](#input\_azure\_federated\_credential\_id) | Resource ID of the Azure federated identity credential for external-dns (required when dns\_provider\_name is 'azure' and azure\_workload\_identity\_enabled is true). Pass module.iam\_external\_dns.id to enforce dependency ordering. | `string` | `""` | no |
 | <a name="input_azure_resource_group"></a> [azure\_resource\_group](#input\_azure\_resource\_group) | Azure resource group containing the DNS zone (required when dns\_provider\_name is 'azure') | `string` | `""` | no |
 | <a name="input_azure_subscription_id"></a> [azure\_subscription\_id](#input\_azure\_subscription\_id) | Azure subscription ID where the DNS zone is located (required when dns\_provider\_name is 'azure') | `string` | `""` | no |
 | <a name="input_azure_tenant_id"></a> [azure\_tenant\_id](#input\_azure\_tenant\_id) | Azure tenant ID (required when dns\_provider\_name is 'azure') | `string` | `""` | no |
+| <a name="input_azure_workload_identity_enabled"></a> [azure\_workload\_identity\_enabled](#input\_azure\_workload\_identity\_enabled) | Enable Workload Identity for Azure DNS provider. When false, Service Principal auth is used and azure\_client\_secret is required. | `bool` | `true` | no |
 | <a name="input_cloudflare_token"></a> [cloudflare\_token](#input\_cloudflare\_token) | The Cloudflare API token for DNS management (required when dns\_provider\_name is 'cloudflare') | `string` | `""` | no |
 | <a name="input_create_namespace"></a> [create\_namespace](#input\_create\_namespace) | Whether to create the Kubernetes namespace. Set to false if the namespace already exists (e.g., when deploying multiple instances) | `bool` | `true` | no |
 | <a name="input_dns_provider_name"></a> [dns\_provider\_name](#input\_dns\_provider\_name) | The DNS provider to use with ExternalDNS | `string` | n/a | yes |
@@ -151,16 +159,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "external_dns",
-  "description": "Deploys ExternalDNS on Kubernetes via Helm to automatically manage DNS records across multiple cloud providers (Cloudflare, AWS Route53, OCI, Azure)",
-  "architecture": "Creates a kubernetes_namespace_v1 resource if requested, then deploys a helm_release for external-dns chart with provider-specific configuration. The module dynamically merges base configuration (sources, domain filters, policy) with provider-specific settings selected from local.provider_configs map based on dns_provider_name. For AWS, configures kubernetes service account with IRSA annotations for IAM role assumption; for OCI and Azure, mounts kubernetes_secret_v1 resources as volumes for authentication config; for Cloudflare, injects API token via secret environment variable. The helm_release depends on all kubernetes_secret_v1 resources to ensure proper creation order.",
+  "description": "Deploys ExternalDNS via Helm on Kubernetes with support for Cloudflare, AWS Route53, OCI, and Azure DNS providers",
+  "architecture": "The module creates an optional kubernetes_namespace_v1 resource and a helm_release resource for the external-dns chart from the kubernetes-sigs registry. Provider-specific configurations are assembled in locals.tf by merging a base_config with one of four provider config maps (cloudflare_config, route53_config, oci_config, azure_config) selected by dns_provider_name, then encoded as YAML values passed to the helm_release. Provider secrets (kubernetes_secret_v1 for Cloudflare tokens, OCI config, and Azure config) are created as dependencies that the helm_release waits on before deploying.",
   "features": [
-    "Deploys ExternalDNS Helm chart with configurable version and namespace management",
-    "Supports multiple DNS providers (Cloudflare, AWS Route53, OCI DNS, Azure DNS) with provider-specific authentication",
-    "Configures Kubernetes service accounts with IRSA for AWS or Workload Identity for Azure",
-    "Creates and mounts secrets for OCI and Azure authentication configuration files",
-    "Manages DNS record policies (create-only, sync, upsert-only) with TXT registry ownership tracking",
-    "Configures RBAC permissions for DNSEndpoint CRDs and Gateway API resources",
-    "Filters DNS zones by domain, zone ID, zone type, and compartment/resource group scope"
+    "Deploys ExternalDNS Helm chart with configurable version and namespace into a Kubernetes cluster",
+    "Supports four DNS providers: Cloudflare (API token via Kubernetes secret), AWS Route53 (IRSA with IAM role annotation), OCI (Workload Identity with compartment OCID and zone scope), and Azure (Workload Identity or Service Principal)",
+    "Configures AWS provider with RBAC permissions for DNSEndpoints, Gateways, and HTTPRoutes CRDs",
+    "Mounts OCI and Azure provider credentials as Kubernetes secrets into the ExternalDNS pod via extraVolumes and extraVolumeMounts",
+    "Controls DNS record management behavior via configurable policy (sync, create-only, upsert-only)",
+    "Supports deploying multiple ExternalDNS instances (public and private) in the same cluster via the type variable",
+    "Enables OCI DNS zone scope selection between GLOBAL and PRIVATE with configurable zones cache duration"
   ],
   "inputs": [
     {
@@ -259,8 +267,23 @@ resource "example_resource" "this" {
       "required": false
     },
     {
+      "name": "azure_workload_identity_enabled",
+      "description": "Enable Workload Identity for Azure DNS provider. When false, Service Principal auth is used and azure_client_secret is required.",
+      "required": false
+    },
+    {
+      "name": "azure_federated_credential_id",
+      "description": "Resource ID of the Azure federated identity credential for external-dns (required when dns_provider_name is 'azure' and azure_workload_identity_enabled is true). Pass module.iam_external_dns.id to enforce dependency ordering.",
+      "required": false
+    },
+    {
+      "name": "azure_client_secret",
+      "description": "Azure AD client secret for Service Principal auth (required when dns_provider_name is 'azure' and azure_workload_identity_enabled is false).",
+      "required": false
+    },
+    {
       "name": "azure_client_id",
-      "description": "Client ID of the Azure Managed Identity for Workload Identity (required when dns_provider_name is 'azure')",
+      "description": "Client ID of the Azure Managed Identity for Workload Identity (required when dns_provider_name is 'azure' and azure_workload_identity_enabled is true)",
       "required": false
     },
     {
@@ -280,6 +303,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "22dc7dbace99d3f1954e173e5cab73ea"
+  "hash": "3543fe48f4d68094d3fb00e2c088917a"
 }
 END_AI_METADATA -->
