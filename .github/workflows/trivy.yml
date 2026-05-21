@@ -6,6 +6,11 @@ on:
       - main
     paths:
       - '**/*.tf'
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*.tf'
 
 jobs:
   trivy:
