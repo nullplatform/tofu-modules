@@ -29,28 +29,28 @@ resource "terraform_data" "provider_validation" {
       error_message = "oci_region is required when dns_provider_name is 'oci'."
     }
     precondition {
-      condition     = var.dns_provider_name != "azure" || length(var.azure_client_id) > 0
-      error_message = "azure_client_id is required when dns_provider_name is 'azure'."
+      condition     = !local.azure_family_active || length(var.azure_client_id) > 0
+      error_message = "azure_client_id is required when dns_provider_name is 'azure' or 'azure-private-dns'."
     }
     precondition {
-      condition     = var.dns_provider_name != "azure" || !var.azure_workload_identity_enabled || length(var.azure_federated_credential_id) > 0
-      error_message = "azure_federated_credential_id is required when dns_provider_name is 'azure' and azure_workload_identity_enabled is true. Use module.iam to create the federated identity credential and pass its id output."
+      condition     = !local.azure_family_active || !var.azure_workload_identity_enabled || length(var.azure_federated_credential_id) > 0
+      error_message = "azure_federated_credential_id is required when dns_provider_name is 'azure' or 'azure-private-dns' and azure_workload_identity_enabled is true. Use module.iam to create the federated identity credential and pass its id output."
     }
     precondition {
-      condition     = var.dns_provider_name != "azure" || var.azure_workload_identity_enabled || length(var.azure_client_secret) > 0
-      error_message = "azure_client_secret is required when dns_provider_name is 'azure' and azure_workload_identity_enabled is false."
+      condition     = !local.azure_family_active || var.azure_workload_identity_enabled || length(var.azure_client_secret) > 0
+      error_message = "azure_client_secret is required when dns_provider_name is 'azure' or 'azure-private-dns' and azure_workload_identity_enabled is false."
     }
     precondition {
-      condition     = var.dns_provider_name != "azure" || length(var.azure_subscription_id) > 0
-      error_message = "azure_subscription_id is required when dns_provider_name is 'azure'."
+      condition     = !local.azure_family_active || length(var.azure_subscription_id) > 0
+      error_message = "azure_subscription_id is required when dns_provider_name is 'azure' or 'azure-private-dns'."
     }
     precondition {
-      condition     = var.dns_provider_name != "azure" || length(var.azure_resource_group) > 0
-      error_message = "azure_resource_group is required when dns_provider_name is 'azure'."
+      condition     = !local.azure_family_active || length(var.azure_resource_group) > 0
+      error_message = "azure_resource_group is required when dns_provider_name is 'azure' or 'azure-private-dns'."
     }
     precondition {
-      condition     = var.dns_provider_name != "azure" || length(var.azure_tenant_id) > 0
-      error_message = "azure_tenant_id is required when dns_provider_name is 'azure'."
+      condition     = !local.azure_family_active || length(var.azure_tenant_id) > 0
+      error_message = "azure_tenant_id is required when dns_provider_name is 'azure' or 'azure-private-dns'."
     }
   }
 }

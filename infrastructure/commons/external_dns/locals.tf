@@ -88,8 +88,13 @@ locals {
     ]
   }
 
+  # Both `azure` (Public DNS zones) and `azure-private-dns` (Private DNS zones)
+  # share the same auth, secret mount, and ServiceAccount wiring — only the
+  # external-dns `provider.name` differs.
+  azure_family_active = contains(["azure", "azure-private-dns"], var.dns_provider_name)
+
   azure_config = {
-    provider = { name = "azure" }
+    provider = { name = var.dns_provider_name }
     serviceAccount = {
       create = true
       annotations = var.azure_workload_identity_enabled ? {
@@ -117,10 +122,11 @@ locals {
   }
 
   provider_configs = {
-    cloudflare = local.cloudflare_config
-    aws        = local.route53_config
-    oci        = local.oci_config
-    azure      = local.azure_config
+    cloudflare          = local.cloudflare_config
+    aws                 = local.route53_config
+    oci                 = local.oci_config
+    azure               = local.azure_config
+    "azure-private-dns" = local.azure_config
   }
 
   external_dns_values = merge(local.base_config, local.provider_configs[var.dns_provider_name])
