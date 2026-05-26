@@ -11,7 +11,7 @@ resource "kubernetes_secret_v1" "external_dns_cloudflare" {
 }
 
 resource "kubernetes_secret_v1" "external_dns_azure_config" {
-  count = var.dns_provider_name == "azure" ? 1 : 0
+  count = local.azure_family_active ? 1 : 0
 
   metadata {
     name      = "external-dns-azure-config"
