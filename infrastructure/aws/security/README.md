@@ -2,27 +2,27 @@
 
 ## Description
 
-Creates AWS security groups and ingress/egress rules for Istio public and private gateways on EKS, with VPC CIDR and cluster security group derived automatically from the cluster name
+Creates AWS security groups and ingress/egress rules for Istio public and private gateways on an EKS cluster, with VPC and CIDR auto-derived from the cluster name
 
 ## Architecture
 
-The module uses data sources (aws_eks_cluster, aws_vpc) to automatically derive VPC ID, CIDR block, and cluster primary security group from the provided cluster name. It creates aws_security_group resources for public and/or private Istio gateways, then attaches aws_vpc_security_group_ingress_rule and aws_vpc_security_group_egress_rule resources to control HTTPS (443) and health check (15021) traffic. When a cluster security group is available, additional ingress rules are added to the cluster SG to allow traffic from the gateway SGs on the gateway port and health check port, enabling ALB-to-pod connectivity.
+The module uses data sources (aws_eks_cluster, aws_vpc) to derive VPC ID and CIDR block from the provided cluster name, with optional overrides via input variables. It creates aws_security_group resources for public and private Istio gateways, each wired with aws_vpc_security_group_ingress_rule and aws_vpc_security_group_egress_rule resources controlling HTTPS (443) and health check (15021) traffic. When a cluster security group is resolved (either derived or overridden), additional aws_vpc_security_group_ingress_rule resources are attached to the cluster SG to allow traffic from the gateway security groups on the gateway port and health check port. Outputs expose the public and private gateway security group IDs for use by load balancer or other downstream resources.
 
 ## Features
 
-- Creates public gateway security group allowing HTTPS from the internet and health checks restricted to VPC CIDR
-- Creates private gateway security group restricting both HTTPS and health check traffic to VPC CIDR only
-- Derives VPC ID, CIDR block, and cluster security group automatically from EKS cluster name via data sources
-- Adds ingress rules to the EKS cluster security group to allow ALB-originated traffic from gateway security groups
-- Supports additional CIDR blocks for health check and HTTPS ingress rules via configurable list
-- Allows optional override of VPC ID, network CIDR, and cluster security group when auto-derivation is not desired
-- Conditionally creates health check port 15021 rules to support both ALB and NLB traffic patterns
+- Creates aws_security_group for public Istio gateway with HTTPS open to internet and health check restricted to VPC CIDR
+- Creates aws_security_group for private Istio gateway with all traffic restricted to VPC CIDR only
+- Auto-derives VPC ID and CIDR block from EKS cluster name via aws_eks_cluster and aws_vpc data sources
+- Adds ingress rules on the EKS cluster primary security group to allow ALB-to-pod traffic from gateway security groups
+- Supports additional CIDR blocks for health check and HTTPS ingress rules via additional_network_cidrs variable
+- Allows toggling health check port 15021 ingress rules independently to support ALB versus NLB load balancer patterns
+- Supports override inputs for vpc_id, network_cidr, and cluster_security_group_id when auto-derivation is not desired
 
 ## Basic Usage
 
 ```hcl
 module "security" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/security?ref=v3.2.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/security?ref=v3.3.0"
 
   cluster_name = "your-cluster-name"
 }
@@ -95,16 +95,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "security",
-  "description": "Creates AWS security groups and ingress/egress rules for Istio public and private gateways on EKS, with VPC CIDR and cluster security group derived automatically from the cluster name",
-  "architecture": "The module uses data sources (aws_eks_cluster, aws_vpc) to automatically derive VPC ID, CIDR block, and cluster primary security group from the provided cluster name. It creates aws_security_group resources for public and/or private Istio gateways, then attaches aws_vpc_security_group_ingress_rule and aws_vpc_security_group_egress_rule resources to control HTTPS (443) and health check (15021) traffic. When a cluster security group is available, additional ingress rules are added to the cluster SG to allow traffic from the gateway SGs on the gateway port and health check port, enabling ALB-to-pod connectivity.",
+  "description": "Creates AWS security groups and ingress/egress rules for Istio public and private gateways on an EKS cluster, with VPC and CIDR auto-derived from the cluster name",
+  "architecture": "The module uses data sources (aws_eks_cluster, aws_vpc) to derive VPC ID and CIDR block from the provided cluster name, with optional overrides via input variables. It creates aws_security_group resources for public and private Istio gateways, each wired with aws_vpc_security_group_ingress_rule and aws_vpc_security_group_egress_rule resources controlling HTTPS (443) and health check (15021) traffic. When a cluster security group is resolved (either derived or overridden), additional aws_vpc_security_group_ingress_rule resources are attached to the cluster SG to allow traffic from the gateway security groups on the gateway port and health check port. Outputs expose the public and private gateway security group IDs for use by load balancer or other downstream resources.",
   "features": [
-    "Creates public gateway security group allowing HTTPS from the internet and health checks restricted to VPC CIDR",
-    "Creates private gateway security group restricting both HTTPS and health check traffic to VPC CIDR only",
-    "Derives VPC ID, CIDR block, and cluster security group automatically from EKS cluster name via data sources",
-    "Adds ingress rules to the EKS cluster security group to allow ALB-originated traffic from gateway security groups",
-    "Supports additional CIDR blocks for health check and HTTPS ingress rules via configurable list",
-    "Allows optional override of VPC ID, network CIDR, and cluster security group when auto-derivation is not desired",
-    "Conditionally creates health check port 15021 rules to support both ALB and NLB traffic patterns"
+    "Creates aws_security_group for public Istio gateway with HTTPS open to internet and health check restricted to VPC CIDR",
+    "Creates aws_security_group for private Istio gateway with all traffic restricted to VPC CIDR only",
+    "Auto-derives VPC ID and CIDR block from EKS cluster name via aws_eks_cluster and aws_vpc data sources",
+    "Adds ingress rules on the EKS cluster primary security group to allow ALB-to-pod traffic from gateway security groups",
+    "Supports additional CIDR blocks for health check and HTTPS ingress rules via additional_network_cidrs variable",
+    "Allows toggling health check port 15021 ingress rules independently to support ALB versus NLB load balancer patterns",
+    "Supports override inputs for vpc_id, network_cidr, and cluster_security_group_id when auto-derivation is not desired"
   ],
   "inputs": [
     {
@@ -157,6 +157,6 @@ resource "example_resource" "this" {
     "public_gateway_security_group_id",
     "private_gateway_security_group_id"
   ],
-  "hash": "01582ff7dec274a1ae3fa434dc028408"
+  "hash": "00a161a9b69cff9aaa1fb6a1952fd4ad"
 }
 END_AI_METADATA -->
