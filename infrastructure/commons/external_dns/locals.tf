@@ -50,7 +50,8 @@ locals {
     }
     extraArgs = compact([
       "--aws-zone-type=${var.zone_type}",
-      "--zone-id-filter=${var.zone_id_filter}"
+      "--zone-id-filter=${var.zone_id_filter}",
+      var.label_filter != "" ? "--label-filter=${var.label_filter}" : ""
     ])
   }
 
