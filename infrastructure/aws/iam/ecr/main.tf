@@ -1,5 +1,6 @@
 resource "aws_iam_role" "ecr_cross_account_pull" {
-  name = "nullplatform-${var.cluster_name}-ecr-cross-account-pull"
+  count = var.enable_cross_account_pull ? 1 : 0
+  name  = "nullplatform-${var.cluster_name}-ecr-cross-account-pull"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -14,6 +15,7 @@ resource "aws_iam_role" "ecr_cross_account_pull" {
 }
 
 resource "aws_iam_policy" "ecr_cross_account_pull" {
+  count       = var.enable_cross_account_pull ? 1 : 0
   name        = "nullplatform-${var.cluster_name}-ecr-cross-account-pull-policy"
   description = "Allows cross-account principals to pull images from ECR"
   policy = jsonencode({
@@ -40,6 +42,7 @@ resource "aws_iam_policy" "ecr_cross_account_pull" {
 }
 
 resource "aws_iam_role_policy_attachment" "ecr_cross_account_pull" {
-  role       = aws_iam_role.ecr_cross_account_pull.name
-  policy_arn = aws_iam_policy.ecr_cross_account_pull.arn
+  count      = var.enable_cross_account_pull ? 1 : 0
+  role       = aws_iam_role.ecr_cross_account_pull[0].name
+  policy_arn = aws_iam_policy.ecr_cross_account_pull[0].arn
 }
