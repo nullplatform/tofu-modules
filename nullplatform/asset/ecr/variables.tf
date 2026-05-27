@@ -3,20 +3,24 @@ variable "nrn" {
   type        = string
 }
 
-variable "application_manager_assume_role" {
-  description = "ARN of the IAM role assumed by the application manager"
-  type        = string
-  default     = "arn:aws:iam::283477532906:role/application_manager"
-}
-
-variable "cluster_name" {
-  description = "Name of the cluster where the policy runs"
-  type        = string
-}
-
 variable "dimensions" {
   description = "Dimensions to segment the nullplatform provider config (e.g. by region, environment)"
   type        = map(string)
   default     = {}
 }
 
+variable "application_role_arn" {
+  description = "ARN of the IAM role used by applications to pull ECR images"
+  type        = string
+}
+
+variable "build_workflow_access_key_id" {
+  description = "Access key ID for the CI/CD build workflow IAM user"
+  type        = string
+}
+
+variable "build_workflow_access_key_secret" {
+  description = "Secret access key for the CI/CD build workflow IAM user"
+  type        = string
+  sensitive   = true
+}

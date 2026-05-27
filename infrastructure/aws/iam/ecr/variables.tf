@@ -3,6 +3,12 @@ variable "cluster_name" {
   type        = string
 }
 
+variable "application_manager_assume_role" {
+  description = "ARN of the IAM role assumed by the application manager"
+  type        = string
+  default     = "arn:aws:iam::283477532906:role/application_manager"
+}
+
 variable "enable_cross_account_pull" {
   description = "Enable cross-account ECR pull access by creating an IAM role that external accounts can assume"
   type        = bool
