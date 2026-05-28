@@ -57,9 +57,18 @@ resource "aws_iam_role_policy_attachment" "ecr_manager_policy" {
   policy_arn = aws_iam_policy.nullplatform_ecr_manager_policy.arn
 }
 
-resource "aws_iam_user_policy_attachment" "ecr_manager_policy_user" {
-  user       = aws_iam_user.nullplatform_build_workflow_user.name
+resource "aws_iam_group" "nullplatform_ecr_managers" {
+  name = "nullplatform-${var.cluster_name}-ecr-managers"
+}
+
+resource "aws_iam_group_policy_attachment" "ecr_manager_policy_group" {
+  group      = aws_iam_group.nullplatform_ecr_managers.name
   policy_arn = aws_iam_policy.nullplatform_ecr_manager_policy.arn
+}
+
+resource "aws_iam_user_group_membership" "build_workflow_ecr_managers" {
+  user   = aws_iam_user.nullplatform_build_workflow_user.name
+  groups = [aws_iam_group.nullplatform_ecr_managers.name]
 }
 
 resource "aws_iam_role" "ecr_cross_account_pull" {
