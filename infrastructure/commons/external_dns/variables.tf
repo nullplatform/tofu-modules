@@ -57,6 +57,12 @@ variable "type" {
   }
 }
 
+variable "label_filter" {
+  description = "Kubernetes label selector to filter resources processed by ExternalDNS. Defaults to 'dns/zone-type=<zone_type>' when zone_type is set. Pass an explicit value to override, or an empty string to disable filtering."
+  type        = string
+  default     = null
+}
+
 ###############################################################################
 # CLOUDFLARE CONFIGURATION
 ###############################################################################
@@ -141,10 +147,10 @@ variable "oci_zones_cache_duration" {
 
 variable "dns_provider_name" {
   type        = string
-  description = "The DNS provider to use with ExternalDNS "
+  description = "The DNS provider to use with ExternalDNS. Use 'azure' for Azure Public DNS zones and 'azure-private-dns' for Azure Private DNS zones — both share the same auth, secret, and ServiceAccount wiring."
   validation {
-    condition     = contains(["cloudflare", "aws", "oci", "azure"], var.dns_provider_name)
-    error_message = "dns_provider_name must be either 'cloudflare', 'aws', 'oci', or 'azure'."
+    condition     = contains(["cloudflare", "aws", "oci", "azure", "azure-private-dns"], var.dns_provider_name)
+    error_message = "dns_provider_name must be one of: 'cloudflare', 'aws', 'oci', 'azure', 'azure-private-dns'."
   }
 }
 
