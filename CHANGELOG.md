@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.2](https://github.com/nullplatform/tofu-modules/compare/v3.5.1...v3.5.2) (2026-05-28)
+
+
+### Bug Fixes
+
+* **service_definition_agent_association:** remove telemetry from channel_sources default ([#377](https://github.com/nullplatform/tofu-modules/issues/377)) ([876ad77](https://github.com/nullplatform/tofu-modules/commit/876ad775c13d4cef46177b47bce0ed108f9ddf57))
+
 ## [3.5.1](https://github.com/nullplatform/tofu-modules/compare/v3.5.0...v3.5.1) (2026-05-28)
 
 
