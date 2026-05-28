@@ -1,4 +1,10 @@
 locals {
+  effective_label_filter = (
+    var.label_filter != null ? var.label_filter :
+    var.zone_type != "" ? "dns/zone-type=${var.zone_type}" :
+    ""
+  )
+
   base_config = {
     sources       = var.sources
     domainFilters = [var.domain_filters]
@@ -51,7 +57,7 @@ locals {
     extraArgs = compact([
       "--aws-zone-type=${var.zone_type}",
       "--zone-id-filter=${var.zone_id_filter}",
-      var.label_filter != "" ? "--label-filter=${var.label_filter}" : ""
+      local.effective_label_filter != "" ? "--label-filter=${local.effective_label_filter}" : ""
     ])
   }
 

@@ -58,9 +58,9 @@ variable "type" {
 }
 
 variable "label_filter" {
-  description = "Kubernetes label selector to filter resources processed by ExternalDNS (e.g. 'dns/zone-type=public'). Only resources matching this label will have DNS records managed."
+  description = "Kubernetes label selector to filter resources processed by ExternalDNS. Defaults to 'dns/zone-type=<zone_type>' when zone_type is set. Pass an explicit value to override, or an empty string to disable filtering."
   type        = string
-  default     = ""
+  default     = null
 }
 
 ###############################################################################
