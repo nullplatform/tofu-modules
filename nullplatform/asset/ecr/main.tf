@@ -5,16 +5,13 @@ resource "nullplatform_provider_config" "ecr" {
   attributes = jsonencode({
     "ci" : {
       "region" : data.aws_region.current.region,
-      "access_key" : aws_iam_access_key.nullplatform_build_workflow_user_key.id,
-      "secret_key" : aws_iam_access_key.nullplatform_build_workflow_user_key.secret
+      "access_key" : var.build_workflow_access_key_id,
+      "secret_key" : var.build_workflow_access_key_secret
     },
-    "setup" : merge(
-      {
-        "region" : data.aws_region.current.region,
-        "role_arn" : aws_iam_role.nullplatform_application_role.arn,
-      },
-      local.setup_policy
-    )
+    "setup" : {
+      "region" : data.aws_region.current.region,
+      "role_arn" : var.application_role_arn,
+    }
   })
   lifecycle {
     ignore_changes = [attributes]

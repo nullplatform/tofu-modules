@@ -3,31 +3,24 @@ variable "nrn" {
   type        = string
 }
 
-variable "application_manager_assume_role" {
-  description = "ARN of the IAM role assumed by the application manager"
-  type        = string
-  default     = "arn:aws:iam::283477532906:role/application_manager"
-}
-
-variable "cluster_name" {
-  description = "Name of the cluster where the policy runs"
-  type        = string
-}
-
 variable "dimensions" {
   description = "Dimensions to segment the nullplatform provider config (e.g. by region, environment)"
   type        = map(string)
   default     = {}
 }
 
-variable "enable_cross_account_pull" {
-  description = "Enable cross-account ECR pull access via a repository policy"
-  type        = bool
-  default     = false
+variable "application_role_arn" {
+  description = "ARN of the IAM role used by applications to pull ECR images"
+  type        = string
 }
 
-variable "repository_policy_pull_accounts" {
-  description = "AWS account IDs allowed to pull images from ECR. The account where this module is deployed is always included."
-  type        = list(string)
-  default     = []
+variable "build_workflow_access_key_id" {
+  description = "Access key ID for the CI/CD build workflow IAM user"
+  type        = string
+}
+
+variable "build_workflow_access_key_secret" {
+  description = "Secret access key for the CI/CD build workflow IAM user"
+  type        = string
+  sensitive   = true
 }
