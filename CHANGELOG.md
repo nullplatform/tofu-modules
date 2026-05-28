@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.1](https://github.com/nullplatform/tofu-modules/compare/v3.5.0...v3.5.1) (2026-05-28)
+
+
+### Bug Fixes
+
+* **external_dns:** derive label_filter default from zone_type convention ([#375](https://github.com/nullplatform/tofu-modules/issues/375)) ([09ec15b](https://github.com/nullplatform/tofu-modules/commit/09ec15b37410dc0d940d19f26ee0724783f67049))
+
 ## [3.5.0](https://github.com/nullplatform/tofu-modules/compare/v3.4.0...v3.5.0) (2026-05-28)
 
 
