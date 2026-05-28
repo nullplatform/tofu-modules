@@ -57,6 +57,12 @@ variable "type" {
   }
 }
 
+variable "label_filter" {
+  description = "Kubernetes label selector to filter resources processed by ExternalDNS (e.g. 'dns/zone-type=public'). Only resources matching this label will have DNS records managed."
+  type        = string
+  default     = ""
+}
+
 ###############################################################################
 # CLOUDFLARE CONFIGURATION
 ###############################################################################
