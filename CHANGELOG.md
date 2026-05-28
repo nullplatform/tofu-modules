@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.0](https://github.com/nullplatform/tofu-modules/compare/v3.4.0...v3.5.0) (2026-05-28)
+
+
+### Features
+
+* **external_dns:** add label_filter support for Route53 provider ([#371](https://github.com/nullplatform/tofu-modules/issues/371)) ([0827191](https://github.com/nullplatform/tofu-modules/commit/082719174c164425d7063fc26edfba546724fdfd))
+
 ## [3.4.0](https://github.com/nullplatform/tofu-modules/compare/v3.3.0...v3.4.0) (2026-05-28)
 
 
