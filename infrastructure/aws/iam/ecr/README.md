@@ -20,7 +20,7 @@ The module creates an aws_iam_role (application role) with a configurable assume
 
 ```hcl
 module "ecr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/ecr?ref=v3.4.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/ecr?ref=v3.5.0"
 
   cluster_name = "your-cluster-name"
 }

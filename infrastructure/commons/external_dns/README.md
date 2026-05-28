@@ -2,27 +2,27 @@
 
 ## Description
 
-Deploys ExternalDNS via Helm onto Kubernetes with support for Cloudflare, AWS Route53, OCI, Azure Public DNS, and Azure Private DNS providers
+Deploys ExternalDNS on Kubernetes via Helm with support for multiple DNS providers including Cloudflare, AWS Route53, OCI, Azure Public DNS, and Azure Private DNS
 
 ## Architecture
 
-The module creates an optional kubernetes_namespace_v1 resource when create_namespace is true, then deploys a helm_release resource using the official external-dns Helm chart. Provider-specific configuration is assembled in locals.tf by merging a base_config with a per-provider config block (cloudflare_config, route53_config, oci_config, or azure_config) selected by dns_provider_name, and the merged map is passed as a YAML-encoded values block. Provider secrets are managed via kubernetes_secret_v1 resources that the helm_release depends_on, ensuring credentials exist before the chart is installed.
+The module creates a kubernetes_namespace_v1 resource conditionally and a helm_release resource that deploys the ExternalDNS chart from the kubernetes-sigs registry. Provider-specific configuration is assembled in locals.tf by merging a base_config with a provider-specific config block selected via var.dns_provider_name, then encoded as YAML values passed to the helm_release. Provider secrets are mounted via kubernetes_secret_v1 resources (cloudflare, OCI config, Azure config) that the helm_release depends on, while AWS uses IRSA annotations on the Kubernetes ServiceAccount.
 
 ## Features
 
-- Deploys ExternalDNS Helm chart with configurable chart version and Kubernetes namespace
-- Supports five DNS providers (Cloudflare, AWS Route53, OCI, Azure Public DNS, Azure Private DNS) via a single dns_provider_name variable
-- Configures AWS Route53 with IRSA annotations on the Kubernetes ServiceAccount and additional RBAC permissions for DNSEndpoint and Gateway resources
-- Configures OCI DNS with Workload Identity ServiceAccount, compartment OCID, zone scope, and a mounted OCI config secret volume
-- Configures Azure DNS (public and private) with optional Workload Identity annotations and pod labels or Service Principal auth via a mounted azure-config secret volume
-- Configures Cloudflare DNS by injecting a CF_API_TOKEN environment variable sourced from a Kubernetes secret
-- Supports public and private deployment types with configurable sync policy (sync, create-only, upsert-only)
+- Deploys ExternalDNS Helm chart with provider-specific configuration assembled via local value merging
+- Creates Kubernetes namespace conditionally to support multi-instance deployments in shared namespaces
+- Configures IRSA ServiceAccount annotations with eks.amazonaws.com/role-arn for AWS Route53 access
+- Mounts provider credentials as Kubernetes secret volumes for OCI and Azure DNS providers
+- Supports Azure Workload Identity with pod labels and client-id annotations, or falls back to Service Principal auth
+- Applies label-based resource filtering and zone-id filtering for scoped DNS record management
+- Adds RBAC permissions for DNSEndpoint CRDs and Gateway API resources when using AWS Route53
 
 ## Basic Usage
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.4.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.5.0"
 
   dns_provider_name = "your-dns-provider-name"
   domain_filters    = "your-domain-filters"
@@ -33,7 +33,7 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.4.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.5.0"
 
   cloudflare_token  = "your-cloudflare-token"  # Required when dns_provider_name = "cloudflare"
   dns_provider_name = "cloudflare"
@@ -45,7 +45,7 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.4.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.5.0"
 
   aws_iam_role_arn  = "your-aws-iam-role-arn"  # Required when dns_provider_name = "aws"
   aws_region        = "your-aws-region"  # Required when dns_provider_name = "aws"
@@ -60,13 +60,15 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.4.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.5.0"
 
-  dns_provider_name    = "oci"
-  domain_filters       = "your-domain-filters"
-  oci_compartment_ocid = "your-oci-compartment-ocid"  # Required when dns_provider_name = "oci"
-  oci_region           = "your-oci-region"  # Required when dns_provider_name = "oci"
-  oci_zone_scope       = "your-oci-zone-scope"  # Required when dns_provider_name = "oci"
+  dns_provider_name        = "oci"
+  domain_filters           = "your-domain-filters"
+  oci_compartment_ocid     = "your-oci-compartment-ocid"  # Required when dns_provider_name = "oci"
+  oci_region               = "your-oci-region"  # Required when dns_provider_name = "oci"
+  oci_service_account_name = "your-oci-service-account-name"  # Required when dns_provider_name = "oci"
+  oci_zone_scope           = "your-oci-zone-scope"  # Required when dns_provider_name = "oci"
+  oci_zones_cache_duration = "your-oci-zones-cache-duration"  # Required when dns_provider_name = "oci"
 }
 ```
 
@@ -74,15 +76,16 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.4.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.5.0"
 
-  azure_client_id               = "your-azure-client-id"  # Required when dns_provider_name = "azure"
-  azure_federated_credential_id = "your-azure-federated-credential-id"  # Required when dns_provider_name = "azure"
-  azure_resource_group          = "your-azure-resource-group"  # Required when dns_provider_name = "azure"
-  azure_subscription_id         = "your-azure-subscription-id"  # Required when dns_provider_name = "azure"
-  azure_tenant_id               = "your-azure-tenant-id"  # Required when dns_provider_name = "azure"
-  dns_provider_name             = "azure"
-  domain_filters                = "your-domain-filters"
+  azure_client_id                 = "your-azure-client-id"  # Required when dns_provider_name = "azure"
+  azure_federated_credential_id   = "your-azure-federated-credential-id"  # Required when dns_provider_name = "azure"
+  azure_resource_group            = "your-azure-resource-group"  # Required when dns_provider_name = "azure"
+  azure_subscription_id           = "your-azure-subscription-id"  # Required when dns_provider_name = "azure"
+  azure_tenant_id                 = "your-azure-tenant-id"  # Required when dns_provider_name = "azure"
+  azure_workload_identity_enabled = "your-azure-workload-identity-enabled"  # Required when dns_provider_name = "azure"
+  dns_provider_name               = "azure"
+  domain_filters                  = "your-domain-filters"
 }
 ```
 
@@ -90,15 +93,16 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.4.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v3.5.0"
 
-  azure_client_id               = "your-azure-client-id"  # Required when dns_provider_name = "azure-private-dns"
-  azure_federated_credential_id = "your-azure-federated-credential-id"  # Required when dns_provider_name = "azure-private-dns"
-  azure_resource_group          = "your-azure-resource-group"  # Required when dns_provider_name = "azure-private-dns"
-  azure_subscription_id         = "your-azure-subscription-id"  # Required when dns_provider_name = "azure-private-dns"
-  azure_tenant_id               = "your-azure-tenant-id"  # Required when dns_provider_name = "azure-private-dns"
-  dns_provider_name             = "azure-private-dns"
-  domain_filters                = "your-domain-filters"
+  azure_client_id                 = "your-azure-client-id"  # Required when dns_provider_name = "azure-private-dns"
+  azure_federated_credential_id   = "your-azure-federated-credential-id"  # Required when dns_provider_name = "azure-private-dns"
+  azure_resource_group            = "your-azure-resource-group"  # Required when dns_provider_name = "azure-private-dns"
+  azure_subscription_id           = "your-azure-subscription-id"  # Required when dns_provider_name = "azure-private-dns"
+  azure_tenant_id                 = "your-azure-tenant-id"  # Required when dns_provider_name = "azure-private-dns"
+  azure_workload_identity_enabled = "your-azure-workload-identity-enabled"  # Required when dns_provider_name = "azure-private-dns"
+  dns_provider_name               = "azure-private-dns"
+  domain_filters                  = "your-domain-filters"
 }
 ```
 
@@ -156,6 +160,7 @@ resource "example_resource" "this" {
 | <a name="input_domain_filters"></a> [domain\_filters](#input\_domain\_filters) | The domain filter to limit ExternalDNS to manage DNS records only for specific domains | `string` | n/a | yes |
 | <a name="input_external_dns_namespace"></a> [external\_dns\_namespace](#input\_external\_dns\_namespace) | The Kubernetes namespace where ExternalDNS will be deployed | `string` | `"external-dns"` | no |
 | <a name="input_external_dns_version"></a> [external\_dns\_version](#input\_external\_dns\_version) | The version of ExternalDNS Helm chart to deploy | `string` | `"1.19.0"` | no |
+| <a name="input_label_filter"></a> [label\_filter](#input\_label\_filter) | Kubernetes label selector to filter resources processed by ExternalDNS (e.g. 'dns/zone-type=public'). Only resources matching this label will have DNS records managed. | `string` | `""` | no |
 | <a name="input_oci_compartment_ocid"></a> [oci\_compartment\_ocid](#input\_oci\_compartment\_ocid) | The OCI compartment OCID where the DNS zones are located (required when dns\_provider\_name is 'oci') | `string` | `""` | no |
 | <a name="input_oci_region"></a> [oci\_region](#input\_oci\_region) | The OCI region for workload identity configuration (required when dns\_provider\_name is 'oci') | `string` | `""` | no |
 | <a name="input_oci_service_account_name"></a> [oci\_service\_account\_name](#input\_oci\_service\_account\_name) | The Kubernetes service account name for OCI Workload Identity | `string` | `"external-dns"` | no |
@@ -172,16 +177,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "external_dns",
-  "description": "Deploys ExternalDNS via Helm onto Kubernetes with support for Cloudflare, AWS Route53, OCI, Azure Public DNS, and Azure Private DNS providers",
-  "architecture": "The module creates an optional kubernetes_namespace_v1 resource when create_namespace is true, then deploys a helm_release resource using the official external-dns Helm chart. Provider-specific configuration is assembled in locals.tf by merging a base_config with a per-provider config block (cloudflare_config, route53_config, oci_config, or azure_config) selected by dns_provider_name, and the merged map is passed as a YAML-encoded values block. Provider secrets are managed via kubernetes_secret_v1 resources that the helm_release depends_on, ensuring credentials exist before the chart is installed.",
+  "description": "Deploys ExternalDNS on Kubernetes via Helm with support for multiple DNS providers including Cloudflare, AWS Route53, OCI, Azure Public DNS, and Azure Private DNS",
+  "architecture": "The module creates a kubernetes_namespace_v1 resource conditionally and a helm_release resource that deploys the ExternalDNS chart from the kubernetes-sigs registry. Provider-specific configuration is assembled in locals.tf by merging a base_config with a provider-specific config block selected via var.dns_provider_name, then encoded as YAML values passed to the helm_release. Provider secrets are mounted via kubernetes_secret_v1 resources (cloudflare, OCI config, Azure config) that the helm_release depends on, while AWS uses IRSA annotations on the Kubernetes ServiceAccount.",
   "features": [
-    "Deploys ExternalDNS Helm chart with configurable chart version and Kubernetes namespace",
-    "Supports five DNS providers (Cloudflare, AWS Route53, OCI, Azure Public DNS, Azure Private DNS) via a single dns_provider_name variable",
-    "Configures AWS Route53 with IRSA annotations on the Kubernetes ServiceAccount and additional RBAC permissions for DNSEndpoint and Gateway resources",
-    "Configures OCI DNS with Workload Identity ServiceAccount, compartment OCID, zone scope, and a mounted OCI config secret volume",
-    "Configures Azure DNS (public and private) with optional Workload Identity annotations and pod labels or Service Principal auth via a mounted azure-config secret volume",
-    "Configures Cloudflare DNS by injecting a CF_API_TOKEN environment variable sourced from a Kubernetes secret",
-    "Supports public and private deployment types with configurable sync policy (sync, create-only, upsert-only)"
+    "Deploys ExternalDNS Helm chart with provider-specific configuration assembled via local value merging",
+    "Creates Kubernetes namespace conditionally to support multi-instance deployments in shared namespaces",
+    "Configures IRSA ServiceAccount annotations with eks.amazonaws.com/role-arn for AWS Route53 access",
+    "Mounts provider credentials as Kubernetes secret volumes for OCI and Azure DNS providers",
+    "Supports Azure Workload Identity with pod labels and client-id annotations, or falls back to Service Principal auth",
+    "Applies label-based resource filtering and zone-id filtering for scoped DNS record management",
+    "Adds RBAC permissions for DNSEndpoint CRDs and Gateway API resources when using AWS Route53"
   ],
   "inputs": [
     {
@@ -232,6 +237,11 @@ resource "example_resource" "this" {
     {
       "name": "sources",
       "description": "Array contents the sources to external dns work",
+      "required": false
+    },
+    {
+      "name": "label_filter",
+      "description": "Kubernetes label selector to filter resources processed by ExternalDNS (e.g. 'dns/zone-type=public'). Only resources matching this label will have DNS records managed.",
       "required": false
     },
     {
@@ -316,6 +326,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "a45e8e85d123df228395ace7414d5f1c"
+  "hash": "56c2b650b7168cb3c06e83511f976121"
 }
 END_AI_METADATA -->
