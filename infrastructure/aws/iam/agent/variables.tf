@@ -18,3 +18,14 @@ variable "additional_policies" {
   type        = map(string)
   default     = {}
 }
+
+variable "assume_role_arns" {
+  description = "List of IAM role ARNs the agent is allowed to assume via sts:AssumeRole"
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = alltrue([for arn in var.assume_role_arns : can(regex("^arn:aws:iam::[0-9]{12}:role/.+", arn))])
+    error_message = "Each ARN must match arn:aws:iam::<account-id>:role/<role-name>"
+  }
+}

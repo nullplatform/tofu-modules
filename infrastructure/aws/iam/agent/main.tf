@@ -22,6 +22,9 @@ module "nullplatform_agent_role" {
       "nullplatform_elb_policy"     = aws_iam_policy.nullplatform_elb_policy.arn,
       "nullplatform_avp_policy"     = aws_iam_policy.nullplatform_avp_policy.arn
     },
+    length(var.assume_role_arns) > 0 ? {
+      "nullplatform_assume_role_policy" = aws_iam_policy.nullplatform_assume_role_policy[0].arn
+    } : {},
     var.additional_policies
   )
 }
@@ -147,6 +150,25 @@ resource "aws_iam_policy" "nullplatform_eks_policy" {
         # }
       }
     ]
+  })
+}
+
+################################################################################
+# STS AssumeRole IAM policy
+################################################################################
+
+resource "aws_iam_policy" "nullplatform_assume_role_policy" {
+  count = length(var.assume_role_arns) > 0 ? 1 : 0
+
+  name        = "nullplatform_${var.cluster_name}_assume_role_policy"
+  description = "Policy allowing the agent to assume specific IAM roles"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "sts:AssumeRole"
+      Resource = var.assume_role_arns
+    }]
   })
 }
 

@@ -102,3 +102,42 @@ run "all_policies_valid_json" {
     error_message = "AVP policy should be valid JSON"
   }
 }
+
+run "assume_role_policy_not_created_by_default" {
+  command = plan
+
+  assert {
+    condition     = length(aws_iam_policy.nullplatform_assume_role_policy) == 0
+    error_message = "assume_role policy should not be created when assume_role_arns is empty"
+  }
+}
+
+run "assume_role_policy_created_when_arns_provided" {
+  command = plan
+
+  variables {
+    assume_role_arns = ["arn:aws:iam::123456789012:role/some-role"]
+  }
+
+  override_resource {
+    target = aws_iam_policy.nullplatform_assume_role_policy
+    values = {
+      arn = "arn:aws:iam::123456789012:policy/nullplatform_test-cluster_assume_role_policy"
+    }
+  }
+
+  assert {
+    condition     = length(aws_iam_policy.nullplatform_assume_role_policy) == 1
+    error_message = "assume_role policy should be created when assume_role_arns is non-empty"
+  }
+
+  assert {
+    condition     = aws_iam_policy.nullplatform_assume_role_policy[0].name == "nullplatform_test-cluster_assume_role_policy"
+    error_message = "assume_role policy name should follow naming convention"
+  }
+
+  assert {
+    condition     = can(jsondecode(aws_iam_policy.nullplatform_assume_role_policy[0].policy))
+    error_message = "assume_role policy should be valid JSON"
+  }
+}
