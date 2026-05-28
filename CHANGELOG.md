@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.0](https://github.com/nullplatform/tofu-modules/compare/v3.2.0...v3.3.0) (2026-05-26)
+
+
+### Features
+
+* **external_dns:** support azure-private-dns provider ([#369](https://github.com/nullplatform/tofu-modules/issues/369)) ([3a0ebf5](https://github.com/nullplatform/tofu-modules/commit/3a0ebf5c13baf7efc6c800266073db88c9436ee0))
+
 ## [3.2.0](https://github.com/nullplatform/tofu-modules/compare/v3.1.0...v3.2.0) (2026-05-20)
 
 
