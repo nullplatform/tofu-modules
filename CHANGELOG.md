@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.4.0](https://github.com/nullplatform/tofu-modules/compare/v3.3.0...v3.4.0) (2026-05-28)
+
+
+### Features
+
+* **ecr:** migrate IAM to infrastructure/aws/iam/ecr module ([#372](https://github.com/nullplatform/tofu-modules/issues/372)) ([faa35b8](https://github.com/nullplatform/tofu-modules/commit/faa35b8fb48aa32ca829e878be4bd0c21db4f1a2))
+
 ## [3.3.0](https://github.com/nullplatform/tofu-modules/compare/v3.2.0...v3.3.0) (2026-05-26)
 
 
