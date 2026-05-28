@@ -22,7 +22,7 @@ The module wraps the Azure/aks/azurerm community module (version 11.0.0) and use
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v3.2.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v3.4.0"
 
   cluster_name        = "your-cluster-name"
   location            = "your-location"
