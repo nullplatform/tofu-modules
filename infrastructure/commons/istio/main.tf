@@ -88,5 +88,19 @@ resource "helm_release" "istio_ingressgateway" {
 
   values = [local.helm_values]
 
-
+  # Enforce HA on istio-ingressgateway. Same class of bug as istiod: the
+  # gateway chart ships a default PDB with minAvailable=1, and the HPA is
+  # enabled with autoscaling.minReplicas=1, so a single-replica install
+  # blocks every node rolling update with PodEvictionFailure. Setting both
+  # replicaCount and autoscaling.minReplicas locks in the floor.
+  set = [
+    {
+      name  = "replicaCount"
+      value = var.istio_ingressgateway_replicas
+    },
+    {
+      name  = "autoscaling.minReplicas"
+      value = var.istio_ingressgateway_replicas
+    },
+  ]
 }
