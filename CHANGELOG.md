@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.0.0](https://github.com/nullplatform/tofu-modules/compare/v3.5.2...v4.0.0) (2026-06-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* **dns,ingress,iam:** support disabling public-side resources ([#364](https://github.com/nullplatform/tofu-modules/issues/364))
+
+### Features
+
+* **dns,ingress,iam:** support disabling public-side resources ([#364](https://github.com/nullplatform/tofu-modules/issues/364)) ([872efa1](https://github.com/nullplatform/tofu-modules/commit/872efa17520793e6369c670d3f6cf1ea5de4cff7))
+
 ## [3.5.2](https://github.com/nullplatform/tofu-modules/compare/v3.5.1...v3.5.2) (2026-05-28)
 
 
