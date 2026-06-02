@@ -1,5 +1,40 @@
 # Changelog
 
+## [3.5.2](https://github.com/nullplatform/tofu-modules/compare/v3.5.1...v3.5.2) (2026-05-28)
+
+
+### Bug Fixes
+
+* **service_definition_agent_association:** remove telemetry from channel_sources default ([#377](https://github.com/nullplatform/tofu-modules/issues/377)) ([876ad77](https://github.com/nullplatform/tofu-modules/commit/876ad775c13d4cef46177b47bce0ed108f9ddf57))
+
+## [3.5.1](https://github.com/nullplatform/tofu-modules/compare/v3.5.0...v3.5.1) (2026-05-28)
+
+
+### Bug Fixes
+
+* **external_dns:** derive label_filter default from zone_type convention ([#375](https://github.com/nullplatform/tofu-modules/issues/375)) ([09ec15b](https://github.com/nullplatform/tofu-modules/commit/09ec15b37410dc0d940d19f26ee0724783f67049))
+
+## [3.5.0](https://github.com/nullplatform/tofu-modules/compare/v3.4.0...v3.5.0) (2026-05-28)
+
+
+### Features
+
+* **external_dns:** add label_filter support for Route53 provider ([#371](https://github.com/nullplatform/tofu-modules/issues/371)) ([0827191](https://github.com/nullplatform/tofu-modules/commit/082719174c164425d7063fc26edfba546724fdfd))
+
+## [3.4.0](https://github.com/nullplatform/tofu-modules/compare/v3.3.0...v3.4.0) (2026-05-28)
+
+
+### Features
+
+* **ecr:** migrate IAM to infrastructure/aws/iam/ecr module ([#372](https://github.com/nullplatform/tofu-modules/issues/372)) ([faa35b8](https://github.com/nullplatform/tofu-modules/commit/faa35b8fb48aa32ca829e878be4bd0c21db4f1a2))
+
+## [3.3.0](https://github.com/nullplatform/tofu-modules/compare/v3.2.0...v3.3.0) (2026-05-26)
+
+
+### Features
+
+* **external_dns:** support azure-private-dns provider ([#369](https://github.com/nullplatform/tofu-modules/issues/369)) ([3a0ebf5](https://github.com/nullplatform/tofu-modules/commit/3a0ebf5c13baf7efc6c800266073db88c9436ee0))
+
 ## [3.2.0](https://github.com/nullplatform/tofu-modules/compare/v3.1.0...v3.2.0) (2026-05-20)
 
 

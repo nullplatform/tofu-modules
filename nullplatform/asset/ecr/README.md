@@ -2,29 +2,31 @@
 
 ## Description
 
-Configures an AWS ECR provider integration for nullplatform by creating IAM users, roles, access keys, and optional cross-account repository policies
+Configures a nullplatform ECR provider config resource that wires AWS region, CI/CD build credentials, and an application IAM role into a nullplatform registry integration
 
 ## Architecture
 
-The module creates an aws_iam_access_key for a build workflow IAM user and an aws_iam_role for application workloads, then wires their credentials and ARN into a nullplatform_provider_config resource of type 'ecr'. The provider config encodes both CI credentials (region, access key, secret key) and setup attributes (region, role ARN) as JSON attributes. When cross-account pull is enabled, a repository policy is generated in locals and merged into the setup attributes, allowing specified AWS account IDs to pull images from ECR.
+The module retrieves the current AWS region via the aws_region data source and passes it into a nullplatform_provider_config resource of type 'ecr'. The resource encodes two attribute blocks as JSON: a 'ci' block containing the region and build workflow IAM access key credentials, and a 'setup' block containing the region and the application IAM role ARN. The lifecycle ignore_changes directive on attributes prevents drift detection from overwriting provider-managed attribute updates after initial creation.
 
 ## Features
 
-- Creates nullplatform_provider_config of type ECR linking CI and setup credentials
-- Configures IAM access keys for build workflow automation with ECR push permissions
-- Creates IAM role for application workloads to pull images from ECR
-- Generates ECR repository policy allowing cross-account image pulls when enabled
-- Supports multiple additional AWS account IDs for cross-account ECR pull access
-- Supports dimension-based segmentation of the nullplatform provider config by region or environment
+- Creates a nullplatform ECR provider config resource scoped to a specific NRN
+- Configures CI/CD build workflow credentials with AWS access key ID and secret for ECR image publishing
+- Configures application-level ECR access using an IAM role ARN for image pulling
+- Automatically resolves and injects the current AWS region into both CI and setup attribute blocks
+- Supports optional dimension segmentation for multi-region or multi-environment provider config scoping
+- Marks build workflow secret access key as sensitive to prevent exposure in Terraform output
 
 ## Basic Usage
 
 ```hcl
 module "ecr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v3.2.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v3.5.2"
 
-  cluster_name = "your-cluster-name"
-  nrn          = "your-nrn"
+  application_role_arn             = "your-application-role-arn"
+  build_workflow_access_key_id     = "your-build-workflow-access-key-id"
+  build_workflow_access_key_secret = "your-build-workflow-access-key-secret"
+  nrn                              = "your-nrn"
 }
 ```
 
@@ -56,12 +58,6 @@ resource "example_resource" "this" {
 
 | Name | Type |
 |------|------|
-| [aws_iam_access_key.nullplatform_build_workflow_user_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_access_key) | resource |
-| [aws_iam_policy.nullplatform_ecr_manager_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_role.nullplatform_application_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role_policy_attachment.ecr_manager_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_iam_user.nullplatform_build_workflow_user](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user) | resource |
-| [aws_iam_user_policy_attachment.ecr_manager_policy_user](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user_policy_attachment) | resource |
 | [nullplatform_provider_config.ecr](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/provider_config) | resource |
 | [terraform_data.validations](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 
@@ -69,26 +65,25 @@ resource "example_resource" "this" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_application_manager_assume_role"></a> [application\_manager\_assume\_role](#input\_application\_manager\_assume\_role) | ARN of the IAM role assumed by the application manager | `string` | `"arn:aws:iam::283477532906:role/application_manager"` | no |
-| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the cluster where the policy runs | `string` | n/a | yes |
+| <a name="input_application_role_arn"></a> [application\_role\_arn](#input\_application\_role\_arn) | ARN of the IAM role used by applications to pull ECR images | `string` | n/a | yes |
+| <a name="input_build_workflow_access_key_id"></a> [build\_workflow\_access\_key\_id](#input\_build\_workflow\_access\_key\_id) | Access key ID for the CI/CD build workflow IAM user | `string` | n/a | yes |
+| <a name="input_build_workflow_access_key_secret"></a> [build\_workflow\_access\_key\_secret](#input\_build\_workflow\_access\_key\_secret) | Secret access key for the CI/CD build workflow IAM user | `string` | n/a | yes |
 | <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Dimensions to segment the nullplatform provider config (e.g. by region, environment) | `map(string)` | `{}` | no |
-| <a name="input_enable_cross_account_pull"></a> [enable\_cross\_account\_pull](#input\_enable\_cross\_account\_pull) | Enable cross-account ECR pull access via a repository policy | `bool` | `false` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | The nullplatform resource name (NRN) | `string` | n/a | yes |
-| <a name="input_repository_policy_pull_accounts"></a> [repository\_policy\_pull\_accounts](#input\_repository\_policy\_pull\_accounts) | AWS account IDs allowed to pull images from ECR. The account where this module is deployed is always included. | `list(string)` | `[]` | no |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
 {
   "name": "ecr",
-  "description": "Configures an AWS ECR provider integration for nullplatform by creating IAM users, roles, access keys, and optional cross-account repository policies",
-  "architecture": "The module creates an aws_iam_access_key for a build workflow IAM user and an aws_iam_role for application workloads, then wires their credentials and ARN into a nullplatform_provider_config resource of type 'ecr'. The provider config encodes both CI credentials (region, access key, secret key) and setup attributes (region, role ARN) as JSON attributes. When cross-account pull is enabled, a repository policy is generated in locals and merged into the setup attributes, allowing specified AWS account IDs to pull images from ECR.",
+  "description": "Configures a nullplatform ECR provider config resource that wires AWS region, CI/CD build credentials, and an application IAM role into a nullplatform registry integration",
+  "architecture": "The module retrieves the current AWS region via the aws_region data source and passes it into a nullplatform_provider_config resource of type 'ecr'. The resource encodes two attribute blocks as JSON: a 'ci' block containing the region and build workflow IAM access key credentials, and a 'setup' block containing the region and the application IAM role ARN. The lifecycle ignore_changes directive on attributes prevents drift detection from overwriting provider-managed attribute updates after initial creation.",
   "features": [
-    "Creates nullplatform_provider_config of type ECR linking CI and setup credentials",
-    "Configures IAM access keys for build workflow automation with ECR push permissions",
-    "Creates IAM role for application workloads to pull images from ECR",
-    "Generates ECR repository policy allowing cross-account image pulls when enabled",
-    "Supports multiple additional AWS account IDs for cross-account ECR pull access",
-    "Supports dimension-based segmentation of the nullplatform provider config by region or environment"
+    "Creates a nullplatform ECR provider config resource scoped to a specific NRN",
+    "Configures CI/CD build workflow credentials with AWS access key ID and secret for ECR image publishing",
+    "Configures application-level ECR access using an IAM role ARN for image pulling",
+    "Automatically resolves and injects the current AWS region into both CI and setup attribute blocks",
+    "Supports optional dimension segmentation for multi-region or multi-environment provider config scoping",
+    "Marks build workflow secret access key as sensitive to prevent exposure in Terraform output"
   ],
   "inputs": [
     {
@@ -97,32 +92,27 @@ resource "example_resource" "this" {
       "required": true
     },
     {
-      "name": "cluster_name",
-      "description": "Name of the cluster where the policy runs",
+      "name": "application_role_arn",
+      "description": "ARN of the IAM role used by applications to pull ECR images",
       "required": true
     },
     {
-      "name": "application_manager_assume_role",
-      "description": "ARN of the IAM role assumed by the application manager",
-      "required": false
+      "name": "build_workflow_access_key_id",
+      "description": "Access key ID for the CI/CD build workflow IAM user",
+      "required": true
+    },
+    {
+      "name": "build_workflow_access_key_secret",
+      "description": "Secret access key for the CI/CD build workflow IAM user",
+      "required": true
     },
     {
       "name": "dimensions",
       "description": "Dimensions to segment the nullplatform provider config (e.g. by region, environment)",
       "required": false
-    },
-    {
-      "name": "enable_cross_account_pull",
-      "description": "Enable cross-account ECR pull access via a repository policy",
-      "required": false
-    },
-    {
-      "name": "repository_policy_pull_accounts",
-      "description": "AWS account IDs allowed to pull images from ECR. The account where this module is deployed is always included.",
-      "required": false
     }
   ],
   "outputs": [],
-  "hash": "dfc7c1cda7f15d57bce971b0129fec6a"
+  "hash": "65f2f22ca359b697be67d2815c2a424a"
 }
 END_AI_METADATA -->

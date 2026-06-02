@@ -18,7 +18,7 @@ This module creates an azurerm_dns_zone resource and configures it with the prov
 
 ```hcl
 module "dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/dns?ref=v3.2.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/dns?ref=v3.5.2"
 
   domain_name         = "your-domain-name"
   resource_group_name = "your-resource-group-name"
