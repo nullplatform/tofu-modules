@@ -69,6 +69,19 @@ run "without_authentication_credentials" {
   }
 }
 
+run "partial_authentication_fails" {
+  command = plan
+
+  variables {
+    client_id = "11111111-0000-0000-0000-000000000001"
+    # client_secret, subscription_id, tenant_id omitted intentionally
+  }
+
+  expect_failures = [
+    nullplatform_provider_config.azure,
+  ]
+}
+
 run "with_domain_name" {
   command = plan
 

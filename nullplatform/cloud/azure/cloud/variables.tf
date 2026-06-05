@@ -6,7 +6,6 @@ variable "nrn" {
 variable "client_id" {
   type        = string
   description = "Azure Service Principal client ID. If omitted, inherits from a parent cloud provider."
-  sensitive   = true
   default     = null
 }
 
