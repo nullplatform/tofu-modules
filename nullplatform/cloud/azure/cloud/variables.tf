@@ -5,24 +5,28 @@ variable "nrn" {
 
 variable "client_id" {
   type        = string
-  description = "Azure Service Principal client ID"
+  description = "Azure Service Principal client ID. If omitted, inherits from a parent cloud provider."
   sensitive   = true
+  default     = null
 }
 
 variable "client_secret" {
   type        = string
-  description = "Azure Service Principal client secret"
+  description = "Azure Service Principal client secret. If omitted, inherits from a parent cloud provider."
   sensitive   = true
+  default     = null
 }
 
 variable "subscription_id" {
   type        = string
-  description = "Azure subscription ID"
+  description = "Azure subscription ID. If omitted, inherits from a parent cloud provider."
+  default     = null
 }
 
 variable "tenant_id" {
   type        = string
-  description = "Azure Active Directory tenant ID"
+  description = "Azure Active Directory tenant ID. If omitted, inherits from a parent cloud provider."
+  default     = null
 }
 
 variable "domain_name" {

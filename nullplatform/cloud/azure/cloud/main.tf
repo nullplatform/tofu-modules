@@ -7,10 +7,12 @@ resource "nullplatform_provider_config" "azure" {
 
   attributes = jsonencode({
     authentication = {
-      client_id       = var.client_id
-      client_secret   = var.client_secret
-      subscription_id = var.subscription_id
-      tenant_id       = var.tenant_id
+      for k, v in {
+        client_id       = var.client_id
+        client_secret   = var.client_secret
+        subscription_id = var.subscription_id
+        tenant_id       = var.tenant_id
+      } : k => v if v != null
     },
     networking = {
       application_domain                   = var.application_domain,
