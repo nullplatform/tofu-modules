@@ -4,6 +4,10 @@ variables {
   nrn                             = "organization=myorg:account=myaccount"
   azure_resource_group_name       = "myorg-rg"
   private_dns_resource_group_name = "myorg-dns-rg"
+  client_id                       = "11111111-0000-0000-0000-000000000001"
+  client_secret                   = "dummy-secret-for-testing-purposes-only!"
+  subscription_id                 = "22222222-0000-0000-0000-000000000002"
+  tenant_id                       = "33333333-0000-0000-0000-000000000003"
 }
 
 run "azure_provider_type" {
@@ -31,6 +35,25 @@ run "attributes_contain_resource_groups" {
   assert {
     condition     = strcontains(nullplatform_provider_config.azure.attributes, "myorg-dns-rg")
     error_message = "Attributes should contain the private DNS resource group name"
+  }
+}
+
+run "attributes_contain_authentication" {
+  command = plan
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.azure.attributes, "11111111-0000-0000-0000-000000000001")
+    error_message = "Attributes should contain the client_id"
+  }
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.azure.attributes, "22222222-0000-0000-0000-000000000002")
+    error_message = "Attributes should contain the subscription_id"
+  }
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.azure.attributes, "33333333-0000-0000-0000-000000000003")
+    error_message = "Attributes should contain the tenant_id"
   }
 }
 
