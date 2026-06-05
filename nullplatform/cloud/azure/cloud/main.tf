@@ -6,7 +6,12 @@ resource "nullplatform_provider_config" "azure" {
   dimensions = var.dimensions
 
   attributes = jsonencode({
-    authentication = {},
+    authentication = {
+      client_id       = var.client_id
+      client_secret   = var.client_secret
+      subscription_id = var.subscription_id
+      tenant_id       = var.tenant_id
+    },
     networking = {
       application_domain                   = var.application_domain,
       domain_name                          = var.domain_name,
@@ -16,7 +21,4 @@ resource "nullplatform_provider_config" "azure" {
       private_dns_zone_resource_group_name = var.private_dns_resource_group_name
     }
   })
-  lifecycle {
-    ignore_changes = [attributes]
-  }
 }

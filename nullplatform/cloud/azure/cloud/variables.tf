@@ -3,6 +3,28 @@ variable "nrn" {
   description = "The NRN of your nullplatform account"
 }
 
+variable "client_id" {
+  type        = string
+  description = "Azure Service Principal client ID"
+  sensitive   = true
+}
+
+variable "client_secret" {
+  type        = string
+  description = "Azure Service Principal client secret"
+  sensitive   = true
+}
+
+variable "subscription_id" {
+  type        = string
+  description = "Azure subscription ID"
+}
+
+variable "tenant_id" {
+  type        = string
+  description = "Azure Active Directory tenant ID"
+}
+
 variable "domain_name" {
   description = "The domain name to be used"
   type        = string
