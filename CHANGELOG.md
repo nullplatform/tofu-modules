@@ -1,5 +1,30 @@
 # Changelog
 
+## [4.0.1](https://github.com/nullplatform/tofu-modules/compare/v4.0.0...v4.0.1) (2026-06-09)
+
+
+### Bug Fixes
+
+* **ecr:** add cross-account pull and repository policy support ([#384](https://github.com/nullplatform/tofu-modules/issues/384)) ([cf6431f](https://github.com/nullplatform/tofu-modules/commit/cf6431f69c5ce3055c60ff3d659a23c12d9162f9))
+
+## [4.0.0](https://github.com/nullplatform/tofu-modules/compare/v3.5.2...v4.0.0) (2026-06-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* **dns,ingress,iam:** support disabling public-side resources ([#364](https://github.com/nullplatform/tofu-modules/issues/364))
+
+### Features
+
+* **dns,ingress,iam:** support disabling public-side resources ([#364](https://github.com/nullplatform/tofu-modules/issues/364)) ([872efa1](https://github.com/nullplatform/tofu-modules/commit/872efa17520793e6369c670d3f6cf1ea5de4cff7))
+
+## [3.5.2](https://github.com/nullplatform/tofu-modules/compare/v3.5.1...v3.5.2) (2026-05-28)
+
+
+### Bug Fixes
+
+* **service_definition_agent_association:** remove telemetry from channel_sources default ([#377](https://github.com/nullplatform/tofu-modules/issues/377)) ([876ad77](https://github.com/nullplatform/tofu-modules/commit/876ad775c13d4cef46177b47bce0ed108f9ddf57))
+
 ## [3.5.1](https://github.com/nullplatform/tofu-modules/compare/v3.5.0...v3.5.1) (2026-05-28)
 
 

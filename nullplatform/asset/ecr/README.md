@@ -2,26 +2,26 @@
 
 ## Description
 
-Configures a nullplatform ECR provider config resource that wires AWS region, CI/CD build credentials, and an application IAM role into a nullplatform registry integration
+Configures a nullplatform ECR provider config resource with CI/CD credentials, application role, and optional cross-account pull access
 
 ## Architecture
 
-The module retrieves the current AWS region via the aws_region data source and passes it into a nullplatform_provider_config resource of type 'ecr'. The resource encodes two attribute blocks as JSON: a 'ci' block containing the region and build workflow IAM access key credentials, and a 'setup' block containing the region and the application IAM role ARN. The lifecycle ignore_changes directive on attributes prevents drift detection from overwriting provider-managed attribute updates after initial creation.
+The module reads the current AWS region via the aws_region data source and uses it alongside input variables to construct a nullplatform_provider_config resource of type 'ecr'. The provider config encodes a JSON attributes blob containing a 'ci' section with build workflow IAM credentials, a 'setup' section with the application role ARN and repository naming rule, and conditionally a 'setup.policy' field when a repository policy is supplied. When a cross-account pull role ARN is provided, an additional 'read' section is merged into the attributes to enable cross-account ECR image pulling.
 
 ## Features
 
-- Creates a nullplatform ECR provider config resource scoped to a specific NRN
-- Configures CI/CD build workflow credentials with AWS access key ID and secret for ECR image publishing
-- Configures application-level ECR access using an IAM role ARN for image pulling
-- Automatically resolves and injects the current AWS region into both CI and setup attribute blocks
-- Supports optional dimension segmentation for multi-region or multi-environment provider config scoping
-- Marks build workflow secret access key as sensitive to prevent exposure in Terraform output
+- Creates a nullplatform ECR provider config resource with structured CI and setup attribute sections
+- Configures CI/CD build workflow credentials using an IAM access key ID and secret for ECR push access
+- Configures application IAM role ARN for ECR image pull in the setup section
+- Supports optional cross-account ECR pull access by conditionally including a read section with a separate IAM role ARN
+- Supports optional ECR repository policy JSON applied to all repositories created by nullplatform
+- Allows customizable ECR repository naming conventions via a configurable jq expression
 
 ## Basic Usage
 
 ```hcl
 module "ecr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v3.5.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v4.0.1"
 
   application_role_arn             = "your-application-role-arn"
   build_workflow_access_key_id     = "your-build-workflow-access-key-id"
@@ -68,22 +68,25 @@ resource "example_resource" "this" {
 | <a name="input_application_role_arn"></a> [application\_role\_arn](#input\_application\_role\_arn) | ARN of the IAM role used by applications to pull ECR images | `string` | n/a | yes |
 | <a name="input_build_workflow_access_key_id"></a> [build\_workflow\_access\_key\_id](#input\_build\_workflow\_access\_key\_id) | Access key ID for the CI/CD build workflow IAM user | `string` | n/a | yes |
 | <a name="input_build_workflow_access_key_secret"></a> [build\_workflow\_access\_key\_secret](#input\_build\_workflow\_access\_key\_secret) | Secret access key for the CI/CD build workflow IAM user | `string` | n/a | yes |
+| <a name="input_cross_account_pull_role_arn"></a> [cross\_account\_pull\_role\_arn](#input\_cross\_account\_pull\_role\_arn) | ARN of the IAM role for cross-account ECR pull access (maps to 'read.role\_arn' in provider config). Leave empty to omit the read section. | `string` | `""` | no |
 | <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Dimensions to segment the nullplatform provider config (e.g. by region, environment) | `map(string)` | `{}` | no |
+| <a name="input_naming_rule"></a> [naming\_rule](#input\_naming\_rule) | jq expression for ECR repository naming convention. Defaults to the Nullplatform platform default. | `string` | `"\"\\(.namespace.slug)/\\(.application.slug)\""` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | The nullplatform resource name (NRN) | `string` | n/a | yes |
+| <a name="input_repository_policy"></a> [repository\_policy](#input\_repository\_policy) | ECR repository policy JSON applied to every new repository Nullplatform creates (maps to 'setup.policy'). Leave empty to omit. | `string` | `""` | no |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
 {
   "name": "ecr",
-  "description": "Configures a nullplatform ECR provider config resource that wires AWS region, CI/CD build credentials, and an application IAM role into a nullplatform registry integration",
-  "architecture": "The module retrieves the current AWS region via the aws_region data source and passes it into a nullplatform_provider_config resource of type 'ecr'. The resource encodes two attribute blocks as JSON: a 'ci' block containing the region and build workflow IAM access key credentials, and a 'setup' block containing the region and the application IAM role ARN. The lifecycle ignore_changes directive on attributes prevents drift detection from overwriting provider-managed attribute updates after initial creation.",
+  "description": "Configures a nullplatform ECR provider config resource with CI/CD credentials, application role, and optional cross-account pull access",
+  "architecture": "The module reads the current AWS region via the aws_region data source and uses it alongside input variables to construct a nullplatform_provider_config resource of type 'ecr'. The provider config encodes a JSON attributes blob containing a 'ci' section with build workflow IAM credentials, a 'setup' section with the application role ARN and repository naming rule, and conditionally a 'setup.policy' field when a repository policy is supplied. When a cross-account pull role ARN is provided, an additional 'read' section is merged into the attributes to enable cross-account ECR image pulling.",
   "features": [
-    "Creates a nullplatform ECR provider config resource scoped to a specific NRN",
-    "Configures CI/CD build workflow credentials with AWS access key ID and secret for ECR image publishing",
-    "Configures application-level ECR access using an IAM role ARN for image pulling",
-    "Automatically resolves and injects the current AWS region into both CI and setup attribute blocks",
-    "Supports optional dimension segmentation for multi-region or multi-environment provider config scoping",
-    "Marks build workflow secret access key as sensitive to prevent exposure in Terraform output"
+    "Creates a nullplatform ECR provider config resource with structured CI and setup attribute sections",
+    "Configures CI/CD build workflow credentials using an IAM access key ID and secret for ECR push access",
+    "Configures application IAM role ARN for ECR image pull in the setup section",
+    "Supports optional cross-account ECR pull access by conditionally including a read section with a separate IAM role ARN",
+    "Supports optional ECR repository policy JSON applied to all repositories created by nullplatform",
+    "Allows customizable ECR repository naming conventions via a configurable jq expression"
   ],
   "inputs": [
     {
@@ -110,9 +113,24 @@ resource "example_resource" "this" {
       "name": "dimensions",
       "description": "Dimensions to segment the nullplatform provider config (e.g. by region, environment)",
       "required": false
+    },
+    {
+      "name": "cross_account_pull_role_arn",
+      "description": "ARN of the IAM role for cross-account ECR pull access (maps to 'read.role_arn' in provider config). Leave empty to omit the read section.",
+      "required": false
+    },
+    {
+      "name": "repository_policy",
+      "description": "ECR repository policy JSON applied to every new repository Nullplatform creates (maps to 'setup.policy'). Leave empty to omit.",
+      "required": false
+    },
+    {
+      "name": "naming_rule",
+      "description": "jq expression for ECR repository naming convention. Defaults to the Nullplatform platform default.",
+      "required": false
     }
   ],
   "outputs": [],
-  "hash": "65f2f22ca359b697be67d2815c2a424a"
+  "hash": "5a7b0f106ac62a1742993b8d7f3cc494"
 }
 END_AI_METADATA -->

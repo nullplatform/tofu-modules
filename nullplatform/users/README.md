@@ -20,7 +20,7 @@ The module creates nullplatform_user resources from a map of user configurations
 
 ```hcl
 module "users" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/users?ref=v3.5.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/users?ref=v4.0.1"
 
   nullplatform_users = "your-nullplatform-users"
 }

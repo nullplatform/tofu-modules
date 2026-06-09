@@ -2,25 +2,26 @@
 
 ## Description
 
-Creates IAM resources for managing ECR repositories and CI/CD build workflows within a named cluster namespace, with optional cross-account pull access
+Provisions IAM resources for ECR image management and optional cross-account ECR pull access within a named cluster namespace
 
 ## Architecture
 
-The module creates an aws_iam_role (application role) with a configurable assume-role principal, an aws_iam_policy granting ECR management permissions, and an aws_iam_user with an aws_iam_access_key for CI/CD build workflows. The ECR policy is attached to the application role via aws_iam_role_policy_attachment and to an aws_iam_group via aws_iam_group_policy_attachment, with the build user added to that group through aws_iam_user_group_membership. When enable_cross_account_pull is true, a second aws_iam_role and aws_iam_policy are conditionally created and attached, allowing specified external AWS account IDs to assume the role for read-only ECR pulls.
+The module creates two aws_iam_role resources (an application role with a configurable assume-role principal and an optional cross-account pull role), an aws_iam_policy for ECR management actions, and an aws_iam_user with an aws_iam_access_key for CI/CD build workflows. The ECR manager policy is attached to both the application role via aws_iam_role_policy_attachment and to an aws_iam_group via aws_iam_group_policy_attachment, with the build workflow user added to that group through aws_iam_user_group_membership. When enable_cross_account_pull is true, a separate aws_iam_role and aws_iam_policy scoped to read-only ECR actions are created and linked, with pull_account_ids driving the Principal trust statements.
 
 ## Features
 
-- Creates an aws_iam_role for application workloads with a configurable assume-role principal ARN
-- Creates an aws_iam_policy granting full ECR repository lifecycle management permissions
-- Creates an aws_iam_user and aws_iam_access_key for CI/CD build workflows with ECR push access
-- Organizes ECR access via an aws_iam_group with policy attachment and user membership
-- Optionally creates a cross-account aws_iam_role and read-only ECR policy for external AWS accounts to pull images
+- Creates a namespaced aws_iam_role for application image pulling with a configurable assume-role principal
+- Creates an aws_iam_policy granting full ECR repository lifecycle permissions including push, pull, and repository management
+- Creates an aws_iam_user and aws_iam_access_key for CI/CD build workflow authentication to ECR
+- Creates an aws_iam_group and attaches the ECR manager policy for group-based permission management
+- Optionally creates a cross-account aws_iam_role and read-only ECR pull policy for external AWS accounts
+- Outputs a ready-to-use ECR repository policy JSON for cross-account pull access configuration
 
 ## Basic Usage
 
 ```hcl
 module "ecr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/ecr?ref=v3.5.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/ecr?ref=v4.0.1"
 
   cluster_name = "your-cluster-name"
 }
@@ -79,19 +80,21 @@ resource "example_resource" "this" {
 | <a name="output_build_workflow_access_key_id"></a> [build\_workflow\_access\_key\_id](#output\_build\_workflow\_access\_key\_id) | Access key ID for the CI/CD build workflow IAM user |
 | <a name="output_build_workflow_access_key_secret"></a> [build\_workflow\_access\_key\_secret](#output\_build\_workflow\_access\_key\_secret) | Secret access key for the CI/CD build workflow IAM user |
 | <a name="output_cross_account_pull_role_arn"></a> [cross\_account\_pull\_role\_arn](#output\_cross\_account\_pull\_role\_arn) | ARN of the IAM role that cross-account principals can assume to pull ECR images. Empty string when enable\_cross\_account\_pull is false. |
+| <a name="output_ecr_repository_policy"></a> [ecr\_repository\_policy](#output\_ecr\_repository\_policy) | ECR repository policy JSON granting pull access to the configured cross-account IDs. Empty string when enable\_cross\_account\_pull is false. |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
 {
   "name": "ecr",
-  "description": "Creates IAM resources for managing ECR repositories and CI/CD build workflows within a named cluster namespace, with optional cross-account pull access",
-  "architecture": "The module creates an aws_iam_role (application role) with a configurable assume-role principal, an aws_iam_policy granting ECR management permissions, and an aws_iam_user with an aws_iam_access_key for CI/CD build workflows. The ECR policy is attached to the application role via aws_iam_role_policy_attachment and to an aws_iam_group via aws_iam_group_policy_attachment, with the build user added to that group through aws_iam_user_group_membership. When enable_cross_account_pull is true, a second aws_iam_role and aws_iam_policy are conditionally created and attached, allowing specified external AWS account IDs to assume the role for read-only ECR pulls.",
+  "description": "Provisions IAM resources for ECR image management and optional cross-account ECR pull access within a named cluster namespace",
+  "architecture": "The module creates two aws_iam_role resources (an application role with a configurable assume-role principal and an optional cross-account pull role), an aws_iam_policy for ECR management actions, and an aws_iam_user with an aws_iam_access_key for CI/CD build workflows. The ECR manager policy is attached to both the application role via aws_iam_role_policy_attachment and to an aws_iam_group via aws_iam_group_policy_attachment, with the build workflow user added to that group through aws_iam_user_group_membership. When enable_cross_account_pull is true, a separate aws_iam_role and aws_iam_policy scoped to read-only ECR actions are created and linked, with pull_account_ids driving the Principal trust statements.",
   "features": [
-    "Creates an aws_iam_role for application workloads with a configurable assume-role principal ARN",
-    "Creates an aws_iam_policy granting full ECR repository lifecycle management permissions",
-    "Creates an aws_iam_user and aws_iam_access_key for CI/CD build workflows with ECR push access",
-    "Organizes ECR access via an aws_iam_group with policy attachment and user membership",
-    "Optionally creates a cross-account aws_iam_role and read-only ECR policy for external AWS accounts to pull images"
+    "Creates a namespaced aws_iam_role for application image pulling with a configurable assume-role principal",
+    "Creates an aws_iam_policy granting full ECR repository lifecycle permissions including push, pull, and repository management",
+    "Creates an aws_iam_user and aws_iam_access_key for CI/CD build workflow authentication to ECR",
+    "Creates an aws_iam_group and attaches the ECR manager policy for group-based permission management",
+    "Optionally creates a cross-account aws_iam_role and read-only ECR pull policy for external AWS accounts",
+    "Outputs a ready-to-use ECR repository policy JSON for cross-account pull access configuration"
   ],
   "inputs": [
     {
@@ -119,8 +122,9 @@ resource "example_resource" "this" {
     "application_role_arn",
     "build_workflow_access_key_id",
     "build_workflow_access_key_secret",
-    "cross_account_pull_role_arn"
+    "cross_account_pull_role_arn",
+    "ecr_repository_policy"
   ],
-  "hash": "919aeb658197d87037609619914d6040"
+  "hash": "3fec1e27ab807f00fd3468e628c7cae3"
 }
 END_AI_METADATA -->
