@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.1](https://github.com/nullplatform/tofu-modules/compare/v4.0.0...v4.0.1) (2026-06-09)
+
+
+### Bug Fixes
+
+* **ecr:** add cross-account pull and repository policy support ([#384](https://github.com/nullplatform/tofu-modules/issues/384)) ([cf6431f](https://github.com/nullplatform/tofu-modules/commit/cf6431f69c5ce3055c60ff3d659a23c12d9162f9))
+
 ## [4.0.0](https://github.com/nullplatform/tofu-modules/compare/v3.5.2...v4.0.0) (2026-06-02)
 
 
