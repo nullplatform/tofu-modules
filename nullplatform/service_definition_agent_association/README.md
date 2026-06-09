@@ -2,25 +2,26 @@
 
 ## Description
 
-Creates a nullplatform notification channel configured with an agent that executes a repository-based entrypoint for handling notifications
+Creates a nullplatform notification channel configured with an agent that executes a service entrypoint command from a cloned repository
 
 ## Architecture
 
-The module creates a nullplatform_notification_channel resource wired to an agent configuration that executes a cmdline path built from repository_service_spec_repo and service_path. A terraform_data resource monitors api_key changes to trigger replacement of the channel. The agent selector uses tags_selectors to filter targets, and the channel applies filters based on service.specification.slug.
+The module creates a terraform_data resource to track API key changes as a replacement trigger, and a nullplatform_notification_channel resource that configures an agent-based notification channel. The agent configuration wires the api_key, repository path (built from base_clone_path, repository_service_spec_repo, and service_path), agent_arguments, and tags_selectors into the channel's nested configuration block. A filter is applied to scope the channel to a specific service specification slug, and the lifecycle block ensures the channel is replaced whenever the API key changes.
 
 ## Features
 
-- Creates nullplatform notification channel with agent-based execution
-- Configures agent command with dynamic path from repository and service path
-- Supports tag-based agent selection via selector map
-- Applies service specification slug filters to incoming notifications
-- Triggers channel replacement on API key rotation
+- Creates a nullplatform_notification_channel with agent-type configuration and exec command execution
+- Builds agent cmdline path dynamically from base_clone_path, repository name, and service_path variables
+- Configures tag-based agent selector filtering using a map of key-value tag selectors
+- Applies service specification slug filtering via a JSON-encoded $or query on the notification channel
+- Triggers automatic channel replacement when the API key value changes using terraform_data lifecycle tracking
+- Supports configurable channel sources and agent arguments for flexible notification routing
 
 ## Basic Usage
 
 ```hcl
 module "service_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v3.5.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v4.0.0"
 
   api_key                      = "your-api-key"
   repository_service_spec_repo = "your-repository-service-spec-repo"
@@ -66,7 +67,7 @@ resource "example_resource" "this" {
 | <a name="input_agent_arguments"></a> [agent\_arguments](#input\_agent\_arguments) | Arguments to pass to the agent entrypoint command | `list(string)` | `[]` | no |
 | <a name="input_api_key"></a> [api\_key](#input\_api\_key) | API key for authenticating with the nullplatform API | `string` | n/a | yes |
 | <a name="input_base_clone_path"></a> [base\_clone\_path](#input\_base\_clone\_path) | Base path where the service repository is cloned inside the agent pod | `string` | `"/root/.np"` | no |
-| <a name="input_channel_sources"></a> [channel\_sources](#input\_channel\_sources) | List of sources for the notification channel (e.g., ['monitoring', 'alerts']) | `list(string)` | <pre>[<br/>  "telemetry",<br/>  "service"<br/>]</pre> | no |
+| <a name="input_channel_sources"></a> [channel\_sources](#input\_channel\_sources) | List of sources for the notification channel (e.g., ['monitoring', 'alerts']) | `list(string)` | <pre>[<br/>  "service"<br/>]</pre> | no |
 | <a name="input_channel_type"></a> [channel\_type](#input\_channel\_type) | Type of the notification channel (e.g., 'agent') | `string` | `"agent"` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name (organization:account format) | `string` | `null` | no |
 | <a name="input_repository_service_spec_repo"></a> [repository\_service\_spec\_repo](#input\_repository\_service\_spec\_repo) | GitHub repository name containing the service specs (used to build the agent cmdline path) | `string` | n/a | yes |
@@ -84,14 +85,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "service_definition_agent_association",
-  "description": "Creates a nullplatform notification channel configured with an agent that executes a repository-based entrypoint for handling notifications",
-  "architecture": "The module creates a nullplatform_notification_channel resource wired to an agent configuration that executes a cmdline path built from repository_service_spec_repo and service_path. A terraform_data resource monitors api_key changes to trigger replacement of the channel. The agent selector uses tags_selectors to filter targets, and the channel applies filters based on service.specification.slug.",
+  "description": "Creates a nullplatform notification channel configured with an agent that executes a service entrypoint command from a cloned repository",
+  "architecture": "The module creates a terraform_data resource to track API key changes as a replacement trigger, and a nullplatform_notification_channel resource that configures an agent-based notification channel. The agent configuration wires the api_key, repository path (built from base_clone_path, repository_service_spec_repo, and service_path), agent_arguments, and tags_selectors into the channel's nested configuration block. A filter is applied to scope the channel to a specific service specification slug, and the lifecycle block ensures the channel is replaced whenever the API key changes.",
   "features": [
-    "Creates nullplatform notification channel with agent-based execution",
-    "Configures agent command with dynamic path from repository and service path",
-    "Supports tag-based agent selection via selector map",
-    "Applies service specification slug filters to incoming notifications",
-    "Triggers channel replacement on API key rotation"
+    "Creates a nullplatform_notification_channel with agent-type configuration and exec command execution",
+    "Builds agent cmdline path dynamically from base_clone_path, repository name, and service_path variables",
+    "Configures tag-based agent selector filtering using a map of key-value tag selectors",
+    "Applies service specification slug filtering via a JSON-encoded $or query on the notification channel",
+    "Triggers automatic channel replacement when the API key value changes using terraform_data lifecycle tracking",
+    "Supports configurable channel sources and agent arguments for flexible notification routing"
   ],
   "inputs": [
     {
@@ -148,6 +150,6 @@ resource "example_resource" "this" {
   "outputs": [
     "id"
   ],
-  "hash": "2261d6bc1c700912722065e90d68238a"
+  "hash": "5ba1dcc4b42ff356d1bc9e9a4512173a"
 }
 END_AI_METADATA -->

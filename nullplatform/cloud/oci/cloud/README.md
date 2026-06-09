@@ -19,7 +19,7 @@ The module creates a single nullplatform_provider_config resource of type 'oci-c
 
 ```hcl
 module "cloud" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/oci/cloud?ref=v3.5.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/oci/cloud?ref=v4.0.0"
 
   account_id       = "your-account-id"
   account_name     = "your-account-name"

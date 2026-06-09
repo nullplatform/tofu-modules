@@ -18,7 +18,7 @@ The module creates an aws_acm_certificate resource with DNS validation, which is
 
 ```hcl
 module "acm" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/acm?ref=v3.5.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/acm?ref=v4.0.0"
 
   domain_name = "your-domain-name"
   zone_id     = "your-zone-id"

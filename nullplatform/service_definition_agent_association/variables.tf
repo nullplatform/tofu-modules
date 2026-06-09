@@ -18,7 +18,7 @@ variable "tags_selectors" {
 variable "channel_sources" {
   type        = list(string)
   description = "List of sources for the notification channel (e.g., ['monitoring', 'alerts'])"
-  default     = ["telemetry", "service"]
+  default     = ["service"]
 }
 
 variable "channel_type" {
