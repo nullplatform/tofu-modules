@@ -49,7 +49,7 @@ resource "terraform_data" "cross_variable_validation" {
 
 # Deploy nullplatform agent to Kubernetes cluster via Helm chart
 resource "helm_release" "agent" {
-  name       = "nullplatform-agent"
+  name       = var.release_name
   chart      = "nullplatform-agent"
   repository = "https://nullplatform.github.io/helm-charts"
   namespace  = var.namespace

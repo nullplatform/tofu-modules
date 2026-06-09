@@ -2,11 +2,18 @@ args:
   %{ for arg in args }
 - "${arg}"
   %{ endfor }
-  
-  %{ if aws_iam_role_arn != "" }
+
+  %{ if aws_iam_role_arn != "" || service_account_name != "" }
 serviceAccount:
+  create: true
+  automount: true
+  %{ if service_account_name != "" }
+  name: "${service_account_name}"
+  %{ endif }
+  %{ if aws_iam_role_arn != "" }
   annotations:
     eks.amazonaws.com/role-arn: "${aws_iam_role_arn}"
+  %{ endif }
   %{ endif }
 
 configuration:
@@ -17,6 +24,9 @@ configuration:
 
 image:
   tag: "${image_tag}"
+  %{ if image_repository != "" }
+  repository: "${image_repository}"
+  %{ endif }
 
   %{ if length(init_scripts) > 0 }
 initScripts:
