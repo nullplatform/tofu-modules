@@ -22,7 +22,7 @@ The module fetches a notification channel template via the `http` data source fr
 
 ```hcl
 module "scope_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=v4.0.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=v4.1.0"
 
   api_key                  = "your-api-key"
   nrn                      = "your-nrn"
