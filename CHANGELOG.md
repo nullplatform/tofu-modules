@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.2.0](https://github.com/nullplatform/tofu-modules/compare/v4.1.0...v4.2.0) (2026-06-10)
+
+
+### Features
+
+* **azure/cloud:** support passing authentication credentials as variables ([#381](https://github.com/nullplatform/tofu-modules/issues/381)) ([2313640](https://github.com/nullplatform/tofu-modules/commit/23136401e863b2d0cbad643a75a0ac6839de6dbc))
+
+
+### Bug Fixes
+
+* **ecr:** remove read section, cross-account role, and fix setup.policy drift ([#389](https://github.com/nullplatform/tofu-modules/issues/389)) ([8000c6b](https://github.com/nullplatform/tofu-modules/commit/8000c6b2fb4baebdbfa0b5c9927a073a23655ac5))
+
 ## [4.1.0](https://github.com/nullplatform/tofu-modules/compare/v4.0.1...v4.1.0) (2026-06-10)
 
 
