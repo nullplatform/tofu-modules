@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.0](https://github.com/nullplatform/tofu-modules/compare/v4.0.1...v4.1.0) (2026-06-10)
+
+
+### Features
+
+* **identity-access-control:** add cloud-agnostic provider config module ([#387](https://github.com/nullplatform/tofu-modules/issues/387)) ([ddcc212](https://github.com/nullplatform/tofu-modules/commit/ddcc2124376dae7ebe11236f79eba74c505f5442))
+
 ## [4.0.1](https://github.com/nullplatform/tofu-modules/compare/v4.0.0...v4.0.1) (2026-06-09)
 
 

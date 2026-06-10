@@ -2,59 +2,28 @@
 
 ## Description
 
-Configures an identity & access control provider in nullplatform via a `nullplatform_provider_config` resource. The provider type defaults to the AWS IAM provider (`aws-iam-configuration`) but is exposed as a variable, so new clouds can be supported by passing their own `type` and `attributes`.
+Configures a nullplatform identity and access control provider by creating a nullplatform_provider_config resource scoped to a given NRN with provider-specific attributes
 
 ## Architecture
 
-The module creates a single `nullplatform_provider_config` resource. The `type` input selects which provider specification to configure (default `aws-iam-configuration`), and the `attributes` input carries the provider-specific configuration, JSON-encoded to match that specification's schema. `dimensions` metadata is supported for environment- or region-specific configuration. The module is intentionally generic: it does not validate cloud-specific attribute shapes, leaving that to the caller, so adding a new cloud requires no changes here. Unlike provider configs that hold externally-rotated secrets, this module does not set `ignore_changes` on `attributes`, so Terraform remains the source of truth and changes are propagated on apply.
-
-For AWS, this module is the platform-side counterpart to `infrastructure/aws/iam/agent`: that module grants the agent `sts:AssumeRole` permission over the role ARNs, while this module publishes those ARNs to nullplatform under friendly selectors.
+The module creates a single nullplatform_provider_config resource named identity_access_control, wiring the input nrn directly to the resource's nrn field and encoding the attributes variable as JSON via jsonencode(). The type field defaults to aws-iam-configuration and the dimensions map is passed through to scope the configuration. Outputs expose the resource's id and nrn for downstream consumption.
 
 ## Features
 
-- Creates a nullplatform identity & access control provider configuration
-- Cloud-agnostic: `type` and `attributes` are inputs, defaulting to AWS IAM
-- For AWS IAM, maps friendly selectors to assumable IAM role ARNs for use in scope/service code
-- Supports dimensions for environment- or region-specific configuration
-- Keeps Terraform as the source of truth for the configuration (no attribute drift suppression)
+- Creates a nullplatform_provider_config resource scoped to a specified NRN for identity and access control
+- Encodes provider-specific attributes to JSON automatically using jsonencode() for compatibility with the nullplatform provider
+- Supports configurable provider type slug to allow different cloud provider integrations beyond the default aws-iam-configuration
+- Accepts dimension scoping via a map to target specific environments or regions
+- Exposes the provider configuration ID and NRN as outputs for use by dependent modules
 
-## Basic Usage (AWS IAM — default)
-
-```hcl
-module "identity_access_control" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/identity-access-control?ref=v4.0.1"
-
-  nrn = "your-nrn"
-
-  attributes = {
-    iam_role_arns = {
-      arns = [
-        {
-          selector = "billing"
-          arn      = "arn:aws:iam::123456789012:role/billing-reader"
-        },
-        {
-          selector = "analytics"
-          arn      = "arn:aws:iam::123456789012:role/analytics-reader"
-        },
-      ]
-    }
-  }
-}
-```
-
-## Usage for a new cloud
+## Basic Usage
 
 ```hcl
-module "identity_access_control" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/identity-access-control?ref=v4.0.1"
+module "identity-access-control" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/identity-access-control?ref=v4.1.0"
 
-  nrn  = "your-nrn"
-  type = "azure-iam-configuration" # slug of the provider specification
-
-  attributes = {
-    # ... shape matching the azure-iam-configuration schema
-  }
+  attributes = "your-attributes"
+  nrn        = "your-nrn"
 }
 ```
 
@@ -63,7 +32,7 @@ module "identity_access_control" {
 ```hcl
 # Reference outputs in other resources
 resource "example_resource" "this" {
-  example_attribute = module.identity_access_control.id
+  example_attribute = module.identity-access-control.id
 }
 ```
 
@@ -78,7 +47,7 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | >= 0.0.86 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.92 |
 
 ## Resources
 
@@ -90,10 +59,10 @@ resource "example_resource" "this" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_nrn"></a> [nrn](#input\_nrn) | nullplatform Resource Name where the provider configuration applies | `string` | n/a | yes |
-| <a name="input_attributes"></a> [attributes](#input\_attributes) | Provider-specific configuration, matching the schema of the selected provider type | `any` | n/a | yes |
-| <a name="input_type"></a> [type](#input\_type) | Slug of the nullplatform provider specification to configure | `string` | `"aws-iam-configuration"` | no |
-| <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Dimensions used to scope this provider configuration | `map(string)` | `{}` | no |
+| <a name="input_attributes"></a> [attributes](#input\_attributes) | Provider-specific configuration, matching the schema of the selected provider type. Encoded to JSON for the provider config. For aws-iam-configuration: { iam\_role\_arns = { arns = [{ selector, arn }] } }. | `any` | n/a | yes |
+| <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Dimensions used to scope this provider configuration (e.g., environment, region) | `map(string)` | `{}` | no |
+| <a name="input_nrn"></a> [nrn](#input\_nrn) | nullplatform Resource Name where the identity & access control provider configuration applies | `string` | n/a | yes |
+| <a name="input_type"></a> [type](#input\_type) | Slug of the nullplatform provider specification to configure (e.g. aws-iam-configuration). Set this when adding support for a new cloud. | `string` | `"aws-iam-configuration"` | no |
 
 ## Outputs
 
@@ -102,3 +71,45 @@ resource "example_resource" "this" {
 | <a name="output_id"></a> [id](#output\_id) | ID of the provider configuration |
 | <a name="output_nrn"></a> [nrn](#output\_nrn) | NRN the provider configuration is attached to |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "identity-access-control",
+  "description": "Configures a nullplatform identity and access control provider by creating a nullplatform_provider_config resource scoped to a given NRN with provider-specific attributes",
+  "architecture": "The module creates a single nullplatform_provider_config resource named identity_access_control, wiring the input nrn directly to the resource's nrn field and encoding the attributes variable as JSON via jsonencode(). The type field defaults to aws-iam-configuration and the dimensions map is passed through to scope the configuration. Outputs expose the resource's id and nrn for downstream consumption.",
+  "features": [
+    "Creates a nullplatform_provider_config resource scoped to a specified NRN for identity and access control",
+    "Encodes provider-specific attributes to JSON automatically using jsonencode() for compatibility with the nullplatform provider",
+    "Supports configurable provider type slug to allow different cloud provider integrations beyond the default aws-iam-configuration",
+    "Accepts dimension scoping via a map to target specific environments or regions",
+    "Exposes the provider configuration ID and NRN as outputs for use by dependent modules"
+  ],
+  "inputs": [
+    {
+      "name": "nrn",
+      "description": "nullplatform Resource Name where the identity & access control provider configuration applies",
+      "required": true
+    },
+    {
+      "name": "attributes",
+      "description": "Provider-specific configuration, matching the schema of the selected provider type. Encoded to JSON for the provider config. For aws-iam-configuration: { iam_role_arns = { arns = [{ selector, arn }] } }.",
+      "required": true
+    },
+    {
+      "name": "type",
+      "description": "Slug of the nullplatform provider specification to configure (e.g. aws-iam-configuration). Set this when adding support for a new cloud.",
+      "required": false
+    },
+    {
+      "name": "dimensions",
+      "description": "Dimensions used to scope this provider configuration (e.g., environment, region)",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "id",
+    "nrn"
+  ],
+  "hash": "5f1135e770dc3ba32b95dde2b65f4f19"
+}
+END_AI_METADATA -->
