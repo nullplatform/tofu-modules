@@ -14,11 +14,6 @@ output "build_workflow_access_key_secret" {
   sensitive   = true
 }
 
-output "cross_account_pull_role_arn" {
-  description = "ARN of the IAM role that cross-account principals can assume to pull ECR images. Empty string when enable_cross_account_pull is false."
-  value       = var.enable_cross_account_pull ? aws_iam_role.ecr_cross_account_pull[0].arn : ""
-}
-
 output "ecr_repository_policy" {
   description = "ECR repository policy JSON granting pull access to the configured cross-account IDs. Empty string when enable_cross_account_pull is false."
   value = var.enable_cross_account_pull ? jsonencode({
