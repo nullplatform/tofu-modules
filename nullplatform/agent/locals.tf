@@ -97,10 +97,12 @@ locals {
 
   # Template único y simple
   nullplatform_agent_values = templatefile("${path.module}/templates/nullplatform_agent_values.tmpl.yaml", {
-    args             = local.all_args
-    config_values    = local.all_config
-    image_tag        = var.image_tag
-    aws_iam_role_arn = var.cloud_provider == "aws" ? var.aws_iam_role_arn : ""
-    init_scripts     = var.init_scripts
+    args                 = local.all_args
+    config_values        = local.all_config
+    image_tag            = var.image_tag
+    image_repository     = var.image_repository
+    aws_iam_role_arn     = var.cloud_provider == "aws" ? var.aws_iam_role_arn : ""
+    init_scripts         = var.init_scripts
+    service_account_name = var.service_account_name
   })
 }

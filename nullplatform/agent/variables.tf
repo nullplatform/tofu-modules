@@ -31,6 +31,20 @@ variable "tags_selectors" {
 # Agent configuration
 ################################################################################
 
+# Override for the Helm release name. Defaults to nullplatform-agent
+variable "release_name" {
+  description = "Override for the Helm release name. Defaults to nullplatform-agent"
+  type        = string
+  default     = "nullplatform-agent"
+}
+
+# Override for the Kubernetes ServiceAccount name. Defaults to the chart's default (nullplatform-agent)
+variable "service_account_name" {
+  description = "Override for the Kubernetes ServiceAccount name created by the Helm chart"
+  type        = string
+  default     = ""
+}
+
 # Version of the nullplatform agent Helm chart to deploy
 variable "nullplatform_agent_helm_version" {
   description = "Version of the nullplatform agent Helm chart to deploy"
@@ -70,6 +84,12 @@ variable "init_scripts" {
 variable "image_tag" {
   description = "Image tag for the agent container image"
   type        = string
+}
+
+variable "image_repository" {
+  description = "Container image repository for the agent. Defaults to the official nullplatform image."
+  type        = string
+  default     = ""
 }
 
 # ARN of the AWS IAM role assigned to the agent (required when cloud_provider is 'aws')

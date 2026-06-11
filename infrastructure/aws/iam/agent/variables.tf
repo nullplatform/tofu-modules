@@ -18,3 +18,32 @@ variable "additional_policies" {
   type        = map(string)
   default     = {}
 }
+
+variable "assume_role_arns" {
+  description = "List of IAM role ARNs the agent is allowed to assume via sts:AssumeRole"
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = alltrue([for arn in var.assume_role_arns : can(regex("^arn:aws:iam::[0-9]{12}:role/.+", arn))])
+    error_message = "Each ARN must match arn:aws:iam::<account-id>:role/<role-name>"
+  }
+}
+
+variable "service_account_name" {
+  description = "Kubernetes service account name trusted by the IRSA role"
+  type        = string
+  default     = "nullplatform-agent"
+}
+
+variable "role_name" {
+  description = "Override for the IAM role name. Defaults to nullplatform-{cluster_name}-agent-role"
+  type        = string
+  default     = ""
+}
+
+variable "policies_name_prefix" {
+  description = "Override for IAM policy name prefix. Defaults to nullplatform_{cluster_name}"
+  type        = string
+  default     = ""
+}
