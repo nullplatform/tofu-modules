@@ -21,7 +21,7 @@ The module reads the current AWS region via the aws_region data source and uses 
 
 ```hcl
 module "ecr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v4.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v4.3.0"
 
   application_role_arn             = "your-application-role-arn"
   build_workflow_access_key_id     = "your-build-workflow-access-key-id"
@@ -68,7 +68,6 @@ resource "example_resource" "this" {
 | <a name="input_application_role_arn"></a> [application\_role\_arn](#input\_application\_role\_arn) | ARN of the IAM role used by applications to pull ECR images | `string` | n/a | yes |
 | <a name="input_build_workflow_access_key_id"></a> [build\_workflow\_access\_key\_id](#input\_build\_workflow\_access\_key\_id) | Access key ID for the CI/CD build workflow IAM user | `string` | n/a | yes |
 | <a name="input_build_workflow_access_key_secret"></a> [build\_workflow\_access\_key\_secret](#input\_build\_workflow\_access\_key\_secret) | Secret access key for the CI/CD build workflow IAM user | `string` | n/a | yes |
-| <a name="input_cross_account_pull_role_arn"></a> [cross\_account\_pull\_role\_arn](#input\_cross\_account\_pull\_role\_arn) | ARN of the IAM role for cross-account ECR pull access (maps to 'read.role\_arn' in provider config). Leave empty to omit the read section. | `string` | `""` | no |
 | <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Dimensions to segment the nullplatform provider config (e.g. by region, environment) | `map(string)` | `{}` | no |
 | <a name="input_naming_rule"></a> [naming\_rule](#input\_naming\_rule) | jq expression for ECR repository naming convention. Defaults to the Nullplatform platform default. | `string` | `"\"\\(.namespace.slug)/\\(.application.slug)\""` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | The nullplatform resource name (NRN) | `string` | n/a | yes |

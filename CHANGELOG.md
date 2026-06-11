@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.0](https://github.com/nullplatform/tofu-modules/compare/v4.2.0...v4.3.0) (2026-06-11)
+
+
+### Features
+
+* **agent:** IAM assume-role support + multi-instance parametrization ([#386](https://github.com/nullplatform/tofu-modules/issues/386)) ([b82df52](https://github.com/nullplatform/tofu-modules/commit/b82df529244fbf85aab52a23d748ea59c31fb11e))
+
 ## [4.2.0](https://github.com/nullplatform/tofu-modules/compare/v4.1.0...v4.2.0) (2026-06-10)
 
 
