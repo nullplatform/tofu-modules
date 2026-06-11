@@ -2,24 +2,27 @@
 
 ## Description
 
-Creates and configures IAM roles and policies for a Kubernetes cluster
+Creates an IRSA-enabled IAM role with scoped policies for the nullplatform agent Kubernetes service account on EKS
 
 ## Architecture
 
-This module creates an IAM role for a Kubernetes service account using the terraform-aws-modules/iam/aws module, and attaches policies for managing Route 53 DNS records, Elastic Load Balancing resources, EKS cluster resources, and AVP resources. The policies are created using the aws_iam_policy resource and are attached to the IAM role using the policies attribute of the iam-role-for-service-accounts module. The module also outputs the ARN of the created IAM role.
+The module uses the terraform-aws-modules/iam//modules/iam-role-for-service-accounts submodule to create an aws_iam_role with an OIDC trust policy bound to a specific Kubernetes namespace and service account. Four aws_iam_policy resources are created for Route53, ELB, EKS, and Amazon Verified Permissions, and conditionally a fifth for sts:AssumeRole when assume_role_arns is non-empty. All policies are attached to the IAM role via the submodule's policies map, and the resulting role ARN is exposed as an output.
 
 ## Features
 
-- Creates IAM role with OIDC provider trust for Kubernetes service account
-- Configures policies for managing Route 53 DNS records and Elastic Load Balancing resources
-- Supports EKS cluster resource management and AVP resource management
-- Attaches additional policies to the IAM role using the additional_policies variable
+- Creates an IRSA IAM role scoped to a specific Kubernetes namespace and service account via OIDC provider trust
+- Attaches a Route53 policy granting DNS record management permissions for hosted zones
+- Attaches an ELB policy granting describe permissions for load balancers and target groups
+- Attaches an EKS policy granting read access to clusters, node groups, and addons
+- Attaches an Amazon Verified Permissions (AVP) policy granting full verifiedpermissions access
+- Conditionally creates and attaches an sts:AssumeRole policy when assume_role_arns is provided
+- Supports attaching additional custom IAM policies via the additional_policies map
 
 ## Basic Usage
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/agent?ref=v4.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/agent?ref=v4.3.0"
 
   agent_namespace                     = "your-agent-namespace"
   aws_iam_openid_connect_provider_arn = "your-aws-iam-openid-connect-provider-arn"
@@ -43,7 +46,7 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.47.0 |
 
 ## Modules
 
@@ -55,6 +58,7 @@ resource "example_resource" "this" {
 
 | Name | Type |
 |------|------|
+| [aws_iam_policy.nullplatform_assume_role_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.nullplatform_avp_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.nullplatform_eks_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.nullplatform_elb_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -66,8 +70,12 @@ resource "example_resource" "this" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_additional_policies"></a> [additional\_policies](#input\_additional\_policies) | Additional policy ARNs to attach to the agent role | `map(string)` | `{}` | no |
 | <a name="input_agent_namespace"></a> [agent\_namespace](#input\_agent\_namespace) | Namespace where the agent runs | `string` | n/a | yes |
+| <a name="input_assume_role_arns"></a> [assume\_role\_arns](#input\_assume\_role\_arns) | List of IAM role ARNs the agent is allowed to assume via sts:AssumeRole | `list(string)` | `[]` | no |
 | <a name="input_aws_iam_openid_connect_provider_arn"></a> [aws\_iam\_openid\_connect\_provider\_arn](#input\_aws\_iam\_openid\_connect\_provider\_arn) | ARN of the AWS IAM OIDC provider for EKS service account authentication | `string` | n/a | yes |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the cluster where the policy runs | `string` | n/a | yes |
+| <a name="input_policies_name_prefix"></a> [policies\_name\_prefix](#input\_policies\_name\_prefix) | Override for IAM policy name prefix. Defaults to nullplatform\_{cluster\_name} | `string` | `""` | no |
+| <a name="input_role_name"></a> [role\_name](#input\_role\_name) | Override for the IAM role name. Defaults to nullplatform-{cluster\_name}-agent-role | `string` | `""` | no |
+| <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | Kubernetes service account name trusted by the IRSA role | `string` | `"nullplatform-agent"` | no |
 
 ## Outputs
 
@@ -79,13 +87,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "agent",
-  "description": "Creates and configures IAM roles and policies for a Kubernetes cluster",
-  "architecture": "This module creates an IAM role for a Kubernetes service account using the terraform-aws-modules/iam/aws module, and attaches policies for managing Route 53 DNS records, Elastic Load Balancing resources, EKS cluster resources, and AVP resources. The policies are created using the aws_iam_policy resource and are attached to the IAM role using the policies attribute of the iam-role-for-service-accounts module. The module also outputs the ARN of the created IAM role.",
+  "description": "Creates an IRSA-enabled IAM role with scoped policies for the nullplatform agent Kubernetes service account on EKS",
+  "architecture": "The module uses the terraform-aws-modules/iam//modules/iam-role-for-service-accounts submodule to create an aws_iam_role with an OIDC trust policy bound to a specific Kubernetes namespace and service account. Four aws_iam_policy resources are created for Route53, ELB, EKS, and Amazon Verified Permissions, and conditionally a fifth for sts:AssumeRole when assume_role_arns is non-empty. All policies are attached to the IAM role via the submodule's policies map, and the resulting role ARN is exposed as an output.",
   "features": [
-    "Creates IAM role with OIDC provider trust for Kubernetes service account",
-    "Configures policies for managing Route 53 DNS records and Elastic Load Balancing resources",
-    "Supports EKS cluster resource management and AVP resource management",
-    "Attaches additional policies to the IAM role using the additional_policies variable"
+    "Creates an IRSA IAM role scoped to a specific Kubernetes namespace and service account via OIDC provider trust",
+    "Attaches a Route53 policy granting DNS record management permissions for hosted zones",
+    "Attaches an ELB policy granting describe permissions for load balancers and target groups",
+    "Attaches an EKS policy granting read access to clusters, node groups, and addons",
+    "Attaches an Amazon Verified Permissions (AVP) policy granting full verifiedpermissions access",
+    "Conditionally creates and attaches an sts:AssumeRole policy when assume_role_arns is provided",
+    "Supports attaching additional custom IAM policies via the additional_policies map"
   ],
   "inputs": [
     {
@@ -104,14 +115,34 @@ resource "example_resource" "this" {
       "required": true
     },
     {
+      "name": "assume_role_arns",
+      "description": "List of IAM role ARNs the agent is allowed to assume via sts:AssumeRole",
+      "required": false
+    },
+    {
       "name": "additional_policies",
       "description": "Additional policy ARNs to attach to the agent role",
+      "required": false
+    },
+    {
+      "name": "service_account_name",
+      "description": "Kubernetes service account name trusted by the IRSA role",
+      "required": false
+    },
+    {
+      "name": "role_name",
+      "description": "Override for the IAM role name. Defaults to nullplatform-{cluster_name}-agent-role",
+      "required": false
+    },
+    {
+      "name": "policies_name_prefix",
+      "description": "Override for IAM policy name prefix. Defaults to nullplatform_{cluster_name}",
       "required": false
     }
   ],
   "outputs": [
     "nullplatform_agent_role_arn"
   ],
-  "hash": "7e0c149a7a37463a4040cfb993cbb71f"
+  "hash": "5142461751e55436dbc95fa82a376955"
 }
 END_AI_METADATA -->

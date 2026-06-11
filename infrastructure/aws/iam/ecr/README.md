@@ -21,7 +21,7 @@ The module creates two aws_iam_role resources (an application role with a config
 
 ```hcl
 module "ecr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/ecr?ref=v4.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/ecr?ref=v4.3.0"
 
   cluster_name = "your-cluster-name"
 }
@@ -53,11 +53,8 @@ resource "example_resource" "this" {
 | [aws_iam_access_key.nullplatform_build_workflow_user_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_access_key) | resource |
 | [aws_iam_group.nullplatform_ecr_managers](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_group) | resource |
 | [aws_iam_group_policy_attachment.ecr_manager_policy_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_group_policy_attachment) | resource |
-| [aws_iam_policy.ecr_cross_account_pull](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.nullplatform_ecr_manager_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_role.ecr_cross_account_pull](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.nullplatform_application_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role_policy_attachment.ecr_cross_account_pull](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.ecr_manager_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_user.nullplatform_build_workflow_user](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user) | resource |
 | [aws_iam_user_group_membership.build_workflow_ecr_managers](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user_group_membership) | resource |
@@ -79,7 +76,6 @@ resource "example_resource" "this" {
 | <a name="output_application_role_arn"></a> [application\_role\_arn](#output\_application\_role\_arn) | ARN of the IAM role used by applications to pull ECR images |
 | <a name="output_build_workflow_access_key_id"></a> [build\_workflow\_access\_key\_id](#output\_build\_workflow\_access\_key\_id) | Access key ID for the CI/CD build workflow IAM user |
 | <a name="output_build_workflow_access_key_secret"></a> [build\_workflow\_access\_key\_secret](#output\_build\_workflow\_access\_key\_secret) | Secret access key for the CI/CD build workflow IAM user |
-| <a name="output_cross_account_pull_role_arn"></a> [cross\_account\_pull\_role\_arn](#output\_cross\_account\_pull\_role\_arn) | ARN of the IAM role that cross-account principals can assume to pull ECR images. Empty string when enable\_cross\_account\_pull is false. |
 | <a name="output_ecr_repository_policy"></a> [ecr\_repository\_policy](#output\_ecr\_repository\_policy) | ECR repository policy JSON granting pull access to the configured cross-account IDs. Empty string when enable\_cross\_account\_pull is false. |
 <!-- END_TF_DOCS -->
 
