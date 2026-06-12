@@ -26,6 +26,12 @@ variable "private_zone_networks" {
   default     = []
 }
 
+variable "dnssec_enabled" {
+  type        = bool
+  description = "Enable DNSSEC for the zone. Only applies to public zones; requires publishing the DS record at the domain registrar to take effect."
+  default     = false
+}
+
 variable "tags" {
   type        = map(string)
   description = "A mapping of labels to assign to the DNS managed zone"
