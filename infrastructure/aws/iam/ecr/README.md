@@ -21,7 +21,7 @@ The module creates two aws_iam_role resources (an application role with a config
 
 ```hcl
 module "ecr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/ecr?ref=v4.3.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/ecr?ref=v4.4.0"
 
   cluster_name = "your-cluster-name"
 }
