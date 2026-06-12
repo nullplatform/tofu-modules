@@ -54,7 +54,7 @@ gateway:
       maxReplicas: 10
     loadBalancerType: "internal"  # internal, external
   public:
-    name: "gateway-public"
+    name: "internet-facing"
     enabled: ${gateway_public_enabled}
     aws:
       name: ${gateway_public_aws_name}
@@ -72,7 +72,7 @@ gateway:
     autoscaling:
       minReplicas: 2
       maxReplicas: 10
-    loadBalancerType: "external"  # internal, external
+    loadBalancerType: "${gateway_public_load_balancer_type}"
 # Nullplatform configurations
 nullplatform:
   apiKey: "${np_api_key}"

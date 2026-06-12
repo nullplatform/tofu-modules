@@ -75,6 +75,16 @@ variable "internal_azure_load_balancer_subnet" {
   default     = "load_balancer"
 }
 
+variable "gateway_public_load_balancer_type" {
+  type        = string
+  description = "Load balancer type for the public gateway. Use 'internal' for Cloudflare Tunnel / VPN setups where public access is proxied through the private network. Use 'external' for direct internet exposure."
+  default     = "external"
+  validation {
+    condition     = contains(["internal", "external"], var.gateway_public_load_balancer_type)
+    error_message = "Must be 'internal' or 'external'."
+  }
+}
+
 variable "gateway_use_cluster_ip" {
   description = ""
   type        = bool
