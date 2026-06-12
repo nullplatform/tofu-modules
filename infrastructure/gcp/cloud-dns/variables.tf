@@ -28,8 +28,8 @@ variable "private_zone_networks" {
 
 variable "dnssec_enabled" {
   type        = bool
-  description = "Enable DNSSEC for the zone. Only applies to public zones; requires publishing the DS record at the domain registrar to take effect."
-  default     = false
+  description = "Enable DNSSEC for the zone. Only applies to public zones; signing is inert until the DS record is published at the domain registrar."
+  default     = true
 }
 
 variable "tags" {

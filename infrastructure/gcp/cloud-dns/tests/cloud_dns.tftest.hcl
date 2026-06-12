@@ -75,25 +75,25 @@ run "labels_applied_from_tags" {
   }
 }
 
-run "dnssec_disabled_by_default" {
+run "dnssec_enabled_by_default_on_public_zone" {
   command = plan
-
-  assert {
-    condition     = length(google_dns_managed_zone.zone.dnssec_config) == 0
-    error_message = "DNSSEC should not be configured by default"
-  }
-}
-
-run "dnssec_enabled_on_public_zone" {
-  command = plan
-
-  variables {
-    dnssec_enabled = true
-  }
 
   assert {
     condition     = google_dns_managed_zone.zone.dnssec_config[0].state == "on"
-    error_message = "DNSSEC should be on when dnssec_enabled is true on a public zone"
+    error_message = "DNSSEC should be on by default for public zones"
+  }
+}
+
+run "dnssec_can_be_disabled" {
+  command = plan
+
+  variables {
+    dnssec_enabled = false
+  }
+
+  assert {
+    condition     = length(google_dns_managed_zone.zone.dnssec_config) == 0
+    error_message = "DNSSEC should not be configured when dnssec_enabled is false"
   }
 }
 
