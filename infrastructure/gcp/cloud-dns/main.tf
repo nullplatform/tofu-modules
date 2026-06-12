@@ -8,6 +8,13 @@ resource "google_dns_managed_zone" "zone" {
   dns_name   = "${var.domain_name}."
   visibility = var.visibility
 
+  dynamic "dnssec_config" {
+    for_each = var.visibility == "public" && var.dnssec_enabled ? [1] : []
+    content {
+      state = "on"
+    }
+  }
+
   dynamic "private_visibility_config" {
     for_each = var.visibility == "private" ? [1] : []
     content {
