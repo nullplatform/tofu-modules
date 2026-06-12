@@ -69,6 +69,12 @@ variable "gateway_public_enabled" {
   default     = true
 }
 
+variable "gateway_public_name" {
+  type        = string
+  description = "Name of the public Gateway resource created by the chart. Must match the gateway name the nullplatform agent resolves from container-orchestration.gateway.public_name (e.g. 'internet-facing' on AKS), otherwise HTTPRoutes are created with an unresolvable parentRef. Defaults to 'gateway-public' for backward compatibility: changing it on an existing install recreates the Gateway and orphans every HTTPRoute referencing the old name, causing a traffic outage until routes are regenerated."
+  default     = "gateway-public"
+}
+
 variable "internal_azure_load_balancer_subnet" {
   description = "The name of the subnet to use in azure private load balancer"
   type        = string

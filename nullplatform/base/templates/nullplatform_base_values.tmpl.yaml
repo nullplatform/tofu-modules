@@ -54,7 +54,7 @@ gateway:
       maxReplicas: 10
     loadBalancerType: "internal"  # internal, external
   public:
-    name: "internet-facing"
+    name: "${gateway_public_name}"
     enabled: ${gateway_public_enabled}
     aws:
       name: ${gateway_public_aws_name}
