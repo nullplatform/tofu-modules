@@ -222,3 +222,51 @@ run "newrelic_metrics_disabled" {
     error_message = "newrelic metricsEnabled should be false"
   }
 }
+
+############################################
+# public gateway name + load balancer type
+############################################
+
+run "gateway_public_name_defaults_to_gateway_public" {
+  command = plan
+
+  assert {
+    condition     = strcontains(output.rendered_values, "name: \"gateway-public\"")
+    error_message = "public gateway name should default to gateway-public so existing installs keep their Gateway and HTTPRoute parentRefs"
+  }
+}
+
+run "gateway_public_name_override" {
+  command = plan
+
+  variables {
+    gateway_public_name = "internet-facing"
+  }
+
+  assert {
+    condition     = strcontains(output.rendered_values, "name: \"internet-facing\"")
+    error_message = "public gateway name should be overridable to match container-orchestration.gateway.public_name"
+  }
+}
+
+run "gateway_public_load_balancer_type_defaults_to_external" {
+  command = plan
+
+  assert {
+    condition     = strcontains(output.rendered_values, "loadBalancerType: \"external\"")
+    error_message = "public gateway loadBalancerType should default to external"
+  }
+}
+
+run "gateway_public_load_balancer_type_internal" {
+  command = plan
+
+  variables {
+    gateway_public_load_balancer_type = "internal"
+  }
+
+  assert {
+    condition     = strcontains(output.rendered_values, "loadBalancerType: \"internal\"\n")
+    error_message = "public gateway loadBalancerType should be settable to internal for Cloudflare Tunnel / VPN setups"
+  }
+}
