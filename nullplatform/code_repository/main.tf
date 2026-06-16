@@ -9,13 +9,9 @@ resource "nullplatform_provider_config" "gitlab" {
       "group_path" : var.gitlab_group_path,
       "access_token" : var.gitlab_access_token,
       "installation_url" : var.gitlab_installation_url
-    },
-    "access" : var.gitlab_collaborators_config
+    }
     }
   )
-  lifecycle {
-    ignore_changes = [attributes]
-  }
 }
 
 /* If the git_provider variable has the value github, create this resource */
@@ -31,9 +27,6 @@ resource "nullplatform_provider_config" "github" {
     },
     }
   )
-  lifecycle {
-    ignore_changes = [attributes]
-  }
 }
 
 /* If the git_provider variable has the value azure, create this resource */
@@ -50,7 +43,4 @@ resource "nullplatform_provider_config" "azure" {
     },
     }
   )
-  lifecycle {
-    ignore_changes = [attributes]
-  }
 }
