@@ -8,10 +8,13 @@ resource "kubernetes_namespace_v1" "nullplatform_tools" {
   metadata {
     name = var.namespace
     labels = {
-      name = var.namespace
+      name                           = var.namespace
+      "app.kubernetes.io/managed-by" = "Helm"
     }
     annotations = {
       "openshift.io/cluster-monitoring" = "true"
+      "meta.helm.sh/release-name"       = "nullplatform-base"
+      "meta.helm.sh/release-namespace"  = var.namespace
     }
   }
 }
