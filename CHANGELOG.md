@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.5.0](https://github.com/nullplatform/tofu-modules/compare/v4.4.0...v4.5.0) (2026-06-16)
+
+
+### Features
+
+* **base:** add gateway_public_load_balancer_type and fix public gateway name ([#392](https://github.com/nullplatform/tofu-modules/issues/392)) ([116fc70](https://github.com/nullplatform/tofu-modules/commit/116fc708441a9c312ede558f5825f639db14caed))
+
+
+### Bug Fixes
+
+* **code_repository:** remove access block and ignore_changes from all providers ([#396](https://github.com/nullplatform/tofu-modules/issues/396)) ([4295a7f](https://github.com/nullplatform/tofu-modules/commit/4295a7f9a18b4082d7b4b4b4bc173c8f25f05888))
+
 ## [4.4.0](https://github.com/nullplatform/tofu-modules/compare/v4.3.0...v4.4.0) (2026-06-12)
 
 
