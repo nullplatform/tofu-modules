@@ -39,22 +39,6 @@ variable "gitlab_installation_url" {
   }
 }
 
-variable "gitlab_collaborators_config" {
-  description = "Configuration for repository collaborators, including their roles and permissions."
-  type = object({
-    collaborators = list(object({
-      id   = string
-      role = string
-      type = string
-    }))
-  })
-  default = null
-  validation {
-    condition     = var.git_provider != "gitlab" || var.gitlab_collaborators_config != null
-    error_message = "collaborators_config is required when git_provider is 'gitlab'."
-  }
-}
-
 variable "gitlab_repository_prefix" {
   description = "Prefix to use for GitLab repository names."
   type        = string
