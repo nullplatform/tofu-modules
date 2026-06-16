@@ -19,7 +19,7 @@ The module creates a single nullplatform_provider_config resource of type 'googl
 
 ```hcl
 module "cloud" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/gcp/cloud?ref=v4.4.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/gcp/cloud?ref=v4.5.0"
 
   domain_name = "your-domain-name"
   location    = "your-location"

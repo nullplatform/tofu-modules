@@ -22,7 +22,7 @@ The module uses data sources (aws_eks_cluster, aws_vpc) to derive VPC ID and CID
 
 ```hcl
 module "security" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/security?ref=v4.4.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/security?ref=v4.5.0"
 
   cluster_name = "your-cluster-name"
 }
