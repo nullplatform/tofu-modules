@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.0](https://github.com/nullplatform/tofu-modules/compare/v4.3.0...v4.4.0) (2026-06-12)
+
+
+### Features
+
+* **cloud-dns:** DNSSEC enabled by default for public zones ([#393](https://github.com/nullplatform/tofu-modules/issues/393)) ([c2e606d](https://github.com/nullplatform/tofu-modules/commit/c2e606d4d52bb49d5c73de03fd32dfeffe16e5b9))
+
 ## [4.3.0](https://github.com/nullplatform/tofu-modules/compare/v4.2.0...v4.3.0) (2026-06-11)
 
 
