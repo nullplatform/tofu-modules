@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.5.1](https://github.com/nullplatform/tofu-modules/compare/v4.5.0...v4.5.1) (2026-06-19)
+
+
+### Bug Fixes
+
+* **dns:** ignore vpc changes on private_zone for cross-account assoc ([#398](https://github.com/nullplatform/tofu-modules/issues/398)) ([772c201](https://github.com/nullplatform/tofu-modules/commit/772c20111c02dfb933755fa6aa0c9917d9b6b025))
+
 ## [4.5.0](https://github.com/nullplatform/tofu-modules/compare/v4.4.0...v4.5.0) (2026-06-16)
 
 
