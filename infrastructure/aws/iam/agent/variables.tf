@@ -42,6 +42,12 @@ variable "role_name" {
   default     = ""
 }
 
+variable "permissions_role_name" {
+  description = "Override for the permissions IAM role name. Defaults to nullplatform-{cluster_name}-agent-permissions-role"
+  type        = string
+  default     = ""
+}
+
 variable "policies_name_prefix" {
   description = "Override for IAM policy name prefix. Defaults to nullplatform_{cluster_name}"
   type        = string

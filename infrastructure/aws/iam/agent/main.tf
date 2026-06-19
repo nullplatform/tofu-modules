@@ -1,13 +1,23 @@
 locals {
-  role_name            = var.role_name != "" ? var.role_name : "nullplatform-${var.cluster_name}-agent-role"
-  policies_name_prefix = var.policies_name_prefix != "" ? var.policies_name_prefix : "nullplatform_${var.cluster_name}"
+  role_name             = var.role_name != "" ? var.role_name : "nullplatform-${var.cluster_name}-agent-role"
+  permissions_role_name = var.permissions_role_name != "" ? var.permissions_role_name : "nullplatform-${var.cluster_name}-agent-permissions-role"
+  policies_name_prefix  = var.policies_name_prefix != "" ? var.policies_name_prefix : "nullplatform_${var.cluster_name}"
+
+  # ARNs built from names + account id to avoid a circular dependency between
+  # the agent role (assume policy -> permissions role) and the permissions role
+  # (trust policy -> agent role).
+  agent_role_arn       = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.role_name}"
+  permissions_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.permissions_role_name}"
 }
 
 ################################################################################
 # IAM role for nullplatform agent service account
 ################################################################################
 
-# Create IAM role with OIDC provider trust for Kubernetes service account
+# Create IAM role with OIDC provider trust for Kubernetes service account.
+# This role only holds an sts:AssumeRole policy: it assumes the permissions
+# role (and any additional assume_role_arns) instead of carrying the workload
+# policies directly.
 module "nullplatform_agent_role" {
   source          = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
   name            = local.role_name
@@ -22,16 +32,51 @@ module "nullplatform_agent_role" {
 
   policies = merge(
     {
-      "nullplatform_route53_policy" = aws_iam_policy.nullplatform_route53_policy.arn,
-      "nullplatform_eks_policy"     = aws_iam_policy.nullplatform_eks_policy.arn,
-      "nullplatform_elb_policy"     = aws_iam_policy.nullplatform_elb_policy.arn,
-      "nullplatform_avp_policy"     = aws_iam_policy.nullplatform_avp_policy.arn
+      "nullplatform_assume_role_policy" = aws_iam_policy.nullplatform_assume_role_policy.arn
     },
-    length(var.assume_role_arns) > 0 ? {
-      "nullplatform_assume_role_policy" = aws_iam_policy.nullplatform_assume_role_policy[0].arn
-    } : {},
     var.additional_policies
   )
+}
+
+################################################################################
+# IAM permissions role assumed by the agent role
+################################################################################
+
+# Holds the actual workload policies (Route53, EKS, ELB, AVP). Trusts only the
+# agent role, so the IRSA token cannot use these permissions without first
+# assuming this role.
+resource "aws_iam_role" "nullplatform_agent_permissions" {
+  name        = local.permissions_role_name
+  description = "Permissions role assumed by the nullplatform agent role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { AWS = local.agent_role_arn }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "permissions_route53" {
+  role       = aws_iam_role.nullplatform_agent_permissions.name
+  policy_arn = aws_iam_policy.nullplatform_route53_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "permissions_eks" {
+  role       = aws_iam_role.nullplatform_agent_permissions.name
+  policy_arn = aws_iam_policy.nullplatform_eks_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "permissions_elb" {
+  role       = aws_iam_role.nullplatform_agent_permissions.name
+  policy_arn = aws_iam_policy.nullplatform_elb_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "permissions_avp" {
+  role       = aws_iam_role.nullplatform_agent_permissions.name
+  policy_arn = aws_iam_policy.nullplatform_avp_policy.arn
 }
 
 ################################################################################
@@ -57,13 +102,7 @@ resource "aws_iam_policy" "nullplatform_route53_policy" {
         "Resource" : [
           "arn:aws:route53:::hostedzone/*"
         ],
-        # "Condition" : {
-        #   "StringEquals" : {
-        #     "aws:RequestedRegion" : [
-        #       data.aws_region.current.region
-        #     ]
-        #   }
-        # }
+
       }
     ]
   })
@@ -107,13 +146,7 @@ resource "aws_iam_policy" "nullplatform_elb_policy" {
             "arn:aws:elasticloadbalancing:*:*:loadbalancer/app/k8s-nullplatform-*",
             "arn:aws:elasticloadbalancing:*:*:targetgroup/k8s-nullplatform-*"
           ],
-          # "Condition" : {
-          #   "StringEquals" : {
-          #     "aws:RequestedRegion" : [
-          #       data.aws_region.current.region
-          #     ]
-          #   }
-          # }
+
         }
       ]
     }
@@ -146,13 +179,7 @@ resource "aws_iam_policy" "nullplatform_eks_policy" {
           "arn:aws:eks:*:*:nodegroup/*",
           "arn:aws:eks:*:*:addon/*"
         ],
-        # "Condition" : {
-        #   "StringEquals" : {
-        #     "aws:RequestedRegion" : [
-        #       data.aws_region.current.region
-        #     ]
-        #   }
-        # }
+
       }
     ]
   })
@@ -163,18 +190,23 @@ resource "aws_iam_policy" "nullplatform_eks_policy" {
 ################################################################################
 
 resource "aws_iam_policy" "nullplatform_assume_role_policy" {
-  count = length(var.assume_role_arns) > 0 ? 1 : 0
-
   name        = "${local.policies_name_prefix}_assume_role_policy"
-  description = "Policy allowing the agent to assume specific IAM roles"
+  description = "Policy allowing the agent to assume the permissions role and any additional roles"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
       Effect   = "Allow"
       Action   = "sts:AssumeRole"
-      Resource = var.assume_role_arns
+      Resource = concat([local.permissions_role_arn], var.assume_role_arns)
     }]
   })
+}
+
+# The assume role policy used to be conditional (count). It is now always
+# created because the agent role must be able to assume the permissions role.
+moved {
+  from = aws_iam_policy.nullplatform_assume_role_policy[0]
+  to   = aws_iam_policy.nullplatform_assume_role_policy
 }
 
 ################################################################################
@@ -194,13 +226,7 @@ resource "aws_iam_policy" "nullplatform_avp_policy" {
           "verifiedpermissions:*"
         ],
         "Resource" : "*",
-        # "Condition" : {
-        #   "StringEquals" : {
-        #     "aws:RequestedRegion" : [
-        #       data.aws_region.current.region
-        #     ]
-        #   }
-        # }
+
       }
     ]
   })

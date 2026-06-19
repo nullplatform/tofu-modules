@@ -6,6 +6,12 @@ mock_provider "aws" {
     }
   }
   override_data {
+    target = data.aws_caller_identity.current
+    values = {
+      account_id = "123456789012"
+    }
+  }
+  override_data {
     target = module.nullplatform_agent_role.data.aws_iam_policy_document.assume
     values = {
       json = "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Federated\":\"test\"},\"Action\":\"sts:AssumeRoleWithWebIdentity\"}]}"
@@ -33,6 +39,12 @@ mock_provider "aws" {
     target = aws_iam_policy.nullplatform_avp_policy
     values = {
       arn = "arn:aws:iam::123456789012:policy/nullplatform_test-cluster_avp_policy"
+    }
+  }
+  override_resource {
+    target = aws_iam_policy.nullplatform_assume_role_policy
+    values = {
+      arn = "arn:aws:iam::123456789012:policy/nullplatform_test-cluster_assume_role_policy"
     }
   }
 }
@@ -103,41 +115,90 @@ run "all_policies_valid_json" {
   }
 }
 
-run "assume_role_policy_not_created_by_default" {
+run "permissions_role_naming" {
   command = plan
 
   assert {
-    condition     = length(aws_iam_policy.nullplatform_assume_role_policy) == 0
-    error_message = "assume_role policy should not be created when assume_role_arns is empty"
+    condition     = aws_iam_role.nullplatform_agent_permissions.name == "nullplatform-test-cluster-agent-permissions-role"
+    error_message = "Permissions role name should follow naming convention"
   }
 }
 
-run "assume_role_policy_created_when_arns_provided" {
+run "permissions_role_trusts_agent_role" {
+  command = plan
+
+  assert {
+    condition = jsondecode(aws_iam_role.nullplatform_agent_permissions.assume_role_policy).Statement[0].Principal.AWS == "arn:aws:iam::123456789012:role/nullplatform-test-cluster-agent-role"
+    error_message = "Permissions role trust policy should allow the agent role to assume it"
+  }
+}
+
+run "permissions_role_has_workload_policies_attached" {
+  command = plan
+
+  assert {
+    condition     = aws_iam_role_policy_attachment.permissions_route53.policy_arn == aws_iam_policy.nullplatform_route53_policy.arn
+    error_message = "Route53 policy should be attached to the permissions role"
+  }
+
+  assert {
+    condition     = aws_iam_role_policy_attachment.permissions_eks.policy_arn == aws_iam_policy.nullplatform_eks_policy.arn
+    error_message = "EKS policy should be attached to the permissions role"
+  }
+
+  assert {
+    condition     = aws_iam_role_policy_attachment.permissions_elb.policy_arn == aws_iam_policy.nullplatform_elb_policy.arn
+    error_message = "ELB policy should be attached to the permissions role"
+  }
+
+  assert {
+    condition     = aws_iam_role_policy_attachment.permissions_avp.policy_arn == aws_iam_policy.nullplatform_avp_policy.arn
+    error_message = "AVP policy should be attached to the permissions role"
+  }
+
+  assert {
+    condition     = aws_iam_role_policy_attachment.permissions_route53.role == aws_iam_role.nullplatform_agent_permissions.name
+    error_message = "Attachments should target the permissions role"
+  }
+}
+
+run "assume_role_policy_always_created_and_targets_permissions_role" {
+  command = plan
+
+  assert {
+    condition     = aws_iam_policy.nullplatform_assume_role_policy.name == "nullplatform_test-cluster_assume_role_policy"
+    error_message = "assume_role policy name should follow naming convention"
+  }
+
+  assert {
+    condition = contains(
+      jsondecode(aws_iam_policy.nullplatform_assume_role_policy.policy).Statement[0].Resource,
+      "arn:aws:iam::123456789012:role/nullplatform-test-cluster-agent-permissions-role"
+    )
+    error_message = "assume_role policy should allow assuming the permissions role by default"
+  }
+}
+
+run "assume_role_policy_includes_additional_arns" {
   command = plan
 
   variables {
     assume_role_arns = ["arn:aws:iam::123456789012:role/some-role"]
   }
 
-  override_resource {
-    target = aws_iam_policy.nullplatform_assume_role_policy
-    values = {
-      arn = "arn:aws:iam::123456789012:policy/nullplatform_test-cluster_assume_role_policy"
-    }
+  assert {
+    condition = contains(
+      jsondecode(aws_iam_policy.nullplatform_assume_role_policy.policy).Statement[0].Resource,
+      "arn:aws:iam::123456789012:role/nullplatform-test-cluster-agent-permissions-role"
+    )
+    error_message = "assume_role policy should still allow assuming the permissions role"
   }
 
   assert {
-    condition     = length(aws_iam_policy.nullplatform_assume_role_policy) == 1
-    error_message = "assume_role policy should be created when assume_role_arns is non-empty"
-  }
-
-  assert {
-    condition     = aws_iam_policy.nullplatform_assume_role_policy[0].name == "nullplatform_test-cluster_assume_role_policy"
-    error_message = "assume_role policy name should follow naming convention"
-  }
-
-  assert {
-    condition     = can(jsondecode(aws_iam_policy.nullplatform_assume_role_policy[0].policy))
-    error_message = "assume_role policy should be valid JSON"
+    condition = contains(
+      jsondecode(aws_iam_policy.nullplatform_assume_role_policy.policy).Statement[0].Resource,
+      "arn:aws:iam::123456789012:role/some-role"
+    )
+    error_message = "assume_role policy should include additional assume_role_arns"
   }
 }
