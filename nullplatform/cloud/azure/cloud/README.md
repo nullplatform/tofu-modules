@@ -19,7 +19,7 @@ Creates a nullplatform_provider_config resource of type azure-configuration that
 
 ```hcl
 module "cloud" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/azure/cloud?ref=v3.5.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/azure/cloud?ref=v4.5.0"
 
   azure_resource_group_name       = "your-azure-resource-group-name"
   nrn                             = "your-nrn"
@@ -61,11 +61,15 @@ resource "example_resource" "this" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_application_domain"></a> [application\_domain](#input\_application\_domain) | Apply application domain or not | `bool` | `false` | no |
 | <a name="input_azure_resource_group_name"></a> [azure\_resource\_group\_name](#input\_azure\_resource\_group\_name) | Your Azure resource group name | `string` | n/a | yes |
+| <a name="input_client_id"></a> [client\_id](#input\_client\_id) | Azure Service Principal client ID. If omitted, inherits from a parent cloud provider. | `string` | `null` | no |
+| <a name="input_client_secret"></a> [client\_secret](#input\_client\_secret) | Azure Service Principal client secret. If omitted, inherits from a parent cloud provider. | `string` | `null` | no |
 | <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Define dimensions. For more information, see https://docs.nullplatform.com/docs/dimensions | `map(any)` | `{}` | no |
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | The domain name to be used | `string` | `""` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | The NRN of your nullplatform account | `string` | n/a | yes |
 | <a name="input_private_dns_resource_group_name"></a> [private\_dns\_resource\_group\_name](#input\_private\_dns\_resource\_group\_name) | Azure resource group name for the DNS private | `string` | n/a | yes |
 | <a name="input_private_domain_name"></a> [private\_domain\_name](#input\_private\_domain\_name) | The private domain name to be used | `string` | `""` | no |
+| <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | Azure subscription ID. If omitted, inherits from a parent cloud provider. | `string` | `null` | no |
+| <a name="input_tenant_id"></a> [tenant\_id](#input\_tenant\_id) | Azure Active Directory tenant ID. If omitted, inherits from a parent cloud provider. | `string` | `null` | no |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA

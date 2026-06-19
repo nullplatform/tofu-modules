@@ -1,3 +1,11 @@
+locals {
+  hosted_zone_arns = [
+    for id in [var.hosted_zone_public_id, var.hosted_zone_private_id] :
+    "arn:aws:route53:::hostedzone/${id}"
+    if id != null && id != ""
+  ]
+}
+
 # Create IAM role with OIDC provider trust for Kubernetes service account
 module "nullplatform_cert_manager_role" {
   source          = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
@@ -34,8 +42,7 @@ resource "aws_iam_policy" "nullplatform_cert_manager_policy" {
           "route53:ChangeResourceRecordSets",
           "route53:ListResourceRecordSets"
         ],
-        "Resource" : ["arn:aws:route53:::hostedzone/${var.hosted_zone_public_id}",
-        "arn:aws:route53:::hostedzone/${var.hosted_zone_private_id}"]
+        "Resource" : local.hosted_zone_arns
       },
       {
         "Effect" : "Allow",

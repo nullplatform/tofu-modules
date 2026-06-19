@@ -1,5 +1,75 @@
 # Changelog
 
+## [4.5.0](https://github.com/nullplatform/tofu-modules/compare/v4.4.0...v4.5.0) (2026-06-16)
+
+
+### Features
+
+* **base:** add gateway_public_load_balancer_type and fix public gateway name ([#392](https://github.com/nullplatform/tofu-modules/issues/392)) ([116fc70](https://github.com/nullplatform/tofu-modules/commit/116fc708441a9c312ede558f5825f639db14caed))
+
+
+### Bug Fixes
+
+* **code_repository:** remove access block and ignore_changes from all providers ([#396](https://github.com/nullplatform/tofu-modules/issues/396)) ([4295a7f](https://github.com/nullplatform/tofu-modules/commit/4295a7f9a18b4082d7b4b4b4bc173c8f25f05888))
+
+## [4.4.0](https://github.com/nullplatform/tofu-modules/compare/v4.3.0...v4.4.0) (2026-06-12)
+
+
+### Features
+
+* **cloud-dns:** DNSSEC enabled by default for public zones ([#393](https://github.com/nullplatform/tofu-modules/issues/393)) ([c2e606d](https://github.com/nullplatform/tofu-modules/commit/c2e606d4d52bb49d5c73de03fd32dfeffe16e5b9))
+
+## [4.3.0](https://github.com/nullplatform/tofu-modules/compare/v4.2.0...v4.3.0) (2026-06-11)
+
+
+### Features
+
+* **agent:** IAM assume-role support + multi-instance parametrization ([#386](https://github.com/nullplatform/tofu-modules/issues/386)) ([b82df52](https://github.com/nullplatform/tofu-modules/commit/b82df529244fbf85aab52a23d748ea59c31fb11e))
+
+## [4.2.0](https://github.com/nullplatform/tofu-modules/compare/v4.1.0...v4.2.0) (2026-06-10)
+
+
+### Features
+
+* **azure/cloud:** support passing authentication credentials as variables ([#381](https://github.com/nullplatform/tofu-modules/issues/381)) ([2313640](https://github.com/nullplatform/tofu-modules/commit/23136401e863b2d0cbad643a75a0ac6839de6dbc))
+
+
+### Bug Fixes
+
+* **ecr:** remove read section, cross-account role, and fix setup.policy drift ([#389](https://github.com/nullplatform/tofu-modules/issues/389)) ([8000c6b](https://github.com/nullplatform/tofu-modules/commit/8000c6b2fb4baebdbfa0b5c9927a073a23655ac5))
+
+## [4.1.0](https://github.com/nullplatform/tofu-modules/compare/v4.0.1...v4.1.0) (2026-06-10)
+
+
+### Features
+
+* **identity-access-control:** add cloud-agnostic provider config module ([#387](https://github.com/nullplatform/tofu-modules/issues/387)) ([ddcc212](https://github.com/nullplatform/tofu-modules/commit/ddcc2124376dae7ebe11236f79eba74c505f5442))
+
+## [4.0.1](https://github.com/nullplatform/tofu-modules/compare/v4.0.0...v4.0.1) (2026-06-09)
+
+
+### Bug Fixes
+
+* **ecr:** add cross-account pull and repository policy support ([#384](https://github.com/nullplatform/tofu-modules/issues/384)) ([cf6431f](https://github.com/nullplatform/tofu-modules/commit/cf6431f69c5ce3055c60ff3d659a23c12d9162f9))
+
+## [4.0.0](https://github.com/nullplatform/tofu-modules/compare/v3.5.2...v4.0.0) (2026-06-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* **dns,ingress,iam:** support disabling public-side resources ([#364](https://github.com/nullplatform/tofu-modules/issues/364))
+
+### Features
+
+* **dns,ingress,iam:** support disabling public-side resources ([#364](https://github.com/nullplatform/tofu-modules/issues/364)) ([872efa1](https://github.com/nullplatform/tofu-modules/commit/872efa17520793e6369c670d3f6cf1ea5de4cff7))
+
+## [3.5.2](https://github.com/nullplatform/tofu-modules/compare/v3.5.1...v3.5.2) (2026-05-28)
+
+
+### Bug Fixes
+
+* **service_definition_agent_association:** remove telemetry from channel_sources default ([#377](https://github.com/nullplatform/tofu-modules/issues/377)) ([876ad77](https://github.com/nullplatform/tofu-modules/commit/876ad775c13d4cef46177b47bce0ed108f9ddf57))
+
 ## [3.5.1](https://github.com/nullplatform/tofu-modules/compare/v3.5.0...v3.5.1) (2026-05-28)
 
 

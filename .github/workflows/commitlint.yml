@@ -7,9 +7,9 @@ on:
 
 jobs:
   branch-name:
-    if: ${{ !startsWith(github.head_ref, 'release-please--') }}
+    if: ${{ !startsWith(github.head_ref, 'release-please--') && !startsWith(github.head_ref, 'dependabot/') }}
     uses: nullplatform/actions-nullplatform/.github/workflows/branch-validation.yml@main
 
   commitlint:
-    if: ${{ !startsWith(github.head_ref, 'release-please--') }}
+    if: ${{ !startsWith(github.head_ref, 'release-please--') && !startsWith(github.head_ref, 'dependabot/') }}
     uses: nullplatform/actions-nullplatform/.github/workflows/conventional-commit.yml@main

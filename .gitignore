@@ -172,3 +172,5 @@ terraform.tfstate.backup
 
 # Local examples (for testing only, not part of the module distribution)
 nullplatform/scope_definition/examples/
+# Local API skill token (credential — never commit)
+np-api-skill.token

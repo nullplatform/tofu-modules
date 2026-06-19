@@ -74,3 +74,39 @@ run "labels_applied_from_tags" {
     error_message = "Labels should be applied from tags variable"
   }
 }
+
+run "dnssec_enabled_by_default_on_public_zone" {
+  command = plan
+
+  assert {
+    condition     = google_dns_managed_zone.zone.dnssec_config[0].state == "on"
+    error_message = "DNSSEC should be on by default for public zones"
+  }
+}
+
+run "dnssec_can_be_disabled" {
+  command = plan
+
+  variables {
+    dnssec_enabled = false
+  }
+
+  assert {
+    condition     = length(google_dns_managed_zone.zone.dnssec_config) == 0
+    error_message = "DNSSEC should not be configured when dnssec_enabled is false"
+  }
+}
+
+run "dnssec_ignored_on_private_zone" {
+  command = plan
+
+  variables {
+    visibility     = "private"
+    dnssec_enabled = true
+  }
+
+  assert {
+    condition     = length(google_dns_managed_zone.zone.dnssec_config) == 0
+    error_message = "DNSSEC should not be configured on private zones even when dnssec_enabled is true"
+  }
+}

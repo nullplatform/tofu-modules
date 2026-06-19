@@ -24,3 +24,15 @@ variable "build_workflow_access_key_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "repository_policy" {
+  description = "ECR repository policy JSON applied to every new repository Nullplatform creates (maps to 'setup.policy'). Leave empty to omit."
+  type        = string
+  default     = ""
+}
+
+variable "naming_rule" {
+  description = "jq expression for ECR repository naming convention. Defaults to the Nullplatform platform default."
+  type        = string
+  default     = "\"\\(.namespace.slug)/\\(.application.slug)\""
+}
