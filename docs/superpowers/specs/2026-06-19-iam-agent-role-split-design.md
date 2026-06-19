@@ -91,6 +91,27 @@ otro rol.
 - **`README.md`**: regenerar descripción/arquitectura/features/inputs/outputs
   (bloques `BEGIN_TF_DOCS` y `BEGIN_AI_METADATA`).
 
+## Extensión: múltiples roles de permisos
+
+Además del rol de permisos default (fijo, con las 4 políticas), el módulo permite
+crear N roles de permisos adicionales vía `var.permissions_roles` (mapa
+`logical_name => { name?, policy_arns }`), resueltos con `for_each`:
+
+- Cada entrada crea un `aws_iam_role.extra_permissions[key]` cuyo trust permite
+  solo al rol agente asumirlo, y le pega los `policy_arns` provistos mediante
+  `aws_iam_role_policy_attachment.extra_permissions` (clave `"role::arn"`).
+- Los nombres y ARNs de los roles extra se computan en `locals`
+  (`extra_permissions_role_names` / `extra_permissions_role_arns`) desde el nombre
+  + account id, igual que el rol default, para mantener la política de assume del
+  agente determinista y sin dependencias circulares.
+- La política `sts:AssumeRole` del rol agente concatena:
+  `[permissions_role_arn] + extra_permissions_role_arns + var.assume_role_arns`.
+- Nuevo output `nullplatform_agent_extra_permissions_role_arns` (mapa
+  `logical_name => arn`).
+
+Roles que ya existen fuera del módulo siguen cubiertos por `var.assume_role_arns`
+(no los crea el módulo, solo se permite asumirlos).
+
 ## Testing
 
 `tofu test` sobre el módulo con el provider mockeado. Se verifica:

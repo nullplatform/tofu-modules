@@ -18,6 +18,7 @@ The module uses the terraform-aws-modules/iam//modules/iam-role-for-service-acco
 - Attaches an EKS policy granting read access to clusters, node groups, and addons to the permissions role
 - Attaches an Amazon Verified Permissions (AVP) policy granting full verifiedpermissions access to the permissions role
 - Supports attaching additional custom IAM policies to the agent role via the additional_policies map
+- Supports creating additional permissions roles via the permissions_roles map, each trusting the agent role and assumable by it
 
 ## Basic Usage
 
@@ -30,6 +31,37 @@ module "agent" {
   cluster_name                        = "your-cluster-name"
 }
 ```
+
+## Multiple permissions roles
+
+The default permissions role (Route53/EKS/ELB/AVP) is always created. To have the
+agent assume additional, module-created roles with their own policies, use the
+`permissions_roles` map. Each entry creates a role that trusts the agent role and
+gets the given policy ARNs attached; the agent's assume policy is extended with
+all of them.
+
+```hcl
+module "agent" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/agent?ref=v4.5.0"
+
+  agent_namespace                     = "your-agent-namespace"
+  aws_iam_openid_connect_provider_arn = "your-aws-iam-openid-connect-provider-arn"
+  cluster_name                        = "your-cluster-name"
+
+  permissions_roles = {
+    data = {
+      policy_arns = ["arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"]
+    }
+    ops = {
+      name        = "custom-ops-role"
+      policy_arns = ["arn:aws:iam::123456789012:policy/ops-policy"]
+    }
+  }
+}
+```
+
+For roles that already exist elsewhere (not created by this module), use
+`assume_role_arns` instead — the agent will be allowed to assume them directly.
 
 ## Using Outputs
 
@@ -64,7 +96,9 @@ resource "example_resource" "this" {
 | [aws_iam_policy.nullplatform_eks_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.nullplatform_elb_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.nullplatform_route53_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_role.extra_permissions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.nullplatform_agent_permissions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy_attachment.extra_permissions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.permissions_avp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.permissions_eks](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.permissions_elb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
@@ -82,6 +116,7 @@ resource "example_resource" "this" {
 | <a name="input_aws_iam_openid_connect_provider_arn"></a> [aws\_iam\_openid\_connect\_provider\_arn](#input\_aws\_iam\_openid\_connect\_provider\_arn) | ARN of the AWS IAM OIDC provider for EKS service account authentication | `string` | n/a | yes |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the cluster where the policy runs | `string` | n/a | yes |
 | <a name="input_permissions_role_name"></a> [permissions\_role\_name](#input\_permissions\_role\_name) | Override for the permissions IAM role name. Defaults to nullplatform-{cluster\_name}-agent-permissions-role | `string` | `""` | no |
+| <a name="input_permissions_roles"></a> [permissions\_roles](#input\_permissions\_roles) | Additional permissions roles created by this module and assumable by the agent role. Map key is a logical name; name overrides the role name (defaults to nullplatform-{cluster\_name}-{key}); policy\_arns are the policy ARNs attached to the role. | <pre>map(object({<br>    name        = optional(string)<br>    policy_arns = optional(list(string), [])<br>  }))</pre> | `{}` | no |
 | <a name="input_policies_name_prefix"></a> [policies\_name\_prefix](#input\_policies\_name\_prefix) | Override for IAM policy name prefix. Defaults to nullplatform\_{cluster\_name} | `string` | `""` | no |
 | <a name="input_role_name"></a> [role\_name](#input\_role\_name) | Override for the IAM role name. Defaults to nullplatform-{cluster\_name}-agent-role | `string` | `""` | no |
 | <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | Kubernetes service account name trusted by the IRSA role | `string` | `"nullplatform-agent"` | no |
@@ -90,6 +125,7 @@ resource "example_resource" "this" {
 
 | Name | Description |
 |------|-------------|
+| <a name="output_nullplatform_agent_extra_permissions_role_arns"></a> [nullplatform\_agent\_extra\_permissions\_role\_arns](#output\_nullplatform\_agent\_extra\_permissions\_role\_arns) | Map of logical name to ARN for each additional permissions role created via permissions\_roles |
 | <a name="output_nullplatform_agent_permissions_role_arn"></a> [nullplatform\_agent\_permissions\_role\_arn](#output\_nullplatform\_agent\_permissions\_role\_arn) | ARN of the permissions role assumed by the agent role |
 | <a name="output_nullplatform_agent_role_arn"></a> [nullplatform\_agent\_role\_arn](#output\_nullplatform\_agent\_role\_arn) | ARN of the agent role |
 <!-- END_TF_DOCS -->
@@ -107,7 +143,8 @@ resource "example_resource" "this" {
     "Attaches an ELB policy granting describe permissions for load balancers and target groups to the permissions role",
     "Attaches an EKS policy granting read access to clusters, node groups, and addons to the permissions role",
     "Attaches an Amazon Verified Permissions (AVP) policy granting full verifiedpermissions access to the permissions role",
-    "Supports attaching additional custom IAM policies to the agent role via the additional_policies map"
+    "Supports attaching additional custom IAM policies to the agent role via the additional_policies map",
+    "Supports creating additional permissions roles via the permissions_roles map, each trusting the agent role and assumable by it"
   ],
   "inputs": [
     {
@@ -141,6 +178,11 @@ resource "example_resource" "this" {
       "required": false
     },
     {
+      "name": "permissions_roles",
+      "description": "Additional permissions roles created by this module and assumable by the agent role. Map key is a logical name; name overrides the role name (defaults to nullplatform-{cluster_name}-{key}); policy_arns are the policy ARNs attached to the role.",
+      "required": false
+    },
+    {
       "name": "service_account_name",
       "description": "Kubernetes service account name trusted by the IRSA role",
       "required": false
@@ -158,7 +200,8 @@ resource "example_resource" "this" {
   ],
   "outputs": [
     "nullplatform_agent_role_arn",
-    "nullplatform_agent_permissions_role_arn"
+    "nullplatform_agent_permissions_role_arn",
+    "nullplatform_agent_extra_permissions_role_arns"
   ],
   "hash": "5142461751e55436dbc95fa82a376955"
 }

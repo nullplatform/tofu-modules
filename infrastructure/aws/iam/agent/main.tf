@@ -8,6 +8,30 @@ locals {
   # (trust policy -> agent role).
   agent_role_arn       = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.role_name}"
   permissions_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.permissions_role_name}"
+
+  # Resolve the name and (computed) ARN of each extra permissions role up front,
+  # so both the agent assume policy and the role trust policies reference the
+  # same deterministic ARN without depending on each other's resources.
+  extra_permissions_role_names = {
+    for key, cfg in var.permissions_roles : key => coalesce(cfg.name, "nullplatform-${var.cluster_name}-${key}")
+  }
+  extra_permissions_role_arns = [
+    for name in values(local.extra_permissions_role_names) : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${name}"
+  ]
+
+  # Flatten the extra permissions roles into one (role, policy_arn) pair per
+  # attachment, keyed by "role::arn" so the for_each key is stable regardless of
+  # list ordering.
+  extra_permissions_attachments = {
+    for pair in flatten([
+      for role_key, cfg in var.permissions_roles : [
+        for arn in cfg.policy_arns : {
+          role_key = role_key
+          arn      = arn
+        }
+      ]
+    ]) : "${pair.role_key}::${pair.arn}" => pair
+  }
 }
 
 ################################################################################
@@ -77,6 +101,36 @@ resource "aws_iam_role_policy_attachment" "permissions_elb" {
 resource "aws_iam_role_policy_attachment" "permissions_avp" {
   role       = aws_iam_role.nullplatform_agent_permissions.name
   policy_arn = aws_iam_policy.nullplatform_avp_policy.arn
+}
+
+################################################################################
+# Additional permissions roles assumed by the agent role
+################################################################################
+
+# Extra permissions roles created on demand via var.permissions_roles. Each one
+# trusts only the agent role and gets the provided policy ARNs attached. The
+# agent role's assume policy is extended with all of these role ARNs.
+resource "aws_iam_role" "extra_permissions" {
+  for_each = var.permissions_roles
+
+  name        = local.extra_permissions_role_names[each.key]
+  description = "Additional permissions role assumed by the nullplatform agent role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { AWS = local.agent_role_arn }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "extra_permissions" {
+  for_each = local.extra_permissions_attachments
+
+  role       = aws_iam_role.extra_permissions[each.value.role_key].name
+  policy_arn = each.value.arn
 }
 
 ################################################################################
@@ -195,9 +249,13 @@ resource "aws_iam_policy" "nullplatform_assume_role_policy" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect   = "Allow"
-      Action   = "sts:AssumeRole"
-      Resource = concat([local.permissions_role_arn], var.assume_role_arns)
+      Effect = "Allow"
+      Action = "sts:AssumeRole"
+      Resource = concat(
+        [local.permissions_role_arn],
+        local.extra_permissions_role_arns,
+        var.assume_role_arns
+      )
     }]
   })
 }
