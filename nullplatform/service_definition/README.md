@@ -2,27 +2,27 @@
 
 ## Description
 
-Creates a Nullplatform service specification by fetching and parsing service spec templates from GitHub, GitLab, or local filesystem, along with associated action and link specifications
+Creates a Nullplatform service specification with associated action and link specifications by fetching JSON templates from GitHub, GitLab, or a local filesystem path
 
 ## Architecture
 
-The module creates a nullplatform_service_specification resource as the primary entity, parsing JSON template files either via data.http resources (for GitHub/GitLab) or local file() calls. For each action in available_actions, it creates a nullplatform_action_specification resource linked to the service specification. For each link in available_links, it creates a nullplatform_link_specification resource, also linked to the service specification. The git_provider variable controls the data source path: GitHub uses raw.githubusercontent.com URLs, GitLab uses API v4 file endpoints to bypass Cloudflare protection, and local reads directly from the filesystem using local_specs_path.
+The module fetches service, action, and link spec templates via the `http` data source from GitHub raw content URLs or GitLab API v4 file endpoints (or reads them from local disk when git_provider is 'local'). The parsed JSON templates are fed into a `nullplatform_service_specification` resource, which is then referenced by `nullplatform_action_specification` and `nullplatform_link_specification` resources created via for_each loops over the available_actions and available_links lists. Authentication headers are conditionally set based on the git_provider value and an optional repository_token, and all created specifications expose their ID and slug as outputs.
 
 ## Features
 
-- Creates Nullplatform service specifications from templated JSON files stored in Git repositories or local filesystem
-- Fetches action specification templates via HTTP from GitHub/GitLab or reads from local files and creates corresponding action resources
-- Generates link specification resources from templates with configurable uniqueness and default action settings
-- Supports both public and private repositories through token-based authentication with provider-specific headers
-- Configures service visibility and access control using Nullplatform Resource Names (NRNs)
-- Associates custom dimensions as key-value metadata with service specifications
-- Handles GitLab self-hosted instances with configurable host parameter
+- Creates a nullplatform_service_specification resource populated from a JSON template fetched remotely or read locally
+- Creates nullplatform_action_specification resources for each action template listed in available_actions
+- Creates nullplatform_link_specification resources for each link template listed in available_links
+- Fetches spec templates from GitHub using raw content URLs with optional Bearer token authentication
+- Fetches spec templates from GitLab using API v4 file endpoints with URL-encoded paths and optional PAT authentication
+- Supports local filesystem spec loading for offline or development workflows via a configurable local path
+- Controls service specification visibility by merging the primary NRN with additional NRNs via extra_visibile_to_nrns
 
 ## Basic Usage
 
 ```hcl
 module "service_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v4.5.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v4.5.2"
 
   nrn          = "your-nrn"
   service_name = "your-service-name"
@@ -92,16 +92,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "service_definition",
-  "description": "Creates a Nullplatform service specification by fetching and parsing service spec templates from GitHub, GitLab, or local filesystem, along with associated action and link specifications",
-  "architecture": "The module creates a nullplatform_service_specification resource as the primary entity, parsing JSON template files either via data.http resources (for GitHub/GitLab) or local file() calls. For each action in available_actions, it creates a nullplatform_action_specification resource linked to the service specification. For each link in available_links, it creates a nullplatform_link_specification resource, also linked to the service specification. The git_provider variable controls the data source path: GitHub uses raw.githubusercontent.com URLs, GitLab uses API v4 file endpoints to bypass Cloudflare protection, and local reads directly from the filesystem using local_specs_path.",
+  "description": "Creates a Nullplatform service specification with associated action and link specifications by fetching JSON templates from GitHub, GitLab, or a local filesystem path",
+  "architecture": "The module fetches service, action, and link spec templates via the `http` data source from GitHub raw content URLs or GitLab API v4 file endpoints (or reads them from local disk when git_provider is 'local'). The parsed JSON templates are fed into a `nullplatform_service_specification` resource, which is then referenced by `nullplatform_action_specification` and `nullplatform_link_specification` resources created via for_each loops over the available_actions and available_links lists. Authentication headers are conditionally set based on the git_provider value and an optional repository_token, and all created specifications expose their ID and slug as outputs.",
   "features": [
-    "Creates Nullplatform service specifications from templated JSON files stored in Git repositories or local filesystem",
-    "Fetches action specification templates via HTTP from GitHub/GitLab or reads from local files and creates corresponding action resources",
-    "Generates link specification resources from templates with configurable uniqueness and default action settings",
-    "Supports both public and private repositories through token-based authentication with provider-specific headers",
-    "Configures service visibility and access control using Nullplatform Resource Names (NRNs)",
-    "Associates custom dimensions as key-value metadata with service specifications",
-    "Handles GitLab self-hosted instances with configurable host parameter"
+    "Creates a nullplatform_service_specification resource populated from a JSON template fetched remotely or read locally",
+    "Creates nullplatform_action_specification resources for each action template listed in available_actions",
+    "Creates nullplatform_link_specification resources for each link template listed in available_links",
+    "Fetches spec templates from GitHub using raw content URLs with optional Bearer token authentication",
+    "Fetches spec templates from GitLab using API v4 file endpoints with URL-encoded paths and optional PAT authentication",
+    "Supports local filesystem spec loading for offline or development workflows via a configurable local path",
+    "Controls service specification visibility by merging the primary NRN with additional NRNs via extra_visibile_to_nrns"
   ],
   "inputs": [
     {
@@ -179,6 +179,6 @@ resource "example_resource" "this" {
     "service_specification_id",
     "service_specification_slug"
   ],
-  "hash": "e1c56bb0086c19cff46e8fbfaf41771d"
+  "hash": "d2c5d76a9178fb0ffc8aaaff485fa6c1"
 }
 END_AI_METADATA -->
