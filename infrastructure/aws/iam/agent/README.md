@@ -2,21 +2,19 @@
 
 ## Description
 
-Creates an IRSA-enabled IAM agent role for the nullplatform Kubernetes service account on EKS, using privilege separation: the agent role only carries an sts:AssumeRole policy and assumes a separate permissions role that holds the scoped workload policies
+Creates an IRSA-enabled IAM agent role for the nullplatform Kubernetes service account on EKS, using privilege separation: the agent role only carries an sts:AssumeRole policy and assumes a separate permissions role (provisioned outside this module) that holds the scoped workload policies
 
 ## Architecture
 
-The module uses the terraform-aws-modules/iam//modules/iam-role-for-service-accounts submodule to create an aws_iam_role (the agent role) with an OIDC trust policy bound to a specific Kubernetes namespace and service account. The agent role only carries an sts:AssumeRole policy that allows it to assume a separate permissions role (and any additional assume_role_arns). The permissions role is a standalone aws_iam_role whose trust policy allows only the agent role to assume it, and the four aws_iam_policy resources (Route53, ELB, EKS, and Amazon Verified Permissions) are attached to it. ARNs are derived from role names and the caller account id to avoid a circular dependency between the two roles. Both role ARNs are exposed as outputs.
+The module uses the terraform-aws-modules/iam//modules/iam-role-for-service-accounts submodule to create an aws_iam_role (the agent role) with an OIDC trust policy bound to a specific Kubernetes namespace and service account. The agent role only carries an sts:AssumeRole policy that allows it to assume a permissions role (and any additional assume_role_arns).
+
+The default permissions role and its workload policies (Route53, ELB, EKS, AVP) are **no longer created by this module**: they are provisioned per-cluster by the k8s scope's OpenTofu module (`k8s/scope/tofu/iam/modules` in the scopes repo). This module still authorizes assuming that role by its conventional ARN (`nullplatform-{cluster_name}-agent-permissions-role`), derived from the role name and the caller account id, and exposes that ARN as an output. The scope module must create the permissions role with that same conventional name so the wiring matches.
 
 ## Features
 
 - Creates an IRSA IAM agent role scoped to a specific Kubernetes namespace and service account via OIDC provider trust
-- Keeps the agent role minimal: it only carries an sts:AssumeRole policy targeting the permissions role and any additional assume_role_arns
-- Creates a separate permissions role that trusts only the agent role and holds the workload policies
-- Attaches a Route53 policy granting DNS record management permissions for hosted zones to the permissions role
-- Attaches an ELB policy granting describe permissions for load balancers and target groups to the permissions role
-- Attaches an EKS policy granting read access to clusters, node groups, and addons to the permissions role
-- Attaches an Amazon Verified Permissions (AVP) policy granting full verifiedpermissions access to the permissions role
+- Keeps the agent role minimal: it only carries an sts:AssumeRole policy targeting the (externally-created) permissions role and any additional assume_role_arns
+- Authorizes assuming the conventional permissions role ARN even though the role itself is created elsewhere (k8s scope tofu module)
 - Supports attaching additional custom IAM policies to the agent role via the additional_policies map
 - Supports creating additional permissions roles via the permissions_roles map, each trusting the agent role and assumable by it
 
@@ -34,8 +32,10 @@ module "agent" {
 
 ## Multiple permissions roles
 
-The default permissions role (Route53/EKS/ELB/AVP) is always created. To have the
-agent assume additional, module-created roles with their own policies, use the
+The agent is always allowed to assume the default permissions role by its
+conventional ARN (`nullplatform-{cluster_name}-agent-permissions-role`), which is
+created externally by the k8s scope tofu module. To have the agent assume
+additional, module-created roles with their own policies, use the
 `permissions_roles` map. Each entry creates a role that trusts the agent role and
 gets the given policy ARNs attached; the agent's assume policy is extended with
 all of them.
@@ -92,19 +92,9 @@ resource "example_resource" "this" {
 | Name | Type |
 |------|------|
 | [aws_iam_policy.nullplatform_assume_role_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.nullplatform_avp_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.nullplatform_eks_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.nullplatform_elb_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.nullplatform_route53_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.extra_permissions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role.nullplatform_agent_permissions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy_attachment.extra_permissions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_iam_role_policy_attachment.permissions_avp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_iam_role_policy_attachment.permissions_eks](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_iam_role_policy_attachment.permissions_elb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_iam_role_policy_attachment.permissions_route53](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
-| [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 
 ## Inputs
 
@@ -126,7 +116,7 @@ resource "example_resource" "this" {
 | Name | Description |
 |------|-------------|
 | <a name="output_nullplatform_agent_extra_permissions_role_arns"></a> [nullplatform\_agent\_extra\_permissions\_role\_arns](#output\_nullplatform\_agent\_extra\_permissions\_role\_arns) | Map of logical name to ARN for each additional permissions role created via permissions\_roles |
-| <a name="output_nullplatform_agent_permissions_role_arn"></a> [nullplatform\_agent\_permissions\_role\_arn](#output\_nullplatform\_agent\_permissions\_role\_arn) | ARN of the permissions role assumed by the agent role |
+| <a name="output_nullplatform_agent_permissions_role_arn"></a> [nullplatform\_agent\_permissions\_role\_arn](#output\_nullplatform\_agent\_permissions\_role\_arn) | Conventional ARN of the permissions role the agent role is allowed to assume. The role itself is created externally (k8s scope tofu module), not by this module. |
 | <a name="output_nullplatform_agent_role_arn"></a> [nullplatform\_agent\_role\_arn](#output\_nullplatform\_agent\_role\_arn) | ARN of the agent role |
 <!-- END_TF_DOCS -->
 

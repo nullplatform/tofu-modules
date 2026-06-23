@@ -62,46 +62,13 @@ module "nullplatform_agent_role" {
   )
 }
 
-################################################################################
-# IAM permissions role assumed by the agent role
-################################################################################
-
-# Holds the actual workload policies (Route53, EKS, ELB, AVP). Trusts only the
-# agent role, so the IRSA token cannot use these permissions without first
-# assuming this role.
-resource "aws_iam_role" "nullplatform_agent_permissions" {
-  name        = local.permissions_role_name
-  description = "Permissions role assumed by the nullplatform agent role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect    = "Allow"
-      Principal = { AWS = local.agent_role_arn }
-      Action    = "sts:AssumeRole"
-    }]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "permissions_route53" {
-  role       = aws_iam_role.nullplatform_agent_permissions.name
-  policy_arn = aws_iam_policy.nullplatform_route53_policy.arn
-}
-
-resource "aws_iam_role_policy_attachment" "permissions_eks" {
-  role       = aws_iam_role.nullplatform_agent_permissions.name
-  policy_arn = aws_iam_policy.nullplatform_eks_policy.arn
-}
-
-resource "aws_iam_role_policy_attachment" "permissions_elb" {
-  role       = aws_iam_role.nullplatform_agent_permissions.name
-  policy_arn = aws_iam_policy.nullplatform_elb_policy.arn
-}
-
-resource "aws_iam_role_policy_attachment" "permissions_avp" {
-  role       = aws_iam_role.nullplatform_agent_permissions.name
-  policy_arn = aws_iam_policy.nullplatform_avp_policy.arn
-}
+# NOTE: The permissions role (nullplatform_agent_permissions) and its workload
+# policies (Route53, EKS, ELB, AVP) are no longer created by this module. They
+# are now provisioned per-cluster by the k8s scope's OpenTofu module
+# (scopes: k8s/scope/tofu/iam/modules). This module keeps only the agent IRSA
+# role and an assume policy that authorizes assuming that externally-created
+# permissions role by its conventional ARN (see nullplatform_assume_role_policy
+# and local.permissions_role_arn).
 
 ################################################################################
 # Additional permissions roles assumed by the agent role
@@ -134,112 +101,6 @@ resource "aws_iam_role_policy_attachment" "extra_permissions" {
 }
 
 ################################################################################
-# Route 53 IAM policy
-################################################################################
-
-# Grant permissions to manage Route 53 DNS records for service discovery
-resource "aws_iam_policy" "nullplatform_route53_policy" {
-  name        = "${local.policies_name_prefix}_route53_policy"
-  description = "Policy for managing Route 53 DNS records"
-  policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Effect" : "Allow",
-        "Action" : [
-          "route53:ChangeResourceRecordSets",
-          "route53:ListResourceRecordSets",
-          "route53:GetHostedZone",
-          "route53:ListHostedZones",
-          "route53:ListHostedZonesByName"
-        ],
-        "Resource" : [
-          "arn:aws:route53:::hostedzone/*"
-        ],
-
-      }
-    ]
-  })
-}
-
-################################################################################
-# Elastic Load Balancing (ELB) IAM policy
-################################################################################
-
-# Grant permissions to describe and monitor load balancers and target groups
-resource "aws_iam_policy" "nullplatform_elb_policy" {
-  name        = "${local.policies_name_prefix}_elb_policy"
-  description = "Policy for managing Elastic Load Balancing resources"
-  policy = jsonencode(
-    {
-      "Version" : "2012-10-17",
-      "Statement" : [
-        {
-          "Effect" : "Allow",
-          "Action" : [
-            "elasticloadbalancing:DescribeLoadBalancers",
-            "elasticloadbalancing:DescribeTargetGroups"
-          ],
-          "Resource" : "*",
-          "Condition" : {
-            "StringEquals" : {
-              "aws:RequestedRegion" : [
-                data.aws_region.current.region
-              ]
-            }
-          }
-        },
-        {
-          "Effect" : "Allow",
-          "Action" : [
-            "elasticloadbalancing:DescribeTargetHealth",
-            "elasticloadbalancing:DescribeListeners",
-            "elasticloadbalancing:DescribeRules"
-          ],
-          "Resource" : [
-            "arn:aws:elasticloadbalancing:*:*:loadbalancer/app/k8s-nullplatform-*",
-            "arn:aws:elasticloadbalancing:*:*:targetgroup/k8s-nullplatform-*"
-          ],
-
-        }
-      ]
-    }
-  )
-}
-
-################################################################################
-# EKS IAM policy
-################################################################################
-
-# Grant permissions to describe and list EKS cluster resources
-resource "aws_iam_policy" "nullplatform_eks_policy" {
-  name        = "${local.policies_name_prefix}_eks_policy"
-  description = "Policy for managing EKS cluster resources"
-  policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Effect" : "Allow",
-        "Action" : [
-          "eks:DescribeCluster",
-          "eks:ListClusters",
-          "eks:DescribeNodegroup",
-          "eks:ListNodegroups",
-          "eks:DescribeAddon",
-          "eks:ListAddons"
-        ],
-        "Resource" : [
-          "arn:aws:eks:*:*:cluster/*",
-          "arn:aws:eks:*:*:nodegroup/*",
-          "arn:aws:eks:*:*:addon/*"
-        ],
-
-      }
-    ]
-  })
-}
-
-################################################################################
 # STS AssumeRole IAM policy
 ################################################################################
 
@@ -265,27 +126,4 @@ resource "aws_iam_policy" "nullplatform_assume_role_policy" {
 moved {
   from = aws_iam_policy.nullplatform_assume_role_policy[0]
   to   = aws_iam_policy.nullplatform_assume_role_policy
-}
-
-################################################################################
-# AVP policy
-################################################################################
-
-# Grant permissions to describe and list EKS cluster resources
-resource "aws_iam_policy" "nullplatform_avp_policy" {
-  name        = "${local.policies_name_prefix}_avp_policy"
-  description = "Policy for managing AVP resources"
-  policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Effect" : "Allow",
-        "Action" : [
-          "verifiedpermissions:*"
-        ],
-        "Resource" : "*",
-
-      }
-    ]
-  })
 }

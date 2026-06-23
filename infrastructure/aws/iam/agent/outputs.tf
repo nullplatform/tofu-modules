@@ -4,8 +4,8 @@ output "nullplatform_agent_role_arn" {
 }
 
 output "nullplatform_agent_permissions_role_arn" {
-  description = "ARN of the permissions role assumed by the agent role"
-  value       = aws_iam_role.nullplatform_agent_permissions.arn
+  description = "Conventional ARN of the permissions role the agent role is allowed to assume. The role itself is created externally (k8s scope tofu module), not by this module."
+  value       = local.permissions_role_arn
 }
 
 output "nullplatform_agent_extra_permissions_role_arns" {
