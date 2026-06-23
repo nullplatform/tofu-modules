@@ -3,6 +3,11 @@ variable "cluster_name" {
   type        = string
 }
 
+variable "build_workflow_group_name" {
+  description = "Name of the IAM group (from the build-user module) to which the ECR manager policy is attached. The build workflow user is a member of this group."
+  type        = string
+}
+
 variable "application_manager_assume_role" {
   description = "ARN of the IAM role assumed by the application manager"
   type        = string
