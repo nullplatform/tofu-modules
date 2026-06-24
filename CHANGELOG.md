@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.5.2](https://github.com/nullplatform/tofu-modules/compare/v4.5.1...v4.5.2) (2026-06-22)
+
+
+### Bug Fixes
+
+* **service_definition:** handle empty service_path for GitLab and cmdline ([#400](https://github.com/nullplatform/tofu-modules/issues/400)) ([826e016](https://github.com/nullplatform/tofu-modules/commit/826e0164c8c36035a93d7eabeed623443f5005e2))
+
+## [4.5.1](https://github.com/nullplatform/tofu-modules/compare/v4.5.0...v4.5.1) (2026-06-19)
+
+
+### Bug Fixes
+
+* **dns:** ignore vpc changes on private_zone for cross-account assoc ([#398](https://github.com/nullplatform/tofu-modules/issues/398)) ([772c201](https://github.com/nullplatform/tofu-modules/commit/772c20111c02dfb933755fa6aa0c9917d9b6b025))
+
 ## [4.5.0](https://github.com/nullplatform/tofu-modules/compare/v4.4.0...v4.5.0) (2026-06-16)
 
 

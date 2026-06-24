@@ -19,7 +19,7 @@ This module creates a google_compute_router resource in a specified region and n
 
 ```hcl
 module "cloud-nat" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/cloud-nat?ref=v4.5.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/cloud-nat?ref=v4.5.2"
 
   nat_name    = "your-nat-name"
   network_id  = "your-network-id"
