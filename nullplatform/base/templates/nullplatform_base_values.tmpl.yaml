@@ -62,6 +62,7 @@ gateway:
       dns_name: ${gateway_public_aws_dns_name}
     azure:
       networkSecurityGroup: "${gateway_public_azure_nsg}"
+      subnet: "${gateway_public_azure_load_balancer_subnet}"
     gcp:
       firewallRule: "${gateway_public_gcp_firewall}"
     oci:

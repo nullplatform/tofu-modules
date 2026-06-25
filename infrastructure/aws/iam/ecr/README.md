@@ -19,9 +19,9 @@ The module creates an aws_iam_role (application role with a configurable assume-
 ## Basic Usage
 
 ```hcl
+
 module "ci_build_workflow_user" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/ci-build-workflow-user?ref=v5.0.0"
-
   cluster_name = "your-cluster-name"
 }
 
