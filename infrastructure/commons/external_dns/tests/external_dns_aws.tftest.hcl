@@ -95,3 +95,16 @@
 #
 #   expect_failures = [var.zone_type]
 # }
+#
+# run "aws_pod_identity_omits_role_annotation" {
+#   command = plan
+#
+#   variables {
+#     aws_identity_mode = "pod_identity"
+#   }
+#
+#   assert {
+#     condition     = !contains(keys(local.route53_config.serviceAccount.annotations), "eks.amazonaws.com/role-arn")
+#     error_message = "Pod Identity mode must omit the IRSA role-arn annotation"
+#   }
+# }

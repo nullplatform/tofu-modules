@@ -91,6 +91,17 @@ variable "aws_iam_role_arn" {
   default     = ""
 }
 
+variable "aws_identity_mode" {
+  description = "AWS identity mechanism for the external-dns service account: \"irsa\" sets the eks.amazonaws.com/role-arn annotation; \"pod_identity\" omits it (EKS Pod Identity injects credentials via the Pod Identity agent)."
+  type        = string
+  default     = "irsa"
+
+  validation {
+    condition     = contains(["irsa", "pod_identity"], var.aws_identity_mode)
+    error_message = "aws_identity_mode must be one of: irsa, pod_identity."
+  }
+}
+
 variable "zone_id_filter" {
   description = "The Route53 public or private hosted zone ID for ExternalDNS to manage (required when dns_provider_name is 'aws')"
   type        = string
