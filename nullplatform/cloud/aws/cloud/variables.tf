@@ -26,8 +26,14 @@ variable "hosted_private_zone_id" {
 }
 
 variable "hosted_public_zone_id" {
-  description = "Hosted zone ID for public DNS"
+  description = "Hosted zone ID for public DNS. Leave empty for private-only installs: when empty it is omitted from the provider config payload (the API rejects an empty string)."
   type        = string
+  default     = ""
+
+  validation {
+    condition     = var.hosted_public_zone_id == null || var.hosted_public_zone_id == "" || can(regex("^Z[A-Z0-9]{10,}$", var.hosted_public_zone_id))
+    error_message = "hosted_public_zone_id must be empty/null for private-only, or a valid Route53 hosted zone ID (^Z[A-Z0-9]{10,}$)."
+  }
 }
 
 variable "dimensions" {
