@@ -21,7 +21,7 @@ The module provisions a google_artifact_registry_repository resource in the spec
 
 ```hcl
 module "artifact-registry" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/artifact-registry?ref=v5.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/artifact-registry?ref=v5.2.0"
 
   location      = "your-location"
   project_id    = "your-project-id"
