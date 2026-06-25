@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.6.0](https://github.com/nullplatform/tofu-modules/compare/v4.5.2...v4.6.0) (2026-06-25)
+
+
+### Features
+
+* **base:** add gateway_public_azure_load_balancer_subnet ([#403](https://github.com/nullplatform/tofu-modules/issues/403)) ([b9b6f5e](https://github.com/nullplatform/tofu-modules/commit/b9b6f5e8b769623d981594064461bfaff963d30c))
+
 ## [4.5.2](https://github.com/nullplatform/tofu-modules/compare/v4.5.1...v4.5.2) (2026-06-22)
 
 
