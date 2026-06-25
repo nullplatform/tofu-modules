@@ -65,3 +65,38 @@ run "aws_requires_region" {
 
   expect_failures = [terraform_data.provider_validation]
 }
+
+# Validates Pod Identity mode omits the IRSA role-arn annotation
+run "aws_pod_identity_omits_role_annotation" {
+  command = plan
+
+  variables {
+    aws_identity_mode = "pod_identity"
+  }
+
+  assert {
+    condition     = !contains(keys(local.annotations_by_provider["aws"]), "eks.amazonaws.com/role-arn")
+    error_message = "Pod Identity mode must omit the IRSA role-arn annotation"
+  }
+}
+
+# Validates IRSA mode (default) keeps the role-arn annotation
+run "aws_irsa_keeps_role_annotation" {
+  command = plan
+
+  assert {
+    condition     = local.annotations_by_provider["aws"]["eks.amazonaws.com/role-arn"] == "arn:aws:iam::123456789012:role/cert-manager"
+    error_message = "IRSA mode (default) must keep the role-arn annotation"
+  }
+}
+
+# Validates invalid aws_identity_mode is rejected
+run "rejects_invalid_aws_identity_mode" {
+  command = plan
+
+  variables {
+    aws_identity_mode = "wireguard"
+  }
+
+  expect_failures = [var.aws_identity_mode]
+}
