@@ -1,71 +1,40 @@
-# Module: build-user
+# Module: ci-build-workflow-user
 
 ## Description
 
-Provisions the shared CI/CD build workflow IAM identity (user, access key, and group) used to publish application assets to any asset repository (ECR, S3, etc.)
+Creates an AWS IAM user with access keys and an IAM group for CI/CD build workflow asset publishing in a nullplatform cluster
 
 ## Architecture
 
-The module creates a single `aws_iam_user` with an `aws_iam_access_key` for CI/CD build workflows, plus an `aws_iam_group` named `asset-publishers` and the `aws_iam_user_group_membership` that adds the user to it. The group is the attachment point for per-destination permission modules: `infrastructure/aws/iam/ecr` attaches its ECR policy to this group, and `infrastructure/aws/iam/s3-assets` attaches its S3 policy to the same group. The build user therefore accumulates the permissions of every enabled destination through a single group, which matches how the platform CLI publishes assets (one credential set used for all asset types).
+The module creates an aws_iam_user named with the cluster_name prefix and generates an aws_iam_access_key for programmatic access. An aws_iam_group is created to serve as the attachment point for downstream policy modules such as ECR or S3 asset repositories. An aws_iam_user_group_membership resource wires the build workflow user into the asset publishers group, and the access key credentials along with the group name are exposed as outputs for consumption by other modules.
 
 ## Features
 
-- Creates a single namespaced `aws_iam_user` and `aws_iam_access_key` for CI/CD build workflow authentication
-- Creates a destination-agnostic `aws_iam_group` (`asset-publishers`) that permission modules attach their policies to
-- Adds the build user to the group via `aws_iam_user_group_membership`
-- Exposes `group_name` so asset-repository modules (`ecr`, `s3-assets`) can grant permissions without recreating the identity
+- Creates a namespaced aws_iam_user for CI/CD build workflow automation scoped to the cluster name
+- Generates aws_iam_access_key credentials for programmatic AWS API access by the build workflow user
+- Creates an aws_iam_group to serve as a shared attachment point for asset-publishing IAM policies
+- Attaches the build workflow user to the asset publishers group via aws_iam_user_group_membership
+- Outputs access key ID and sensitive secret key for use in CI/CD pipeline configuration
+- Exposes the IAM group name output for policy attachment by downstream ECR and S3 asset modules
 
 ## Basic Usage
 
 ```hcl
-module "build_user" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/build-user?ref=v5.0.0"
+module "ci-build-workflow-user" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/ci-build-workflow-user?ref=v5.0.0"
 
   cluster_name = "your-cluster-name"
 }
 ```
 
-The `group_name` output is consumed by the asset-repository permission modules:
+## Using Outputs
 
 ```hcl
-module "ecr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/ecr?ref=v5.0.0"
-
-  cluster_name              = "your-cluster-name"
-  build_workflow_group_name = module.build_user.group_name
-}
-
-module "s3_assets" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/s3-assets?ref=v5.0.0"
-
-  cluster_name              = "your-cluster-name"
-  build_workflow_group_name = module.build_user.group_name
-  assets_bucket             = "your-assets-bucket"
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.ci-build-workflow-user.build_workflow_access_key_id
 }
 ```
-
-## Migration from < v5.0.0 (build user previously created by `iam/ecr`)
-
-Before v5.0.0 the build workflow user, its access key and the group lived inside the `iam/ecr`
-module. This module extracts them. To migrate **without rotating the access keys** (which would
-break CI), move the user and its access key in state — the group is renamed
-(`ecr-managers` → `asset-publishers`) and is recreated, which does not affect the user's credentials:
-
-```bash
-tofu state mv 'module.ecr.aws_iam_user.nullplatform_build_workflow_user' \
-              'module.build_user.aws_iam_user.nullplatform_build_workflow_user'
-
-tofu state mv 'module.ecr.aws_iam_access_key.nullplatform_build_workflow_user_key' \
-              'module.build_user.aws_iam_access_key.nullplatform_build_workflow_user_key'
-```
-
-After the moves, a `tofu plan` should show **no changes** to the user and access key (only their
-state address moved), the group + membership recreated as `asset-publishers`, and the ECR policy
-re-attached to the new group.
-
-> **Security note:** the build credentials are read by the platform on each CI run (they are not
-> stored as per-repository secrets), so rotating them periodically is a good practice and this
-> module makes it easy — regenerate the access key and let the platform re-read the new value.
 
 <!-- BEGIN_TF_DOCS -->
 
@@ -99,3 +68,32 @@ re-attached to the new group.
 | <a name="output_build_workflow_access_key_secret"></a> [build\_workflow\_access\_key\_secret](#output\_build\_workflow\_access\_key\_secret) | Secret access key for the CI/CD build workflow IAM user |
 | <a name="output_group_name"></a> [group\_name](#output\_group\_name) | Name of the IAM group that asset-repository permission modules (ecr, s3-assets) attach their policies to. The build workflow user is a member of this group. |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "ci-build-workflow-user",
+  "description": "Creates an AWS IAM user with access keys and an IAM group for CI/CD build workflow asset publishing in a nullplatform cluster",
+  "architecture": "The module creates an aws_iam_user named with the cluster_name prefix and generates an aws_iam_access_key for programmatic access. An aws_iam_group is created to serve as the attachment point for downstream policy modules such as ECR or S3 asset repositories. An aws_iam_user_group_membership resource wires the build workflow user into the asset publishers group, and the access key credentials along with the group name are exposed as outputs for consumption by other modules.",
+  "features": [
+    "Creates a namespaced aws_iam_user for CI/CD build workflow automation scoped to the cluster name",
+    "Generates aws_iam_access_key credentials for programmatic AWS API access by the build workflow user",
+    "Creates an aws_iam_group to serve as a shared attachment point for asset-publishing IAM policies",
+    "Attaches the build workflow user to the asset publishers group via aws_iam_user_group_membership",
+    "Outputs access key ID and sensitive secret key for use in CI/CD pipeline configuration",
+    "Exposes the IAM group name output for policy attachment by downstream ECR and S3 asset modules"
+  ],
+  "inputs": [
+    {
+      "name": "cluster_name",
+      "description": "Name of the cluster, used to namespace IAM resource names",
+      "required": true
+    }
+  ],
+  "outputs": [
+    "build_workflow_access_key_id",
+    "build_workflow_access_key_secret",
+    "group_name"
+  ],
+  "hash": "2c0aef02dbbd6af2dd32f8a3a9f60802"
+}
+END_AI_METADATA -->

@@ -22,7 +22,7 @@ The module creates two kubernetes_namespace_v1 resources (nullplatform-tools and
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v4.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v5.0.0"
 
   k8s_provider = "your-k8s-provider"
   np_api_key   = "your-np-api-key"
@@ -33,7 +33,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v4.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v5.0.0"
 
   k8s_provider = "eks"
   np_api_key   = "your-np-api-key"
@@ -44,7 +44,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v4.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v5.0.0"
 
   k8s_provider = "gke"
   np_api_key   = "your-np-api-key"
@@ -55,7 +55,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v4.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v5.0.0"
 
   k8s_provider = "aks"
   np_api_key   = "your-np-api-key"
@@ -66,7 +66,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v4.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v5.0.0"
 
   k8s_provider = "oke"
   np_api_key   = "your-np-api-key"
@@ -77,7 +77,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v4.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v5.0.0"
 
   k8s_provider = "aro"
   np_api_key   = "your-np-api-key"
@@ -99,7 +99,7 @@ resource "example_resource" "this" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 3.0 |
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.86 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.86 |
 
 ## Providers
 

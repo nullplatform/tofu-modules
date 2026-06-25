@@ -2,44 +2,45 @@
 
 ## Description
 
-Configures an AWS S3 asset repository in nullplatform, registering the bucket where Lambda and bundle assets are published
+Configures a nullplatform S3 provider configuration resource linking an existing S3 bucket as the asset repository for a given NRN
 
 ## Architecture
 
-The module creates a `nullplatform_provider_config` resource of type `s3-configuration` (a platform-global provider specification in the `assets-repository` category) whose attributes carry the target `bucket.name`. The platform maps this bucket to the `aws.s3_assets_bucket` NRN configuration (via the specification's `runtime_configuration` storage strategy), which the backend reads when generating the S3 upload URL for Lambda/bundle assets. Unlike the `ecr` asset module, this provider config does **not** carry build credentials: the CI publishes S3 assets with the shared build workflow credentials (`BUILD_AWS_*`), so the build workflow user must be granted S3 permissions separately via `infrastructure/aws/iam/s3-assets`.
+The module creates a single nullplatform_provider_config resource of type s3-configuration. The nrn input is used to scope the provider config to a specific nullplatform resource, while bucket_name is encoded as a JSON attribute defining the S3 bucket. The optional dimensions map allows segmenting the configuration by arbitrary key-value pairs such as region or environment.
 
 ## Features
 
-- Registers an AWS S3 bucket as a nullplatform asset repository (`s3-configuration` provider config)
-- Supplies the `bucket.name` that the platform exposes as `aws.s3_assets_bucket`
-- Optionally segments the provider config by `dimensions` (e.g. region, environment)
-- Does not manage the bucket or credentials: the bucket is referenced by name and S3 publish permissions are granted by `infrastructure/aws/iam/s3-assets`
+- Creates a nullplatform_provider_config resource of type s3-configuration targeting an existing S3 bucket
+- Encodes bucket name as a JSON attribute payload within the provider configuration
+- Supports dimensional segmentation of the provider config via an optional key-value dimensions map
+- Scopes the S3 asset repository configuration to a specific nullplatform resource using the NRN identifier
 
 ## Basic Usage
 
 ```hcl
-module "asset_s3" {
+module "s3" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/s3?ref=v5.0.0"
 
-  nrn         = var.nrn
-  bucket_name = "your-assets-bucket"
+  bucket_name = "your-bucket-name"
+  nrn         = "your-nrn"
 }
 ```
 
-Grant the build workflow user permission to write to that bucket with the companion IAM module:
+## Using Outputs
 
 ```hcl
-module "s3_assets" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/s3-assets?ref=v5.0.0"
-
-  cluster_name              = "your-cluster-name"
-  build_workflow_group_name = module.build_user.group_name
-  assets_bucket             = "your-assets-bucket"
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.s3.id
 }
 ```
 
 <!-- BEGIN_TF_DOCS -->
+## Requirements
 
+| Name | Version |
+|------|---------|
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.88 |
 
 ## Providers
 
@@ -60,8 +61,37 @@ module "s3_assets" {
 | <a name="input_bucket_name"></a> [bucket\_name](#input\_bucket\_name) | Name of the existing S3 bucket used as the asset repository, where Lambda/bundle assets are published. Maps to the platform's aws.s3\_assets\_bucket configuration. | `string` | n/a | yes |
 | <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Dimensions to segment the nullplatform provider config (e.g. by region, environment) | `map(string)` | `{}` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | The nullplatform resource name (NRN) | `string` | n/a | yes |
-
-## Outputs
-
-No outputs.
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "s3",
+  "description": "Configures a nullplatform S3 provider configuration resource linking an existing S3 bucket as the asset repository for a given NRN",
+  "architecture": "The module creates a single nullplatform_provider_config resource of type s3-configuration. The nrn input is used to scope the provider config to a specific nullplatform resource, while bucket_name is encoded as a JSON attribute defining the S3 bucket. The optional dimensions map allows segmenting the configuration by arbitrary key-value pairs such as region or environment.",
+  "features": [
+    "Creates a nullplatform_provider_config resource of type s3-configuration targeting an existing S3 bucket",
+    "Encodes bucket name as a JSON attribute payload within the provider configuration",
+    "Supports dimensional segmentation of the provider config via an optional key-value dimensions map",
+    "Scopes the S3 asset repository configuration to a specific nullplatform resource using the NRN identifier"
+  ],
+  "inputs": [
+    {
+      "name": "nrn",
+      "description": "The nullplatform resource name (NRN)",
+      "required": true
+    },
+    {
+      "name": "bucket_name",
+      "description": "Name of the existing S3 bucket used as the asset repository, where Lambda/bundle assets are published. Maps to the platform's aws.s3_assets_bucket configuration.",
+      "required": true
+    },
+    {
+      "name": "dimensions",
+      "description": "Dimensions to segment the nullplatform provider config (e.g. by region, environment)",
+      "required": false
+    }
+  ],
+  "outputs": [],
+  "hash": "6c52d855caa5663ae6f4b3fe5e6b2193"
+}
+END_AI_METADATA -->
