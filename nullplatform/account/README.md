@@ -20,7 +20,7 @@ This module creates nullplatform_account resources using a for_each loop over th
 
 ```hcl
 module "account" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/account?ref=v4.5.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/account?ref=v4.6.0"
 
   nullplatform_accounts = "your-nullplatform-accounts"
 }
