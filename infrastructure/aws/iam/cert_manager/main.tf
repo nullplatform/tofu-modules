@@ -62,6 +62,13 @@ resource "aws_eks_pod_identity_association" "this" {
   role_arn        = one(aws_iam_role.pod_identity[*].arn)
 }
 
+# Backward-compat: count was added to this module in v4.6.0; consumers upgrading
+# from a prior version have the state at the un-indexed address.
+moved {
+  from = module.nullplatform_cert_manager_role
+  to   = module.nullplatform_cert_manager_role[0]
+}
+
 # Grant permissions to manage Route 53 DNS records for DNS01 challenge
 resource "aws_iam_policy" "nullplatform_cert_manager_policy" {
   name        = "nullplatform-${var.cluster_name}-cert-manager-policy"
