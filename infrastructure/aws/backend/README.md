@@ -20,7 +20,7 @@ This module creates an S3 bucket with versioning and server-side encryption enab
 
 ```hcl
 module "backend" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/backend?ref=v5.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/backend?ref=v6.0.0"
 }
 ```
 

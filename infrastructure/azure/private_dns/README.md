@@ -18,7 +18,7 @@ This module creates an azurerm_private_dns_zone resource and optionally multiple
 
 ```hcl
 module "private_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/private_dns?ref=v5.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/private_dns?ref=v6.0.0"
 
   domain_name           = "your-domain-name"
   resource_group_name   = "your-resource-group-name"
