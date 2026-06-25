@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.2.0](https://github.com/nullplatform/tofu-modules/compare/v5.1.0...v5.2.0) (2026-06-25)
+
+
+### Features
+
+* **cloud/aws:** make hosted_public_zone_id optional for private-only ([#408](https://github.com/nullplatform/tofu-modules/issues/408)) ([7f52d4b](https://github.com/nullplatform/tofu-modules/commit/7f52d4b9078543694d54d501a0ddb9188f2d26c3))
+
 ## [5.1.0](https://github.com/nullplatform/tofu-modules/compare/v5.1.0...v5.1.0) (2026-06-25)
 
 
