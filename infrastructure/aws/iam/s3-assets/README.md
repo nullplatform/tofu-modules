@@ -19,7 +19,7 @@ This module creates an aws_iam_policy resource named with the cluster_name prefi
 
 ```hcl
 module "s3-assets" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/s3-assets?ref=v5.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/s3-assets?ref=v5.1.0"
 
   assets_bucket             = "your-assets-bucket"
   build_workflow_group_name = "your-build-workflow-group-name"
