@@ -2,33 +2,37 @@
 
 ## Description
 
-Grants the shared build workflow group permission to publish build assets (e.g. Lambda deployment zips) to an existing S3 assets bucket
+Creates and attaches an IAM policy granting S3 PutObject and GetObject permissions on a specified assets bucket to an existing IAM group used by build workflows
 
 ## Architecture
 
-The module creates an `aws_iam_policy` allowing `s3:PutObject` and `s3:GetObject` on the objects of a given assets bucket (`arn:aws:s3:::<assets_bucket>/*`) and attaches it to the shared build-workflow group via `aws_iam_group_policy_attachment`. The group is created by the `ci-build-workflow-user` module and passed in through `build_workflow_group_name`, so the build workflow user accumulates S3 publishing permissions alongside ECR (and any other destination) through that single group. The bucket itself is managed elsewhere and only referenced by name.
+This module creates an aws_iam_policy resource named with the cluster_name prefix that allows s3:PutObject and s3:GetObject actions scoped to the provided assets_bucket. The policy is then attached to an existing IAM group via an aws_iam_group_policy_attachment resource, linking the policy ARN to the group specified by build_workflow_group_name. No new users or groups are created; the module only manages the policy and its attachment to an externally managed group.
 
 ## Features
 
-- Creates a namespaced `aws_iam_policy` scoped to `s3:PutObject`/`s3:GetObject` on the assets bucket objects
-- Attaches the policy to the shared build-workflow group (created by the ci-build-workflow-user module)
-- Keeps the bucket out of scope: it is referenced by name, not created or managed here
+- Creates an aws_iam_policy scoped to PutObject and GetObject actions on the specified S3 assets bucket
+- Attaches the created IAM policy to an existing IAM group via aws_iam_group_policy_attachment
+- Namespaces the IAM policy name using the cluster_name variable to avoid naming collisions across clusters
+- Grants build workflow users inherited S3 access through group membership rather than direct user policy attachment
 
 ## Basic Usage
 
 ```hcl
-module "ci_build_workflow_user" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/ci-build-workflow-user?ref=v5.0.0"
-
-  cluster_name = "your-cluster-name"
-}
-
-module "s3_assets" {
+module "s3-assets" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/s3-assets?ref=v5.0.0"
 
-  cluster_name              = "your-cluster-name"
-  build_workflow_group_name = module.ci_build_workflow_user.group_name
   assets_bucket             = "your-assets-bucket"
+  build_workflow_group_name = "your-build-workflow-group-name"
+  cluster_name              = "your-cluster-name"
+}
+```
+
+## Using Outputs
+
+```hcl
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.s3-assets.id
 }
 ```
 
@@ -55,8 +59,37 @@ module "s3_assets" {
 | <a name="input_assets_bucket"></a> [assets\_bucket](#input\_assets\_bucket) | Name of the S3 bucket where build assets (e.g. Lambda zips) are published. The bucket is managed elsewhere; this module only grants the build workflow group permission to write to it. | `string` | n/a | yes |
 | <a name="input_build_workflow_group_name"></a> [build\_workflow\_group\_name](#input\_build\_workflow\_group\_name) | Name of the IAM group (from the ci-build-workflow-user module) to which the S3 assets policy is attached. The build workflow user is a member of this group. | `string` | n/a | yes |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the cluster, used to namespace IAM resource names | `string` | n/a | yes |
-
-## Outputs
-
-No outputs.
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "s3-assets",
+  "description": "Creates and attaches an IAM policy granting S3 PutObject and GetObject permissions on a specified assets bucket to an existing IAM group used by build workflows",
+  "architecture": "This module creates an aws_iam_policy resource named with the cluster_name prefix that allows s3:PutObject and s3:GetObject actions scoped to the provided assets_bucket. The policy is then attached to an existing IAM group via an aws_iam_group_policy_attachment resource, linking the policy ARN to the group specified by build_workflow_group_name. No new users or groups are created; the module only manages the policy and its attachment to an externally managed group.",
+  "features": [
+    "Creates an aws_iam_policy scoped to PutObject and GetObject actions on the specified S3 assets bucket",
+    "Attaches the created IAM policy to an existing IAM group via aws_iam_group_policy_attachment",
+    "Namespaces the IAM policy name using the cluster_name variable to avoid naming collisions across clusters",
+    "Grants build workflow users inherited S3 access through group membership rather than direct user policy attachment"
+  ],
+  "inputs": [
+    {
+      "name": "cluster_name",
+      "description": "Name of the cluster, used to namespace IAM resource names",
+      "required": true
+    },
+    {
+      "name": "build_workflow_group_name",
+      "description": "Name of the IAM group (from the ci-build-workflow-user module) to which the S3 assets policy is attached. The build workflow user is a member of this group.",
+      "required": true
+    },
+    {
+      "name": "assets_bucket",
+      "description": "Name of the S3 bucket where build assets (e.g. Lambda zips) are published. The bucket is managed elsewhere; this module only grants the build workflow group permission to write to it.",
+      "required": true
+    }
+  ],
+  "outputs": [],
+  "hash": "8a89e66cfee86c54f5a8aa097c91ca1b"
+}
+END_AI_METADATA -->

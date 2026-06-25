@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.0.0](https://github.com/nullplatform/tofu-modules/compare/v4.6.0...v5.0.0) (2026-06-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* **iam:** infrastructure/aws/iam/ecr no longer creates the build workflow user, access key or group, and no longer outputs build_workflow_access_key_id / build_workflow_access_key_secret. Consumers must instantiate the new build-user module, pass its group_name to ecr (new required input build_workflow_group_name) and to s3-assets, take the build credentials from build-user outputs, and run a tofu state mv to preserve the existing user and access key (see infrastructure/aws/iam/build-user/README.md). The IAM group is renamed from ecr-managers to asset-publishers (recreated; does not rotate the user's keys).
+
+### Features
+
+* **iam:** separate build workflow user from asset repositories + add S3 asset support ([#402](https://github.com/nullplatform/tofu-modules/issues/402)) ([9ae9e09](https://github.com/nullplatform/tofu-modules/commit/9ae9e095e5090d08508b97e6ec4da1a1b7e2ab6a))
+
 ## [4.6.0](https://github.com/nullplatform/tofu-modules/compare/v4.5.2...v4.6.0) (2026-06-25)
 
 

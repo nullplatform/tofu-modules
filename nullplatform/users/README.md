@@ -2,25 +2,26 @@
 
 ## Description
 
-Creates and manages Nullplatform users with their profile information and role-based authorization grants
+Creates and manages NullPlatform users with profile information and role-based authorization grants
 
 ## Architecture
 
-The module creates nullplatform_user resources from a map of user configurations, then flattens the user-to-role relationships into individual nullplatform_authz_grant resources. Each user can have multiple role assignments, which are expanded through a nested for_each loop that merges all user-role combinations into a single flat map. The authorization grants reference the created user IDs and associate them with role slugs and NRN (Nullplatform Resource Name) identifiers for access control.
+The module iterates over a map of user definitions using `nullplatform_user` resources created with `for_each` to provision each user's profile including email, first name, and last name. A flattened merge of role assignments is then computed to drive `nullplatform_authz_grant` resources, linking each user ID to one or more role slugs and NRN scopes. The authorization grants reference the IDs output by the user resources, establishing an implicit dependency between the two resource types.
 
 ## Features
 
-- Creates Nullplatform user accounts with email, first name, and last name attributes
-- Supports multiple role assignments per user through a list of role slugs
-- Generates individual authorization grants for each user-role combination
-- Associates role grants with Nullplatform Resource Names (NRN) for resource-level access control
-- Manages user-role relationships through a flattened resource mapping pattern
+- Creates nullplatform_user resources for each entry in the users map with email, first name, and last name
+- Validates email addresses against a standard RFC-style regex pattern before provisioning
+- Enforces that each user has at least one role_slug assigned
+- Creates nullplatform_authz_grant resources for every user-role combination using a flattened merge
+- Supports multiple role assignments per user by expanding role_slug lists into individual grant resources
+- Scopes authorization grants to specific NRN (NullPlatform Resource Name) values per user
 
 ## Basic Usage
 
 ```hcl
 module "users" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/users?ref=v4.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/users?ref=v5.0.0"
 
   nullplatform_users = "your-nullplatform-users"
 }
@@ -40,13 +41,13 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.86 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.86 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.86 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.95 |
 
 ## Resources
 
@@ -65,14 +66,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "users",
-  "description": "Creates and manages Nullplatform users with their profile information and role-based authorization grants",
-  "architecture": "The module creates nullplatform_user resources from a map of user configurations, then flattens the user-to-role relationships into individual nullplatform_authz_grant resources. Each user can have multiple role assignments, which are expanded through a nested for_each loop that merges all user-role combinations into a single flat map. The authorization grants reference the created user IDs and associate them with role slugs and NRN (Nullplatform Resource Name) identifiers for access control.",
+  "description": "Creates and manages NullPlatform users with profile information and role-based authorization grants",
+  "architecture": "The module iterates over a map of user definitions using `nullplatform_user` resources created with `for_each` to provision each user's profile including email, first name, and last name. A flattened merge of role assignments is then computed to drive `nullplatform_authz_grant` resources, linking each user ID to one or more role slugs and NRN scopes. The authorization grants reference the IDs output by the user resources, establishing an implicit dependency between the two resource types.",
   "features": [
-    "Creates Nullplatform user accounts with email, first name, and last name attributes",
-    "Supports multiple role assignments per user through a list of role slugs",
-    "Generates individual authorization grants for each user-role combination",
-    "Associates role grants with Nullplatform Resource Names (NRN) for resource-level access control",
-    "Manages user-role relationships through a flattened resource mapping pattern"
+    "Creates nullplatform_user resources for each entry in the users map with email, first name, and last name",
+    "Validates email addresses against a standard RFC-style regex pattern before provisioning",
+    "Enforces that each user has at least one role_slug assigned",
+    "Creates nullplatform_authz_grant resources for every user-role combination using a flattened merge",
+    "Supports multiple role assignments per user by expanding role_slug lists into individual grant resources",
+    "Scopes authorization grants to specific NRN (NullPlatform Resource Name) values per user"
   ],
   "inputs": [
     {
@@ -82,6 +84,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "4ae90811c4ec5e5eedf7feff500c1f44"
+  "hash": "bb0a7d042bbd373cf31af2f9f008f786"
 }
 END_AI_METADATA -->

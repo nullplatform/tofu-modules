@@ -2,27 +2,27 @@
 
 ## Description
 
-Creates a nullplatform notification channel by fetching and processing a JSON template from a remote repository and registering it with the nullplatform API
+Creates a nullplatform notification channel by fetching and processing a JSON template from a remote repository using gomplate and registering it via the nullplatform provider
 
 ## Architecture
 
-The module fetches a notification channel template via the `http` data source from a configurable GitHub raw URL, then processes it through an `external` data source using `gomplate` for variable substitution and `jq` for JSON normalization. The processed template drives a `nullplatform_notification_channel` resource, which is wired with a `terraform_data` trigger resource to force replacement when the API key changes. Conditional logic in locals merges optional extra filters using a MongoDB-style `$and` expression, and a dynamic `agent` block in the configuration is populated only when the template type is `agent`.
+The module fetches a notification channel template via the `data.http` data source from a configurable raw GitHub URL, then processes it using a `data.external` shell script that invokes gomplate for variable substitution and jq for JSON normalization. The rendered template drives a `nullplatform_notification_channel` resource, which dynamically configures an agent block (including command data and environment injection) only when the channel type is 'agent'. A `terraform_data` resource keyed on the API key triggers replacement of the notification channel whenever the key rotates, and optional override flags are appended to the cmdline argument when `enabled_override` is true.
 
 ## Features
 
-- Fetches and processes notification channel templates from a remote GitHub repository using gomplate templating
-- Creates a nullplatform_notification_channel resource with dynamic agent configuration driven by template content
-- Supports optional command-line override flags injected into the agent command data when enabled_override is true
-- Merges additional MongoDB-style filter expressions with base template filters using a $and logical operator
-- Forces resource replacement via terraform_data trigger when the API key changes
-- Configures tag-based agent selectors for filtering notification channels and agents
-- Supports configurable repository branch, path, and Git reference for template versioning
+- Fetches notification channel JSON templates dynamically from a remote GitHub repository using configurable branch and path
+- Processes templates with gomplate for variable substitution, injecting NRN, API key, and scope identifiers at render time
+- Creates a nullplatform_notification_channel resource with dynamic agent configuration including command type and environment context
+- Appends override flags to agent command cmdline when custom scope configuration overrides are enabled
+- Merges base template filters with user-supplied MongoDB-style extra_filters using a $and expression
+- Triggers automatic notification channel replacement via terraform_data when the API key changes
+- Supports tag-based agent selector configuration through a flexible map of key-value tags
 
 ## Basic Usage
 
 ```hcl
 module "scope_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=v4.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=v5.0.0"
 
   api_key                  = "your-api-key"
   nrn                      = "your-nrn"
@@ -46,7 +46,7 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.86 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.86 |
 
 ## Providers
 
@@ -54,7 +54,7 @@ resource "example_resource" "this" {
 |------|---------|
 | <a name="provider_external"></a> [external](#provider\_external) | 2.3.5 |
 | <a name="provider_http"></a> [http](#provider\_http) | 3.5.0 |
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.86 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.95 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Resources
@@ -73,7 +73,7 @@ resource "example_resource" "this" {
 | <a name="input_extra_filters"></a> [extra\_filters](#input\_extra\_filters) | Additional filter expression to merge with the base template filters using $and.<br/>Accepts any valid MongoDB-style filter expression, including logical operators<br/>($and, $or, $nor, $not) and comparison operators ($eq, $ne, $in, $nin, $gt,<br/>$gte, $lt, $lte, $regex). If null, only the base template filters are applied.<br/><br/>Examples:<br/>  Simple equality:    { "dimensions.environment" = "production" }<br/>  Comparison:         { "action" = { "$in" = ["deployment:create", "deployment:update"] } }<br/>  Logical OR:         { "$or" = [{ "details.namespace.slug" = "prod" }, { "details.namespace.slug" = "staging" }] }<br/>  Negation:           { "$not" = { "entity\_data.status" = "failed" } }<br/>  Combined:           { "$and" = [{ "action" = { "$regex" = "^deployment" } }, { "$or" = [...] }] } | `any` | `null` | no |
 | <a name="input_github_ref"></a> [github\_ref](#input\_github\_ref) | Git reference to use (branch name, tag, or commit SHA) | `string` | `"beta"` | no |
 | <a name="input_github_repo_url"></a> [github\_repo\_url](#input\_github\_repo\_url) | GitHub repository URL containing scope and action templates | `string` | `"https://github.com/nullplatform/scopes"` | no |
-| <a name="input_nrn"></a> [nrn](#input\_nrn) | n/a | `string` | n/a | yes |
+| <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name (NRN) — unique identifier for the target resource | `string` | n/a | yes |
 | <a name="input_override_repo_path"></a> [override\_repo\_path](#input\_override\_repo\_path) | Local filesystem path where the scope repository will be cloned | `string` | `null` | no |
 | <a name="input_overrides_service_path"></a> [overrides\_service\_path](#input\_overrides\_service\_path) | Local filesystem path to the directory containing override configurations | `string` | `null` | no |
 | <a name="input_repo_path"></a> [repo\_path](#input\_repo\_path) | Local filesystem path where the scope repository will be cloned | `string` | `"/root/.np/nullplatform/scopes"` | no |
@@ -94,21 +94,21 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "scope_definition_agent_association",
-  "description": "Creates a nullplatform notification channel by fetching and processing a JSON template from a remote repository and registering it with the nullplatform API",
-  "architecture": "The module fetches a notification channel template via the `http` data source from a configurable GitHub raw URL, then processes it through an `external` data source using `gomplate` for variable substitution and `jq` for JSON normalization. The processed template drives a `nullplatform_notification_channel` resource, which is wired with a `terraform_data` trigger resource to force replacement when the API key changes. Conditional logic in locals merges optional extra filters using a MongoDB-style `$and` expression, and a dynamic `agent` block in the configuration is populated only when the template type is `agent`.",
+  "description": "Creates a nullplatform notification channel by fetching and processing a JSON template from a remote repository using gomplate and registering it via the nullplatform provider",
+  "architecture": "The module fetches a notification channel template via the `data.http` data source from a configurable raw GitHub URL, then processes it using a `data.external` shell script that invokes gomplate for variable substitution and jq for JSON normalization. The rendered template drives a `nullplatform_notification_channel` resource, which dynamically configures an agent block (including command data and environment injection) only when the channel type is 'agent'. A `terraform_data` resource keyed on the API key triggers replacement of the notification channel whenever the key rotates, and optional override flags are appended to the cmdline argument when `enabled_override` is true.",
   "features": [
-    "Fetches and processes notification channel templates from a remote GitHub repository using gomplate templating",
-    "Creates a nullplatform_notification_channel resource with dynamic agent configuration driven by template content",
-    "Supports optional command-line override flags injected into the agent command data when enabled_override is true",
-    "Merges additional MongoDB-style filter expressions with base template filters using a $and logical operator",
-    "Forces resource replacement via terraform_data trigger when the API key changes",
-    "Configures tag-based agent selectors for filtering notification channels and agents",
-    "Supports configurable repository branch, path, and Git reference for template versioning"
+    "Fetches notification channel JSON templates dynamically from a remote GitHub repository using configurable branch and path",
+    "Processes templates with gomplate for variable substitution, injecting NRN, API key, and scope identifiers at render time",
+    "Creates a nullplatform_notification_channel resource with dynamic agent configuration including command type and environment context",
+    "Appends override flags to agent command cmdline when custom scope configuration overrides are enabled",
+    "Merges base template filters with user-supplied MongoDB-style extra_filters using a $and expression",
+    "Triggers automatic notification channel replacement via terraform_data when the API key changes",
+    "Supports tag-based agent selector configuration through a flexible map of key-value tags"
   ],
   "inputs": [
     {
       "name": "nrn",
-      "description": "",
+      "description": "Nullplatform Resource Name (NRN) — unique identifier for the target resource",
       "required": true
     },
     {
@@ -132,6 +132,11 @@ resource "example_resource" "this" {
       "required": true
     },
     {
+      "name": "github_repo_url",
+      "description": "GitHub repository URL containing scope and action templates",
+      "required": false
+    },
+    {
       "name": "enabled_override",
       "description": "Enable custom overrides for scope configurations via command line",
       "required": false
@@ -144,11 +149,6 @@ resource "example_resource" "this" {
     {
       "name": "override_repo_path",
       "description": "Local filesystem path where the scope repository will be cloned",
-      "required": false
-    },
-    {
-      "name": "github_repo_url",
-      "description": "GitHub repository URL containing scope and action templates",
       "required": false
     },
     {
@@ -185,6 +185,6 @@ resource "example_resource" "this" {
   "outputs": [
     "notification_channel_id"
   ],
-  "hash": "56e4330dddab5eef6b306255c7a20494"
+  "hash": "506c8b9088177ee7ee6ad97e7339abbf"
 }
 END_AI_METADATA -->
