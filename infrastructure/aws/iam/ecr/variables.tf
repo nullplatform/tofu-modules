@@ -4,7 +4,7 @@ variable "cluster_name" {
 }
 
 variable "build_workflow_group_name" {
-  description = "Name of the IAM group (from the build-user module) to which the ECR manager policy is attached. The build workflow user is a member of this group."
+  description = "Name of the IAM group (from the ci-build-workflow-user module) to which the ECR manager policy is attached. The build workflow user is a member of this group."
   type        = string
 }
 
