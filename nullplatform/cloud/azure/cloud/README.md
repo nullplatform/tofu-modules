@@ -2,24 +2,27 @@
 
 ## Description
 
-Configures Azure networking settings for a Nullplatform provider
+Configures a nullplatform Azure provider by creating a nullplatform_provider_config resource with authentication credentials and networking settings for Azure infrastructure
 
 ## Architecture
 
-Creates a nullplatform_provider_config resource of type azure-configuration that sets up networking attributes including DNS zones and resource groups. The module maps input variables like domain_name, azure_resource_group_name, and private_dns_resource_group_name into the attributes block of the provider config. The nullplatform_provider_config resource integrates with Nullplatform's infrastructure management system to apply Azure-specific networking configurations.
+The module creates a single nullplatform_provider_config resource of type 'azure-configuration' that encodes Azure authentication and networking attributes as a JSON payload. Authentication fields (client_id, client_secret, subscription_id, tenant_id) are conditionally included only when non-null, enforced by a lifecycle precondition requiring all-or-none credential provisioning. Networking attributes including public and private DNS zone names and their respective resource group names are wired directly from input variables into the jsonencode attributes block. The resource is bound to a nullplatform NRN and optional dimensions map to scope the configuration within the nullplatform hierarchy.
 
 ## Features
 
-- Configures public and private DNS zone names for Azure
-- Maps Azure resource groups to DNS zones
-- Supports custom application domain configuration
-- Allows dimension tagging for resource organization
+- Creates a nullplatform_provider_config resource of type 'azure-configuration' scoped to a specific NRN
+- Configures Azure Service Principal authentication with client_id, client_secret, subscription_id, and tenant_id supporting inheritance from parent providers when omitted
+- Enforces all-or-nothing credential validation ensuring authentication fields are either all set or all null via lifecycle precondition
+- Configures public and private DNS zone names with their respective Azure resource group references for networking
+- Supports optional dimensions map for scoping the provider configuration within nullplatform hierarchy
+- Marks client_secret as sensitive to prevent exposure in Terraform state output
+- Ignores post-creation attribute drift via ignore_changes to prevent unintended updates
 
 ## Basic Usage
 
 ```hcl
 module "cloud" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/azure/cloud?ref=v4.5.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/azure/cloud?ref=v5.0.0"
 
   azure_resource_group_name       = "your-azure-resource-group-name"
   nrn                             = "your-nrn"
@@ -41,13 +44,13 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.86 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.86 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.86 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.95 |
 
 ## Resources
 
@@ -75,13 +78,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "cloud",
-  "description": "Configures Azure networking settings for a Nullplatform provider",
-  "architecture": "Creates a nullplatform_provider_config resource of type azure-configuration that sets up networking attributes including DNS zones and resource groups. The module maps input variables like domain_name, azure_resource_group_name, and private_dns_resource_group_name into the attributes block of the provider config. The nullplatform_provider_config resource integrates with Nullplatform's infrastructure management system to apply Azure-specific networking configurations.",
+  "description": "Configures a nullplatform Azure provider by creating a nullplatform_provider_config resource with authentication credentials and networking settings for Azure infrastructure",
+  "architecture": "The module creates a single nullplatform_provider_config resource of type 'azure-configuration' that encodes Azure authentication and networking attributes as a JSON payload. Authentication fields (client_id, client_secret, subscription_id, tenant_id) are conditionally included only when non-null, enforced by a lifecycle precondition requiring all-or-none credential provisioning. Networking attributes including public and private DNS zone names and their respective resource group names are wired directly from input variables into the jsonencode attributes block. The resource is bound to a nullplatform NRN and optional dimensions map to scope the configuration within the nullplatform hierarchy.",
   "features": [
-    "Configures public and private DNS zone names for Azure",
-    "Maps Azure resource groups to DNS zones",
-    "Supports custom application domain configuration",
-    "Allows dimension tagging for resource organization"
+    "Creates a nullplatform_provider_config resource of type 'azure-configuration' scoped to a specific NRN",
+    "Configures Azure Service Principal authentication with client_id, client_secret, subscription_id, and tenant_id supporting inheritance from parent providers when omitted",
+    "Enforces all-or-nothing credential validation ensuring authentication fields are either all set or all null via lifecycle precondition",
+    "Configures public and private DNS zone names with their respective Azure resource group references for networking",
+    "Supports optional dimensions map for scoping the provider configuration within nullplatform hierarchy",
+    "Marks client_secret as sensitive to prevent exposure in Terraform state output",
+    "Ignores post-creation attribute drift via ignore_changes to prevent unintended updates"
   ],
   "inputs": [
     {
@@ -98,6 +104,26 @@ resource "example_resource" "this" {
       "name": "private_dns_resource_group_name",
       "description": "Azure resource group name for the DNS private",
       "required": true
+    },
+    {
+      "name": "client_id",
+      "description": "Azure Service Principal client ID. If omitted, inherits from a parent cloud provider.",
+      "required": false
+    },
+    {
+      "name": "client_secret",
+      "description": "Azure Service Principal client secret. If omitted, inherits from a parent cloud provider.",
+      "required": false
+    },
+    {
+      "name": "subscription_id",
+      "description": "Azure subscription ID. If omitted, inherits from a parent cloud provider.",
+      "required": false
+    },
+    {
+      "name": "tenant_id",
+      "description": "Azure Active Directory tenant ID. If omitted, inherits from a parent cloud provider.",
+      "required": false
     },
     {
       "name": "domain_name",
@@ -121,6 +147,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "1038ba6fe7ba85cfa18ce2965b818679"
+  "hash": "02119a8630f0bd1a785f49967ff9291d"
 }
 END_AI_METADATA -->

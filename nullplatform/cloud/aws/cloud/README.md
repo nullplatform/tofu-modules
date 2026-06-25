@@ -20,7 +20,7 @@ The module uses data sources aws_caller_identity and aws_region to dynamically r
 
 ```hcl
 module "cloud" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/cloud?ref=v4.5.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/cloud?ref=v5.0.0"
 
   domain_name            = "your-domain-name"
   hosted_private_zone_id = "your-hosted-private-zone-id"
@@ -43,14 +43,14 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.86 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.86 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | 6.43.0 |
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.86 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.95 |
 
 ## Resources
 

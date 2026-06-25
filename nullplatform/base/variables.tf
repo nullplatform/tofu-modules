@@ -91,6 +91,12 @@ variable "gateway_public_load_balancer_type" {
   }
 }
 
+variable "gateway_public_azure_load_balancer_subnet" {
+  type        = string
+  description = "Name of the subnet for the public gateway's internal Azure load balancer. Only applied when gateway_public_load_balancer_type is 'internal'; empty by default, in which case Azure picks the subnet automatically."
+  default     = ""
+}
+
 variable "gateway_use_cluster_ip" {
   description = ""
   type        = bool

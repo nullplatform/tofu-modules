@@ -29,6 +29,7 @@ locals {
       gateway_public_name                         = var.gateway_public_name
       gateway_internal_azure_load_balancer_subnet = var.internal_azure_load_balancer_subnet
       gateway_public_load_balancer_type           = var.gateway_public_load_balancer_type
+      gateway_public_azure_load_balancer_subnet   = var.gateway_public_azure_load_balancer_subnet
       gateway_public_aws_name                     = var.gateway_public_aws_name
       gateway_internal_aws_name                   = var.gateway_internal_aws_name
       gateway_public_aws_dns_name                 = var.gateway_public_aws_dns_name
