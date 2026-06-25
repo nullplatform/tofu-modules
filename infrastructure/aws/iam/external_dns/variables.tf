@@ -27,3 +27,14 @@ variable "cluster_name" {
   description = "Name of the cluster where the policy runs"
   type        = string
 }
+
+variable "identity_mode" {
+  description = "IAM identity mode: 'irsa' uses OIDC federation via the community iam-role-for-service-accounts module; 'pod_identity' creates a native IAM role trusted by pods.eks.amazonaws.com with EKS Pod Identity associations"
+  type        = string
+  default     = "irsa"
+
+  validation {
+    condition     = contains(["irsa", "pod_identity"], var.identity_mode)
+    error_message = "identity_mode must be either 'irsa' or 'pod_identity'."
+  }
+}

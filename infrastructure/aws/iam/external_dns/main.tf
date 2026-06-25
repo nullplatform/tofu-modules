@@ -4,10 +4,16 @@ locals {
     "arn:aws:route53:::hostedzone/${id}"
     if id != null && id != ""
   ]
+
+  external_dns_service_accounts = [
+    { namespace = "external-dns", service_account = "external-dns-private" },
+    { namespace = "external-dns", service_account = "external-dns-public" },
+  ]
 }
 
-# Create IAM role with OIDC provider trust for Kubernetes service account
+# IRSA: OIDC federation via community module
 module "nullplatform_external_dns_role" {
+  count           = var.identity_mode == "irsa" ? 1 : 0
   source          = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
   name            = "nullplatform-${var.cluster_name}-external-dns-role"
   use_name_prefix = false
@@ -25,6 +31,39 @@ module "nullplatform_external_dns_role" {
   policies = {
     "nullplatform_external_dns_policy" = aws_iam_policy.nullplatform_external_dns_policy.arn,
   }
+}
+
+# Pod Identity: native IAM role trusted by the EKS Pod Identity agent
+resource "aws_iam_role" "pod_identity" {
+  count = var.identity_mode == "pod_identity" ? 1 : 0
+  name  = "nullplatform-${var.cluster_name}-external-dns-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "pods.eks.amazonaws.com" }
+      Action    = ["sts:AssumeRole", "sts:TagSession"]
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "pod_identity" {
+  count      = var.identity_mode == "pod_identity" ? 1 : 0
+  role       = aws_iam_role.pod_identity[0].name
+  policy_arn = aws_iam_policy.nullplatform_external_dns_policy.arn
+}
+
+resource "aws_eks_pod_identity_association" "this" {
+  for_each = var.identity_mode == "pod_identity" ? {
+    for sa in local.external_dns_service_accounts :
+    "${sa.namespace}:${sa.service_account}" => sa
+  } : {}
+
+  cluster_name    = var.cluster_name
+  namespace       = each.value.namespace
+  service_account = each.value.service_account
+  role_arn        = aws_iam_role.pod_identity[0].arn
 }
 
 # Grant permissions to manage Route 53 DNS records for service discovery
