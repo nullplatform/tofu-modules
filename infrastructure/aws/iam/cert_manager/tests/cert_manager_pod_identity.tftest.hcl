@@ -14,9 +14,9 @@ mock_provider "aws" {
 }
 
 variables {
-  cluster_name   = "test-cluster"
+  cluster_name           = "test-cluster"
   hosted_zone_private_id = "Z0987654321DEF"
-  identity_mode  = "pod_identity"
+  identity_mode          = "pod_identity"
 }
 
 run "creates_pod_identity_role" {
