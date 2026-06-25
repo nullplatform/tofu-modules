@@ -18,7 +18,7 @@ This module creates a helm_release resource to deploy the Prometheus chart from 
 
 ```hcl
 module "prometheus" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v5.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v5.1.0"
 }
 ```
 
