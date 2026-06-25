@@ -2,25 +2,25 @@
 
 ## Description
 
-Creates a Nullplatform provider configuration resource with JSON-encoded attributes and optional dimensions
+Creates a Nullplatform provider configuration (scope configuration) resource associated with a specific provider specification and NRN
 
 ## Architecture
 
-The module creates a single nullplatform_provider_config resource that associates a provider specification (identified by slug) with a target NRN. Input attributes are JSON-encoded and passed to the resource along with optional dimension mappings. The resource lifecycle is configured to ignore changes to attributes after initial creation. The provider configuration ID is exposed as an output for reference by dependent resources.
+The module creates a single nullplatform_provider_config resource that binds a Nullplatform Resource Name (NRN) to a provider specification type defined by the provider_specification_slug. The attributes input is JSON-encoded before being passed to the resource, and dimension values are passed as a map to scope the configuration. The resource uses a lifecycle ignore_changes rule on attributes to prevent drift detection after initial creation. The resource ID is exposed as an output for downstream module consumption.
 
 ## Features
 
-- Creates a Nullplatform provider configuration resource linked to a specific NRN
-- JSON-encodes arbitrary configuration attributes matching provider specification schema
-- Associates provider specification via slug identifier
-- Supports optional dimension key-value mappings for scoped configurations
-- Ignores attribute changes in lifecycle to prevent drift after initial deployment
+- Creates a nullplatform_provider_config resource linked to a specific NRN and provider specification slug
+- Encodes configuration attributes as JSON to match the provider specification schema
+- Supports dimensional scoping of provider configurations via a key-value dimension map
+- Prevents attribute drift after initial creation using Terraform lifecycle ignore_changes
+- Exposes the created provider config ID as an output for downstream reference
 
 ## Basic Usage
 
 ```hcl
 module "scope_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v4.5.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v5.1.0"
 
   attributes                  = "your-attributes"
   np_api_key                  = "your-np-api-key"
@@ -43,13 +43,13 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.67 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.86 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | ~> 0.0.67 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.95 |
 
 ## Resources
 
@@ -77,14 +77,14 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "scope_configuration",
-  "description": "Creates a Nullplatform provider configuration resource with JSON-encoded attributes and optional dimensions",
-  "architecture": "The module creates a single nullplatform_provider_config resource that associates a provider specification (identified by slug) with a target NRN. Input attributes are JSON-encoded and passed to the resource along with optional dimension mappings. The resource lifecycle is configured to ignore changes to attributes after initial creation. The provider configuration ID is exposed as an output for reference by dependent resources.",
+  "description": "Creates a Nullplatform provider configuration (scope configuration) resource associated with a specific provider specification and NRN",
+  "architecture": "The module creates a single nullplatform_provider_config resource that binds a Nullplatform Resource Name (NRN) to a provider specification type defined by the provider_specification_slug. The attributes input is JSON-encoded before being passed to the resource, and dimension values are passed as a map to scope the configuration. The resource uses a lifecycle ignore_changes rule on attributes to prevent drift detection after initial creation. The resource ID is exposed as an output for downstream module consumption.",
   "features": [
-    "Creates a Nullplatform provider configuration resource linked to a specific NRN",
-    "JSON-encodes arbitrary configuration attributes matching provider specification schema",
-    "Associates provider specification via slug identifier",
-    "Supports optional dimension key-value mappings for scoped configurations",
-    "Ignores attribute changes in lifecycle to prevent drift after initial deployment"
+    "Creates a nullplatform_provider_config resource linked to a specific NRN and provider specification slug",
+    "Encodes configuration attributes as JSON to match the provider specification schema",
+    "Supports dimensional scoping of provider configurations via a key-value dimension map",
+    "Prevents attribute drift after initial creation using Terraform lifecycle ignore_changes",
+    "Exposes the created provider config ID as an output for downstream reference"
   ],
   "inputs": [
     {
@@ -98,13 +98,13 @@ resource "example_resource" "this" {
       "required": true
     },
     {
-      "name": "provider_specification_slug",
-      "description": "Slug of the provider specification (scope configuration type) to associate with.",
+      "name": "attributes",
+      "description": "Configuration attributes matching the provider specification schema.",
       "required": true
     },
     {
-      "name": "attributes",
-      "description": "Configuration attributes matching the provider specification schema.",
+      "name": "provider_specification_slug",
+      "description": "Slug of the provider specification (scope configuration type) to associate with.",
       "required": true
     },
     {
@@ -116,6 +116,6 @@ resource "example_resource" "this" {
   "outputs": [
     "provider_config_id"
   ],
-  "hash": "78fb31d42df72b1ddeff84e1886f6c9c"
+  "hash": "05a6b14a1bad1e51d5cb3708971964d8"
 }
 END_AI_METADATA -->

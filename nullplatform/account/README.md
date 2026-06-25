@@ -2,25 +2,24 @@
 
 ## Description
 
-Creates and manages Nullplatform accounts with repository configuration settings
+Creates and manages multiple nullplatform accounts using a map-based configuration with optional repository settings
 
 ## Architecture
 
-This module creates nullplatform_account resources using a for_each loop over the input map. Each account resource is configured with name, repository prefix, repository provider, and slug attributes. The module takes a map of account objects as input and provisions corresponding nullplatform_account resources. The repository_prefix and repository_provider fields are optional and pass through as null when not set, leaving them unmanaged by the provider; slug has a default value.
+The module iterates over the `nullplatform_accounts` input map using `for_each` to create one `nullplatform_account` resource per entry. Each resource receives its `name`, `repository_prefix`, `repository_provider`, and `slug` values directly from the corresponding map object. Optional fields default to null unless specified, with `slug` defaulting to `poc-account` when omitted.
 
 ## Features
 
-- Creates multiple Nullplatform accounts from a single map input
-- Optional repository_prefix (no default; provider treats null as unset)
-- Optional repository_provider (no default; provider treats null as unset)
-- Assigns custom slugs to accounts with default value 'poc-account'
-- Supports dynamic account provisioning via for_each iteration
+- Creates multiple nullplatform_account resources from a single map variable using for_each iteration
+- Supports optional repository prefix and provider configuration per account
+- Defaults the slug field to 'poc-account' when not explicitly provided
+- Enables independent lifecycle management of each account through map key-based resource addressing
 
 ## Basic Usage
 
 ```hcl
 module "account" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/account?ref=v4.5.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/account?ref=v5.1.0"
 
   nullplatform_accounts = "your-nullplatform-accounts"
 }
@@ -40,13 +39,13 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.86 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.86 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.86 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.95 |
 
 ## Resources
 
@@ -64,14 +63,13 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "account",
-  "description": "Creates and manages Nullplatform accounts with repository configuration settings",
-  "architecture": "This module creates nullplatform_account resources using a for_each loop over the input map. Each account resource is configured with name, repository prefix, repository provider, and slug attributes. The module takes a map of account objects as input and provisions corresponding nullplatform_account resources. The repository_prefix and repository_provider fields are optional and pass through as null when not set, leaving them unmanaged by the provider; slug has a default value.",
+  "description": "Creates and manages multiple nullplatform accounts using a map-based configuration with optional repository settings",
+  "architecture": "The module iterates over the `nullplatform_accounts` input map using `for_each` to create one `nullplatform_account` resource per entry. Each resource receives its `name`, `repository_prefix`, `repository_provider`, and `slug` values directly from the corresponding map object. Optional fields default to null unless specified, with `slug` defaulting to `poc-account` when omitted.",
   "features": [
-    "Creates multiple Nullplatform accounts from a single map input",
-    "Optional repository_prefix (no default; provider treats null as unset)",
-    "Optional repository_provider (no default; provider treats null as unset)",
-    "Assigns custom slugs to accounts with default value 'poc-account'",
-    "Supports dynamic account provisioning via for_each iteration"
+    "Creates multiple nullplatform_account resources from a single map variable using for_each iteration",
+    "Supports optional repository prefix and provider configuration per account",
+    "Defaults the slug field to 'poc-account' when not explicitly provided",
+    "Enables independent lifecycle management of each account through map key-based resource addressing"
   ],
   "inputs": [
     {
@@ -81,6 +79,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "2b87820ae1d2b13cad2586ff6803ffdc"
+  "hash": "c0c778247ee53319c633d7d4bb9cef6e"
 }
 END_AI_METADATA -->

@@ -12,6 +12,11 @@ variable "nrn" {
 variable "provider_specification_slug" {
   description = "Slug of the provider specification (scope configuration type) to associate with."
   type        = string
+
+  validation {
+    condition     = length(trimspace(var.provider_specification_slug)) > 0
+    error_message = "provider_specification_slug must not be empty."
+  }
 }
 
 variable "attributes" {
