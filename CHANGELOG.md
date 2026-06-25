@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.1.0](https://github.com/nullplatform/tofu-modules/compare/v5.0.0...v5.1.0) (2026-06-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* **iam/agent:** the IRSA token no longer has Route53/EKS/ELB/AVP permissions directly. The agent must assume the permissions role (exposed via the nullplatform_agent_permissions_role_arn output) to use them.
+
+### Features
+
+* **iam/agent:** split agent role into agent + permissions roles ([#397](https://github.com/nullplatform/tofu-modules/issues/397)) ([9df28f5](https://github.com/nullplatform/tofu-modules/commit/9df28f53ae726a251eb7ed937b88dd1057452672))
+
+
+### Miscellaneous Chores
+
+* release 5.1.0 ([#410](https://github.com/nullplatform/tofu-modules/issues/410)) ([fc5ef69](https://github.com/nullplatform/tofu-modules/commit/fc5ef69851a7b21204a4e07ba04968728d47a6a1))
+
 ## [5.0.0](https://github.com/nullplatform/tofu-modules/compare/v4.6.0...v5.0.0) (2026-06-25)
 
 
