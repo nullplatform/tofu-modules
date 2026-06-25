@@ -20,6 +20,11 @@ variable "github_repo_url" {
   description = "GitHub repository URL containing scope and action templates"
   type        = string
   default     = "https://github.com/nullplatform/scopes"
+
+  validation {
+    condition     = can(regex("^https?://", var.github_repo_url))
+    error_message = "github_repo_url must be a valid HTTP(S) URL."
+  }
 }
 
 variable "github_ref" {
@@ -46,8 +51,8 @@ variable "service_path" {
   default     = "k8s"
 }
 variable "nrn" {
-  type = string
-
+  description = "Nullplatform Resource Name (NRN) — unique identifier for the target resource"
+  type        = string
 }
 variable "api_key" {
   description = "API key for authenticating with the nullplatform API"
