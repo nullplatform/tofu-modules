@@ -19,8 +19,14 @@ variable "hosted_zone_private_id" {
 }
 
 variable "aws_iam_openid_connect_provider_arn" {
-  description = "ARN of the AWS IAM OIDC provider for EKS service account authentication"
+  description = "ARN of the AWS IAM OIDC provider. Required when identity_mode is 'irsa'; ignored when identity_mode is 'pod_identity'."
   type        = string
+  default     = null
+
+  validation {
+    condition     = var.identity_mode != "irsa" || (var.aws_iam_openid_connect_provider_arn != null && var.aws_iam_openid_connect_provider_arn != "")
+    error_message = "aws_iam_openid_connect_provider_arn is required when identity_mode is 'irsa'."
+  }
 }
 
 variable "cluster_name" {
@@ -29,7 +35,7 @@ variable "cluster_name" {
 }
 
 variable "identity_mode" {
-  description = "IAM identity mode: 'irsa' uses OIDC federation via the community iam-role-for-service-accounts module; 'pod_identity' creates a native IAM role trusted by pods.eks.amazonaws.com with EKS Pod Identity associations"
+  description = "IAM identity mode: 'irsa' uses OIDC federation via the community iam-role-for-service-accounts module; 'pod_identity' creates a native IAM role trusted by pods.eks.amazonaws.com with EKS Pod Identity associations. WARNING: changing this value on an existing deployment destroys the current IAM role before creating a new one — external-dns will lose permissions during the transition."
   type        = string
   default     = "irsa"
 

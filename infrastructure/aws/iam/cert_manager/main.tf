@@ -46,7 +46,7 @@ resource "aws_iam_role" "pod_identity" {
 
 resource "aws_iam_role_policy_attachment" "pod_identity" {
   count      = var.identity_mode == "pod_identity" ? 1 : 0
-  role       = aws_iam_role.pod_identity[0].name
+  role       = one(aws_iam_role.pod_identity[*].name)
   policy_arn = aws_iam_policy.nullplatform_cert_manager_policy.arn
 }
 
@@ -59,7 +59,7 @@ resource "aws_eks_pod_identity_association" "this" {
   cluster_name    = var.cluster_name
   namespace       = each.value.namespace
   service_account = each.value.service_account
-  role_arn        = aws_iam_role.pod_identity[0].arn
+  role_arn        = one(aws_iam_role.pod_identity[*].arn)
 }
 
 # Grant permissions to manage Route 53 DNS records for DNS01 challenge

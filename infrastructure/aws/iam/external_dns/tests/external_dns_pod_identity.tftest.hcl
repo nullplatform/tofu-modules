@@ -14,10 +14,9 @@ mock_provider "aws" {
 }
 
 variables {
-  cluster_name                        = "test-cluster"
-  hosted_zone_private_id              = "Z0987654321DEF"
-  aws_iam_openid_connect_provider_arn = "arn:aws:iam::123456789012:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/EXAMPLE"
-  identity_mode                       = "pod_identity"
+  cluster_name           = "test-cluster"
+  hosted_zone_private_id = "Z0987654321DEF"
+  identity_mode          = "pod_identity"
 }
 
 run "creates_pod_identity_role" {
@@ -55,6 +54,23 @@ run "creates_two_associations" {
   assert {
     condition     = aws_eks_pod_identity_association.this["external-dns:external-dns-private"].namespace == "external-dns"
     error_message = "Associations must target the external-dns namespace"
+  }
+  assert {
+    condition     = aws_eks_pod_identity_association.this["external-dns:external-dns-public"].namespace == "external-dns"
+    error_message = "Associations must target the external-dns namespace"
+  }
+}
+
+run "pod_identity_mode_does_not_create_irsa_module" {
+  command = plan
+
+  assert {
+    condition     = length(module.nullplatform_external_dns_role) == 0
+    error_message = "pod_identity mode must not instantiate the IRSA community module"
+  }
+  assert {
+    condition     = output.nullplatform_external_dns_role_arn != null
+    error_message = "pod_identity mode must produce a non-null role ARN output"
   }
 }
 
