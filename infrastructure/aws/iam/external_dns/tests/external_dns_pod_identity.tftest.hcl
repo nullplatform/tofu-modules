@@ -34,6 +34,14 @@ run "creates_pod_identity_role" {
     condition     = strcontains(aws_iam_role.pod_identity[0].assume_role_policy, "sts:TagSession")
     error_message = "Pod Identity role trust must allow sts:TagSession"
   }
+  assert {
+    condition     = length(aws_iam_role_policy_attachment.pod_identity) == 1
+    error_message = "Pod Identity mode must create exactly one policy attachment"
+  }
+  assert {
+    condition     = aws_iam_role_policy_attachment.pod_identity[0].role == "nullplatform-test-cluster-external-dns-role"
+    error_message = "Policy attachment must reference the Pod Identity role"
+  }
 }
 
 run "creates_two_associations" {
@@ -69,8 +77,21 @@ run "pod_identity_mode_does_not_create_irsa_module" {
     error_message = "pod_identity mode must not instantiate the IRSA community module"
   }
   assert {
-    condition     = output.nullplatform_external_dns_role_arn != null
-    error_message = "pod_identity mode must produce a non-null role ARN output"
+    condition     = output.nullplatform_external_dns_role_arn == "arn:aws:iam::123456789012:role/nullplatform-test-cluster-external-dns-role"
+    error_message = "pod_identity mode must output the Pod Identity role ARN"
+  }
+}
+
+run "pod_identity_does_not_require_oidc_arn" {
+  command = plan
+
+  variables {
+    aws_iam_openid_connect_provider_arn = null
+  }
+
+  assert {
+    condition     = length(aws_iam_role.pod_identity) == 1
+    error_message = "Pod Identity mode must succeed without aws_iam_openid_connect_provider_arn"
   }
 }
 

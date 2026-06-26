@@ -66,8 +66,9 @@ resource "aws_eks_pod_identity_association" "this" {
   role_arn        = one(aws_iam_role.pod_identity[*].arn)
 }
 
-# Backward-compat: count was added to this module in v4.6.0; consumers upgrading
-# from a prior version have the state at the un-indexed address.
+# Backward-compat (IRSA path only): count was added to this module call in v4.6.0;
+# consumers upgrading from a prior version have state at the un-indexed address.
+# Pod Identity deployments are new in v4.6.0 and have no prior state to migrate.
 moved {
   from = module.nullplatform_external_dns_role
   to   = module.nullplatform_external_dns_role[0]
