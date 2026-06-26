@@ -83,12 +83,14 @@ variable "aws_region" {
   description = "The AWS region where the Route53 hosted zones are located"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 variable "aws_iam_role_arn" {
   description = "The IAM role ARN for ExternalDNS to assume for Route53 access (required when dns_provider_name is 'aws')"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 variable "aws_identity_mode" {
@@ -106,12 +108,14 @@ variable "zone_id_filter" {
   description = "The Route53 public or private hosted zone ID for ExternalDNS to manage (required when dns_provider_name is 'aws')"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 variable "zone_type" {
   description = "The Route53 hosted zone type for ExternalDNS to manage (public or private)"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 ###############################################################################
