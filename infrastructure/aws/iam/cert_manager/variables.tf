@@ -35,7 +35,7 @@ variable "cluster_name" {
 }
 
 variable "identity_mode" {
-  description = "IAM identity mode: 'irsa' uses OIDC federation via the community iam-role-for-service-accounts module; 'pod_identity' creates a native IAM role trusted by pods.eks.amazonaws.com with an EKS Pod Identity association. WARNING: changing this value on an existing deployment destroys the current IAM role before creating a new one — cert-manager will lose permissions during the transition."
+  description = "IAM identity mode: 'irsa' uses OIDC federation via the community iam-role-for-service-accounts module; 'pod_identity' creates a native IAM role trusted by pods.eks.amazonaws.com with an EKS Pod Identity association. Default 'irsa' is backward compatible with v4.5.x — no state changes required on upgrade. Note: switching between modes on an existing deployment replaces the IAM role; cert-manager will lose permissions during the transition until apply completes."
   type        = string
   default     = "irsa"
 
