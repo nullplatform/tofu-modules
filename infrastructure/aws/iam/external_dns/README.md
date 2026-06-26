@@ -134,6 +134,6 @@ resource "example_resource" "this" {
   "outputs": [
     "nullplatform_external_dns_role_arn"
   ],
-  "hash": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6"
+  "hash": "6919410eaa2347cfed3c8c4d64d61479"
 }
 END_AI_METADATA -->

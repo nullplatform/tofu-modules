@@ -134,6 +134,6 @@ resource "example_resource" "this" {
   "outputs": [
     "nullplatform_cert_manager_role_arn"
   ],
-  "hash": "f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6"
+  "hash": "e4578ab43eee3db215746d060099bc27"
 }
 END_AI_METADATA -->
