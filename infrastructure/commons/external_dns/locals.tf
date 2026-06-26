@@ -35,9 +35,9 @@ locals {
     }]
     serviceAccount = {
       create = true
-      annotations = {
+      annotations = var.aws_identity_mode == "irsa" ? {
         "eks.amazonaws.com/role-arn" = var.aws_iam_role_arn
-      }
+      } : {}
     }
     rbac = {
       create = true
