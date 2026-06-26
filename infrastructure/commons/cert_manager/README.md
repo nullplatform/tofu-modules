@@ -6,13 +6,13 @@ Deploys cert-manager and its cloud-provider-specific configuration onto a Kubern
 
 ## Architecture
 
-The module creates two core helm_release resources: cert-manager from the Jetstack chart repository and nullplatform-cert-manager-config from the nullplatform Helm chart repository, with the config release depending on the cert-manager release. A third conditional helm_release resource for cert-manager-webhook-oci is created only when cloud_provider is set to 'oci'. Provider-specific service account annotations (such as GKE Workload Identity email, EKS IRSA role ARN, Azure Workload Identity client ID, or OCI workload identity OCID) are merged into the cert-manager serviceAccount resource via locals, and provider-specific solver values are rendered from per-provider template files and passed as Helm values to the config chart.
+The module creates two core helm_release resources: cert-manager from the Jetstack chart repository and nullplatform-cert-manager-config from the nullplatform Helm chart repository, with the config release depending on the cert-manager release. A third conditional helm_release resource for cert-manager-webhook-oci is created only when cloud_provider is set to 'oci'. Provider-specific service account annotations are merged into the cert-manager serviceAccount resource via locals (GKE Workload Identity email, EKS IRSA role ARN when `aws_identity_mode=irsa`, Azure Workload Identity client ID, OCI workload identity OCID). When `aws_identity_mode=pod_identity` the IRSA annotation is omitted and EKS Pod Identity injects credentials via the agent. Provider-specific solver values are rendered from per-provider template files and passed as Helm values to the config chart.
 
 ## Features
 
 - Deploys cert-manager Helm chart with CRDs enabled and DNS01 recursive nameservers configured
 - Renders provider-specific cert-manager-config Helm values from templatefiles for each supported cloud provider
-- Configures cert-manager Kubernetes ServiceAccount annotations with cloud-provider IAM identity bindings (GKE Workload Identity, EKS IRSA, Azure Workload Identity, OCI Workload Identity)
+- Configures cert-manager Kubernetes ServiceAccount annotations with cloud-provider IAM identity bindings (GKE Workload Identity, EKS IRSA or Pod Identity via `aws_identity_mode`, Azure Workload Identity, OCI Workload Identity)
 - Deploys cert-manager-webhook-oci Helm chart conditionally when OCI is the selected cloud provider
 - Supports Azure Service Principal authentication as fallback when Workload Identity is disabled
 - Merges base Helm chart version annotations with provider-specific pod and service account annotations using locals
@@ -122,20 +122,20 @@ resource "example_resource" "this" {
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 3.0 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | 3.1.1 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [helm_release.cert_manager](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.cert_manager_config](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.cert_manager_webhook_oci](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
@@ -144,8 +144,9 @@ resource "example_resource" "this" {
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_account_slug"></a> [account\_slug](#input\_account\_slug) | The nullplatform account slug. | `string` | n/a | yes |
+| <a name="input_aws_identity_mode"></a> [aws\_identity\_mode](#input\_aws\_identity\_mode) | AWS identity mechanism for the cert-manager service account: "irsa" sets the eks.amazonaws.com/role-arn annotation; "pod\_identity" omits it (EKS Pod Identity injects credentials via the Pod Identity agent). | `string` | `"irsa"` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region. | `string` | `""` | no |
 | <a name="input_aws_sa_arn"></a> [aws\_sa\_arn](#input\_aws\_sa\_arn) | The AWS IAM role ARN for cert-manager. | `string` | `""` | no |
 | <a name="input_azure_client_id"></a> [azure\_client\_id](#input\_azure\_client\_id) | The Azure client ID for cert-manager. | `string` | `""` | no |

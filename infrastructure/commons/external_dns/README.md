@@ -6,14 +6,14 @@ Deploys ExternalDNS on Kubernetes via Helm with support for Cloudflare, AWS Rout
 
 ## Architecture
 
-The module creates an optional kubernetes_namespace_v1 resource and a helm_release resource that deploys the external-dns Helm chart. Provider-specific configuration is assembled in locals.tf by merging a base_config with a provider-specific config block (cloudflare_config, route53_config, oci_config, or azure_config) selected via var.dns_provider_name. Provider secrets are injected as kubernetes_secret_v1 resources (Cloudflare API token, OCI config file, Azure config file) and mounted into the ExternalDNS pod via extraVolumes and extraVolumeMounts. For AWS and OCI, IRSA or Workload Identity is wired through serviceAccount annotations; for Azure, pod labels and service account annotations are conditionally set based on azure_workload_identity_enabled.
+The module creates an optional kubernetes_namespace_v1 resource and a helm_release resource that deploys the external-dns Helm chart. Provider-specific configuration is assembled in locals.tf by merging a base_config with a provider-specific config block (cloudflare_config, route53_config, oci_config, or azure_config) selected via var.dns_provider_name. Provider secrets are injected as kubernetes_secret_v1 resources (Cloudflare API token, OCI config file, Azure config file) and mounted into the ExternalDNS pod via extraVolumes and extraVolumeMounts. For AWS, the `aws_identity_mode` variable controls whether the `eks.amazonaws.com/role-arn` SA annotation is set (`irsa`, default) or omitted (`pod_identity`, where EKS Pod Identity injects credentials via the agent). For Azure, pod labels and service account annotations are conditionally set based on `azure_workload_identity_enabled`.
 
 ## Features
 
 - Deploys ExternalDNS via helm_release with atomic, self-healing install options and configurable chart version
 - Creates kubernetes_namespace_v1 optionally to support multi-instance deployments in existing namespaces
 - Configures Cloudflare provider by injecting CF_API_TOKEN from a kubernetes_secret_v1 environment variable reference
-- Configures AWS Route53 provider with IRSA service account annotations, RBAC for DNSEndpoints and Gateway API resources, and zone/label filters
+- Configures AWS Route53 provider with IRSA or Pod Identity support via `aws_identity_mode`, RBAC for DNSEndpoints and Gateway API resources, and zone/label filters
 - Configures OCI provider with Workload Identity service account, compartment OCID, zone scope, and a mounted OCI config secret
 - Configures Azure Public and Private DNS providers with Workload Identity or Service Principal auth via a mounted azure-config secret
 - Supports public and private deployment types with label-based resource filtering for multi-instance scenarios
@@ -115,13 +115,13 @@ resource "example_resource" "this" {
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 3.0 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | 3.1.1 |
 | <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | 3.0.1 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
@@ -129,7 +129,7 @@ resource "example_resource" "this" {
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [helm_release.external_dns](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [kubernetes_namespace_v1.external_dns](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace_v1) | resource |
 | [kubernetes_secret_v1.external_dns_azure_config](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/secret_v1) | resource |
@@ -140,8 +140,9 @@ resource "example_resource" "this" {
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_aws_iam_role_arn"></a> [aws\_iam\_role\_arn](#input\_aws\_iam\_role\_arn) | The IAM role ARN for ExternalDNS to assume for Route53 access (required when dns\_provider\_name is 'aws') | `string` | `""` | no |
+| <a name="input_aws_identity_mode"></a> [aws\_identity\_mode](#input\_aws\_identity\_mode) | AWS identity mechanism for the external-dns service account: "irsa" sets the eks.amazonaws.com/role-arn annotation; "pod\_identity" omits it (EKS Pod Identity injects credentials via the Pod Identity agent). | `string` | `"irsa"` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region where the Route53 hosted zones are located | `string` | `""` | no |
 | <a name="input_azure_client_id"></a> [azure\_client\_id](#input\_azure\_client\_id) | Client ID of the Azure Managed Identity for Workload Identity (required when dns\_provider\_name is 'azure' and azure\_workload\_identity\_enabled is true) | `string` | `""` | no |
 | <a name="input_azure_client_secret"></a> [azure\_client\_secret](#input\_azure\_client\_secret) | Azure AD client secret for Service Principal auth (required when dns\_provider\_name is 'azure' and azure\_workload\_identity\_enabled is false). | `string` | `""` | no |
