@@ -21,7 +21,7 @@ The module creates a single nullplatform_api_key resource whose name, grants, an
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v4.5.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v5.2.0"
 
   type = "your-type"
 }
@@ -31,7 +31,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v4.5.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v5.2.0"
 
   nrn  = "your-nrn"  # Required when type = "agent"
   type = "agent"
@@ -42,7 +42,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v4.5.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v5.2.0"
 
   nrn                = "your-nrn"  # Required when type = "scope_notification"
   specification_slug = "your-specification-slug"  # Required when type = "scope_notification"
@@ -54,7 +54,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v4.5.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v5.2.0"
 
   nrn                = "your-nrn"  # Required when type = "service_notification"
   specification_slug = "your-specification-slug"  # Required when type = "service_notification"
@@ -66,7 +66,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v4.5.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v5.2.0"
 
   custom_grants     = "your-custom-grants"  # Required when type = "custom"
   custom_name       = "your-custom-name"  # Required when type = "custom"
@@ -89,13 +89,13 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.86 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.86 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.86 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.95 |
 
 ## Resources
 

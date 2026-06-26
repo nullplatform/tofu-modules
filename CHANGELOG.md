@@ -1,5 +1,316 @@
 # Changelog
 
+## [5.2.0](https://github.com/nullplatform/tofu-modules/compare/v5.1.0...v5.2.0) (2026-06-25)
+
+
+### Features
+
+* **cloud/aws:** make hosted_public_zone_id optional for private-only ([#408](https://github.com/nullplatform/tofu-modules/issues/408)) ([7f52d4b](https://github.com/nullplatform/tofu-modules/commit/7f52d4b9078543694d54d501a0ddb9188f2d26c3))
+
+## [5.1.0](https://github.com/nullplatform/tofu-modules/compare/v5.1.0...v5.1.0) (2026-06-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* **iam/agent:** the IRSA token no longer has Route53/EKS/ELB/AVP permissions directly. The agent must assume the permissions role (exposed via the nullplatform_agent_permissions_role_arn output) to use them.
+* **iam:** infrastructure/aws/iam/ecr no longer creates the build workflow user, access key or group, and no longer outputs build_workflow_access_key_id / build_workflow_access_key_secret. Consumers must instantiate the new build-user module, pass its group_name to ecr (new required input build_workflow_group_name) and to s3-assets, take the build credentials from build-user outputs, and run a tofu state mv to preserve the existing user and access key (see infrastructure/aws/iam/build-user/README.md). The IAM group is renamed from ecr-managers to asset-publishers (recreated; does not rotate the user's keys).
+* **dns,ingress,iam:** support disabling public-side resources ([#364](https://github.com/nullplatform/tofu-modules/issues/364))
+* **nullplatform/dimension:** callers of `nullplatform/dimensions` must migrate to `nullplatform/dimension` and run a `terraform state mv` to preserve the existing dimension (resource labels changed from `environment` / `environment_value` to `this`). Migration steps are documented in the new module's README.
+* **security,eks:** cluster_security_group_id and gateway_port variables removed from infrastructure/aws/security. Callers must replace those inputs with a separate module eks_gateway_rules call using infrastructure/aws/eks-gateway-rules.
+
+### Features
+
+* **613:** add support cert manager for oci ([#152](https://github.com/nullplatform/tofu-modules/issues/152)) ([1282171](https://github.com/nullplatform/tofu-modules/commit/12821712e781ae1b976feeafa6f29b4be0abb4c4))
+* **account:** make repository_prefix and repository_provider optional ([#326](https://github.com/nullplatform/tofu-modules/issues/326)) ([a0a079a](https://github.com/nullplatform/tofu-modules/commit/a0a079a97fafbdfd5bb6d51cd271fdf191c30d91))
+* add additional_policies variable to agent IAM module ([#233](https://github.com/nullplatform/tofu-modules/issues/233)) ([7762406](https://github.com/nullplatform/tofu-modules/commit/77624065a5686d00be0355db014a8dd738858a8c))
+* add ebs and storage class for eks ([#298](https://github.com/nullplatform/tofu-modules/issues/298)) ([8c00ba3](https://github.com/nullplatform/tofu-modules/commit/8c00ba3b67a6ca1960a70c04c9108c5df2edd3f3))
+* add eks_cluster_primary_security_group_id output ([#236](https://github.com/nullplatform/tofu-modules/issues/236)) ([46412f8](https://github.com/nullplatform/tofu-modules/commit/46412f809fac72cceeb8fd918435ef029cb4852e))
+* add extra_envs variable to agent module ([#229](https://github.com/nullplatform/tofu-modules/issues/229)) ([996b24f](https://github.com/nullplatform/tofu-modules/commit/996b24fbdd044b5483387deff1b56ff0b7375520))
+* add istio security groups ([#190](https://github.com/nullplatform/tofu-modules/issues/190)) ([5e06e8c](https://github.com/nullplatform/tofu-modules/commit/5e06e8c5c8737c89c3081e85c9445f123a3d3de3))
+* add pre-configured api_key modules for agent, scope and service notifications ([d5d1d76](https://github.com/nullplatform/tofu-modules/commit/d5d1d7622cab8b8905ee6ddf89a39e25a3a103b5))
+* add scope_configuration module ([#271](https://github.com/nullplatform/tofu-modules/issues/271)) ([a49e943](https://github.com/nullplatform/tofu-modules/commit/a49e943f0159e5b0808cd616f892252f32402183))
+* **agent:** add config external-dns to aws config ([3d69436](https://github.com/nullplatform/tofu-modules/commit/3d694365764e92a23a0c1f2c2a076c644801d2d0))
+* **agent:** add config external-dns to aws config ([#105](https://github.com/nullplatform/tofu-modules/issues/105)) ([1a828f9](https://github.com/nullplatform/tofu-modules/commit/1a828f97f671ea4dfcdf34bb49ee7e21ec5dac43))
+* **agent:** IAM assume-role support + multi-instance parametrization ([#386](https://github.com/nullplatform/tofu-modules/issues/386)) ([b82df52](https://github.com/nullplatform/tofu-modules/commit/b82df529244fbf85aab52a23d748ea59c31fb11e))
+* **agent:** move identical variables to global configuration ([2b78254](https://github.com/nullplatform/tofu-modules/commit/2b78254ab4d16251ac3d1c4504189b5ce3201841))
+* aks acr integration ([#120](https://github.com/nullplatform/tofu-modules/issues/120)) ([e2237b6](https://github.com/nullplatform/tofu-modules/commit/e2237b608ee9ccfabb40582582ab0e664640e13a))
+* **api-key:** add custom_grants support for multi-NRN grants ([#276](https://github.com/nullplatform/tofu-modules/issues/276)) ([ce70c59](https://github.com/nullplatform/tofu-modules/commit/ce70c59cec7aaa3f072a6c54d1e82f238df00928))
+* **aws-backend:** make backend module compliant with OpenTofu S3 backend docs ([#238](https://github.com/nullplatform/tofu-modules/issues/238)) ([d494c20](https://github.com/nullplatform/tofu-modules/commit/d494c20153232076fbd7ad6978dd501938b18284))
+* **aws-eks:** add private access to k8s API ([7d971ad](https://github.com/nullplatform/tofu-modules/commit/7d971adae341ae920b93d0d71a01705de364be90))
+* **aws-vpc:** disable public ip to EC2 ([973f1bc](https://github.com/nullplatform/tofu-modules/commit/973f1bc600fba7b2aac7450604c3b48086674fe2))
+* **azure/aks:** enforce workload identity — hardcode oidc_issuer_enabled ([#358](https://github.com/nullplatform/tofu-modules/issues/358)) ([e542032](https://github.com/nullplatform/tofu-modules/commit/e5420325565a3099ebab6add83e3a0db508defb7))
+* **azure/cloud:** support passing authentication credentials as variables ([#381](https://github.com/nullplatform/tofu-modules/issues/381)) ([2313640](https://github.com/nullplatform/tofu-modules/commit/23136401e863b2d0cbad643a75a0ac6839de6dbc))
+* **azure:** Add private DNS zone module ([813cad3](https://github.com/nullplatform/tofu-modules/commit/813cad3709d212cc3d78bab5000261f8afec2aa4))
+* **azure:** Add private DNS zone module ([#90](https://github.com/nullplatform/tofu-modules/issues/90)) ([5d4399e](https://github.com/nullplatform/tofu-modules/commit/5d4399ea5f1823cc5d96c1075083b74d426b4ff1))
+* **azure:** AKS routing infra — aks_route_table module, vnet drift fix, security improvements ([#360](https://github.com/nullplatform/tofu-modules/issues/360)) ([15c2372](https://github.com/nullplatform/tofu-modules/commit/15c2372bb7b9820834e31ad1517d5e624d5a37dd))
+* **azure:** unify variable names and update module conventions ([41d4f3b](https://github.com/nullplatform/tofu-modules/commit/41d4f3b36ef6d6e072358321b41884139c0ed82b))
+* **azure:** unify variable names and update module conventions ([#162](https://github.com/nullplatform/tofu-modules/issues/162)) ([d8bccf1](https://github.com/nullplatform/tofu-modules/commit/d8bccf17878008538978d2127e678364f988ff34))
+* **backend:** add optional KMS encryption and IAM bucket policy ([#246](https://github.com/nullplatform/tofu-modules/issues/246)) ([1af61bd](https://github.com/nullplatform/tofu-modules/commit/1af61bd8f2c47c70d0261184d91648c31d9103a8))
+* **base:** add gateway_public_azure_load_balancer_subnet ([#403](https://github.com/nullplatform/tofu-modules/issues/403)) ([b9b6f5e](https://github.com/nullplatform/tofu-modules/commit/b9b6f5e8b769623d981594064461bfaff963d30c))
+* **base:** add gateway_public_load_balancer_type and fix public gateway name ([#392](https://github.com/nullplatform/tofu-modules/issues/392)) ([116fc70](https://github.com/nullplatform/tofu-modules/commit/116fc708441a9c312ede558f5825f639db14caed))
+* **base:** security and nrn tags ([#160](https://github.com/nullplatform/tofu-modules/issues/160)) ([2ad4b2f](https://github.com/nullplatform/tofu-modules/commit/2ad4b2f9227b89032d5a2259a513a3a75a14014f))
+* **cert-manager:** add aws support ([858e346](https://github.com/nullplatform/tofu-modules/commit/858e3464fa74de5f64e67fcfe60bf5c6199cb177))
+* **cert-manager:** add Azure Workload Identity support ([#272](https://github.com/nullplatform/tofu-modules/issues/272)) ([800249c](https://github.com/nullplatform/tofu-modules/commit/800249caad39e4728d293cd70ecf612b3a1c8cc5))
+* **chart:** new version of charts ([#122](https://github.com/nullplatform/tofu-modules/issues/122)) ([83a8b39](https://github.com/nullplatform/tofu-modules/commit/83a8b399b836ca053fe8fc7b8689d1c198cd4e32))
+* **ci:** enable AI readme generator workflow ([#203](https://github.com/nullplatform/tofu-modules/issues/203)) ([5ed8c84](https://github.com/nullplatform/tofu-modules/commit/5ed8c8492cc0825a4b8094b63f35e795da37f833))
+* **ci:** integrate AI readme generation into Release Please workflow ([#209](https://github.com/nullplatform/tofu-modules/issues/209)) ([5ea8de5](https://github.com/nullplatform/tofu-modules/commit/5ea8de5726e89330ac4141e94726740fc0f76224))
+* **cloud-dns:** DNSSEC enabled by default for public zones ([#393](https://github.com/nullplatform/tofu-modules/issues/393)) ([c2e606d](https://github.com/nullplatform/tofu-modules/commit/c2e606d4d52bb49d5c73de03fd32dfeffe16e5b9))
+* **commons/azure:** Workload Identity for cert-manager and external-dns, with Service Principal fallback ([#361](https://github.com/nullplatform/tofu-modules/issues/361)) ([f11896e](https://github.com/nullplatform/tofu-modules/commit/f11896e3314e4661134a89002e5caaa1b1ff248f))
+* container orchestration ([#216](https://github.com/nullplatform/tofu-modules/issues/216)) ([1a87622](https://github.com/nullplatform/tofu-modules/commit/1a8762245f86762aec6fc300297170cf454e9190))
+* **customers-aws-image:** update readme ([f367a8f](https://github.com/nullplatform/tofu-modules/commit/f367a8f4e6cc303958e02d76c6ff1197b05d919e))
+* **dns,ingress,iam:** support disabling public-side resources ([#364](https://github.com/nullplatform/tofu-modules/issues/364)) ([872efa1](https://github.com/nullplatform/tofu-modules/commit/872efa17520793e6369c670d3f6cf1ea5de4cff7))
+* do not require org nrn ([#261](https://github.com/nullplatform/tofu-modules/issues/261)) ([25d5a5b](https://github.com/nullplatform/tofu-modules/commit/25d5a5befe31ca27dcc86d2000281e339e44adbc))
+* **ecr:** migrate IAM to infrastructure/aws/iam/ecr module ([#372](https://github.com/nullplatform/tofu-modules/issues/372)) ([faa35b8](https://github.com/nullplatform/tofu-modules/commit/faa35b8fb48aa32ca829e878be4bd0c21db4f1a2))
+* edit readme ([#222](https://github.com/nullplatform/tofu-modules/issues/222)) ([4f94816](https://github.com/nullplatform/tofu-modules/commit/4f94816cb9bdbbe86b14ef8709e39f59ac34f8c2))
+* eks version ([#270](https://github.com/nullplatform/tofu-modules/issues/270)) ([8bf801e](https://github.com/nullplatform/tofu-modules/commit/8bf801e2edaee0e0c6b3ed70197342831b192623))
+* **eks:** expose ami_release_version and use_latest_ami_release_version ([#334](https://github.com/nullplatform/tofu-modules/issues/334)) ([1d88c1e](https://github.com/nullplatform/tofu-modules/commit/1d88c1e2b9197b1e893d2cc394ead7707b2ce3bf))
+* **eks:** expose control plane logging configuration ([#242](https://github.com/nullplatform/tofu-modules/issues/242)) ([322d3f6](https://github.com/nullplatform/tofu-modules/commit/322d3f626354bd285687141c43c8883b97fe4d49))
+* **esternal-dns:** resolve conflicts ([4f71b63](https://github.com/nullplatform/tofu-modules/commit/4f71b6359456c3c4e201deec7aed30c6b72092bd))
+* **external_dns:** add label_filter support for Route53 provider ([#371](https://github.com/nullplatform/tofu-modules/issues/371)) ([0827191](https://github.com/nullplatform/tofu-modules/commit/082719174c164425d7063fc26edfba546724fdfd))
+* **external_dns:** support azure-private-dns provider ([#369](https://github.com/nullplatform/tofu-modules/issues/369)) ([3a0ebf5](https://github.com/nullplatform/tofu-modules/commit/3a0ebf5c13baf7efc6c800266073db88c9436ee0))
+* **externaldns:** support multi external dns ([#97](https://github.com/nullplatform/tofu-modules/issues/97)) ([3ddbd8e](https://github.com/nullplatform/tofu-modules/commit/3ddbd8ebf152722be693539493229a6f6098a27c))
+* **gcp:** unify variable names and rename modules for consistency ([3a619f8](https://github.com/nullplatform/tofu-modules/commit/3a619f8a096e01f295b83d63bed3294b07c04fc8))
+* **iam/agent:** split agent role into agent + permissions roles ([#397](https://github.com/nullplatform/tofu-modules/issues/397)) ([9df28f5](https://github.com/nullplatform/tofu-modules/commit/9df28f53ae726a251eb7ed937b88dd1057452672))
+* **iam:** separate build workflow user from asset repositories + add S3 asset support ([#402](https://github.com/nullplatform/tofu-modules/issues/402)) ([9ae9e09](https://github.com/nullplatform/tofu-modules/commit/9ae9e095e5090d08508b97e6ec4da1a1b7e2ab6a))
+* **identity-access-control:** add cloud-agnostic provider config module ([#387](https://github.com/nullplatform/tofu-modules/issues/387)) ([ddcc212](https://github.com/nullplatform/tofu-modules/commit/ddcc2124376dae7ebe11236f79eba74c505f5442))
+* **infra:** add v1 to namespace external dns ([ae35596](https://github.com/nullplatform/tofu-modules/commit/ae3559643f72bd3f8f188dfc215e449fae70d813))
+* **infrastructure/aws/eks:** expose encryption_config (backward-compatible) ([#324](https://github.com/nullplatform/tofu-modules/issues/324)) ([f3294d6](https://github.com/nullplatform/tofu-modules/commit/f3294d69eb202bc13e9ad2889f45166370c2d550))
+* introduce api_key module for unified API key management  ([#155](https://github.com/nullplatform/tofu-modules/issues/155)) ([aded8a6](https://github.com/nullplatform/tofu-modules/commit/aded8a6b048590d2427f8072e419edd91af83064))
+* **istio:** expose istiod_replicas to guarantee HA for node drains ([#292](https://github.com/nullplatform/tofu-modules/issues/292)) ([05a081f](https://github.com/nullplatform/tofu-modules/commit/05a081f7e175b42280ffe40aa108a90281482857))
+* **nullplatform-base:** update version ([a872b6f](https://github.com/nullplatform/tofu-modules/commit/a872b6f5e3875b6988b2b432065b7ce819644555))
+* **nullplatform/asset/ecr:** add configurable cross-account pull policy ([#330](https://github.com/nullplatform/tofu-modules/issues/330)) ([6f4392f](https://github.com/nullplatform/tofu-modules/commit/6f4392f2761561567f6df5024b81815b110fe5ad))
+* **nullplatform/asset/ecr:** add ecr:SetRepositoryPolicy to manager policy ([#307](https://github.com/nullplatform/tofu-modules/issues/307)) ([a0520b5](https://github.com/nullplatform/tofu-modules/commit/a0520b574b7fede83ea4bc98f067fa3db32b17d9))
+* **nullplatform/base:** add per-provider log/metrics split and applicationLogs toggle ([#362](https://github.com/nullplatform/tofu-modules/issues/362)) ([b6fb844](https://github.com/nullplatform/tofu-modules/commit/b6fb84460882de589f6945bddc295b750e416397))
+* **nullplatform/cloud/aws/vpc:** implement aws-networking-configuration provider config ([#255](https://github.com/nullplatform/tofu-modules/issues/255)) ([3c3439b](https://github.com/nullplatform/tofu-modules/commit/3c3439b5ddde154636b696404169d0a0117e3262))
+* **nullplatform/scope_definition:** add extra_visible_to_nrns for org-wide sharing ([#304](https://github.com/nullplatform/tofu-modules/issues/304)) ([b52d0f0](https://github.com/nullplatform/tofu-modules/commit/b52d0f0139f8877262ea4fee3475239a93dd1bc3))
+* **nullplatform/scope_definition:** expose scope_configuration_name_override (backward-compatible) ([#328](https://github.com/nullplatform/tofu-modules/issues/328)) ([8ef0b0e](https://github.com/nullplatform/tofu-modules/commit/8ef0b0ef85a038fbf374d1ec959d7227b78e6c50))
+* OCI security list auto-management and namespace race condition fix ([#197](https://github.com/nullplatform/tofu-modules/issues/197)) ([3d2a723](https://github.com/nullplatform/tofu-modules/commit/3d2a723cce84718f9e23c140fbad8b26855f00e5))
+* oci test ([#213](https://github.com/nullplatform/tofu-modules/issues/213)) ([33594c7](https://github.com/nullplatform/tofu-modules/commit/33594c7ffcb07f79ecc914bbbd482bedde9dae08))
+* **oci:** add support for oci ([#146](https://github.com/nullplatform/tofu-modules/issues/146)) ([ffaa72d](https://github.com/nullplatform/tofu-modules/commit/ffaa72d6d529ef168a422b7a4242a80a56920104))
+* **oci:** cloud provider ([#175](https://github.com/nullplatform/tofu-modules/issues/175)) ([bcdc2b5](https://github.com/nullplatform/tofu-modules/commit/bcdc2b55818859d660c5694a4bc20c051b9e6563))
+* **provider:** add support for azure devops ([#133](https://github.com/nullplatform/tofu-modules/issues/133)) ([e0125d9](https://github.com/nullplatform/tofu-modules/commit/e0125d921a288f866623661caf30d95be592e77d))
+* rename route53 to dns and add diagnose actions to scope definition ([#215](https://github.com/nullplatform/tofu-modules/issues/215)) ([a40c98b](https://github.com/nullplatform/tofu-modules/commit/a40c98b9d3a092cc6eb132b770edf11c3f225118))
+* **scope_configuration:** support icon ([#348](https://github.com/nullplatform/tofu-modules/issues/348)) ([a4db9cf](https://github.com/nullplatform/tofu-modules/commit/a4db9cfa33c2dbe85d64dc2a3e77ddebaf9027a4))
+* **scope-definition-agent-association:** add extra_filters support ([#353](https://github.com/nullplatform/tofu-modules/issues/353)) ([0b0191f](https://github.com/nullplatform/tofu-modules/commit/0b0191f1c326049afec456d3741292f0d2aed51b))
+* **scope-definition:** add description field to nullplatform_service_specification ([#273](https://github.com/nullplatform/tofu-modules/issues/273)) ([f9ee6ea](https://github.com/nullplatform/tofu-modules/commit/f9ee6ea670260874899aa0620eaf0ef19fb04389))
+* **scope-definition:** add optional scope configuration support ([#254](https://github.com/nullplatform/tofu-modules/issues/254)) ([b585706](https://github.com/nullplatform/tofu-modules/commit/b585706f43007d0467d9ab2f3fac7976283d6ca8))
+* **scope:** parameterize repository values ([#110](https://github.com/nullplatform/tofu-modules/issues/110)) ([297c1a3](https://github.com/nullplatform/tofu-modules/commit/297c1a3ed788faf13cc9ef76c9480ad2227db9dc))
+* **security,eks:** extract gateway SG rules into dedicated eks-gateway-rules module ([#314](https://github.com/nullplatform/tofu-modules/issues/314)) ([bb5a1dd](https://github.com/nullplatform/tofu-modules/commit/bb5a1ddd232fcc4fdc49cabe2ed2506d3814f3c1))
+* service definition and service association channel ([#121](https://github.com/nullplatform/tofu-modules/issues/121)) ([44e6a8e](https://github.com/nullplatform/tofu-modules/commit/44e6a8e35bf3ed9cf42b0cd090eae215e62ff71a))
+* **service-definition:** add local filesystem provider for spec loading ([#278](https://github.com/nullplatform/tofu-modules/issues/278)) ([f24d7c9](https://github.com/nullplatform/tofu-modules/commit/f24d7c93be4415d9fd38bb8975fed08fcf538ee0))
+* **service:** add support to gitlab ([#249](https://github.com/nullplatform/tofu-modules/issues/249)) ([1d41de6](https://github.com/nullplatform/tofu-modules/commit/1d41de6c312008f82a77bc51b4d27962d9c825d0))
+* support to different cni of oke ([#250](https://github.com/nullplatform/tofu-modules/issues/250)) ([9905b57](https://github.com/nullplatform/tofu-modules/commit/9905b57ab87ba05dc8ba2f7980eea337d36885db))
+* **tofu:** run fmt ([371342b](https://github.com/nullplatform/tofu-modules/commit/371342bf77151e4f5c70e4e3a3a27c605af16454))
+* update nullplatform provider to &gt;= 0.0.86 across all modules ([#322](https://github.com/nullplatform/tofu-modules/issues/322)) ([6b5e5ce](https://github.com/nullplatform/tofu-modules/commit/6b5e5ce1649721eb7010903d2229004d0225f97f))
+* **vpc:** export security group IDs as output ([#258](https://github.com/nullplatform/tofu-modules/issues/258)) ([7509399](https://github.com/nullplatform/tofu-modules/commit/750939944c9c13b2e4e6447587173e10a86d5f27))
+
+
+### Bug Fixes
+
+* **acm:** fix logic ([cafffea](https://github.com/nullplatform/tofu-modules/commit/cafffea8c62d26716da2ad70564ccffc01c2f428))
+* actions ([#227](https://github.com/nullplatform/tofu-modules/issues/227)) ([1bff3ae](https://github.com/nullplatform/tofu-modules/commit/1bff3ae87930036fbbceee00a3918f362846ece1))
+* add disclaimer for registration_enabled usage ([ac1fd0a](https://github.com/nullplatform/tofu-modules/commit/ac1fd0a60b373656a922e5836a8f38fb5986e807))
+* add missing description and type fields to module variables ([#268](https://github.com/nullplatform/tofu-modules/issues/268)) ([36faf96](https://github.com/nullplatform/tofu-modules/commit/36faf96018e4ce5fc618761fc1b41e55f0537754))
+* add push release-please ([#225](https://github.com/nullplatform/tofu-modules/issues/225)) ([1803560](https://github.com/nullplatform/tofu-modules/commit/1803560f13001b309fe0a04e77a28da1cd8d0fbe))
+* add terraform-docs step to release PR generation flow ([#262](https://github.com/nullplatform/tofu-modules/issues/262)) ([5a35267](https://github.com/nullplatform/tofu-modules/commit/5a35267bf7c503b8a73c83ab1d3d2ac7904f1d6c))
+* add validation for virtual_network_links ([76438d0](https://github.com/nullplatform/tofu-modules/commit/76438d08e1160f3d18e292f5bfa2c35ac7a3283e))
+* **agent:** add permission to verifiedpermissions ([7d2c50c](https://github.com/nullplatform/tofu-modules/commit/7d2c50cbf2afcbd16724723e3cb12e235af7ea11))
+* **agent:** add permission to verifiedpermissions ([#145](https://github.com/nullplatform/tofu-modules/issues/145)) ([369012e](https://github.com/nullplatform/tofu-modules/commit/369012e79199a5f70d696a5f2dc082ed76d208b4))
+* **agent:** move cross-variable validations to lifecycle preconditions ([#341](https://github.com/nullplatform/tofu-modules/issues/341)) ([799f26c](https://github.com/nullplatform/tofu-modules/commit/799f26cd80c319468a08ce1675cf94736ff25511))
+* **aks:** add network contributor ([0305ade](https://github.com/nullplatform/tofu-modules/commit/0305ade8dda6389a57e47cb4999abeb9e2362f5c))
+* **aks:** add network contributor ([#114](https://github.com/nullplatform/tofu-modules/issues/114)) ([1542270](https://github.com/nullplatform/tofu-modules/commit/1542270b0f8a34ff52918bbdcbca42a75936f5e8))
+* **alb-controller:** fix sa to v1 ([ab6f557](https://github.com/nullplatform/tofu-modules/commit/ab6f5574e047112dd5b5ea4a6067e6cd99f58c5f))
+* **alb-controller:** fix sa to v1 ([8a9d1d3](https://github.com/nullplatform/tofu-modules/commit/8a9d1d3b083041d53fa3001c1ab51f549459fe4a))
+* api key lifecycle ([#163](https://github.com/nullplatform/tofu-modules/issues/163)) ([beaa60f](https://github.com/nullplatform/tofu-modules/commit/beaa60fdcc527122acac669f78a8ccf10a687042))
+* api key lifecycle ([#165](https://github.com/nullplatform/tofu-modules/issues/165)) ([86fd93e](https://github.com/nullplatform/tofu-modules/commit/86fd93e8be4569b41b43b791585260f3168425c7))
+* **api_key:** add create_before_destroy to prevent service disruption ([7efc3ed](https://github.com/nullplatform/tofu-modules/commit/7efc3edb82945e50d39734eb1a1b0de6b29d58fc))
+* **api_key:** convert tuple to map in dynamic block for_each ([#342](https://github.com/nullplatform/tofu-modules/issues/342)) ([1d38bba](https://github.com/nullplatform/tofu-modules/commit/1d38bba2637f8dbc768f17c0e03c683fa7a6b567))
+* **api_key:** rename backend.tf to providers.tf and add version constraint ([543b174](https://github.com/nullplatform/tofu-modules/commit/543b17409f56b8be9336fc67bef8f69475448d9c))
+* **api_key:** replace concat with merge to produce map(string) for tags ([#346](https://github.com/nullplatform/tofu-modules/issues/346)) ([9cf26ea](https://github.com/nullplatform/tofu-modules/commit/9cf26eae330365eaded55c98b62497bc9b2f9b7b))
+* **api_key:** use tomap and map(string) to satisfy for_each type constraint ([#344](https://github.com/nullplatform/tofu-modules/issues/344)) ([bf02402](https://github.com/nullplatform/tofu-modules/commit/bf02402702f450c764eb73d5a8be0af591ef6949))
+* **aws-eks:** fix name varible ([2b178e1](https://github.com/nullplatform/tofu-modules/commit/2b178e11321408c165465c8b345d1acb36a26f63))
+* **aws-region:** use .name instead of .region attribute in aws_region data source ([0d0912e](https://github.com/nullplatform/tofu-modules/commit/0d0912eab1a91b3d22cdf6e6f6b5116a1872c839))
+* **aws-region:** use .name instead of .region attribute in aws_region data source ([#154](https://github.com/nullplatform/tofu-modules/issues/154)) ([7094878](https://github.com/nullplatform/tofu-modules/commit/7094878a5eabcd8838c9e2be967450e0028cb415))
+* **aws-security:** resolve confllicts ([34a4c27](https://github.com/nullplatform/tofu-modules/commit/34a4c2755bce9f88d11ea65b445d72b88b162e64))
+* **aws/cloud:** allow to update attributes ([#363](https://github.com/nullplatform/tofu-modules/issues/363)) ([f99f9a1](https://github.com/nullplatform/tofu-modules/commit/f99f9a1d2471687ff7205c3b8f4ced833f612d8a))
+* **azure-aks:** add role to vnet ([b40d33d](https://github.com/nullplatform/tofu-modules/commit/b40d33d4f80cbed3c552a5b4f7ac593c145ff5f3))
+* **azure-aks:** principal_id variable ([6e3d54c](https://github.com/nullplatform/tofu-modules/commit/6e3d54c4bc00833161a03d4c65d0b9db8aba9b9f))
+* **azure-aks:** principal_id variable ([6232bf0](https://github.com/nullplatform/tofu-modules/commit/6232bf0f44c7c99377b220f28895bd7a52039b35))
+* **azure/vnet:** relax azurerm provider constraint to ~&gt; 4.0 ([a4985ec](https://github.com/nullplatform/tofu-modules/commit/a4985ec66da8a792cf31b443761caf117b3d88c4))
+* **base-gateways:** add annottaion to LB use subnet private ([8e3b09e](https://github.com/nullplatform/tofu-modules/commit/8e3b09e0a57f0a86e0494145b69d8da0540123d7))
+* **base:** adding gateway name parameter ([#139](https://github.com/nullplatform/tofu-modules/issues/139)) ([a47a299](https://github.com/nullplatform/tofu-modules/commit/a47a299a890570a2960b90195247de9b45d0921a))
+* **base:** disabled webhook option ([2496ba4](https://github.com/nullplatform/tofu-modules/commit/2496ba4bd091f7bc8f6f2e19de18a2ff003ceee8))
+* **base:** remove dangerous helm release options ([#302](https://github.com/nullplatform/tofu-modules/issues/302)) ([66cdd18](https://github.com/nullplatform/tofu-modules/commit/66cdd180c6f253990891c82aa2c675b2846072a0))
+* **base:** update outputs to use input vars instead of removed modules ([ac34128](https://github.com/nullplatform/tofu-modules/commit/ac34128a98a1758f827e00b4a4bc34a6c6b07e85))
+* **base:** update version chart ([0bc1fbd](https://github.com/nullplatform/tofu-modules/commit/0bc1fbdd45ae873a42c13c7a8618bd5f54f140ca))
+* **base:** update version chart ([#116](https://github.com/nullplatform/tofu-modules/issues/116)) ([26a1034](https://github.com/nullplatform/tofu-modules/commit/26a1034eec4285cb3fca8f8904c0a4d2da76524f))
+* **base:** update version heml chart ([b8bec08](https://github.com/nullplatform/tofu-modules/commit/b8bec0826d820583f5cbbb2e1b065554e967fa15))
+* **cert manager:** fix linter ([#95](https://github.com/nullplatform/tofu-modules/issues/95)) ([260d4c2](https://github.com/nullplatform/tofu-modules/commit/260d4c246c25f924fe49ead3801562cf188b25f4))
+* **cert_manager,external_dns:** move cross-variable validations to terraform_data preconditions ([#315](https://github.com/nullplatform/tofu-modules/issues/315)) ([a213e35](https://github.com/nullplatform/tofu-modules/commit/a213e357ddeef15d364e11e64ed5b4615efdd8f8))
+* **cert-manager-iam:** fix allow hosted zone ([e819f79](https://github.com/nullplatform/tofu-modules/commit/e819f79b97656a75832242d2f6be13218583baff))
+* **cert-manager-iam:** fix sa name & add private zone managed ([5142697](https://github.com/nullplatform/tofu-modules/commit/51426976d172439c55700e8df560027e10be904a))
+* **cert-manager:** add helm options ([7bd7b2c](https://github.com/nullplatform/tofu-modules/commit/7bd7b2cbd36dba868805f11cabaaab7966bc1d5a))
+* **cert-manager:** remove deafult to mandatory variables ([351a7f9](https://github.com/nullplatform/tofu-modules/commit/351a7f98c1de121640bd9b8a29bcb8b09069114d))
+* **cert-manager:** remove IRSA ([6383227](https://github.com/nullplatform/tofu-modules/commit/63832273477c7bb8220633444d28158e8554b929))
+* **cert-manager:** resolve conflicts ([c6a3cb7](https://github.com/nullplatform/tofu-modules/commit/c6a3cb7e2a864038fed59334302ca2803cffb2a5))
+* **chart-base:** add istio gateway security groups ([#143](https://github.com/nullplatform/tofu-modules/issues/143)) ([03fa7be](https://github.com/nullplatform/tofu-modules/commit/03fa7be2d3c9970b41935e683b5b58df71de27a1))
+* **ci:** correct workflow reference path in tofu-test pipeline ([0c97f44](https://github.com/nullplatform/tofu-modules/commit/0c97f44f4d38198056391e89e579ca739a82e439))
+* **ci:** pass secrets to readme-generator workflow ([#207](https://github.com/nullplatform/tofu-modules/issues/207)) ([a99fa51](https://github.com/nullplatform/tofu-modules/commit/a99fa5104bf79ed5bf1512e7d23befa126d93133))
+* **ci:** remove push trigger from tofu-test workflow ([#205](https://github.com/nullplatform/tofu-modules/issues/205)) ([aef2384](https://github.com/nullplatform/tofu-modules/commit/aef23846f41fded075b0b54370032f1e5f24c317))
+* **ci:** restore git permissions after secondary checkout ([#264](https://github.com/nullplatform/tofu-modules/issues/264)) ([a1d81a5](https://github.com/nullplatform/tofu-modules/commit/a1d81a5a8d4ece8f8082e0eb9f60c1617c926b9c))
+* **ci:** skip branch validation and commitlint for release-please branches ([#300](https://github.com/nullplatform/tofu-modules/issues/300)) ([ce771a5](https://github.com/nullplatform/tofu-modules/commit/ce771a53de110a837d8c9fb47a671e172145a0cf))
+* **ci:** skip deleted modules in readme generation ([#301](https://github.com/nullplatform/tofu-modules/issues/301)) ([5f74c38](https://github.com/nullplatform/tofu-modules/commit/5f74c382add33acc33b5e8d143d837f1ebd1e902))
+* **ci:** update readme versions to release target and exclude root README ([#211](https://github.com/nullplatform/tofu-modules/issues/211)) ([2b70f1b](https://github.com/nullplatform/tofu-modules/commit/2b70f1bf569d62b8272afdc425c5819566bdc583))
+* **code_repository:** remove access block and ignore_changes from all providers ([#396](https://github.com/nullplatform/tofu-modules/issues/396)) ([4295a7f](https://github.com/nullplatform/tofu-modules/commit/4295a7f9a18b4082d7b4b4b4bc173c8f25f05888))
+* **code-repository:** fix version ([c7a371b](https://github.com/nullplatform/tofu-modules/commit/c7a371bd2995eef9abbde98de9616edd32120a5a))
+* **code-repository:** fix version ([eaa3117](https://github.com/nullplatform/tofu-modules/commit/eaa3117f6f4d467bbb298a3f0d056903f522ebd2))
+* **commitlint:** disable body-max-line-length rule ([3ed3244](https://github.com/nullplatform/tofu-modules/commit/3ed32441e387090dcc08d00fbf5532a6a1b80e9a))
+* **commons-external-dns:** add switch to namespaces create ([06852f7](https://github.com/nullplatform/tofu-modules/commit/06852f7077aa8c203f5a080d8780cc6a871a43e7))
+* **commons-external-dns:** add switch to namespaces create ([19cd4a6](https://github.com/nullplatform/tofu-modules/commit/19cd4a62ced0ed218ccbed07f4a29629071e02b3))
+* delete conflicting aws provider from backend module ([#240](https://github.com/nullplatform/tofu-modules/issues/240)) ([aa6cb87](https://github.com/nullplatform/tofu-modules/commit/aa6cb877e112590c1048bae712aa980236d513ba))
+* disable readme version update temporarily ([#192](https://github.com/nullplatform/tofu-modules/issues/192)) ([58072e7](https://github.com/nullplatform/tofu-modules/commit/58072e7bf5c5da92c153a91290cf084704c056ce))
+* **dns:** ignore vpc changes on private_zone for cross-account assoc ([#398](https://github.com/nullplatform/tofu-modules/issues/398)) ([772c201](https://github.com/nullplatform/tofu-modules/commit/772c20111c02dfb933755fa6aa0c9917d9b6b025))
+* **ecr:** add cross-account pull and repository policy support ([#384](https://github.com/nullplatform/tofu-modules/issues/384)) ([cf6431f](https://github.com/nullplatform/tofu-modules/commit/cf6431f69c5ce3055c60ff3d659a23c12d9162f9))
+* **ecr:** remove read section, cross-account role, and fix setup.policy drift ([#389](https://github.com/nullplatform/tofu-modules/issues/389)) ([8000c6b](https://github.com/nullplatform/tofu-modules/commit/8000c6b2fb4baebdbfa0b5c9927a073a23655ac5))
+* **eks:** add aditional security gorup ([2c44375](https://github.com/nullplatform/tofu-modules/commit/2c44375a379383bc9a2f22a49eeb4086277e20e9))
+* **eks:** auth mode validation and s3 secure transport policy ([#266](https://github.com/nullplatform/tofu-modules/issues/266)) ([3a96b54](https://github.com/nullplatform/tofu-modules/commit/3a96b549d1d771c9c289d96aaf039261695ab92f))
+* **eks:** disable node security group to avoid ALB controller conflict ([#137](https://github.com/nullplatform/tofu-modules/issues/137)) ([8cbe80b](https://github.com/nullplatform/tofu-modules/commit/8cbe80b63d8edf2763d8bb1ed88e3b9b1b64a111))
+* **eks:** resolve Auto Mode compatibility issues ([#167](https://github.com/nullplatform/tofu-modules/issues/167)) ([c58baea](https://github.com/nullplatform/tofu-modules/commit/c58baea3611b3e3c9e847e7b742f1975372eae69))
+* **eks:** segretate logic of node groups ([0937b93](https://github.com/nullplatform/tofu-modules/commit/0937b93cc9c6e523c21c189d1c888ff80db384d0))
+* **external_dns:** change default sources and policy ([#282](https://github.com/nullplatform/tofu-modules/issues/282)) ([50e8cde](https://github.com/nullplatform/tofu-modules/commit/50e8cded7ae466aebb8894c6efce656bb00667f5))
+* **external_dns:** derive label_filter default from zone_type convention ([#375](https://github.com/nullplatform/tofu-modules/issues/375)) ([09ec15b](https://github.com/nullplatform/tofu-modules/commit/09ec15b37410dc0d940d19f26ee0724783f67049))
+* **external_dns:** move cross-variable validations to terraform_data preconditions ([#310](https://github.com/nullplatform/tofu-modules/issues/310)) ([c4f010e](https://github.com/nullplatform/tofu-modules/commit/c4f010e118ac57f9a1c4247082f48d907de23f16))
+* **external-dns-iam:** add trust policy ([4fc890f](https://github.com/nullplatform/tofu-modules/commit/4fc890f92d15a9e7fdbf00b9bc3cbb4a9b447f3a))
+* **external-dns:** add action external dns policy ([4752701](https://github.com/nullplatform/tofu-modules/commit/4752701633dbbcf4242134001342310161a75a89))
+* **external-dns:** add manage private zone ([e0fbfff](https://github.com/nullplatform/tofu-modules/commit/e0fbfff1b83c442a652aa228f89485ff513a8f24))
+* **external-dns:** add rbac  ([#141](https://github.com/nullplatform/tofu-modules/issues/141)) ([ea5c5bb](https://github.com/nullplatform/tofu-modules/commit/ea5c5bbedb559b5d797185186204353a6d65186a))
+* **external-dns:** add rbac to manage dns endpoints ([546876e](https://github.com/nullplatform/tofu-modules/commit/546876e59e2706d36c10c37c832f47bf3b377ee6))
+* **external-dns:** add source httproute ([ba3b6fc](https://github.com/nullplatform/tofu-modules/commit/ba3b6fc3ea16925e92ebd14059b549e39d0672a4))
+* **external-dns:** add source variable ([aed8c25](https://github.com/nullplatform/tofu-modules/commit/aed8c25fe5054b8e4f842dd24c264ed535f6a42e))
+* **external-dns:** delete namespace manifest ([17b7495](https://github.com/nullplatform/tofu-modules/commit/17b7495fb1808c3aa740299bb9e22fd5a3297ba9))
+* **external-dns:** fix external dns varaible type ([d44879c](https://github.com/nullplatform/tofu-modules/commit/d44879ceeae517c5dec097c7fa6d19e9b8bea06c))
+* **external-dns:** fix external dns varaible type ([#128](https://github.com/nullplatform/tofu-modules/issues/128)) ([af26c59](https://github.com/nullplatform/tofu-modules/commit/af26c590b04089a7202d07a09ac6e6a30feaa06c))
+* **external-dns:** fix name chart ([b0c4d05](https://github.com/nullplatform/tofu-modules/commit/b0c4d0595f5b4a3971a6187820a0be667cc0b042))
+* **external-dns:** fix name chart ([01852d9](https://github.com/nullplatform/tofu-modules/commit/01852d9b10e0a72be589566ea43720531827b21a))
+* **external-dns:** fix rbac to dnsendpoint ([1e26890](https://github.com/nullplatform/tofu-modules/commit/1e268909545969d3d41005bd40d701d1cd8b7906))
+* **external-dns:** fix sources ([fe50c75](https://github.com/nullplatform/tofu-modules/commit/fe50c75187b5b60c2e7f4286adc651a3186f3e88))
+* **external-dns:** move zone_type to variable ([bd3ac1b](https://github.com/nullplatform/tofu-modules/commit/bd3ac1baa98cd08a693aaeaafed53a51a19330a3))
+* **external-dns:** remove regsitry ([73cf983](https://github.com/nullplatform/tofu-modules/commit/73cf983930e0dbbccc37cc94ddacaff5be0bae03))
+* **external-dns:** resolve conflicts ([4c9a701](https://github.com/nullplatform/tofu-modules/commit/4c9a7015daeb1664a7c33f883686955b6416bc62))
+* **external-dns:** rollback name dns provider ([16ecdd9](https://github.com/nullplatform/tofu-modules/commit/16ecdd9f98c38b8b74724edf51d7d0375eb14819))
+* **external-dns:** sa name ([e0bdcb6](https://github.com/nullplatform/tofu-modules/commit/e0bdcb693ee5bf62706b0212bdec136e91ba2ba7))
+* **external-dns:** set default value ([#126](https://github.com/nullplatform/tofu-modules/issues/126)) ([c652f64](https://github.com/nullplatform/tofu-modules/commit/c652f64adc2e04683c6495a2eaae8dd4a810e950))
+* **external-dns:** single managed hosted zone ([8dd9c20](https://github.com/nullplatform/tofu-modules/commit/8dd9c20caba37fc513d53e77a8c3e05d0bc26f18))
+* **gcp:** remove duplicate output and version files ([4004729](https://github.com/nullplatform/tofu-modules/commit/400472926ed4c90cbec89a29ff3ef5a032d4f081))
+* **gke:** add protection destroy as false ([#102](https://github.com/nullplatform/tofu-modules/issues/102)) ([26f0788](https://github.com/nullplatform/tofu-modules/commit/26f07883fd2bf6d0f351755d0e730fecc281e49a))
+* **helm:** add options to applies ([987403a](https://github.com/nullplatform/tofu-modules/commit/987403a9269659bfa8d008d9f80735675283f678))
+* **helm:** add options to applies ([b64a340](https://github.com/nullplatform/tofu-modules/commit/b64a3406d23b79b8ea8388917d8661c8d214ac80))
+* **iam-cert-manager:** arn role ([f9e27bd](https://github.com/nullplatform/tofu-modules/commit/f9e27bd092427636ef4e09e6ab3460bda61d2320))
+* **iam-cert-manager:** arn role ([e0e112c](https://github.com/nullplatform/tofu-modules/commit/e0e112c45c48f89686cf09914a624541f2c45d43))
+* **iam-cert-manager:** arn role ([65c5fb0](https://github.com/nullplatform/tofu-modules/commit/65c5fb0196413b06582cedf9df5c96f7e559049a))
+* **iam-cert-manager:** arn role ([4ea5275](https://github.com/nullplatform/tofu-modules/commit/4ea52750bd23f08da11f5d9a744bafa7c5b22b33))
+* **iam-cert-manager:** arn role ([63959ac](https://github.com/nullplatform/tofu-modules/commit/63959ac25ac14fe7134ec7bd1439caf1b728af63))
+* improve vpc variable descriptions for clarity ([#194](https://github.com/nullplatform/tofu-modules/issues/194)) ([a165d43](https://github.com/nullplatform/tofu-modules/commit/a165d43eecb13d3677d847425947c826fda18bd4))
+* **infra:** fix namespace name ([5f22a63](https://github.com/nullplatform/tofu-modules/commit/5f22a63e1a08099399feb9c67d093b62fe513b08))
+* **infra:** security hardening, DNS test fixes, WI docs and AVP revert ([#295](https://github.com/nullplatform/tofu-modules/issues/295)) ([d5982fe](https://github.com/nullplatform/tofu-modules/commit/d5982fe6abe9cf687cb1abb0e778d9c53535ab8c))
+* istio subnet annotation ([#327](https://github.com/nullplatform/tofu-modules/issues/327)) ([57c2495](https://github.com/nullplatform/tofu-modules/commit/57c2495fd180057d4484b368d25d34adeb2378da))
+* **istio:** add OCI LoadBalancer subnet annotation support ([#317](https://github.com/nullplatform/tofu-modules/issues/317)) ([4427b61](https://github.com/nullplatform/tofu-modules/commit/4427b61229b4ca996c95d7dfb839a1fed9340e9d))
+* **istio:** wait for condition ([8cbe4e1](https://github.com/nullplatform/tofu-modules/commit/8cbe4e1f3452ebf9c382613b489e613dc941a1a3))
+* make virtual_network_links required without default ([329f5a5](https://github.com/nullplatform/tofu-modules/commit/329f5a5a3c44d97239eb6875aa6784881a603e41))
+* **nullplatform-asset-ecr:** fix deprecated attribute name for region ([ed29e76](https://github.com/nullplatform/tofu-modules/commit/ed29e7687fec7799f26310e62fc118526ff75b0e))
+* **nullplatform-base:** add security groups to gateways ([2b72d60](https://github.com/nullplatform/tofu-modules/commit/2b72d6023cd78242c773d8dbb2a1668963db07b9))
+* **nullplatform/asset/ecr:** correct invalid provider version constraint operator ([#332](https://github.com/nullplatform/tofu-modules/issues/332)) ([8467496](https://github.com/nullplatform/tofu-modules/commit/8467496a52c2f20bbd1f715ce929fac32ff5874c))
+* **nullplatform/asset/ecr:** remove unsupported dimensions variable ([#308](https://github.com/nullplatform/tofu-modules/issues/308)) ([6caa947](https://github.com/nullplatform/tofu-modules/commit/6caa947128a691aeb2d3ebb5e41467ec8322b13e))
+* **nullplatform/scope_definition:** ignore_changes on action_specification icon ([#350](https://github.com/nullplatform/tofu-modules/issues/350)) ([b895608](https://github.com/nullplatform/tofu-modules/commit/b895608300e896d91506e5a299b2b520f49639ce))
+* **nullplatform/scope_definition:** ignore_changes on scope_type provider_type and status ([#305](https://github.com/nullplatform/tofu-modules/issues/305)) ([895ced0](https://github.com/nullplatform/tofu-modules/commit/895ced0eb58fa7972cbc942e236f4e601d7d69fc))
+* **nullplatform:** add dimensions variable and eks balancer improvements ([#290](https://github.com/nullplatform/tofu-modules/issues/290)) ([e38d07e](https://github.com/nullplatform/tofu-modules/commit/e38d07ef2515867747518d43a86af1550e91d5e9))
+* **nullplatform:** rename api key to SCOPE_DEFINITION_AGENT_ASSOCIATION ([d23557a](https://github.com/nullplatform/tofu-modules/commit/d23557a6ee88e7fa3020b3f1d9d1ace9bc93d0a5))
+* **pipeline:** fix reference ([#176](https://github.com/nullplatform/tofu-modules/issues/176)) ([ac897ab](https://github.com/nullplatform/tofu-modules/commit/ac897ab2669f3f2f4535e64d378de6e0c4addce0))
+* **private_dns:** make virtual_network_links required and update example ([c75b08f](https://github.com/nullplatform/tofu-modules/commit/c75b08f1950fcff94db4a4a7a0d3c87809da72d7))
+* **release:** fix commit message ([#131](https://github.com/nullplatform/tofu-modules/issues/131)) ([eb4e239](https://github.com/nullplatform/tofu-modules/commit/eb4e2395ce90ae9b2c08425ae99888c4b04cb02f))
+* **release:** fix commit message ([#88](https://github.com/nullplatform/tofu-modules/issues/88)) ([5926b7b](https://github.com/nullplatform/tofu-modules/commit/5926b7b64b739e76c4d341db480dff86adb4088e))
+* remove OCI configuration aliases and bump chart defaults ([#184](https://github.com/nullplatform/tofu-modules/issues/184)) ([2e65a28](https://github.com/nullplatform/tofu-modules/commit/2e65a28e721c0d40a34e340bd00a90c75faac9a1))
+* remove provider ([#285](https://github.com/nullplatform/tofu-modules/issues/285)) ([65a31b1](https://github.com/nullplatform/tofu-modules/commit/65a31b14ace78620d52c89856f2b96e10ae36a02))
+* remove provider ([#287](https://github.com/nullplatform/tofu-modules/issues/287)) ([6cd6ef0](https://github.com/nullplatform/tofu-modules/commit/6cd6ef0d5a60b6ec56d3561a51e803a37b4e8a1c))
+* remove usedBy tag from api_key notification channels ([#183](https://github.com/nullplatform/tofu-modules/issues/183)) ([dbe2c9a](https://github.com/nullplatform/tofu-modules/commit/dbe2c9aeaec0c342564def3be6fba19b66d8d5e7))
+* rename agent API key to AGENT-ASSOCIATION with minimal permissions ([#92](https://github.com/nullplatform/tofu-modules/issues/92)) ([1fb44b2](https://github.com/nullplatform/tofu-modules/commit/1fb44b2c7ead437e082142157baad98ee98d6a66))
+* rename api key to SCOPE_DEFINITION_AGENT_ASSOCIATION ([#117](https://github.com/nullplatform/tofu-modules/issues/117)) ([1ed79ba](https://github.com/nullplatform/tofu-modules/commit/1ed79ba7773d7b1f9792215623d4a3b40a988443))
+* replace agent helm release when API key rotates ([b0ea1c9](https://github.com/nullplatform/tofu-modules/commit/b0ea1c903477d25ba46cc656a85c0245511d2d4f))
+* replace deprecated data.aws_region.current.name with .region ([5e90e4a](https://github.com/nullplatform/tofu-modules/commit/5e90e4a7e8eae1a99ba28cb9452b7bcbed106430))
+* replace deprecated data.aws_region.current.name with .region ([#201](https://github.com/nullplatform/tofu-modules/issues/201)) ([0ba762b](https://github.com/nullplatform/tofu-modules/commit/0ba762b9daf66346d522ea8faeb7eee9b8e0e3ad))
+* replace notification channels when API key rotates ([07d3e17](https://github.com/nullplatform/tofu-modules/commit/07d3e17f29087c64028aad6b61dfc37cb1443e32))
+* **route53:** disable output acm ([1dc1601](https://github.com/nullplatform/tofu-modules/commit/1dc1601a08178f562c3f51a18d4cc54ac7bf4a47))
+* **route53:** disabled ACM ([413144d](https://github.com/nullplatform/tofu-modules/commit/413144d7e921cf9c81a6977b68e98645d96d391c))
+* **scope_configuration:** remove icon attribute (not in nullplatform_provider_config schema) ([#351](https://github.com/nullplatform/tofu-modules/issues/351)) ([35b3d93](https://github.com/nullplatform/tofu-modules/commit/35b3d93e161c6c02fdfaa2921b0bac6f7ded4b15))
+* **scope_definition_agent_association:** add devops role to channel API key ([dc92016](https://github.com/nullplatform/tofu-modules/commit/dc9201607fa32be697b9f44bc022d2bee7789ee8))
+* **scope_definition_agent_association:** use ops role instead of devops ([6012a4a](https://github.com/nullplatform/tofu-modules/commit/6012a4a0966511fc7ca3660aeb6821eed64fd6f6))
+* **scope:** Add support for icon and annotations in service action spec definition ([#82](https://github.com/nullplatform/tofu-modules/issues/82)) ([5c7c1bb](https://github.com/nullplatform/tofu-modules/commit/5c7c1bbd677f3644c7e2df639e3cc25d336b30f0))
+* **scope:** Fixing typo in annotation in scope definition module ([#85](https://github.com/nullplatform/tofu-modules/issues/85)) ([75a0d48](https://github.com/nullplatform/tofu-modules/commit/75a0d48a672152e3cf27c4ba907736d5fb75c634))
+* **security,base:** add health check toggle, ALB-to-pod rules, and gateway fixes ([#230](https://github.com/nullplatform/tofu-modules/issues/230)) ([f60a1a5](https://github.com/nullplatform/tofu-modules/commit/f60a1a5bb3752693c15da880ba1b3c855a129299))
+* **security:** align provider version constraints with repo conventions ([a47de86](https://github.com/nullplatform/tofu-modules/commit/a47de86ce69b6a2dcf699d519304c69bebea995d))
+* **security:** change gateway_port default from 8443 to 443 ([#281](https://github.com/nullplatform/tofu-modules/issues/281)) ([6c5fc5c](https://github.com/nullplatform/tofu-modules/commit/6c5fc5c7a755ece4bb4befe040d33028ec761d3a))
+* **security:** resolve cluster SG from data source instead of variable ([#284](https://github.com/nullplatform/tofu-modules/issues/284)) ([a816f55](https://github.com/nullplatform/tofu-modules/commit/a816f550620506e9b489ac1593e4de87a2a536f2))
+* **security:** use static var.cluster_name in count to avoid unknown at plan time ([#338](https://github.com/nullplatform/tofu-modules/issues/338)) ([a2675f4](https://github.com/nullplatform/tofu-modules/commit/a2675f4548f8f3395517378825e2524485aea885))
+* **service_definition_agent_association:** remove telemetry from channel_sources default ([#377](https://github.com/nullplatform/tofu-modules/issues/377)) ([876ad77](https://github.com/nullplatform/tofu-modules/commit/876ad775c13d4cef46177b47bce0ed108f9ddf57))
+* **service_definition:** handle empty service_path for GitLab and cmdline ([#400](https://github.com/nullplatform/tofu-modules/issues/400)) ([826e016](https://github.com/nullplatform/tofu-modules/commit/826e0164c8c36035a93d7eabeed623443f5005e2))
+* **service-definition:** simplify link specifications to use only links/ directory ([#149](https://github.com/nullplatform/tofu-modules/issues/149)) ([6db7d61](https://github.com/nullplatform/tofu-modules/commit/6db7d61765e8b08bafde28e3d682009b32f21fdd))
+* **tofu-modules:** update varibles & readme ([8de37f1](https://github.com/nullplatform/tofu-modules/commit/8de37f1576b42935d114c57dc0686fbc33c2a186))
+* **tofu:** fmt ([a9da839](https://github.com/nullplatform/tofu-modules/commit/a9da83956908a28fd9796a52768d0c8656d274f7))
+* **tofu:** resolve conflicts ([57ef623](https://github.com/nullplatform/tofu-modules/commit/57ef623285f2515428877880f4d014ca125ea443))
+* **tofu:** resolve conflicts ([013628f](https://github.com/nullplatform/tofu-modules/commit/013628f8e0530d20d0622f58008ea47b2970e54a))
+* trigger release ([#150](https://github.com/nullplatform/tofu-modules/issues/150)) ([eaa6a66](https://github.com/nullplatform/tofu-modules/commit/eaa6a667032be9c330d84f70996f732d8444d812))
+* update to v0.15.0 and replace resource_group_name for parent_id ([#53](https://github.com/nullplatform/tofu-modules/issues/53)) ([fe32430](https://github.com/nullplatform/tofu-modules/commit/fe3243067b684682be22661c993033cb2094f4fc))
+* use configurable branch for notification channel template URL ([#224](https://github.com/nullplatform/tofu-modules/issues/224)) ([825343d](https://github.com/nullplatform/tofu-modules/commit/825343d9ad562cb2a48e6c207175d2ce7276112e))
+
+
+### Reverts
+
+* release 2.0.0 and feat eks-gateway-rules ([#318](https://github.com/nullplatform/tofu-modules/issues/318), [#314](https://github.com/nullplatform/tofu-modules/issues/314)) ([#319](https://github.com/nullplatform/tofu-modules/issues/319)) ([167304f](https://github.com/nullplatform/tofu-modules/commit/167304f6023dbfe886490743b019421c46707615))
+
+
+### Miscellaneous Chores
+
+* release 5.1.0 ([#410](https://github.com/nullplatform/tofu-modules/issues/410)) ([fc5ef69](https://github.com/nullplatform/tofu-modules/commit/fc5ef69851a7b21204a4e07ba04968728d47a6a1))
+
+
+### Code Refactoring
+
+* **nullplatform/dimension:** replace dimensions with parameterized single-dimension module ([#354](https://github.com/nullplatform/tofu-modules/issues/354)) ([319d962](https://github.com/nullplatform/tofu-modules/commit/319d9620335beee312d97256d6ecd483652d1c06))
+
+## [5.1.0](https://github.com/nullplatform/tofu-modules/compare/v5.0.0...v5.1.0) (2026-06-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* **iam/agent:** the IRSA token no longer has Route53/EKS/ELB/AVP permissions directly. The agent must assume the permissions role (exposed via the nullplatform_agent_permissions_role_arn output) to use them.
+
+### Features
+
+* **iam/agent:** split agent role into agent + permissions roles ([#397](https://github.com/nullplatform/tofu-modules/issues/397)) ([9df28f5](https://github.com/nullplatform/tofu-modules/commit/9df28f53ae726a251eb7ed937b88dd1057452672))
+
+
+### Miscellaneous Chores
+
+* release 5.1.0 ([#410](https://github.com/nullplatform/tofu-modules/issues/410)) ([fc5ef69](https://github.com/nullplatform/tofu-modules/commit/fc5ef69851a7b21204a4e07ba04968728d47a6a1))
+
+## [5.0.0](https://github.com/nullplatform/tofu-modules/compare/v4.6.0...v5.0.0) (2026-06-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* **iam:** infrastructure/aws/iam/ecr no longer creates the build workflow user, access key or group, and no longer outputs build_workflow_access_key_id / build_workflow_access_key_secret. Consumers must instantiate the new build-user module, pass its group_name to ecr (new required input build_workflow_group_name) and to s3-assets, take the build credentials from build-user outputs, and run a tofu state mv to preserve the existing user and access key (see infrastructure/aws/iam/build-user/README.md). The IAM group is renamed from ecr-managers to asset-publishers (recreated; does not rotate the user's keys).
+
+### Features
+
+* **iam:** separate build workflow user from asset repositories + add S3 asset support ([#402](https://github.com/nullplatform/tofu-modules/issues/402)) ([9ae9e09](https://github.com/nullplatform/tofu-modules/commit/9ae9e095e5090d08508b97e6ec4da1a1b7e2ab6a))
+
+## [4.6.0](https://github.com/nullplatform/tofu-modules/compare/v4.5.2...v4.6.0) (2026-06-25)
+
+
+### Features
+
+* **base:** add gateway_public_azure_load_balancer_subnet ([#403](https://github.com/nullplatform/tofu-modules/issues/403)) ([b9b6f5e](https://github.com/nullplatform/tofu-modules/commit/b9b6f5e8b769623d981594064461bfaff963d30c))
+
 ## [4.5.2](https://github.com/nullplatform/tofu-modules/compare/v4.5.1...v4.5.2) (2026-06-22)
 
 

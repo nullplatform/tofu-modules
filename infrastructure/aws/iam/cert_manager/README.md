@@ -23,7 +23,7 @@ An aws_iam_policy is created granting Route53 permissions (GetChange, ChangeReso
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/cert_manager?ref=v4.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/cert_manager?ref=v5.2.0"
 
   aws_iam_openid_connect_provider_arn = "your-aws-iam-openid-connect-provider-arn"
   cluster_name                        = "your-cluster-name"
@@ -34,7 +34,7 @@ module "cert_manager" {
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/cert_manager?ref=v4.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/cert_manager?ref=v5.2.0"
 
   cluster_name  = "your-cluster-name"
   identity_mode = "pod_identity"
