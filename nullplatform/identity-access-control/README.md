@@ -20,7 +20,7 @@ The module creates a single nullplatform_provider_config resource named identity
 
 ```hcl
 module "identity-access-control" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/identity-access-control?ref=v5.2.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/identity-access-control?ref=v5.3.0"
 
   attributes = "your-attributes"
   nrn        = "your-nrn"

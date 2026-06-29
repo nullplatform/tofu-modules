@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.3.0](https://github.com/nullplatform/tofu-modules/compare/v5.2.0...v5.3.0) (2026-06-26)
+
+
+### Features
+
+* **iam:** add Pod Identity support to cert-manager and external-dns modules ([#409](https://github.com/nullplatform/tofu-modules/issues/409)) ([1f4e5ff](https://github.com/nullplatform/tofu-modules/commit/1f4e5ff1a37dea78c396dcf176a1c1db308f503b))
+
 ## [5.2.0](https://github.com/nullplatform/tofu-modules/compare/v5.1.0...v5.2.0) (2026-06-25)
 
 
