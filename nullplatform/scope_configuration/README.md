@@ -20,7 +20,7 @@ The module creates a single nullplatform_provider_config resource that binds a N
 
 ```hcl
 module "scope_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v5.3.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v5.3.1"
 
   attributes                  = "your-attributes"
   np_api_key                  = "your-np-api-key"

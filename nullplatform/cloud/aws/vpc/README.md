@@ -20,7 +20,7 @@ Creates a nullplatform_provider_config resource of type 'aws-networking-configur
 
 ```hcl
 module "vpc" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/vpc?ref=v5.3.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/vpc?ref=v5.3.1"
 
   nrn                 = "your-nrn"
   vpc_id              = "your-vpc-id"
