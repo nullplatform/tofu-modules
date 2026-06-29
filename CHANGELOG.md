@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.3.1](https://github.com/nullplatform/tofu-modules/compare/v5.3.0...v5.3.1) (2026-06-29)
+
+
+### Bug Fixes
+
+* move infrastructure/aws/iam/s3 to scopes-static-files requirements ([#419](https://github.com/nullplatform/tofu-modules/issues/419)) ([33d9b50](https://github.com/nullplatform/tofu-modules/commit/33d9b50a71917291ac66bc20a86a84c9b6f37722))
+
+## [5.3.0](https://github.com/nullplatform/tofu-modules/compare/v5.2.0...v5.3.0) (2026-06-26)
+
+
+### Features
+
+* **iam:** add Pod Identity support to cert-manager and external-dns modules ([#409](https://github.com/nullplatform/tofu-modules/issues/409)) ([1f4e5ff](https://github.com/nullplatform/tofu-modules/commit/1f4e5ff1a37dea78c396dcf176a1c1db308f503b))
+
 ## [5.2.0](https://github.com/nullplatform/tofu-modules/compare/v5.1.0...v5.2.0) (2026-06-25)
 
 

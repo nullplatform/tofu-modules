@@ -2,26 +2,27 @@
 
 ## Description
 
-Deploys cert-manager and its cloud-provider-specific configuration onto a Kubernetes cluster using Helm, supporting DNS01 challenge solvers for GCP, Azure, AWS, Cloudflare, and OCI
+Deploys cert-manager and its configuration Helm charts on Kubernetes with multi-cloud DNS01 solver support for GCP, Azure, AWS, Cloudflare, and OCI
 
 ## Architecture
 
-The module creates two core helm_release resources: cert-manager from the Jetstack chart repository and nullplatform-cert-manager-config from the nullplatform Helm chart repository, with the config release depending on the cert-manager release. A third conditional helm_release resource for cert-manager-webhook-oci is created only when cloud_provider is set to 'oci'. Provider-specific service account annotations are merged into the cert-manager serviceAccount resource via locals (GKE Workload Identity email, EKS IRSA role ARN when `aws_identity_mode=irsa`, Azure Workload Identity client ID, OCI workload identity OCID). When `aws_identity_mode=pod_identity` the IRSA annotation is omitted and EKS Pod Identity injects credentials via the agent. Provider-specific solver values are rendered from per-provider template files and passed as Helm values to the config chart.
+Two primary helm_release resources are created: cert-manager from the Jetstack chart repository and nullplatform-cert-manager-config from the nullplatform chart repository, with the config chart depending on the base cert-manager release. A third conditional helm_release for cert-manager-webhook-oci is created only when cloud_provider is 'oci'. The cert_manager_values local constructs the Helm values dynamically, merging base service account annotations with provider-specific annotations (GCP Workload Identity, AWS IRSA role ARN, Azure Workload Identity client ID, or OCI workload identity principal) based on cloud_provider and aws_identity_mode. Template files cert_manager_default_values and cert_manager_provider_values are rendered via templatefile() using common_context and provider_context locals and passed as values to the config chart.
 
 ## Features
 
-- Deploys cert-manager Helm chart with CRDs enabled and DNS01 recursive nameservers configured
-- Renders provider-specific cert-manager-config Helm values from templatefiles for each supported cloud provider
-- Configures cert-manager Kubernetes ServiceAccount annotations with cloud-provider IAM identity bindings (GKE Workload Identity, EKS IRSA or Pod Identity via `aws_identity_mode`, Azure Workload Identity, OCI Workload Identity)
-- Deploys cert-manager-webhook-oci Helm chart conditionally when OCI is the selected cloud provider
-- Supports Azure Service Principal authentication as fallback when Workload Identity is disabled
-- Merges base Helm chart version annotations with provider-specific pod and service account annotations using locals
+- Deploys cert-manager Helm chart with CRDs enabled and DNS01 recursive nameserver configuration
+- Deploys nullplatform-cert-manager-config Helm chart with provider-specific DNS01 solver templates rendered via templatefile()
+- Configures cert-manager Kubernetes service account annotations for GCP Workload Identity, AWS IRSA, Azure Workload Identity, and OCI workload identity
+- Deploys cert-manager-webhook-oci Helm chart conditionally when cloud_provider is set to oci
+- Supports AWS Pod Identity mode that omits IRSA role annotation for EKS Pod Identity agent-based credential injection
+- Supports Azure Service Principal authentication when workload identity is disabled via azure_workload_identity_enabled
+- Merges provider-specific pod labels for Azure Workload Identity use annotation on cert-manager pods
 
 ## Basic Usage
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v5.2.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v5.3.1"
 
   account_slug        = "your-account-slug"
   cloud_provider      = "your-cloud-provider"
@@ -30,11 +31,11 @@ module "cert_manager" {
 }
 ```
 
-### Usage with GCP
+### Usage with GCP Provider
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v5.2.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v5.3.1"
 
   account_slug        = "your-account-slug"
   cloud_provider      = "gcp"
@@ -45,11 +46,11 @@ module "cert_manager" {
 }
 ```
 
-### Usage with Azure
+### Usage with Azure Provider
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v5.2.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v5.3.1"
 
   account_slug              = "your-account-slug"
   azure_client_id           = "your-azure-client-id"  # Required when cloud_provider = "azure"
@@ -63,11 +64,11 @@ module "cert_manager" {
 }
 ```
 
-### Usage with Cloudflare
+### Usage with Cloudflare Provider
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v5.2.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v5.3.1"
 
   account_slug           = "your-account-slug"
   cloud_provider         = "cloudflare"
@@ -78,13 +79,14 @@ module "cert_manager" {
 }
 ```
 
-### Usage with AWS
+### Usage with AWS Provider
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v5.2.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v5.3.1"
 
   account_slug        = "your-account-slug"
+  aws_identity_mode   = "your-aws-identity-mode"  # Required when cloud_provider = "aws"
   aws_region          = "your-aws-region"  # Required when cloud_provider = "aws"
   aws_sa_arn          = "your-aws-sa-arn"  # Required when cloud_provider = "aws"
   cloud_provider      = "aws"
@@ -93,19 +95,21 @@ module "cert_manager" {
 }
 ```
 
-### Usage with OCI
+### Usage with OCI Provider
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v5.2.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v5.3.1"
 
-  account_slug         = "your-account-slug"
-  cloud_provider       = "oci"
-  hosted_zone_name     = "your-hosted-zone-name"
-  oci_compartment_ocid = "your-oci-compartment-ocid"  # Required when cloud_provider = "oci"
-  oci_region           = "your-oci-region"  # Required when cloud_provider = "oci"
-  oci_sa_ocid          = "your-oci-sa-ocid"  # Required when cloud_provider = "oci"
-  private_domain_name  = "your-private-domain-name"
+  account_slug                       = "your-account-slug"
+  cert_manager_webhook_oci_namespace = "your-cert-manager-webhook-oci-namespace"  # Required when cloud_provider = "oci"
+  cert_manager_webhook_oci_version   = "your-cert-manager-webhook-oci-version"  # Required when cloud_provider = "oci"
+  cloud_provider                     = "oci"
+  hosted_zone_name                   = "your-hosted-zone-name"
+  oci_compartment_ocid               = "your-oci-compartment-ocid"  # Required when cloud_provider = "oci"
+  oci_region                         = "your-oci-region"  # Required when cloud_provider = "oci"
+  oci_sa_ocid                        = "your-oci-sa-ocid"  # Required when cloud_provider = "oci"
+  private_domain_name                = "your-private-domain-name"
 }
 ```
 
@@ -122,20 +126,20 @@ resource "example_resource" "this" {
 ## Requirements
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 3.0 |
 
 ## Providers
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="provider_helm"></a> [helm](#provider\_helm) | 3.1.1 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Resources
 
 | Name | Type |
-| ---- | ---- |
+|------|------|
 | [helm_release.cert_manager](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.cert_manager_config](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.cert_manager_webhook_oci](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
@@ -144,7 +148,7 @@ resource "example_resource" "this" {
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-| ---- | ----------- | ---- | ------- | :------: |
+|------|-------------|------|---------|:--------:|
 | <a name="input_account_slug"></a> [account\_slug](#input\_account\_slug) | The nullplatform account slug. | `string` | n/a | yes |
 | <a name="input_aws_identity_mode"></a> [aws\_identity\_mode](#input\_aws\_identity\_mode) | AWS identity mechanism for the cert-manager service account: "irsa" sets the eks.amazonaws.com/role-arn annotation; "pod\_identity" omits it (EKS Pod Identity injects credentials via the Pod Identity agent). | `string` | `"irsa"` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region. | `string` | `""` | no |
@@ -177,15 +181,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "cert_manager",
-  "description": "Deploys cert-manager and its cloud-provider-specific configuration onto a Kubernetes cluster using Helm, supporting DNS01 challenge solvers for GCP, Azure, AWS, Cloudflare, and OCI",
-  "architecture": "The module creates two core helm_release resources: cert-manager from the Jetstack chart repository and nullplatform-cert-manager-config from the nullplatform Helm chart repository, with the config release depending on the cert-manager release. A third conditional helm_release resource for cert-manager-webhook-oci is created only when cloud_provider is set to 'oci'. Provider-specific service account annotations (such as GKE Workload Identity email, EKS IRSA role ARN, Azure Workload Identity client ID, or OCI workload identity OCID) are merged into the cert-manager serviceAccount resource via locals, and provider-specific solver values are rendered from per-provider template files and passed as Helm values to the config chart.",
+  "description": "Deploys cert-manager and its configuration Helm charts on Kubernetes with multi-cloud DNS01 solver support for GCP, Azure, AWS, Cloudflare, and OCI",
+  "architecture": "Two primary helm_release resources are created: cert-manager from the Jetstack chart repository and nullplatform-cert-manager-config from the nullplatform chart repository, with the config chart depending on the base cert-manager release. A third conditional helm_release for cert-manager-webhook-oci is created only when cloud_provider is 'oci'. The cert_manager_values local constructs the Helm values dynamically, merging base service account annotations with provider-specific annotations (GCP Workload Identity, AWS IRSA role ARN, Azure Workload Identity client ID, or OCI workload identity principal) based on cloud_provider and aws_identity_mode. Template files cert_manager_default_values and cert_manager_provider_values are rendered via templatefile() using common_context and provider_context locals and passed as values to the config chart.",
   "features": [
-    "Deploys cert-manager Helm chart with CRDs enabled and DNS01 recursive nameservers configured",
-    "Renders provider-specific cert-manager-config Helm values from templatefiles for each supported cloud provider",
-    "Configures cert-manager Kubernetes ServiceAccount annotations with cloud-provider IAM identity bindings (GKE Workload Identity, EKS IRSA, Azure Workload Identity, OCI Workload Identity)",
-    "Deploys cert-manager-webhook-oci Helm chart conditionally when OCI is the selected cloud provider",
-    "Supports Azure Service Principal authentication as fallback when Workload Identity is disabled",
-    "Merges base Helm chart version annotations with provider-specific pod and service account annotations using locals"
+    "Deploys cert-manager Helm chart with CRDs enabled and DNS01 recursive nameserver configuration",
+    "Deploys nullplatform-cert-manager-config Helm chart with provider-specific DNS01 solver templates rendered via templatefile()",
+    "Configures cert-manager Kubernetes service account annotations for GCP Workload Identity, AWS IRSA, Azure Workload Identity, and OCI workload identity",
+    "Deploys cert-manager-webhook-oci Helm chart conditionally when cloud_provider is set to oci",
+    "Supports AWS Pod Identity mode that omits IRSA role annotation for EKS Pod Identity agent-based credential injection",
+    "Supports Azure Service Principal authentication when workload identity is disabled via azure_workload_identity_enabled",
+    "Merges provider-specific pod labels for Azure Workload Identity use annotation on cert-manager pods"
   ],
   "inputs": [
     {
@@ -207,6 +212,11 @@ resource "example_resource" "this" {
       "name": "cloud_provider",
       "description": "The cloud provider to use: gcp, azure, aws, cloudflare, or oci",
       "required": true
+    },
+    {
+      "name": "aws_identity_mode",
+      "description": "AWS identity mechanism for the cert-manager service account: \\",
+      "required": false
     },
     {
       "name": "gcp_sa_email",
@@ -320,6 +330,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "eed29df7c90a6c77635ad0b9ac31e94d"
+  "hash": "9b9ca597c8f741fa93ed83cf97031619"
 }
 END_AI_METADATA -->
