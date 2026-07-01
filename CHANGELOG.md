@@ -1,5 +1,16 @@
 # Changelog
 
+## [6.0.0](https://github.com/nullplatform/tofu-modules/compare/v5.3.1...v6.0.0) (2026-07-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* **iam/agent:** clusters that relied on the implicit permissions role must now pass it explicitly in assume_role_arns.
+
+### Features
+
+* **iam/agent:** require explicit assume_role_arns, drop implicit permissions role ([#421](https://github.com/nullplatform/tofu-modules/issues/421)) ([44b8fd6](https://github.com/nullplatform/tofu-modules/commit/44b8fd6d631c1fab3247383728a5d64efea5687f))
+
 ## [5.3.1](https://github.com/nullplatform/tofu-modules/compare/v5.3.0...v5.3.1) (2026-06-29)
 
 
