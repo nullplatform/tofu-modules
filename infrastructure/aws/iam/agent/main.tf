@@ -1,13 +1,11 @@
 locals {
-  role_name             = var.role_name != "" ? var.role_name : "nullplatform-${var.cluster_name}-agent-role"
-  permissions_role_name = var.permissions_role_name != "" ? var.permissions_role_name : "nullplatform-${var.cluster_name}-agent-permissions-role"
-  policies_name_prefix  = var.policies_name_prefix != "" ? var.policies_name_prefix : "nullplatform_${var.cluster_name}"
+  role_name            = var.role_name != "" ? var.role_name : "nullplatform-${var.cluster_name}-agent-role"
+  policies_name_prefix = var.policies_name_prefix != "" ? var.policies_name_prefix : "nullplatform_${var.cluster_name}"
 
-  # ARNs built from names + account id to avoid a circular dependency between
-  # the agent role (assume policy -> permissions role) and the permissions role
-  # (trust policy -> agent role).
-  agent_role_arn       = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.role_name}"
-  permissions_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.permissions_role_name}"
+  # ARN built from name + account id to avoid a circular dependency between the
+  # agent role (extra permissions trust) and the extra permissions roles (trust
+  # policy -> agent role).
+  agent_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.role_name}"
 
   # Resolve the name and (computed) ARN of each extra permissions role up front,
   # so both the agent assume policy and the role trust policies reference the
@@ -63,12 +61,13 @@ module "nullplatform_agent_role" {
 }
 
 # NOTE: The permissions role (nullplatform_agent_permissions) and its workload
-# policies (Route53, EKS, ELB, AVP) are no longer created by this module. They
-# are now provisioned per-cluster by the k8s scope's OpenTofu module
-# (scopes: k8s/scope/tofu/iam/modules). This module keeps only the agent IRSA
-# role and an assume policy that authorizes assuming that externally-created
-# permissions role by its conventional ARN (see nullplatform_assume_role_policy
-# and local.permissions_role_arn).
+# policies (Route53, EKS, ELB, AVP) are not created by this module. They are
+# provisioned per-cluster by the k8s scope's OpenTofu module (scopes:
+# k8s/scope/tofu/iam/modules). This module keeps only the agent IRSA role and an
+# assume policy. The agent role is NOT granted permission to assume that
+# externally-created permissions role by convention: callers must pass every
+# role the agent should assume explicitly via var.assume_role_arns (see
+# nullplatform_assume_role_policy).
 
 ################################################################################
 # Additional permissions roles assumed by the agent role
@@ -106,23 +105,32 @@ resource "aws_iam_role_policy_attachment" "extra_permissions" {
 
 resource "aws_iam_policy" "nullplatform_assume_role_policy" {
   name        = "${local.policies_name_prefix}_assume_role_policy"
-  description = "Policy allowing the agent to assume the permissions role and any additional roles"
+  description = "Policy allowing the agent to assume the roles passed via permissions_roles and assume_role_arns"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
       Effect = "Allow"
       Action = "sts:AssumeRole"
       Resource = concat(
-        [local.permissions_role_arn],
         local.extra_permissions_role_arns,
         var.assume_role_arns
       )
     }]
   })
+
+  # The agent role no longer assumes any role by convention: at least one role
+  # must be provided explicitly (via permissions_roles or assume_role_arns),
+  # otherwise the policy would render an empty Resource and AWS would reject it.
+  lifecycle {
+    precondition {
+      condition     = length(concat(local.extra_permissions_role_arns, var.assume_role_arns)) > 0
+      error_message = "The agent role must be allowed to assume at least one role: pass it via var.assume_role_arns (e.g. the k8s permissions role ARN) or define var.permissions_roles."
+    }
+  }
 }
 
 # The assume role policy used to be conditional (count). It is now always
-# created because the agent role must be able to assume the permissions role.
+# created because the agent role holds its sts:AssumeRole grants here.
 moved {
   from = aws_iam_policy.nullplatform_assume_role_policy[0]
   to   = aws_iam_policy.nullplatform_assume_role_policy

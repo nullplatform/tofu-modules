@@ -25,8 +25,12 @@ variables {
   aws_iam_openid_connect_provider_arn = "arn:aws:iam::123456789012:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/EXAMPLE"
 }
 
-run "assume_role_policy_always_created_and_targets_permissions_role" {
+run "assume_role_policy_targets_only_provided_arns" {
   command = plan
+
+  variables {
+    assume_role_arns = ["arn:aws:iam::123456789012:role/some-role"]
+  }
 
   assert {
     condition     = aws_iam_policy.nullplatform_assume_role_policy.name == "nullplatform_test-cluster_assume_role_policy"
@@ -36,38 +40,34 @@ run "assume_role_policy_always_created_and_targets_permissions_role" {
   assert {
     condition = contains(
       jsondecode(aws_iam_policy.nullplatform_assume_role_policy.policy).Statement[0].Resource,
+      "arn:aws:iam::123456789012:role/some-role"
+    )
+    error_message = "assume_role policy should include the provided assume_role_arns"
+  }
+
+  assert {
+    condition = !contains(
+      jsondecode(aws_iam_policy.nullplatform_assume_role_policy.policy).Statement[0].Resource,
       "arn:aws:iam::123456789012:role/nullplatform-test-cluster-agent-permissions-role"
     )
-    error_message = "assume_role policy should allow assuming the permissions role by default"
+    error_message = "assume_role policy must NOT inject the permissions role by convention anymore"
   }
 }
 
-run "assume_role_policy_includes_additional_arns" {
+run "assume_role_policy_fails_without_any_role" {
+  command = plan
+
+  expect_failures = [
+    aws_iam_policy.nullplatform_assume_role_policy,
+  ]
+}
+
+run "extra_permissions_roles_not_created_by_default" {
   command = plan
 
   variables {
     assume_role_arns = ["arn:aws:iam::123456789012:role/some-role"]
   }
-
-  assert {
-    condition = contains(
-      jsondecode(aws_iam_policy.nullplatform_assume_role_policy.policy).Statement[0].Resource,
-      "arn:aws:iam::123456789012:role/nullplatform-test-cluster-agent-permissions-role"
-    )
-    error_message = "assume_role policy should still allow assuming the permissions role"
-  }
-
-  assert {
-    condition = contains(
-      jsondecode(aws_iam_policy.nullplatform_assume_role_policy.policy).Statement[0].Resource,
-      "arn:aws:iam::123456789012:role/some-role"
-    )
-    error_message = "assume_role policy should include additional assume_role_arns"
-  }
-}
-
-run "extra_permissions_roles_not_created_by_default" {
-  command = plan
 
   assert {
     condition     = length(aws_iam_role.extra_permissions) == 0
@@ -101,7 +101,7 @@ run "extra_permissions_roles_created_and_assumable" {
   }
 
   assert {
-    condition = jsondecode(aws_iam_role.extra_permissions["data"].assume_role_policy).Statement[0].Principal.AWS == "arn:aws:iam::123456789012:role/nullplatform-test-cluster-agent-role"
+    condition     = jsondecode(aws_iam_role.extra_permissions["data"].assume_role_policy).Statement[0].Principal.AWS == "arn:aws:iam::123456789012:role/nullplatform-test-cluster-agent-role"
     error_message = "Extra role trust policy should allow the agent role to assume it"
   }
 
@@ -124,5 +124,13 @@ run "extra_permissions_roles_created_and_assumable" {
       "arn:aws:iam::123456789012:role/custom-ops-role"
     )
     error_message = "agent assume_role policy should include the ops extra role"
+  }
+
+  assert {
+    condition = !contains(
+      jsondecode(aws_iam_policy.nullplatform_assume_role_policy.policy).Statement[0].Resource,
+      "arn:aws:iam::123456789012:role/nullplatform-test-cluster-agent-permissions-role"
+    )
+    error_message = "permissions_roles alone must not re-introduce the convention permissions role ARN"
   }
 }

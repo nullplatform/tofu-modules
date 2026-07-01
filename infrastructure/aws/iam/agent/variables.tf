@@ -42,12 +42,6 @@ variable "role_name" {
   default     = ""
 }
 
-variable "permissions_role_name" {
-  description = "Override for the permissions IAM role name. Defaults to nullplatform-{cluster_name}-agent-permissions-role"
-  type        = string
-  default     = ""
-}
-
 variable "permissions_roles" {
   description = "Additional permissions roles created by this module and assumable by the agent role. Map key is a logical name; name overrides the role name (defaults to nullplatform-{cluster_name}-{key}); policy_arns are the policy ARNs attached to the role."
   type = map(object({
