@@ -270,3 +270,16 @@ run "gateway_public_load_balancer_type_internal" {
     error_message = "public gateway loadBalancerType should be settable to internal for Cloudflare Tunnel / VPN setups"
   }
 }
+
+run "gateway_public_azure_load_balancer_subnet" {
+  command = plan
+
+  variables {
+    gateway_public_azure_load_balancer_subnet = "snet-aks-lab"
+  }
+
+  assert {
+    condition     = strcontains(output.rendered_values, "subnet: \"snet-aks-lab\"")
+    error_message = "public gateway azure subnet should be wired into the rendered public.azure block"
+  }
+}

@@ -19,11 +19,28 @@ variable "hosted_zone_private_id" {
 }
 
 variable "aws_iam_openid_connect_provider_arn" {
-  description = "ARN of the AWS IAM OIDC provider for EKS service account authentication"
+  description = "ARN of the AWS IAM OIDC provider. Required when identity_mode is 'irsa'; ignored when identity_mode is 'pod_identity'."
   type        = string
+  default     = null
+
+  validation {
+    condition     = var.identity_mode != "irsa" || (var.aws_iam_openid_connect_provider_arn != null && var.aws_iam_openid_connect_provider_arn != "")
+    error_message = "aws_iam_openid_connect_provider_arn is required when identity_mode is 'irsa'."
+  }
 }
 
 variable "cluster_name" {
   description = "Name of the cluster where the policy runs"
   type        = string
+}
+
+variable "identity_mode" {
+  description = "IAM identity mode: 'irsa' uses OIDC federation via the community iam-role-for-service-accounts module; 'pod_identity' creates a native IAM role trusted by pods.eks.amazonaws.com with an EKS Pod Identity association. Default 'irsa' is backward compatible with v4.5.x — no state changes required on upgrade. Note: switching between modes on an existing deployment replaces the IAM role; cert-manager will lose permissions during the transition until apply completes."
+  type        = string
+  default     = "irsa"
+
+  validation {
+    condition     = contains(["irsa", "pod_identity"], var.identity_mode)
+    error_message = "identity_mode must be either 'irsa' or 'pod_identity'."
+  }
 }

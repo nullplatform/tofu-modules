@@ -7,6 +7,9 @@ locals {
   _gitlab_project_encoded      = replace("${var.repository_org}/${var.repository_name}", "/", "%2F")
   _gitlab_service_path_encoded = replace(var.service_path, "/", "%2F")
   gitlab_api_file_prefix       = "https://${var.gitlab_host}/api/v4/projects/${local._gitlab_project_encoded}/repository/files/${local._gitlab_service_path_encoded}"
+  # Separator between service_path and the specs/ segment: omitted when service_path is empty
+  # to avoid a leading %2F that causes GitLab API to return a 404.
+  gitlab_path_sep              = var.service_path != "" ? "%2F" : ""
 
   auth_headers = var.repository_token == null ? {} : (
     var.git_provider == "github" ? (

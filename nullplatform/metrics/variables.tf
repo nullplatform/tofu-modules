@@ -2,6 +2,11 @@ variable "prometheus_url" {
   description = "URL of the Prometheus instance used for metrics scraping"
   type        = string
   default     = ""
+
+  validation {
+    condition     = var.prometheus_url == "" || can(regex("^https?://", var.prometheus_url))
+    error_message = "prometheus_url must start with http:// or https:// when set."
+  }
 }
 variable "dimensions" {
   default     = {}

@@ -71,3 +71,56 @@ run "attributes_contain_networking" {
     error_message = "Attributes should contain the public hosted zone ID"
   }
 }
+
+run "private_only_omits_public_zone" {
+  command = plan
+
+  variables {
+    hosted_public_zone_id = ""
+  }
+
+  assert {
+    condition     = !strcontains(nullplatform_provider_config.aws.attributes, "hosted_public_zone_id")
+    error_message = "hosted_public_zone_id must be omitted from the payload when empty (private-only); the API rejects an empty string"
+  }
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.aws.attributes, "Z1234567890PRIV")
+    error_message = "Private hosted zone ID must still be present in private-only mode"
+  }
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.aws.attributes, "example.com")
+    error_message = "domain_name must still be present in private-only mode"
+  }
+}
+
+run "private_only_omits_public_zone_when_null" {
+  command = plan
+
+  variables {
+    hosted_public_zone_id = null
+  }
+
+  assert {
+    condition     = !strcontains(nullplatform_provider_config.aws.attributes, "hosted_public_zone_id")
+    error_message = "hosted_public_zone_id must be omitted from the payload when null (private-only)"
+  }
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.aws.attributes, "Z1234567890PRIV")
+    error_message = "Private hosted zone ID must still be present when public zone is null"
+  }
+}
+
+run "rejects_malformed_public_zone_id" {
+  command = plan
+
+  variables {
+    hosted_public_zone_id = "not-a-zone-id"
+  }
+
+  expect_failures = [
+    var.hosted_public_zone_id,
+  ]
+}

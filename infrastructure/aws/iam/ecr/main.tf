@@ -44,30 +44,13 @@ resource "aws_iam_policy" "nullplatform_ecr_manager_policy" {
   })
 }
 
-resource "aws_iam_user" "nullplatform_build_workflow_user" {
-  name = "nullplatform-${var.cluster_name}-build-workflow-user"
-}
-
-resource "aws_iam_access_key" "nullplatform_build_workflow_user_key" {
-  user = aws_iam_user.nullplatform_build_workflow_user.name
-}
-
 resource "aws_iam_role_policy_attachment" "ecr_manager_policy" {
   role       = aws_iam_role.nullplatform_application_role.name
   policy_arn = aws_iam_policy.nullplatform_ecr_manager_policy.arn
 }
 
-resource "aws_iam_group" "nullplatform_ecr_managers" {
-  name = "nullplatform-${var.cluster_name}-ecr-managers"
-}
-
 resource "aws_iam_group_policy_attachment" "ecr_manager_policy_group" {
-  group      = aws_iam_group.nullplatform_ecr_managers.name
+  group      = var.build_workflow_group_name
   policy_arn = aws_iam_policy.nullplatform_ecr_manager_policy.arn
-}
-
-resource "aws_iam_user_group_membership" "build_workflow_ecr_managers" {
-  user   = aws_iam_user.nullplatform_build_workflow_user.name
-  groups = [aws_iam_group.nullplatform_ecr_managers.name]
 }
 

@@ -147,6 +147,17 @@ variable "aws_region" {
   default     = ""
 }
 
+variable "aws_identity_mode" {
+  description = "AWS identity mechanism for the cert-manager service account: \"irsa\" sets the eks.amazonaws.com/role-arn annotation; \"pod_identity\" omits it (EKS Pod Identity injects credentials via the Pod Identity agent)."
+  type        = string
+  default     = "irsa"
+
+  validation {
+    condition     = contains(["irsa", "pod_identity"], var.aws_identity_mode)
+    error_message = "aws_identity_mode must be one of: irsa, pod_identity."
+  }
+}
+
 ###############################################################################
 # OCI CONFIGURATION
 ###############################################################################

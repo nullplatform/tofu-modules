@@ -19,7 +19,7 @@ The module creates a nullplatform_dimension resource using the provided name, or
 
 ```hcl
 module "dimension" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimension?ref=v4.5.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimension?ref=v5.3.1"
 
   name = "your-name"
   nrn  = "your-nrn"
@@ -40,13 +40,13 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.86 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.86 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | >= 0.0.86 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.95 |
 
 ## Resources
 

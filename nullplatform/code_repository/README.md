@@ -20,7 +20,7 @@ The module uses local values to evaluate which git provider is selected and cond
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v4.5.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v5.3.1"
 
   git_provider = "your-git-provider"
   nrn          = "your-nrn"
@@ -31,7 +31,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v4.5.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v5.3.1"
 
   git_provider           = "github"
   github_installation_id = "your-github-installation-id"  # Required when git_provider = "github"
@@ -44,7 +44,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v4.5.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v5.3.1"
 
   git_provider             = "gitlab"
   gitlab_access_token      = "your-gitlab-access-token"  # Required when git_provider = "gitlab"
@@ -70,13 +70,13 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.86 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.86 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.86 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.95 |
 
 ## Resources
 

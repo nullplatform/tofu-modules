@@ -65,9 +65,9 @@ locals {
       "iam.gke.io/gcp-service-account" = var.gcp_sa_email
     }
 
-    aws = {
+    aws = var.aws_identity_mode == "irsa" ? {
       "eks.amazonaws.com/role-arn" = var.aws_sa_arn
-    }
+    } : {}
 
     azure = var.azure_workload_identity_enabled ? {
       "azure.workload.identity/client-id" = var.azure_client_id

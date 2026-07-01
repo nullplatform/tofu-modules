@@ -2,25 +2,26 @@
 
 ## Description
 
-Creates AWS Route53 public and/or private hosted zones for a given domain name
+Creates and manages AWS Route53 public and/or private hosted zones for a given domain name
 
 ## Architecture
 
-The module conditionally creates an aws_route53_zone resource for a public hosted zone and/or a private hosted zone based on boolean flags. The private aws_route53_zone includes a vpc block that associates it with the specified VPC using var.vpc_id. Both zones share the same domain name but differ in visibility, and outputs expose each zone's ID, name, and nameservers using Terraform's one() function for safe conditional access.
+The module conditionally creates an aws_route53_zone resource for a public hosted zone and a separate aws_route53_zone resource for a private hosted zone based on boolean flags. The private zone resource includes a vpc block referencing the provided vpc_id to associate it with the specified VPC at creation time, with lifecycle ignore_changes on vpc to support additional cross-account associations managed externally. Outputs expose zone IDs, zone names, and nameservers for both zone types using the one() and try() functions to safely return null when a zone is disabled.
 
 ## Features
 
-- Creates a public Route53 hosted zone for internet-facing DNS resolution
-- Creates a private Route53 hosted zone scoped to a specific VPC for internal DNS resolution
-- Supports enabling both public and private zones simultaneously for split-horizon DNS
-- Validates that at least one of the public or private zone options is enabled
-- Outputs nameservers for the public hosted zone to facilitate domain delegation
+- Creates a public aws_route53_zone hosted zone for internet-facing DNS resolution
+- Creates a private aws_route53_zone hosted zone associated with a specified VPC for internal DNS resolution
+- Supports simultaneous creation of both public and private zones for the same domain
+- Ignores post-creation VPC association changes to support cross-account hub-and-spoke Route53 configurations
+- Outputs nameserver records for the public zone to facilitate domain delegation
+- Enforces that at least one of the public or private zones must be enabled via input validation
 
 ## Basic Usage
 
 ```hcl
 module "dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/dns?ref=v4.5.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/dns?ref=v5.3.1"
 
   domain_name = "your-domain-name"
   vpc_id      = "your-vpc-id"
@@ -79,14 +80,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "dns",
-  "description": "Creates AWS Route53 public and/or private hosted zones for a given domain name",
-  "architecture": "The module conditionally creates an aws_route53_zone resource for a public hosted zone and/or a private hosted zone based on boolean flags. The private aws_route53_zone includes a vpc block that associates it with the specified VPC using var.vpc_id. Both zones share the same domain name but differ in visibility, and outputs expose each zone's ID, name, and nameservers using Terraform's one() function for safe conditional access.",
+  "description": "Creates and manages AWS Route53 public and/or private hosted zones for a given domain name",
+  "architecture": "The module conditionally creates an aws_route53_zone resource for a public hosted zone and a separate aws_route53_zone resource for a private hosted zone based on boolean flags. The private zone resource includes a vpc block referencing the provided vpc_id to associate it with the specified VPC at creation time, with lifecycle ignore_changes on vpc to support additional cross-account associations managed externally. Outputs expose zone IDs, zone names, and nameservers for both zone types using the one() and try() functions to safely return null when a zone is disabled.",
   "features": [
-    "Creates a public Route53 hosted zone for internet-facing DNS resolution",
-    "Creates a private Route53 hosted zone scoped to a specific VPC for internal DNS resolution",
-    "Supports enabling both public and private zones simultaneously for split-horizon DNS",
-    "Validates that at least one of the public or private zone options is enabled",
-    "Outputs nameservers for the public hosted zone to facilitate domain delegation"
+    "Creates a public aws_route53_zone hosted zone for internet-facing DNS resolution",
+    "Creates a private aws_route53_zone hosted zone associated with a specified VPC for internal DNS resolution",
+    "Supports simultaneous creation of both public and private zones for the same domain",
+    "Ignores post-creation VPC association changes to support cross-account hub-and-spoke Route53 configurations",
+    "Outputs nameserver records for the public zone to facilitate domain delegation",
+    "Enforces that at least one of the public or private zones must be enabled via input validation"
   ],
   "inputs": [
     {
@@ -117,6 +119,6 @@ resource "example_resource" "this" {
     "private_zone_name",
     "nameservers"
   ],
-  "hash": "07140b3e460ec51726b5dbccc4f7b627"
+  "hash": "1b46d98a7254246dfd378f789427522f"
 }
 END_AI_METADATA -->

@@ -42,6 +42,26 @@ variable "role_name" {
   default     = ""
 }
 
+variable "permissions_role_name" {
+  description = "Override for the permissions IAM role name. Defaults to nullplatform-{cluster_name}-agent-permissions-role"
+  type        = string
+  default     = ""
+}
+
+variable "permissions_roles" {
+  description = "Additional permissions roles created by this module and assumable by the agent role. Map key is a logical name; name overrides the role name (defaults to nullplatform-{cluster_name}-{key}); policy_arns are the policy ARNs attached to the role."
+  type = map(object({
+    name        = optional(string)
+    policy_arns = optional(list(string), [])
+  }))
+  default = {}
+
+  validation {
+    condition     = alltrue([for cfg in values(var.permissions_roles) : alltrue([for arn in cfg.policy_arns : can(regex("^arn:aws:iam::(aws|[0-9]{12}):policy/.+", arn))])])
+    error_message = "Each policy_arn must match arn:aws:iam::<account-id|aws>:policy/<policy-name>"
+  }
+}
+
 variable "policies_name_prefix" {
   description = "Override for IAM policy name prefix. Defaults to nullplatform_{cluster_name}"
   type        = string

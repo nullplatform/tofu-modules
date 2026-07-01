@@ -2,26 +2,26 @@
 
 ## Description
 
-Configures a Prometheus provider in Nullplatform with automatic server URL resolution from Kubernetes service discovery or custom endpoint
+Configures a Prometheus provider integration in nullplatform by registering the Prometheus server URL as a provider configuration resource
 
 ## Architecture
 
-The module creates a nullplatform_provider_config resource of type prometheus that stores connection configuration in a JSON-encoded attributes block. It uses a local value to determine the Prometheus server URL, either accepting a custom var.prometheus_url or auto-generating a Kubernetes cluster-internal service URL using the format http://prometheus-server.<namespace>.svc.cluster.local:80. The resource accepts dimensions metadata and includes lifecycle rules to ignore changes to attributes after initial creation.
+The module creates a single nullplatform_provider_config resource of type 'prometheus' that registers the Prometheus server endpoint with the nullplatform platform. A local value resolves the effective Prometheus URL, either using the explicitly provided var.prometheus_url or constructing a Kubernetes in-cluster DNS address from var.prometheus_namespace. The resulting URL is encoded as a JSON attribute and stored in the provider config alongside optional dimension metadata supplied via var.dimensions. The nrn input uniquely identifies the target nullplatform resource receiving this configuration.
 
 ## Features
 
-- Creates Nullplatform provider configuration for Prometheus integration
-- Auto-generates Kubernetes service discovery URL for Prometheus server when custom URL not provided
-- Supports custom Prometheus endpoint URL for external or non-standard deployments
-- Configures namespace-aware internal cluster service URLs using Kubernetes DNS naming
-- Applies lifecycle ignore_changes to prevent attribute drift on subsequent applies
-- Associates provider configuration with dimensions for multi-tenant or environment-specific setups
+- Creates a nullplatform_provider_config resource that registers Prometheus as a metrics provider
+- Constructs an in-cluster Kubernetes DNS URL automatically when no explicit Prometheus URL is provided
+- Validates that the prometheus_url value conforms to http:// or https:// scheme when specified
+- Supports custom Kubernetes namespace targeting for automatic Prometheus service discovery
+- Attaches optional dimension metadata to the provider configuration for multi-tenant or scoped deployments
+- Ignores downstream attribute drift via lifecycle ignore_changes to prevent unintended updates
 
 ## Basic Usage
 
 ```hcl
 module "metrics" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/metrics?ref=v4.5.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/metrics?ref=v5.3.1"
 
   nrn = "your-nrn"
 }
@@ -41,13 +41,13 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.86 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.86 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.86 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.95 |
 
 ## Resources
 
@@ -68,15 +68,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "metrics",
-  "description": "Configures a Prometheus provider in Nullplatform with automatic server URL resolution from Kubernetes service discovery or custom endpoint",
-  "architecture": "The module creates a nullplatform_provider_config resource of type prometheus that stores connection configuration in a JSON-encoded attributes block. It uses a local value to determine the Prometheus server URL, either accepting a custom var.prometheus_url or auto-generating a Kubernetes cluster-internal service URL using the format http://prometheus-server.<namespace>.svc.cluster.local:80. The resource accepts dimensions metadata and includes lifecycle rules to ignore changes to attributes after initial creation.",
+  "description": "Configures a Prometheus provider integration in nullplatform by registering the Prometheus server URL as a provider configuration resource",
+  "architecture": "The module creates a single nullplatform_provider_config resource of type 'prometheus' that registers the Prometheus server endpoint with the nullplatform platform. A local value resolves the effective Prometheus URL, either using the explicitly provided var.prometheus_url or constructing a Kubernetes in-cluster DNS address from var.prometheus_namespace. The resulting URL is encoded as a JSON attribute and stored in the provider config alongside optional dimension metadata supplied via var.dimensions. The nrn input uniquely identifies the target nullplatform resource receiving this configuration.",
   "features": [
-    "Creates Nullplatform provider configuration for Prometheus integration",
-    "Auto-generates Kubernetes service discovery URL for Prometheus server when custom URL not provided",
-    "Supports custom Prometheus endpoint URL for external or non-standard deployments",
-    "Configures namespace-aware internal cluster service URLs using Kubernetes DNS naming",
-    "Applies lifecycle ignore_changes to prevent attribute drift on subsequent applies",
-    "Associates provider configuration with dimensions for multi-tenant or environment-specific setups"
+    "Creates a nullplatform_provider_config resource that registers Prometheus as a metrics provider",
+    "Constructs an in-cluster Kubernetes DNS URL automatically when no explicit Prometheus URL is provided",
+    "Validates that the prometheus_url value conforms to http:// or https:// scheme when specified",
+    "Supports custom Kubernetes namespace targeting for automatic Prometheus service discovery",
+    "Attaches optional dimension metadata to the provider configuration for multi-tenant or scoped deployments",
+    "Ignores downstream attribute drift via lifecycle ignore_changes to prevent unintended updates"
   ],
   "inputs": [
     {
@@ -101,6 +101,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "53cef1f8ff4770b8ec9cfa0b736eef61"
+  "hash": "1a62b01ad80634cbebcf25d7f50be2bf"
 }
 END_AI_METADATA -->
