@@ -2,19 +2,20 @@
 
 ## Description
 
-Creates an IRSA (IAM Roles for Service Accounts) role for a nullplatform agent on EKS, with an assume-role policy allowing the agent to assume a conventional permissions role and any additional roles
+Creates an IRSA (IAM Roles for Service Accounts) role for a nullplatform agent on EKS, with an assume-role policy allowing the agent to assume the roles explicitly provided by the caller (via assume_role_arns and/or permissions_roles)
 
 ## Architecture
 
-The module uses the terraform-aws-modules/iam//modules/iam-role-for-service-accounts module to create an aws_iam_role with an OIDC trust policy scoped to a specific Kubernetes namespace and service account. An aws_iam_policy (nullplatform_assume_role_policy) is created and attached to the agent role, granting sts:AssumeRole on a conventionally named permissions role ARN, any extra permissions roles, and any caller-supplied assume_role_arns. Optionally, one or more aws_iam_role resources (extra_permissions) are created via for_each from var.permissions_roles, each trusting only the agent role ARN, with aws_iam_role_policy_attachment resources wiring the provided policy ARNs to each extra role.
+The module uses the terraform-aws-modules/iam//modules/iam-role-for-service-accounts module to create an aws_iam_role with an OIDC trust policy scoped to a specific Kubernetes namespace and service account. An aws_iam_policy (nullplatform_assume_role_policy) is created and attached to the agent role, granting sts:AssumeRole only on the roles the caller supplies: any extra permissions roles created via var.permissions_roles plus any caller-supplied var.assume_role_arns. The module no longer injects any permissions role by naming convention; a lifecycle precondition requires at least one role to be provided. Optionally, one or more aws_iam_role resources (extra_permissions) are created via for_each from var.permissions_roles, each trusting only the agent role ARN, with aws_iam_role_policy_attachment resources wiring the provided policy ARNs to each extra role.
 
 ## Features
 
 - Creates IRSA-enabled aws_iam_role scoped to a specific Kubernetes namespace and service account via OIDC provider trust
-- Creates aws_iam_policy granting sts:AssumeRole on a conventional permissions role ARN and any additional supplied role ARNs
+- Creates aws_iam_policy granting sts:AssumeRole only on the role ARNs explicitly supplied by the caller (no implicit permissions role by convention)
+- Requires at least one assumable role (via assume_role_arns or permissions_roles) through a lifecycle precondition
 - Creates optional extra aws_iam_role resources (permissions_roles) trusted exclusively by the agent role with configurable policy attachments
 - Attaches additional caller-supplied policy ARNs directly to the agent role via var.additional_policies
-- Outputs the agent role ARN, the conventional permissions role ARN, and a map of extra permissions role ARNs for downstream consumption
+- Outputs the agent role ARN and a map of extra permissions role ARNs for downstream consumption
 - Derives deterministic role ARNs from account ID and name locals to avoid circular dependencies between role trust and assume policies
 
 ## Basic Usage
@@ -26,6 +27,12 @@ module "agent" {
   agent_namespace                     = "your-agent-namespace"
   aws_iam_openid_connect_provider_arn = "your-aws-iam-openid-connect-provider-arn"
   cluster_name                        = "your-cluster-name"
+
+  # The agent no longer assumes any role by convention. Pass every role it must
+  # assume explicitly, e.g. the k8s permissions role created by the k8s scope module:
+  assume_role_arns = [
+    "arn:aws:iam::123456789012:role/nullplatform-your-cluster-name-agent-permissions-role",
+  ]
 }
 ```
 
@@ -70,7 +77,6 @@ resource "example_resource" "this" {
 | <a name="input_assume_role_arns"></a> [assume\_role\_arns](#input\_assume\_role\_arns) | List of IAM role ARNs the agent is allowed to assume via sts:AssumeRole | `list(string)` | `[]` | no |
 | <a name="input_aws_iam_openid_connect_provider_arn"></a> [aws\_iam\_openid\_connect\_provider\_arn](#input\_aws\_iam\_openid\_connect\_provider\_arn) | ARN of the AWS IAM OIDC provider for EKS service account authentication | `string` | n/a | yes |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the cluster where the policy runs | `string` | n/a | yes |
-| <a name="input_permissions_role_name"></a> [permissions\_role\_name](#input\_permissions\_role\_name) | Override for the permissions IAM role name. Defaults to nullplatform-{cluster\_name}-agent-permissions-role | `string` | `""` | no |
 | <a name="input_permissions_roles"></a> [permissions\_roles](#input\_permissions\_roles) | Additional permissions roles created by this module and assumable by the agent role. Map key is a logical name; name overrides the role name (defaults to nullplatform-{cluster\_name}-{key}); policy\_arns are the policy ARNs attached to the role. | <pre>map(object({<br/>    name        = optional(string)<br/>    policy_arns = optional(list(string), [])<br/>  }))</pre> | `{}` | no |
 | <a name="input_policies_name_prefix"></a> [policies\_name\_prefix](#input\_policies\_name\_prefix) | Override for IAM policy name prefix. Defaults to nullplatform\_{cluster\_name} | `string` | `""` | no |
 | <a name="input_role_name"></a> [role\_name](#input\_role\_name) | Override for the IAM role name. Defaults to nullplatform-{cluster\_name}-agent-role | `string` | `""` | no |
@@ -81,21 +87,21 @@ resource "example_resource" "this" {
 | Name | Description |
 |------|-------------|
 | <a name="output_nullplatform_agent_extra_permissions_role_arns"></a> [nullplatform\_agent\_extra\_permissions\_role\_arns](#output\_nullplatform\_agent\_extra\_permissions\_role\_arns) | Map of logical name to ARN for each additional permissions role created via permissions\_roles |
-| <a name="output_nullplatform_agent_permissions_role_arn"></a> [nullplatform\_agent\_permissions\_role\_arn](#output\_nullplatform\_agent\_permissions\_role\_arn) | Conventional ARN of the permissions role the agent role is allowed to assume. The role itself is created externally (k8s scope tofu module), not by this module. |
 | <a name="output_nullplatform_agent_role_arn"></a> [nullplatform\_agent\_role\_arn](#output\_nullplatform\_agent\_role\_arn) | ARN of the agent role |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
 {
   "name": "agent",
-  "description": "Creates an IRSA (IAM Roles for Service Accounts) role for a nullplatform agent on EKS, with an assume-role policy allowing the agent to assume a conventional permissions role and any additional roles",
-  "architecture": "The module uses the terraform-aws-modules/iam//modules/iam-role-for-service-accounts module to create an aws_iam_role with an OIDC trust policy scoped to a specific Kubernetes namespace and service account. An aws_iam_policy (nullplatform_assume_role_policy) is created and attached to the agent role, granting sts:AssumeRole on a conventionally named permissions role ARN, any extra permissions roles, and any caller-supplied assume_role_arns. Optionally, one or more aws_iam_role resources (extra_permissions) are created via for_each from var.permissions_roles, each trusting only the agent role ARN, with aws_iam_role_policy_attachment resources wiring the provided policy ARNs to each extra role.",
+  "description": "Creates an IRSA (IAM Roles for Service Accounts) role for a nullplatform agent on EKS, with an assume-role policy allowing the agent to assume the roles explicitly provided by the caller (via assume_role_arns and/or permissions_roles)",
+  "architecture": "The module uses the terraform-aws-modules/iam//modules/iam-role-for-service-accounts module to create an aws_iam_role with an OIDC trust policy scoped to a specific Kubernetes namespace and service account. An aws_iam_policy (nullplatform_assume_role_policy) is created and attached to the agent role, granting sts:AssumeRole only on the roles the caller supplies: any extra permissions roles created via var.permissions_roles plus any caller-supplied var.assume_role_arns. The module no longer injects any permissions role by naming convention; a lifecycle precondition requires at least one role to be provided. Optionally, one or more aws_iam_role resources (extra_permissions) are created via for_each from var.permissions_roles, each trusting only the agent role ARN, with aws_iam_role_policy_attachment resources wiring the provided policy ARNs to each extra role.",
   "features": [
     "Creates IRSA-enabled aws_iam_role scoped to a specific Kubernetes namespace and service account via OIDC provider trust",
-    "Creates aws_iam_policy granting sts:AssumeRole on a conventional permissions role ARN and any additional supplied role ARNs",
+    "Creates aws_iam_policy granting sts:AssumeRole only on the role ARNs explicitly supplied by the caller (no implicit permissions role by convention)",
+    "Requires at least one assumable role (via assume_role_arns or permissions_roles) through a lifecycle precondition",
     "Creates optional extra aws_iam_role resources (permissions_roles) trusted exclusively by the agent role with configurable policy attachments",
     "Attaches additional caller-supplied policy ARNs directly to the agent role via var.additional_policies",
-    "Outputs the agent role ARN, the conventional permissions role ARN, and a map of extra permissions role ARNs for downstream consumption",
+    "Outputs the agent role ARN and a map of extra permissions role ARNs for downstream consumption",
     "Derives deterministic role ARNs from account ID and name locals to avoid circular dependencies between role trust and assume policies"
   ],
   "inputs": [
@@ -140,11 +146,6 @@ resource "example_resource" "this" {
       "required": false
     },
     {
-      "name": "permissions_role_name",
-      "description": "Override for the permissions IAM role name. Defaults to nullplatform-{cluster_name}-agent-permissions-role",
-      "required": false
-    },
-    {
       "name": "policies_name_prefix",
       "description": "Override for IAM policy name prefix. Defaults to nullplatform_{cluster_name}",
       "required": false
@@ -152,7 +153,6 @@ resource "example_resource" "this" {
   ],
   "outputs": [
     "nullplatform_agent_role_arn",
-    "nullplatform_agent_permissions_role_arn",
     "nullplatform_agent_extra_permissions_role_arns"
   ],
   "hash": "080cc2f1402698f5884c98e39f0ef01a"
