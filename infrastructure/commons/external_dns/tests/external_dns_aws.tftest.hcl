@@ -43,6 +43,37 @@ run "aws_zone_filtering_args" {
   }
 }
 
+run "default_sources_is_crd_only" {
+  command = plan
+
+  assert {
+    condition     = length(local.base_config.sources) == 1 && local.base_config.sources[0] == "crd"
+    error_message = "Default sources should be crd-only (no gateway-httproute)"
+  }
+}
+
+run "rbac_has_no_gateway_permissions" {
+  command = plan
+
+  assert {
+    condition     = length(local.route53_config.rbac.additionalPermissions) == 1
+    error_message = "RBAC should only grant the crd (dnsendpoints) permission"
+  }
+
+  assert {
+    condition     = local.route53_config.rbac.additionalPermissions[0].apiGroups == ["externaldns.k8s.io"]
+    error_message = "The only additional RBAC permission should be for externaldns.k8s.io/dnsendpoints"
+  }
+
+  assert {
+    condition = !contains(
+      [for p in local.route53_config.rbac.additionalPermissions : p.apiGroups[0]],
+      "gateway.networking.k8s.io"
+    )
+    error_message = "RBAC must not include gateway.networking.k8s.io permissions after removing the gateway-httproute source"
+  }
+}
+
 run "no_cloudflare_secret_for_aws" {
   command = plan
 

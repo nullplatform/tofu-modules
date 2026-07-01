@@ -44,7 +44,7 @@ variable "policy" {
 variable "sources" {
   description = "Array contents the sources to external dns work"
   type        = list(string)
-  default     = ["crd", "gateway-httproute"]
+  default     = ["crd"]
 }
 
 variable "type" {
