@@ -18,7 +18,7 @@ The module creates an oci_objectstorage_bucket resource, which is configured wit
 
 ```hcl
 module "backend" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/backend?ref=v6.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/backend?ref=v6.1.0"
 
   compartment_id = "your-compartment-id"
   namespace      = "your-namespace"

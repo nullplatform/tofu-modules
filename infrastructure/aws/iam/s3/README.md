@@ -2,26 +2,25 @@
 
 ## Description
 
-Creates and attaches an IAM policy granting S3 PutObject and GetObject permissions on a specified assets bucket to an existing IAM group used by build workflows
+Grants an IAM group permission to read and write build assets to a specified S3 bucket by creating and attaching an IAM policy
 
 ## Architecture
 
-This module creates an aws_iam_policy resource named with the cluster_name prefix that allows s3:PutObject and s3:GetObject actions scoped to the provided bucket. The policy is then attached to an existing IAM group via an aws_iam_group_policy_attachment resource, linking the policy ARN to the group specified by build_workflow_group_name. No new users or groups are created; the module only manages the policy and its attachment to an externally managed group.
+The module creates an aws_iam_policy resource that allows s3:PutObject and s3:GetObject actions on a specified S3 bucket ARN, scoped with the cluster name for namespacing. The policy is then attached to an existing IAM group via an aws_iam_group_policy_attachment resource, using the group name passed in as input. No new users, roles, or buckets are created; the module solely wires permissions between an existing group and an existing bucket.
 
 ## Features
 
-- Creates an aws_iam_policy scoped to PutObject and GetObject actions on the specified S3 assets bucket
-- Attaches the created IAM policy to an existing IAM group via aws_iam_group_policy_attachment
-- Namespaces the IAM policy name using the cluster_name variable to avoid naming collisions across clusters
-- Grants build workflow users inherited S3 access through group membership rather than direct user policy attachment
+- Creates a cluster-namespaced aws_iam_policy granting PutObject and GetObject access to a specified S3 bucket
+- Attaches the S3 assets policy to an existing IAM group via aws_iam_group_policy_attachment
+- Scopes S3 access to all objects within the target bucket using a wildcard resource ARN
 
 ## Basic Usage
 
 ```hcl
 module "s3" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/s3?ref=v6.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/s3?ref=v6.1.0"
 
-  bucket                    = "your-assets-bucket"
+  bucket                    = "your-bucket"
   build_workflow_group_name = "your-build-workflow-group-name"
   cluster_name              = "your-cluster-name"
 }
@@ -64,13 +63,12 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "s3",
-  "description": "Creates and attaches an IAM policy granting S3 PutObject and GetObject permissions on a specified assets bucket to an existing IAM group used by build workflows",
-  "architecture": "This module creates an aws_iam_policy resource named with the cluster_name prefix that allows s3:PutObject and s3:GetObject actions scoped to the provided bucket. The policy is then attached to an existing IAM group via an aws_iam_group_policy_attachment resource, linking the policy ARN to the group specified by build_workflow_group_name. No new users or groups are created; the module only manages the policy and its attachment to an externally managed group.",
+  "description": "Grants an IAM group permission to read and write build assets to a specified S3 bucket by creating and attaching an IAM policy",
+  "architecture": "The module creates an aws_iam_policy resource that allows s3:PutObject and s3:GetObject actions on a specified S3 bucket ARN, scoped with the cluster name for namespacing. The policy is then attached to an existing IAM group via an aws_iam_group_policy_attachment resource, using the group name passed in as input. No new users, roles, or buckets are created; the module solely wires permissions between an existing group and an existing bucket.",
   "features": [
-    "Creates an aws_iam_policy scoped to PutObject and GetObject actions on the specified S3 assets bucket",
-    "Attaches the created IAM policy to an existing IAM group via aws_iam_group_policy_attachment",
-    "Namespaces the IAM policy name using the cluster_name variable to avoid naming collisions across clusters",
-    "Grants build workflow users inherited S3 access through group membership rather than direct user policy attachment"
+    "Creates a cluster-namespaced aws_iam_policy granting PutObject and GetObject access to a specified S3 bucket",
+    "Attaches the S3 assets policy to an existing IAM group via aws_iam_group_policy_attachment",
+    "Scopes S3 access to all objects within the target bucket using a wildcard resource ARN"
   ],
   "inputs": [
     {
@@ -90,6 +88,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "8a89e66cfee86c54f5a8aa097c91ca1b"
+  "hash": "a11ede543e34569de6169c538b02b09a"
 }
 END_AI_METADATA -->
