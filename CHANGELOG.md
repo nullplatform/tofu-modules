@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.1.0](https://github.com/nullplatform/tofu-modules/compare/v6.0.0...v6.1.0) (2026-07-03)
+
+
+### Features
+
+* **iam/s3:** release renamed s3 module (formerly s3-assets) ([#425](https://github.com/nullplatform/tofu-modules/issues/425)) ([687338e](https://github.com/nullplatform/tofu-modules/commit/687338e79510a4baca6ead2f8b22e0993b6af217))
+
 ## [6.0.0](https://github.com/nullplatform/tofu-modules/compare/v5.3.1...v6.0.0) (2026-07-01)
 
 
