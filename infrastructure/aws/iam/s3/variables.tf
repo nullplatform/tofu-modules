@@ -8,7 +8,7 @@ variable "build_workflow_group_name" {
   type        = string
 }
 
-variable "assets_bucket" {
+variable "bucket" {
   description = "Name of the S3 bucket where build assets (e.g. Lambda zips) are published. The bucket is managed elsewhere; this module only grants the build workflow group permission to write to it."
   type        = string
 }
