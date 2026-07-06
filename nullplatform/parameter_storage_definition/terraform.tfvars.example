@@ -1,0 +1,35 @@
+nrn        = "organization=1"
+np_api_key = "REPLACE_ME"
+
+extra_visible_to_nrns = []
+
+instances = {
+  prod-billing = {
+    nrn        = "organization=1:account=2:namespace=3"
+    dimensions = { environment = "production" }
+    attributes = {
+        sensibility = {
+        applies_to = ["secret"]
+      }
+      setup = {
+        kms_key_id = "alias/parameters-prod-billing"
+      }
+    }
+  }
+  staging-billing = {
+    nrn        = "organization=1:account=2:namespace=3"
+    dimensions = { environment = "staging" }
+    attributes = {
+      sensibility = {
+        applies_to = ["non_secret"]
+      }
+      setup = {
+        kms_key_id = ""
+        tier       = "Advanced"
+      }
+    }
+  }
+}
+
+repository_parameter_storage_spec_branch = "main"
+repository_parameter_storage_spec = "https://raw.githubusercontent.com/nullplatform/parameters/refs/heads"
