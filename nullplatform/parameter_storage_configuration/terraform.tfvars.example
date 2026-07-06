@@ -1,0 +1,14 @@
+np_api_key                  = "REPLACE_ME"
+nrn                         = "organization=1:account=2:namespace=3"
+provider_specification_slug = "aws-secrets-manager"
+
+dimensions = { environment = "production" }
+
+attributes = {
+  sensibility = {
+    applies_to = ["secret"]
+  }
+  setup = {
+    kms_key_id = ""
+  }
+}

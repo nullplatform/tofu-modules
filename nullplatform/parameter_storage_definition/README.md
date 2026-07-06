@@ -2,20 +2,18 @@
 
 ## Description
 
-Provisions a nullplatform parameter-storage provider specification by fetching and rendering a gomplate template from a remote repository, then registers one or more provider instances (per NRN and dimensions) via the upstream scope_configuration module
+Provisions a nullplatform parameter-storage provider specification by fetching and rendering a gomplate template from a remote repository. It creates the specification only; instances are registered separately with the parameter_storage_configuration module
 
 ## Architecture
 
-The module fetches a parameter-storage specification template via a `data.http` resource and renders it through `data.external` using a gomplate shell command that injects the `NRN` environment variable, emitting the result as a JSON string that `locals` decode into the provider specification fields. It then creates a single `nullplatform_provider_specification` (name, icon, description, category, allow_dimensions, schema) whose `visible_to` is computed from `var.nrn`, the per-instance NRNs, and any `extra_visible_to_nrns`. For every entry in `var.instances`, it instantiates the remote `scope_configuration` module (pinned to a fixed ref) to register a provider config against that instance's NRN and dimensions, passing the caller-shaped `attributes` object through unchanged. The instance modules `depend_on` the provider specification to enforce that the spec exists before any instance is registered.
+The module fetches a parameter-storage specification template via a `data.http` resource and renders it through `data.external` using a gomplate shell command that injects the `NRN` environment variable, emitting the result as a JSON string that `locals` decode into the provider specification fields. It then creates a single `nullplatform_provider_specification` (name, icon, description, category, allow_dimensions, schema) whose `visible_to` is computed from `var.nrn` plus any `extra_visible_to_nrns`. It exposes the specification `slug` and `id` so callers can register instances against it — one per NRN and dimension set — using the companion `parameter_storage_configuration` module with their own `for_each`.
 
 ## Features
 
 - Creates a nullplatform_provider_specification from a remotely fetched and gomplate-rendered JSON template
 - Resolves specification fields (name, icon, description, category, allow_dimensions, schema) from the rendered template rather than hardcoding them
-- Registers multiple provider instances via the scope_configuration module, one per entry in `var.instances`, each with its own NRN and dimensions
-- Passes a provider-specific `attributes` object per instance so each caller matches its own provider schema (e.g. Parameter Store sends setup.tier, Secrets Manager omits it)
-- Computes `visible_to` from the anchor NRN, every instance NRN, and optional extra NRNs to support cross-account visibility sharing
-- Exposes the specification ID plus per-instance provider config IDs keyed by instance identifier through a single output
+- Computes `visible_to` from the anchor NRN plus optional extra NRNs to support cross-account visibility sharing
+- Exposes the specification `slug`, `id`, and `name` so callers can wire instances into parameter_storage_configuration
 
 ## Basic Usage
 
@@ -24,19 +22,26 @@ module "parameter_storage_definition" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_definition?ref=v6.1.0"
 
   np_api_key    = "your-np-api-key"
-  nrn           = "your-nrn"
+  nrn           = "organization=1"
   template_path = "parameters/providers/aws-secrets-manager/specs/install/aws-secrets-manager-configuration.json.tpl"
 
-  instances = {
-    prod = {
-      nrn        = "organization=1:account=2:namespace=3"
-      dimensions = { environment = "production" }
-      attributes = {
-        sensibility = { applies_to = ["secret"] }
-        setup       = { kms_key_id = "alias/parameters-prod" }
-      }
-    }
-  }
+  # Make the spec visible at every NRN where you will anchor an instance.
+  extra_visible_to_nrns = [for i in local.instances : i.nrn]
+}
+```
+
+Register the instances separately with `parameter_storage_configuration`, driving multiplicity with `for_each`:
+
+```hcl
+module "parameter_storage_configuration" {
+  source   = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=v6.1.0"
+  for_each = local.instances
+
+  np_api_key                  = "your-np-api-key"
+  nrn                         = each.value.nrn
+  provider_specification_slug = module.parameter_storage_definition.slug
+  dimensions                  = each.value.dimensions
+  attributes                  = each.value.attributes
 }
 ```
 
@@ -45,7 +50,7 @@ module "parameter_storage_definition" {
 ```hcl
 # Reference outputs in other resources
 resource "example_resource" "this" {
-  example_attribute = module.parameter_storage_definition.storage_configuration.specification_id
+  example_attribute = module.parameter_storage_definition.specification_id
 }
 ```
 
@@ -67,9 +72,7 @@ resource "example_resource" "this" {
 
 ## Modules
 
-| Name | Source | Version |
-|------|--------|---------|
-| <a name="module_parameter_storage_instance"></a> [parameter\_storage\_instance](#module\_parameter\_storage\_instance) | git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration | v4.5.1 |
+No modules.
 
 ## Resources
 
@@ -84,10 +87,9 @@ resource "example_resource" "this" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | NRN where the provider specification is anchored (the top-level scope it belongs to). | `string` | n/a | yes |
-| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | nullplatform API key used by the upstream scope\_configuration module to register provider instances. | `string` | n/a | yes |
+| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | nullplatform API key. Kept for interface consistency across the parameter-storage modules; the provider is configured at the root. | `string` | n/a | yes |
 | <a name="input_template_path"></a> [template\_path](#input\_template\_path) | Path to the parameter storage specification template | `string` | n/a | yes |
-| <a name="input_extra_visible_to_nrns"></a> [extra\_visible\_to\_nrns](#input\_extra\_visible\_to\_nrns) | Additional NRNs that should see the provider specification besides var.nrn and the per-instance NRNs. | `list(string)` | `[]` | no |
-| <a name="input_instances"></a> [instances](#input\_instances) | Provider instances to create. Map key is a stable identifier (used in for\_each). Each entry carries its own NRN, dimensions, and a provider-specific `attributes` object that each caller shapes to match its provider specification schema (e.g. Parameter Store sends setup.tier, Secrets Manager omits it). | <pre>map(object({<br/>  nrn            = string<br/>  dimensions     = map(string)<br/>  attributes     = any<br/>  tags_selectors = optional(map(string), {})<br/>}))</pre> | `{}` | no |
+| <a name="input_extra_visible_to_nrns"></a> [extra\_visible\_to\_nrns](#input\_extra\_visible\_to\_nrns) | Additional NRNs that should see the provider specification besides var.nrn. Callers registering instances at other NRNs (via parameter\_storage\_configuration) should list those NRNs here so the spec is visible where the instances are anchored. | `list(string)` | `[]` | no |
 | <a name="input_repository_parameter_storage_spec"></a> [repository\_parameter\_storage\_spec](#input\_repository\_parameter\_storage\_spec) | repository of parameter storage spec | `string` | `"https://raw.githubusercontent.com/nullplatform/parameters/refs/heads"` | no |
 | <a name="input_repository_parameter_storage_spec_branch"></a> [repository\_parameter\_storage\_spec\_branch](#input\_repository\_parameter\_storage\_spec\_branch) | branch reference of parameter storage spec | `string` | `"main"` | no |
 
@@ -95,61 +97,7 @@ resource "example_resource" "this" {
 
 | Name | Description |
 |------|-------------|
-| <a name="output_storage_configuration"></a> [storage\_configuration](#output\_storage\_configuration) | Provider specification ID plus the per-instance provider configs (id, nrn, dimensions), keyed by instance key. |
+| <a name="output_name"></a> [name](#output\_name) | Name of the provider specification, resolved from the rendered template. |
+| <a name="output_slug"></a> [slug](#output\_slug) | Slug of the provider specification, resolved from the rendered template. Pass this to parameter\_storage\_configuration.provider\_specification\_slug. |
+| <a name="output_specification_id"></a> [specification\_id](#output\_specification\_id) | ID of the created parameter-storage provider specification. |
 <!-- END_TF_DOCS -->
-
-<!-- BEGIN_AI_METADATA
-{
-  "name": "parameter_storage_definition",
-  "description": "Provisions a nullplatform parameter-storage provider specification by fetching and rendering a gomplate template from a remote repository, then registers one or more provider instances (per NRN and dimensions) via the upstream scope_configuration module",
-  "architecture": "The module fetches a parameter-storage specification template via a `data.http` resource and renders it through `data.external` using a gomplate shell command that injects the `NRN` environment variable, emitting the result as a JSON string that `locals` decode into the provider specification fields. It then creates a single `nullplatform_provider_specification` (name, icon, description, category, allow_dimensions, schema) whose `visible_to` is computed from `var.nrn`, the per-instance NRNs, and any `extra_visible_to_nrns`. For every entry in `var.instances`, it instantiates the remote `scope_configuration` module (pinned to a fixed ref) to register a provider config against that instance's NRN and dimensions, passing the caller-shaped `attributes` object through unchanged. The instance modules `depend_on` the provider specification to enforce that the spec exists before any instance is registered.",
-  "features": [
-    "Creates a nullplatform_provider_specification from a remotely fetched and gomplate-rendered JSON template",
-    "Resolves specification fields (name, icon, description, category, allow_dimensions, schema) from the rendered template rather than hardcoding them",
-    "Registers multiple provider instances via the scope_configuration module, one per entry in var.instances, each with its own NRN and dimensions",
-    "Passes a provider-specific attributes object per instance so each caller matches its own provider schema (e.g. Parameter Store sends setup.tier, Secrets Manager omits it)",
-    "Computes visible_to from the anchor NRN, every instance NRN, and optional extra NRNs to support cross-account visibility sharing",
-    "Exposes the specification ID plus per-instance provider config IDs keyed by instance identifier through a single output"
-  ],
-  "inputs": [
-    {
-      "name": "nrn",
-      "description": "NRN where the provider specification is anchored (the top-level scope it belongs to).",
-      "required": true
-    },
-    {
-      "name": "np_api_key",
-      "description": "nullplatform API key used by the upstream scope_configuration module to register provider instances.",
-      "required": true
-    },
-    {
-      "name": "template_path",
-      "description": "Path to the parameter storage specification template",
-      "required": true
-    },
-    {
-      "name": "extra_visible_to_nrns",
-      "description": "Additional NRNs that should see the provider specification besides var.nrn and the per-instance NRNs.",
-      "required": false
-    },
-    {
-      "name": "instances",
-      "description": "Provider instances to create. Map key is a stable identifier (used in for_each). Each entry carries its own NRN, dimensions, and a provider-specific attributes object that each caller shapes to match its provider specification schema.",
-      "required": false
-    },
-    {
-      "name": "repository_parameter_storage_spec",
-      "description": "repository of parameter storage spec",
-      "required": false
-    },
-    {
-      "name": "repository_parameter_storage_spec_branch",
-      "description": "branch reference of parameter storage spec",
-      "required": false
-    }
-  ],
-  "outputs": [
-    "storage_configuration"
-  ]
-}
-END_AI_METADATA -->
