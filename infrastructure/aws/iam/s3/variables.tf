@@ -1,19 +1,14 @@
-variable "bucket_id" {
-  description = "ID (name) of the S3 bucket to which the policy will be applied."
+variable "cluster_name" {
+  description = "Name of the cluster, used to namespace IAM resource names"
   type        = string
 }
 
-variable "bucket_arn" {
-  description = "ARN of the S3 bucket. Used to build the resource ARNs in the secure transport statement."
+variable "build_workflow_group_name" {
+  description = "Name of the IAM group (from the ci-build-workflow-user module) to which the S3 assets policy is attached. The build workflow user is a member of this group."
   type        = string
 }
 
-variable "additional_policy_json" {
-  description = <<-EOT
-    Optional JSON policy document to merge with the mandatory secure transport policy.
-    Must NOT contain statements with Principal \"*\" and Effect \"Allow\", as that grants
-    unrestricted public access. Use specific principals (IAM roles, accounts) instead.
-  EOT
+variable "bucket" {
+  description = "Name of the S3 bucket where build assets (e.g. Lambda zips) are published. The bucket is managed elsewhere; this module only grants the build workflow group permission to write to it."
   type        = string
-  default     = null
 }

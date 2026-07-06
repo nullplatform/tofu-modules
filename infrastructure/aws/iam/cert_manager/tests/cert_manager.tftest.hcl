@@ -125,3 +125,28 @@ run "rejects_when_both_zones_empty_strings" {
 
   expect_failures = [var.hosted_zone_public_id]
 }
+
+run "irsa_mode_creates_module_and_no_pod_identity_resources" {
+  command = plan
+
+  assert {
+    condition     = length(module.nullplatform_cert_manager_role) == 1
+    error_message = "IRSA mode must create exactly one module instance"
+  }
+  assert {
+    condition     = length(aws_iam_role.pod_identity) == 0
+    error_message = "IRSA mode must not create a pod_identity IAM role"
+  }
+  assert {
+    condition     = length(aws_eks_pod_identity_association.this) == 0
+    error_message = "IRSA mode must not create any Pod Identity associations"
+  }
+  assert {
+    condition     = length(aws_iam_role_policy_attachment.pod_identity) == 0
+    error_message = "IRSA mode must not create a pod_identity policy attachment"
+  }
+  assert {
+    condition     = output.nullplatform_cert_manager_role_arn != null
+    error_message = "IRSA mode must produce a non-null role ARN output"
+  }
+}

@@ -2,27 +2,27 @@
 
 ## Description
 
-Attaches an S3 bucket policy that enforces secure transport (HTTPS-only) and optionally merges additional IAM policy statements
+Grants an IAM group permission to read and write build assets to a specified S3 bucket by creating and attaching an IAM policy
 
 ## Architecture
 
-The module creates an aws_s3_bucket_policy resource attached to an existing S3 bucket. It uses aws_iam_policy_document data sources to construct the policy: one generates a mandatory Deny statement for aws:SecureTransport=false (rejecting non-HTTPS requests), and another merges this with any additional policy JSON provided via input. The merged policy document flows into the aws_s3_bucket_policy resource, which applies it to the bucket identified by bucket_id.
+The module creates an aws_iam_policy resource that allows s3:PutObject and s3:GetObject actions on a specified S3 bucket ARN, scoped with the cluster name for namespacing. The policy is then attached to an existing IAM group via an aws_iam_group_policy_attachment resource, using the group name passed in as input. No new users, roles, or buckets are created; the module solely wires permissions between an existing group and an existing bucket.
 
 ## Features
 
-- Enforces HTTPS-only access by denying all S3 actions when aws:SecureTransport is false
-- Merges caller-supplied IAM policy statements with the mandatory secure transport policy
-- Prevents unrestricted public access by disallowing Principal '*' with Effect 'Allow'
-- Outputs the final merged policy JSON for verification and audit purposes
+- Creates a cluster-namespaced aws_iam_policy granting PutObject and GetObject access to a specified S3 bucket
+- Attaches the S3 assets policy to an existing IAM group via aws_iam_group_policy_attachment
+- Scopes S3 access to all objects within the target bucket using a wildcard resource ARN
 
 ## Basic Usage
 
 ```hcl
 module "s3" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/s3?ref=v5.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/s3?ref=v6.1.0"
 
-  bucket_arn = "your-bucket-arn"
-  bucket_id  = "your-bucket-id"
+  bucket                    = "your-bucket"
+  build_workflow_group_name = "your-build-workflow-group-name"
+  cluster_name              = "your-cluster-name"
 }
 ```
 
@@ -31,7 +31,7 @@ module "s3" {
 ```hcl
 # Reference outputs in other resources
 resource "example_resource" "this" {
-  example_attribute = module.s3.bucket_id
+  example_attribute = module.s3.id
 }
 ```
 
@@ -48,56 +48,46 @@ resource "example_resource" "this" {
 
 | Name | Type |
 |------|------|
-| [aws_s3_bucket_policy.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
+| [aws_iam_group_policy_attachment.s3_policy_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_group_policy_attachment) | resource |
+| [aws_iam_policy.nullplatform_s3_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_additional_policy_json"></a> [additional\_policy\_json](#input\_additional\_policy\_json) | Optional JSON policy document to merge with the mandatory secure transport policy.<br/>Must NOT contain statements with Principal \"*\" and Effect \"Allow\", as that grants<br/>unrestricted public access. Use specific principals (IAM roles, accounts) instead. | `string` | `null` | no |
-| <a name="input_bucket_arn"></a> [bucket\_arn](#input\_bucket\_arn) | ARN of the S3 bucket. Used to build the resource ARNs in the secure transport statement. | `string` | n/a | yes |
-| <a name="input_bucket_id"></a> [bucket\_id](#input\_bucket\_id) | ID (name) of the S3 bucket to which the policy will be applied. | `string` | n/a | yes |
-
-## Outputs
-
-| Name | Description |
-|------|-------------|
-| <a name="output_bucket_id"></a> [bucket\_id](#output\_bucket\_id) | ID of the S3 bucket to which the policy was applied. |
-| <a name="output_policy_json"></a> [policy\_json](#output\_policy\_json) | The final bucket policy JSON applied to the bucket. |
+| <a name="input_bucket"></a> [bucket](#input\_bucket) | Name of the S3 bucket where build assets (e.g. Lambda zips) are published. The bucket is managed elsewhere; this module only grants the build workflow group permission to write to it. | `string` | n/a | yes |
+| <a name="input_build_workflow_group_name"></a> [build\_workflow\_group\_name](#input\_build\_workflow\_group\_name) | Name of the IAM group (from the ci-build-workflow-user module) to which the S3 assets policy is attached. The build workflow user is a member of this group. | `string` | n/a | yes |
+| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the cluster, used to namespace IAM resource names | `string` | n/a | yes |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
 {
   "name": "s3",
-  "description": "Attaches an S3 bucket policy that enforces secure transport (HTTPS-only) and optionally merges additional IAM policy statements",
-  "architecture": "The module creates an aws_s3_bucket_policy resource attached to an existing S3 bucket. It uses aws_iam_policy_document data sources to construct the policy: one generates a mandatory Deny statement for aws:SecureTransport=false (rejecting non-HTTPS requests), and another merges this with any additional policy JSON provided via input. The merged policy document flows into the aws_s3_bucket_policy resource, which applies it to the bucket identified by bucket_id.",
+  "description": "Grants an IAM group permission to read and write build assets to a specified S3 bucket by creating and attaching an IAM policy",
+  "architecture": "The module creates an aws_iam_policy resource that allows s3:PutObject and s3:GetObject actions on a specified S3 bucket ARN, scoped with the cluster name for namespacing. The policy is then attached to an existing IAM group via an aws_iam_group_policy_attachment resource, using the group name passed in as input. No new users, roles, or buckets are created; the module solely wires permissions between an existing group and an existing bucket.",
   "features": [
-    "Enforces HTTPS-only access by denying all S3 actions when aws:SecureTransport is false",
-    "Merges caller-supplied IAM policy statements with the mandatory secure transport policy",
-    "Prevents unrestricted public access by disallowing Principal '*' with Effect 'Allow'",
-    "Outputs the final merged policy JSON for verification and audit purposes"
+    "Creates a cluster-namespaced aws_iam_policy granting PutObject and GetObject access to a specified S3 bucket",
+    "Attaches the S3 assets policy to an existing IAM group via aws_iam_group_policy_attachment",
+    "Scopes S3 access to all objects within the target bucket using a wildcard resource ARN"
   ],
   "inputs": [
     {
-      "name": "bucket_id",
-      "description": "ID (name) of the S3 bucket to which the policy will be applied.",
+      "name": "cluster_name",
+      "description": "Name of the cluster, used to namespace IAM resource names",
       "required": true
     },
     {
-      "name": "bucket_arn",
-      "description": "ARN of the S3 bucket. Used to build the resource ARNs in the secure transport statement.",
+      "name": "build_workflow_group_name",
+      "description": "Name of the IAM group (from the ci-build-workflow-user module) to which the S3 assets policy is attached. The build workflow user is a member of this group.",
       "required": true
     },
     {
-      "name": "additional_policy_json",
-      "description": "",
-      "required": false
+      "name": "bucket",
+      "description": "Name of the S3 bucket where build assets (e.g. Lambda zips) are published. The bucket is managed elsewhere; this module only grants the build workflow group permission to write to it.",
+      "required": true
     }
   ],
-  "outputs": [
-    "bucket_id",
-    "policy_json"
-  ],
-  "hash": "ce11b8c0d0b0f01c1bb738d0c11d0e4c"
+  "outputs": [],
+  "hash": "a11ede543e34569de6169c538b02b09a"
 }
 END_AI_METADATA -->

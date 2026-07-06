@@ -1,5 +1,44 @@
 # Changelog
 
+## [6.1.0](https://github.com/nullplatform/tofu-modules/compare/v6.0.0...v6.1.0) (2026-07-03)
+
+
+### Features
+
+* **iam/s3:** release renamed s3 module (formerly s3-assets) ([#425](https://github.com/nullplatform/tofu-modules/issues/425)) ([687338e](https://github.com/nullplatform/tofu-modules/commit/687338e79510a4baca6ead2f8b22e0993b6af217))
+
+## [6.0.0](https://github.com/nullplatform/tofu-modules/compare/v5.3.1...v6.0.0) (2026-07-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* **iam/agent:** clusters that relied on the implicit permissions role must now pass it explicitly in assume_role_arns.
+
+### Features
+
+* **iam/agent:** require explicit assume_role_arns, drop implicit permissions role ([#421](https://github.com/nullplatform/tofu-modules/issues/421)) ([44b8fd6](https://github.com/nullplatform/tofu-modules/commit/44b8fd6d631c1fab3247383728a5d64efea5687f))
+
+## [5.3.1](https://github.com/nullplatform/tofu-modules/compare/v5.3.0...v5.3.1) (2026-06-29)
+
+
+### Bug Fixes
+
+* move infrastructure/aws/iam/s3 to scopes-static-files requirements ([#419](https://github.com/nullplatform/tofu-modules/issues/419)) ([33d9b50](https://github.com/nullplatform/tofu-modules/commit/33d9b50a71917291ac66bc20a86a84c9b6f37722))
+
+## [5.3.0](https://github.com/nullplatform/tofu-modules/compare/v5.2.0...v5.3.0) (2026-06-26)
+
+
+### Features
+
+* **iam:** add Pod Identity support to cert-manager and external-dns modules ([#409](https://github.com/nullplatform/tofu-modules/issues/409)) ([1f4e5ff](https://github.com/nullplatform/tofu-modules/commit/1f4e5ff1a37dea78c396dcf176a1c1db308f503b))
+
+## [5.2.0](https://github.com/nullplatform/tofu-modules/compare/v5.1.0...v5.2.0) (2026-06-25)
+
+
+### Features
+
+* **cloud/aws:** make hosted_public_zone_id optional for private-only ([#408](https://github.com/nullplatform/tofu-modules/issues/408)) ([7f52d4b](https://github.com/nullplatform/tofu-modules/commit/7f52d4b9078543694d54d501a0ddb9188f2d26c3))
+
 ## [5.1.0](https://github.com/nullplatform/tofu-modules/compare/v5.1.0...v5.1.0) (2026-06-25)
 
 
