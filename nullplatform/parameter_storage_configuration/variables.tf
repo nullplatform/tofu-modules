@@ -1,5 +1,5 @@
 variable "np_api_key" {
-  description = "nullplatform API key for authentication."
+  description = "nullplatform API key. Forwarded to the wrapped scope_configuration module; the provider is configured at the root."
   type        = string
   sensitive   = true
 }

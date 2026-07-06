@@ -95,7 +95,7 @@ No resources.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | nullplatform API key for authentication. | `string` | n/a | yes |
+| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | nullplatform API key. Forwarded to the wrapped scope\_configuration module; the provider is configured at the root. | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | NRN where this parameter-storage instance (provider config) is anchored. | `string` | n/a | yes |
 | <a name="input_provider_specification_slug"></a> [provider\_specification\_slug](#input\_provider\_specification\_slug) | Slug of the parameter-storage provider specification to associate with. Typically the `slug` output of the parameter\_storage\_definition module. | `string` | n/a | yes |
 | <a name="input_attributes"></a> [attributes](#input\_attributes) | Provider-specific configuration matching the provider specification schema (e.g. sensibility.applies\_to, setup.kms\_key\_id). | `any` | n/a | yes |
