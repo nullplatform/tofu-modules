@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.2.0](https://github.com/nullplatform/tofu-modules/compare/v6.1.0...v6.2.0) (2026-07-06)
+
+
+### Features
+
+* **parameter_storage:** add definition, configuration and agent association modules ([#428](https://github.com/nullplatform/tofu-modules/issues/428)) ([3f6a5c7](https://github.com/nullplatform/tofu-modules/commit/3f6a5c7b7d144477e31732a6695e10433faac15f))
+
 ## [6.1.0](https://github.com/nullplatform/tofu-modules/compare/v6.0.0...v6.1.0) (2026-07-03)
 
 
