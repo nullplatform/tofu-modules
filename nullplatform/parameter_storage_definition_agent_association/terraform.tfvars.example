@@ -1,0 +1,6 @@
+nrn            = "organization=1:account=2:namespace=3"
+api_key        = "REPLACE_ME"
+tags_selectors = { environment = "production" }
+
+# Optional: override only if the agent entrypoint differs from the default.
+# script_path = "nullplatform/parameters/parameters/entrypoint"

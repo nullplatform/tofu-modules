@@ -23,6 +23,14 @@ repos:
       require_serial: true
       exclude: '\.terraform/|\.terragrunt-cache/'
 
+    - id: block-superpowers-files
+      name: block superpowers files
+      entry: >-
+        Superpowers artifacts (e.g. docs/superpowers/, specs, plans,
+        brainstorms) must not be committed. Unstage them before committing.
+      language: fail
+      files: '(^|/)superpowers/'
+
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v6.0.0  # Use the ref you want to point at
   hooks:

@@ -19,7 +19,7 @@ The module uses a terraform_data resource to enforce mutual-exclusivity and pres
 
 ```hcl
 module "dimension_value" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimension_value?ref=v6.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/dimension_value?ref=v6.1.0"
 
   dimension_id = "your-dimension-id"
   name         = "your-name"
