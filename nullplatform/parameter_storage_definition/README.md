@@ -98,6 +98,6 @@ No modules.
 | Name | Description |
 |------|-------------|
 | <a name="output_name"></a> [name](#output\_name) | Name of the provider specification, resolved from the rendered template. |
-| <a name="output_slug"></a> [slug](#output\_slug) | Slug of the provider specification, resolved from the rendered template. Pass this to parameter\_storage\_configuration.provider\_specification\_slug. |
+| <a name="output_slug"></a> [slug](#output\_slug) | Server-assigned slug of the provider specification. Pass this to parameter\_storage\_configuration.provider\_specification\_slug. Read from the created resource (not the template) so it reflects the slug the API actually assigned and orders instance registration after the spec exists. |
 | <a name="output_specification_id"></a> [specification\_id](#output\_specification\_id) | ID of the created parameter-storage provider specification. |
 <!-- END_TF_DOCS -->
