@@ -1,0 +1,12 @@
+nrn        = "organization=1"
+np_api_key = "REPLACE_ME"
+
+# NRNs (besides var.nrn) that need to see the spec — typically the NRNs where
+# you will anchor instances via the parameter_storage_configuration module.
+extra_visible_to_nrns = [
+  "organization=1:account=2:namespace=3",
+]
+
+template_path                            = "parameters/providers/aws-secrets-manager/specs/install/aws-secrets-manager-configuration.json.tpl"
+repository_parameter_storage_spec        = "https://raw.githubusercontent.com/nullplatform/parameters-provider/refs/heads"
+repository_parameter_storage_spec_branch = "main"
