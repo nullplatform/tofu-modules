@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.2.1](https://github.com/nullplatform/tofu-modules/compare/v6.2.0...v6.2.1) (2026-07-06)
+
+
+### Bug Fixes
+
+* **commons/external_dns:** use only the crd source, drop unused gateway-httproute ([#423](https://github.com/nullplatform/tofu-modules/issues/423)) ([a33103c](https://github.com/nullplatform/tofu-modules/commit/a33103cd4e09f160e44a9576ab9486a7bff4e676))
+
 ## [6.2.0](https://github.com/nullplatform/tofu-modules/compare/v6.1.0...v6.2.0) (2026-07-06)
 
 
