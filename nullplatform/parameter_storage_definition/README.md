@@ -90,7 +90,7 @@ No modules.
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | nullplatform API key. Kept for interface consistency across the parameter-storage modules; the provider is configured at the root. | `string` | n/a | yes |
 | <a name="input_template_path"></a> [template\_path](#input\_template\_path) | Path to the parameter storage specification template | `string` | n/a | yes |
 | <a name="input_extra_visible_to_nrns"></a> [extra\_visible\_to\_nrns](#input\_extra\_visible\_to\_nrns) | Additional NRNs that should see the provider specification besides var.nrn. Callers registering instances at other NRNs (via parameter\_storage\_configuration) should list those NRNs here so the spec is visible where the instances are anchored. | `list(string)` | `[]` | no |
-| <a name="input_repository_parameter_storage_spec"></a> [repository\_parameter\_storage\_spec](#input\_repository\_parameter\_storage\_spec) | repository of parameter storage spec | `string` | `"https://raw.githubusercontent.com/nullplatform/parameters/refs/heads"` | no |
+| <a name="input_repository_parameter_storage_spec"></a> [repository\_parameter\_storage\_spec](#input\_repository\_parameter\_storage\_spec) | repository of parameter storage spec | `string` | `"https://raw.githubusercontent.com/nullplatform/parameters-provider/refs/heads"` | no |
 | <a name="input_repository_parameter_storage_spec_branch"></a> [repository\_parameter\_storage\_spec\_branch](#input\_repository\_parameter\_storage\_spec\_branch) | branch reference of parameter storage spec | `string` | `"main"` | no |
 
 ## Outputs

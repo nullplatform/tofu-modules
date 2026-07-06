@@ -8,5 +8,5 @@ extra_visible_to_nrns = [
 ]
 
 template_path                            = "parameters/providers/aws-secrets-manager/specs/install/aws-secrets-manager-configuration.json.tpl"
-repository_parameter_storage_spec        = "https://raw.githubusercontent.com/nullplatform/parameters/refs/heads"
+repository_parameter_storage_spec        = "https://raw.githubusercontent.com/nullplatform/parameters-provider/refs/heads"
 repository_parameter_storage_spec_branch = "main"

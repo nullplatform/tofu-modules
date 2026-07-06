@@ -23,7 +23,7 @@ variable "template_path" {
 variable "repository_parameter_storage_spec" {
   description = "repository of parameter storage spec"
   type        = string
-  default     = "https://raw.githubusercontent.com/nullplatform/parameters/refs/heads"
+  default     = "https://raw.githubusercontent.com/nullplatform/parameters-provider/refs/heads"
 }
 
 variable "repository_parameter_storage_spec_branch" {
