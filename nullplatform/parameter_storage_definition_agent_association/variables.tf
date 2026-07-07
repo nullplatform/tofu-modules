@@ -18,5 +18,5 @@ variable "tags_selectors" {
 variable "script_path" {
   description = "Command line path the agent executes to handle parameter storage and retrieval."
   type        = string
-  default     = "nullplatform/parameters/parameters/entrypoint"
+  default     = "nullplatform/parameters-provider/parameters/entrypoint"
 }
