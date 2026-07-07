@@ -10,7 +10,7 @@ data "external" "parameter_storage_spec" {
     processed_json=$(echo "$template_b64" | base64 -d | \
     NRN='${var.nrn}' \
     gomplate)
-    echo "$processed_json" | jq -c '{json: tojson}'
+    printf '%s\n' "$processed_json" | jq -c '{json: tojson}'
   EOT
   ]
 }
