@@ -21,7 +21,7 @@ The module uses azurerm_kubernetes_cluster and azurerm_virtual_network data sour
 
 ```hcl
 module "security" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/security?ref=v6.2.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/security?ref=v6.2.2"
 
   cluster_name        = "your-cluster-name"
   resource_group_name = "your-resource-group-name"

@@ -20,7 +20,7 @@ The module creates an aws_iam_role named nullplatform-{cluster_name}-application
 
 ```hcl
 module "ecr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/ecr?ref=v6.2.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/ecr?ref=v6.2.2"
 
   build_workflow_group_name = "your-build-workflow-group-name"
   cluster_name              = "your-cluster-name"

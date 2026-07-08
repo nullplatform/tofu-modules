@@ -6,22 +6,22 @@ Creates a NullPlatform agent notification channel configured to handle parameter
 
 ## Architecture
 
-The module creates a terraform_data resource that tracks the api_key value as a lifecycle trigger, and a nullplatform_notification_channel resource of type 'agent' anchored to the provided NRN. The notification channel is configured with an agent block containing the API key, tag selectors, and an exec command pointing to a script path with an injected NOTIFICATION_CONTEXT environment variable. When the api_key changes, the replace_triggered_by lifecycle rule forces recreation of the notification channel. The channel ID is exposed as an output for downstream consumption.
+A terraform_data resource stores the api_key as a trigger value, causing the nullplatform_notification_channel resource to be recreated whenever the API key changes. The nullplatform_notification_channel resource is created with type 'agent' and source 'parameters', wiring in the nrn, api_key, tags_selectors, and script_path inputs into its nested agent configuration block. The lifecycle replace_triggered_by directive links the notification channel to the terraform_data trigger, ensuring channel recreation on key rotation. The channel's ID is exposed via an output for downstream consumption.
 
 ## Features
 
-- Creates a nullplatform_notification_channel of type 'agent' anchored to a specified NRN resource
-- Configures an exec-based command with a customizable script path for parameter storage and retrieval
-- Injects NOTIFICATION_CONTEXT environment variable into the agent exec command at runtime
-- Supports tag-based selector filtering via a configurable map of key-value tag selectors
-- Automatically recreates the notification channel when the API key is rotated using terraform_data lifecycle triggers
-- Marks the API key as sensitive to prevent exposure in Terraform plan and state output
+- Creates a nullplatform_notification_channel of type 'agent' anchored to a specified NRN
+- Configures an exec command within the agent channel to invoke a custom script path for parameter handling
+- Injects the NOTIFICATION_CONTEXT environment variable into the agent exec command using jsonencode
+- Supports tag-based selector filtering via a configurable map of tags applied to the agent channel
+- Triggers automatic channel recreation via terraform_data when the API key is rotated
+- Exposes the created notification channel ID as an output for reference by other modules
 
 ## Basic Usage
 
 ```hcl
 module "parameter_storage_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_definition_agent_association?ref=v6.2.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_definition_agent_association?ref=v6.2.2"
 
   api_key = "your-api-key"
   nrn     = "your-nrn"
@@ -65,7 +65,7 @@ resource "example_resource" "this" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_api_key"></a> [api\_key](#input\_api\_key) | Agent API key for the notification channel. Rotating it recreates the channel (via terraform\_data.api\_key\_trigger). | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | NRN where the agent notification channel is anchored. | `string` | n/a | yes |
-| <a name="input_script_path"></a> [script\_path](#input\_script\_path) | Command line path the agent executes to handle parameter storage and retrieval. | `string` | `"nullplatform/parameters/parameters/entrypoint"` | no |
+| <a name="input_script_path"></a> [script\_path](#input\_script\_path) | Command line path the agent executes to handle parameter storage and retrieval. | `string` | `"nullplatform/parameters-provider/parameters/entrypoint"` | no |
 | <a name="input_tags_selectors"></a> [tags\_selectors](#input\_tags\_selectors) | Map of tags the agent uses to select/filter this channel against scope tags (e.g. { environment = "production" }). | `map(string)` | `{}` | no |
 
 ## Outputs
@@ -79,14 +79,14 @@ resource "example_resource" "this" {
 {
   "name": "parameter_storage_definition_agent_association",
   "description": "Creates a NullPlatform agent notification channel configured to handle parameter storage and retrieval via an exec command",
-  "architecture": "The module creates a terraform_data resource that tracks the api_key value as a lifecycle trigger, and a nullplatform_notification_channel resource of type 'agent' anchored to the provided NRN. The notification channel is configured with an agent block containing the API key, tag selectors, and an exec command pointing to a script path with an injected NOTIFICATION_CONTEXT environment variable. When the api_key changes, the replace_triggered_by lifecycle rule forces recreation of the notification channel. The channel ID is exposed as an output for downstream consumption.",
+  "architecture": "A terraform_data resource stores the api_key as a trigger value, causing the nullplatform_notification_channel resource to be recreated whenever the API key changes. The nullplatform_notification_channel resource is created with type 'agent' and source 'parameters', wiring in the nrn, api_key, tags_selectors, and script_path inputs into its nested agent configuration block. The lifecycle replace_triggered_by directive links the notification channel to the terraform_data trigger, ensuring channel recreation on key rotation. The channel's ID is exposed via an output for downstream consumption.",
   "features": [
-    "Creates a nullplatform_notification_channel of type 'agent' anchored to a specified NRN resource",
-    "Configures an exec-based command with a customizable script path for parameter storage and retrieval",
-    "Injects NOTIFICATION_CONTEXT environment variable into the agent exec command at runtime",
-    "Supports tag-based selector filtering via a configurable map of key-value tag selectors",
-    "Automatically recreates the notification channel when the API key is rotated using terraform_data lifecycle triggers",
-    "Marks the API key as sensitive to prevent exposure in Terraform plan and state output"
+    "Creates a nullplatform_notification_channel of type 'agent' anchored to a specified NRN",
+    "Configures an exec command within the agent channel to invoke a custom script path for parameter handling",
+    "Injects the NOTIFICATION_CONTEXT environment variable into the agent exec command using jsonencode",
+    "Supports tag-based selector filtering via a configurable map of tags applied to the agent channel",
+    "Triggers automatic channel recreation via terraform_data when the API key is rotated",
+    "Exposes the created notification channel ID as an output for reference by other modules"
   ],
   "inputs": [
     {
@@ -113,6 +113,6 @@ resource "example_resource" "this" {
   "outputs": [
     "notification_channel_id"
   ],
-  "hash": "9be10070d69155de12b0c1bc965d7ac4"
+  "hash": "456b971b7955c2f1cb601d516158cac6"
 }
 END_AI_METADATA -->
