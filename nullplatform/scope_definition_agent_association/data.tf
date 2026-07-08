@@ -24,7 +24,7 @@ data "external" "notification_channel" {
     SERVICE_SLUG='${var.scope_specification_slug}' \
     SERVICE_SPECIFICATION_ID='${var.scope_specification_id}' \
     gomplate)
-    echo "$processed_json" | jq -c '{json: tojson}'
+    printf '%s\n' "$processed_json" | jq -c '{json: tojson}'
   EOT
   ]
 }
