@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.2.2](https://github.com/nullplatform/tofu-modules/compare/v6.2.1...v6.2.2) (2026-07-08)
+
+
+### Bug Fixes
+
+* use printf over echo to preserve backslashes in rendered templates ([#431](https://github.com/nullplatform/tofu-modules/issues/431)) ([7d62a2d](https://github.com/nullplatform/tofu-modules/commit/7d62a2ded96faf060ce1259d0aeaad75a05ee58c))
+
 ## [6.2.1](https://github.com/nullplatform/tofu-modules/compare/v6.2.0...v6.2.1) (2026-07-06)
 
 

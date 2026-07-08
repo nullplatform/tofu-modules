@@ -2,25 +2,25 @@
 
 ## Description
 
-Registers a nullplatform provider specification for parameter storage by fetching, rendering, and applying a gomplate template from a remote GitHub repository
+Registers a nullplatform provider specification for parameter storage by fetching and rendering a gomplate template from a remote repository and creating the resulting resource
 
 ## Architecture
 
-A data.http resource fetches the raw specification template from a configurable GitHub repository URL constructed from repository base, branch, and template path variables. A data.external resource then processes the fetched template body through gomplate with the NRN environment variable injected, producing a rendered JSON configuration. The rendered config is decoded into locals and fed into a nullplatform_provider_specification resource that creates the provider spec with visibility scoped to the given NRN plus any extra NRNs. The resource ID, slug, and name are exposed as outputs for downstream configuration modules.
+A data.http resource fetches the raw specification template from a configurable GitHub raw content URL composed of the repository base, branch, and template path variables. A data.external resource then processes the downloaded template body through gomplate (injecting the NRN environment variable) and parses the rendered output with jq into a JSON string. The decoded JSON is stored in a local and used to populate all fields of a nullplatform_provider_specification resource, including name, icon, description, category, allow_dimensions, schema, and a visibility list that merges var.nrn with any extra NRNs. The resource ID, slug, and name are exposed as outputs.
 
 ## Features
 
-- Fetches parameter storage specification templates from a configurable remote GitHub repository and branch
-- Renders gomplate templates with NRN context injection to produce provider-specific configuration
-- Creates a nullplatform_provider_specification resource with name, icon, description, category, schema, and dimension settings
-- Configures visibility of the provider specification to the anchor NRN and any additional NRNs via extra_visible_to_nrns
-- Outputs specification ID, slug, and name for use by downstream parameter storage configuration modules
+- Fetches provider specification templates from a remote GitHub repository via HTTP
+- Renders gomplate templates with NRN injection to produce environment-specific specifications
+- Creates a nullplatform_provider_specification resource with full schema, icon, category, and dimension configuration
+- Controls specification visibility across multiple NRNs by merging the primary NRN with optional extra NRNs
+- Exposes specification ID, slug, and name as outputs for downstream configuration modules
 
 ## Basic Usage
 
 ```hcl
 module "parameter_storage_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_definition?ref=v6.2.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_definition?ref=v6.2.2"
 
   np_api_key    = "your-np-api-key"
   nrn           = "your-nrn"
@@ -82,14 +82,14 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "parameter_storage_definition",
-  "description": "Registers a nullplatform provider specification for parameter storage by fetching, rendering, and applying a gomplate template from a remote GitHub repository",
-  "architecture": "A data.http resource fetches the raw specification template from a configurable GitHub repository URL constructed from repository base, branch, and template path variables. A data.external resource then processes the fetched template body through gomplate with the NRN environment variable injected, producing a rendered JSON configuration. The rendered config is decoded into locals and fed into a nullplatform_provider_specification resource that creates the provider spec with visibility scoped to the given NRN plus any extra NRNs. The resource ID, slug, and name are exposed as outputs for downstream configuration modules.",
+  "description": "Registers a nullplatform provider specification for parameter storage by fetching and rendering a gomplate template from a remote repository and creating the resulting resource",
+  "architecture": "A data.http resource fetches the raw specification template from a configurable GitHub raw content URL composed of the repository base, branch, and template path variables. A data.external resource then processes the downloaded template body through gomplate (injecting the NRN environment variable) and parses the rendered output with jq into a JSON string. The decoded JSON is stored in a local and used to populate all fields of a nullplatform_provider_specification resource, including name, icon, description, category, allow_dimensions, schema, and a visibility list that merges var.nrn with any extra NRNs. The resource ID, slug, and name are exposed as outputs.",
   "features": [
-    "Fetches parameter storage specification templates from a configurable remote GitHub repository and branch",
-    "Renders gomplate templates with NRN context injection to produce provider-specific configuration",
-    "Creates a nullplatform_provider_specification resource with name, icon, description, category, schema, and dimension settings",
-    "Configures visibility of the provider specification to the anchor NRN and any additional NRNs via extra_visible_to_nrns",
-    "Outputs specification ID, slug, and name for use by downstream parameter storage configuration modules"
+    "Fetches provider specification templates from a remote GitHub repository via HTTP",
+    "Renders gomplate templates with NRN injection to produce environment-specific specifications",
+    "Creates a nullplatform_provider_specification resource with full schema, icon, category, and dimension configuration",
+    "Controls specification visibility across multiple NRNs by merging the primary NRN with optional extra NRNs",
+    "Exposes specification ID, slug, and name as outputs for downstream configuration modules"
   ],
   "inputs": [
     {
@@ -128,6 +128,6 @@ resource "example_resource" "this" {
     "slug",
     "name"
   ],
-  "hash": "8b2225c8abab73f3d65d369025e206fa"
+  "hash": "fcad363c38285304c33f56b348de0465"
 }
 END_AI_METADATA -->

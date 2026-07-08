@@ -2,27 +2,27 @@
 
 ## Description
 
-Creates a nullplatform notification channel by fetching and processing a JSON template from a remote repository using gomplate and registering it via the nullplatform provider
+Creates and configures a nullplatform notification channel by fetching and processing a template from a remote repository using gomplate and registering it via the nullplatform provider
 
 ## Architecture
 
-The module fetches a notification channel template via the `data.http` data source from a configurable raw GitHub URL, then processes it using a `data.external` shell script that invokes gomplate for variable substitution and jq for JSON normalization. The rendered template drives a `nullplatform_notification_channel` resource, which dynamically configures an agent block (including command data and environment injection) only when the channel type is 'agent'. A `terraform_data` resource keyed on the API key triggers replacement of the notification channel whenever the key rotates, and optional override flags are appended to the cmdline argument when `enabled_override` is true.
+The module fetches a notification channel JSON template from a raw GitHub URL using the `http` data source, then processes it through an `external` data source that pipes it through gomplate with NRN, API key, and scope variables injected as environment variables. The rendered JSON is decoded via `jsondecode` in locals and used to populate a `nullplatform_notification_channel` resource, which dynamically constructs an `agent` configuration block with command data, environment context, optional override flags, and tag selectors. A `terraform_data` resource tracks the API key and triggers replacement of the notification channel when the key changes.
 
 ## Features
 
-- Fetches notification channel JSON templates dynamically from a remote GitHub repository using configurable branch and path
-- Processes templates with gomplate for variable substitution, injecting NRN, API key, and scope identifiers at render time
-- Creates a nullplatform_notification_channel resource with dynamic agent configuration including command type and environment context
-- Appends override flags to agent command cmdline when custom scope configuration overrides are enabled
-- Merges base template filters with user-supplied MongoDB-style extra_filters using a $and expression
-- Triggers automatic notification channel replacement via terraform_data when the API key changes
-- Supports tag-based agent selector configuration through a flexible map of key-value tags
+- Fetches notification channel templates dynamically from a configurable remote GitHub repository branch
+- Processes templates with gomplate to inject NRN, API key, and scope-specific variables at runtime
+- Creates a nullplatform_notification_channel resource with dynamic agent configuration including command type and data
+- Merges base template filters with optional extra MongoDB-style filter expressions using $and logic
+- Supports optional override flag injection into the agent command cmdline for custom scope configuration overrides
+- Triggers automatic replacement of the notification channel resource when the API key changes
+- Configures agent selector using a flexible map of tag key-value pairs for channel and agent filtering
 
 ## Basic Usage
 
 ```hcl
 module "scope_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=v6.2.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=v6.2.2"
 
   api_key                  = "your-api-key"
   nrn                      = "your-nrn"
@@ -94,16 +94,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "scope_definition_agent_association",
-  "description": "Creates a nullplatform notification channel by fetching and processing a JSON template from a remote repository using gomplate and registering it via the nullplatform provider",
-  "architecture": "The module fetches a notification channel template via the `data.http` data source from a configurable raw GitHub URL, then processes it using a `data.external` shell script that invokes gomplate for variable substitution and jq for JSON normalization. The rendered template drives a `nullplatform_notification_channel` resource, which dynamically configures an agent block (including command data and environment injection) only when the channel type is 'agent'. A `terraform_data` resource keyed on the API key triggers replacement of the notification channel whenever the key rotates, and optional override flags are appended to the cmdline argument when `enabled_override` is true.",
+  "description": "Creates and configures a nullplatform notification channel by fetching and processing a template from a remote repository using gomplate and registering it via the nullplatform provider",
+  "architecture": "The module fetches a notification channel JSON template from a raw GitHub URL using the `http` data source, then processes it through an `external` data source that pipes it through gomplate with NRN, API key, and scope variables injected as environment variables. The rendered JSON is decoded via `jsondecode` in locals and used to populate a `nullplatform_notification_channel` resource, which dynamically constructs an `agent` configuration block with command data, environment context, optional override flags, and tag selectors. A `terraform_data` resource tracks the API key and triggers replacement of the notification channel when the key changes.",
   "features": [
-    "Fetches notification channel JSON templates dynamically from a remote GitHub repository using configurable branch and path",
-    "Processes templates with gomplate for variable substitution, injecting NRN, API key, and scope identifiers at render time",
-    "Creates a nullplatform_notification_channel resource with dynamic agent configuration including command type and environment context",
-    "Appends override flags to agent command cmdline when custom scope configuration overrides are enabled",
-    "Merges base template filters with user-supplied MongoDB-style extra_filters using a $and expression",
-    "Triggers automatic notification channel replacement via terraform_data when the API key changes",
-    "Supports tag-based agent selector configuration through a flexible map of key-value tags"
+    "Fetches notification channel templates dynamically from a configurable remote GitHub repository branch",
+    "Processes templates with gomplate to inject NRN, API key, and scope-specific variables at runtime",
+    "Creates a nullplatform_notification_channel resource with dynamic agent configuration including command type and data",
+    "Merges base template filters with optional extra MongoDB-style filter expressions using $and logic",
+    "Supports optional override flag injection into the agent command cmdline for custom scope configuration overrides",
+    "Triggers automatic replacement of the notification channel resource when the API key changes",
+    "Configures agent selector using a flexible map of tag key-value pairs for channel and agent filtering"
   ],
   "inputs": [
     {
@@ -185,6 +185,6 @@ resource "example_resource" "this" {
   "outputs": [
     "notification_channel_id"
   ],
-  "hash": "506c8b9088177ee7ee6ad97e7339abbf"
+  "hash": "34e3ea16007de5d089d4e2c6967046b2"
 }
 END_AI_METADATA -->

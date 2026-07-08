@@ -21,7 +21,7 @@ Creates a nullplatform_provider_config resource with type 'eks-configuration' th
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v6.2.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v6.2.2"
 
   cluster_name = "your-cluster-name"
   nrn          = "your-nrn"
