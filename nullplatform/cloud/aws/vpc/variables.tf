@@ -23,3 +23,12 @@ variable "dimensions" {
   type        = map(string)
   default     = {}
 }
+
+variable "load_balancer" {
+  description = "Load balancer wiring published under the networking provider's load_balancer.{public,private} so scope workflows (e.g. the Lambda ALB) can resolve listener/target details. Each side is free-form (e.g. { arn = ..., listener_arn = ... }); defaults to empty objects, preserving the previous behaviour."
+  type = object({
+    public  = optional(any, {})
+    private = optional(any, {})
+  })
+  default = {}
+}

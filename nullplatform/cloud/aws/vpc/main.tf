@@ -10,8 +10,8 @@ resource "nullplatform_provider_config" "vpc" {
       security_groups = var.vpc_security_groups
     }
     load_balancer = {
-      public  = {}
-      private = {}
+      public  = var.load_balancer.public
+      private = var.load_balancer.private
     }
   })
   lifecycle {
