@@ -21,7 +21,7 @@ A terraform_data resource stores the api_key as a trigger value, causing the nul
 
 ```hcl
 module "parameter_storage_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_definition_agent_association?ref=v6.2.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_definition_agent_association?ref=v6.3.0"
 
   api_key = "your-api-key"
   nrn     = "your-nrn"

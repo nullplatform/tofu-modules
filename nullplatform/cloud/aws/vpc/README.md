@@ -2,25 +2,25 @@
 
 ## Description
 
-Configures AWS networking provider settings in Nullplatform with VPC, subnet, security group, and load balancer configurations
+Registers AWS VPC networking configuration (subnets, security groups, and load balancer details) as a nullplatform provider config resource
 
 ## Architecture
 
-Creates a nullplatform_provider_config resource of type 'aws-networking-configuration' that stores AWS VPC networking details. The resource accepts VPC ID, subnet IDs, and security group IDs as inputs and encodes them into a JSON attributes structure. The configuration includes placeholders for public and private load balancers and uses a lifecycle rule to ignore changes to the attributes field after creation.
+The module creates a single nullplatform_provider_config resource of type aws-networking-configuration, wiring the vpc_id, vpc_subnets, and vpc_security_groups inputs into a nested vpc attribute block alongside public and private load_balancer objects. The nrn input identifies the Nullplatform resource hierarchy scope, and optional dimensions enable multi-tenant or environment-scoped configuration. A lifecycle ignore_changes block on attributes prevents drift detection from overwriting externally managed state.
 
 ## Features
 
-- Creates Nullplatform provider configuration for AWS networking
-- Configures VPC networking with subnet and security group associations
-- Provides load balancer configuration placeholders for public and private endpoints
-- Supports custom dimension mappings for Nullplatform resource organization
-- Implements lifecycle management to prevent attribute drift after initial creation
+- Creates a nullplatform provider config resource of type aws-networking-configuration scoped to a given NRN
+- Registers VPC ID, subnet list, and security group list as structured networking attributes
+- Publishes public and private load balancer details under the networking provider for downstream workflow resolution
+- Supports optional dimension mapping for multi-tenant or environment-scoped Nullplatform configurations
+- Prevents Terraform drift on attributes block via lifecycle ignore_changes to preserve externally managed state
 
 ## Basic Usage
 
 ```hcl
 module "vpc" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/vpc?ref=v6.2.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/vpc?ref=v6.3.0"
 
   nrn                 = "your-nrn"
   vpc_id              = "your-vpc-id"
@@ -62,6 +62,7 @@ resource "example_resource" "this" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Map of dimension values to configure nullplatform | `map(string)` | `{}` | no |
+| <a name="input_load_balancer"></a> [load\_balancer](#input\_load\_balancer) | Load balancer wiring published under the networking provider's load\_balancer.{public,private} so scope workflows (e.g. the Lambda ALB) can resolve listener/target details. Each side is free-form (e.g. { arn = ..., listener\_arn = ... }); defaults to empty objects, preserving the previous behaviour. | <pre>object({<br/>    public  = optional(any, {})<br/>    private = optional(any, {})<br/>  })</pre> | `{}` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Identifier Nullplatform Resources Name | `string` | n/a | yes |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The ID of the VPC | `string` | n/a | yes |
 | <a name="input_vpc_security_groups"></a> [vpc\_security\_groups](#input\_vpc\_security\_groups) | List of security group IDs associated with the VPC | `list(string)` | n/a | yes |
@@ -71,14 +72,14 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "vpc",
-  "description": "Configures AWS networking provider settings in Nullplatform with VPC, subnet, security group, and load balancer configurations",
-  "architecture": "Creates a nullplatform_provider_config resource of type 'aws-networking-configuration' that stores AWS VPC networking details. The resource accepts VPC ID, subnet IDs, and security group IDs as inputs and encodes them into a JSON attributes structure. The configuration includes placeholders for public and private load balancers and uses a lifecycle rule to ignore changes to the attributes field after creation.",
+  "description": "Registers AWS VPC networking configuration (subnets, security groups, and load balancer details) as a nullplatform provider config resource",
+  "architecture": "The module creates a single nullplatform_provider_config resource of type aws-networking-configuration, wiring the vpc_id, vpc_subnets, and vpc_security_groups inputs into a nested vpc attribute block alongside public and private load_balancer objects. The nrn input identifies the Nullplatform resource hierarchy scope, and optional dimensions enable multi-tenant or environment-scoped configuration. A lifecycle ignore_changes block on attributes prevents drift detection from overwriting externally managed state.",
   "features": [
-    "Creates Nullplatform provider configuration for AWS networking",
-    "Configures VPC networking with subnet and security group associations",
-    "Provides load balancer configuration placeholders for public and private endpoints",
-    "Supports custom dimension mappings for Nullplatform resource organization",
-    "Implements lifecycle management to prevent attribute drift after initial creation"
+    "Creates a nullplatform provider config resource of type aws-networking-configuration scoped to a given NRN",
+    "Registers VPC ID, subnet list, and security group list as structured networking attributes",
+    "Publishes public and private load balancer details under the networking provider for downstream workflow resolution",
+    "Supports optional dimension mapping for multi-tenant or environment-scoped Nullplatform configurations",
+    "Prevents Terraform drift on attributes block via lifecycle ignore_changes to preserve externally managed state"
   ],
   "inputs": [
     {
@@ -105,9 +106,14 @@ resource "example_resource" "this" {
       "name": "dimensions",
       "description": "Map of dimension values to configure nullplatform",
       "required": false
+    },
+    {
+      "name": "load_balancer",
+      "description": "Load balancer wiring published under the networking provider's load_balancer.{public,private} so scope workflows (e.g. the Lambda ALB) can resolve listener/target details. Each side is free-form (e.g. { arn = ..., listener_arn = ... }); defaults to empty objects, preserving the previous behaviour.",
+      "required": false
     }
   ],
   "outputs": [],
-  "hash": "5ff480ac7d9e061b2bc18fcc29750aa6"
+  "hash": "396315238cd4cd3bde47416f7cfafa11"
 }
 END_AI_METADATA -->
