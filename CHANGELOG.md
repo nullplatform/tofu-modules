@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.3.0](https://github.com/nullplatform/tofu-modules/compare/v6.2.2...v6.3.0) (2026-07-13)
+
+
+### Features
+
+* **cloud/aws/vpc:** optional load_balancer input for networking config ([#433](https://github.com/nullplatform/tofu-modules/issues/433)) ([de919ea](https://github.com/nullplatform/tofu-modules/commit/de919eac95ad92583165e9f25c6659b1cc246de3))
+
 ## [6.2.2](https://github.com/nullplatform/tofu-modules/compare/v6.2.1...v6.2.2) (2026-07-08)
 
 
