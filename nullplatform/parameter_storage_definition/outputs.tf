@@ -4,8 +4,8 @@ output "specification_id" {
 }
 
 output "slug" {
-  description = "Slug of the provider specification, resolved from the rendered template. Pass this to parameter_storage_configuration.provider_specification_slug."
-  value       = local.config.slug
+  description = "Slug of the created provider specification. Pass this to parameter_storage_configuration.provider_specification_slug."
+  value       = nullplatform_provider_specification.parameter_storage_specification.slug
 }
 
 output "name" {
