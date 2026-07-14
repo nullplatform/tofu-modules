@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.3.1](https://github.com/nullplatform/tofu-modules/compare/v6.3.0...v6.3.1) (2026-07-14)
+
+
+### Bug Fixes
+
+* **parameter_storage_definition:** derive slug output from the created resource ([#436](https://github.com/nullplatform/tofu-modules/issues/436)) ([d27b92a](https://github.com/nullplatform/tofu-modules/commit/d27b92ae2f9ad56a14815494e76d62707abcbf39))
+
 ## [6.3.0](https://github.com/nullplatform/tofu-modules/compare/v6.2.2...v6.3.0) (2026-07-13)
 
 

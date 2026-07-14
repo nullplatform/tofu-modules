@@ -21,7 +21,7 @@ Three helm_release resources are created in a strict dependency chain: istio-bas
 
 ```hcl
 module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v6.3.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v6.3.1"
 }
 ```
 
