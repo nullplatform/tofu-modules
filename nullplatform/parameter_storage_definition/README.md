@@ -2,25 +2,25 @@
 
 ## Description
 
-Registers a nullplatform provider specification for parameter storage by fetching and rendering a gomplate template from a remote repository and creating the resulting resource
+Registers a nullplatform provider specification for parameter storage by fetching, rendering with gomplate, and applying a template from a remote GitHub repository
 
 ## Architecture
 
-A data.http resource fetches the raw specification template from a configurable GitHub raw content URL composed of the repository base, branch, and template path variables. A data.external resource then processes the downloaded template body through gomplate (injecting the NRN environment variable) and parses the rendered output with jq into a JSON string. The decoded JSON is stored in a local and used to populate all fields of a nullplatform_provider_specification resource, including name, icon, description, category, allow_dimensions, schema, and a visibility list that merges var.nrn with any extra NRNs. The resource ID, slug, and name are exposed as outputs.
+A data.http resource fetches the raw specification template from a configurable GitHub repository URL composed of repository base, branch, and template path variables. A data.external resource then pipes the fetched template body through gomplate for NRN-based variable substitution and jq for JSON normalization. The rendered JSON is decoded into locals and fed into a nullplatform_provider_specification resource that sets name, icon, description, category, schema, and visibility scope. Outputs expose the created resource's id, slug, and resolved name for downstream configuration modules.
 
 ## Features
 
-- Fetches provider specification templates from a remote GitHub repository via HTTP
-- Renders gomplate templates with NRN injection to produce environment-specific specifications
-- Creates a nullplatform_provider_specification resource with full schema, icon, category, and dimension configuration
-- Controls specification visibility across multiple NRNs by merging the primary NRN with optional extra NRNs
-- Exposes specification ID, slug, and name as outputs for downstream configuration modules
+- Fetches provider specification templates from a configurable remote GitHub repository with branch selection
+- Renders specification templates using gomplate with NRN variable substitution before applying
+- Creates a nullplatform_provider_specification resource with full schema, icon, category, and dimension support
+- Controls specification visibility across multiple NRNs by merging the anchor NRN with additional NRNs via distinct(concat())
+- Exposes specification ID and slug outputs for use by downstream parameter storage configuration modules
 
 ## Basic Usage
 
 ```hcl
 module "parameter_storage_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_definition?ref=v6.3.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_definition?ref=v6.3.1"
 
   np_api_key    = "your-np-api-key"
   nrn           = "your-nrn"
@@ -75,21 +75,21 @@ resource "example_resource" "this" {
 | Name | Description |
 |------|-------------|
 | <a name="output_name"></a> [name](#output\_name) | Name of the provider specification, resolved from the rendered template. |
-| <a name="output_slug"></a> [slug](#output\_slug) | Slug of the provider specification, resolved from the rendered template. Pass this to parameter\_storage\_configuration.provider\_specification\_slug. |
+| <a name="output_slug"></a> [slug](#output\_slug) | Slug of the created provider specification. Pass this to parameter\_storage\_configuration.provider\_specification\_slug. |
 | <a name="output_specification_id"></a> [specification\_id](#output\_specification\_id) | ID of the created parameter-storage provider specification. |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
 {
   "name": "parameter_storage_definition",
-  "description": "Registers a nullplatform provider specification for parameter storage by fetching and rendering a gomplate template from a remote repository and creating the resulting resource",
-  "architecture": "A data.http resource fetches the raw specification template from a configurable GitHub raw content URL composed of the repository base, branch, and template path variables. A data.external resource then processes the downloaded template body through gomplate (injecting the NRN environment variable) and parses the rendered output with jq into a JSON string. The decoded JSON is stored in a local and used to populate all fields of a nullplatform_provider_specification resource, including name, icon, description, category, allow_dimensions, schema, and a visibility list that merges var.nrn with any extra NRNs. The resource ID, slug, and name are exposed as outputs.",
+  "description": "Registers a nullplatform provider specification for parameter storage by fetching, rendering with gomplate, and applying a template from a remote GitHub repository",
+  "architecture": "A data.http resource fetches the raw specification template from a configurable GitHub repository URL composed of repository base, branch, and template path variables. A data.external resource then pipes the fetched template body through gomplate for NRN-based variable substitution and jq for JSON normalization. The rendered JSON is decoded into locals and fed into a nullplatform_provider_specification resource that sets name, icon, description, category, schema, and visibility scope. Outputs expose the created resource's id, slug, and resolved name for downstream configuration modules.",
   "features": [
-    "Fetches provider specification templates from a remote GitHub repository via HTTP",
-    "Renders gomplate templates with NRN injection to produce environment-specific specifications",
-    "Creates a nullplatform_provider_specification resource with full schema, icon, category, and dimension configuration",
-    "Controls specification visibility across multiple NRNs by merging the primary NRN with optional extra NRNs",
-    "Exposes specification ID, slug, and name as outputs for downstream configuration modules"
+    "Fetches provider specification templates from a configurable remote GitHub repository with branch selection",
+    "Renders specification templates using gomplate with NRN variable substitution before applying",
+    "Creates a nullplatform_provider_specification resource with full schema, icon, category, and dimension support",
+    "Controls specification visibility across multiple NRNs by merging the anchor NRN with additional NRNs via distinct(concat())",
+    "Exposes specification ID and slug outputs for use by downstream parameter storage configuration modules"
   ],
   "inputs": [
     {
@@ -128,6 +128,6 @@ resource "example_resource" "this" {
     "slug",
     "name"
   ],
-  "hash": "fcad363c38285304c33f56b348de0465"
+  "hash": "3392b26896c52e2a2d0131bda856b5fd"
 }
 END_AI_METADATA -->
