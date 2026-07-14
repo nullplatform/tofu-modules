@@ -41,10 +41,6 @@ resource "nullplatform_notification_channel" "from_template" {
   }
   filters = local.merged_filters_json
   lifecycle {
-    ignore_changes = [
-      source,
-      type,
-    ]
     replace_triggered_by = [terraform_data.api_key_trigger]
   }
 }
