@@ -38,16 +38,6 @@ resource "nullplatform_scope_type" "from_template" {
   description   = var.service_spec_description
   provider_id   = local.service_specification_id
   provider_type = local.scope_type_def.provider_type
-
-  # `provider_type` comes from a `data.external` keyed on
-  # `service_specification.id`. Any pending change on `service_specification`
-  # (even in an unrelated field) replans that data source as
-  # `(known after apply)`, and since provider_type is ForceNew, the phantom
-  # unknown forces a destroy+recreate of scope_type. Confirmed by forcing a
-  # drift on service_specification and observing the cascade.
-  lifecycle {
-    ignore_changes = [provider_type]
-  }
 }
 
 ################################################################################
@@ -68,16 +58,6 @@ resource "nullplatform_action_specification" "from_templates" {
   retryable                = try(jsondecode(base64decode(data.external.action_specs[each.key].result.json_b64)).retryable, false)
   icon                     = try(jsondecode(base64decode(data.external.action_specs[each.key].result.json_b64)).icon, "")
   annotations              = jsonencode(try(jsondecode(base64decode(data.external.action_specs[each.key].result.json_b64)).annotations, {}))
-
-  # `type` comes from the same per-service_specification `data.external`
-  # pattern as scope_type.provider_type above. Any pending change on
-  # `service_specification` replans it as `(known after apply)`, and since
-  # `type` is ForceNew, it forces a destroy+recreate of EVERY
-  # action_specification instance at once. Confirmed by forcing a drift on
-  # service_specification and observing the cascade.
-  lifecycle {
-    ignore_changes = [type]
-  }
 }
 
 ################################################################################
