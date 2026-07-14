@@ -6,11 +6,14 @@ resource "nullplatform_service_specification" "from_template" {
   depends_on = [
     data.external.service_spec
   ]
-  name                = var.service_spec_name
-  visible_to          = concat(local.service_spec_parsed.visible_to, var.extra_visible_to_nrns)
-  assignable_to       = local.service_spec_parsed.assignable_to
-  type                = local.service_spec_parsed.type
-  attributes          = jsonencode(local.service_spec_parsed.attributes)
+  name          = var.service_spec_name
+  visible_to    = concat(local.service_spec_parsed.visible_to, var.extra_visible_to_nrns)
+  assignable_to = local.service_spec_parsed.assignable_to
+  type          = local.service_spec_parsed.type
+  # The API persists a `values = {}` key inside `attributes` that the
+  # template never sets, causing perpetual drift on every plan. Mirroring
+  # it here keeps config and state in sync instead of masking the diff.
+  attributes          = jsonencode(merge({ values = {} }, local.service_spec_parsed.attributes))
   use_default_actions = local.service_spec_parsed.use_default_actions
 
   selectors {
@@ -18,13 +21,6 @@ resource "nullplatform_service_specification" "from_template" {
     imported     = local.service_spec_parsed.selectors.imported
     provider     = local.service_spec_parsed.selectors.provider
     sub_category = local.service_spec_parsed.selectors.sub_category
-  }
-
-  # `visible_to` deliberately NOT in ignore_changes so updates from
-  # `var.extra_visible_to_nrns` flow via `tofu apply`. The other ignored
-  # attributes (name, attributes, type) are server-enriched after create.
-  lifecycle {
-    ignore_changes = [name, attributes, type]
   }
 }
 
@@ -43,16 +39,14 @@ resource "nullplatform_scope_type" "from_template" {
   provider_id   = local.service_specification_id
   provider_type = local.scope_type_def.provider_type
 
-  # `provider_type` is read from a `data.external` (gomplate-rendered template)
-  # which Terraform plans as `(known after apply)`. Combined with the provider
-  # marking `provider_type` as ForceNew, every plan triggers a phantom replace
-  # even when the upstream template value is unchanged. `status` is server-
-  # managed (not user-set). Ignoring both is safe — neither field can be
-  # mutated after create in any meaningful way — and prevents the false
-  # `must be replaced` diff that would otherwise destroy and re-create the
-  # scope_type on every apply.
+  # `provider_type` comes from a `data.external` keyed on
+  # `service_specification.id`. Any pending change on `service_specification`
+  # (even in an unrelated field) replans that data source as
+  # `(known after apply)`, and since provider_type is ForceNew, the phantom
+  # unknown forces a destroy+recreate of scope_type. Confirmed by forcing a
+  # drift on service_specification and observing the cascade.
   lifecycle {
-    ignore_changes = [provider_type, status]
+    ignore_changes = [provider_type]
   }
 }
 
@@ -75,8 +69,14 @@ resource "nullplatform_action_specification" "from_templates" {
   icon                     = try(jsondecode(base64decode(data.external.action_specs[each.key].result.json_b64)).icon, "")
   annotations              = jsonencode(try(jsondecode(base64decode(data.external.action_specs[each.key].result.json_b64)).annotations, {}))
 
+  # `type` comes from the same per-service_specification `data.external`
+  # pattern as scope_type.provider_type above. Any pending change on
+  # `service_specification` replans it as `(known after apply)`, and since
+  # `type` is ForceNew, it forces a destroy+recreate of EVERY
+  # action_specification instance at once. Confirmed by forcing a drift on
+  # service_specification and observing the cascade.
   lifecycle {
-    ignore_changes = [name, annotations, parameters, results, type, retryable, icon]
+    ignore_changes = [type]
   }
 }
 
