@@ -1,5 +1,17 @@
 # Changelog
 
+## [6.4.0](https://github.com/nullplatform/tofu-modules/compare/v6.3.1...v6.4.0) (2026-07-15)
+
+
+### Features
+
+* **agent_association:** add configurable description input for notification channels ([#439](https://github.com/nullplatform/tofu-modules/issues/439)) ([7663877](https://github.com/nullplatform/tofu-modules/commit/7663877bad9fcbf95162e7ecf8f816722cd6944d))
+
+
+### Bug Fixes
+
+* **scope_definition:** remove ignore_changes masking a redundant depends_on drift bug ([#438](https://github.com/nullplatform/tofu-modules/issues/438)) ([2a715b6](https://github.com/nullplatform/tofu-modules/commit/2a715b6ecc39001e6b1dff6511019e2bea46d140))
+
 ## [6.3.1](https://github.com/nullplatform/tofu-modules/compare/v6.3.0...v6.3.1) (2026-07-14)
 
 
