@@ -34,9 +34,15 @@ data "external" "service_spec" {
 }
 
 # Process scope type template with service specification context
+# `depends_on` deliberately does NOT list `nullplatform_service_specification`:
+# the implicit reference to its `.id` via SERVICE_SPECIFICATION_ID already
+# creates that edge. An explicit whole-resource depends_on here defers this
+# entire data source to apply-time whenever service_specification has ANY
+# pending change, marking provider_type unknown and forcing a phantom
+# destroy+recreate of scope_type (provider_type is ForceNew). Confirmed by
+# forcing a drift on service_specification with/without this depends_on.
 data "external" "scope_type" {
   depends_on = [
-    nullplatform_service_specification.from_template,
     data.http.scope_type_template
   ]
 
@@ -52,10 +58,13 @@ data "external" "scope_type" {
 }
 
 # Process all action specification templates with full service context
+# `depends_on` deliberately does NOT list `nullplatform_service_specification`
+# — see the comment on `data.external.scope_type` above. Same cascade, but
+# it forces a phantom destroy+recreate of EVERY action_specification
+# instance at once (their `type` is ForceNew).
 data "external" "action_specs" {
   for_each = toset(var.action_spec_names)
   depends_on = [
-    nullplatform_service_specification.from_template,
     data.http.action_templates
   ]
 
