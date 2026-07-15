@@ -4,9 +4,10 @@ resource "terraform_data" "api_key_trigger" {
 }
 
 resource "nullplatform_notification_channel" "channel_from_template" {
-  nrn    = var.nrn
-  type   = var.channel_type
-  source = var.channel_sources
+  nrn         = var.nrn
+  type        = var.channel_type
+  source      = var.channel_sources
+  description = var.description
 
 
   configuration {

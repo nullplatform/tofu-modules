@@ -20,3 +20,9 @@ variable "script_path" {
   type        = string
   default     = "nullplatform/parameters-provider/parameters/entrypoint"
 }
+
+variable "description" {
+  description = "Description shown for the notification channel."
+  type        = string
+  default     = ""
+}

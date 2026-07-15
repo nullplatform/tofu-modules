@@ -6,7 +6,7 @@ resource "nullplatform_notification_channel" "from_template" {
   nrn         = var.nrn
   type        = "agent"
   source      = ["parameters"]
-  description = "Notification channel to handle parameter storage and retrieval"
+  description = var.description
   configuration {
     agent {
       api_key  = var.api_key
