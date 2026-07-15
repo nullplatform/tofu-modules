@@ -54,3 +54,9 @@ variable "agent_arguments" {
   default     = []
   description = "Arguments to pass to the agent entrypoint command"
 }
+
+variable "description" {
+  description = "Description shown for the notification channel."
+  type        = string
+  default     = ""
+}
