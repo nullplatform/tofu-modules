@@ -8,9 +8,10 @@ resource "terraform_data" "api_key_trigger" {
 
 # Create notification channel with agent configuration and optional overrides
 resource "nullplatform_notification_channel" "from_template" {
-  nrn    = var.nrn
-  type   = local.notification_channel_def.type
-  source = local.notification_channel_def.source
+  nrn         = var.nrn
+  type        = local.notification_channel_def.type
+  source      = local.notification_channel_def.source
+  description = var.description
   configuration {
     # Only configure agent block when notification channel type is "agent"
     dynamic "agent" {

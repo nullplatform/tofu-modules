@@ -80,6 +80,12 @@ variable "tags_selectors" {
   type        = map(string)
 }
 
+variable "description" {
+  description = "Description shown for the notification channel."
+  type        = string
+  default     = ""
+}
+
 variable "extra_filters" {
   description = <<-EOT
     Additional filter expression to merge with the base template filters using $and.
