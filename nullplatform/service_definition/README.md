@@ -22,7 +22,7 @@ The module fetches service, action, and link spec templates via the `http` data 
 
 ```hcl
 module "service_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v6.3.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v6.4.0"
 
   nrn          = "your-nrn"
   service_name = "your-service-name"

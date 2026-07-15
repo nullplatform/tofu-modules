@@ -21,7 +21,7 @@ The module iterates over a map of user definitions using `nullplatform_user` res
 
 ```hcl
 module "users" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/users?ref=v6.3.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/users?ref=v6.4.0"
 
   nullplatform_users = "your-nullplatform-users"
 }
