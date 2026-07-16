@@ -126,6 +126,7 @@ resource "example_resource" "this" {
 | <a name="input_cloudwatch_enabled"></a> [cloudwatch\_enabled](#input\_cloudwatch\_enabled) | Enable CloudWatch (global switch). | `bool` | `false` | no |
 | <a name="input_cloudwatch_logs_enabled"></a> [cloudwatch\_logs\_enabled](#input\_cloudwatch\_logs\_enabled) | Enable log forwarding to CloudWatch. | `bool` | `false` | no |
 | <a name="input_cloudwatch_performance_metrics_enabled"></a> [cloudwatch\_performance\_metrics\_enabled](#input\_cloudwatch\_performance\_metrics\_enabled) | Enable performance metrics in CloudWatch. | `bool` | `false` | no |
+| <a name="input_cloudwatch_service_account_annotations"></a> [cloudwatch\_service\_account\_annotations](#input\_cloudwatch\_service\_account\_annotations) | Annotations for the logs controller ServiceAccount (nullplatform-pod-metadata-reader-sa). Rendered only when cloudwatch\_enabled is true. Set eks.amazonaws.com/role-arn here to use IRSA instead of the node instance role. | `map(string)` | `{}` | no |
 | <a name="input_control_plane_enabled"></a> [control\_plane\_enabled](#input\_control\_plane\_enabled) | Enable the control plane. | `bool` | `false` | no |
 | <a name="input_datadog_api_key"></a> [datadog\_api\_key](#input\_datadog\_api\_key) | Datadog API key. | `string` | `""` | no |
 | <a name="input_datadog_enabled"></a> [datadog\_enabled](#input\_datadog\_enabled) | Enable Datadog integration. | `bool` | `false` | no |
@@ -480,6 +481,11 @@ resource "example_resource" "this" {
     {
       "name": "cloudwatch_access_logs_enabled",
       "description": "Enable access logs in CloudWatch.",
+      "required": false
+    },
+    {
+      "name": "cloudwatch_service_account_annotations",
+      "description": "Annotations for the logs controller ServiceAccount (nullplatform-pod-metadata-reader-sa). Rendered only when cloudwatch_enabled is true. Set eks.amazonaws.com/role-arn here to use IRSA instead of the node instance role.",
       "required": false
     },
     {
