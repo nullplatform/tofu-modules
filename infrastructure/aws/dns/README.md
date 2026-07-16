@@ -21,7 +21,7 @@ The module conditionally creates an aws_route53_zone resource for a public hoste
 
 ```hcl
 module "dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/dns?ref=v6.4.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/dns?ref=v6.5.0"
 
   domain_name = "your-domain-name"
   vpc_id      = "your-vpc-id"
