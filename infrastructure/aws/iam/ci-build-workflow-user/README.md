@@ -21,7 +21,7 @@ The module creates an aws_iam_user named with the cluster_name prefix and genera
 
 ```hcl
 module "ci-build-workflow-user" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/ci-build-workflow-user?ref=v6.4.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/ci-build-workflow-user?ref=v6.5.0"
 
   cluster_name = "your-cluster-name"
 }

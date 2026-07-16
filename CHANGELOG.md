@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.5.0](https://github.com/nullplatform/tofu-modules/compare/v6.4.0...v6.5.0) (2026-07-16)
+
+
+### Features
+
+* **base:** pass cloudwatch service account annotations for IRSA support ([#441](https://github.com/nullplatform/tofu-modules/issues/441)) ([65f0598](https://github.com/nullplatform/tofu-modules/commit/65f059813fd41205b456063e7aaf956a80bf3b4d))
+
 ## [6.4.0](https://github.com/nullplatform/tofu-modules/compare/v6.3.1...v6.4.0) (2026-07-15)
 
 
