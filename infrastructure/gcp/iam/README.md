@@ -19,7 +19,7 @@ The module creates google_service_account resources for each service account spe
 
 ```hcl
 module "iam" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/iam?ref=v6.5.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/iam?ref=v6.6.0"
 
   project_id = "your-project-id"
 }
