@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.6.0](https://github.com/nullplatform/tofu-modules/compare/v6.5.0...v6.6.0) (2026-07-16)
+
+
+### Features
+
+* **iam:** add cloudwatch IAM module for the logs controller ([#443](https://github.com/nullplatform/tofu-modules/issues/443)) ([35b3b33](https://github.com/nullplatform/tofu-modules/commit/35b3b330ed24d6327132e113dfbeb9a1f831ea4f))
+
 ## [6.5.0](https://github.com/nullplatform/tofu-modules/compare/v6.4.0...v6.5.0) (2026-07-16)
 
 
