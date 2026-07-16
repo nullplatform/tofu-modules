@@ -365,6 +365,12 @@ variable "cloudwatch_access_logs_enabled" {
   default     = false
 }
 
+variable "cloudwatch_service_account_annotations" {
+  type        = map(string)
+  description = "Annotations for the logs controller ServiceAccount (nullplatform-pod-metadata-reader-sa). Rendered only when cloudwatch_enabled is true. Set eks.amazonaws.com/role-arn here to use IRSA instead of the node instance role."
+  default     = {}
+}
+
 ############################################
 # Metrics Server
 ############################################

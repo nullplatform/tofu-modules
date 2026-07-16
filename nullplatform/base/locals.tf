@@ -98,11 +98,12 @@ locals {
       newrelic_region          = var.newrelic_region
 
       # ---- cloudwatch ----
-      cloudwatch_enabled                    = var.cloudwatch_enabled ? "true" : "false"
-      cloudwatch_logs_enabled               = var.cloudwatch_logs_enabled ? "true" : "false"
-      cloudwatch_performancemetrics_enabled = var.cloudwatch_performance_metrics_enabled ? "true" : "false"
-      cloudwatch_custommetrics_enabled      = var.cloudwatch_custom_metrics_enabled ? "true" : "false"
-      cloudwatch_accesslogs_enabled         = var.cloudwatch_access_logs_enabled ? "true" : "false"
+      cloudwatch_enabled                     = var.cloudwatch_enabled ? "true" : "false"
+      cloudwatch_logs_enabled                = var.cloudwatch_logs_enabled ? "true" : "false"
+      cloudwatch_performancemetrics_enabled  = var.cloudwatch_performance_metrics_enabled ? "true" : "false"
+      cloudwatch_custommetrics_enabled       = var.cloudwatch_custom_metrics_enabled ? "true" : "false"
+      cloudwatch_accesslogs_enabled          = var.cloudwatch_access_logs_enabled ? "true" : "false"
+      cloudwatch_service_account_annotations = var.cloudwatch_service_account_annotations
 
       # ---- metrics server ----
       metricsserver_enabled = var.metrics_server_enabled ? "true" : "false"

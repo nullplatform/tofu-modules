@@ -150,6 +150,13 @@ cloudwatch:
     enabled: ${cloudwatch_custommetrics_enabled}
   accessLogs:
     enabled: ${cloudwatch_accesslogs_enabled}
+%{ if cloudwatch_enabled == "true" && length(cloudwatch_service_account_annotations) > 0 ~}
+  serviceAccount:
+    annotations:
+%{ for key, value in cloudwatch_service_account_annotations ~}
+      ${key}: "${value}"
+%{ endfor ~}
+%{ endif ~}
 # Metrics server configuration
 metricsServer:
   enabled: ${metricsserver_enabled}
