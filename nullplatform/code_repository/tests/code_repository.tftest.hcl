@@ -76,6 +76,45 @@ run "gitlab_provider_config" {
   }
 }
 
+run "bitbucket_provider_config" {
+  command = plan
+
+  variables {
+    git_provider          = "bitbucket"
+    nrn                   = "organization=myorg:account=myaccount"
+    np_api_key            = "test-api-key"
+    bitbucket_workspace   = "myworkspace"
+    bitbucket_project_key = "MYPROJ"
+    bitbucket_email       = "bot@example.com"
+    bitbucket_api_token   = "atlassian-api-token"
+  }
+
+  assert {
+    condition     = nullplatform_provider_config.bitbucket[0].type == "bitbucket-configuration"
+    error_message = "Bitbucket provider config type should be 'bitbucket-configuration'"
+  }
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.bitbucket[0].attributes, "myworkspace")
+    error_message = "Attributes should contain the workspace"
+  }
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.bitbucket[0].attributes, "MYPROJ")
+    error_message = "Attributes should contain the project key"
+  }
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.bitbucket[0].attributes, "https://bitbucket.org")
+    error_message = "Attributes should default the installation URL to Bitbucket Cloud"
+  }
+
+  assert {
+    condition     = length(nullplatform_provider_config.github) == 0 && length(nullplatform_provider_config.gitlab) == 0
+    error_message = "Only the Bitbucket provider should be created for bitbucket"
+  }
+}
+
 run "gitlab_strips_namespace_from_nrn" {
   command = plan
 
