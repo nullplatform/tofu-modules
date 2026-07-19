@@ -15,7 +15,7 @@ The module fetches service, action, and link spec templates via the `http` data 
 - Creates nullplatform_link_specification resources for each link template listed in available_links
 - Fetches spec templates from GitHub using raw content URLs with optional Bearer token authentication
 - Fetches spec templates from GitLab using API v4 file endpoints with URL-encoded paths and optional PAT authentication
-- Fetches spec templates from Bitbucket Cloud using raw file endpoints under the canonical repository URL with optional Bearer token authentication
+- Fetches spec templates from Bitbucket Cloud using raw file endpoints under the canonical repository URL; authenticates via HTTP Basic `email:api_token` when `bitbucket_email` is set (required for Atlassian API tokens) or via a Bearer token otherwise (for workspace/repository access tokens)
 - Supports local filesystem spec loading for offline or development workflows via a configurable local path
 - Controls service specification visibility by merging the primary NRN with additional NRNs via extra_visibile_to_nrns
 
@@ -69,6 +69,7 @@ resource "example_resource" "this" {
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_available_actions"></a> [available\_actions](#input\_available\_actions) | List of action template names to fetch from the service spec repository | `list(string)` | `[]` | no |
 | <a name="input_available_links"></a> [available\_links](#input\_available\_links) | List of link template names to fetch from the service spec repository | `list(string)` | <pre>[<br/>  "connect"<br/>]</pre> | no |
+| <a name="input_bitbucket_email"></a> [bitbucket\_email](#input\_bitbucket\_email) | Bitbucket account email, used only when git\_provider = "bitbucket". Set it when repository\_token is an Atlassian API token: those authenticate ONLY via HTTP Basic "email:api\_token" and return 401 with a Bearer header. Leave null when repository\_token is a Bitbucket workspace/repository access token, which is sent as a Bearer token. | `string` | `null` | no |
 | <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Key-value pairs for dimensions to be associated with the service specification | `map(string)` | `{}` | no |
 | <a name="input_extra_visibile_to_nrns"></a> [extra\_visibile\_to\_nrns](#input\_extra\_visibile\_to\_nrns) | Additional NRNs that should have visibility to the created service specification | `list(string)` | `[]` | no |
 | <a name="input_git_provider"></a> [git\_provider](#input\_git\_provider) | Git provider to fetch service specs from. Supported values: "github", "gitlab", "bitbucket", "local". | `string` | `"github"` | no |

@@ -17,11 +17,22 @@ locals {
   bitbucket_repo_url   = "https://bitbucket.org/${var.repository_org}/${var.repository_name}"
   bitbucket_raw_prefix = "${local.bitbucket_repo_url}/raw/${var.repository_branch}${var.service_path != "" ? "/${var.service_path}" : ""}"
 
-  # Auth header per provider. GitLab uses PRIVATE-TOKEN; GitHub and Bitbucket both use a
-  # Bearer token header. Enumerated explicitly rather than relying on a positional fallback.
+  # Auth header per provider, enumerated explicitly rather than relying on a positional
+  # fallback:
+  #   - GitLab: PRIVATE-TOKEN header.
+  #   - Bitbucket: HTTP Basic "email:api_token" when bitbucket_email is set. Atlassian API
+  #     tokens (the program's standard bot-user credential) authenticate ONLY via Basic and
+  #     return 401 on Bearer. When bitbucket_email is null the token is treated as a Bitbucket
+  #     workspace/repository access token and sent as Bearer.
+  #   - GitHub (and any other): Bearer token header.
   auth_headers = (
     var.repository_token == null ? {} :
     var.git_provider == "gitlab" ? { PRIVATE-TOKEN = var.repository_token } :
+    var.git_provider == "bitbucket" ? (
+      var.bitbucket_email != null
+      ? { Authorization = "Basic ${base64encode("${var.bitbucket_email}:${var.repository_token}")}" }
+      : { Authorization = "Bearer ${var.repository_token}" }
+    ) :
     { Authorization = "Bearer ${var.repository_token}" }
   )
 }
