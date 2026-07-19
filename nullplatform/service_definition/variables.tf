@@ -6,10 +6,10 @@ variable "nrn" {
 variable "git_provider" {
   type        = string
   default     = "github"
-  description = "Git provider to fetch service specs from. Supported values: \"github\", \"gitlab\", \"local\"."
+  description = "Git provider to fetch service specs from. Supported values: \"github\", \"gitlab\", \"bitbucket\", \"local\"."
   validation {
-    condition     = contains(["github", "gitlab", "local"], var.git_provider)
-    error_message = "git_provider must be \"github\", \"gitlab\", or \"local\"."
+    condition     = contains(["github", "gitlab", "bitbucket", "local"], var.git_provider)
+    error_message = "git_provider must be \"github\", \"gitlab\", \"bitbucket\", or \"local\"."
   }
 }
 
