@@ -173,6 +173,12 @@ resource "example_resource" "this" {
 | <a name="input_use_account_slug"></a> [use\_account\_slug](#input\_use\_account\_slug) | Flag to determine whether to use account slug in resource naming | `string` | `""` | no |
 | <a name="input_volume_mounts"></a> [volume\_mounts](#input\_volume\_mounts) | Additional volumeMounts to add to the main agent container (raw Kubernetes volumeMount spec, passed through to the Helm chart's volumeMounts value) | `list(any)` | `[]` | no |
 | <a name="input_volumes"></a> [volumes](#input\_volumes) | Additional volumes to add to the agent pod (raw Kubernetes volume spec, passed through to the Helm chart's volumes value) | `list(any)` | `[]` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_rendered_values"></a> [rendered\_values](#output\_rendered\_values) | The rendered Helm values passed to the agent chart. |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
