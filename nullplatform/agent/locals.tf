@@ -104,5 +104,8 @@ locals {
     aws_iam_role_arn     = var.cloud_provider == "aws" ? var.aws_iam_role_arn : ""
     init_scripts         = var.init_scripts
     service_account_name = var.service_account_name
+    init_containers      = var.init_containers
+    volumes              = var.volumes
+    volume_mounts        = var.volume_mounts
   })
 }

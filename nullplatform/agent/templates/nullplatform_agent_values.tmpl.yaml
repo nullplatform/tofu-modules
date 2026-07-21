@@ -35,3 +35,18 @@ initScripts:
   %{ endfor }
   %{ endif }
 
+  %{ if length(init_containers) > 0 }
+initContainers:
+${yamlencode(init_containers)}
+  %{ endif }
+
+  %{ if length(volumes) > 0 }
+volumes:
+${yamlencode(volumes)}
+  %{ endif }
+
+  %{ if length(volume_mounts) > 0 }
+volumeMounts:
+${yamlencode(volume_mounts)}
+  %{ endif }
+

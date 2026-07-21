@@ -234,3 +234,24 @@ variable "extra_envs" {
   type        = map(string)
   default     = {}
 }
+
+# Additional init containers to run before the main agent container (raw container spec, passed through to the chart's initContainers value)
+variable "init_containers" {
+  description = "Additional init containers to run before the main agent container (raw Kubernetes container spec, passed through to the Helm chart's initContainers value)"
+  type        = list(any)
+  default     = []
+}
+
+# Additional volumes to add to the agent pod (raw volume spec, passed through to the chart's volumes value)
+variable "volumes" {
+  description = "Additional volumes to add to the agent pod (raw Kubernetes volume spec, passed through to the Helm chart's volumes value)"
+  type        = list(any)
+  default     = []
+}
+
+# Additional volumeMounts to add to the main agent container (raw volumeMount spec, passed through to the chart's volumeMounts value)
+variable "volume_mounts" {
+  description = "Additional volumeMounts to add to the main agent container (raw Kubernetes volumeMount spec, passed through to the Helm chart's volumeMounts value)"
+  type        = list(any)
+  default     = []
+}

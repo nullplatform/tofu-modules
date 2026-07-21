@@ -156,6 +156,7 @@ resource "example_resource" "this" {
 | <a name="input_image_pull_secrets"></a> [image\_pull\_secrets](#input\_image\_pull\_secrets) | Image pull secrets configuration | `string` | `""` | no |
 | <a name="input_image_repository"></a> [image\_repository](#input\_image\_repository) | Container image repository for the agent. Defaults to the official nullplatform image. | `string` | `""` | no |
 | <a name="input_image_tag"></a> [image\_tag](#input\_image\_tag) | Image tag for the agent container image | `string` | n/a | yes |
+| <a name="input_init_containers"></a> [init\_containers](#input\_init\_containers) | Additional init containers to run before the main agent container (raw Kubernetes container spec, passed through to the Helm chart's initContainers value) | `list(any)` | `[]` | no |
 | <a name="input_init_scripts"></a> [init\_scripts](#input\_init\_scripts) | List of initialization scripts to execute during agent startup | `list(string)` | `[]` | no |
 | <a name="input_initial_ingress_path"></a> [initial\_ingress\_path](#input\_initial\_ingress\_path) | Defines the initial ingress path used when deploying the application for the first time. | `string` | `""` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Kubernetes namespace where the nullplatform agent will run | `string` | `"nullplatform-tools"` | no |
@@ -170,6 +171,8 @@ resource "example_resource" "this" {
 | <a name="input_service_template"></a> [service\_template](#input\_service\_template) | Specifies the name or reference of the scope service template to be used for deployment. | `string` | `""` | no |
 | <a name="input_tags_selectors"></a> [tags\_selectors](#input\_tags\_selectors) | Map of tags used to select and filter channels and agents | `map(string)` | n/a | yes |
 | <a name="input_use_account_slug"></a> [use\_account\_slug](#input\_use\_account\_slug) | Flag to determine whether to use account slug in resource naming | `string` | `""` | no |
+| <a name="input_volume_mounts"></a> [volume\_mounts](#input\_volume\_mounts) | Additional volumeMounts to add to the main agent container (raw Kubernetes volumeMount spec, passed through to the Helm chart's volumeMounts value) | `list(any)` | `[]` | no |
+| <a name="input_volumes"></a> [volumes](#input\_volumes) | Additional volumes to add to the agent pod (raw Kubernetes volume spec, passed through to the Helm chart's volumes value) | `list(any)` | `[]` | no |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
