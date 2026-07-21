@@ -181,3 +181,60 @@ variable "extra_visible_to_nrns" {
   type        = list(string)
   default     = []
 }
+
+################################################################################
+# Package (optional)
+################################################################################
+
+variable "package" {
+  description = <<-EOT
+    Register this scope definition as a versioned PACKAGE. When set, the module
+    publishes a package revision whose bill of materials pins the service
+    specification, every action specification, and the artifacts you list —
+    so scopes bind to an immutable revision and later template changes never
+    mutate what already runs.
+
+    artifacts: each entry does ONE of:
+      • register a new artifact revision — set `meta` (JSON-able object, e.g.
+        { registry = "ghcr.io", repository = "acme/img", digest = "sha256:…" });
+      • look up one registered elsewhere BY IDENTITY (no ids needed) — set
+        `lookup = true` + `meta` with the identity fields (e.g. registry +
+        repository; add digest/reference to pin a specific revision, otherwise
+        the latest revision is used);
+      • pin explicit ids — set `resource_id` + `resource_revision_id`.
+
+    Null (the default) keeps the classic module behavior — no package.
+  EOT
+  type = object({
+    slug       = optional(string)            # default: the service specification slug
+    name       = optional(string)            # default: var.service_spec_name
+    version    = string                      # semver of the revision this configuration publishes
+    default    = optional(bool, true)        # promote each published revision to the package default
+    tags       = optional(map(string), {})   # release tags: name => version (requires an API with the package release-tag routes)
+    visible_to = optional(list(string))      # default: [var.nrn]
+    artifacts = optional(list(object({
+      name                 = string
+      type                 = optional(string, "oci_image") # oci_image | oras_artifact | git_repository | blob
+      meta                 = optional(any)                 # register (lookup=false) or find (lookup=true)
+      lookup               = optional(bool, false)         # true: resolve an EXISTING artifact by meta identity
+      resource_id          = optional(string)              # …or pin explicit ids
+      resource_revision_id = optional(string)
+    })), [])
+  })
+  default = null
+
+  validation {
+    condition = var.package == null ? true : alltrue([
+      for a in var.package.artifacts :
+      (a.meta != null) != (a.resource_id != null && a.resource_revision_id != null)
+    ])
+    error_message = "Each package artifact must EITHER set `meta` (register or look up) OR both `resource_id` and `resource_revision_id` — not neither, not both."
+  }
+
+  validation {
+    condition = var.package == null ? true : alltrue([
+      for a in var.package.artifacts : a.lookup ? a.meta != null : true
+    ])
+    error_message = "`lookup = true` requires `meta` with the identity fields of the existing artifact."
+  }
+}
