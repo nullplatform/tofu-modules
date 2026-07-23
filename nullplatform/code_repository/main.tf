@@ -44,3 +44,25 @@ resource "nullplatform_provider_config" "azure" {
     }
   )
 }
+
+/* If the git_provider variable has the value bitbucket, create this resource */
+resource "nullplatform_provider_config" "bitbucket" {
+  count      = local.is_bitbucket ? 1 : 0
+  nrn        = replace(var.nrn, ":namespace=.*$", "")
+  type       = "bitbucket-configuration"
+  dimensions = var.dimensions
+  attributes = jsonencode({
+    "setup" : {
+      "workspace" : var.bitbucket_workspace,
+      "project_key" : var.bitbucket_project_key,
+      "email" : var.bitbucket_email,
+      "api_token" : var.bitbucket_api_token,
+      "installation_url" : var.bitbucket_installation_url,
+      "flavor" : var.bitbucket_flavor
+    },
+    "access" : {
+      "collaborators" : var.bitbucket_collaborators
+    },
+    }
+  )
+}

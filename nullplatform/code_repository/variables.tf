@@ -1,9 +1,9 @@
 variable "git_provider" {
-  description = "Git provider to use (GitHub or GitLab)."
+  description = "Git provider to use (GitHub, GitLab, Azure DevOps or Bitbucket)."
   type        = string
   validation {
-    condition     = contains(["github", "gitlab"], var.git_provider)
-    error_message = "git_provider must be either 'github' or 'gitlab'."
+    condition     = contains(["github", "gitlab", "azure", "bitbucket"], var.git_provider)
+    error_message = "git_provider must be one of 'github', 'gitlab', 'azure' or 'bitbucket'."
   }
 }
 
@@ -109,6 +109,70 @@ variable "azure_agent_pool" {
     condition     = var.git_provider != "azure" || var.azure_agent_pool != null
     error_message = "agent_pool is required when git_provider is 'azure'."
   }
+}
+
+# Bitbucket-specific variables
+variable "bitbucket_workspace" {
+  description = "Bitbucket workspace that owns the repositories."
+  type        = string
+  default     = null
+  validation {
+    condition     = var.git_provider != "bitbucket" || var.bitbucket_workspace != null
+    error_message = "bitbucket_workspace is required when git_provider is 'bitbucket'."
+  }
+}
+
+variable "bitbucket_project_key" {
+  description = "Bitbucket project key under which repositories are created."
+  type        = string
+  default     = null
+  validation {
+    condition     = var.git_provider != "bitbucket" || var.bitbucket_project_key != null
+    error_message = "bitbucket_project_key is required when git_provider is 'bitbucket'."
+  }
+}
+
+variable "bitbucket_email" {
+  description = "Email of the Bitbucket account used together with the API token for authentication."
+  type        = string
+  default     = null
+  validation {
+    condition     = var.git_provider != "bitbucket" || var.bitbucket_email != null
+    error_message = "bitbucket_email is required when git_provider is 'bitbucket'."
+  }
+}
+
+variable "bitbucket_api_token" {
+  description = "Bitbucket API token used to authenticate against the Bitbucket API."
+  type        = string
+  sensitive   = true
+  default     = null
+  validation {
+    condition     = var.git_provider != "bitbucket" || var.bitbucket_api_token != null
+    error_message = "bitbucket_api_token is required when git_provider is 'bitbucket'."
+  }
+}
+
+variable "bitbucket_installation_url" {
+  description = "Base URL for the Bitbucket integration. Defaults to Bitbucket Cloud."
+  type        = string
+  default     = "https://bitbucket.org"
+}
+
+variable "bitbucket_flavor" {
+  description = "Bitbucket flavor. Only 'cloud' is supported at this time; the field exists so Data Center can be added later without reworking callers."
+  type        = string
+  default     = "cloud"
+}
+
+variable "bitbucket_collaborators" {
+  description = "Collaborators to grant repository access to. Each entry has an id, a role and a type."
+  type = list(object({
+    id   = string
+    role = string
+    type = string
+  }))
+  default = []
 }
 
 

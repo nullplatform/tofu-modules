@@ -2,11 +2,11 @@
 
 ## Description
 
-Creates a Nullplatform service specification with associated action and link specifications by fetching JSON templates from GitHub, GitLab, or a local filesystem path
+Creates a Nullplatform service specification with associated action and link specifications by fetching JSON templates from GitHub, GitLab, Bitbucket, or a local filesystem path
 
 ## Architecture
 
-The module fetches service, action, and link spec templates via the `http` data source from GitHub raw content URLs or GitLab API v4 file endpoints (or reads them from local disk when git_provider is 'local'). The parsed JSON templates are fed into a `nullplatform_service_specification` resource, which is then referenced by `nullplatform_action_specification` and `nullplatform_link_specification` resources created via for_each loops over the available_actions and available_links lists. Authentication headers are conditionally set based on the git_provider value and an optional repository_token, and all created specifications expose their ID and slug as outputs.
+The module fetches service, action, and link spec templates via the `http` data source from GitHub raw content URLs, GitLab API v4 file endpoints, or Bitbucket Cloud raw file endpoints (or reads them from local disk when git_provider is 'local'). The provider-specific URL is selected with an explicit conditional chain keyed on git_provider. The parsed JSON templates are fed into a `nullplatform_service_specification` resource, which is then referenced by `nullplatform_action_specification` and `nullplatform_link_specification` resources created via for_each loops over the available_actions and available_links lists. Authentication headers are conditionally set based on the git_provider value and an optional repository_token, and all created specifications expose their ID and slug as outputs.
 
 ## Features
 
@@ -15,6 +15,7 @@ The module fetches service, action, and link spec templates via the `http` data 
 - Creates nullplatform_link_specification resources for each link template listed in available_links
 - Fetches spec templates from GitHub using raw content URLs with optional Bearer token authentication
 - Fetches spec templates from GitLab using API v4 file endpoints with URL-encoded paths and optional PAT authentication
+- Fetches spec templates from Bitbucket Cloud using raw file endpoints under the canonical repository URL; authenticates via HTTP Basic `email:api_token` when `bitbucket_email` is set (required for Atlassian API tokens) or via a Bearer token otherwise (for workspace/repository access tokens)
 - Supports local filesystem spec loading for offline or development workflows via a configurable local path
 - Controls service specification visibility by merging the primary NRN with additional NRNs via extra_visibile_to_nrns
 
@@ -43,21 +44,21 @@ resource "example_resource" "this" {
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_http"></a> [http](#requirement\_http) | ~> 3.0 |
 | <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.86 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_http"></a> [http](#provider\_http) | 3.5.0 |
 | <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.95 |
 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [nullplatform_action_specification.from_templates](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/action_specification) | resource |
 | [nullplatform_link_specification.from_templates](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/link_specification) | resource |
 | [nullplatform_service_specification.from_template](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/service_specification) | resource |
@@ -65,12 +66,13 @@ resource "example_resource" "this" {
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_available_actions"></a> [available\_actions](#input\_available\_actions) | List of action template names to fetch from the service spec repository | `list(string)` | `[]` | no |
 | <a name="input_available_links"></a> [available\_links](#input\_available\_links) | List of link template names to fetch from the service spec repository | `list(string)` | <pre>[<br/>  "connect"<br/>]</pre> | no |
+| <a name="input_bitbucket_email"></a> [bitbucket\_email](#input\_bitbucket\_email) | Bitbucket account email, used only when git\_provider = "bitbucket". Set it when repository\_token is an Atlassian API token: those authenticate ONLY via HTTP Basic "email:api\_token" and return 401 with a Bearer header. Leave null when repository\_token is a Bitbucket workspace/repository access token, which is sent as a Bearer token. | `string` | `null` | no |
 | <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Key-value pairs for dimensions to be associated with the service specification | `map(string)` | `{}` | no |
 | <a name="input_extra_visibile_to_nrns"></a> [extra\_visibile\_to\_nrns](#input\_extra\_visibile\_to\_nrns) | Additional NRNs that should have visibility to the created service specification | `list(string)` | `[]` | no |
-| <a name="input_git_provider"></a> [git\_provider](#input\_git\_provider) | Git provider to fetch service specs from. Supported values: "github", "gitlab", "local". | `string` | `"github"` | no |
+| <a name="input_git_provider"></a> [git\_provider](#input\_git\_provider) | Git provider to fetch service specs from. Supported values: "github", "gitlab", "bitbucket", "local". | `string` | `"github"` | no |
 | <a name="input_gitlab_host"></a> [gitlab\_host](#input\_gitlab\_host) | GitLab host. Only used when git\_provider = "gitlab". Override for self-hosted instances (e.g. "gitlab.mycompany.com"). | `string` | `"gitlab.com"` | no |
 | <a name="input_local_specs_path"></a> [local\_specs\_path](#input\_local\_specs\_path) | Absolute path to the local service directory containing specs/. Required when git\_provider = "local". The directory must contain specs/service-spec.json.tpl and optionally specs/links/*.json.tpl and specs/actions/*.json.tpl. | `string` | `null` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name (organization:account format) | `string` | n/a | yes |
@@ -84,7 +86,7 @@ resource "example_resource" "this" {
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_service_specification_id"></a> [service\_specification\_id](#output\_service\_specification\_id) | The ID of the created service specification |
 | <a name="output_service_specification_slug"></a> [service\_specification\_slug](#output\_service\_specification\_slug) | The slug of the created service specification |
 <!-- END_TF_DOCS -->
