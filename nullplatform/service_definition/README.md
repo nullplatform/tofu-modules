@@ -2,28 +2,27 @@
 
 ## Description
 
-Creates a Nullplatform service specification with associated action and link specifications by fetching JSON templates from GitHub, GitLab, Bitbucket, or a local filesystem path
+Provisions a Nullplatform service specification with its associated action and link specifications by fetching JSON templates from GitHub, GitLab, Bitbucket, or a local filesystem
 
 ## Architecture
 
-The module fetches service, action, and link spec templates via the `http` data source from GitHub raw content URLs, GitLab API v4 file endpoints, or Bitbucket Cloud raw file endpoints (or reads them from local disk when git_provider is 'local'). The provider-specific URL is selected with an explicit conditional chain keyed on git_provider. The parsed JSON templates are fed into a `nullplatform_service_specification` resource, which is then referenced by `nullplatform_action_specification` and `nullplatform_link_specification` resources created via for_each loops over the available_actions and available_links lists. Authentication headers are conditionally set based on the git_provider value and an optional repository_token, and all created specifications expose their ID and slug as outputs.
+The module uses data.http resources to fetch service-spec, action, and link JSON templates from a remote git provider (GitHub, GitLab, or Bitbucket) or reads them from local files when git_provider is set to 'local'. Parsed template data flows into a nullplatform_service_specification resource, which is created first and provides its ID to nullplatform_action_specification and nullplatform_link_specification resources via depends_on. Authentication headers are constructed per-provider in locals (Bearer for GitHub, PRIVATE-TOKEN for GitLab, Basic or Bearer for Bitbucket) and passed to each data.http request.
 
 ## Features
 
-- Creates a nullplatform_service_specification resource populated from a JSON template fetched remotely or read locally
-- Creates nullplatform_action_specification resources for each action template listed in available_actions
-- Creates nullplatform_link_specification resources for each link template listed in available_links
-- Fetches spec templates from GitHub using raw content URLs with optional Bearer token authentication
-- Fetches spec templates from GitLab using API v4 file endpoints with URL-encoded paths and optional PAT authentication
-- Fetches spec templates from Bitbucket Cloud using raw file endpoints under the canonical repository URL; authenticates via HTTP Basic `email:api_token` when `bitbucket_email` is set (required for Atlassian API tokens) or via a Bearer token otherwise (for workspace/repository access tokens)
-- Supports local filesystem spec loading for offline or development workflows via a configurable local path
-- Controls service specification visibility by merging the primary NRN with additional NRNs via extra_visibile_to_nrns
+- Creates a nullplatform_service_specification resource from a JSON template with configurable name, type, attributes, selectors, and dimensions
+- Fetches service, action, and link spec templates from GitHub, GitLab, Bitbucket, or local filesystem based on git_provider
+- Creates nullplatform_action_specification resources for each entry in available_actions list using fetched templates
+- Creates nullplatform_link_specification resources for each entry in available_links list using fetched templates
+- Configures provider-specific authentication headers including Bearer tokens, GitLab PRIVATE-TOKEN, and Bitbucket HTTP Basic auth
+- Supports visibility scoping via NRN list combining the required nrn with optional extra_visibile_to_nrns
+- Outputs service specification ID and slug for use by downstream modules
 
 ## Basic Usage
 
 ```hcl
 module "service_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v6.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v6.7.0"
 
   nrn          = "your-nrn"
   service_name = "your-service-name"
@@ -44,21 +43,21 @@ resource "example_resource" "this" {
 ## Requirements
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="requirement_http"></a> [http](#requirement\_http) | ~> 3.0 |
 | <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.86 |
 
 ## Providers
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="provider_http"></a> [http](#provider\_http) | 3.5.0 |
 | <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.95 |
 
 ## Resources
 
 | Name | Type |
-| ---- | ---- |
+|------|------|
 | [nullplatform_action_specification.from_templates](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/action_specification) | resource |
 | [nullplatform_link_specification.from_templates](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/link_specification) | resource |
 | [nullplatform_service_specification.from_template](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/service_specification) | resource |
@@ -66,7 +65,7 @@ resource "example_resource" "this" {
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-| ---- | ----------- | ---- | ------- | :------: |
+|------|-------------|------|---------|:--------:|
 | <a name="input_available_actions"></a> [available\_actions](#input\_available\_actions) | List of action template names to fetch from the service spec repository | `list(string)` | `[]` | no |
 | <a name="input_available_links"></a> [available\_links](#input\_available\_links) | List of link template names to fetch from the service spec repository | `list(string)` | <pre>[<br/>  "connect"<br/>]</pre> | no |
 | <a name="input_bitbucket_email"></a> [bitbucket\_email](#input\_bitbucket\_email) | Bitbucket account email, used only when git\_provider = "bitbucket". Set it when repository\_token is an Atlassian API token: those authenticate ONLY via HTTP Basic "email:api\_token" and return 401 with a Bearer header. Leave null when repository\_token is a Bitbucket workspace/repository access token, which is sent as a Bearer token. | `string` | `null` | no |
@@ -86,7 +85,7 @@ resource "example_resource" "this" {
 ## Outputs
 
 | Name | Description |
-| ---- | ----------- |
+|------|-------------|
 | <a name="output_service_specification_id"></a> [service\_specification\_id](#output\_service\_specification\_id) | The ID of the created service specification |
 | <a name="output_service_specification_slug"></a> [service\_specification\_slug](#output\_service\_specification\_slug) | The slug of the created service specification |
 <!-- END_TF_DOCS -->
@@ -94,16 +93,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "service_definition",
-  "description": "Creates a Nullplatform service specification with associated action and link specifications by fetching JSON templates from GitHub, GitLab, or a local filesystem path",
-  "architecture": "The module fetches service, action, and link spec templates via the `http` data source from GitHub raw content URLs or GitLab API v4 file endpoints (or reads them from local disk when git_provider is 'local'). The parsed JSON templates are fed into a `nullplatform_service_specification` resource, which is then referenced by `nullplatform_action_specification` and `nullplatform_link_specification` resources created via for_each loops over the available_actions and available_links lists. Authentication headers are conditionally set based on the git_provider value and an optional repository_token, and all created specifications expose their ID and slug as outputs.",
+  "description": "Provisions a Nullplatform service specification with its associated action and link specifications by fetching JSON templates from GitHub, GitLab, Bitbucket, or a local filesystem",
+  "architecture": "The module uses data.http resources to fetch service-spec, action, and link JSON templates from a remote git provider (GitHub, GitLab, or Bitbucket) or reads them from local files when git_provider is set to 'local'. Parsed template data flows into a nullplatform_service_specification resource, which is created first and provides its ID to nullplatform_action_specification and nullplatform_link_specification resources via depends_on. Authentication headers are constructed per-provider in locals (Bearer for GitHub, PRIVATE-TOKEN for GitLab, Basic or Bearer for Bitbucket) and passed to each data.http request.",
   "features": [
-    "Creates a nullplatform_service_specification resource populated from a JSON template fetched remotely or read locally",
-    "Creates nullplatform_action_specification resources for each action template listed in available_actions",
-    "Creates nullplatform_link_specification resources for each link template listed in available_links",
-    "Fetches spec templates from GitHub using raw content URLs with optional Bearer token authentication",
-    "Fetches spec templates from GitLab using API v4 file endpoints with URL-encoded paths and optional PAT authentication",
-    "Supports local filesystem spec loading for offline or development workflows via a configurable local path",
-    "Controls service specification visibility by merging the primary NRN with additional NRNs via extra_visibile_to_nrns"
+    "Creates a nullplatform_service_specification resource from a JSON template with configurable name, type, attributes, selectors, and dimensions",
+    "Fetches service, action, and link spec templates from GitHub, GitLab, Bitbucket, or local filesystem based on git_provider",
+    "Creates nullplatform_action_specification resources for each entry in available_actions list using fetched templates",
+    "Creates nullplatform_link_specification resources for each entry in available_links list using fetched templates",
+    "Configures provider-specific authentication headers including Bearer tokens, GitLab PRIVATE-TOKEN, and Bitbucket HTTP Basic auth",
+    "Supports visibility scoping via NRN list combining the required nrn with optional extra_visibile_to_nrns",
+    "Outputs service specification ID and slug for use by downstream modules"
   ],
   "inputs": [
     {
@@ -167,6 +166,11 @@ resource "example_resource" "this" {
       "required": false
     },
     {
+      "name": "bitbucket_email",
+      "description": "Bitbucket account email, used only when git_provider = \\",
+      "required": false
+    },
+    {
       "name": "extra_visibile_to_nrns",
       "description": "Additional NRNs that should have visibility to the created service specification",
       "required": false
@@ -181,6 +185,6 @@ resource "example_resource" "this" {
     "service_specification_id",
     "service_specification_slug"
   ],
-  "hash": "d2c5d76a9178fb0ffc8aaaff485fa6c1"
+  "hash": "0a2d08fcd9c6399fe76d2cb845333039"
 }
 END_AI_METADATA -->
