@@ -3,6 +3,10 @@ locals {
   # Build overrides flag only when override feature is enabled
   overrides_flag = var.enabled_override ? "--overrides-path=${var.override_repo_path}${var.overrides_service_path}" : ""
 
+  # Worker-orchestrator entrypoint: the package's baked worker entrypoint. Mirrors
+  # `np package publish` (bakedEntrypoint = "/app/packages/<slug>/entrypoint").
+  worker_entrypoint = var.entrypoint != "" ? var.entrypoint : "/app/packages/${var.package_slug}/entrypoint"
+
   base_filters = can(local.notification_channel_def.filters) ? local.notification_channel_def.filters : null
 
   # Produce a JSON string to avoid Terraform's object-shape type-consistency constraint.

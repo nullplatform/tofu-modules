@@ -105,4 +105,9 @@ locals {
     init_scripts         = var.init_scripts
     service_account_name = var.service_account_name
   })
+
+  # Worker-orchestration values, merged as a second Helm values layer so the
+  # nested shape (allowedRegistries/rules/pins) passes through verbatim without
+  # hand-rendering YAML. Omitted entirely when var.worker is null.
+  worker_values = var.worker != null ? yamlencode({ worker = var.worker }) : null
 }

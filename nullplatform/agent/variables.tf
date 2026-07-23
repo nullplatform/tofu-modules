@@ -234,3 +234,23 @@ variable "extra_envs" {
   type        = map(string)
   default     = {}
 }
+
+variable "worker" {
+  description = <<-EOT
+    Worker-orchestration config, passed straight through to the agent chart's
+    `worker` block: backend, security, allowedRegistries (the deny-by-default
+    registry guardrail), defaults (config for every worker), rules (config for a
+    matched class of dynamic workers), and pins (exact known workers). See the
+    nullplatform-agent chart values for the full shape. null = chart defaults.
+
+    Example:
+      worker = {
+        backend           = "kubernetes"
+        allowedRegistries = ["ghcr.io/your-org/*"]
+        defaults          = { imagePullSecrets = ["ghcr-pull"] }
+        rules             = [{ match = { package = "heavy-*" }, resources = { limits = { memory = "2Gi" } } }]
+      }
+  EOT
+  type        = any
+  default     = null
+}

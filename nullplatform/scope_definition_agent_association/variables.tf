@@ -5,6 +5,30 @@ variable "enabled_override" {
   default     = false
 }
 
+variable "worker_orchestrator" {
+  description = <<-EOT
+    Emit a worker-orchestrator (package-exec) channel instead of the legacy
+    git-clone exec channel. When true, the channel routes package-exec commands
+    to an agent that spawns the package's worker image and runs its baked
+    entrypoint — matching what `np package publish` registers. Requires
+    package_slug; set tags_selectors to select the agent (e.g. {package = slug}).
+  EOT
+  type        = bool
+  default     = false
+}
+
+variable "package_slug" {
+  description = "Package/scope slug — the package-exec NP_PLUGIN and default entrypoint path. Required when worker_orchestrator = true."
+  type        = string
+  default     = ""
+}
+
+variable "entrypoint" {
+  description = "Override the worker's baked entrypoint path. Defaults to /app/packages/<package_slug>/entrypoint."
+  type        = string
+  default     = ""
+}
+
 variable "overrides_service_path" {
   description = "Local filesystem path to the directory containing override configurations"
   type        = string
