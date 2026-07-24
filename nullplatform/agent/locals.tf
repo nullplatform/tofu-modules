@@ -72,9 +72,7 @@ locals {
       PRIVATE_DOMAIN       = var.private_domain
     }
 
-    # AZURE_CLIENT_SECRET is only wired for the service-principal path. With
-    # Workload Identity there is no secret — the AKS webhook injects a federated
-    # token — so it is omitted (and would be null anyway).
+    # Omit AZURE_CLIENT_SECRET under Workload Identity: the AKS webhook injects a federated token, so there is no secret to pass.
     azure = merge(
       {
         PRIVATE_HOSTED_ZONE_RG = var.private_hosted_zone_rg
@@ -85,9 +83,7 @@ locals {
         AZURE_CLIENT_ID        = var.azure_client_id
         AZURE_TENANT_ID        = var.azure_tenant_id
       },
-      var.azure_use_workload_identity ? {} : {
-        AZURE_CLIENT_SECRET = var.azure_client_secret
-      }
+      var.azure_use_workload_identity ? {} : { AZURE_CLIENT_SECRET = var.azure_client_secret },
     )
 
     oci = {
@@ -102,8 +98,7 @@ locals {
     var.extra_envs,
   )
 
-  # Client ID to annotate the ServiceAccount with for AKS Workload Identity
-  # (empty unless the azure workload-identity path is active).
+  # Client ID to annotate the ServiceAccount with for AKS Workload Identity (empty unless that path is active)
   azure_workload_identity_client_id = var.cloud_provider == "azure" && var.azure_use_workload_identity ? var.azure_client_id : ""
 
   # Template único y simple
