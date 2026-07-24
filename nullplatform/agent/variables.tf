@@ -135,6 +135,13 @@ variable "azure_use_workload_identity" {
   default     = false
 }
 
+# Resource ID of the Azure federated identity credential (enforces ordering under workload identity)
+variable "azure_federated_credential_id" {
+  description = "Resource ID of the Azure federated identity credential for the agent (required when cloud_provider is 'azure' and azure_use_workload_identity is true). Pass the federated credential resource/module id output so the Helm release waits until the credential exists before the pod attempts its token exchange."
+  type        = string
+  default     = ""
+}
+
 # Azure subscription ID (required when cloud_provider is 'azure')
 variable "azure_subscription_id" {
   description = "Azure subscription ID"

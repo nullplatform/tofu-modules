@@ -99,22 +99,23 @@ identity credential's subject (`system:serviceaccount:<namespace>:<name>`).
 module "agent" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.7.0"
 
-  api_key                     = "your-api-key"
-  azure_use_workload_identity = true  # secret-less; no azure_client_secret needed
-  azure_client_id             = "your-azure-client-id"  # Required when cloud_provider = "azure"
-  azure_resource_group        = "your-azure-resource-group"  # Required when cloud_provider = "azure"
-  azure_subscription_id       = "your-azure-subscription-id"  # Required when cloud_provider = "azure"
-  azure_tenant_id             = "your-azure-tenant-id"  # Required when cloud_provider = "azure"
-  cloud_provider              = "azure"
-  cluster_name                = "your-cluster-name"
-  image_tag                   = "your-image-tag"
-  namespace                   = "nullplatform-tools"  # must match the federated credential subject
-  service_account_name        = "nullplatform-agent"  # must match the federated credential subject
-  nrn                         = "your-nrn"
-  private_gateway_name        = "your-private-gateway-name"  # Required when cloud_provider = "azure"
-  private_hosted_zone_rg      = "your-private-hosted-zone-rg"  # Required when cloud_provider = "azure"
-  public_gateway_name         = "your-public-gateway-name"  # Required when cloud_provider = "azure"
-  tags_selectors              = "your-tags-selectors"
+  api_key                       = "your-api-key"
+  azure_use_workload_identity   = true  # secret-less; no azure_client_secret needed
+  azure_client_id               = "your-azure-client-id"  # Required when cloud_provider = "azure"
+  azure_federated_credential_id = module.requirements.federated_credential_id  # enforces ordering
+  azure_resource_group          = "your-azure-resource-group"  # Required when cloud_provider = "azure"
+  azure_subscription_id         = "your-azure-subscription-id"  # Required when cloud_provider = "azure"
+  azure_tenant_id               = "your-azure-tenant-id"  # Required when cloud_provider = "azure"
+  cloud_provider                = "azure"
+  cluster_name                  = "your-cluster-name"
+  image_tag                     = "your-image-tag"
+  namespace                     = "nullplatform-tools"  # must match the federated credential subject
+  service_account_name          = "nullplatform-agent"  # must match the federated credential subject
+  nrn                           = "your-nrn"
+  private_gateway_name          = "your-private-gateway-name"  # Required when cloud_provider = "azure"
+  private_hosted_zone_rg        = "your-private-hosted-zone-rg"  # Required when cloud_provider = "azure"
+  public_gateway_name           = "your-public-gateway-name"  # Required when cloud_provider = "azure"
+  tags_selectors                = "your-tags-selectors"
 }
 ```
 
@@ -175,6 +176,7 @@ resource "example_resource" "this" {
 | <a name="input_aws_iam_role_arn"></a> [aws\_iam\_role\_arn](#input\_aws\_iam\_role\_arn) | ARN of the AWS IAM role assigned to the agent | `string` | `""` | no |
 | <a name="input_azure_client_id"></a> [azure\_client\_id](#input\_azure\_client\_id) | Azure client ID for authentication | `string` | `null` | no |
 | <a name="input_azure_client_secret"></a> [azure\_client\_secret](#input\_azure\_client\_secret) | Azure client secret for authentication | `string` | `null` | no |
+| <a name="input_azure_federated_credential_id"></a> [azure\_federated\_credential\_id](#input\_azure\_federated\_credential\_id) | Resource ID of the Azure federated identity credential for the agent (required when cloud\_provider is 'azure' and azure\_use\_workload\_identity is true). Pass the federated credential resource/module id output so the Helm release waits until the credential exists before the pod attempts its token exchange. | `string` | `""` | no |
 | <a name="input_azure_resource_group"></a> [azure\_resource\_group](#input\_azure\_resource\_group) | Azure resource group name | `string` | `null` | no |
 | <a name="input_azure_subscription_id"></a> [azure\_subscription\_id](#input\_azure\_subscription\_id) | Azure subscription ID | `string` | `null` | no |
 | <a name="input_azure_tenant_id"></a> [azure\_tenant\_id](#input\_azure\_tenant\_id) | Azure tenant ID | `string` | `null` | no |
@@ -337,6 +339,11 @@ resource "example_resource" "this" {
     {
       "name": "azure_use_workload_identity",
       "description": "Use AKS Workload Identity (federated managed identity) instead of a service-principal client secret. When true, azure_client_secret is not required; the ServiceAccount is annotated with azure.workload.identity/client-id and the pod is labeled azure.workload.identity/use=true so the AKS webhook injects a federated token.",
+      "required": false
+    },
+    {
+      "name": "azure_federated_credential_id",
+      "description": "Resource ID of the Azure federated identity credential for the agent (required when cloud_provider is 'azure' and azure_use_workload_identity is true). Pass the federated credential resource/module id output so the Helm release waits until the credential exists before the pod attempts its token exchange.",
       "required": false
     },
     {

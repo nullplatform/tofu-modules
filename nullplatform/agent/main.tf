@@ -21,8 +21,12 @@ resource "terraform_data" "cross_variable_validation" {
       error_message = "azure_client_secret is required when cloud_provider is 'azure' and azure_use_workload_identity is false."
     }
     precondition {
-      condition     = !(var.cloud_provider == "azure" && var.azure_use_workload_identity) || trimspace(coalesce(var.azure_client_id, "")) != ""
+      condition     = !(var.cloud_provider == "azure" && var.azure_use_workload_identity) || try(trimspace(var.azure_client_id), "") != ""
       error_message = "azure_client_id must be a non-empty client ID when azure_use_workload_identity is true (it becomes the ServiceAccount's azure.workload.identity/client-id annotation)."
+    }
+    precondition {
+      condition     = !(var.cloud_provider == "azure" && var.azure_use_workload_identity) || length(var.azure_federated_credential_id) > 0
+      error_message = "azure_federated_credential_id is required when cloud_provider is 'azure' and azure_use_workload_identity is true. Pass the federated identity credential's id to enforce dependency ordering."
     }
     precondition {
       condition     = var.cloud_provider != "azure" || var.azure_subscription_id != null
@@ -75,6 +79,12 @@ resource "helm_release" "agent" {
   max_history       = 10
 
   values = [local.nullplatform_agent_values]
+
+  # Gate the release on the cross-variable validation. Because that resource
+  # references var.azure_federated_credential_id, wiring the caller's federated
+  # credential id into it makes the Helm release wait until the credential
+  # exists before the pod attempts its workload-identity token exchange.
+  depends_on = [terraform_data.cross_variable_validation]
 
   lifecycle {
     replace_triggered_by = [terraform_data.api_key_trigger]
