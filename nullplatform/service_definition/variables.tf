@@ -6,10 +6,10 @@ variable "nrn" {
 variable "git_provider" {
   type        = string
   default     = "github"
-  description = "Git provider to fetch service specs from. Supported values: \"github\", \"gitlab\", \"local\"."
+  description = "Git provider to fetch service specs from. Supported values: \"github\", \"gitlab\", \"bitbucket\", \"local\"."
   validation {
-    condition     = contains(["github", "gitlab", "local"], var.git_provider)
-    error_message = "git_provider must be \"github\", \"gitlab\", or \"local\"."
+    condition     = contains(["github", "gitlab", "bitbucket", "local"], var.git_provider)
+    error_message = "git_provider must be \"github\", \"gitlab\", \"bitbucket\", or \"local\"."
   }
 }
 
@@ -70,6 +70,12 @@ variable "gitlab_host" {
   type        = string
   default     = "gitlab.com"
   description = "GitLab host. Only used when git_provider = \"gitlab\". Override for self-hosted instances (e.g. \"gitlab.mycompany.com\")."
+}
+
+variable "bitbucket_email" {
+  type        = string
+  default     = null
+  description = "Bitbucket account email, used only when git_provider = \"bitbucket\". Set it when repository_token is an Atlassian API token: those authenticate ONLY via HTTP Basic \"email:api_token\" and return 401 with a Bearer header. Leave null when repository_token is a Bitbucket workspace/repository access token, which is sent as a Bearer token."
 }
 
 variable "extra_visibile_to_nrns" {

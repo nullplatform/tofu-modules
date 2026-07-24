@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.7.0](https://github.com/nullplatform/tofu-modules/compare/v6.6.0...v6.7.0) (2026-07-23)
+
+
+### Features
+
+* add Bitbucket support to code_repository and service_definition modules ([#445](https://github.com/nullplatform/tofu-modules/issues/445)) ([2b680b9](https://github.com/nullplatform/tofu-modules/commit/2b680b952238a304f9c15cba82c5e9fa25180d12))
+
 ## [6.6.0](https://github.com/nullplatform/tofu-modules/compare/v6.5.0...v6.6.0) (2026-07-16)
 
 
