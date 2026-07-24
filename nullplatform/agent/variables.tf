@@ -120,12 +120,19 @@ variable "azure_client_id" {
   default     = null
 }
 
-# Azure client secret for authentication (required when cloud_provider is 'azure')
+# Azure client secret for authentication (required when cloud_provider is 'azure' and azure_use_workload_identity is false)
 variable "azure_client_secret" {
   description = "Azure client secret for authentication"
   type        = string
   default     = null
   sensitive   = true
+}
+
+# Use AKS Workload Identity instead of a service-principal client secret
+variable "azure_use_workload_identity" {
+  description = "Use AKS Workload Identity (federated managed identity) instead of a service-principal client secret. When true, azure_client_secret is not required; the ServiceAccount is annotated with azure.workload.identity/client-id and the pod is labeled azure.workload.identity/use=true so the AKS webhook injects a federated token."
+  type        = bool
+  default     = false
 }
 
 # Azure subscription ID (required when cloud_provider is 'azure')

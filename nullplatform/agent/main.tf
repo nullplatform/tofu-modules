@@ -17,8 +17,8 @@ resource "terraform_data" "cross_variable_validation" {
       error_message = "azure_client_id is required when cloud_provider is 'azure'."
     }
     precondition {
-      condition     = var.cloud_provider != "azure" || var.azure_client_secret != null
-      error_message = "azure_client_secret is required when cloud_provider is 'azure'."
+      condition     = var.cloud_provider != "azure" || var.azure_use_workload_identity || var.azure_client_secret != null
+      error_message = "azure_client_secret is required when cloud_provider is 'azure' and azure_use_workload_identity is false."
     }
     precondition {
       condition     = var.cloud_provider != "azure" || var.azure_subscription_id != null

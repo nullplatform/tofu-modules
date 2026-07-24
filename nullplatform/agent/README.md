@@ -87,6 +87,37 @@ module "agent" {
 }
 ```
 
+### Usage with Azure Cloud Provider (Workload Identity)
+
+Secret-less alternative for AKS: set `azure_use_workload_identity = true` and omit
+`azure_client_secret`. The module annotates the agent ServiceAccount with the
+client ID and labels the pod so the AKS workload-identity webhook injects a
+federated token. The ServiceAccount name/namespace must match the federated
+identity credential's subject (`system:serviceaccount:<namespace>:<name>`).
+
+```hcl
+module "agent" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.7.0"
+
+  api_key                     = "your-api-key"
+  azure_use_workload_identity = true  # secret-less; no azure_client_secret needed
+  azure_client_id             = "your-azure-client-id"  # Required when cloud_provider = "azure"
+  azure_resource_group        = "your-azure-resource-group"  # Required when cloud_provider = "azure"
+  azure_subscription_id       = "your-azure-subscription-id"  # Required when cloud_provider = "azure"
+  azure_tenant_id             = "your-azure-tenant-id"  # Required when cloud_provider = "azure"
+  cloud_provider              = "azure"
+  cluster_name                = "your-cluster-name"
+  image_tag                   = "your-image-tag"
+  namespace                   = "nullplatform-tools"  # must match the federated credential subject
+  service_account_name        = "nullplatform-agent"  # must match the federated credential subject
+  nrn                         = "your-nrn"
+  private_gateway_name        = "your-private-gateway-name"  # Required when cloud_provider = "azure"
+  private_hosted_zone_rg      = "your-private-hosted-zone-rg"  # Required when cloud_provider = "azure"
+  public_gateway_name         = "your-public-gateway-name"  # Required when cloud_provider = "azure"
+  tags_selectors              = "your-tags-selectors"
+}
+```
+
 ### Usage with OCI Cloud Provider
 
 ```hcl
@@ -147,6 +178,7 @@ resource "example_resource" "this" {
 | <a name="input_azure_resource_group"></a> [azure\_resource\_group](#input\_azure\_resource\_group) | Azure resource group name | `string` | `null` | no |
 | <a name="input_azure_subscription_id"></a> [azure\_subscription\_id](#input\_azure\_subscription\_id) | Azure subscription ID | `string` | `null` | no |
 | <a name="input_azure_tenant_id"></a> [azure\_tenant\_id](#input\_azure\_tenant\_id) | Azure tenant ID | `string` | `null` | no |
+| <a name="input_azure_use_workload_identity"></a> [azure\_use\_workload\_identity](#input\_azure\_use\_workload\_identity) | Use AKS Workload Identity (federated managed identity) instead of a service-principal client secret. When true, azure\_client\_secret is not required; the ServiceAccount is annotated with azure.workload.identity/client-id and the pod is labeled azure.workload.identity/use=true so the AKS webhook injects a federated token. | `bool` | `false` | no |
 | <a name="input_blue_green_ingress_path"></a> [blue\_green\_ingress\_path](#input\_blue\_green\_ingress\_path) | Specifies the ingress path used for blue-green deployments to route traffic to the new version. | `string` | `""` | no |
 | <a name="input_cloud_provider"></a> [cloud\_provider](#input\_cloud\_provider) | Cloud provider to use (aws, gcp, or azure) | `string` | n/a | yes |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the EKS cluster where the nullplatform agent will be deployed | `string` | n/a | yes |
@@ -300,6 +332,11 @@ resource "example_resource" "this" {
     {
       "name": "azure_tenant_id",
       "description": "Azure tenant ID",
+      "required": false
+    },
+    {
+      "name": "azure_use_workload_identity",
+      "description": "Use AKS Workload Identity (federated managed identity) instead of a service-principal client secret. When true, azure_client_secret is not required; the ServiceAccount is annotated with azure.workload.identity/client-id and the pod is labeled azure.workload.identity/use=true so the AKS webhook injects a federated token.",
       "required": false
     },
     {

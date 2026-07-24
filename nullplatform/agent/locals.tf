@@ -72,16 +72,23 @@ locals {
       PRIVATE_DOMAIN       = var.private_domain
     }
 
-    azure = {
-      PRIVATE_HOSTED_ZONE_RG = var.private_hosted_zone_rg
-      PRIVATE_GATEWAY_NAME   = var.private_gateway_name
-      PUBLIC_GATEWAY_NAME    = var.public_gateway_name
-      RESOURCE_GROUP         = var.azure_resource_group
-      AZURE_SUBSCRIPTION_ID  = var.azure_subscription_id
-      AZURE_CLIENT_SECRET    = var.azure_client_secret
-      AZURE_CLIENT_ID        = var.azure_client_id
-      AZURE_TENANT_ID        = var.azure_tenant_id
-    }
+    # AZURE_CLIENT_SECRET is only wired for the service-principal path. With
+    # Workload Identity there is no secret — the AKS webhook injects a federated
+    # token — so it is omitted (and would be null anyway).
+    azure = merge(
+      {
+        PRIVATE_HOSTED_ZONE_RG = var.private_hosted_zone_rg
+        PRIVATE_GATEWAY_NAME   = var.private_gateway_name
+        PUBLIC_GATEWAY_NAME    = var.public_gateway_name
+        RESOURCE_GROUP         = var.azure_resource_group
+        AZURE_SUBSCRIPTION_ID  = var.azure_subscription_id
+        AZURE_CLIENT_ID        = var.azure_client_id
+        AZURE_TENANT_ID        = var.azure_tenant_id
+      },
+      var.azure_use_workload_identity ? {} : {
+        AZURE_CLIENT_SECRET = var.azure_client_secret
+      }
+    )
 
     oci = {
       PRIVATE_GATEWAY_NAME = var.private_gateway_name
@@ -95,14 +102,19 @@ locals {
     var.extra_envs,
   )
 
+  # Client ID to annotate the ServiceAccount with for AKS Workload Identity
+  # (empty unless the azure workload-identity path is active).
+  azure_workload_identity_client_id = var.cloud_provider == "azure" && var.azure_use_workload_identity ? var.azure_client_id : ""
+
   # Template único y simple
   nullplatform_agent_values = templatefile("${path.module}/templates/nullplatform_agent_values.tmpl.yaml", {
-    args                 = local.all_args
-    config_values        = local.all_config
-    image_tag            = var.image_tag
-    image_repository     = var.image_repository
-    aws_iam_role_arn     = var.cloud_provider == "aws" ? var.aws_iam_role_arn : ""
-    init_scripts         = var.init_scripts
-    service_account_name = var.service_account_name
+    args                              = local.all_args
+    config_values                     = local.all_config
+    image_tag                         = var.image_tag
+    image_repository                  = var.image_repository
+    aws_iam_role_arn                  = var.cloud_provider == "aws" ? var.aws_iam_role_arn : ""
+    azure_workload_identity_client_id = local.azure_workload_identity_client_id
+    init_scripts                      = var.init_scripts
+    service_account_name              = var.service_account_name
   })
 }
