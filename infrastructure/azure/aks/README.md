@@ -6,7 +6,7 @@ Deploys an Azure Kubernetes Service (AKS) cluster with system and user node pool
 
 ## Architecture
 
-The module wraps the Azure/aks/azurerm community module (version 11.0.0) and uses azurerm_client_config data source to retrieve the current tenant ID for AAD RBAC configuration. It provisions an AKS cluster with a system node pool and a separate autoscaling user node pool (nodepool), both attached to the provided vnet_subnet_id. The cluster has OIDC issuer and Workload Identity enabled, and the module conditionally attaches an ACR pull role by passing acr_id into attached_acr_id_map when provided. Outputs expose the cluster endpoint, CA certificate, client credentials, OIDC issuer URL, and node resource group for downstream consumption.
+The module wraps the Azure/aks/azurerm community module (version 11.0.0) and uses azurerm_client_config data source to retrieve the current tenant ID for AAD RBAC configuration. It provisions an AKS cluster with a system node pool and a separate autoscaling user node pool (nodepool), both attached to the provided vnet_subnet_id. The cluster has OIDC issuer and Workload Identity enabled, and the module attaches an ACR pull role for acr_id; by default (attach_acr null) it attaches whenever acr_id is non-null, and setting attach_acr to true keeps the assignment plan-stable when acr_id is only known after apply. Outputs expose the cluster endpoint, CA certificate, client credentials, OIDC issuer URL, and node resource group for downstream consumption.
 
 ## Features
 
@@ -14,7 +14,7 @@ The module wraps the Azure/aks/azurerm community module (version 11.0.0) and use
 - Enables OIDC issuer and Workload Identity on the cluster for pod-level Azure identity federation
 - Configures Azure RBAC and AAD tenant integration using the current client tenant ID from azurerm_client_config
 - Assigns Network Contributor role to the AKS identity on the provided VNet subnet for CNI networking
-- Optionally attaches an Azure Container Registry by granting AcrPull role when acr_id is provided
+- Attaches an Azure Container Registry by granting AcrPull role on acr_id; defaults to attaching whenever acr_id is non-null (attach_acr null), with attach_acr=true keeping the assignment plan-stable when acr_id is known only after apply
 - Supports private cluster mode and API server authorized IP range restrictions for network security
 - Exposes cluster credentials, CA certificate, OIDC issuer URL, and node resource group as outputs
 
@@ -45,32 +45,35 @@ resource "example_resource" "this" {
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.6 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 4.0 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.41.0 |
+| <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_aks"></a> [aks](#module\_aks) | Azure/aks/azurerm | 11.0.0 |
 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
+| [terraform_data.validations](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_acr_id"></a> [acr\_id](#input\_acr\_id) | The ID of the Azure Container Registry. If provided, AKS will be granted AcrPull role to pull images. | `string` | `null` | no |
+| <a name="input_attach_acr"></a> [attach\_acr](#input\_attach\_acr) | Whether to grant AKS the AcrPull role on acr\_id. Null (default) preserves the legacy behaviour of attaching whenever acr\_id is non-null. Set to true for a greenfield single-apply where acr\_id is known only after apply (keeps the for\_each key set plan-stable); set to false to disable. | `bool` | `null` | no |
 | <a name="input_authorized_ip_ranges"></a> [authorized\_ip\_ranges](#input\_authorized\_ip\_ranges) | The set of authorized IP ranges allowed to access the Kubernetes API server | `set(string)` | `null` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The name of the AKS cluster | `string` | n/a | yes |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment name used for tagging and naming purposes | `string` | `"nullplatform"` | no |
@@ -88,7 +91,7 @@ resource "example_resource" "this" {
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_admin_client_certificate"></a> [admin\_client\_certificate](#output\_admin\_client\_certificate) | The admin client certificate for authentication |
 | <a name="output_admin_client_key"></a> [admin\_client\_key](#output\_admin\_client\_key) | The admin client key for authentication |
 | <a name="output_admin_cluster_ca_certificate"></a> [admin\_cluster\_ca\_certificate](#output\_admin\_cluster\_ca\_certificate) | The admin cluster CA certificate in base64 |
@@ -105,13 +108,13 @@ resource "example_resource" "this" {
 {
   "name": "aks",
   "description": "Deploys an Azure Kubernetes Service (AKS) cluster with system and user node pools, OIDC/Workload Identity, and optional ACR integration using the official Azure/aks/azurerm Terraform module",
-  "architecture": "The module wraps the Azure/aks/azurerm community module (version 11.0.0) and uses azurerm_client_config data source to retrieve the current tenant ID for AAD RBAC configuration. It provisions an AKS cluster with a system node pool and a separate autoscaling user node pool (nodepool), both attached to the provided vnet_subnet_id. The cluster has OIDC issuer and Workload Identity enabled, and the module conditionally attaches an ACR pull role by passing acr_id into attached_acr_id_map when provided. Outputs expose the cluster endpoint, CA certificate, client credentials, OIDC issuer URL, and node resource group for downstream consumption.",
+  "architecture": "The module wraps the Azure/aks/azurerm community module (version 11.0.0) and uses azurerm_client_config data source to retrieve the current tenant ID for AAD RBAC configuration. It provisions an AKS cluster with a system node pool and a separate autoscaling user node pool (nodepool), both attached to the provided vnet_subnet_id. The cluster has OIDC issuer and Workload Identity enabled, and the module attaches an ACR pull role for acr_id; by default (attach_acr null) it attaches whenever acr_id is non-null, and setting attach_acr to true keeps the assignment plan-stable when acr_id is only known after apply. Outputs expose the cluster endpoint, CA certificate, client credentials, OIDC issuer URL, and node resource group for downstream consumption.",
   "features": [
     "Creates an AKS cluster with a dedicated system node pool and a separate autoscaling user node pool spanning three availability zones",
     "Enables OIDC issuer and Workload Identity on the cluster for pod-level Azure identity federation",
     "Configures Azure RBAC and AAD tenant integration using the current client tenant ID from azurerm_client_config",
     "Assigns Network Contributor role to the AKS identity on the provided VNet subnet for CNI networking",
-    "Optionally attaches an Azure Container Registry by granting AcrPull role when acr_id is provided",
+    "Attaches an Azure Container Registry by granting AcrPull role on acr_id; defaults to attaching whenever acr_id is non-null (attach_acr null), with attach_acr=true keeping the assignment plan-stable when acr_id is known only after apply",
     "Supports private cluster mode and API server authorized IP range restrictions for network security",
     "Exposes cluster credentials, CA certificate, OIDC issuer URL, and node resource group as outputs"
   ],
@@ -184,6 +187,11 @@ resource "example_resource" "this" {
     {
       "name": "acr_id",
       "description": "The ID of the Azure Container Registry. If provided, AKS will be granted AcrPull role to pull images.",
+      "required": false
+    },
+    {
+      "name": "attach_acr",
+      "description": "Whether to grant AKS the AcrPull role on acr_id. Null (default) preserves the legacy behaviour of attaching whenever acr_id is non-null. Set to true for a greenfield single-apply where acr_id is known only after apply (keeps the for_each key set plan-stable); set to false to disable.",
       "required": false
     }
   ],

@@ -104,3 +104,9 @@ variable "acr_id" {
   description = "The ID of the Azure Container Registry. If provided, AKS will be granted AcrPull role to pull images."
   default     = null
 }
+
+variable "attach_acr" {
+  type        = bool
+  description = "Whether to grant AKS the AcrPull role on acr_id. Null (default) preserves the legacy behaviour of attaching whenever acr_id is non-null. Set to true for a greenfield single-apply where acr_id is known only after apply (keeps the for_each key set plan-stable); set to false to disable."
+  default     = null
+}
