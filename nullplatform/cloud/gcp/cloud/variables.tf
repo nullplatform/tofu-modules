@@ -8,11 +8,6 @@ variable "domain_name" {
   type        = string
 }
 
-variable "location" {
-  description = "GCP location/region where resources will be deployed"
-  type        = string
-}
-
 variable "project_id" {
   description = "GCP project ID where resources will be created"
   type        = string
