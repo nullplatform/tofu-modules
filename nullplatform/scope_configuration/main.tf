@@ -19,11 +19,4 @@ resource "nullplatform_provider_config" "scope_configuration" {
       aws_web_acl_name = var.aws_web_acl_name
     })
   }))
-
-  # TODO: unverified whether this is actually needed for nullplatform_provider_config —
-  # pending a drift investigation against the live API (same class of issue found for
-  # nullplatform_service_specification.attributes in scope_definition, see #438).
-  lifecycle {
-    ignore_changes = [attributes]
-  }
 }
