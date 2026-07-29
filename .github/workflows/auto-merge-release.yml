@@ -1,45 +1,22 @@
 name: auto-merge-release-pr
 
 on:
-  workflow_run:
-    workflows: ["Release Please"]
-    types: [completed]
+  pull_request:
+    types: [opened, synchronize, labeled]
 
-permissions:
-  pull-requests: read
+# The release workflow's generate-readmes job pushes an extra commit
+# (regenerated READMEs) to the release PR branch shortly after it's opened
+# (observed gap: ~38s on a real release). That push fires a new
+# 'synchronize' event, starting a fresh run for this PR. Cancelling any
+# still-running older run for the same PR ensures we never merge a stale
+# commit that's missing the README update — the newest run always wins.
+concurrency:
+  group: auto-merge-release-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
-  find-release-pr:
-    name: Find release PR
-    if: github.event.workflow_run.conclusion == 'success'
-    runs-on: ubuntu-24.04
-    outputs:
-      pr_number: ${{ steps.find.outputs.pr_number }}
-    steps:
-      # The "Release Please" workflow's generate-readmes job pushes an extra
-      # commit (regenerated READMEs) to the release PR branch after the PR is
-      # opened. Waiting for the whole workflow run to finish (workflow_run)
-      # instead of reacting directly to pull_request events avoids merging
-      # before that commit lands.
-      - name: Find open release-please PR
-        id: find
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          pr_number="$(gh pr list --repo "$GITHUB_REPOSITORY" \
-            --head release-please--branches--main \
-            --state open \
-            --json number,author,labels \
-            --jq '[.[] | select(.author.login == "github-actions[bot]" and ([.labels[].name] | contains(["autorelease: pending"])))][0].number // 0')"
-          echo "pr_number=$pr_number" >> "$GITHUB_OUTPUT"
-
   automerge:
-    name: Auto-merge release PR
-    needs: find-release-pr
-    if: needs.find-release-pr.outputs.pr_number != '0'
     uses: nullplatform/actions-nullplatform/.github/workflows/auto-merge-release.yml@main
-    with:
-      pr_number: ${{ fromJson(needs.find-release-pr.outputs.pr_number) }}
     secrets:
       app-id: ${{ secrets.APP_RELEASE_ID }}
       app-private-key: ${{ secrets.APP_RELEASE_PRIVATE_KEY }}
