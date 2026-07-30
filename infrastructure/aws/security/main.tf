@@ -121,6 +121,19 @@ resource "aws_vpc_security_group_egress_rule" "public_gateway_all" {
   }
 }
 
+resource "aws_vpc_security_group_egress_rule" "public_gateway_all_additional" {
+  for_each = var.gateways_enabled ? toset(var.additional_network_cidrs) : toset([])
+
+  security_group_id = aws_security_group.public_gateway[0].id
+  description       = "Allow outbound traffic to additional CIDR (gateway proxies to internal services only)"
+  ip_protocol       = "-1"
+  cidr_ipv4         = each.value
+
+  tags = {
+    Name = "${var.cluster_name}-istio-public-egress-additional"
+  }
+}
+
 ###############################################################################
 # PRIVATE GATEWAY
 ###############################################################################
@@ -279,5 +292,18 @@ resource "aws_vpc_security_group_egress_rule" "private_gateway_all" {
 
   tags = {
     Name = "${var.cluster_name}-istio-private-egress"
+  }
+}
+
+resource "aws_vpc_security_group_egress_rule" "private_gateway_all_additional" {
+  for_each = var.gateway_internal_enabled ? toset(var.additional_network_cidrs) : toset([])
+
+  security_group_id = aws_security_group.private_gateway[0].id
+  description       = "Allow outbound traffic to additional CIDR (gateway proxies to internal services only)"
+  ip_protocol       = "-1"
+  cidr_ipv4         = each.value
+
+  tags = {
+    Name = "${var.cluster_name}-istio-private-egress-additional"
   }
 }
