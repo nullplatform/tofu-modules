@@ -1,6 +1,6 @@
 resource "nullplatform_provider_config" "parameter_store_configuration" {
   nrn        = var.nrn
-  type       = "aws-secrets-manager"
+  type       = var.type
   dimensions = var.dimensions
 
   attributes = jsonencode(merge(local.defaults, {

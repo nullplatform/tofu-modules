@@ -3,5 +3,7 @@ nrn        = "organization=1:account=2:namespace=3"
 
 dimensions = { environment = "production" }
 
+type = "aws-secrets-manager"
+
 kms_key_id = ""
 applies_to = ["secret"]

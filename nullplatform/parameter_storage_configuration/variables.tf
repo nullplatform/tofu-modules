@@ -9,14 +9,25 @@ variable "nrn" {
   type        = string
 }
 
+variable "type" {
+  description = "Provider specification slug this configuration targets. Determines which default attribute shape is applied — see README for the supported types and their payloads."
+  type        = string
+  default     = "aws-secrets-manager"
+
+  validation {
+    condition     = contains(["aws-secrets-manager"], var.type)
+    error_message = "type must be one of: aws-secrets-manager."
+  }
+}
+
 variable "kms_key_id" {
-  description = "Customer-managed KMS key ARN or alias. If empty, the default aws/secretsmanager managed key is used."
+  description = "aws-secrets-manager only. Customer-managed KMS key ARN or alias. If empty, the default aws/secretsmanager managed key is used."
   type        = string
   default     = ""
 }
 
 variable "applies_to" {
-  description = "Resource types this parameter storage configuration applies to."
+  description = "aws-secrets-manager only. Resource types this parameter storage configuration applies to."
   type        = list(string)
   default     = ["secret"]
 }
