@@ -1,5 +1,13 @@
 # Changelog
 
+## [6.7.2](https://github.com/nullplatform/tofu-modules/compare/v6.7.1...v6.7.2) (2026-07-30)
+
+
+### Bug Fixes
+
+* allow gateway egress to additional VPC CIDR blocks ([#452](https://github.com/nullplatform/tofu-modules/issues/452)) ([c6a9f3a](https://github.com/nullplatform/tofu-modules/commit/c6a9f3a0567825a4c130766b4034c582d31d7151))
+* use pull_request trigger with per-PR concurrency instead of workflow_run ([#455](https://github.com/nullplatform/tofu-modules/issues/455)) ([6475fb6](https://github.com/nullplatform/tofu-modules/commit/6475fb682b7d8fa0a80c2e0363a14edbfe312225))
+
 ## [6.7.1](https://github.com/nullplatform/tofu-modules/compare/v6.7.0...v6.7.1) (2026-07-28)
 
 
