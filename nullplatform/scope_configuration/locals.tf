@@ -24,4 +24,33 @@ locals {
       aws_web_acl_name = ""
     }
   }
+
+  # Per-cloud override shape merged on top of `defaults`, built from that
+  # cloud's own variables. Unlike `defaults` above (shared across every
+  # cloud because of the API drift issue), this map only ever needs the
+  # active cloud's own fields, so it's keyed by cloud_provider like a normal
+  # per-type override. Adding a new cloud means: a new key here with its own
+  # variables, that cloud's own schema-default fields folded into `defaults`
+  # above if the API requires them, a new allowed value in variables.tf's
+  # cloud_provider validation, and a new section in the README.
+  cloud_overrides = {
+    "aws" = {
+      cloud_provider = var.cloud_provider
+      provider = {
+        aws_region       = var.aws_region
+        aws_state_bucket = var.aws_state_bucket
+      }
+      distribution = merge(local.defaults.distribution, { aws_distribution = var.aws_distribution })
+      network = merge(local.defaults.network, {
+        aws_network               = var.aws_network
+        aws_hosted_public_zone_id = var.aws_hosted_public_zone_id
+      })
+      security = merge(local.defaults.security, {
+        aws_security     = var.aws_security
+        aws_web_acl_name = var.aws_web_acl_name
+      })
+    }
+  }
+
+  overrides = local.cloud_overrides[var.cloud_provider]
 }
