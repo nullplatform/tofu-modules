@@ -49,11 +49,15 @@ resource "terraform_data" "cross_variable_validation" {
 
 # Deploy nullplatform agent to Kubernetes cluster via Helm chart
 resource "helm_release" "agent" {
-  name       = var.release_name
-  chart      = "nullplatform-agent"
-  repository = "https://nullplatform.github.io/helm-charts"
+  name = var.release_name
+  # Temporary escape hatch: until the worker-orchestrator chart is published to
+  # the helm repo, use_embedded_chart installs the chart bundled in this module
+  # (nullplatform/agent/chart, pinned at the worker-capable version). Default
+  # false = pull the published chart from the repo — unchanged behavior.
+  chart      = var.use_embedded_chart ? "${path.module}/chart" : "nullplatform-agent"
+  repository = var.use_embedded_chart ? null : "https://nullplatform.github.io/helm-charts"
   namespace  = var.namespace
-  version    = var.nullplatform_agent_helm_version
+  version    = var.use_embedded_chart ? null : var.nullplatform_agent_helm_version
 
   create_namespace  = true
   disable_webhooks  = false

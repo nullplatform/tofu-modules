@@ -52,6 +52,15 @@ variable "nullplatform_agent_helm_version" {
   default     = "2.29.2"
 }
 
+# Install the chart bundled in this module (nullplatform/agent/chart) instead of
+# pulling from the helm repo. Temporary: lets the worker-orchestrator chart run
+# before it's published. When true, nullplatform_agent_helm_version is ignored.
+variable "use_embedded_chart" {
+  description = "Install the agent chart bundled in this module instead of pulling from the helm repo (temporary, until the worker chart is published)."
+  type        = bool
+  default     = false
+}
+
 # Kubernetes namespace where the nullplatform agent will run
 variable "namespace" {
   description = "Kubernetes namespace where the nullplatform agent will run"

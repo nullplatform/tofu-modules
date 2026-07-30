@@ -1,0 +1,267 @@
+replicaCount: 1
+
+# Workload type: "deployment" or "statefulset"
+workloadType: deployment
+
+# StatefulSet specific configuration (only used when workloadType is "statefulset")
+statefulset:
+  # Service name for StatefulSet (required for StatefulSet)
+  serviceName: nullplatform-agent
+  # Pod Management Policy: "OrderedReady" or "Parallel"
+  podManagementPolicy: OrderedReady
+  # Update strategy
+  updateStrategy:
+    type: RollingUpdate
+  # Persistent Volume Claims for StatefulSet
+  # volumeClaimTemplates: []
+  # Example:
+  # volumeClaimTemplates:
+  #   - metadata:
+  #       name: data
+  #     spec:
+  #       accessModes: [ "ReadWriteOnce" ]
+  #       storageClassName: "standard"
+  #       resources:
+  #         requests:
+  #           storage: 1Gi
+  volumeClaimTemplates: []
+
+namespace: nullplatform-tools
+
+args:
+  - "--tags=$(TAGS)"
+  - "--apikey=$(NP_API_KEY)"
+  - "--runtime=host"
+  - "--command-executor-env=NP_API_KEY=$(NP_API_KEY)"
+  - "--command-executor-debug"
+  - "--webserver-enabled"
+  - "--command-executor-git-command-repos $(AGENT_REPO)"
+
+configuration:
+  create: true
+  secretName: nullplatform-agent-secret
+  values:
+    TAGS: "gato:negro"
+    NP_LOG_LEVEL: DEBUG
+    NP_API_KEY: ""
+      # example:
+    # AGENT_REPO: "https://reppo_01.gt#main,https://token@repo_01.git#main"
+    AGENT_REPO: ""
+
+image:
+  repository: public.ecr.aws/nullplatform/controlplane-agent
+  pullPolicy: Always
+  tag: latest
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: nullplatform-agent
+  # Set to true for cluster-wide access (ClusterRole), false for namespace-scoped access (Role)
+  clusterWide: true
+  role:
+    rules:
+      - apiGroups:
+          - '*'
+          - ""
+        resources:
+          - '*'
+        verbs:
+          - '*'
+
+podAnnotations:
+  name: nullplatform-agent
+podLabels:
+  name: nullplatform-agent
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+resources: {}
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8080
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8080
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 2
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations:
+  - key: "node.kubernetes.io/not-ready"
+    operator: "Exists"
+    effect: "NoExecute"
+    tolerationSeconds: 300
+  - key: "node.kubernetes.io/unreachable"
+    operator: "Exists"
+    effect: "NoExecute"
+    tolerationSeconds: 300
+
+affinity: {}
+
+priorityClass:
+  enabled: true
+  value: 500000
+
+# Init containers to run before the main container
+# Example:
+# initContainers:
+#   - name: install-dependencies
+#     image: busybox:1.36
+#     command: ['sh', '-c', 'echo "Installing dependencies..."']
+#     volumeMounts:
+#       - name: repos
+#         mountPath: /root/.np
+initContainers: []
+
+githubTokenInit:
+  enabled: false
+  image: alpine:3.22.2
+  # Secret that contains GitHub App configuration
+  secretName: "github-app-secret"
+  # Keys in the secret for each value
+  secretKeys:
+    appId: "APP_ID"           # nombre de la clave en el secret
+    installationId: "INSTALLATION_ID"
+    privateKey: "PRIVATE_KEY"
+  values:
+    appId: ""
+    installationId: ""
+    privateKey: ""
+  # Directory where the repository will be cloned (shared with main container)
+  cloneDir: "nullplatform"
+  repositoryUrl: ""
+  workingDir: "/root/.np"
+
+volumes: []
+
+initScripts: []
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+
+# Lifecycle preStop Hook for Graceful Agent Shutdown
+lifecycle:
+  preStop:
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - 'pid=$(pgrep -f agent) && kill -15 $pid && sleep 30'
+
+# Image pull secret configuration
+imagePullSecret:
+  # Use an existing secret (recommended for production)
+  # Set 'name' to reference an existing secret, leave create: false
+  # OR
+  # Create a new secret by setting create: true and providing credentials
+  create: false
+  # name: image-pull-secret-agent
+  # registry: ""
+  # username: ""
+  # password: ""
+
+# ── Worker orchestration ─────────────────────────────────────────────────────
+# The agent spawns package workers (lean gRPC servers) and streams actions to
+# them over gRPC — no separate controller.
+#
+# Priority when a package-exec arrives:
+#   pins (an exact worker you control, trusted)  >  rules (config for a matched
+#   class)  >  defaults (every worker).  allowedRegistries gates every image that
+#   is resolved DYNAMICALLY (i.e. not from a pin) — deny-by-default.
+worker:
+  # backend: kubernetes (agent creates Deployment+Service per package) |
+  #          docker (agent runs host containers)
+  backend: kubernetes
+  # security between the agent and its workers:
+  #   mtls     – agent mints a per-process CA, hands each worker a cert, and dials
+  #              with a client cert (only the agent can call the worker, encrypted).
+  #              No external CA / cert-manager / service mesh. (default, recommended)
+  #   insecure – plaintext, no auth. Only if the path is already secured elsewhere.
+  security: mtls
+  # NetworkPolicy so ONLY the agent may reach worker pods (needs a CNI that
+  # enforces NetworkPolicy — Calico/Cilium/EKS/GKE/AKS). Defense in depth on top
+  # of mTLS. Applies to the kubernetes backend.
+  networkPolicy:
+    create: true
+  # namespace workers are created in (empty = the agent's namespace)
+  namespace: ""
+  # gRPC port every worker listens on (NP_GRPC_LISTEN)
+  grpcPort: 50051
+
+  # ── allowedRegistries — the guardrail (rendered as NP_ALLOWED_REGISTRIES) ──
+  # Deny-by-default: a worker whose image is resolved DYNAMICALLY from the action
+  # (not pinned below) only spawns when its image matches one of these globs.
+  # '*' matches any characters, including '/'. An empty list means nothing
+  # dynamic runs (only pins do) — set this, or every package-exec is refused.
+  allowedRegistries: []
+    # - "ghcr.io/your-org/*"
+    # - "*.dkr.ecr.us-east-1.amazonaws.com/your-org/*"
+
+  # ── defaults — config inherited by EVERY worker (rendered as NP_WORKER_*) ──
+  defaults:
+    serviceAccount: ""      # default SA for worker pods (empty = namespace default)
+    nodeSelector: {}
+    labels: {}
+    imagePullSecrets: []    # names of existing pull secrets
+    env: {}                 # extra env for every worker (NP_API_KEY + the cluster
+                            # CA trust are handled by the agent automatically)
+    resources:
+      requests:
+        cpu: "50m"
+        memory: "64Mi"
+      limits:
+        cpu: "500m"
+        memory: "256Mi"
+
+  # ── rules — config for a matched CLASS of dynamic workers (NP_WORKER_RULES) ──
+  # First match wins. `match` globs the image registry/repository, the package
+  # slug, and/or the version; an empty field is a wildcard and an empty match is
+  # a catch-all. A rule supplies pod config only — the image stays dynamic.
+  rules: []
+    # - match: { registry: "*.dkr.ecr.us-east-1.amazonaws.com/*" }
+    #   imagePullSecrets: [ecr-pull]
+    # - match: { package: "heavy-*" }
+    #   resources: { limits: { memory: "2Gi" } }
+
+  # ── pins — EXACT workers you control (rendered as NP_WORKERS) ──
+  # Highest priority, and a pin's image is TRUSTED (bypasses allowedRegistries).
+  # Matched by exact (package, version), else the package's no-version pin. Each
+  # pin may carry its own per-worker overrides (own serviceAccount/RBAC, resources,
+  # env, namespace, …); anything omitted inherits `defaults`.
+  pins: []
+    # - package: my-scope
+    #   version: "0.0.7"
+    #   image: ghcr.io/org/my-scope:0.0.7
+    #   serviceAccount: my-scope-sa
+    # - package: heavy-scope
+    #   version: "1.2.0"
+    #   image: ghcr.io/org/heavy:1.2.0
+    #   resources: { limits: { memory: "1Gi" } }
+
+  # RBAC letting the agent manage worker Deployments/Services/Pods/Secrets in
+  # `namespace`. Enable when you scope the agent's own RBAC down from cluster-wide.
+  rbac:
+    create: false

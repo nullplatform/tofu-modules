@@ -1,0 +1,182 @@
+{{- if eq .Values.workloadType "deployment" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nullplatform-agent-{{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "agent.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "agent.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "agent.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- if .Values.priorityClass.enabled }}
+      priorityClassName: nullplatform-critical-{{ .Release.Name }}
+      {{- end }}
+      serviceAccountName: {{ include "agent.serviceAccountName" . }}
+      {{- if .Values.imagePullSecret.name }}
+      imagePullSecrets:
+        - name: {{ .Values.imagePullSecret.name }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if or .Values.initContainers .Values.githubTokenInit.enabled }}
+      initContainers:
+         {{- if .Values.githubTokenInit.enabled }}
+        - name: github-token-init
+          image: {{ .Values.githubTokenInit.image }}
+          command: ["/bin/sh"]
+          args:
+            - -c
+            - |
+              apk add --no-cache openssl jq git bash curl
+
+              # Write private key to file (decode from base64)
+              echo "$PRIVATE_KEY" | base64 -d > /tmp/github-app-private-key.pem
+              chmod 600 /tmp/github-app-private-key.pem
+
+              cat > /tmp/github-token.sh << 'EOF'
+              #!/bin/bash
+
+              PRIVATE_KEY_FILE="/tmp/github-app-private-key.pem"
+
+              generate_jwt() {
+                  local header=$(echo -n '{"alg":"RS256","typ":"JWT"}' | openssl base64 -e | tr -d '=' | tr '/+' '_-' | tr -d '\n')
+
+                  local now=$(date +%s)
+                  local iat=$((now - 60))
+                  local exp=$((now + 600))
+
+                  local payload=$(echo -n "{\"iat\":${iat},\"exp\":${exp},\"iss\":\"${APP_ID}\"}" | openssl base64 -e | tr -d '=' | tr '/+' '_-' | tr -d '\n')
+
+                  local unsigned="${header}.${payload}"
+                  local signature=$(echo -n "$unsigned" | openssl dgst -sha256 -sign "$PRIVATE_KEY_FILE" | openssl base64 -e | tr -d '=' | tr '/+' '_-' | tr -d '\n')
+
+                  echo "${unsigned}.${signature}"
+              }
+
+              get_installation_token() {
+                  local jwt=$(generate_jwt)
+
+                  curl -s -X POST \
+                      -H "Authorization: Bearer ${jwt}" \
+                      -H "Accept: application/vnd.github+json" \
+                      "https://api.github.com/app/installations/${INSTALLATION_ID}/access_tokens" | jq -r '.token'
+              }
+
+              TOKEN=$(get_installation_token)
+              echo "Token: $TOKEN"
+
+              {{- if .Values.githubTokenInit.repositoryUrl }}
+              # Create the nullplatform directory
+              mkdir -p {{ .Values.githubTokenInit.workingDir }}/{{ .Values.githubTokenInit.cloneDir }}
+ 
+              # Clone the repository
+              #git clone https://x-access-token:$TOKEN@{{ .Values.githubTokenInit.repositoryUrl }} {{ .Values.githubTokenInit.workingDir }}/{{ .Values.githubTokenInit.cloneDir }}
+              REPO_NAME=$(basename "{{ .Values.githubTokenInit.repositoryUrl }}" .git)
+              git clone https://x-access-token:$TOKEN@{{ .Values.githubTokenInit.repositoryUrl }} {{ .Values.githubTokenInit.workingDir }}/$REPO_NAME
+              {{- end }}
+              EOF
+
+              chmod +x /tmp/github-token.sh
+              bash /tmp/github-token.sh
+          env:
+            - name: APP_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.githubTokenInit.secretName | default "github-app-secret" | quote }}
+                  key: {{ .Values.githubTokenInit.secretKeys.appId }}
+            - name: INSTALLATION_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.githubTokenInit.secretName | default "github-app-secret" | quote }}
+                  key: {{ .Values.githubTokenInit.secretKeys.installationId }}
+            - name: PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.githubTokenInit.secretName | default "github-app-secret" | quote }}
+                  key: {{ .Values.githubTokenInit.secretKeys.privateKey }}
+          volumeMounts:
+            - name: repos-storage
+              mountPath: {{ .Values.githubTokenInit.workingDir }}
+        {{- end }}
+        {{- with .Values.initContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.args }}
+          args:
+          {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- if or .Values.volumeMounts .Values.githubTokenInit.enabled }}
+          volumeMounts:
+            {{- if .Values.githubTokenInit.enabled }}
+            - name: repos-storage
+              mountPath: {{ .Values.githubTokenInit.workingDir }}
+            {{- end }}
+            {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          env:
+            {{- if .Values.initScripts }}
+            - name: INIT_SCRIPTS_CONFIGMAP
+              value: "init-scripts-{{ .Release.Name }}"
+            {{- end }}
+            {{- include "agent.workerEnv" . | nindent 12 }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.configuration.secretName }}-{{ .Release.Name }}
+          lifecycle:
+            {{- toYaml .Values.lifecycle | nindent 12 }}
+      {{- if or .Values.volumes .Values.githubTokenInit.enabled }}
+      volumes:
+        {{- if .Values.githubTokenInit.enabled }}
+        - name: repos-storage
+          emptyDir: {}
+        {{- end }}
+        {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

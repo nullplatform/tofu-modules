@@ -1,0 +1,34 @@
+{{- /*
+Restrict worker pods so ONLY the agent may reach their gRPC port — defense in
+depth on top of the agent↔worker mTLS. Requires a CNI that enforces
+NetworkPolicy (Calico, Cilium, EKS/GKE/AKS policy modes). Kubernetes backend only.
+*/ -}}
+{{- if and (eq .Values.worker.backend "kubernetes") .Values.worker.networkPolicy.create }}
+{{- $ns := default .Values.namespace .Values.worker.namespace }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "agent.fullname" . }}-worker
+  namespace: {{ $ns }}
+  labels:
+    {{- include "agent.labels" . | nindent 4 }}
+spec:
+  # Applies to every worker the agent creates.
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/managed-by: np-agent
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        # Only the agent pod, in the agent's namespace, may connect.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.namespace }}
+          podSelector:
+            matchLabels:
+              {{- include "agent.selectorLabels" . | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.worker.grpcPort | default 50051 }}
+{{- end }}
