@@ -64,8 +64,8 @@ run "without_authentication_credentials" {
   command = plan
 
   assert {
-    condition     = strcontains(nullplatform_provider_config.azure.attributes, "\"authentication\":{}") || strcontains(nullplatform_provider_config.azure.attributes, "\"authentication\": {}")
-    error_message = "Authentication block should be empty when no credentials provided (inherits from parent)"
+    condition     = !strcontains(nullplatform_provider_config.azure.attributes, "authentication")
+    error_message = "Authentication key should be omitted entirely when no credentials provided (API never persists it)"
   }
 }
 
