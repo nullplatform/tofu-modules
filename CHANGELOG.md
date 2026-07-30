@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.7.1](https://github.com/nullplatform/tofu-modules/compare/v6.7.0...v6.7.1) (2026-07-28)
+
+
+### Bug Fixes
+
+* **azure/aks:** make ACR attach plan-stable for greenfield applies ([#448](https://github.com/nullplatform/tofu-modules/issues/448)) ([92b29f8](https://github.com/nullplatform/tofu-modules/commit/92b29f8fb93a3bd85c633851efa08f3e2422698f))
+
 ## [6.7.0](https://github.com/nullplatform/tofu-modules/compare/v6.6.0...v6.7.0) (2026-07-23)
 
 
