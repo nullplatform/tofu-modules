@@ -1,5 +1,25 @@
 #!/bin/sh
 
+# Detect unused Terraform/OpenTofu declarations (variables, locals, outputs,
+# data sources) in modules touched by this commit.
+CHANGED_TF_DIRS=$(git diff --cached --name-only --diff-filter=ACM -- '*.tf' | xargs -n1 dirname 2>/dev/null | sort -u)
+
+if [ -n "$CHANGED_TF_DIRS" ]; then
+  if ! command -v tflint >/dev/null 2>&1; then
+    echo "tflint not found — skipping unused-declaration check. Install it: https://github.com/terraform-linters/tflint"
+  else
+    TFLINT_FAILED=0
+    for dir in $CHANGED_TF_DIRS; do
+      tflint --chdir="$dir" --config="$(git rev-parse --show-toplevel)/.tflint.hcl" --only=terraform_unused_declarations || TFLINT_FAILED=1
+    done
+    if [ "$TFLINT_FAILED" -eq 1 ]; then
+      echo ""
+      echo "tflint found unused declarations in the module(s) above. Remove them, or use them, before committing."
+      exit 1
+    fi
+  fi
+fi
+
 # Validate branch name
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 PATTERN="^(feat|feature|fix|docs|style|refactor|perf|test|build|ci|chore|revert)/.+$"
