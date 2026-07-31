@@ -1,9 +1,6 @@
 locals {
-  # La API de nullplatform valida hosted_public_zone_id con ^Z[A-Z0-9]{10,}$
-  # (verificado empíricamente) y rechaza el string vacío. Se incluye en el payload
-  # sólo cuando tiene valor → habilita instalaciones private-only (sin zona pública).
-  # El guard != null es defensivo (el default es "", pero un módulo caller podría
-  # pasar null explícitamente); la API no distingue null de "".
+  # La API rechaza un hosted_public_zone_id vacío, así que solo se incluye
+  # cuando tiene valor — esto habilita instalaciones private-only.
   networking = merge(
     {
       application_domain = var.application_domain,
