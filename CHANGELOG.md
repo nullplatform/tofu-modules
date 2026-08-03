@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.8.0](https://github.com/nullplatform/tofu-modules/compare/v6.7.2...v6.8.0) (2026-08-03)
+
+
+### Features
+
+* **scope_definition:** read action list from service spec by default ([#458](https://github.com/nullplatform/tofu-modules/issues/458)) ([3695dbe](https://github.com/nullplatform/tofu-modules/commit/3695dbedc8966a0c032a0fdbcd271a760d73016a))
+
 ## [6.7.2](https://github.com/nullplatform/tofu-modules/compare/v6.7.1...v6.7.2) (2026-07-30)
 
 
