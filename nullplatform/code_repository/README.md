@@ -21,7 +21,7 @@ The module evaluates the git_provider input using locals to set boolean flags (i
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v6.7.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v6.8.0"
 
   git_provider = "your-git-provider"
   nrn          = "your-nrn"
@@ -32,7 +32,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v6.7.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v6.8.0"
 
   git_provider           = "github"
   github_installation_id = "your-github-installation-id"  # Required when git_provider = "github"
@@ -45,7 +45,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v6.7.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v6.8.0"
 
   git_provider             = "gitlab"
   gitlab_access_token      = "your-gitlab-access-token"  # Required when git_provider = "gitlab"
@@ -61,7 +61,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v6.7.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v6.8.0"
 
   azure_access_token = "your-azure-access-token"  # Required when git_provider = "azure"
   azure_agent_pool   = "your-azure-agent-pool"  # Required when git_provider = "azure"
@@ -75,7 +75,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v6.7.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v6.8.0"
 
   bitbucket_api_token   = "your-bitbucket-api-token"  # Required when git_provider = "bitbucket"
   bitbucket_email       = "your-bitbucket-email"  # Required when git_provider = "bitbucket"
