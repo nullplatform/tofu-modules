@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.8.1](https://github.com/nullplatform/tofu-modules/compare/v6.8.0...v6.8.1) (2026-08-04)
+
+
+### Bug Fixes
+
+* **code_repository:** align bitbucket config with the current specification ([#463](https://github.com/nullplatform/tofu-modules/issues/463)) ([402c4df](https://github.com/nullplatform/tofu-modules/commit/402c4dfd91eb61b8e0c995559fef81159704fddb))
+
 ## [6.8.0](https://github.com/nullplatform/tofu-modules/compare/v6.7.2...v6.8.0) (2026-08-03)
 
 
