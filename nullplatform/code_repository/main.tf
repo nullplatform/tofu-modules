@@ -62,7 +62,7 @@ resource "nullplatform_provider_config" "bitbucket" {
     "setup" : {
       "workspace" : var.bitbucket_workspace,
       "project_key" : var.bitbucket_project_key,
-      "installation_url" : var.bitbucket_installation_url
+      "installation_url" : coalesce(var.bitbucket_installation_url, "https://bitbucket.org")
     },
     "access" : {
       "collaborators" : var.bitbucket_collaborators

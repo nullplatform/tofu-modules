@@ -126,39 +126,47 @@ variable "azure_agent_pool" {
 # application-lifecycle-manager deployment instead, because nullplatform nullifies
 # secret attribute values on authenticated provider reads.
 variable "bitbucket_workspace" {
-  description = "Bitbucket workspace that owns the repositories."
+  description = "Bitbucket workspace that owns the repositories. Only for git_provider = \"bitbucket\"."
   type        = string
   default     = null
   validation {
-    condition     = var.git_provider != "bitbucket" || var.bitbucket_workspace != null
-    error_message = "bitbucket_workspace is required when git_provider is 'bitbucket'."
+    condition     = var.git_provider == "bitbucket" ? var.bitbucket_workspace != null : var.bitbucket_workspace == null
+    error_message = "bitbucket_workspace is required when git_provider is 'bitbucket', and must be left unset for every other provider."
   }
 }
 
 variable "bitbucket_project_key" {
-  description = "Bitbucket project key under which repositories are created."
+  description = "Bitbucket project key under which repositories are created. Only for git_provider = \"bitbucket\"."
   type        = string
   default     = null
   validation {
-    condition     = var.git_provider != "bitbucket" || var.bitbucket_project_key != null
-    error_message = "bitbucket_project_key is required when git_provider is 'bitbucket'."
+    condition     = var.git_provider == "bitbucket" ? var.bitbucket_project_key != null : var.bitbucket_project_key == null
+    error_message = "bitbucket_project_key is required when git_provider is 'bitbucket', and must be left unset for every other provider."
   }
 }
 
 variable "bitbucket_installation_url" {
-  description = "Base URL for the Bitbucket integration. Defaults to Bitbucket Cloud."
+  description = "Base URL for the Bitbucket integration. Only for git_provider = \"bitbucket\"; leave unset for Bitbucket Cloud (https://bitbucket.org)."
   type        = string
-  default     = "https://bitbucket.org"
+  default     = null
+  validation {
+    condition     = var.git_provider == "bitbucket" || var.bitbucket_installation_url == null
+    error_message = "bitbucket_installation_url must be left unset unless git_provider is 'bitbucket'."
+  }
 }
 
 variable "bitbucket_collaborators" {
-  description = "Collaborators to grant repository access to. Each entry has an id, a role and a type."
+  description = "Collaborators to grant repository access to. Each entry has an id, a role and a type. Only for git_provider = \"bitbucket\"."
   type = list(object({
     id   = string
     role = string
     type = string
   }))
   default = []
+  validation {
+    condition     = var.git_provider == "bitbucket" || length(var.bitbucket_collaborators) == 0
+    error_message = "bitbucket_collaborators must be left empty unless git_provider is 'bitbucket'."
+  }
 }
 
 
