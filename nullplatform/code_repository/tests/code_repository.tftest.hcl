@@ -85,13 +85,13 @@ run "bitbucket_provider_config" {
     np_api_key            = "test-api-key"
     bitbucket_workspace   = "myworkspace"
     bitbucket_project_key = "MYPROJ"
-    bitbucket_email       = "bot@example.com"
-    bitbucket_api_token   = "atlassian-api-token"
   }
 
+  # The specification is slugged `bitbucket`, unlike its siblings, which carry a
+  # `-configuration` suffix.
   assert {
-    condition     = nullplatform_provider_config.bitbucket[0].type == "bitbucket-configuration"
-    error_message = "Bitbucket provider config type should be 'bitbucket-configuration'"
+    condition     = nullplatform_provider_config.bitbucket[0].type == "bitbucket"
+    error_message = "Bitbucket provider config type should be 'bitbucket'"
   }
 
   assert {
@@ -107,6 +107,22 @@ run "bitbucket_provider_config" {
   assert {
     condition     = strcontains(nullplatform_provider_config.bitbucket[0].attributes, "https://bitbucket.org")
     error_message = "Attributes should default the installation URL to Bitbucket Cloud"
+  }
+
+  # The `bitbucket` specification declares no credential fields: they live in the
+  # application-lifecycle-manager environment, because nullplatform nullifies secret
+  # attribute values on authenticated provider reads. Sending them here would be
+  # stripped server-side, so the module must not send them at all.
+  assert {
+    condition     = !strcontains(nullplatform_provider_config.bitbucket[0].attributes, "api_token") && !strcontains(nullplatform_provider_config.bitbucket[0].attributes, "email")
+    error_message = "Attributes must not carry credential fields: the specification does not declare any"
+  }
+
+  # Removed from the specification: only Bitbucket Cloud is supported and nothing
+  # reads the value.
+  assert {
+    condition     = !strcontains(nullplatform_provider_config.bitbucket[0].attributes, "flavor")
+    error_message = "Attributes must not carry a flavor field"
   }
 
   assert {
