@@ -112,18 +112,45 @@ resource "nullplatform_link_specification" "managed_postgre_sql_non_prod_link" {
   }
 }
 
-# PACKAGE the service + link into a versioned package.
+# ── Package the service + link as a versioned package ────────────────────────
+# Publishes ONE package revision whose bill of materials pins the service spec,
+# the link spec, the default actions of both, and any artifacts you add — so
+# consumers bind to an immutable version instead of the live spec.
 module "packaged_service" {
+  # For this example, the module in this repo. In real use, pin a released ref:
+  #   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/packaged_service?ref=v1.0.0"
   source = "../../"
 
+  # Owner NRN — the org/account/namespace the package (and its artifacts) live in.
   nrn = local.nrn
 
+  # The specs to package. Pass the whole resources, not their ids — the module
+  # reads each one's id, snapshot and default actions itself.
   service_specification = nullplatform_service_specification.managed_postgre_sql_non_prod_service
   link_specification    = nullplatform_link_specification.managed_postgre_sql_non_prod_link
 
-  package_version = "0.0.1"     # your imagined `version`
-  alias           = { default = "0.0.1" }
-  artifacts       = []
+  # Semver of the revision to publish. It's `package_version`, not `version`,
+  # because `version` is a reserved module argument in Terraform/OpenTofu (it
+  # only applies to registry sources). Bump it to publish a new revision.
+  package_version = "0.0.1"
+
+  # ── everything below is optional ────────────────────────────────────────────
+  #
+  # slug + name default to the service spec's. Override to set them by hand:
+  #   slug = "managed-postgres-nonprod"
+  #   name = "Managed PostgreSQL (Non-Prod)"
+  #
+  # Artifacts to pin into the revision. A plain service package needs none; add
+  # one when the package ships an image / git source / blob:
+  #   artifacts = [{
+  #     name = "provisioner"
+  #     type = "oci_image"
+  #     meta = { registry = "public.ecr.aws", repository = "org/provisioner", digest = "sha256:…" }
+  #   }]
+  #
+  # alias only matters when the package's default should point at a version OTHER
+  # than the one you're publishing here; omit it and default_version = package_version:
+  #   alias = { default = "0.0.1" }
 }
 
 output "package_id" {

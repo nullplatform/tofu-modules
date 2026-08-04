@@ -25,15 +25,33 @@ module "packaged_service" {
   service_specification = nullplatform_service_specification.my_service
   link_specification    = nullplatform_link_specification.my_link  # optional
 
-  package_version = "0.0.1"
-  alias           = { default = "0.0.1" }   # optional; default → default_version
-  artifacts       = []                       # optional
+  package_version = "0.0.1"   # bump to publish a new revision
 }
 ```
 
 You pass the **whole resource objects** for `service_specification` /
 `link_specification`; the module reads their `id`, `last_snapshot_id` and
 `action_specifications` itself.
+
+### Overriding the defaults
+
+Everything else is optional. Set any of these by hand:
+
+```hcl
+  slug      = "my-service"                 # defaults to the service spec's slug
+  name      = "My Service"                 # defaults to the service spec's name
+  visible_to = ["organization=…:account=…:namespace=…"]  # defaults to the spec's
+
+  # Pin an artifact the package ships (image / git source / blob):
+  artifacts = [{
+    name = "provisioner"
+    type = "oci_image"
+    meta = { registry = "public.ecr.aws", repository = "org/provisioner", digest = "sha256:…" }
+  }]
+
+  # Only when the default should point at a version you're NOT publishing here:
+  alias = { default = "0.0.2" }
+```
 
 ## Notes
 
