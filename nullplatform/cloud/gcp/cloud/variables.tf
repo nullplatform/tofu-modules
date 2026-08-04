@@ -36,9 +36,3 @@ variable "dimensions" {
   type        = map(any)
   default     = {}
 }
-
-variable "private_domain_name" {
-  description = "Private domain name"
-  type        = string
-  default     = ""
-}

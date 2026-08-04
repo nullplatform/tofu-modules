@@ -67,9 +67,7 @@ resource "example_resource" "this" {
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | Domain name for the configuration | `string` | n/a | yes |
 | <a name="input_hosted_private_zone_id"></a> [hosted\_private\_zone\_id](#input\_hosted\_private\_zone\_id) | Hosted zone ID for private DNS | `string` | n/a | yes |
 | <a name="input_hosted_public_zone_id"></a> [hosted\_public\_zone\_id](#input\_hosted\_public\_zone\_id) | Hosted zone ID for public DNS. Leave empty for private-only installs: when empty it is omitted from the provider config payload (the API rejects an empty string). | `string` | `""` | no |
-| <a name="input_include_environment"></a> [include\_environment](#input\_include\_environment) | Whether to use Environment as a default dimension | `bool` | `true` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Identifier Nullplatform Resources Name | `string` | n/a | yes |
-| <a name="input_scope_manager_assume_role"></a> [scope\_manager\_assume\_role](#input\_scope\_manager\_assume\_role) | ARN of the IAM role for scope and deploy manager | `string` | `"arn:aws:iam::283477532906:role/scope_and_deploy_manager"` | no |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
@@ -104,16 +102,6 @@ resource "example_resource" "this" {
     {
       "name": "hosted_public_zone_id",
       "description": "Hosted zone ID for public DNS. Leave empty for private-only installs: when empty it is omitted from the provider config payload (the API rejects an empty string).",
-      "required": false
-    },
-    {
-      "name": "scope_manager_assume_role",
-      "description": "ARN of the IAM role for scope and deploy manager",
-      "required": false
-    },
-    {
-      "name": "include_environment",
-      "description": "Whether to use Environment as a default dimension",
       "required": false
     },
     {
