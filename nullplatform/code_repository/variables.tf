@@ -39,6 +39,13 @@ variable "gitlab_installation_url" {
   }
 }
 
+# Neither of the two below is read by main.tf, so tflint's
+# terraform_unused_declarations flags them. They are NOT removed: their own
+# validation blocks make them REQUIRED whenever git_provider is "gitlab", so every
+# gitlab caller passes them today and dropping them would break those callers with
+# "Unsupported argument". Whether the module should still demand values it never
+# sends anywhere is a separate question from this change.
+# tflint-ignore: terraform_unused_declarations
 variable "gitlab_repository_prefix" {
   description = "Prefix to use for GitLab repository names."
   type        = string
@@ -49,6 +56,7 @@ variable "gitlab_repository_prefix" {
   }
 }
 
+# tflint-ignore: terraform_unused_declarations
 variable "gitlab_slug" {
   description = "GitLab project slug identifier."
   type        = string
@@ -112,67 +120,53 @@ variable "azure_agent_pool" {
 }
 
 # Bitbucket-specific variables
+#
+# There are deliberately no credential variables: the `bitbucket` specification
+# declares none. BITBUCKET_EMAIL and BITBUCKET_API_TOKEN are set on the
+# application-lifecycle-manager deployment instead, because nullplatform nullifies
+# secret attribute values on authenticated provider reads.
 variable "bitbucket_workspace" {
-  description = "Bitbucket workspace that owns the repositories."
+  description = "Bitbucket workspace that owns the repositories. Only for git_provider = \"bitbucket\"."
   type        = string
   default     = null
   validation {
-    condition     = var.git_provider != "bitbucket" || var.bitbucket_workspace != null
-    error_message = "bitbucket_workspace is required when git_provider is 'bitbucket'."
+    condition     = var.git_provider == "bitbucket" ? var.bitbucket_workspace != null : var.bitbucket_workspace == null
+    error_message = "bitbucket_workspace is required when git_provider is 'bitbucket', and must be left unset for every other provider."
   }
 }
 
 variable "bitbucket_project_key" {
-  description = "Bitbucket project key under which repositories are created."
+  description = "Bitbucket project key under which repositories are created. Only for git_provider = \"bitbucket\"."
   type        = string
   default     = null
   validation {
-    condition     = var.git_provider != "bitbucket" || var.bitbucket_project_key != null
-    error_message = "bitbucket_project_key is required when git_provider is 'bitbucket'."
-  }
-}
-
-variable "bitbucket_email" {
-  description = "Email of the Bitbucket account used together with the API token for authentication."
-  type        = string
-  default     = null
-  validation {
-    condition     = var.git_provider != "bitbucket" || var.bitbucket_email != null
-    error_message = "bitbucket_email is required when git_provider is 'bitbucket'."
-  }
-}
-
-variable "bitbucket_api_token" {
-  description = "Bitbucket API token used to authenticate against the Bitbucket API."
-  type        = string
-  sensitive   = true
-  default     = null
-  validation {
-    condition     = var.git_provider != "bitbucket" || var.bitbucket_api_token != null
-    error_message = "bitbucket_api_token is required when git_provider is 'bitbucket'."
+    condition     = var.git_provider == "bitbucket" ? var.bitbucket_project_key != null : var.bitbucket_project_key == null
+    error_message = "bitbucket_project_key is required when git_provider is 'bitbucket', and must be left unset for every other provider."
   }
 }
 
 variable "bitbucket_installation_url" {
-  description = "Base URL for the Bitbucket integration. Defaults to Bitbucket Cloud."
+  description = "Base URL for the Bitbucket integration. Only for git_provider = \"bitbucket\"; leave unset for Bitbucket Cloud (https://bitbucket.org)."
   type        = string
-  default     = "https://bitbucket.org"
-}
-
-variable "bitbucket_flavor" {
-  description = "Bitbucket flavor. Only 'cloud' is supported at this time; the field exists so Data Center can be added later without reworking callers."
-  type        = string
-  default     = "cloud"
+  default     = null
+  validation {
+    condition     = var.git_provider == "bitbucket" || var.bitbucket_installation_url == null
+    error_message = "bitbucket_installation_url must be left unset unless git_provider is 'bitbucket'."
+  }
 }
 
 variable "bitbucket_collaborators" {
-  description = "Collaborators to grant repository access to. Each entry has an id, a role and a type."
+  description = "Collaborators to grant repository access to. Each entry has an id, a role and a type. Only for git_provider = \"bitbucket\"."
   type = list(object({
     id   = string
     role = string
     type = string
   }))
   default = []
+  validation {
+    condition     = var.git_provider == "bitbucket" || length(var.bitbucket_collaborators) == 0
+    error_message = "bitbucket_collaborators must be left empty unless git_provider is 'bitbucket'."
+  }
 }
 
 
