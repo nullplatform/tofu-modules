@@ -22,6 +22,29 @@ resource "nullplatform_service_specification" "from_template" {
     provider     = local.service_spec_parsed.selectors.provider
     sub_category = local.service_spec_parsed.selectors.sub_category
   }
+
+  # Resolving to no actions means the caller relied on the default this variable
+  # no longer has, and its spec predates `available_actions`. Left alone that is
+  # an empty for_each below, which destroys every action specification the scope
+  # has registered — silently, since an empty list is not an error.
+  #
+  # The check lives here and not on the action_specification resource: with an
+  # empty for_each that resource has no instances, so its preconditions never run.
+  lifecycle {
+    precondition {
+      condition     = length(local.static_action_specs) > 0
+      error_message = <<-EOT
+        No actions resolved for scope "${var.service_spec_name}".
+
+        Declare `available_actions` in ${var.service_path}/specs/service-spec.json.tpl,
+        or pass `action_spec_names` explicitly.
+
+        Proceeding would destroy every action specification registered for this
+        scope: creating and deleting scopes, deploying, blue/green, rollback and
+        diagnostics all stop being available from the UI.
+      EOT
+    }
+  }
 }
 
 ################################################################################

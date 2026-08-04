@@ -18,7 +18,7 @@ This module creates oci_dns_zone resources for each DNS zone defined in the dns_
 
 ```hcl
 module "dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/dns?ref=v6.7.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/dns?ref=v6.8.0"
 
   compartment_id = "your-compartment-id"
 }
