@@ -27,8 +27,11 @@ locals {
   artifacts_existing  = { for a in var.artifacts : a.name => a if a.meta == null }
 
   # Default-created action specs of each spec, keyed by slug for a stable BOM.
-  svc_actions = { for a in try(local.svc.action_specifications, []) : a.slug => a }
-  lnk_actions = local.lnk == null ? {} : { for a in try(local.lnk.action_specifications, []) : a.slug => a }
+  # Only actions that already have a snapshot can be pinned — skip any without
+  # one (e.g. an old action predating snapshots) rather than sending an empty
+  # resource_revision_id the package API would reject.
+  svc_actions = { for a in try(local.svc.action_specifications, []) : a.slug => a if try(a.last_snapshot_id, "") != "" }
+  lnk_actions = local.lnk == null ? {} : { for a in try(local.lnk.action_specifications, []) : a.slug => a if try(a.last_snapshot_id, "") != "" }
 }
 
 # New artifact revisions declared inline on the package.
@@ -58,6 +61,21 @@ resource "nullplatform_package" "this" {
   default_version = local.default_version
   tags            = var.tags
   visible_to      = local.visible_to
+
+  # A component can only be pinned to an existing snapshot. The service spec
+  # (BOM root) and the link spec — if given — are mandatory, so fail clearly
+  # when they have no snapshot yet instead of publishing a broken revision.
+  # (Saving/updating a spec once creates its first snapshot.)
+  lifecycle {
+    precondition {
+      condition     = try(local.svc.last_snapshot_id, "") != ""
+      error_message = "service_specification has no snapshot yet (last_snapshot_id is empty). Save/update the service specification once so a snapshot exists, then package it."
+    }
+    precondition {
+      condition     = local.lnk == null || try(local.lnk.last_snapshot_id, "") != ""
+      error_message = "link_specification has no snapshot yet (last_snapshot_id is empty). Save/update the link specification once so a snapshot exists, then package it."
+    }
+  }
 
   # Service specification — root of the bill of materials.
   components {
