@@ -2,26 +2,27 @@
 
 ## Description
 
-Configures a nullplatform git provider integration by creating a nullplatform_provider_config resource for the selected provider (GitHub, GitLab, Azure DevOps, or Bitbucket)
+Configures a nullplatform git provider integration by creating a nullplatform_provider_config resource for one of four supported providers: GitHub, GitLab, Azure DevOps, or Bitbucket
 
 ## Architecture
 
-The module evaluates the git_provider input using locals to set boolean flags (is_gitlab, is_github, is_azure, is_bitbucket) which drive count-based conditional creation of nullplatform_provider_config resources. Each provider creates exactly one nullplatform_provider_config resource with a provider-specific type string (gitlab-configuration, github-configuration, azure-devops-configuration, bitbucket) and a jsonencode attributes block containing provider-specific credentials and settings. The nrn input is transformed via regex or replace to strip namespace segments before being passed to the resource, and optional dimensions are forwarded as-is.
+The module uses local boolean flags (is_gitlab, is_github, is_azure, is_bitbucket) derived from var.git_provider to conditionally create exactly one nullplatform_provider_config resource via count = local.is_X ? 1 : 0. Each nullplatform_provider_config resource is bound to a scoped NRN (namespace-stripped via regex or replace), a provider-specific type string (e.g. gitlab-configuration, github-configuration, azure-devops-configuration, bitbucket), and a JSON-encoded attributes block containing provider-specific setup credentials and configuration. The dimensions input flows directly into every resource to support multi-environment or multi-region segmentation within the nullplatform platform.
 
 ## Features
 
-- Creates nullplatform_provider_config for GitLab with group path, access token, and installation URL
-- Creates nullplatform_provider_config for GitHub with organization name and App installation ID
-- Creates nullplatform_provider_config for Azure DevOps with project, personal access token, and CI agent pool
-- Creates nullplatform_provider_config for Bitbucket with workspace, project key, email, API token, installation URL, and collaborator access
-- Validates provider-specific required variables at plan time using conditional validation rules
-- Segments provider configuration using optional dimensions map for environment or region scoping
+- Creates a nullplatform_provider_config resource with GitLab-specific setup including group path, access token, and installation URL
+- Creates a nullplatform_provider_config resource with GitHub-specific setup including organization name and App installation ID
+- Creates a nullplatform_provider_config resource with Azure DevOps setup including project name, personal access token, and CI agent pool
+- Creates a nullplatform_provider_config resource with Bitbucket setup including workspace, project key, installation URL, and collaborator access list
+- Enforces provider-specific required variables at plan time using Terraform validation blocks tied to the git_provider selector
+- Supports dimensional segmentation of provider configs via a flexible map of key-value dimension labels
+- Strips namespace scope from the NRN automatically to ensure provider configs are registered at the correct platform hierarchy level
 
 ## Basic Usage
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v6.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v6.8.1"
 
   git_provider = "your-git-provider"
   nrn          = "your-nrn"
@@ -32,7 +33,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v6.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v6.8.1"
 
   git_provider           = "github"
   github_installation_id = "your-github-installation-id"  # Required when git_provider = "github"
@@ -45,7 +46,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v6.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v6.8.1"
 
   git_provider             = "gitlab"
   gitlab_access_token      = "your-gitlab-access-token"  # Required when git_provider = "gitlab"
@@ -61,7 +62,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v6.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v6.8.1"
 
   azure_access_token = "your-azure-access-token"  # Required when git_provider = "azure"
   azure_agent_pool   = "your-azure-agent-pool"  # Required when git_provider = "azure"
@@ -75,25 +76,16 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v6.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v6.8.1"
 
-  bitbucket_project_key = "your-bitbucket-project-key"  # Required when git_provider = "bitbucket"
-  bitbucket_workspace   = "your-bitbucket-workspace"  # Required when git_provider = "bitbucket"
-  git_provider          = "bitbucket"
-  nrn                   = "your-nrn"
+  bitbucket_collaborators    = "your-bitbucket-collaborators"  # Required when git_provider = "bitbucket"
+  bitbucket_installation_url = "your-bitbucket-installation-url"  # Required when git_provider = "bitbucket"
+  bitbucket_project_key      = "your-bitbucket-project-key"  # Required when git_provider = "bitbucket"
+  bitbucket_workspace        = "your-bitbucket-workspace"  # Required when git_provider = "bitbucket"
+  git_provider               = "bitbucket"
+  nrn                        = "your-nrn"
 }
 ```
-
-The bot user's credentials are **not** part of this configuration. Set them as environment variables
-on the application-lifecycle-manager deployment instead:
-
-| Variable | Value |
-|---|---|
-| `BITBUCKET_EMAIL` | the Atlassian account email of the Bitbucket bot user |
-| `BITBUCKET_API_TOKEN` | that user's Atlassian API token |
-
-nullplatform nullifies secret attribute values on authenticated provider reads, so a token stored on
-the provider would come back `null` and never reach the workflow that needs it.
 
 ## Using Outputs
 
@@ -152,15 +144,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "code_repository",
-  "description": "Configures a nullplatform git provider integration by creating a nullplatform_provider_config resource for the selected provider (GitHub, GitLab, Azure DevOps, or Bitbucket)",
-  "architecture": "The module evaluates the git_provider input using locals to set boolean flags (is_gitlab, is_github, is_azure, is_bitbucket) which drive count-based conditional creation of nullplatform_provider_config resources. Each provider creates exactly one nullplatform_provider_config resource with a provider-specific type string (gitlab-configuration, github-configuration, azure-devops-configuration, bitbucket) and a jsonencode attributes block containing provider-specific credentials and settings. The nrn input is transformed via regex or replace to strip namespace segments before being passed to the resource, and optional dimensions are forwarded as-is.",
+  "description": "Configures a nullplatform git provider integration by creating a nullplatform_provider_config resource for one of four supported providers: GitHub, GitLab, Azure DevOps, or Bitbucket",
+  "architecture": "The module uses local boolean flags (is_gitlab, is_github, is_azure, is_bitbucket) derived from var.git_provider to conditionally create exactly one nullplatform_provider_config resource via count = local.is_X ? 1 : 0. Each nullplatform_provider_config resource is bound to a scoped NRN (namespace-stripped via regex or replace), a provider-specific type string (e.g. gitlab-configuration, github-configuration, azure-devops-configuration, bitbucket), and a JSON-encoded attributes block containing provider-specific setup credentials and configuration. The dimensions input flows directly into every resource to support multi-environment or multi-region segmentation within the nullplatform platform.",
   "features": [
-    "Creates nullplatform_provider_config for GitLab with group path, access token, and installation URL",
-    "Creates nullplatform_provider_config for GitHub with organization name and App installation ID",
-    "Creates nullplatform_provider_config for Azure DevOps with project, personal access token, and CI agent pool",
-    "Creates nullplatform_provider_config for Bitbucket with workspace, project key, email, API token, installation URL, and collaborator access",
-    "Validates provider-specific required variables at plan time using conditional validation rules",
-    "Segments provider configuration using optional dimensions map for environment or region scoping"
+    "Creates a nullplatform_provider_config resource with GitLab-specific setup including group path, access token, and installation URL",
+    "Creates a nullplatform_provider_config resource with GitHub-specific setup including organization name and App installation ID",
+    "Creates a nullplatform_provider_config resource with Azure DevOps setup including project name, personal access token, and CI agent pool",
+    "Creates a nullplatform_provider_config resource with Bitbucket setup including workspace, project key, installation URL, and collaborator access list",
+    "Enforces provider-specific required variables at plan time using Terraform validation blocks tied to the git_provider selector",
+    "Supports dimensional segmentation of provider configs via a flexible map of key-value dimension labels",
+    "Strips namespace scope from the NRN automatically to ensure provider configs are registered at the correct platform hierarchy level"
   ],
   "inputs": [
     {
@@ -225,22 +218,22 @@ resource "example_resource" "this" {
     },
     {
       "name": "bitbucket_workspace",
-      "description": "Bitbucket workspace that owns the repositories.",
+      "description": "Bitbucket workspace that owns the repositories. Only for git_provider = \\",
       "required": false
     },
     {
       "name": "bitbucket_project_key",
-      "description": "Bitbucket project key under which repositories are created.",
+      "description": "Bitbucket project key under which repositories are created. Only for git_provider = \\",
       "required": false
     },
     {
       "name": "bitbucket_installation_url",
-      "description": "Base URL for the Bitbucket integration. Defaults to Bitbucket Cloud.",
+      "description": "Base URL for the Bitbucket integration. Only for git_provider = \\",
       "required": false
     },
     {
       "name": "bitbucket_collaborators",
-      "description": "Collaborators to grant repository access to. Each entry has an id, a role and a type.",
+      "description": "Collaborators to grant repository access to. Each entry has an id, a role and a type. Only for git_provider = \\",
       "required": false
     },
     {
@@ -250,6 +243,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "664582ab3443e8a501447805134ff7ca"
+  "hash": "78d2c8b0829524bd28615a692ff9331c"
 }
 END_AI_METADATA -->
