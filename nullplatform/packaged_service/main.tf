@@ -26,6 +26,12 @@ locals {
   # Explicitly-listed action components (rare — actions normally come from a spec).
   action_components = { for i, c in local.indexed : i => c if c.type == "action_specification" }
 
+  # resource_ids of the explicitly-listed actions. These win over the same action
+  # arriving through a spec's automatic expansion: the explicit entry carries the
+  # parent_id the author chose, and its name is stable from the very first apply
+  # (when the spec's action_specifications is still empty).
+  explicit_action_ids = toset([for c in local.action_components : c.resource.id])
+
   # Artifact components, split by intent:
   #   create — inline `meta`, no lookup: register a new revision here
   #   lookup — inline `meta` + lookup=true: resolve an existing artifact by identity
@@ -59,7 +65,7 @@ locals {
           resource_id          = a.id
           resource_revision_id = a.last_snapshot_id
           parent_id            = c.resource.id
-        } if try(a.last_snapshot_id, "") != ""
+        } if try(a.last_snapshot_id, "") != "" && !contains(local.explicit_action_ids, a.id)
       ]
     )
   ])
