@@ -46,6 +46,14 @@ variable "components" {
     ])
     error_message = "each artifact `resource` must set EITHER `meta` (register / look up) OR both `resource_id` and `resource_revision_id` — not neither, not both."
   }
+  validation {
+    condition = alltrue([
+      for c in var.components :
+      try(c.parent_resource, null) != null
+      if contains(["link_specification", "action_specification"], c.type)
+    ])
+    error_message = "every link_specification / action_specification component must set `parent_resource` — the package API requires a parent_id on those component types, and without it the BOM is published with a null parent."
+  }
 }
 
 variable "release" {

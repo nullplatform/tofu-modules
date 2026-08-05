@@ -149,6 +149,19 @@ resource "nullplatform_package" "this" {
       condition     = alltrue([for c in var.components : try(c.resource.last_snapshot_id, "") != "" if contains(["service_specification", "link_specification"], c.type)])
       error_message = "every service_specification / link_specification component must have a snapshot (last_snapshot_id) before it can be pinned. Save/update each spec once so a snapshot exists, then package it."
     }
+
+    # A revision's component names must be unique, and pinning the same resource
+    # twice publishes a BOM that claims two revisions of one resource. Checked on
+    # the assembled BOM rather than on var.components, so it also catches a
+    # collision built from two different component entries.
+    precondition {
+      condition     = length(distinct([for c in local.bom : c.name])) == length(local.bom)
+      error_message = "two BOM components resolved to the same name. Component names must be unique within a revision — give the colliding entries distinct `name`s, or drop the duplicate entry."
+    }
+    precondition {
+      condition     = length(distinct([for c in local.bom : c.resource_id])) == length(local.bom)
+      error_message = "the same resource_id appears twice in the BOM. Each resource may be pinned once per revision — check for a resource listed both explicitly and via a spec's expansion, or listed twice explicitly."
+    }
   }
 
   dynamic "components" {

@@ -60,7 +60,7 @@ run "explicit_actions_are_not_duplicated_by_spec_expansion" {
   }
 
   assert {
-    condition = length(distinct([for c in nullplatform_package.this.components : c.resource_id])) == length(nullplatform_package.this.components)
+    condition     = length(distinct([for c in nullplatform_package.this.components : c.resource_id])) == length(nullplatform_package.this.components)
     error_message = "BOM must not pin the same resource_id twice"
   }
 
@@ -190,4 +190,93 @@ run "spec_expansion_skips_actions_without_a_snapshot" {
     condition     = length(nullplatform_package.this.components) == 2
     error_message = "the snapshotless action should be skipped, leaving 1 spec + 1 action"
   }
+}
+
+# A resource may be pinned once per revision. The dedupe above only reconciles a
+# spec's expansion against the explicit entries; two explicit entries for the same
+# action slip past it, so the assembled BOM is checked for uniqueness too.
+run "rejects_the_same_action_listed_twice" {
+  command = plan
+
+  variables {
+    components = [
+      {
+        type = "service_specification"
+        resource = {
+          id                    = "id-spec"
+          slug                  = "sqs-queue"
+          name                  = "SQS Queue"
+          last_snapshot_id      = "snap-spec"
+          visible_to            = ["organization=myorg:account=myaccount"]
+          action_specifications = []
+        }
+      },
+      {
+        type            = "action_specification"
+        resource        = { id = "id-create", slug = "create-sqs-queue", last_snapshot_id = "snap-create" }
+        parent_resource = { id = "id-spec" }
+      },
+      {
+        type            = "action_specification"
+        resource        = { id = "id-create", slug = "create-sqs-queue", last_snapshot_id = "snap-create" }
+        parent_resource = { id = "id-spec" }
+      },
+    ]
+  }
+
+  expect_failures = [nullplatform_package.this]
+}
+
+# The package API requires parent_id on link and action components. Without
+# parent_resource the module used to publish them with a null parent.
+run "rejects_an_action_component_without_parent_resource" {
+  command = plan
+
+  variables {
+    components = [
+      {
+        type = "service_specification"
+        resource = {
+          id                    = "id-spec"
+          slug                  = "sqs-queue"
+          name                  = "SQS Queue"
+          last_snapshot_id      = "snap-spec"
+          visible_to            = ["organization=myorg:account=myaccount"]
+          action_specifications = []
+        }
+      },
+      {
+        type     = "action_specification"
+        resource = { id = "id-create", slug = "create-sqs-queue", last_snapshot_id = "snap-create" }
+      },
+    ]
+  }
+
+  expect_failures = [var.components]
+}
+
+run "rejects_a_link_component_without_parent_resource" {
+  command = plan
+
+  variables {
+    components = [
+      {
+        type = "service_specification"
+        resource = {
+          id                    = "id-spec"
+          slug                  = "sqs-queue"
+          name                  = "SQS Queue"
+          last_snapshot_id      = "snap-spec"
+          visible_to            = ["organization=myorg:account=myaccount"]
+          action_specifications = []
+        }
+      },
+      {
+        type     = "link_specification"
+        resource = { id = "id-link", slug = "connect", last_snapshot_id = "snap-link" }
+      },
+    ]
+  }
+
+  expect_failures = [var.components]
 }
