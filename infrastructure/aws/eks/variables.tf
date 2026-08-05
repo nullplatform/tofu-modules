@@ -231,3 +231,9 @@ variable "encryption_config" {
   # or pass `{}` to use defaults.
   nullable = false
 }
+
+variable "aws_profile" {
+  description = "Optional AWS CLI profile used by the kubernetes provider's exec plugin (`aws eks get-token`) to authenticate against the cluster. If empty, the default AWS credential chain (or the AWS_PROFILE environment variable) is used."
+  type        = string
+  default     = ""
+}
