@@ -23,11 +23,12 @@ variable "components" {
       pin       { resource_id = "…", resource_revision_id = "…" }   # existing ids
     `type` defaults to "oci_image"; `name` (optional) labels it in the BOM/outputs.
   EOT
-  type = list(object({
-    type            = string
-    resource        = any
-    parent_resource = optional(any)
-  }))
+  # `any`, not list(object({... resource = any ...})): inside a homogeneous list
+  # Terraform unifies the `any` across every element, so a service_specification
+  # and a link_specification (different object shapes) have no common base type
+  # and it errors. Bare `any` keeps each element its own type. Every field is read
+  # through try() below, and the validations enforce the structure.
+  type = any
 
   validation {
     condition     = length([for c in var.components : c if c.type == "service_specification"]) == 1
