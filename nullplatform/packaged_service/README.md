@@ -9,11 +9,9 @@ Terraform-defined and CLI-published service packages are interchangeable.
 
 ## Requirements
 
-Provider **`nullplatform/nullplatform` >= 0.0.98** — the first release that
-exposes `last_snapshot_id` **and** `action_specifications` on the service and
-link specification resources (nullplatform/terraform-provider-nullplatform#149).
-The module pins the BOM from those computed attributes, so an older provider
-fails to resolve them.
+Provider **`nullplatform/nullplatform` >= 0.0.99**. It exposes the BOM computed
+fields the module pins (`last_snapshot_id`, `action_specifications`) and handles
+spec updates / republish correctly.
 
 ## Usage
 
