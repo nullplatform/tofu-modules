@@ -9,10 +9,11 @@ Terraform-defined and CLI-published service packages are interchangeable.
 
 ## Requirements
 
-A `nullplatform/nullplatform` provider that exposes `last_snapshot_id` **and**
-`action_specifications` on the service and link specification resources. The
-module pins the BOM from those computed attributes, so an older provider will
-fail to resolve them. (Built locally via `dev_overrides` until released.)
+Provider **`nullplatform/nullplatform` >= 0.0.98** — the first release that
+exposes `last_snapshot_id` **and** `action_specifications` on the service and
+link specification resources (nullplatform/terraform-provider-nullplatform#149).
+The module pins the BOM from those computed attributes, so an older provider
+fails to resolve them.
 
 ## Usage
 
@@ -113,5 +114,5 @@ git/local source.
 | `default_revision_id` | Revision services bind to by default. |
 | `artifacts` | `name => { resource_id, resource_revision_id }` for artifacts registered here. |
 
-See `examples/postgres` for a full "Managed PostgreSQL (Non-Prod)" service + link
-packaged in one apply.
+See `examples/postgres` for a full sample PostgreSQL service + link packaged in
+one apply.

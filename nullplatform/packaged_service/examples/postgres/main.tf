@@ -1,9 +1,7 @@
 ################################################################################
-# Example: package the "Managed PostgreSQL (Non-Prod)" service + link, in the
-# lambdasebasn namespace (332024164), as a versioned nullplatform package.
-#
-# Adapted from the original (org 934477941) example: visible_to repointed to
-# this namespace and the import{} blocks dropped (these are created fresh here).
+# Example: package a sample PostgreSQL database dependency service + its link as
+# a versioned nullplatform package. The specs below are a generic sample — swap
+# in your own service_specification / link_specification.
 ################################################################################
 
 terraform {
@@ -17,17 +15,22 @@ variable "np_api_key" {
   sensitive = true
 }
 
+variable "nrn" {
+  description = "Owner NRN — organization=…:account=…:namespace=… the package lives in."
+  type        = string
+}
+
 provider "nullplatform" {
   api_key = var.np_api_key
 }
 
 locals {
-  nrn = "organization=1255165411:account=95118862:namespace=332024164"
+  nrn = var.nrn
 }
 
-# SERVICE SPECIFICATION
-resource "nullplatform_service_specification" "managed_postgre_sql_non_prod_service" {
-  name                = "Managed PostgreSQL (Non-Prod) Service"
+# SERVICE SPECIFICATION — a sample managed PostgreSQL dependency.
+resource "nullplatform_service_specification" "postgres_service" {
+  name                = "Sample PostgreSQL Database"
   type                = "dependency"
   assignable_to       = "dimension"
   use_default_actions = true
@@ -35,11 +38,9 @@ resource "nullplatform_service_specification" "managed_postgre_sql_non_prod_serv
   visible_to = [local.nrn]
 
   dimensions = jsonencode({
-    "region" : {
-      "required" : true
-    },
+    "region" : { "required" : true },
     "environment" : {
-      "values" : ["dev", "stg"],
+      "values" : ["dev", "stg", "prod"],
       "required" : true
     }
   })
@@ -48,28 +49,20 @@ resource "nullplatform_service_specification" "managed_postgre_sql_non_prod_serv
     "values" : {},
     "schema" : {
       "type" : "object",
-      "required" : ["db_flavor"],
+      "required" : ["size"],
       "properties" : {
         "region" : { "type" : "string", "config" : { "key" : "aws.region" }, "readOnly" : true, "visibleOn" : [] },
-        "db_flavor" : {
-          "enum" : ["STANDARD", "PERFORMANCE", "HIGH_PERFORMANCE"],
-          "type" : "string", "order" : 4, "title" : "Flavor", "default" : "STANDARD",
-          "description" : "STANDARD: 1 ACU | PERFORMANCE: 2 ACUs | HIGH_PERFORMANCE: 4 ACUs"
+        "size" : {
+          "enum" : ["small", "medium", "large"],
+          "type" : "string", "order" : 1, "title" : "Instance size", "default" : "small",
+          "description" : "small: 1 vCPU / 2 GB · medium: 2 vCPU / 8 GB · large: 4 vCPU / 16 GB"
         },
-        "price_net" : { "type" : "string", "order" : 3, "title" : "Data Transfer Price", "default" : "U$S 20/TB", "readOnly" : true, "description" : "Cross-AZ transfer cost. Free within same AZ." },
-        "account_id" : { "type" : "string", "config" : { "key" : "aws.account_id" }, "readOnly" : true, "visibleOn" : [] },
-        "price_data" : { "type" : "string", "order" : 2, "title" : "Storage Price", "default" : "U$S 100/TB", "readOnly" : true, "description" : "Aurora storage cost per terabyte per month" },
-        "price_infra" : { "type" : "string", "order" : 1, "title" : "Infrastructure Price", "default" : "U$S 39 to U$S 291", "readOnly" : true, "description" : "Price of the infrastructure per month" },
-        "service_name" : { "type" : "string", "default" : "Managed PostgreSQL (non-prod) Service Tester", "readOnly" : true, "visibleOn" : [] },
-        "pg_app_password" : { "type" : "string", "export" : { "secret" : false, "target" : "PG_APP_PASSWORD" }, "readOnly" : true, "visibleOn" : [] },
-        "pg_app_username" : { "type" : "string", "export" : { "secret" : false, "target" : "PG_APP_USERNAME" }, "readOnly" : true, "visibleOn" : [] },
-        "pg_database_name" : { "type" : "string", "export" : { "secret" : false, "target" : "PG_DATABASE_NAME" }, "readOnly" : true, "visibleOn" : [] },
-        "pg_app_secret_arn" : { "type" : "string", "export" : { "secret" : true, "target" : "PG_APP_SECRET_ARN" }, "readOnly" : true, "visibleOn" : [] },
-        "pg_reader_endpoint" : { "type" : "string", "export" : { "secret" : false, "target" : "PG_READER_ENDPOINT" }, "readOnly" : true, "visibleOn" : [] },
-        "pg_writer_endpoint" : { "type" : "string", "export" : { "secret" : false, "target" : "PG_WRITER_ENDPOINT" }, "readOnly" : true, "visibleOn" : [] },
-        "pg_migration_password" : { "type" : "string", "export" : { "secret" : false, "target" : "PG_MIGRATION_PASSWORD" }, "readOnly" : true, "visibleOn" : [] },
-        "pg_migration_username" : { "type" : "string", "export" : { "secret" : false, "target" : "PG_MIGRATION_USERNAME" }, "readOnly" : true, "visibleOn" : [] },
-        "pg_migration_secret_arn" : { "type" : "string", "export" : { "secret" : true, "target" : "PG_MIGRATION_SECRET_ARN" }, "readOnly" : true, "visibleOn" : [] }
+        "engine_version" : { "type" : "string", "order" : 2, "title" : "Engine version", "default" : "16", "description" : "PostgreSQL major version." },
+        "db_host" : { "type" : "string", "export" : { "secret" : false, "target" : "DB_HOST" }, "readOnly" : true, "visibleOn" : [] },
+        "db_port" : { "type" : "string", "export" : { "secret" : false, "target" : "DB_PORT" }, "readOnly" : true, "visibleOn" : [] },
+        "db_name" : { "type" : "string", "export" : { "secret" : false, "target" : "DB_NAME" }, "readOnly" : true, "visibleOn" : [] },
+        "db_username" : { "type" : "string", "export" : { "secret" : false, "target" : "DB_USERNAME" }, "readOnly" : true, "visibleOn" : [] },
+        "db_password" : { "type" : "string", "export" : { "secret" : true, "target" : "DB_PASSWORD" }, "readOnly" : true, "visibleOn" : [] }
       },
       "additionalProperties" : false,
       "uiSchema" : {}
@@ -84,10 +77,10 @@ resource "nullplatform_service_specification" "managed_postgre_sql_non_prod_serv
   }
 }
 
-# LINK SPECIFICATION
-resource "nullplatform_link_specification" "managed_postgre_sql_non_prod_link" {
-  name                = "Managed PostgreSQL (non-prod) Link"
-  specification_id    = nullplatform_service_specification.managed_postgre_sql_non_prod_service.id
+# LINK SPECIFICATION — how a service consumes the database above.
+resource "nullplatform_link_specification" "postgres_link" {
+  name                = "Sample PostgreSQL Database Link"
+  specification_id    = nullplatform_service_specification.postgres_service.id
   use_default_actions = true
   unique              = false
 
@@ -122,7 +115,6 @@ module "packaged_service" {
   #   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/packaged_service?ref=v1.0.0"
   source = "../../"
 
-  # Owner NRN — the org/account/namespace the package (and its artifacts) live in.
   nrn = local.nrn
 
   # The bill of materials, one flat list. Pass whole resources — the module reads
@@ -131,12 +123,12 @@ module "packaged_service" {
   components = [
     {
       type     = "service_specification"
-      resource = nullplatform_service_specification.managed_postgre_sql_non_prod_service
+      resource = nullplatform_service_specification.postgres_service
     },
     {
       type            = "link_specification"
-      resource        = nullplatform_link_specification.managed_postgre_sql_non_prod_link
-      parent_resource = nullplatform_service_specification.managed_postgre_sql_non_prod_service
+      resource        = nullplatform_link_specification.postgres_link
+      parent_resource = nullplatform_service_specification.postgres_service
     },
     # A plain service package needs no artifacts. Add one when the package ships
     # an image / git source / blob — registered inline here:
@@ -156,13 +148,16 @@ module "packaged_service" {
   release = {
     version = "0.0.1"
     default = true
-    # slug = "managed-postgres-nonprod"
-    # name = "Managed PostgreSQL (Non-Prod)"
+    # slug = "sample-postgresql-database"
+    # name = "Sample PostgreSQL Database"
   }
 }
 
 output "package_id" {
   value = module.packaged_service.package_id
+}
+output "package_slug" {
+  value = module.packaged_service.package_slug
 }
 output "package_default_version" {
   value = module.packaged_service.default_version
