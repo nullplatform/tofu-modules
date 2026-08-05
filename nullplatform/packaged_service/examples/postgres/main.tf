@@ -113,9 +113,10 @@ resource "nullplatform_link_specification" "managed_postgre_sql_non_prod_link" {
 }
 
 # ── Package the service + link as a versioned package ────────────────────────
-# Publishes ONE package revision whose bill of materials pins the service spec,
-# the link spec, the default actions of both, and any artifacts you add — so
-# consumers bind to an immutable version instead of the live spec.
+# ONE package revision whose bill of materials mirrors nullplatform_package: the
+# service spec (root), the link spec under it, the default actions of both
+# (pinned automatically), plus any artifacts. Consumers bind to an immutable
+# version instead of the live specs.
 module "packaged_service" {
   # For this example, the module in this repo. In real use, pin a released ref:
   #   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/packaged_service?ref=v1.0.0"
@@ -124,33 +125,40 @@ module "packaged_service" {
   # Owner NRN — the org/account/namespace the package (and its artifacts) live in.
   nrn = local.nrn
 
-  # The specs to package. Pass the whole resources, not their ids — the module
-  # reads each one's id, snapshot and default actions itself.
-  service_specification = nullplatform_service_specification.managed_postgre_sql_non_prod_service
-  link_specification    = nullplatform_link_specification.managed_postgre_sql_non_prod_link
+  # The bill of materials, one flat list. Pass whole resources — the module reads
+  # each one's id + snapshot itself and expands every spec's default actions as
+  # children. `parent_resource` places a component under another (link → service).
+  components = [
+    {
+      type     = "service_specification"
+      resource = nullplatform_service_specification.managed_postgre_sql_non_prod_service
+    },
+    {
+      type            = "link_specification"
+      resource        = nullplatform_link_specification.managed_postgre_sql_non_prod_link
+      parent_resource = nullplatform_service_specification.managed_postgre_sql_non_prod_service
+    },
+    # A plain service package needs no artifacts. Add one when the package ships
+    # an image / git source / blob — registered inline here:
+    #   {
+    #     type     = "artifact"
+    #     resource = {
+    #       name = "provisioner"
+    #       type = "git_repository"
+    #       meta = { url = "https://github.com/org/pg-provisioner", reference = "v1.2.0" }
+    #     }
+    #   },
+  ]
 
-  # Semver of the revision to publish. It's `package_version`, not `version`,
-  # because `version` is a reserved module argument in Terraform/OpenTofu (it
-  # only applies to registry sources). Bump it to publish a new revision.
-  package_version = "0.0.1"
-
-  # ── everything below is optional ────────────────────────────────────────────
-  #
-  # slug + name default to the service spec's. Override to set them by hand:
-  #   slug = "managed-postgres-nonprod"
-  #   name = "Managed PostgreSQL (Non-Prod)"
-  #
-  # Artifacts to pin into the revision. A plain service package needs none; add
-  # one when the package ships an image / git source / blob:
-  #   artifacts = [{
-  #     name = "provisioner"
-  #     type = "oci_image"
-  #     meta = { registry = "public.ecr.aws", repository = "org/provisioner", digest = "sha256:…" }
-  #   }]
-  #
-  # alias only matters when the package's default should point at a version OTHER
-  # than the one you're publishing here; omit it and default_version = package_version:
-  #   alias = { default = "0.0.1" }
+  # How to publish. `version` is nested (not a top-level module arg) because a
+  # top-level `version` is reserved by Terraform for registry sources. slug + name
+  # default to the service spec's; override here to set them by hand.
+  release = {
+    version = "0.0.1"
+    default = true
+    # slug = "managed-postgres-nonprod"
+    # name = "Managed PostgreSQL (Non-Prod)"
+  }
 }
 
 output "package_id" {

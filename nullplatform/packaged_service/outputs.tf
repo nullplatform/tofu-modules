@@ -26,7 +26,7 @@ output "default_revision_id" {
 output "artifacts" {
   description = "Artifacts registered by this module: name => { resource_id, resource_revision_id }."
   value = {
-    for k, v in nullplatform_artifact.this : k => {
+    for i, v in nullplatform_artifact.this : local.art_name[i] => {
       resource_id          = v.artifact_id
       resource_revision_id = v.id
     }

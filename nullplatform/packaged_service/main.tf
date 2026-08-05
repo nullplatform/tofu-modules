@@ -1,37 +1,107 @@
 ################################################################################
 # packaged_service
 #
-# Turns a service_specification (+ optional link_specification) into a versioned
-# nullplatform PACKAGE: one revision whose bill of materials pins the service
-# spec, the link spec, every default-created action of both, and the caller's
-# artifacts — each frozen to an exact snapshot. Mirrors what the CLI publishes,
-# so Terraform-defined and CLI-published service packages are interchangeable.
+# Turns a service specification (+ its links + artifacts) into a versioned
+# nullplatform PACKAGE. You describe the bill of materials as ONE flat
+# `components` list that mirrors nullplatform_package.components 1:1; the module
+# pins every entry to an exact snapshot and expands each spec's default actions
+# as children. Mirrors what the CLI publishes, so Terraform-defined and
+# CLI-published service packages are interchangeable.
 ################################################################################
 
 locals {
-  svc = var.service_specification
-  lnk = var.link_specification
+  # The single service_specification is the BOM root; its slug/name/visible_to
+  # become the package defaults when `release` doesn't override them.
+  service = try([for c in var.components : c.resource if c.type == "service_specification"][0], null)
 
-  # `alias.default` is the package's default version; absent → the version we
-  # publish. (Other alias keys are reserved for a later revision → package tags.)
-  default_version = coalesce(try(var.alias["default"], null), var.package_version)
+  visible_to = coalesce(var.release.visible_to, try(local.service.visible_to, null), [var.nrn])
 
-  visible_to = coalesce(var.visible_to, try(local.svc.visible_to, null), [var.nrn])
+  # Index every component so BOM entry names (and for_each keys) are stable.
+  indexed = { for i, c in var.components : tostring(i) => c }
 
-  # Artifacts split by intent (same partitioning as scope_definition/package.tf):
-  #   create — `meta`, lookup=false: register a new revision here
-  #   lookup — `meta`, lookup=true:  resolve an existing artifact by identity
-  #   pinned — explicit ids:         taken as-is
-  artifacts_to_create = { for a in var.artifacts : a.name => a if a.meta != null && !a.lookup }
-  artifacts_to_lookup = { for a in var.artifacts : a.name => a if a.meta != null && a.lookup }
-  artifacts_existing  = { for a in var.artifacts : a.name => a if a.meta == null }
+  # Spec components (service + link): pinned themselves AND expanded into their
+  # default action_specifications as children.
+  spec_components = { for i, c in local.indexed : i => c if contains(["service_specification", "link_specification"], c.type) }
 
-  # Default-created action specs of each spec, keyed by slug for a stable BOM.
-  # Only actions that already have a snapshot can be pinned — skip any without
-  # one (e.g. an old action predating snapshots) rather than sending an empty
-  # resource_revision_id the package API would reject.
-  svc_actions = { for a in try(local.svc.action_specifications, []) : a.slug => a if try(a.last_snapshot_id, "") != "" }
-  lnk_actions = local.lnk == null ? {} : { for a in try(local.lnk.action_specifications, []) : a.slug => a if try(a.last_snapshot_id, "") != "" }
+  # Explicitly-listed action components (rare — actions normally come from a spec).
+  action_components = { for i, c in local.indexed : i => c if c.type == "action_specification" }
+
+  # Artifact components, split by intent:
+  #   create — inline `meta`, no lookup: register a new revision here
+  #   lookup — inline `meta` + lookup=true: resolve an existing artifact by identity
+  #   pinned — explicit ids: taken as-is
+  art_components      = { for i, c in local.indexed : i => c if c.type == "artifact" }
+  artifacts_to_create = { for i, c in local.art_components : i => c if try(c.resource.meta, null) != null && !try(c.resource.lookup, false) }
+  artifacts_to_lookup = { for i, c in local.art_components : i => c if try(c.resource.meta, null) != null && try(c.resource.lookup, false) }
+  artifacts_existing  = { for i, c in local.art_components : i => c if try(c.resource.meta, null) == null }
+
+  # Friendly, stable name per artifact component (for the BOM and outputs).
+  art_name = { for i, c in local.art_components : i => try(c.resource.name, "artifact-${i}") }
+}
+
+locals {
+  # Spec components + their auto-derived default actions. Only actions that
+  # already have a snapshot can be pinned — skip any without one rather than
+  # send an empty resource_revision_id the package API would reject.
+  spec_boms = flatten([
+    for i, c in local.spec_components : concat(
+      [{
+        name                 = "${c.type}/${try(c.resource.slug, i)}"
+        resource_type        = c.type
+        resource_id          = c.resource.id
+        resource_revision_id = c.resource.last_snapshot_id
+        parent_id            = try(c.parent_resource.id, null)
+      }],
+      [
+        for a in try(c.resource.action_specifications, []) : {
+          name                 = "action_specification/${try(c.resource.slug, i)}/${a.slug}"
+          resource_type        = "action_specification"
+          resource_id          = a.id
+          resource_revision_id = a.last_snapshot_id
+          parent_id            = c.resource.id
+        } if try(a.last_snapshot_id, "") != ""
+      ]
+    )
+  ])
+
+  # Explicitly-listed action components.
+  action_boms = [
+    for i, c in local.action_components : {
+      name                 = "action_specification/${try(c.resource.slug, i)}"
+      resource_type        = "action_specification"
+      resource_id          = c.resource.id
+      resource_revision_id = c.resource.last_snapshot_id
+      parent_id            = try(c.parent_resource.id, null)
+    }
+  ]
+
+  # Artifact components (register / lookup / pin).
+  artifact_boms = concat(
+    [for i, c in local.artifacts_to_create : {
+      name                 = "artifact/${local.art_name[i]}"
+      resource_type        = "artifact"
+      resource_id          = nullplatform_artifact.this[i].artifact_id
+      resource_revision_id = nullplatform_artifact.this[i].id
+      parent_id            = try(c.parent_resource.id, null)
+    }],
+    [for i, c in local.artifacts_to_lookup : {
+      name                 = "artifact/${local.art_name[i]}"
+      resource_type        = "artifact"
+      resource_id          = data.nullplatform_artifact.this[i].artifact_id
+      resource_revision_id = data.nullplatform_artifact.this[i].revision_id
+      parent_id            = try(c.parent_resource.id, null)
+    }],
+    [for i, c in local.artifacts_existing : {
+      name                 = "artifact/${local.art_name[i]}"
+      resource_type        = "artifact"
+      resource_id          = c.resource.resource_id
+      resource_revision_id = c.resource.resource_revision_id
+      parent_id            = try(c.parent_resource.id, null)
+    }],
+  )
+
+  # The full bill of materials sent to the package.
+  bom = concat(local.spec_boms, local.action_boms, local.artifact_boms)
 }
 
 # New artifact revisions declared inline on the package.
@@ -39,8 +109,8 @@ resource "nullplatform_artifact" "this" {
   for_each = local.artifacts_to_create
 
   nrn        = var.nrn
-  type       = each.value.type
-  meta       = jsonencode(each.value.meta)
+  type       = try(each.value.resource.type, "oci_image")
+  meta       = jsonencode(each.value.resource.meta)
   visible_to = local.visible_to
 }
 
@@ -49,108 +119,40 @@ data "nullplatform_artifact" "this" {
   for_each = local.artifacts_to_lookup
 
   nrn  = var.nrn
-  type = each.value.type
-  meta = jsonencode(each.value.meta)
+  type = try(each.value.resource.type, "oci_image")
+  meta = jsonencode(each.value.resource.meta)
 }
 
 resource "nullplatform_package" "this" {
-  nrn             = var.nrn
-  slug            = coalesce(var.slug, try(local.svc.slug, null))
-  name            = coalesce(var.name, try(local.svc.name, null))
-  version         = var.package_version
-  default_version = local.default_version
-  tags            = var.tags
-  visible_to      = local.visible_to
+  nrn        = var.nrn
+  slug       = coalesce(var.release.slug, try(local.service.slug, null))
+  name       = coalesce(var.release.name, try(local.service.name, null))
+  version    = var.release.version
+  default    = var.release.default
+  visible_to = local.visible_to
 
-  # A component can only be pinned to an existing snapshot. The service spec
-  # (BOM root) and the link spec — if given — are mandatory, so fail clearly
-  # when they have no snapshot yet instead of publishing a broken revision.
-  # (Saving/updating a spec once creates its first snapshot.)
+  # A component can only be pinned to an existing snapshot. The service spec (BOM
+  # root) and every link are mandatory, so fail clearly when one has no snapshot
+  # yet instead of publishing a broken revision. (Saving a spec once creates it.)
   lifecycle {
     precondition {
-      condition     = try(local.svc.last_snapshot_id, "") != ""
-      error_message = "service_specification has no snapshot yet (last_snapshot_id is empty). Save/update the service specification once so a snapshot exists, then package it."
+      condition     = local.service != null
+      error_message = "components must include a service_specification — it's the root of the package's bill of materials."
     }
     precondition {
-      condition     = local.lnk == null || try(local.lnk.last_snapshot_id, "") != ""
-      error_message = "link_specification has no snapshot yet (last_snapshot_id is empty). Save/update the link specification once so a snapshot exists, then package it."
+      condition     = alltrue([for c in var.components : try(c.resource.last_snapshot_id, "") != "" if contains(["service_specification", "link_specification"], c.type)])
+      error_message = "every service_specification / link_specification component must have a snapshot (last_snapshot_id) before it can be pinned. Save/update each spec once so a snapshot exists, then package it."
     }
   }
 
-  # Service specification — root of the bill of materials.
-  components {
-    name                 = "service"
-    resource_type        = "service_specification"
-    resource_id          = local.svc.id
-    resource_revision_id = local.svc.last_snapshot_id
-  }
-
-  # Service default actions (child of the service spec).
   dynamic "components" {
-    for_each = local.svc_actions
+    for_each = local.bom
     content {
-      name                 = "service-action-${components.key}"
-      resource_type        = "action_specification"
-      resource_id          = components.value.id
-      resource_revision_id = components.value.last_snapshot_id
-      parent_id            = local.svc.id
-    }
-  }
-
-  # Link specification (child of the service spec) — only when a link is given.
-  dynamic "components" {
-    for_each = local.lnk == null ? {} : { link = local.lnk }
-    content {
-      name                 = "link"
-      resource_type        = "link_specification"
-      resource_id          = components.value.id
-      resource_revision_id = components.value.last_snapshot_id
-      parent_id            = local.svc.id
-    }
-  }
-
-  # Link default actions (child of the link spec).
-  dynamic "components" {
-    for_each = local.lnk_actions
-    content {
-      name                 = "link-action-${components.key}"
-      resource_type        = "action_specification"
-      resource_id          = components.value.id
-      resource_revision_id = components.value.last_snapshot_id
-      parent_id            = local.lnk.id
-    }
-  }
-
-  # Artifacts registered by this module.
-  dynamic "components" {
-    for_each = nullplatform_artifact.this
-    content {
-      name                 = components.key
-      resource_type        = "artifact"
-      resource_id          = components.value.artifact_id
-      resource_revision_id = components.value.id
-    }
-  }
-
-  # Artifacts resolved by identity lookup.
-  dynamic "components" {
-    for_each = data.nullplatform_artifact.this
-    content {
-      name                 = components.key
-      resource_type        = "artifact"
-      resource_id          = components.value.artifact_id
-      resource_revision_id = components.value.revision_id
-    }
-  }
-
-  # Artifacts registered elsewhere, pinned as-is.
-  dynamic "components" {
-    for_each = local.artifacts_existing
-    content {
-      name                 = components.key
-      resource_type        = "artifact"
+      name                 = components.value.name
+      resource_type        = components.value.resource_type
       resource_id          = components.value.resource_id
       resource_revision_id = components.value.resource_revision_id
+      parent_id            = components.value.parent_id
     }
   }
 }

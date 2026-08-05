@@ -1,11 +1,11 @@
 # packaged_service
 
-Turns a `nullplatform_service_specification` (+ optional `nullplatform_link_specification`)
-into a versioned nullplatform **package**: one revision whose bill of materials
-pins the service spec, the link spec, every default-created action of both, and
-your artifacts — each frozen to an exact snapshot. Mirrors what `np package
-publish` registers, so Terraform-defined and CLI-published service packages are
-interchangeable.
+Turns a `nullplatform_service_specification` (+ its links and artifacts) into a
+versioned nullplatform **package**. You describe the bill of materials as one
+flat `components` list that mirrors `nullplatform_package.components` 1:1; the
+module pins every entry to an exact snapshot and expands each spec's default
+actions as children. Mirrors what `np package publish` registers, so
+Terraform-defined and CLI-published service packages are interchangeable.
 
 ## Requirements
 
@@ -22,66 +22,85 @@ module "packaged_service" {
 
   nrn = "organization=…:account=…:namespace=…"
 
-  service_specification = nullplatform_service_specification.my_service
-  link_specification    = nullplatform_link_specification.my_link  # optional
+  components = [
+    {
+      type     = "service_specification"
+      resource = nullplatform_service_specification.postgres
+    },
+    {
+      type            = "link_specification"
+      resource        = nullplatform_link_specification.postgres
+      parent_resource = nullplatform_service_specification.postgres
+    },
+    {
+      type     = "artifact"
+      resource = {
+        type = "git_repository"
+        meta = { url = "https://github.com/org/pg-provisioner", reference = "v1.2.0" }
+      }
+    },
+  ]
 
-  package_version = "0.0.1"   # bump to publish a new revision
+  release = {
+    version = "0.0.1"   # bump to publish a new revision
+    default = true      # promote this revision to the package default
+  }
 }
 ```
 
-You pass the **whole resource objects** for `service_specification` /
-`link_specification`; the module reads their `id`, `last_snapshot_id` and
-`action_specifications` itself.
+You pass the **whole resource objects** in `components`; the module reads each
+one's `id`, `last_snapshot_id` and `action_specifications` itself, and pins every
+spec's default actions as child components automatically — you never list them.
 
-### Overriding the defaults
+## The `components` list
 
-Everything else is optional. Set any of these by hand:
+One entry per thing in the bill of materials — it maps 1:1 onto
+`nullplatform_package.components`.
+
+| Field | Required | Meaning |
+|-------|----------|---------|
+| `type` | yes | `service_specification` \| `link_specification` \| `artifact` \| `action_specification` |
+| `resource` | yes | The whole TF resource to pin (for `artifact`: an inline object, below). |
+| `parent_resource` | no | The resource this hangs off — e.g. a link's service. Root components omit it. |
+
+Exactly **one** `service_specification` is required — it's the BOM root and its
+`slug` / `name` / `visible_to` become the package defaults.
+
+An `artifact`'s `resource` is an inline object doing exactly one of:
 
 ```hcl
-  slug      = "my-service"                 # defaults to the service spec's slug
-  name      = "My Service"                 # defaults to the service spec's name
-  visible_to = ["organization=…:account=…:namespace=…"]  # defaults to the spec's
-
-  # Pin an artifact the package ships (image / git source / blob):
-  artifacts = [{
-    name = "provisioner"
-    type = "oci_image"
-    meta = { registry = "public.ecr.aws", repository = "org/provisioner", digest = "sha256:…" }
-  }]
-
-  # Only when the default should point at a version you're NOT publishing here:
-  alias = { default = "0.0.2" }
+resource = { type = "oci_image", meta = {…} }                 # register a new revision
+resource = { type = "oci_image", meta = {…}, lookup = true }  # resolve an existing one by identity
+resource = { resource_id = "…", resource_revision_id = "…" }  # pin explicit ids
 ```
+
+`type` defaults to `oci_image`; add `name` to label it in the BOM and the
+`artifacts` output.
+
+## The `release` object
+
+| Field | Required | Default | Meaning |
+|-------|----------|---------|---------|
+| `version` | yes | — | Semver of the revision to publish; bump for a new one. |
+| `default` | no | `true` | Promote this revision to the package default. |
+| `slug` | no | service spec's | Package slug (unique per NRN). |
+| `name` | no | service spec's | Package display name. |
+| `visible_to` | no | service spec's | Package + artifact visibility. |
+
+`version` sits **inside `release`**, not at the top level, because a top-level
+`version` is Terraform's reserved registry-module argument and errors on a
+git/local source.
 
 ## Notes
 
-- **`package_version`, not `version`** — `version` is a reserved module
-  meta-argument in Terraform/OpenTofu (parsed as a registry version constraint,
-  rejected on git sources), so the input is `package_version`.
-- **`alias`** — only the `default` key is honored today and maps to the
-  package's `default_version`; omit it and `default_version = package_version`.
-  Other aliases (e.g. `beta`) are reserved for a later revision → package `tags`.
-- **`link_specification`** is optional — leave it null for a service with no link.
-- **`artifacts`** — same shape as the `scope_definition` module: each entry
-  registers a new revision (`meta`), looks one up by identity (`lookup = true`
-  + `meta`), or pins explicit ids (`resource_id` + `resource_revision_id`).
+- **Default actions are automatic** — every `service_specification` /
+  `link_specification` in `components` contributes its default
+  `action_specifications` as children. List an `action_specification` component
+  yourself only to pin one that a spec didn't create.
+- **No tags yet** — release tags beyond `default` aren't modeled; `release.default`
+  is the only promotion knob today.
 - **Source `@version` sugar** isn't native Terraform — pin the module with a git
-  `?ref=` (or the module registry `version` argument), not `…/packaged_service@1.0.0`.
-
-## Inputs
-
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `service_specification` | any | — | The service spec resource to package (whole object). |
-| `link_specification` | any | `null` | Optional link spec resource (whole object). |
-| `package_version` | string | — | Semver of the revision to publish. |
-| `alias` | map(string) | `{}` | `default` → package default_version. |
-| `artifacts` | list(object) | `[]` | Artifacts to register + pin. |
-| `nrn` | string | — | Owner NRN for the package + artifacts. |
-| `slug` | string | service slug | Package slug (unique per NRN). |
-| `name` | string | service name | Package display name. |
-| `visible_to` | list(string) | service visible_to | Package/artifact visibility. |
-| `tags` | map(string) | `{}` | Release tags (not `default`/`latest`). |
+  `?ref=` (or the registry `version` argument), not `…/packaged_service@1.0.0`.
 
 ## Outputs
 
@@ -89,7 +108,7 @@ Everything else is optional. Set any of these by hand:
 |------|-------------|
 | `package_id` | ID of the published package. |
 | `package_slug` | Slug of the published package. |
-| `published_revision_id` | Revision UUID published for `package_version`. |
+| `published_revision_id` | Revision UUID published for `release.version`. |
 | `default_version` | The package's default version after apply. |
 | `default_revision_id` | Revision services bind to by default. |
 | `artifacts` | `name => { resource_id, resource_revision_id }` for artifacts registered here. |
