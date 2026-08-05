@@ -17,7 +17,12 @@ locals {
   visible_to = coalesce(var.release.visible_to, try(local.service.visible_to, null), [var.nrn])
 
   # Index every component so BOM entry names (and for_each keys) are stable.
-  indexed = { for i, c in var.components : tostring(i) => c }
+  # Zero-padded: Terraform walks maps in lexicographic key order, so a bare
+  # tostring(i) puts "10" between "1" and "2" and the BOM stops following the
+  # order of var.components once there are ten or more entries. components is an
+  # ordered block list, so that shows up as a reordering diff and republishes the
+  # revision for nothing.
+  indexed = { for i, c in var.components : format("%04d", i) => c }
 
   # Spec components (service + link): pinned themselves AND expanded into their
   # default action_specifications as children.
@@ -36,7 +41,10 @@ locals {
   artifacts_existing  = { for i, c in local.art_components : i => c if try(c.resource.meta, null) == null }
 
   # Friendly, stable name per artifact component (for the BOM and outputs).
-  art_name = { for i, c in local.art_components : i => try(c.resource.name, "artifact-${i}") }
+  # tonumber() strips the padding the sort key needs: the fallback name is part of
+  # the published BOM, so letting it become "artifact-0005" would rename the
+  # component for every package that relies on the index fallback.
+  art_name = { for i, c in local.art_components : i => try(c.resource.name, "artifact-${tonumber(i)}") }
 }
 
 locals {
