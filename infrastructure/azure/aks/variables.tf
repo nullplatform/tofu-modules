@@ -110,3 +110,44 @@ variable "attach_acr" {
   description = "Whether to grant AKS the AcrPull role on acr_id. Null (default) preserves the legacy behaviour of attaching whenever acr_id is non-null. Set to true for a greenfield single-apply where acr_id is known only after apply (keeps the for_each key set plan-stable); set to false to disable."
   default     = null
 }
+
+# ==============================================================================
+# Availability zones
+#
+# `node_pools` in the upstream module (Azure/aks/azurerm) declares the field as
+# `zones`. This module passed `availability_zones`, and Terraform DISCARDS
+# attributes that are absent from an object({...}) type rather than failing, so
+# the value never reached Azure: pools created by this module have no zone
+# spread. The system pool had no zones either -- upstream takes those through
+# the top-level `agents_availability_zones`, which was never set.
+#
+# Both default to null, which is exactly what the clusters got until now, so
+# existing deployments see no diff -- verified against a live cluster: the plan
+# is byte-identical with the defaults, and setting them is what finally makes
+# `zones` show up in the diff.
+# ==============================================================================
+
+variable "node_pool_zones" {
+  description = <<-EOT
+    Availability zones for the user node pool, e.g. ["1", "2", "3"].
+    Null (default) leaves the pool unzoned. Set it deliberately on a live
+    cluster: Azure treats a pool's zones as immutable, and upstream rotates the
+    pool through `temporary_name_for_rotation` to honour the change.
+  EOT
+  type        = set(string)
+  default     = null
+}
+
+# list, not set: upstream declares `agents_availability_zones` as list(string),
+# while `node_pools.zones` is set(string). Matching each exactly avoids relying
+# on an implicit conversion whose ordering is not guaranteed.
+variable "system_pool_zones" {
+  description = <<-EOT
+    Availability zones for the system node pool, e.g. ["1", "2", "3"].
+    Null (default) leaves the pool unzoned. Set it deliberately on a live
+    cluster: Azure treats a pool's zones as immutable, and upstream rotates the
+    pool through `temporary_name_for_rotation` to honour the change.
+  EOT
+  type        = list(string)
+  default     = null
+}
