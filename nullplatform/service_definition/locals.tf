@@ -74,5 +74,4 @@ locals {
 
 locals {
   service_specification_id = nullplatform_service_specification.from_template.id
-  service_slug             = nullplatform_service_specification.from_template.slug
 }
