@@ -82,9 +82,21 @@ The agent reads these (os.Getenv) to pick the backend and shape worker pods.
   value: {{ .security | default "mtls" | quote }}
 - name: NP_WORKER_NAMESPACE
   value: {{ .namespace | default $.Values.namespace | quote }}
+# Stable per-install identity: this agent only manages workers labelled with it,
+# so two agents in one cluster never collide or cross-talk.
+- name: NP_AGENT_INSTANCE
+  value: {{ $.Release.Name | quote }}
 {{- if .allowedRegistries }}
 - name: NP_ALLOWED_REGISTRIES
   value: {{ join "," .allowedRegistries | quote }}
+{{- end }}
+{{- if .patches }}
+- name: NP_WORKER_PATCHES
+  value: {{ .patches | toJson | quote }}
+{{- end }}
+{{- if .idleTTL }}
+- name: NP_WORKER_IDLE_TTL
+  value: {{ .idleTTL | quote }}
 {{- end }}
 {{- if .pins }}
 - name: NP_WORKERS
