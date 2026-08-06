@@ -1,18 +1,6 @@
-variable "scope_manager_assume_role" {
-  description = "ARN of the IAM role for scope and deploy manager"
-  type        = string
-  default     = "arn:aws:iam::283477532906:role/scope_and_deploy_manager"
-}
-
 variable "nrn" {
   description = "Identifier Nullplatform Resources Name"
   type        = string
-}
-
-variable "include_environment" {
-  description = "Whether to use Environment as a default dimension"
-  type        = bool
-  default     = true
 }
 
 variable "domain_name" {
