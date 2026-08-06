@@ -2,29 +2,31 @@
 # Template Fetching
 ################################################################################
 data "http" "service_spec_template" {
-  url = "${var.repository_service_spec}/${var.repository_service_spec_branch}/${var.service_path}/specs/service-spec.json.tpl"
+  count = var.git_provider == "local" ? 0 : 1
+  url   = "${var.repository_service_spec}/${var.repository_service_spec_branch}/${var.service_path}/specs/service-spec.json.tpl"
 }
 
 data "http" "scope_type_template" {
-  url = "${var.repository_scope_template}/${var.repository_scope_template_branch}/${var.service_path}/specs/scope-type-definition.json.tpl"
+  count = var.git_provider == "local" ? 0 : 1
+  url   = "${var.repository_scope_template}/${var.repository_scope_template_branch}/${var.service_path}/specs/scope-type-definition.json.tpl"
 }
 
 data "http" "action_templates" {
-  for_each = local.static_action_specs
+  for_each = var.git_provider == "local" ? toset([]) : local.static_action_specs
   url      = "${var.repository_action_templates}/${var.repository_action_templates_branch}/${var.service_path}/specs/actions/${each.key}.json.tpl"
 }
 
 data "http" "scope_configuration_template" {
-  count = var.create_scope_configuration ? 1 : 0
+  count = var.create_scope_configuration && var.git_provider != "local" ? 1 : 0
   url   = "${var.repository_scope_template}/${var.repository_scope_template_branch}/${var.service_path}/specs/scope-configuration.json.tpl"
 }
 
 # Process service specification template using gomplate with NRN variable
 data "external" "service_spec" {
-  depends_on = [data.http.service_spec_template]
+  depends_on = [data.http.service_spec_template] # no-op cuando git_provider = "local"
 
   program = ["sh", "-c", <<-EOT
-    template_b64="${base64encode(data.http.service_spec_template.response_body)}"
+    template_b64="${base64encode(local.service_spec_template_body)}"
     processed_json=$(echo "$template_b64" | base64 -d | \
     NRN='${var.nrn}' \
     gomplate)
@@ -47,7 +49,7 @@ data "external" "scope_type" {
   ]
 
   program = ["sh", "-c", <<-EOT
-    template_b64="${base64encode(data.http.scope_type_template.response_body)}"
+    template_b64="${base64encode(local.scope_type_template_body)}"
     processed_json=$(echo "$template_b64" | base64 -d | \
     NRN='${local.dependent_env_vars.NRN}' \
     SERVICE_SPECIFICATION_ID='${local.dependent_env_vars.SERVICE_SPECIFICATION_ID}' \
@@ -69,7 +71,7 @@ data "external" "action_specs" {
   ]
 
   program = ["sh", "-c", <<-EOT
-    template_b64="${base64encode(try(data.http.action_templates[each.key].response_body, "{}"))}"
+    template_b64="${base64encode(try(local.action_template_bodies[each.key], "{}"))}"
     processed_json=$(echo "$template_b64" | base64 -d | \
     NRN='${local.dependent_env_vars.NRN}' \
     SERVICE_SPECIFICATION_ID='${local.dependent_env_vars.SERVICE_SPECIFICATION_ID}' \

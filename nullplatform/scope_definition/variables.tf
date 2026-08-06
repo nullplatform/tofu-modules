@@ -171,3 +171,19 @@ variable "extra_visible_to_nrns" {
   type        = list(string)
   default     = []
 }
+
+variable "git_provider" {
+  type        = string
+  default     = "github"
+  description = "Where to read the scope specs from. Supported values: \"github\", \"local\"."
+  validation {
+    condition     = contains(["github", "local"], var.git_provider)
+    error_message = "git_provider must be \"github\" or \"local\"."
+  }
+}
+
+variable "local_specs_path" {
+  type        = string
+  default     = null
+  description = "Path to the local scope directory containing specs/. Required when git_provider = \"local\". Must contain specs/service-spec.json.tpl, specs/scope-type-definition.json.tpl and specs/actions/*.json.tpl."
+}
