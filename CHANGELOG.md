@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.8.2](https://github.com/nullplatform/tofu-modules/compare/v6.8.1...v6.8.2) (2026-08-06)
+
+
+### Bug Fixes
+
+* **service_definition:** wire `icon` on action specifications ([#468](https://github.com/nullplatform/tofu-modules/issues/468)) ([ae2ac09](https://github.com/nullplatform/tofu-modules/commit/ae2ac092fddb13e000c86d88bf0df4fe6c92da83))
+
 ## [6.8.1](https://github.com/nullplatform/tofu-modules/compare/v6.8.0...v6.8.1) (2026-08-04)
 
 
