@@ -79,7 +79,7 @@ The agent reads these (os.Getenv) to pick the backend and shape worker pods.
 - name: NP_WORKER_BACKEND
   value: {{ .backend | default "kubernetes" | quote }}
 - name: NP_WORKER_SECURITY
-  value: {{ .security | default "mtls" | quote }}
+  value: {{ .security | default "insecure" | quote }}
 - name: NP_WORKER_NAMESPACE
   value: {{ .namespace | default $.Values.namespace | quote }}
 # Stable per-install identity: this agent only manages workers labelled with it,
