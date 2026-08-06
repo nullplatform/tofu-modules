@@ -89,3 +89,13 @@ variable "dimensions" {
   default     = {}
   description = "Key-value pairs for dimensions to be associated with the service specification"
 }
+
+variable "repository_ref_type" {
+  type        = string
+  default     = "heads"
+  description = "Git ref namespace for `repository_branch` on GitHub: \"heads\" for a branch, \"tags\" for a tag, or \"\" to treat it as a raw commit SHA. Defaults to \"heads\", preserving previous behaviour."
+  validation {
+    condition     = contains(["heads", "tags", ""], var.repository_ref_type)
+    error_message = "repository_ref_type must be \"heads\", \"tags\" or \"\"."
+  }
+}
