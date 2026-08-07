@@ -49,6 +49,7 @@ module "aks" {
   temporary_name_for_rotation = "systempool"
   agents_pool_max_surge       = "10%"
   agents_availability_zones   = var.system_pool_zones
+  agents_count                = var.system_pool_node_count
 
   ############################################
   # Node pools (user workloads)
@@ -58,8 +59,8 @@ module "aks" {
       name                 = "nodepool"
       vm_size              = var.user_pool_vm_size
       auto_scaling_enabled = true
-      min_count            = 1
-      max_count            = 5
+      min_count            = var.user_pool_min_count
+      max_count            = var.user_pool_max_count
       #node_count           = 3
       # The upstream module calls this `zones`. `availability_zones` was silently
       # discarded -- Terraform drops attributes that are absent from an

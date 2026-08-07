@@ -163,3 +163,34 @@ variable "system_pool_zones" {
   type        = list(string)
   default     = null
 }
+
+# ==============================================================================
+# Node counts
+#
+# These were hardcoded (user pool min=1/max=5, system pool implicitly 2 via the
+# upstream default). Hardcoding min=1 capped baseline HA: at rest the user pool
+# runs a single node in a single zone, so zone spread only kicks in once
+# autoscaling grows it. Exposing the counts lets a consumer set a multi-node
+# floor that actually spans the zones above.
+#
+# Defaults equal the previous hardcoded values, so this is behaviour-preserving:
+# existing consumers see no diff until they raise the floor deliberately.
+# ==============================================================================
+
+variable "user_pool_min_count" {
+  description = "Minimum node count for the autoscaling user pool. Raise to >=2 (with node_pool_zones set) for a multi-zone baseline."
+  type        = number
+  default     = 1
+}
+
+variable "user_pool_max_count" {
+  description = "Maximum node count for the autoscaling user pool."
+  type        = number
+  default     = 5
+}
+
+variable "system_pool_node_count" {
+  description = "Fixed node count for the system pool. Defaults to 2, the upstream default this module relied on implicitly."
+  type        = number
+  default     = 2
+}
