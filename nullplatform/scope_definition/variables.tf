@@ -58,25 +58,15 @@ variable "repo_path" {
 }
 
 variable "action_spec_names" {
-  description = "List of action specification template names to fetch and create for scope operations"
+  description = <<-EOT
+    List of action specification template names to fetch and create for scope
+    operations. Default `null` -> use the `available_actions` array from the
+    scope's `service-spec.json.tpl` (fetched via `repository_service_spec` /
+    `service_path`). Set this explicitly only when the spec's list is wrong
+    for your case or the spec predates the `available_actions` field.
+  EOT
   type        = list(string)
-  default = [
-    "create-scope",
-    "delete-scope",
-    "start-initial",
-    "start-blue-green",
-    "finalize-blue-green",
-    "rollback-deployment",
-    "delete-deployment",
-    "switch-traffic",
-    "set-desired-instance-count",
-    "pause-autoscaling",
-    "resume-autoscaling",
-    "restart-pods",
-    "kill-instances",
-    "diagnose-deployment",
-    "diagnose-scope"
-  ]
+  default     = null
 }
 
 ################################################################################

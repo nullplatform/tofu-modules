@@ -68,7 +68,9 @@ module "aks" {
 
   }
 
-  attached_acr_id_map                          = var.acr_id != null ? { acr = var.acr_id } : {}
+  # attach_acr null (default) keeps the legacy "attach iff acr_id is non-null" behaviour;
+  # setting it true makes the for_each key set plan-stable when acr_id is known-after-apply.
+  attached_acr_id_map                          = (var.attach_acr != null ? var.attach_acr : var.acr_id != null) ? { acr = var.acr_id } : {}
   network_contributor_role_assigned_subnet_ids = { subnet = var.vnet_subnet_id }
 
   ############################################

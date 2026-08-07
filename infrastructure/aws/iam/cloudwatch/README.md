@@ -20,7 +20,7 @@ The module creates an aws_iam_policy granting CloudWatch Logs and Metrics write 
 
 ```hcl
 module "cloudwatch" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/cloudwatch?ref=v6.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/cloudwatch?ref=v6.8.1"
 
   cluster_name = "your-cluster-name"
 }

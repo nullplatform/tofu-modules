@@ -44,3 +44,29 @@ resource "nullplatform_provider_config" "azure" {
     }
   )
 }
+
+/* If the git_provider variable has the value bitbucket, create this resource.
+
+   The specification is slugged `bitbucket`, not `bitbucket-configuration` like its
+   siblings, and it declares NO credential fields. The bot user's email and API
+   token are environment variables on the application-lifecycle-manager
+   deployment (BITBUCKET_EMAIL and BITBUCKET_API_TOKEN): nullplatform nullifies
+   secret attribute values on authenticated provider reads, so a token stored here
+   would come back null and never reach the workflow that needs it. */
+resource "nullplatform_provider_config" "bitbucket" {
+  count      = local.is_bitbucket ? 1 : 0
+  nrn        = replace(var.nrn, ":namespace=.*$", "")
+  type       = "bitbucket"
+  dimensions = var.dimensions
+  attributes = jsonencode({
+    "setup" : {
+      "workspace" : var.bitbucket_workspace,
+      "project_key" : var.bitbucket_project_key,
+      "installation_url" : coalesce(var.bitbucket_installation_url, "https://bitbucket.org")
+    },
+    "access" : {
+      "collaborators" : var.bitbucket_collaborators
+    },
+    }
+  )
+}

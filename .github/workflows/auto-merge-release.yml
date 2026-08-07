@@ -1,0 +1,69 @@
+name: auto-merge-release-pr
+
+# Triggered via workflow_run (not pull_request) on purpose: the release PR
+# is always opened by github-actions[bot], whose author_association on this
+# repo is CONTRIBUTOR rather than MEMBER/COLLABORATOR. That's enough for
+# GitHub's "require approval for outside collaborators" gate to treat its
+# pull_request-triggered runs as needing manual approval, even though the
+# branch isn't a fork — every recent release PR ended up merged by hand
+# because of this. workflow_run runs use the workflow file from the default
+# branch with full permissions and aren't subject to that gate, and it also
+# naturally waits for the whole "Release Please" run (release + the
+# generate-readmes follow-up commit) to finish before firing, so there's no
+# race with a stale commit to guard against here.
+on:
+  workflow_run:
+    workflows: ["Release Please"]
+    types: [completed]
+
+jobs:
+  find-pr:
+    name: Resolve open release PR
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    outputs:
+      pr_number: ${{ steps.find.outputs.pr_number }}
+    steps:
+      # workflow_run doesn't carry pull_request context, so we resolve the
+      # release PR ourselves and validate its author/label — this is exactly
+      # what the reusable workflow's `pr_number` input expects the caller to
+      # do for non-pull_request triggers.
+      - name: Find open release-please PR
+        id: find
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PR_JSON=$(gh pr list \
+            --repo ${{ github.repository }} \
+            --head release-please--branches--main \
+            --state open \
+            --json number,author,labels \
+            --jq '.[0] // empty')
+
+          if [ -z "$PR_JSON" ]; then
+            echo "No open release-please PR found."
+            echo "pr_number=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          AUTHOR=$(echo "$PR_JSON" | jq -r '.author.login')
+          HAS_LABEL=$(echo "$PR_JSON" | jq '[.labels[].name] | contains(["autorelease: pending"])')
+
+          if [ "$AUTHOR" != "github-actions[bot]" ] || [ "$HAS_LABEL" != "true" ]; then
+            echo "Open PR doesn't match expected author/label. Skipping."
+            echo "pr_number=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "pr_number=$(echo "$PR_JSON" | jq -r '.number')" >> "$GITHUB_OUTPUT"
+
+  automerge:
+    name: Auto-merge release PR
+    needs: find-pr
+    if: needs.find-pr.outputs.pr_number != ''
+    uses: nullplatform/actions-nullplatform/.github/workflows/auto-merge-release.yml@main
+    secrets:
+      app-id: ${{ secrets.APP_RELEASE_ID }}
+      app-private-key: ${{ secrets.APP_RELEASE_PRIVATE_KEY }}
+    with:
+      pr_number: ${{ fromJson(needs.find-pr.outputs.pr_number) }}

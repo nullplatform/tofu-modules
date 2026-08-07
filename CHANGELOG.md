@@ -1,5 +1,48 @@
 # Changelog
 
+## [6.8.2](https://github.com/nullplatform/tofu-modules/compare/v6.8.1...v6.8.2) (2026-08-06)
+
+
+### Bug Fixes
+
+* **service_definition:** wire `icon` on action specifications ([#468](https://github.com/nullplatform/tofu-modules/issues/468)) ([ae2ac09](https://github.com/nullplatform/tofu-modules/commit/ae2ac092fddb13e000c86d88bf0df4fe6c92da83))
+
+## [6.8.1](https://github.com/nullplatform/tofu-modules/compare/v6.8.0...v6.8.1) (2026-08-04)
+
+
+### Bug Fixes
+
+* **code_repository:** align bitbucket config with the current specification ([#463](https://github.com/nullplatform/tofu-modules/issues/463)) ([402c4df](https://github.com/nullplatform/tofu-modules/commit/402c4dfd91eb61b8e0c995559fef81159704fddb))
+
+## [6.8.0](https://github.com/nullplatform/tofu-modules/compare/v6.7.2...v6.8.0) (2026-08-03)
+
+
+### Features
+
+* **scope_definition:** read action list from service spec by default ([#458](https://github.com/nullplatform/tofu-modules/issues/458)) ([3695dbe](https://github.com/nullplatform/tofu-modules/commit/3695dbedc8966a0c032a0fdbcd271a760d73016a))
+
+## [6.7.2](https://github.com/nullplatform/tofu-modules/compare/v6.7.1...v6.7.2) (2026-07-30)
+
+
+### Bug Fixes
+
+* allow gateway egress to additional VPC CIDR blocks ([#452](https://github.com/nullplatform/tofu-modules/issues/452)) ([c6a9f3a](https://github.com/nullplatform/tofu-modules/commit/c6a9f3a0567825a4c130766b4034c582d31d7151))
+* use pull_request trigger with per-PR concurrency instead of workflow_run ([#455](https://github.com/nullplatform/tofu-modules/issues/455)) ([6475fb6](https://github.com/nullplatform/tofu-modules/commit/6475fb682b7d8fa0a80c2e0363a14edbfe312225))
+
+## [6.7.1](https://github.com/nullplatform/tofu-modules/compare/v6.7.0...v6.7.1) (2026-07-28)
+
+
+### Bug Fixes
+
+* **azure/aks:** make ACR attach plan-stable for greenfield applies ([#448](https://github.com/nullplatform/tofu-modules/issues/448)) ([92b29f8](https://github.com/nullplatform/tofu-modules/commit/92b29f8fb93a3bd85c633851efa08f3e2422698f))
+
+## [6.7.0](https://github.com/nullplatform/tofu-modules/compare/v6.6.0...v6.7.0) (2026-07-23)
+
+
+### Features
+
+* add Bitbucket support to code_repository and service_definition modules ([#445](https://github.com/nullplatform/tofu-modules/issues/445)) ([2b680b9](https://github.com/nullplatform/tofu-modules/commit/2b680b952238a304f9c15cba82c5e9fa25180d12))
+
 ## [6.6.0](https://github.com/nullplatform/tofu-modules/compare/v6.5.0...v6.6.0) (2026-07-16)
 
 

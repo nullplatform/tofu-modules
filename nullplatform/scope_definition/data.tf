@@ -10,7 +10,7 @@ data "http" "scope_type_template" {
 }
 
 data "http" "action_templates" {
-  for_each = toset(var.action_spec_names)
+  for_each = local.static_action_specs
   url      = "${var.repository_action_templates}/${var.repository_action_templates_branch}/${var.service_path}/specs/actions/${each.key}.json.tpl"
 }
 
@@ -63,7 +63,7 @@ data "external" "scope_type" {
 # it forces a phantom destroy+recreate of EVERY action_specification
 # instance at once (their `type` is ForceNew).
 data "external" "action_specs" {
-  for_each = toset(var.action_spec_names)
+  for_each = local.static_action_specs
   depends_on = [
     data.http.action_templates
   ]

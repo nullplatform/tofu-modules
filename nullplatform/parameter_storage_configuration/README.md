@@ -20,7 +20,7 @@ The module delegates entirely to a remote `scope_configuration` module sourced f
 
 ```hcl
 module "parameter_storage_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=v6.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=v6.8.1"
 
   attributes                  = "your-attributes"
   np_api_key                  = "your-np-api-key"
@@ -35,6 +35,30 @@ module "parameter_storage_configuration" {
 # Reference outputs in other resources
 resource "example_resource" "this" {
   example_attribute = module.parameter_storage_configuration.provider_config_id
+}
+```
+
+## Supported Types
+
+`type` selects the provider specification this configuration targets. Each type has its own payload and its own set of type-specific variables; adding a new type means adding it to the list below along with its variables.
+
+### aws-secrets-manager (default)
+
+| Variable | Maps to |
+|----------|---------|
+| `applies_to` | `sensibility.applies_to` |
+| `kms_key_id` | `setup.kms_key_id` |
+
+```hcl
+module "parameter_storage_configuration" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=vX.Y.Z"
+
+  np_api_key = "your-np-api-key"
+  nrn        = "your-nrn"
+  type       = "aws-secrets-manager"
+
+  applies_to = ["secret"]
+  kms_key_id = "" # empty = default aws/secretsmanager managed key
 }
 ```
 
