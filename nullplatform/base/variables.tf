@@ -1,7 +1,22 @@
 variable "nullplatform_base_helm_version" {
   description = "Helm chart version for the nullplatform base."
   type        = string
-  default     = "2.40.0"
+  # 2.43.1 carries two fixes over 2.40.0:
+  #   - helm-charts #164: the gateway/tools/apps namespaces no longer delete
+  #     themselves on upgrade (a `lookup` guard dropped them from the manifest,
+  #     which Helm read as a delete, taking the Gateways/HPAs/PDBs with them).
+  #   - helm-charts #165: the gateway PodDisruptionBudgets now select the label
+  #     Istio actually sets (gateway.networking.k8s.io/gateway-name); the old
+  #     istio.io/gateway-name matched zero pods since Istio 1.24.
+  #
+  # UPGRADE HAZARD for existing clusters still on 2.40.0: the namespace-keep
+  # annotation is read from the OLD release manifest, so it is NOT effective on
+  # the very transition 2.40.0 -> 2.43.1 -- the namespace already exists, the
+  # lookup excludes it from both manifests, and Helm can still delete it. Before
+  # applying this bump to a live cluster, annotate the existing namespaces with
+  # `helm.sh/resource-policy: keep` first (kubectl annotate), so Helm skips the
+  # delete. Greenfield installs are unaffected.
+  default = "2.43.1"
 }
 
 variable "namespace" {
