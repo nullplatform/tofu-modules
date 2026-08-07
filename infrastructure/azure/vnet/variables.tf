@@ -26,8 +26,21 @@ variable "subnets_definition" {
   type = map(object({
     name             = string
     address_prefixes = list(string)
+
+    # The AVM submodule accepts this and always renders the field, so leaving it
+    # out is an explicit `routeTable: null` -- i.e. a detach -- not an omission.
+    # On an AKS kubenet subnet that means every plan proposes to strip the route
+    # table AKS attached, which is why `aks_route_table` has to keep putting it
+    # back. Declaring it here lets the subnet own what it actually has.
+    route_table = optional(object({
+      id = string
+    }))
   }))
-  description = "A map of subnets to create within the virtual network. Each subnet requires a name and address_prefixes."
+  description = <<-EOT
+    A map of subnets to create within the virtual network. Each subnet requires
+    a name and address_prefixes, and may set route_table to associate an
+    existing route table.
+  EOT
 }
 
 # Example:

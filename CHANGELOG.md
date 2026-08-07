@@ -1,5 +1,21 @@
 # Changelog
 
+## [6.10.0](https://github.com/nullplatform/tofu-modules/compare/v6.9.0...v6.10.0) (2026-08-07)
+
+
+### Features
+
+* **service_definition:** forward link spec fields from the template ([#477](https://github.com/nullplatform/tofu-modules/issues/477)) ([2994e6b](https://github.com/nullplatform/tofu-modules/commit/2994e6b67a81d00aba769dc7951155cf762e4253))
+
+
+### Bug Fixes
+
+* **ci:** compare release PR author against REST-style bot login ([4e00860](https://github.com/nullplatform/tofu-modules/commit/4e008609e2e8f674d647ae16158a8d5d3807ad67))
+* **ci:** compare release PR author against REST-style bot login ([#481](https://github.com/nullplatform/tofu-modules/issues/481)) ([75a16ea](https://github.com/nullplatform/tofu-modules/commit/75a16ea5d6ab3fefb3955ecbf9a66adb91f70d81))
+* **ci:** trigger release PR auto-merge via workflow_run instead of pull_request ([e7eff48](https://github.com/nullplatform/tofu-modules/commit/e7eff48c66daacfa73594bd7a465c7403f5cfe6b))
+* **ci:** trigger release PR auto-merge via workflow_run instead of pull_request ([#479](https://github.com/nullplatform/tofu-modules/issues/479)) ([80738de](https://github.com/nullplatform/tofu-modules/commit/80738de1b9b1deeaf44121546ce7f51ca4697028))
+* **eks:** support an optional aws_profile for the kubernetes provider exec plugin ([#471](https://github.com/nullplatform/tofu-modules/issues/471)) ([ccb2f5f](https://github.com/nullplatform/tofu-modules/commit/ccb2f5f013221bd848a80a983064c4f46dcfc76d))
+
 ## [6.8.2](https://github.com/nullplatform/tofu-modules/compare/v6.8.1...v6.8.2) (2026-08-06)
 
 

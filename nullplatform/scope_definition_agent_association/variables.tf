@@ -5,6 +5,30 @@ variable "enabled_override" {
   default     = false
 }
 
+variable "worker_orchestrator" {
+  description = <<-EOT
+    Emit a worker-orchestrator (package-exec) channel instead of the legacy
+    git-clone exec channel. When true, the channel routes package-exec commands
+    to an agent that spawns the package's worker image and runs its baked
+    entrypoint — matching what `np package publish` registers. Requires
+    package_slug; set tags_selectors to select the agent (e.g. {package = slug}).
+  EOT
+  type        = bool
+  default     = false
+}
+
+variable "package_slug" {
+  description = "Package/scope slug — the package-exec NP_PLUGIN and default entrypoint path. Required when worker_orchestrator = true."
+  type        = string
+  default     = ""
+}
+
+variable "entrypoint" {
+  description = "Override the worker's baked entrypoint path. Defaults to /app/packages/<package_slug>/entrypoint."
+  type        = string
+  default     = ""
+}
+
 variable "overrides_service_path" {
   description = "Local filesystem path to the directory containing override configurations"
   type        = string
@@ -16,8 +40,9 @@ variable "override_repo_path" {
   default     = null
 }
 
-# Unused here (the fetch uses repository_notification_channel/_branch) but published with
-# a default, so deleting it breaks any consumer that sets it.
+# Retained optional input for backward compatibility; the notification-channel
+# template is sourced from repository_notification_channel(_branch), so this value
+# is not consumed here.
 # tflint-ignore: terraform_unused_declarations
 variable "github_repo_url" {
   description = "GitHub repository URL containing scope and action templates"
@@ -30,7 +55,7 @@ variable "github_repo_url" {
   }
 }
 
-# Same as github_repo_url above.
+# Retained optional input for backward compatibility; see github_repo_url above.
 # tflint-ignore: terraform_unused_declarations
 variable "github_ref" {
   description = "Git reference to use (branch name, tag, or commit SHA)"
