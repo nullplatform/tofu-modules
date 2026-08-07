@@ -49,7 +49,29 @@ variable "service_account_name" {
 variable "nullplatform_agent_helm_version" {
   description = "Version of the nullplatform agent Helm chart to deploy"
   type        = string
-  default     = "2.29.2"
+  # 2.37.0+ ships the worker orchestrator (patches, per-install isolation, idle
+  # reaper, insecure default).
+  default = "2.37.0"
+}
+
+variable "worker" {
+  description = <<-EOT
+    Worker-orchestration config, merged into the agent chart's `worker` block:
+    backend, security, allowedRegistries (deny-by-default registry guardrail),
+    patches (standard k8s patching of workers — the preferred way to shape them),
+    idleTTL (reap idle workers), and the legacy defaults/rules/pins. See the
+    nullplatform-agent chart values (>= 2.37.0) for the full shape. null = chart
+    defaults.
+
+    Example:
+      worker = {
+        allowedRegistries = ["public.ecr.aws/your-org/*"]
+        patches           = [{ target = { package = "my-pkg" }, merge = { spec = { serviceAccountName = "np-agent-sa" } } }]
+        idleTTL           = "30m"
+      }
+  EOT
+  type        = any
+  default     = null
 }
 
 # Kubernetes namespace where the nullplatform agent will run

@@ -105,4 +105,8 @@ locals {
     init_scripts         = var.init_scripts
     service_account_name = var.service_account_name
   })
+
+  # Worker-orchestration config as a second Helm values layer, so the nested
+  # shape (allowedRegistries/patches/rules/pins) passes through verbatim.
+  worker_values = var.worker != null ? yamlencode({ worker = var.worker }) : null
 }
