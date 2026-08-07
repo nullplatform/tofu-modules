@@ -197,16 +197,17 @@ worker:
   backend: kubernetes
   # security between the agent and its workers:
   #   insecure – plaintext, no auth (default). Fine when the network path is
-  #              already isolated (the NetworkPolicy below, a private cluster, a mesh).
+  #              already isolated (a private cluster, a mesh, or the opt-in
+  #              NetworkPolicy below).
   #   mtls     – agent mints a per-process CA, hands each worker a cert, and dials
   #              with a client cert (only the agent can call the worker, encrypted).
   #              No external CA / cert-manager / service mesh. Opt in for it.
   security: insecure
-  # NetworkPolicy so ONLY the agent may reach worker pods (needs a CNI that
-  # enforces NetworkPolicy — Calico/Cilium/EKS/GKE/AKS). Defense in depth on top
-  # of mTLS. Applies to the kubernetes backend.
+  # Opt-in NetworkPolicy so ONLY the agent may reach worker pods (needs a CNI that
+  # enforces it — Calico/Cilium/EKS/GKE/AKS). Off by default; turn it on for
+  # network-level isolation (esp. with security: insecure). k8s backend only.
   networkPolicy:
-    create: true
+    create: false
   # namespace workers are created in (empty = the agent's namespace)
   namespace: ""
   # gRPC port every worker listens on (NP_GRPC_LISTEN)
