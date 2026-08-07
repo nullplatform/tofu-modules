@@ -2,6 +2,13 @@
 # REQUIRED VARIABLES
 ###############################################################################
 
+# Nothing in this module reads it, so tflint's terraform_unused_declarations
+# flags it -- the subscription is selected by the caller's azurerm provider, and
+# a module has no business declaring that provider. It is NOT removed: it is
+# required (no default), so every caller passes it today and dropping it would
+# break them all with "Unsupported argument". Whether the module should keep
+# demanding a value it never sends anywhere is a separate, breaking change.
+# tflint-ignore: terraform_unused_declarations
 variable "subscription_id" {
   type        = string
   description = "The ID of the Azure subscription"
@@ -89,6 +96,11 @@ variable "tags" {
   default     = {}
 }
 
+# Same story: declared for tagging and naming, never actually merged into `tags`
+# or any name, so tflint flags it. Folding it into the tags now would add a tag
+# to every cluster already built by this module -- a diff for every consumer --
+# and removing it would break the ones that pass it. Left as-is deliberately.
+# tflint-ignore: terraform_unused_declarations
 variable "environment" {
   type        = string
   description = "The environment name used for tagging and naming purposes"
