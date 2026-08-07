@@ -1,9 +1,7 @@
-module "config" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v6.1.0"
+resource "nullplatform_provider_config" "parameter_store_configuration" {
+  nrn        = var.nrn
+  type       = var.type
+  dimensions = var.dimensions
 
-  nrn                         = var.nrn
-  np_api_key                  = var.np_api_key
-  provider_specification_slug = var.provider_specification_slug
-  dimensions                  = var.dimensions
-  attributes                  = var.attributes
+  attributes = jsonencode(merge(local.defaults, local.overrides))
 }

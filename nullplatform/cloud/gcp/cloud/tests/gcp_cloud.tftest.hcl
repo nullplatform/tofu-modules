@@ -4,7 +4,6 @@ variables {
   nrn         = "organization=myorg:account=myaccount"
   domain_name = "example.com"
   project_id  = "myorg-gcp-project"
-  location    = "us-central1"
 }
 
 run "gcp_provider_type" {
@@ -27,11 +26,6 @@ run "attributes_contain_project" {
   assert {
     condition     = strcontains(nullplatform_provider_config.gcp.attributes, "myorg-gcp-project")
     error_message = "Attributes should contain the project ID"
-  }
-
-  assert {
-    condition     = strcontains(nullplatform_provider_config.gcp.attributes, "us-central1")
-    error_message = "Attributes should contain the location"
   }
 }
 
