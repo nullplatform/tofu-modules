@@ -1,22 +1,59 @@
 ################################################################################
 # Template Fetching
+#
+# A non-2xx response is NOT an error for the http provider, so without the
+# postconditions below the response body (e.g. `404: Not Found`) flows on as if
+# it were the template: gomplate passes it through and jq dies with
+# `parse error: Expected string key before ':'`, four layers away from the
+# renamed or missing file that actually caused it. The branch defaults track a
+# moving ref, so a rename upstream can break an already-applied state without
+# anything changing in the caller's configuration — assert 200 and let the
+# failure name the URL.
 ################################################################################
 data "http" "service_spec_template" {
   url = "${var.repository_service_spec}/${var.repository_service_spec_branch}/${var.service_path}/specs/service-spec.json.tpl"
+
+  lifecycle {
+    postcondition {
+      condition     = self.status_code == 200
+      error_message = "Fetch of ${self.url} returned HTTP ${self.status_code}, expected 200."
+    }
+  }
 }
 
 data "http" "scope_type_template" {
   url = "${var.repository_scope_template}/${var.repository_scope_template_branch}/${var.service_path}/specs/scope-type-definition.json.tpl"
+
+  lifecycle {
+    postcondition {
+      condition     = self.status_code == 200
+      error_message = "Fetch of ${self.url} returned HTTP ${self.status_code}, expected 200."
+    }
+  }
 }
 
 data "http" "action_templates" {
   for_each = local.static_action_specs
   url      = "${var.repository_action_templates}/${var.repository_action_templates_branch}/${var.service_path}/specs/actions/${each.key}.json.tpl"
+
+  lifecycle {
+    postcondition {
+      condition     = self.status_code == 200
+      error_message = "Fetch of ${self.url} returned HTTP ${self.status_code}, expected 200. Check that the action name is spelled as the template file in the scope repository."
+    }
+  }
 }
 
 data "http" "scope_configuration_template" {
   count = var.create_scope_configuration ? 1 : 0
   url   = "${var.repository_scope_template}/${var.repository_scope_template_branch}/${var.service_path}/specs/scope-configuration.json.tpl"
+
+  lifecycle {
+    postcondition {
+      condition     = self.status_code == 200
+      error_message = "Fetch of ${self.url} returned HTTP ${self.status_code}, expected 200."
+    }
+  }
 }
 
 # Process service specification template using gomplate with NRN variable

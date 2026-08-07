@@ -2,8 +2,18 @@
 # Notification Channel Template Fetching
 ################################################################################
 
+# A non-2xx response is NOT an error for the http provider: the body (e.g.
+# `404: Not Found`) would flow on as if it were the template and fail later
+# while rendering, far from the file that is actually missing.
 data "http" "notification_channel_template" {
   url = "${var.repository_notification_channel}/${var.repository_notification_channel_branch}/${var.service_path}/specs/notification-channel.json.tpl"
+
+  lifecycle {
+    postcondition {
+      condition     = self.status_code == 200
+      error_message = "Fetch of ${self.url} returned HTTP ${self.status_code}, expected 200."
+    }
+  }
 }
 
 ################################################################################
