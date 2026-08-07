@@ -1,5 +1,13 @@
 # Changelog
 
+## [6.11.1](https://github.com/nullplatform/tofu-modules/compare/v6.11.0...v6.11.1) (2026-08-07)
+
+
+### Bug Fixes
+
+* **docs:** bump usage example ref to current release tag ([b685c35](https://github.com/nullplatform/tofu-modules/commit/b685c35369d0a98f2d0e23fe7a216da822184ed3))
+* **docs:** bump usage example ref to current release tag ([#486](https://github.com/nullplatform/tofu-modules/issues/486)) ([6feea3d](https://github.com/nullplatform/tofu-modules/commit/6feea3d238d3428a5847f3893c1183f03856e554))
+
 ## [6.11.0](https://github.com/nullplatform/tofu-modules/compare/v6.10.0...v6.11.0) (2026-08-07)
 
 
