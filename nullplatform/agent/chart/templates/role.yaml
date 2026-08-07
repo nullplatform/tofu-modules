@@ -1,9 +1,0 @@
-{{- if and .Values.serviceAccount.create (not .Values.serviceAccount.clusterWide) -}}
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: {{ include "agent.serviceAccountName" . }}-role
-  namespace: {{ .Values.namespace }}
-rules:
-  {{- toYaml .Values.serviceAccount.role.rules | nindent 3 }}
-{{- end }}
