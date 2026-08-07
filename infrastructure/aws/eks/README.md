@@ -22,7 +22,7 @@ The module wraps terraform-aws-modules/eks to create the EKS cluster (aws_eks_cl
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/eks?ref=v6.11.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/eks?ref=v6.11.2"
 
   aws_subnets_private_ids = "your-aws-subnets-private-ids"
   aws_vpc_vpc_id          = "your-aws-vpc-vpc-id"
@@ -80,6 +80,7 @@ resource "example_resource" "this" {
 | <a name="input_attach_cluster_primary_security_group"></a> [attach\_cluster\_primary\_security\_group](#input\_attach\_cluster\_primary\_security\_group) | Attach cluster primary security group to node groups | `bool` | `true` | no |
 | <a name="input_authentication_mode"></a> [authentication\_mode](#input\_authentication\_mode) | Authentication mode for the EKS cluster. Valid values: CONFIG\_MAP, API, API\_AND\_CONFIG\_MAP. | `string` | `"API_AND_CONFIG_MAP"` | no |
 | <a name="input_auto_mode_node_pools"></a> [auto\_mode\_node\_pools](#input\_auto\_mode\_node\_pools) | Node pools for Auto Mode. Valid values are 'general-purpose' and 'system'. | `list(string)` | <pre>[<br/>  "general-purpose",<br/>  "system"<br/>]</pre> | no |
+| <a name="input_aws_profile"></a> [aws\_profile](#input\_aws\_profile) | Optional AWS CLI profile used by the kubernetes provider's exec plugin (`aws eks get-token`) to authenticate against the cluster. If empty, the default AWS credential chain (or the AWS\_PROFILE environment variable) is used. | `string` | `""` | no |
 | <a name="input_aws_subnets_private_ids"></a> [aws\_subnets\_private\_ids](#input\_aws\_subnets\_private\_ids) | List of private subnet IDs for the EKS cluster and node groups | `list(string)` | n/a | yes |
 | <a name="input_aws_vpc_vpc_id"></a> [aws\_vpc\_vpc\_id](#input\_aws\_vpc\_vpc\_id) | VPC ID where the EKS cluster will be deployed | `string` | n/a | yes |
 | <a name="input_cloudwatch_log_group_retention_in_days"></a> [cloudwatch\_log\_group\_retention\_in\_days](#input\_cloudwatch\_log\_group\_retention\_in\_days) | Number of days to retain log events in the CloudWatch log group | `number` | `90` | no |

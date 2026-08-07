@@ -2,27 +2,27 @@
 
 ## Description
 
-Deploys an Azure Kubernetes Service (AKS) cluster with dual node pools, OIDC/Workload Identity, and optional ACR integration using the Azure/aks/azurerm community module
+Deploys an Azure Kubernetes Service (AKS) cluster with a system node pool, an autoscaling user node pool, workload identity, OIDC issuer, and optional ACR integration using the Azure/aks/azurerm community module
 
 ## Architecture
 
-The module wraps the Azure/aks/azurerm community module (version 11.0.0) which internally provisions azurerm_kubernetes_cluster and azurerm_kubernetes_cluster_node_pool resources. A system node pool is created using agents_size with a dedicated subnet attachment, while a separate user node pool named 'nodepool' is configured with auto-scaling between 1 and 5 nodes across three availability zones. RBAC is enforced with Azure AD tenant binding, OIDC issuer and Workload Identity are enabled, and an optional AcrPull role assignment is made to the specified Azure Container Registry based on the attach_acr and acr_id inputs. Outputs expose the cluster endpoint, CA certificate, client credentials, OIDC issuer URL, and node resource group for downstream consumption.
+The module wraps the Azure/aks/azurerm community module (version 11.0.0) and passes all inputs into it, which internally creates an azurerm_kubernetes_cluster resource with a system agent pool and a separate user node pool via azurerm_kubernetes_cluster_node_pool. Network contributor role assignment is applied to the provided subnet, and when ACR integration is enabled the module creates an azurerm_role_assignment granting AcrPull to the cluster's managed identity. Outputs such as host, cluster_ca_certificate, client credentials, and oidc_issuer_url are surfaced directly from the inner module.
 
 ## Features
 
-- Creates an AKS cluster with a system node pool and a separate auto-scaling user node pool across three availability zones
-- Enables OIDC issuer and Workload Identity for pod-level Azure identity federation
-- Configures Azure RBAC with tenant-scoped AAD integration and role-based access control
-- Attaches an Azure Container Registry with AcrPull role when acr_id is provided
-- Assigns Network Contributor role on the specified VNet subnet for AKS networking
-- Supports optional private cluster mode and API server authorized IP range restrictions
-- Exposes cluster credentials, CA certificates, and OIDC issuer URL as sensitive outputs
+- Creates AKS cluster with separate system and autoscaling user node pools on a specified VNet subnet
+- Enables workload identity and OIDC issuer for pod-level Azure authentication
+- Assigns Network Contributor role to the AKS managed identity on the provided subnet
+- Optionally attaches an Azure Container Registry by granting the AcrPull role to the cluster identity
+- Configures availability zone distribution for both system and user node pools
+- Exposes kubeconfig credentials, OIDC issuer URL, and node resource group as outputs
+- Supports private cluster mode and API server authorized IP range restrictions
 
 ## Basic Usage
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v6.11.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v6.11.2"
 
   cluster_name        = "your-cluster-name"
   location            = "your-location"
@@ -79,12 +79,17 @@ resource "example_resource" "this" {
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment name used for tagging and naming purposes | `string` | `"nullplatform"` | no |
 | <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | The version of Kubernetes to use for the AKS cluster | `string` | `"1.32.7"` | no |
 | <a name="input_location"></a> [location](#input\_location) | The Azure region where the AKS cluster will be deployed (e.g., eastus, westus2) | `string` | n/a | yes |
+| <a name="input_node_pool_zones"></a> [node\_pool\_zones](#input\_node\_pool\_zones) | Availability zones for the user node pool, e.g. ["1", "2", "3"].<br/>Null (default) leaves the pool unzoned. Set it deliberately on a live<br/>cluster: Azure treats a pool's zones as immutable, and upstream rotates the<br/>pool through `temporary_name_for_rotation` to honour the change. | `set(string)` | `null` | no |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | The prefix for resources created by the AKS module | `string` | `"aks"` | no |
 | <a name="input_private_cluster_enabled"></a> [private\_cluster\_enabled](#input\_private\_cluster\_enabled) | Whether to enable private cluster mode (API server accessible only via the private network) | `bool` | `false` | no |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | The name of the resource group where the AKS cluster will be created | `string` | n/a | yes |
 | <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | The ID of the Azure subscription | `string` | n/a | yes |
+| <a name="input_system_pool_node_count"></a> [system\_pool\_node\_count](#input\_system\_pool\_node\_count) | Fixed node count for the system pool. Defaults to 2, the upstream default this module relied on implicitly. | `number` | `2` | no |
 | <a name="input_system_pool_vm_size"></a> [system\_pool\_vm\_size](#input\_system\_pool\_vm\_size) | The VM size for the system node pool (e.g., Standard\_D2s\_v4, Standard\_D4s\_v4) | `string` | `"Standard_D2s_v5"` | no |
+| <a name="input_system_pool_zones"></a> [system\_pool\_zones](#input\_system\_pool\_zones) | Availability zones for the system node pool, e.g. ["1", "2", "3"].<br/>Null (default) leaves the pool unzoned. Set it deliberately on a live<br/>cluster: Azure treats a pool's zones as immutable, and upstream rotates the<br/>pool through `temporary_name_for_rotation` to honour the change. | `list(string)` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to the AKS cluster and related resources | `map(string)` | `{}` | no |
+| <a name="input_user_pool_max_count"></a> [user\_pool\_max\_count](#input\_user\_pool\_max\_count) | Maximum node count for the autoscaling user pool. | `number` | `5` | no |
+| <a name="input_user_pool_min_count"></a> [user\_pool\_min\_count](#input\_user\_pool\_min\_count) | Minimum node count for the autoscaling user pool. Raise to >=2 (with node\_pool\_zones set) for a multi-zone baseline. | `number` | `1` | no |
 | <a name="input_user_pool_vm_size"></a> [user\_pool\_vm\_size](#input\_user\_pool\_vm\_size) | The VM size for the user node pool (e.g., Standard\_D2s\_v5, Standard\_D4s\_v5) | `string` | `"Standard_D2s_v5"` | no |
 | <a name="input_vnet_subnet_id"></a> [vnet\_subnet\_id](#input\_vnet\_subnet\_id) | The ID of the subnet where AKS nodes will be deployed | `string` | n/a | yes |
 
@@ -107,16 +112,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "aks",
-  "description": "Deploys an Azure Kubernetes Service (AKS) cluster with dual node pools, OIDC/Workload Identity, and optional ACR integration using the Azure/aks/azurerm community module",
-  "architecture": "The module wraps the Azure/aks/azurerm community module (version 11.0.0) which internally provisions azurerm_kubernetes_cluster and azurerm_kubernetes_cluster_node_pool resources. A system node pool is created using agents_size with a dedicated subnet attachment, while a separate user node pool named 'nodepool' is configured with auto-scaling between 1 and 5 nodes across three availability zones. RBAC is enforced with Azure AD tenant binding, OIDC issuer and Workload Identity are enabled, and an optional AcrPull role assignment is made to the specified Azure Container Registry based on the attach_acr and acr_id inputs. Outputs expose the cluster endpoint, CA certificate, client credentials, OIDC issuer URL, and node resource group for downstream consumption.",
+  "description": "Deploys an Azure Kubernetes Service (AKS) cluster with a system node pool, an autoscaling user node pool, workload identity, OIDC issuer, and optional ACR integration using the Azure/aks/azurerm community module",
+  "architecture": "The module wraps the Azure/aks/azurerm community module (version 11.0.0) and passes all inputs into it, which internally creates an azurerm_kubernetes_cluster resource with a system agent pool and a separate user node pool via azurerm_kubernetes_cluster_node_pool. Network contributor role assignment is applied to the provided subnet, and when ACR integration is enabled the module creates an azurerm_role_assignment granting AcrPull to the cluster's managed identity. Outputs such as host, cluster_ca_certificate, client credentials, and oidc_issuer_url are surfaced directly from the inner module.",
   "features": [
-    "Creates an AKS cluster with a system node pool and a separate auto-scaling user node pool across three availability zones",
-    "Enables OIDC issuer and Workload Identity for pod-level Azure identity federation",
-    "Configures Azure RBAC with tenant-scoped AAD integration and role-based access control",
-    "Attaches an Azure Container Registry with AcrPull role when acr_id is provided",
-    "Assigns Network Contributor role on the specified VNet subnet for AKS networking",
-    "Supports optional private cluster mode and API server authorized IP range restrictions",
-    "Exposes cluster credentials, CA certificates, and OIDC issuer URL as sensitive outputs"
+    "Creates AKS cluster with separate system and autoscaling user node pools on a specified VNet subnet",
+    "Enables workload identity and OIDC issuer for pod-level Azure authentication",
+    "Assigns Network Contributor role to the AKS managed identity on the provided subnet",
+    "Optionally attaches an Azure Container Registry by granting the AcrPull role to the cluster identity",
+    "Configures availability zone distribution for both system and user node pools",
+    "Exposes kubeconfig credentials, OIDC issuer URL, and node resource group as outputs",
+    "Supports private cluster mode and API server authorized IP range restrictions"
   ],
   "inputs": [
     {
@@ -193,6 +198,31 @@ resource "example_resource" "this" {
       "name": "attach_acr",
       "description": "Whether to grant AKS the AcrPull role on acr_id. Null (default) preserves the legacy behaviour of attaching whenever acr_id is non-null. Set to true for a greenfield single-apply where acr_id is known only after apply (keeps the for_each key set plan-stable); set to false to disable.",
       "required": false
+    },
+    {
+      "name": "node_pool_zones",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "system_pool_zones",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "user_pool_min_count",
+      "description": "Minimum node count for the autoscaling user pool. Raise to >=2 (with node_pool_zones set) for a multi-zone baseline.",
+      "required": false
+    },
+    {
+      "name": "user_pool_max_count",
+      "description": "Maximum node count for the autoscaling user pool.",
+      "required": false
+    },
+    {
+      "name": "system_pool_node_count",
+      "description": "Fixed node count for the system pool. Defaults to 2, the upstream default this module relied on implicitly.",
+      "required": false
     }
   ],
   "outputs": [
@@ -207,6 +237,6 @@ resource "example_resource" "this" {
     "oidc_issuer_url",
     "node_resource_group"
   ],
-  "hash": "a9e0d0d0a9c7729ab5f7b167c2db1b8d"
+  "hash": "f5177eb49e3caf5d2155d3685be48572"
 }
 END_AI_METADATA -->

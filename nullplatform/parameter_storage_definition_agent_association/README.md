@@ -21,7 +21,7 @@ The module creates a terraform_data resource to track API key changes and a null
 
 ```hcl
 module "parameter_storage_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_definition_agent_association?ref=v6.11.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_definition_agent_association?ref=v6.11.2"
 
   api_key = "your-api-key"
   nrn     = "your-nrn"
