@@ -28,16 +28,23 @@ jobs:
       # release PR ourselves and validate its author/label — this is exactly
       # what the reusable workflow's `pr_number` input expects the caller to
       # do for non-pull_request triggers.
+      #
+      # Uses the REST API (`gh api .../pulls`) rather than `gh pr list
+      # --json author`: gh's --json output is GraphQL-backed and represents
+      # this bot as "app/github-actions", not "github-actions[bot]" like the
+      # REST `user.login` (and like github.event.pull_request.user.login,
+      # which the old pull_request-triggered version of this workflow — and
+      # the reusable workflow's release_pr_author default — compare against).
       - name: Find open release-please PR
         id: find
         env:
           GH_TOKEN: ${{ github.token }}
+          REPO_OWNER: ${{ github.repository_owner }}
         run: |
-          PR_JSON=$(gh pr list \
-            --repo ${{ github.repository }} \
-            --head release-please--branches--main \
-            --state open \
-            --json number,author,labels \
+          PR_JSON=$(gh api "repos/${{ github.repository }}/pulls" \
+            -X GET \
+            -f state=open \
+            -f "head=${REPO_OWNER}:release-please--branches--main" \
             --jq '.[0] // empty')
 
           if [ -z "$PR_JSON" ]; then
@@ -46,7 +53,7 @@ jobs:
             exit 0
           fi
 
-          AUTHOR=$(echo "$PR_JSON" | jq -r '.author.login')
+          AUTHOR=$(echo "$PR_JSON" | jq -r '.user.login')
           HAS_LABEL=$(echo "$PR_JSON" | jq '[.labels[].name] | contains(["autorelease: pending"])')
 
           if [ "$AUTHOR" != "github-actions[bot]" ] || [ "$HAS_LABEL" != "true" ]; then
