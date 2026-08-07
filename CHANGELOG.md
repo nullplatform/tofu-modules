@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.11.2](https://github.com/nullplatform/tofu-modules/compare/v6.11.1...v6.11.2) (2026-08-07)
+
+
+### Bug Fixes
+
+* **azure/aks:** make node pools HA-capable (zones + counts) ([#473](https://github.com/nullplatform/tofu-modules/issues/473)) ([dc453bf](https://github.com/nullplatform/tofu-modules/commit/dc453bfa7b9d85e6b851ea0704175d6600acb3bd))
+
 ## [6.11.1](https://github.com/nullplatform/tofu-modules/compare/v6.11.0...v6.11.1) (2026-08-07)
 
 

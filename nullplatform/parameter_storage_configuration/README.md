@@ -20,7 +20,7 @@ The module delegates entirely to a remote `scope_configuration` module sourced f
 
 ```hcl
 module "parameter_storage_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=v6.11.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=v6.11.2"
 
   attributes                  = "your-attributes"
   np_api_key                  = "your-np-api-key"
@@ -69,21 +69,27 @@ module "parameter_storage_configuration" {
 |------|---------|
 | <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.86 |
 
-## Modules
+## Providers
 
-| Name | Source | Version |
-|------|--------|---------|
-| <a name="module_config"></a> [config](#module\_config) | git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration | v6.1.0 |
+| Name | Version |
+|------|---------|
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.96 |
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [nullplatform_provider_config.parameter_store_configuration](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/provider_config) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_attributes"></a> [attributes](#input\_attributes) | Provider-specific configuration matching the provider specification schema (e.g. sensibility.applies\_to, setup.kms\_key\_id). | `any` | n/a | yes |
+| <a name="input_applies_to"></a> [applies\_to](#input\_applies\_to) | aws-secrets-manager only. Resource types this parameter storage configuration applies to. | `list(string)` | <pre>[<br/>  "secret"<br/>]</pre> | no |
 | <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Dimension values for this instance (e.g. { environment = "production" }). | `map(string)` | `{}` | no |
-| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | nullplatform API key. Forwarded to the wrapped scope\_configuration module; the provider is configured at the root. | `string` | n/a | yes |
+| <a name="input_kms_key_id"></a> [kms\_key\_id](#input\_kms\_key\_id) | aws-secrets-manager only. Customer-managed KMS key ARN or alias. If empty, the default aws/secretsmanager managed key is used. | `string` | `""` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | NRN where this parameter-storage instance (provider config) is anchored. | `string` | n/a | yes |
-| <a name="input_provider_specification_slug"></a> [provider\_specification\_slug](#input\_provider\_specification\_slug) | Slug of the parameter-storage provider specification to associate with. Typically the `slug` output of the parameter\_storage\_definition module. | `string` | n/a | yes |
+| <a name="input_type"></a> [type](#input\_type) | Provider specification slug this configuration targets. Determines which default attribute shape is applied — see README for the supported types and their payloads. | `string` | n/a | yes |
 
 ## Outputs
 

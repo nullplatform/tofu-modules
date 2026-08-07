@@ -20,7 +20,7 @@ The module creates a single nullplatform_provider_config resource that binds a N
 
 ```hcl
 module "scope_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v6.11.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v6.11.2"
 
   attributes                  = "your-attributes"
   np_api_key                  = "your-np-api-key"
@@ -61,11 +61,25 @@ resource "example_resource" "this" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_attributes"></a> [attributes](#input\_attributes) | Configuration attributes matching the provider specification schema. | `any` | n/a | yes |
+| <a name="input_aws_distribution"></a> [aws\_distribution](#input\_aws\_distribution) | CDN distribution for serving static files. | `string` | `"cloudfront"` | no |
+| <a name="input_aws_hosted_public_zone_id"></a> [aws\_hosted\_public\_zone\_id](#input\_aws\_hosted\_public\_zone\_id) | Public hosted zone ID for DNS records (e.g., Z1234567890ABC). | `string` | `null` | no |
+| <a name="input_aws_network"></a> [aws\_network](#input\_aws\_network) | DNS provider for managing records. | `string` | `"route53"` | no |
+| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region where resources will be deployed. | `string` | `null` | no |
+| <a name="input_aws_security"></a> [aws\_security](#input\_aws\_security) | Optional WAF attachment for the CloudFront distribution. Choose 'none' to skip, or 'waf' to attach an existing AWS WAF WebACL. | `string` | `"none"` | no |
+| <a name="input_aws_state_bucket"></a> [aws\_state\_bucket](#input\_aws\_state\_bucket) | S3 bucket name for storing OpenTofu state (also used for S3-native state locking). | `string` | `null` | no |
+| <a name="input_aws_web_acl_name"></a> [aws\_web\_acl\_name](#input\_aws\_web\_acl\_name) | Name of an existing AWS WAF WebACL with scope=CLOUDFRONT. Only used when aws\_security = "waf". | `string` | `""` | no |
+| <a name="input_cloud_provider"></a> [cloud\_provider](#input\_cloud\_provider) | static-files only. Cloud provider for this static-files scope configuration. | `string` | `null` | no |
 | <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Dimension values for this configuration. | `map(string)` | `{}` | no |
-| <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication. | `string` | n/a | yes |
+| <a name="input_lambda_available_layers"></a> [lambda\_available\_layers](#input\_lambda\_available\_layers) | aws-lambda-configuration only. Lambda layer ARNs made available for developers to select when creating scopes. | `list(string)` | `[]` | no |
+| <a name="input_lambda_certificate_arn"></a> [lambda\_certificate\_arn](#input\_lambda\_certificate\_arn) | aws-lambda-configuration only. ARN of the certificate to use for the function. Required when lambda\_enable\_endpoint is true (the default). | `string` | `null` | no |
+| <a name="input_lambda_enable_endpoint"></a> [lambda\_enable\_endpoint](#input\_lambda\_enable\_endpoint) | aws-lambda-configuration only. Whether to create an endpoint domain. If true, lambda\_certificate\_arn is required. | `bool` | `true` | no |
+| <a name="input_lambda_provisioned_concurrency_type"></a> [lambda\_provisioned\_concurrency\_type](#input\_lambda\_provisioned\_concurrency\_type) | aws-lambda-configuration only. 'unprovisioned' (default AWS behavior) or 'provisioned' (set a specific limit via lambda\_provisioned\_concurrency\_value). | `string` | `"unprovisioned"` | no |
+| <a name="input_lambda_provisioned_concurrency_value"></a> [lambda\_provisioned\_concurrency\_value](#input\_lambda\_provisioned\_concurrency\_value) | aws-lambda-configuration only. Provisioned concurrency for this function. Required when lambda\_provisioned\_concurrency\_type is 'provisioned'. | `number` | `null` | no |
+| <a name="input_lambda_reserved_concurrency_type"></a> [lambda\_reserved\_concurrency\_type](#input\_lambda\_reserved\_concurrency\_type) | aws-lambda-configuration only. 'unreserved' (default AWS behavior) or 'reserved' (set a specific limit via lambda\_reserved\_concurrency\_value). | `string` | `"unreserved"` | no |
+| <a name="input_lambda_reserved_concurrency_value"></a> [lambda\_reserved\_concurrency\_value](#input\_lambda\_reserved\_concurrency\_value) | aws-lambda-configuration only. Number of concurrent executions to reserve (1-1000). Required when lambda\_reserved\_concurrency\_type is 'reserved'. | `number` | `null` | no |
+| <a name="input_lambda_role_arn"></a> [lambda\_role\_arn](#input\_lambda\_role\_arn) | aws-lambda-configuration only. ARN of the IAM role to use for the function. | `string` | `""` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name (NRN) — unique identifier for the target resource. | `string` | n/a | yes |
-| <a name="input_provider_specification_slug"></a> [provider\_specification\_slug](#input\_provider\_specification\_slug) | Slug of the provider specification (scope configuration type) to associate with. | `string` | n/a | yes |
+| <a name="input_type"></a> [type](#input\_type) | Provider specification slug this scope configuration targets. Determines which set of variables below applies — see README for each type's payload. | `string` | n/a | yes |
 
 ## Outputs
 
