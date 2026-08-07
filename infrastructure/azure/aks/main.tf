@@ -48,6 +48,8 @@ module "aks" {
   agents_size                 = var.system_pool_vm_size
   temporary_name_for_rotation = "systempool"
   agents_pool_max_surge       = "10%"
+  agents_availability_zones   = var.system_pool_zones
+  agents_count                = var.system_pool_node_count
 
   ############################################
   # Node pools (user workloads)
@@ -57,10 +59,14 @@ module "aks" {
       name                 = "nodepool"
       vm_size              = var.user_pool_vm_size
       auto_scaling_enabled = true
-      min_count            = 1
-      max_count            = 5
+      min_count            = var.user_pool_min_count
+      max_count            = var.user_pool_max_count
       #node_count           = 3
-      availability_zones          = ["1", "2", "3"]
+      # The upstream module calls this `zones`. `availability_zones` was silently
+      # discarded -- Terraform drops attributes that are absent from an
+      # object({...}) type instead of failing -- so this pool has been created
+      # with no zone spread at all. See var.node_pool_zones.
+      zones                       = var.node_pool_zones
       vnet_subnet                 = { id = var.vnet_subnet_id }
       upgrade_settings            = { max_surge = "10%", drain_timeout_in_minutes = 0, node_soak_duration_in_minutes = 0 }
       temporary_name_for_rotation = "poolrot"
