@@ -2,27 +2,27 @@
 
 ## Description
 
-Creates and configures a nullplatform notification channel by fetching and processing a JSON template from a remote repository using gomplate and registering it via the nullplatform provider
+Creates and configures a nullplatform notification channel from a remote template, supporting both legacy git-clone exec and worker-orchestrator package-exec modes with optional filter merging and override support
 
 ## Architecture
 
-The module fetches a notification channel template via the `data.http` data source from a configurable raw GitHub URL, then processes it using a `data.external` shell script that invokes gomplate with NRN, API key, and service context variables injected as environment variables. The rendered JSON is decoded in locals to extract type, source, filters, and configuration, which are passed into a `nullplatform_notification_channel` resource along with a dynamic `agent` block that conditionally injects override flags and environment variables into command data. A `terraform_data` resource tracks the API key and triggers replacement of the notification channel when it changes.
+The module fetches a notification channel JSON template via the `data.http` data source from a configurable GitHub raw URL, then processes it using `data.external` with gomplate templating to inject NRN, API key, and scope identifiers. The processed template drives a `nullplatform_notification_channel` resource that dynamically configures an agent block with either a legacy command type or a worker-orchestrator package-exec command based on the `worker_orchestrator` flag. A `terraform_data` resource tracks the API key to trigger replacement of the notification channel when credentials change, and a lifecycle precondition enforces that `package_slug` is provided when worker-orchestrator mode is enabled.
 
 ## Features
 
-- Fetches notification channel templates dynamically from a configurable remote GitHub repository branch
-- Processes templates with gomplate to inject NRN, API key, scope specification ID, and slug at render time
-- Creates a nullplatform_notification_channel resource with dynamic agent configuration including command data and tag-based selectors
-- Merges base template filters with optional extra MongoDB-style filter expressions using $and composition
-- Injects NP_ACTION_CONTEXT environment variable and optional overrides CLI flag into agent command data when override mode is enabled
-- Triggers automatic replacement of the notification channel resource when the API key changes via terraform_data lifecycle dependency
-- Supports configurable repository URL, branch reference, and service path for flexible template sourcing
+- Fetches and renders notification channel templates remotely using gomplate with scope-specific variable injection
+- Creates nullplatform_notification_channel resources supporting both legacy git-clone exec and worker-orchestrator package-exec command types
+- Configures dynamic agent selector blocks using tag-based agent filtering via tags_selectors map
+- Merges base template filters with user-supplied extra_filters using MongoDB-style $and logical composition
+- Supports custom override paths for scope configurations via CLI flag injection into agent commands
+- Triggers automatic notification channel replacement when the API key changes via terraform_data lifecycle tracking
+- Allows custom worker entrypoint override with fallback to the standard /app/packages/<slug>/entrypoint path
 
 ## Basic Usage
 
 ```hcl
 module "scope_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=v6.8.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=v6.11.0"
 
   api_key                  = "your-api-key"
   nrn                      = "your-nrn"
@@ -46,7 +46,7 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.86 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.99 |
 
 ## Providers
 
@@ -71,12 +71,14 @@ resource "example_resource" "this" {
 | <a name="input_api_key"></a> [api\_key](#input\_api\_key) | API key for authenticating with the nullplatform API | `string` | n/a | yes |
 | <a name="input_description"></a> [description](#input\_description) | Description shown for the notification channel. | `string` | `""` | no |
 | <a name="input_enabled_override"></a> [enabled\_override](#input\_enabled\_override) | Enable custom overrides for scope configurations via command line | `bool` | `false` | no |
+| <a name="input_entrypoint"></a> [entrypoint](#input\_entrypoint) | Override the worker's baked entrypoint path. Defaults to /app/packages/<package\_slug>/entrypoint. | `string` | `""` | no |
 | <a name="input_extra_filters"></a> [extra\_filters](#input\_extra\_filters) | Additional filter expression to merge with the base template filters using $and.<br/>Accepts any valid MongoDB-style filter expression, including logical operators<br/>($and, $or, $nor, $not) and comparison operators ($eq, $ne, $in, $nin, $gt,<br/>$gte, $lt, $lte, $regex). If null, only the base template filters are applied.<br/><br/>Examples:<br/>  Simple equality:    { "dimensions.environment" = "production" }<br/>  Comparison:         { "action" = { "$in" = ["deployment:create", "deployment:update"] } }<br/>  Logical OR:         { "$or" = [{ "details.namespace.slug" = "prod" }, { "details.namespace.slug" = "staging" }] }<br/>  Negation:           { "$not" = { "entity\_data.status" = "failed" } }<br/>  Combined:           { "$and" = [{ "action" = { "$regex" = "^deployment" } }, { "$or" = [...] }] } | `any` | `null` | no |
 | <a name="input_github_ref"></a> [github\_ref](#input\_github\_ref) | Git reference to use (branch name, tag, or commit SHA) | `string` | `"beta"` | no |
 | <a name="input_github_repo_url"></a> [github\_repo\_url](#input\_github\_repo\_url) | GitHub repository URL containing scope and action templates | `string` | `"https://github.com/nullplatform/scopes"` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name (NRN) — unique identifier for the target resource | `string` | n/a | yes |
 | <a name="input_override_repo_path"></a> [override\_repo\_path](#input\_override\_repo\_path) | Local filesystem path where the scope repository will be cloned | `string` | `null` | no |
 | <a name="input_overrides_service_path"></a> [overrides\_service\_path](#input\_overrides\_service\_path) | Local filesystem path to the directory containing override configurations | `string` | `null` | no |
+| <a name="input_package_slug"></a> [package\_slug](#input\_package\_slug) | Package/scope slug — the package-exec NP\_PLUGIN and default entrypoint path. Required when worker\_orchestrator = true. | `string` | `""` | no |
 | <a name="input_repo_path"></a> [repo\_path](#input\_repo\_path) | Local filesystem path where the scope repository will be cloned | `string` | `"/root/.np/nullplatform/scopes"` | no |
 | <a name="input_repository_notification_channel"></a> [repository\_notification\_channel](#input\_repository\_notification\_channel) | repository of notification channel template | `string` | `"https://raw.githubusercontent.com/nullplatform/scopes/refs/heads"` | no |
 | <a name="input_repository_notification_channel_branch"></a> [repository\_notification\_channel\_branch](#input\_repository\_notification\_channel\_branch) | branch reference of notification channel template | `string` | `"main"` | no |
@@ -84,6 +86,7 @@ resource "example_resource" "this" {
 | <a name="input_scope_specification_slug"></a> [scope\_specification\_slug](#input\_scope\_specification\_slug) | Slug of the scope (service) specification, used as a filter in the notification channel | `string` | n/a | yes |
 | <a name="input_service_path"></a> [service\_path](#input\_service\_path) | Path to the service directory within the repository structure | `string` | `"k8s"` | no |
 | <a name="input_tags_selectors"></a> [tags\_selectors](#input\_tags\_selectors) | Map of tags used to select and filter channels and agents | `map(string)` | n/a | yes |
+| <a name="input_worker_orchestrator"></a> [worker\_orchestrator](#input\_worker\_orchestrator) | Emit a worker-orchestrator (package-exec) channel instead of the legacy<br/>git-clone exec channel. When true, the channel routes package-exec commands<br/>to an agent that spawns the package's worker image and runs its baked<br/>entrypoint — matching what `np package publish` registers. Requires<br/>package\_slug; set tags\_selectors to select the agent (e.g. {package = slug}). | `bool` | `false` | no |
 
 ## Outputs
 
@@ -95,16 +98,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "scope_definition_agent_association",
-  "description": "Creates and configures a nullplatform notification channel by fetching and processing a JSON template from a remote repository using gomplate and registering it via the nullplatform provider",
-  "architecture": "The module fetches a notification channel template via the `data.http` data source from a configurable raw GitHub URL, then processes it using a `data.external` shell script that invokes gomplate with NRN, API key, and service context variables injected as environment variables. The rendered JSON is decoded in locals to extract type, source, filters, and configuration, which are passed into a `nullplatform_notification_channel` resource along with a dynamic `agent` block that conditionally injects override flags and environment variables into command data. A `terraform_data` resource tracks the API key and triggers replacement of the notification channel when it changes.",
+  "description": "Creates and configures a nullplatform notification channel from a remote template, supporting both legacy git-clone exec and worker-orchestrator package-exec modes with optional filter merging and override support",
+  "architecture": "The module fetches a notification channel JSON template via the `data.http` data source from a configurable GitHub raw URL, then processes it using `data.external` with gomplate templating to inject NRN, API key, and scope identifiers. The processed template drives a `nullplatform_notification_channel` resource that dynamically configures an agent block with either a legacy command type or a worker-orchestrator package-exec command based on the `worker_orchestrator` flag. A `terraform_data` resource tracks the API key to trigger replacement of the notification channel when credentials change, and a lifecycle precondition enforces that `package_slug` is provided when worker-orchestrator mode is enabled.",
   "features": [
-    "Fetches notification channel templates dynamically from a configurable remote GitHub repository branch",
-    "Processes templates with gomplate to inject NRN, API key, scope specification ID, and slug at render time",
-    "Creates a nullplatform_notification_channel resource with dynamic agent configuration including command data and tag-based selectors",
-    "Merges base template filters with optional extra MongoDB-style filter expressions using $and composition",
-    "Injects NP_ACTION_CONTEXT environment variable and optional overrides CLI flag into agent command data when override mode is enabled",
-    "Triggers automatic replacement of the notification channel resource when the API key changes via terraform_data lifecycle dependency",
-    "Supports configurable repository URL, branch reference, and service path for flexible template sourcing"
+    "Fetches and renders notification channel templates remotely using gomplate with scope-specific variable injection",
+    "Creates nullplatform_notification_channel resources supporting both legacy git-clone exec and worker-orchestrator package-exec command types",
+    "Configures dynamic agent selector blocks using tag-based agent filtering via tags_selectors map",
+    "Merges base template filters with user-supplied extra_filters using MongoDB-style $and logical composition",
+    "Supports custom override paths for scope configurations via CLI flag injection into agent commands",
+    "Triggers automatic notification channel replacement when the API key changes via terraform_data lifecycle tracking",
+    "Allows custom worker entrypoint override with fallback to the standard /app/packages/<slug>/entrypoint path"
   ],
   "inputs": [
     {
@@ -140,6 +143,21 @@ resource "example_resource" "this" {
     {
       "name": "enabled_override",
       "description": "Enable custom overrides for scope configurations via command line",
+      "required": false
+    },
+    {
+      "name": "worker_orchestrator",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "package_slug",
+      "description": "Package/scope slug — the package-exec NP_PLUGIN and default entrypoint path. Required when worker_orchestrator = true.",
+      "required": false
+    },
+    {
+      "name": "entrypoint",
+      "description": "Override the worker's baked entrypoint path. Defaults to /app/packages/<package_slug>/entrypoint.",
       "required": false
     },
     {
@@ -191,6 +209,6 @@ resource "example_resource" "this" {
   "outputs": [
     "notification_channel_id"
   ],
-  "hash": "06eed3b017002506f11d1f8dbbbab524"
+  "hash": "6a97a47ed5e232ad6869f1339342808f"
 }
 END_AI_METADATA -->
