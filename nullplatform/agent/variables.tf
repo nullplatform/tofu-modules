@@ -15,7 +15,11 @@ variable "cluster_name" {
   type        = string
 }
 
-# Nullplatform Resource Name - unique identifier for nullplatform resources
+# Nullplatform Resource Name - unique identifier for nullplatform resources.
+# Kept as a required input for interface parity with the other nullplatform
+# modules; the agent resolves its own scope from the API key, so this module does
+# not consume the value directly.
+# tflint-ignore: terraform_unused_declarations
 variable "nrn" {
   description = "Nullplatform Resource Name - unique identifier for nullplatform resources"
   type        = string
