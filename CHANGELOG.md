@@ -1,5 +1,20 @@
 # Changelog
 
+## [6.11.0](https://github.com/nullplatform/tofu-modules/compare/v6.10.0...v6.11.0) (2026-08-07)
+
+
+### Features
+
+* **agent:** worker orchestration passthrough + chart 2.37.0 ([#478](https://github.com/nullplatform/tofu-modules/issues/478)) ([6758a95](https://github.com/nullplatform/tofu-modules/commit/6758a9566e9e0623dec4d91172e8793ed8234c68))
+* **service_definition:** allow pinning specs to a tag or commit SHA ([#470](https://github.com/nullplatform/tofu-modules/issues/470)) ([15b6d47](https://github.com/nullplatform/tofu-modules/commit/15b6d473375031b31f7c8b17049e315bef4fc879))
+
+
+### Bug Fixes
+
+* **azure/vnet:** let a subnet declare its route table ([#475](https://github.com/nullplatform/tofu-modules/issues/475)) ([d2a5faf](https://github.com/nullplatform/tofu-modules/commit/d2a5faf83e8f3297503f961e30a0a3d5b60ae015))
+* **docs:** update usage example to a current release tag ([a167934](https://github.com/nullplatform/tofu-modules/commit/a167934eaa22e97d3a704c1cb1f00ffe731d8ca3))
+* **docs:** update usage example to a current release tag ([#484](https://github.com/nullplatform/tofu-modules/issues/484)) ([ed6f5b0](https://github.com/nullplatform/tofu-modules/commit/ed6f5b06a907ef538c3cb44cb1614e9474414de9))
+
 ## [6.10.0](https://github.com/nullplatform/tofu-modules/compare/v6.9.0...v6.10.0) (2026-08-07)
 
 
