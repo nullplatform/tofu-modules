@@ -2,19 +2,17 @@
 
 ## Description
 
-Creates an Azure Virtual Network with configurable subnets using the Azure Verified Module for network virtual networks
+Creates an Azure virtual network with specified address space and subnets
 
 ## Architecture
 
-The module wraps the azure/avm-res-network-virtualnetwork/azurerm AVM module, passing address_space, name, location, and tags directly into it while constructing the parent_id from the subscription_id and resource_group_name inputs. The subnets_definition map is forwarded to the AVM module's subnets argument, which internally provisions azurerm_subnet resources with optional route table associations. Outputs derive from the AVM module's resource_id and name attributes, with subnet_ids computed by interpolating subnet names against the virtual network resource ID.
+This module creates an Azure virtual network using the azurerm provider and configures it with the specified address space and subnets. The virtual network is created in the specified resource group and location. The module uses the avm_res_network_virtualnetwork module from the azure registry to create the virtual network and its subnets. The module also outputs the resource ID of the virtual network, its name, and a map of subnet names to their resource IDs.
 
 ## Features
 
-- Creates an Azure Virtual Network with one or more CIDR address spaces
-- Provisions multiple subnets with configurable address prefixes via a flexible map input
-- Supports optional route table association per subnet to preserve existing routing configurations
-- Outputs a computed map of subnet names to their full Azure resource IDs
-- Applies resource tags to all virtual network resources
+- Creates Azure virtual network with specified address space
+- Configures subnets within the virtual network
+- Supports custom tagging of virtual network resources
 
 ## Basic Usage
 
@@ -61,7 +59,7 @@ resource "example_resource" "this" {
 | <a name="input_address_space"></a> [address\_space](#input\_address\_space) | The address space (CIDR blocks) for the virtual network (e.g., ["10.0.0.0/16"]) | `set(string)` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | The Azure region where the virtual network will be created (e.g., eastus, westus2) | `string` | n/a | yes |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | The name of the resource group where the virtual network will be created | `string` | n/a | yes |
-| <a name="input_subnets_definition"></a> [subnets\_definition](#input\_subnets\_definition) | A map of subnets to create within the virtual network. Each subnet requires<br/>a name and address\_prefixes, and may set route\_table to associate an<br/>existing route table. | <pre>map(object({<br/>    name             = string<br/>    address_prefixes = list(string)<br/><br/>    # The AVM submodule accepts this and always renders the field, so leaving it<br/>    # out is an explicit `routeTable: null` -- i.e. a detach -- not an omission.<br/>    # On an AKS kubenet subnet that means every plan proposes to strip the route<br/>    # table AKS attached, which is why `aks_route_table` has to keep putting it<br/>    # back. Declaring it here lets the subnet own what it actually has.<br/>    route_table = optional(object({<br/>      id = string<br/>    }))<br/>  }))</pre> | n/a | yes |
+| <a name="input_subnets_definition"></a> [subnets\_definition](#input\_subnets\_definition) | A map of subnets to create within the virtual network. Each subnet requires a name and address\_prefixes. | <pre>map(object({<br/>    name             = string<br/>    address_prefixes = list(string)<br/>  }))</pre> | n/a | yes |
 | <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | The ID of the Azure subscription | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to the virtual network resources | `map(string)` | `{}` | no |
 | <a name="input_vnet_name"></a> [vnet\_name](#input\_vnet\_name) | The name of the virtual network | `string` | n/a | yes |
@@ -78,14 +76,12 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "vnet",
-  "description": "Creates an Azure Virtual Network with configurable subnets using the Azure Verified Module for network virtual networks",
-  "architecture": "The module wraps the azure/avm-res-network-virtualnetwork/azurerm AVM module, passing address_space, name, location, and tags directly into it while constructing the parent_id from the subscription_id and resource_group_name inputs. The subnets_definition map is forwarded to the AVM module's subnets argument, which internally provisions azurerm_subnet resources with optional route table associations. Outputs derive from the AVM module's resource_id and name attributes, with subnet_ids computed by interpolating subnet names against the virtual network resource ID.",
+  "description": "Creates an Azure virtual network with specified address space and subnets",
+  "architecture": "This module creates an Azure virtual network using the azurerm provider and configures it with the specified address space and subnets. The virtual network is created in the specified resource group and location. The module uses the avm_res_network_virtualnetwork module from the azure registry to create the virtual network and its subnets. The module also outputs the resource ID of the virtual network, its name, and a map of subnet names to their resource IDs.",
   "features": [
-    "Creates an Azure Virtual Network with one or more CIDR address spaces",
-    "Provisions multiple subnets with configurable address prefixes via a flexible map input",
-    "Supports optional route table association per subnet to preserve existing routing configurations",
-    "Outputs a computed map of subnet names to their full Azure resource IDs",
-    "Applies resource tags to all virtual network resources"
+    "Creates Azure virtual network with specified address space",
+    "Configures subnets within the virtual network",
+    "Supports custom tagging of virtual network resources"
   ],
   "inputs": [
     {
@@ -110,7 +106,7 @@ resource "example_resource" "this" {
     },
     {
       "name": "subnets_definition",
-      "description": "",
+      "description": "A map of subnets to create within the virtual network. Each subnet requires a name and address_prefixes.",
       "required": true
     },
     {
@@ -129,6 +125,6 @@ resource "example_resource" "this" {
     "vnet_name",
     "subnet_ids"
   ],
-  "hash": "6e0c66f2c0f455a2b357a8d2e0d56ae8"
+  "hash": "fd524b5a584382c1be860e9b6871644c"
 }
 END_AI_METADATA -->

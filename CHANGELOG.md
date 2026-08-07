@@ -14,6 +14,7 @@
 * **azure/vnet:** let a subnet declare its route table ([#475](https://github.com/nullplatform/tofu-modules/issues/475)) ([d2a5faf](https://github.com/nullplatform/tofu-modules/commit/d2a5faf83e8f3297503f961e30a0a3d5b60ae015))
 * **docs:** update usage example to a current release tag ([a167934](https://github.com/nullplatform/tofu-modules/commit/a167934eaa22e97d3a704c1cb1f00ffe731d8ca3))
 * **docs:** update usage example to a current release tag ([#484](https://github.com/nullplatform/tofu-modules/issues/484)) ([ed6f5b0](https://github.com/nullplatform/tofu-modules/commit/ed6f5b06a907ef538c3cb44cb1614e9474414de9))
+* **nullplatform:** fail template fetches that do not return 200 ([#482](https://github.com/nullplatform/tofu-modules/issues/482)) ([c47b78b](https://github.com/nullplatform/tofu-modules/commit/c47b78bcf1c46f40304208637d50b3eb81577844))
 
 ## [6.10.0](https://github.com/nullplatform/tofu-modules/compare/v6.9.0...v6.10.0) (2026-08-07)
 
