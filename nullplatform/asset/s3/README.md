@@ -19,7 +19,7 @@ The module creates a single nullplatform_provider_config resource of type s3-con
 
 ```hcl
 module "s3" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/s3?ref=v6.11.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/s3?ref=v6.8.1"
 
   bucket_name = "your-bucket-name"
   nrn         = "your-nrn"

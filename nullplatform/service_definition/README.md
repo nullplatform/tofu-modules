@@ -2,27 +2,27 @@
 
 ## Description
 
-Provisions nullplatform service, action, and link specifications by fetching JSON template files from a remote Git repository (GitHub, GitLab, or Bitbucket) or a local filesystem path
+Provisions a Nullplatform service specification with its associated action and link specifications by fetching JSON templates from GitHub, GitLab, Bitbucket, or a local filesystem
 
 ## Architecture
 
-The module uses `data.http` resources to fetch `service-spec.json.tpl`, action templates, and link templates from GitHub, GitLab, or Bitbucket raw/API endpoints constructed in `locals.tf`, or reads them directly from the local filesystem when `git_provider = "local"`. Parsed JSON templates are fed into `nullplatform_service_specification.from_template`, which is created first, and then `nullplatform_action_specification.from_templates` and `nullplatform_link_specification.from_templates` are created as `for_each` resources that depend on it. Authentication headers are computed per-provider in locals and injected into all HTTP data source requests, supporting Bearer tokens, GitLab PRIVATE-TOKEN headers, and Bitbucket HTTP Basic auth.
+The module uses data.http resources to fetch service-spec, action, and link JSON templates from a remote git provider (GitHub, GitLab, or Bitbucket) or reads them from local files when git_provider is set to 'local'. Parsed template data flows into a nullplatform_service_specification resource, which is created first and provides its ID to nullplatform_action_specification and nullplatform_link_specification resources via depends_on. Authentication headers are constructed per-provider in locals (Bearer for GitHub, PRIVATE-TOKEN for GitLab, Basic or Bearer for Bitbucket) and passed to each data.http request.
 
 ## Features
 
-- Creates a nullplatform_service_specification resource from a JSON template with configurable name, visibility, type, selectors, and dimensions
-- Creates nullplatform_action_specification resources for each action template fetched from the repository or local filesystem
-- Creates nullplatform_link_specification resources for each link template with support for scopes, dimensions, and external configuration
-- Fetches spec templates from GitHub, GitLab, or Bitbucket using provider-specific URL construction and authentication headers
-- Supports local filesystem spec loading for offline or monorepo workflows via the local_specs_path variable
-- Constructs GitHub raw URLs with configurable ref types (branch heads, tags, or raw commit SHAs) for immutable pinning
-- Supports optional visibility sharing across multiple NRNs via the extra_visibile_to_nrns variable
+- Creates a nullplatform_service_specification resource from a JSON template with configurable name, type, attributes, selectors, and dimensions
+- Fetches service, action, and link spec templates from GitHub, GitLab, Bitbucket, or local filesystem based on git_provider
+- Creates nullplatform_action_specification resources for each entry in available_actions list using fetched templates
+- Creates nullplatform_link_specification resources for each entry in available_links list using fetched templates
+- Configures provider-specific authentication headers including Bearer tokens, GitLab PRIVATE-TOKEN, and Bitbucket HTTP Basic auth
+- Supports visibility scoping via NRN list combining the required nrn with optional extra_visibile_to_nrns
+- Outputs service specification ID and slug for use by downstream modules
 
 ## Basic Usage
 
 ```hcl
 module "service_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v6.11.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v6.8.1"
 
   nrn          = "your-nrn"
   service_name = "your-service-name"
@@ -78,7 +78,6 @@ resource "example_resource" "this" {
 | <a name="input_repository_branch"></a> [repository\_branch](#input\_repository\_branch) | Branch of the service spec repository to use. Must be a short branch name (e.g. "main"), not a full ref. | `string` | `"main"` | no |
 | <a name="input_repository_name"></a> [repository\_name](#input\_repository\_name) | Repository name containing the service spec templates. | `string` | `"service"` | no |
 | <a name="input_repository_org"></a> [repository\_org](#input\_repository\_org) | GitHub organization or GitLab group owning the service spec repository. | `string` | `"nullplatform"` | no |
-| <a name="input_repository_ref_type"></a> [repository\_ref\_type](#input\_repository\_ref\_type) | Git ref namespace for `repository_branch` on GitHub: "heads" for a branch, "tags" for a tag, or "" to treat it as a raw commit SHA. Defaults to "heads", preserving previous behaviour. | `string` | `"heads"` | no |
 | <a name="input_repository_token"></a> [repository\_token](#input\_repository\_token) | Access token for private repositories. GitHub: personal access token or fine-grained token. GitLab: Personal Access Token (PAT) with read\_api scope. | `string` | `null` | no |
 | <a name="input_service_name"></a> [service\_name](#input\_service\_name) | Name of the scope type to be created | `string` | n/a | yes |
 | <a name="input_service_path"></a> [service\_path](#input\_service\_path) | Path within the repository for the specific service (e.g., databases/postgres/k8s) | `string` | n/a | yes |
@@ -94,16 +93,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "service_definition",
-  "description": "Provisions nullplatform service, action, and link specifications by fetching JSON template files from a remote Git repository (GitHub, GitLab, or Bitbucket) or a local filesystem path",
-  "architecture": "The module uses `data.http` resources to fetch `service-spec.json.tpl`, action templates, and link templates from GitHub, GitLab, or Bitbucket raw/API endpoints constructed in `locals.tf`, or reads them directly from the local filesystem when `git_provider = \"local\"`. Parsed JSON templates are fed into `nullplatform_service_specification.from_template`, which is created first, and then `nullplatform_action_specification.from_templates` and `nullplatform_link_specification.from_templates` are created as `for_each` resources that depend on it. Authentication headers are computed per-provider in locals and injected into all HTTP data source requests, supporting Bearer tokens, GitLab PRIVATE-TOKEN headers, and Bitbucket HTTP Basic auth.",
+  "description": "Provisions a Nullplatform service specification with its associated action and link specifications by fetching JSON templates from GitHub, GitLab, Bitbucket, or a local filesystem",
+  "architecture": "The module uses data.http resources to fetch service-spec, action, and link JSON templates from a remote git provider (GitHub, GitLab, or Bitbucket) or reads them from local files when git_provider is set to 'local'. Parsed template data flows into a nullplatform_service_specification resource, which is created first and provides its ID to nullplatform_action_specification and nullplatform_link_specification resources via depends_on. Authentication headers are constructed per-provider in locals (Bearer for GitHub, PRIVATE-TOKEN for GitLab, Basic or Bearer for Bitbucket) and passed to each data.http request.",
   "features": [
-    "Creates a nullplatform_service_specification resource from a JSON template with configurable name, visibility, type, selectors, and dimensions",
-    "Creates nullplatform_action_specification resources for each action template fetched from the repository or local filesystem",
-    "Creates nullplatform_link_specification resources for each link template with support for scopes, dimensions, and external configuration",
-    "Fetches spec templates from GitHub, GitLab, or Bitbucket using provider-specific URL construction and authentication headers",
-    "Supports local filesystem spec loading for offline or monorepo workflows via the local_specs_path variable",
-    "Constructs GitHub raw URLs with configurable ref types (branch heads, tags, or raw commit SHAs) for immutable pinning",
-    "Supports optional visibility sharing across multiple NRNs via the extra_visibile_to_nrns variable"
+    "Creates a nullplatform_service_specification resource from a JSON template with configurable name, type, attributes, selectors, and dimensions",
+    "Fetches service, action, and link spec templates from GitHub, GitLab, Bitbucket, or local filesystem based on git_provider",
+    "Creates nullplatform_action_specification resources for each entry in available_actions list using fetched templates",
+    "Creates nullplatform_link_specification resources for each entry in available_links list using fetched templates",
+    "Configures provider-specific authentication headers including Bearer tokens, GitLab PRIVATE-TOKEN, and Bitbucket HTTP Basic auth",
+    "Supports visibility scoping via NRN list combining the required nrn with optional extra_visibile_to_nrns",
+    "Outputs service specification ID and slug for use by downstream modules"
   ],
   "inputs": [
     {
@@ -124,11 +123,6 @@ resource "example_resource" "this" {
     {
       "name": "git_provider",
       "description": "Git provider to fetch service specs from. Supported values: \\",
-      "required": false
-    },
-    {
-      "name": "repository_ref_type",
-      "description": "Git ref namespace for `repository_branch` on GitHub: \\",
       "required": false
     },
     {
@@ -191,6 +185,6 @@ resource "example_resource" "this" {
     "service_specification_id",
     "service_specification_slug"
   ],
-  "hash": "7532fe14aa033d8cdb88f4965ef68db9"
+  "hash": "0a2d08fcd9c6399fe76d2cb845333039"
 }
 END_AI_METADATA -->

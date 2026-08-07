@@ -2,27 +2,27 @@
 
 ## Description
 
-Provisions a nullplatform scope definition by fetching and rendering gomplate templates from a remote repository to create service specifications, scope types, action specifications, and optionally scope configurations and versioned packages
+Provisions a Nullplatform service specification, scope type, and action specifications by fetching and rendering gomplate templates from a remote repository, then patching the NRN with external provider configuration
 
 ## Architecture
 
-The module fetches JSON templates via `data.http` from configurable GitHub raw URLs and processes them through `data.external` using gomplate and jq shell programs to produce rendered JSON. The rendered outputs are consumed by `nullplatform_service_specification`, `nullplatform_scope_type`, `nullplatform_action_specification`, and optionally `nullplatform_provider_specification` resources, with local IDs and slugs threaded as environment variables between template-processing steps. A `null_resource.nrn_patch` provisioner runs the `np` CLI with `NP_API_KEY` to patch external metrics and logging provider references onto the NRN after all nullplatform resources are created. When `var.package` is set, additional `nullplatform_package` and `nullplatform_artifact` resources are created and wired to the service specification outputs.
+The module fetches JSON templates via data.http resources from a configurable GitHub raw URL, processes them through data.external using gomplate and jq shell commands, and feeds the rendered outputs into nullplatform_service_specification, nullplatform_scope_type, and nullplatform_action_specification resources. A null_resource.nrn_patch uses a local-exec provisioner to invoke the np CLI with the NP_API_KEY environment variable to patch metrics and logging provider configuration on the NRN. Optionally, a nullplatform_provider_specification is created from a scope-configuration template when create_scope_configuration is true, with visibility controlled by concatenating var.nrn and var.extra_visible_to_nrns.
 
 ## Features
 
-- Fetches and renders gomplate service specification, scope type, and action specification templates from configurable remote GitHub repositories
-- Creates nullplatform_service_specification with dynamically parsed attributes, selectors, and visibility from rendered templates
-- Creates nullplatform_scope_type linked to the service specification with provider type resolved from the scope type template
-- Creates one nullplatform_action_specification per action name, sourcing name, type, parameters, results, retryable, icon, and annotations from rendered action templates
-- Patches the NRN with external metrics and logging provider configuration using the np CLI via a null_resource local-exec provisioner
-- Optionally creates a nullplatform_provider_specification from a scope-configuration template when create_scope_configuration is true
-- Optionally registers a versioned nullplatform_package with artifact bill of materials supporting new registration, identity-based lookup, or explicit resource ID pinning
+- Fetches and renders service specification, scope type, and action templates from remote GitHub repositories using gomplate
+- Creates nullplatform_service_specification with attributes, selectors, and cross-account visibility via extra_visible_to_nrns
+- Creates nullplatform_scope_type linked to the service specification with provider type derived from rendered template
+- Creates nullplatform_action_specification resources for each action defined in the service spec or explicitly provided via action_spec_names
+- Patches the NRN with external metrics and logging provider slugs using the np CLI via null_resource local-exec
+- Optionally creates nullplatform_provider_specification from scope-configuration template with override support for name collision avoidance
+- Enforces precondition ensuring at least one action specification is resolved to prevent silent destruction of registered scope actions
 
 ## Basic Usage
 
 ```hcl
 module "scope_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v6.11.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v6.8.1"
 
   np_api_key = "your-np-api-key"
   nrn        = "your-nrn"
@@ -45,7 +45,7 @@ resource "example_resource" "this" {
 |------|---------|
 | <a name="requirement_external"></a> [external](#requirement\_external) | ~> 2.3.5 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | ~> 3.2.4 |
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.99 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.86 |
 
 ## Providers
 
@@ -62,8 +62,6 @@ resource "example_resource" "this" {
 |------|------|
 | [null_resource.nrn_patch](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [nullplatform_action_specification.from_templates](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/action_specification) | resource |
-| [nullplatform_artifact.package](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/artifact) | resource |
-| [nullplatform_package.this](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/package) | resource |
 | [nullplatform_provider_specification.from_scope_configuration](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/provider_specification) | resource |
 | [nullplatform_scope_type.from_template](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/scope_type) | resource |
 | [nullplatform_service_specification.from_template](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/service_specification) | resource |
@@ -79,7 +77,6 @@ resource "example_resource" "this" {
 | <a name="input_extra_visible_to_nrns"></a> [extra\_visible\_to\_nrns](#input\_extra\_visible\_to\_nrns) | Additional NRNs to add to `visible_to` of the `nullplatform_service_specification`<br/>and `nullplatform_provider_specification` created by this module. The base<br/>visible\_to (the spec template's value for the service\_spec, and `[var.nrn]`<br/>for the provider\_spec) is preserved; this list is appended.<br/><br/>Use case: share a scope\_definition with sibling accounts in the same<br/>organization without duplicating it per account. Example:<br/><br/>  extra\_visible\_to\_nrns = ["organization=1636958496"]<br/><br/>makes the spec consumable by every account under that organization.<br/>Default = [] (no extra visibility, backwards compatible). | `list(string)` | `[]` | no |
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key used for executing local commands (e.g., 'np nrn patch') | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Unique NRN identifier of the environment or resource in nullplatform | `string` | n/a | yes |
-| <a name="input_package"></a> [package](#input\_package) | Register this scope definition as a versioned PACKAGE. When set, the module<br/>publishes a package revision whose bill of materials pins the service<br/>specification, every action specification, and the artifacts you list —<br/>so scopes bind to an immutable revision and later template changes never<br/>mutate what already runs.<br/><br/>artifacts: each entry does ONE of:<br/>  • register a new artifact revision — set `meta` (JSON-able object, e.g.<br/>    { registry = "ghcr.io", repository = "acme/img", digest = "sha256:…" });<br/>  • look up one registered elsewhere BY IDENTITY (no ids needed) — set<br/>    `lookup = true` + `meta` with the identity fields (e.g. registry +<br/>    repository; add digest/reference to pin a specific revision, otherwise<br/>    the latest revision is used);<br/>  • pin explicit ids — set `resource_id` + `resource_revision_id`.<br/><br/>Null (the default) keeps the classic module behavior — no package. | <pre>object({<br/>    slug       = optional(string)            # default: the service specification slug<br/>    name       = optional(string)            # default: var.service_spec_name<br/>    version    = string                      # semver of the revision this configuration publishes<br/>    default    = optional(bool, true)        # promote each published revision to the package default<br/>    tags       = optional(map(string), {})   # release tags: name => version (requires an API with the package release-tag routes)<br/>    visible_to = optional(list(string))      # default: [var.nrn]<br/>    artifacts = optional(list(object({<br/>      name                 = string<br/>      type                 = optional(string, "oci_image") # oci_image | oras_artifact | git_repository | blob<br/>      meta                 = optional(any)                 # register (lookup=false) or find (lookup=true)<br/>      lookup               = optional(bool, false)         # true: resolve an EXISTING artifact by meta identity<br/>      resource_id          = optional(string)              # …or pin explicit ids<br/>      resource_revision_id = optional(string)<br/>    })), [])<br/>  })</pre> | `null` | no |
 | <a name="input_repo_path"></a> [repo\_path](#input\_repo\_path) | Base path to the repository used as context for gomplate template rendering | `string` | `"/root/.np/nullplatform/scopes"` | no |
 | <a name="input_repository_action_templates"></a> [repository\_action\_templates](#input\_repository\_action\_templates) | repository of action template | `string` | `"https://raw.githubusercontent.com/nullplatform/scopes/refs/heads"` | no |
 | <a name="input_repository_action_templates_branch"></a> [repository\_action\_templates\_branch](#input\_repository\_action\_templates\_branch) | branch reference of action template | `string` | `"main"` | no |
@@ -97,10 +94,6 @@ resource "example_resource" "this" {
 | Name | Description |
 |------|-------------|
 | <a name="output_actions_created"></a> [actions\_created](#output\_actions\_created) | Map of all action specifications created from templates. |
-| <a name="output_package_artifacts"></a> [package\_artifacts](#output\_package\_artifacts) | Artifacts registered by this module: name => { resource\_id, resource\_revision\_id }. |
-| <a name="output_package_default_version"></a> [package\_default\_version](#output\_package\_default\_version) | The package's default version after apply, or null. |
-| <a name="output_package_id"></a> [package\_id](#output\_package\_id) | ID of the package registered from this scope definition, or null when packaging is disabled. |
-| <a name="output_package_published_revision_id"></a> [package\_published\_revision\_id](#output\_package\_published\_revision\_id) | Revision UUID published for the configured package version, or null. |
 | <a name="output_provider_specification_id"></a> [provider\_specification\_id](#output\_provider\_specification\_id) | The ID of the created provider specification, or null if scope configuration was not fetched |
 | <a name="output_provider_specification_slug"></a> [provider\_specification\_slug](#output\_provider\_specification\_slug) | The slug of the created provider specification, or null if scope configuration was not fetched |
 | <a name="output_scope_configuration"></a> [scope\_configuration](#output\_scope\_configuration) | Parsed scope configuration from scope-configuration.json.tpl, or null if not fetched |
@@ -112,16 +105,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "scope_definition",
-  "description": "Provisions a nullplatform scope definition by fetching and rendering gomplate templates from a remote repository to create service specifications, scope types, action specifications, and optionally scope configurations and versioned packages",
-  "architecture": "The module fetches JSON templates via `data.http` from configurable GitHub raw URLs and processes them through `data.external` using gomplate and jq shell programs to produce rendered JSON. The rendered outputs are consumed by `nullplatform_service_specification`, `nullplatform_scope_type`, `nullplatform_action_specification`, and optionally `nullplatform_provider_specification` resources, with local IDs and slugs threaded as environment variables between template-processing steps. A `null_resource.nrn_patch` provisioner runs the `np` CLI with `NP_API_KEY` to patch external metrics and logging provider references onto the NRN after all nullplatform resources are created. When `var.package` is set, additional `nullplatform_package` and `nullplatform_artifact` resources are created and wired to the service specification outputs.",
+  "description": "Provisions a Nullplatform service specification, scope type, and action specifications by fetching and rendering gomplate templates from a remote repository, then patching the NRN with external provider configuration",
+  "architecture": "The module fetches JSON templates via data.http resources from a configurable GitHub raw URL, processes them through data.external using gomplate and jq shell commands, and feeds the rendered outputs into nullplatform_service_specification, nullplatform_scope_type, and nullplatform_action_specification resources. A null_resource.nrn_patch uses a local-exec provisioner to invoke the np CLI with the NP_API_KEY environment variable to patch metrics and logging provider configuration on the NRN. Optionally, a nullplatform_provider_specification is created from a scope-configuration template when create_scope_configuration is true, with visibility controlled by concatenating var.nrn and var.extra_visible_to_nrns.",
   "features": [
-    "Fetches and renders gomplate service specification, scope type, and action specification templates from configurable remote GitHub repositories",
-    "Creates nullplatform_service_specification with dynamically parsed attributes, selectors, and visibility from rendered templates",
-    "Creates nullplatform_scope_type linked to the service specification with provider type resolved from the scope type template",
-    "Creates one nullplatform_action_specification per action name, sourcing name, type, parameters, results, retryable, icon, and annotations from rendered action templates",
-    "Patches the NRN with external metrics and logging provider configuration using the np CLI via a null_resource local-exec provisioner",
-    "Optionally creates a nullplatform_provider_specification from a scope-configuration template when create_scope_configuration is true",
-    "Optionally registers a versioned nullplatform_package with artifact bill of materials supporting new registration, identity-based lookup, or explicit resource ID pinning"
+    "Fetches and renders service specification, scope type, and action templates from remote GitHub repositories using gomplate",
+    "Creates nullplatform_service_specification with attributes, selectors, and cross-account visibility via extra_visible_to_nrns",
+    "Creates nullplatform_scope_type linked to the service specification with provider type derived from rendered template",
+    "Creates nullplatform_action_specification resources for each action defined in the service spec or explicitly provided via action_spec_names",
+    "Patches the NRN with external metrics and logging provider slugs using the np CLI via null_resource local-exec",
+    "Optionally creates nullplatform_provider_specification from scope-configuration template with override support for name collision avoidance",
+    "Enforces precondition ensuring at least one action specification is resolved to prevent silent destruction of registered scope actions"
   ],
   "inputs": [
     {
@@ -133,11 +126,6 @@ resource "example_resource" "this" {
       "name": "np_api_key",
       "description": "Nullplatform API key used for executing local commands (e.g., 'np nrn patch')",
       "required": true
-    },
-    {
-      "name": "package",
-      "description": "",
-      "required": false
     },
     {
       "name": "repository_service_spec",
@@ -227,12 +215,41 @@ resource "example_resource" "this" {
     "actions_created",
     "scope_configuration",
     "provider_specification_id",
-    "provider_specification_slug",
-    "package_id",
-    "package_published_revision_id",
-    "package_default_version",
-    "package_artifacts"
+    "provider_specification_slug"
   ],
-  "hash": "e5c377dfc94421b96492540a2bc0b2f8"
+  "hash": "505399efc221d090f86c3412fd3a5551"
 }
 END_AI_METADATA -->
+
+## Package (optional)
+
+Set `var.package` to also register this scope definition as a **versioned
+package**: one revision whose bill of materials pins the service
+specification, every action specification (both snapshotted automatically at
+their latest revision), and your artifacts. Scopes then bind to an immutable
+revision — publishing later versions never mutates what already runs.
+
+```hcl
+module "scope_definition" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=<version>"
+  # … the classic inputs …
+
+  package = {
+    version = "1.0.0"
+    artifacts = [
+      # find an artifact registered elsewhere (CI, `np package publish`) — no ids:
+      { name = "worker-image", lookup = true,
+        meta = { registry = "ghcr.io", repository = "acme/my-scope" } },
+      # or register one right here:
+      { name = "helm-chart", type = "oci_image",
+        meta = { registry = "ghcr.io", repository = "acme/chart", digest = "sha256:…" } },
+    ]
+  }
+}
+```
+
+Iterate by bumping `package.version` (usually together with new artifact
+metas) — each apply publishes a new revision and, with `default = true` (the
+default), promotes it. See `examples/package/` for a complete, applied-and-
+verified configuration. Requires a provider build with the package/artifact
+resources (release pending — use `dev_overrides` meanwhile).
