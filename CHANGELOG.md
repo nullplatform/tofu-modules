@@ -1,5 +1,45 @@
 # Changelog
 
+## [6.11.1](https://github.com/nullplatform/tofu-modules/compare/v6.11.0...v6.11.1) (2026-08-07)
+
+
+### Bug Fixes
+
+* **docs:** bump usage example ref to current release tag ([b685c35](https://github.com/nullplatform/tofu-modules/commit/b685c35369d0a98f2d0e23fe7a216da822184ed3))
+* **docs:** bump usage example ref to current release tag ([#486](https://github.com/nullplatform/tofu-modules/issues/486)) ([6feea3d](https://github.com/nullplatform/tofu-modules/commit/6feea3d238d3428a5847f3893c1183f03856e554))
+
+## [6.11.0](https://github.com/nullplatform/tofu-modules/compare/v6.10.0...v6.11.0) (2026-08-07)
+
+
+### Features
+
+* **agent:** worker orchestration passthrough + chart 2.37.0 ([#478](https://github.com/nullplatform/tofu-modules/issues/478)) ([6758a95](https://github.com/nullplatform/tofu-modules/commit/6758a9566e9e0623dec4d91172e8793ed8234c68))
+* **service_definition:** allow pinning specs to a tag or commit SHA ([#470](https://github.com/nullplatform/tofu-modules/issues/470)) ([15b6d47](https://github.com/nullplatform/tofu-modules/commit/15b6d473375031b31f7c8b17049e315bef4fc879))
+
+
+### Bug Fixes
+
+* **azure/vnet:** let a subnet declare its route table ([#475](https://github.com/nullplatform/tofu-modules/issues/475)) ([d2a5faf](https://github.com/nullplatform/tofu-modules/commit/d2a5faf83e8f3297503f961e30a0a3d5b60ae015))
+* **docs:** update usage example to a current release tag ([a167934](https://github.com/nullplatform/tofu-modules/commit/a167934eaa22e97d3a704c1cb1f00ffe731d8ca3))
+* **docs:** update usage example to a current release tag ([#484](https://github.com/nullplatform/tofu-modules/issues/484)) ([ed6f5b0](https://github.com/nullplatform/tofu-modules/commit/ed6f5b06a907ef538c3cb44cb1614e9474414de9))
+* **nullplatform:** fail template fetches that do not return 200 ([#482](https://github.com/nullplatform/tofu-modules/issues/482)) ([c47b78b](https://github.com/nullplatform/tofu-modules/commit/c47b78bcf1c46f40304208637d50b3eb81577844))
+
+## [6.10.0](https://github.com/nullplatform/tofu-modules/compare/v6.9.0...v6.10.0) (2026-08-07)
+
+
+### Features
+
+* **service_definition:** forward link spec fields from the template ([#477](https://github.com/nullplatform/tofu-modules/issues/477)) ([2994e6b](https://github.com/nullplatform/tofu-modules/commit/2994e6b67a81d00aba769dc7951155cf762e4253))
+
+
+### Bug Fixes
+
+* **ci:** compare release PR author against REST-style bot login ([4e00860](https://github.com/nullplatform/tofu-modules/commit/4e008609e2e8f674d647ae16158a8d5d3807ad67))
+* **ci:** compare release PR author against REST-style bot login ([#481](https://github.com/nullplatform/tofu-modules/issues/481)) ([75a16ea](https://github.com/nullplatform/tofu-modules/commit/75a16ea5d6ab3fefb3955ecbf9a66adb91f70d81))
+* **ci:** trigger release PR auto-merge via workflow_run instead of pull_request ([e7eff48](https://github.com/nullplatform/tofu-modules/commit/e7eff48c66daacfa73594bd7a465c7403f5cfe6b))
+* **ci:** trigger release PR auto-merge via workflow_run instead of pull_request ([#479](https://github.com/nullplatform/tofu-modules/issues/479)) ([80738de](https://github.com/nullplatform/tofu-modules/commit/80738de1b9b1deeaf44121546ce7f51ca4697028))
+* **eks:** support an optional aws_profile for the kubernetes provider exec plugin ([#471](https://github.com/nullplatform/tofu-modules/issues/471)) ([ccb2f5f](https://github.com/nullplatform/tofu-modules/commit/ccb2f5f013221bd848a80a983064c4f46dcfc76d))
+
 ## [6.8.2](https://github.com/nullplatform/tofu-modules/compare/v6.8.1...v6.8.2) (2026-08-06)
 
 

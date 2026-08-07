@@ -1,6 +1,10 @@
 locals {
   # GitHub: raw content URL base (includes service_path)
-  raw_base_url = "https://raw.githubusercontent.com/${var.repository_org}/${var.repository_name}/refs/heads/${var.repository_branch}/${var.service_path}"
+  # `repository_ref_type` selects the git namespace: heads (branch), tags (tag) or
+  # "" for a raw commit SHA, which raw.githubusercontent.com serves directly.
+  # Hardcoding refs/heads left consumers unable to pin to anything immutable.
+  _github_ref_prefix = var.repository_ref_type == "" ? "" : "refs/${var.repository_ref_type}/"
+  raw_base_url       = "https://raw.githubusercontent.com/${var.repository_org}/${var.repository_name}/${local._github_ref_prefix}${var.repository_branch}/${var.service_path}"
 
   # GitLab: API v4 file endpoint avoids Cloudflare bot-protection on /-/raw/ URLs.
   # Both the project path and service_path must be URL-encoded (/ → %2F).

@@ -20,7 +20,7 @@ The module creates a single nullplatform_provider_config resource of type aws-ne
 
 ```hcl
 module "vpc" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/vpc?ref=v6.8.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/vpc?ref=v6.11.1"
 
   nrn                 = "your-nrn"
   vpc_id              = "your-vpc-id"
