@@ -2,9 +2,7 @@
 # Notification Channel Template Fetching
 ################################################################################
 
-# A non-2xx response is NOT an error for the http provider: the body (e.g.
-# `404: Not Found`) would flow on as if it were the template and fail later
-# while rendering, far from the file that is actually missing.
+# A non-2xx is not an error for the http provider: the body would render as the template.
 data "http" "notification_channel_template" {
   url = "${var.repository_notification_channel}/${var.repository_notification_channel_branch}/${var.service_path}/specs/notification-channel.json.tpl"
 

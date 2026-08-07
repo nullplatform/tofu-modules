@@ -16,9 +16,8 @@ variable "override_repo_path" {
   default     = null
 }
 
-# Not referenced inside the module: the template fetch uses
-# repository_notification_channel/_branch. Still a published input with a default, so
-# deleting it breaks any consumer that sets it — removal belongs in a major bump.
+# Unused here (the fetch uses repository_notification_channel/_branch) but published with
+# a default, so deleting it breaks any consumer that sets it.
 # tflint-ignore: terraform_unused_declarations
 variable "github_repo_url" {
   description = "GitHub repository URL containing scope and action templates"
@@ -31,8 +30,7 @@ variable "github_repo_url" {
   }
 }
 
-# Same as github_repo_url above: unused here, published with a default, so it cannot be
-# dropped without breaking consumers.
+# Same as github_repo_url above.
 # tflint-ignore: terraform_unused_declarations
 variable "github_ref" {
   description = "Git reference to use (branch name, tag, or commit SHA)"

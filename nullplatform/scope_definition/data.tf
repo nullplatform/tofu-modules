@@ -1,14 +1,10 @@
 ################################################################################
 # Template Fetching
 #
-# A non-2xx response is NOT an error for the http provider, so without the
-# postconditions below the response body (e.g. `404: Not Found`) flows on as if
-# it were the template: gomplate passes it through and jq dies with
-# `parse error: Expected string key before ':'`, four layers away from the
-# renamed or missing file that actually caused it. The branch defaults track a
-# moving ref, so a rename upstream can break an already-applied state without
-# anything changing in the caller's configuration — assert 200 and let the
-# failure name the URL.
+# A non-2xx is not an error for the http provider: without these postconditions
+# a missing template's body (`404: Not Found`) renders as the template and dies
+# later in jq. Branch defaults track a moving ref, so an upstream rename can
+# break an already-applied state.
 ################################################################################
 data "http" "service_spec_template" {
   url = "${var.repository_service_spec}/${var.repository_service_spec_branch}/${var.service_path}/specs/service-spec.json.tpl"

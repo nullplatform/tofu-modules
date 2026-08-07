@@ -1,12 +1,9 @@
 ################################################################################
 # Template Fetching
 #
-# A non-2xx response is NOT an error for the http provider, so without the
-# postconditions below the response body (e.g. `404: Not Found`) flows on as if
-# it were the template and fails much later while rendering, far from the file
-# that is actually missing. On private repositories a 401/403/404 here usually
-# means the token in `auth_headers` or `repository_branch` is wrong, not that
-# the template is gone.
+# A non-2xx is not an error for the http provider: without these postconditions
+# a missing template's body renders as the template and fails later. On private
+# repositories a 401/403/404 usually means the token or branch is wrong.
 ################################################################################
 data "http" "service_spec_template" {
   count = var.git_provider != "local" ? 1 : 0
