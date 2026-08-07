@@ -2,11 +2,13 @@ resource "nullplatform_provider_config" "oci" {
   nrn  = var.nrn
   type = "oci-configuration"
 
-
   dimensions = var.dimensions
 
+  # `authentication` was dropped: it doesn't exist in the "oci-configuration"
+  # provider specification schema at all (top-level properties are only
+  # account/compartment/networking) and had no backing variable — the API
+  # never persisted it back, causing perpetual drift on every plan.
   attributes = jsonencode({
-    authentication = {},
     account = {
       id     = var.account_id
       region = var.account_region
@@ -22,7 +24,4 @@ resource "nullplatform_provider_config" "oci" {
       private_domain_name = var.private_domain_name
     }
   })
-  lifecycle {
-    ignore_changes = [attributes]
-  }
 }

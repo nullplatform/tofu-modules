@@ -37,6 +37,12 @@ resource "nullplatform_link_specification" "from_templates" {
   specification_id    = local.service_specification_id
   attributes          = jsonencode(local.link_specs_parsed[each.key].attributes)
   use_default_actions = try(local.link_specs_parsed[each.key].use_default_actions, true)
+
+  assignable_to = try(local.link_specs_parsed[each.key].assignable_to, "any")
+  scopes        = jsonencode(try(local.link_specs_parsed[each.key].scopes, {}))
+  dimensions    = jsonencode(try(local.link_specs_parsed[each.key].dimensions, {}))
+  external      = try(jsonencode(local.link_specs_parsed[each.key].external), null)
+
   selectors {
     category     = local.service_spec_parsed.selectors.category
     imported     = local.service_spec_parsed.selectors.imported

@@ -63,10 +63,8 @@ resource "example_resource" "this" {
 | <a name="input_application_domain"></a> [application\_domain](#input\_application\_domain) | Whether this is an application domain | `bool` | `false` | no |
 | <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Dimensions for the provider configuration | `map(any)` | `{}` | no |
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | Domain name for the configuration | `string` | n/a | yes |
-| <a name="input_location"></a> [location](#input\_location) | GCP location/region where resources will be deployed | `string` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Identifier Nullplatform Resources Name | `string` | n/a | yes |
 | <a name="input_private_dns_zone_name"></a> [private\_dns\_zone\_name](#input\_private\_dns\_zone\_name) | Name of the private DNS zone in GCP Cloud DNS | `string` | `""` | no |
-| <a name="input_private_domain_name"></a> [private\_domain\_name](#input\_private\_domain\_name) | Private domain name | `string` | `""` | no |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | GCP project ID where resources will be created | `string` | n/a | yes |
 | <a name="input_public_dns_zone_name"></a> [public\_dns\_zone\_name](#input\_public\_dns\_zone\_name) | Name of the public DNS zone in GCP Cloud DNS | `string` | `""` | no |
 
@@ -101,11 +99,6 @@ resource "example_resource" "this" {
       "required": true
     },
     {
-      "name": "location",
-      "description": "GCP location/region where resources will be deployed",
-      "required": true
-    },
-    {
       "name": "project_id",
       "description": "GCP project ID where resources will be created",
       "required": true
@@ -128,11 +121,6 @@ resource "example_resource" "this" {
     {
       "name": "dimensions",
       "description": "Dimensions for the provider configuration",
-      "required": false
-    },
-    {
-      "name": "private_domain_name",
-      "description": "Private domain name",
       "required": false
     }
   ],
