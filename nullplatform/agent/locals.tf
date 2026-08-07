@@ -4,17 +4,6 @@
 
 locals {
 
-  # Parse and clean the primary scope repository
-  nrn_without_namespace = join(":", slice(split(":", var.nrn), 0, 2))
-
-  # Parse NRN parts into individual tags: "organization=123:account=456:namespace=789"
-  nrn_parts = { for part in split(":", var.nrn) : split("=", part)[0] => split("=", part)[1] }
-  nrn_tags = [
-    for key in ["organization", "account", "namespace"] : {
-      key   = key
-      value = local.nrn_parts[key]
-    } if contains(keys(local.nrn_parts), key)
-  ]
   scope_list = compact([trimspace(coalesce(var.agent_repos_scope, ""))])
   # Parse comma-separated extra repositories and clean whitespace
   repos_extra = compact([for s in var.agent_repos_extra : trimspace(s)])
@@ -106,8 +95,7 @@ locals {
     service_account_name = var.service_account_name
   })
 
-  # Worker-orchestration values, merged as a second Helm values layer so the
-  # nested shape (allowedRegistries/rules/pins) passes through verbatim without
-  # hand-rendering YAML. Omitted entirely when var.worker is null.
+  # Worker-orchestration config as a second Helm values layer, so the nested
+  # shape (allowedRegistries/patches/rules/pins) passes through verbatim.
   worker_values = var.worker != null ? yamlencode({ worker = var.worker }) : null
 }

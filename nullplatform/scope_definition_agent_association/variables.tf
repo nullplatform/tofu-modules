@@ -40,6 +40,10 @@ variable "override_repo_path" {
   default     = null
 }
 
+# Retained optional input for backward compatibility; the notification-channel
+# template is sourced from repository_notification_channel(_branch), so this value
+# is not consumed here.
+# tflint-ignore: terraform_unused_declarations
 variable "github_repo_url" {
   description = "GitHub repository URL containing scope and action templates"
   type        = string
@@ -51,6 +55,8 @@ variable "github_repo_url" {
   }
 }
 
+# Retained optional input for backward compatibility; see github_repo_url above.
+# tflint-ignore: terraform_unused_declarations
 variable "github_ref" {
   description = "Git reference to use (branch name, tag, or commit SHA)"
   type        = string

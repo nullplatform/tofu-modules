@@ -15,7 +15,11 @@ variable "cluster_name" {
   type        = string
 }
 
-# Nullplatform Resource Name - unique identifier for nullplatform resources
+# Nullplatform Resource Name - unique identifier for nullplatform resources.
+# Kept as a required input for interface parity with the other nullplatform
+# modules; the agent resolves its own scope from the API key, so this module does
+# not consume the value directly.
+# tflint-ignore: terraform_unused_declarations
 variable "nrn" {
   description = "Nullplatform Resource Name - unique identifier for nullplatform resources"
   type        = string
@@ -49,7 +53,29 @@ variable "service_account_name" {
 variable "nullplatform_agent_helm_version" {
   description = "Version of the nullplatform agent Helm chart to deploy"
   type        = string
-  default     = "2.29.2"
+  # 2.37.0+ ships the worker orchestrator (patches, per-install isolation, idle
+  # reaper, insecure default).
+  default = "2.37.0"
+}
+
+variable "worker" {
+  description = <<-EOT
+    Worker-orchestration config, merged into the agent chart's `worker` block:
+    backend, security, allowedRegistries (deny-by-default registry guardrail),
+    patches (standard k8s patching of workers — the preferred way to shape them),
+    idleTTL (reap idle workers), and the legacy defaults/rules/pins. See the
+    nullplatform-agent chart values (>= 2.37.0) for the full shape. null = chart
+    defaults.
+
+    Example:
+      worker = {
+        allowedRegistries = ["public.ecr.aws/your-org/*"]
+        patches           = [{ target = { package = "my-pkg" }, merge = { spec = { serviceAccountName = "np-agent-sa" } } }]
+        idleTTL           = "30m"
+      }
+  EOT
+  type        = any
+  default     = null
 }
 
 # Kubernetes namespace where the nullplatform agent will run
@@ -233,24 +259,4 @@ variable "extra_envs" {
   description = "Additional environment variables to pass to the agent"
   type        = map(string)
   default     = {}
-}
-
-variable "worker" {
-  description = <<-EOT
-    Worker-orchestration config, passed straight through to the agent chart's
-    `worker` block: backend, security, allowedRegistries (the deny-by-default
-    registry guardrail), defaults (config for every worker), rules (config for a
-    matched class of dynamic workers), and pins (exact known workers). See the
-    nullplatform-agent chart values for the full shape. null = chart defaults.
-
-    Example:
-      worker = {
-        backend           = "kubernetes"
-        allowedRegistries = ["ghcr.io/your-org/*"]
-        defaults          = { imagePullSecrets = ["ghcr-pull"] }
-        rules             = [{ match = { package = "heavy-*" }, resources = { limits = { memory = "2Gi" } } }]
-      }
-  EOT
-  type        = any
-  default     = null
 }
