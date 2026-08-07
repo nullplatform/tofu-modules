@@ -220,3 +220,36 @@ resource "example_resource" "this" {
   "hash": "505399efc221d090f86c3412fd3a5551"
 }
 END_AI_METADATA -->
+
+## Package (optional)
+
+Set `var.package` to also register this scope definition as a **versioned
+package**: one revision whose bill of materials pins the service
+specification, every action specification (both snapshotted automatically at
+their latest revision), and your artifacts. Scopes then bind to an immutable
+revision — publishing later versions never mutates what already runs.
+
+```hcl
+module "scope_definition" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=<version>"
+  # … the classic inputs …
+
+  package = {
+    version = "1.0.0"
+    artifacts = [
+      # find an artifact registered elsewhere (CI, `np package publish`) — no ids:
+      { name = "worker-image", lookup = true,
+        meta = { registry = "ghcr.io", repository = "acme/my-scope" } },
+      # or register one right here:
+      { name = "helm-chart", type = "oci_image",
+        meta = { registry = "ghcr.io", repository = "acme/chart", digest = "sha256:…" } },
+    ]
+  }
+}
+```
+
+Iterate by bumping `package.version` (usually together with new artifact
+metas) — each apply publishes a new revision and, with `default = true` (the
+default), promotes it. See `examples/package/` for a complete, applied-and-
+verified configuration. Requires a provider build with the package/artifact
+resources (release pending — use `dev_overrides` meanwhile).
