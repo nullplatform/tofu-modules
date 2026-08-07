@@ -3,6 +3,10 @@ variable "nrn" {
   type        = string
 }
 
+# Not referenced inside the module (the provider is configured at the root), but published
+# and passed by consumers, so deleting it — what tflint marks as [Fixable] — is a breaking
+# interface change that belongs in a major bump.
+# tflint-ignore: terraform_unused_declarations
 variable "np_api_key" {
   description = "nullplatform API key. Kept for interface consistency across the parameter-storage modules; the provider is configured at the root."
   type        = string
