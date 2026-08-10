@@ -34,6 +34,12 @@ variable "vnet_subnet_id" {
   description = "The ID of the subnet where AKS nodes will be deployed"
 }
 
+variable "additional_network_contributor_subnet_ids" {
+  type        = map(string)
+  description = "Extra subnet IDs, keyed by an arbitrary stable name, where the cluster identity also needs Network Contributor. The node subnet is granted automatically; add an entry for any other subnet the cloud-provider must write into -- typically the one an internal load balancer is pinned to via service.beta.kubernetes.io/azure-load-balancer-internal-subnet, which otherwise fails to provision with a 403 on virtualNetworks/subnets/read."
+  default     = {}
+}
+
 ###############################################################################
 # OPTIONAL VARIABLES - KUBERNETES CONFIGURATION
 ###############################################################################
