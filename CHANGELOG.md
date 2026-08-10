@@ -1,5 +1,16 @@
 # Changelog
 
+## [7.0.0](https://github.com/nullplatform/tofu-modules/compare/v6.11.2...v7.0.0) (2026-08-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* **scope_configuration:** target the aws-lambda scope configuration ([#491](https://github.com/nullplatform/tofu-modules/issues/491))
+
+### Bug Fixes
+
+* **scope_configuration:** target the aws-lambda scope configuration ([#491](https://github.com/nullplatform/tofu-modules/issues/491)) ([ab61fc6](https://github.com/nullplatform/tofu-modules/commit/ab61fc60346bad27ad6bd174c49370f09f739555))
+
 ## [6.11.2](https://github.com/nullplatform/tofu-modules/compare/v6.11.1...v6.11.2) (2026-08-07)
 
 
