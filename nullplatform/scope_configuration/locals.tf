@@ -43,38 +43,31 @@ locals {
   }
 
   ##############################################################################
-  # aws-lambda-configuration
+  # aws-lambda
   ##############################################################################
-  # Mirrors the "AWS Lambda" provider spec's own defaults.
-  aws_lambda_configuration_defaults = {
-    setup = {
-      enable_endpoint = true
-    }
-    runtime = {
-      available_layers = []
-    }
-    concurrency = {
-      reserved_concurrency_type    = "unreserved"
-      provisioned_concurrency_type = "unprovisioned"
-    }
+  # Mirrors scopes-lambda's specs/scope-configuration.json.tpl. `agent` is
+  # omitted unless a layer ARN is given: the schema makes it optional, and an
+  # empty object would show up as drift against a config that never had it.
+  aws_lambda_defaults = {
+    state      = {}
+    deployment = {}
   }
 
-  aws_lambda_configuration_overrides = {
-    setup = merge(local.aws_lambda_configuration_defaults.setup, {
-      role_arn        = var.lambda_role_arn
-      certificate_arn = var.lambda_certificate_arn
-      enable_endpoint = var.lambda_enable_endpoint
-    })
-    runtime = merge(local.aws_lambda_configuration_defaults.runtime, {
-      available_layers = var.lambda_available_layers
-    })
-    concurrency = merge(local.aws_lambda_configuration_defaults.concurrency, {
-      reserved_concurrency_type     = var.lambda_reserved_concurrency_type
-      reserved_concurrency_value    = var.lambda_reserved_concurrency_value
-      provisioned_concurrency_type  = var.lambda_provisioned_concurrency_type
-      provisioned_concurrency_value = var.lambda_provisioned_concurrency_value
-    })
-  }
+  aws_lambda_overrides = merge(
+    {
+      state = {
+        tofu_state_bucket = var.lambda_tofu_state_bucket
+      }
+      deployment = {
+        placeholder_image_uri = var.lambda_placeholder_image_uri
+      }
+    },
+    var.lambda_null_agent_layer_arn == null ? {} : {
+      agent = {
+        null_agent_layer_arn = var.lambda_null_agent_layer_arn
+      }
+    }
+  )
 
   ##############################################################################
   # Type dispatch
@@ -83,13 +76,13 @@ locals {
   # static-files entry needs try(): cloud_provider is null for other types,
   # and indexing by null would error even though this branch goes unused.
   type_defaults = {
-    "static-files"             = local.static_files_defaults
-    "aws-lambda-configuration" = local.aws_lambda_configuration_defaults
+    "static-files" = local.static_files_defaults
+    "aws-lambda"   = local.aws_lambda_defaults
   }
 
   type_overrides = {
-    "static-files"             = try(local.static_files_cloud_overrides[var.cloud_provider], {})
-    "aws-lambda-configuration" = local.aws_lambda_configuration_overrides
+    "static-files" = try(local.static_files_cloud_overrides[var.cloud_provider], {})
+    "aws-lambda"   = local.aws_lambda_overrides
   }
 
   defaults  = local.type_defaults[var.type]

@@ -8,8 +8,8 @@ variable "type" {
   type        = string
 
   validation {
-    condition     = contains(["static-files", "aws-lambda-configuration"], var.type)
-    error_message = "type must be one of: static-files, aws-lambda-configuration."
+    condition     = contains(["static-files", "aws-lambda"], var.type)
+    error_message = "type must be one of: static-files, aws-lambda."
   }
 }
 
@@ -152,117 +152,48 @@ variable "aws_web_acl_name" {
 }
 
 ################################################################################
-# aws-lambda-configuration
+# aws-lambda
 ################################################################################
-# Schema verified via `np provider specification list --name "AWS Lambda"`
-# (slug: aws-lambda-configuration).
+# The scope configuration declared by the scopes-lambda repo
+# (specs/scope-configuration.json.tpl), created by the scope_definition module
+# when create_scope_configuration is true. Category "scope-configurations",
+# which is what the scope's create-scope workflow reads:
+#
+#   np provider list --categories "vpc,scope-configurations,cloud-providers"
+#
+# Not to be confused with "aws-lambda-configuration", the platform-wide provider
+# spec that shares the display name "AWS Lambda" but holds runtime settings for
+# the function itself.
 
-variable "lambda_role_arn" {
-  description = "aws-lambda-configuration only. ARN of the IAM role to use for the function."
-  type        = string
-  default     = ""
-
-  validation {
-    condition     = var.type == "aws-lambda-configuration" || var.lambda_role_arn == ""
-    error_message = "lambda_role_arn only applies when type is 'aws-lambda-configuration'."
-  }
-}
-
-variable "lambda_enable_endpoint" {
-  description = "aws-lambda-configuration only. Whether to create an endpoint domain. If true, lambda_certificate_arn is required."
-  type        = bool
-  default     = true
-
-  validation {
-    condition     = var.type == "aws-lambda-configuration" || var.lambda_enable_endpoint == true
-    error_message = "lambda_enable_endpoint only applies when type is 'aws-lambda-configuration'."
-  }
-}
-
-variable "lambda_certificate_arn" {
-  description = "aws-lambda-configuration only. ARN of the certificate to use for the function. Required when lambda_enable_endpoint is true (the default)."
+variable "lambda_tofu_state_bucket" {
+  description = "aws-lambda only. S3 bucket where each Lambda scope writes its OpenTofu state. Scopes use distinct key prefixes, so one bucket can be shared."
   type        = string
   default     = null
 
   validation {
-    condition     = var.type != "aws-lambda-configuration" || var.lambda_enable_endpoint != true || var.lambda_certificate_arn != null
-    error_message = "lambda_certificate_arn is required when type is 'aws-lambda-configuration' and lambda_enable_endpoint is true."
-  }
-
-  validation {
-    condition     = var.type == "aws-lambda-configuration" || var.lambda_certificate_arn == null
-    error_message = "lambda_certificate_arn only applies when type is 'aws-lambda-configuration'."
+    condition     = var.type != "aws-lambda" || var.lambda_tofu_state_bucket != null
+    error_message = "lambda_tofu_state_bucket is required when type is 'aws-lambda'."
   }
 }
 
-variable "lambda_available_layers" {
-  description = "aws-lambda-configuration only. Lambda layer ARNs made available for developers to select when creating scopes."
-  type        = list(string)
-  default     = []
-
-  validation {
-    condition     = var.type == "aws-lambda-configuration" || length(var.lambda_available_layers) == 0
-    error_message = "lambda_available_layers only applies when type is 'aws-lambda-configuration'."
-  }
-}
-
-variable "lambda_reserved_concurrency_type" {
-  description = "aws-lambda-configuration only. 'unreserved' (default AWS behavior) or 'reserved' (set a specific limit via lambda_reserved_concurrency_value)."
+variable "lambda_placeholder_image_uri" {
+  description = "aws-lambda only. ECR URI of the placeholder image, without the architecture suffix — the workflow appends -arm64 or -amd64 from the scope's architecture."
   type        = string
-  default     = "unreserved"
-
-  validation {
-    condition     = contains(["unreserved", "reserved"], var.lambda_reserved_concurrency_type)
-    error_message = "lambda_reserved_concurrency_type must be one of: unreserved, reserved."
-  }
-
-  validation {
-    condition     = var.type == "aws-lambda-configuration" || var.lambda_reserved_concurrency_type == "unreserved"
-    error_message = "lambda_reserved_concurrency_type only applies when type is 'aws-lambda-configuration'."
-  }
-}
-
-variable "lambda_reserved_concurrency_value" {
-  description = "aws-lambda-configuration only. Number of concurrent executions to reserve (1-1000). Required when lambda_reserved_concurrency_type is 'reserved'."
-  type        = number
   default     = null
 
   validation {
-    condition     = var.lambda_reserved_concurrency_value == null || (var.lambda_reserved_concurrency_value >= 1 && var.lambda_reserved_concurrency_value <= 1000)
-    error_message = "lambda_reserved_concurrency_value must be between 1 and 1000."
-  }
-
-  validation {
-    condition     = var.lambda_reserved_concurrency_type != "reserved" || var.lambda_reserved_concurrency_value != null
-    error_message = "lambda_reserved_concurrency_value is required when lambda_reserved_concurrency_type is 'reserved'."
+    condition     = var.type != "aws-lambda" || var.lambda_placeholder_image_uri != null
+    error_message = "lambda_placeholder_image_uri is required when type is 'aws-lambda'."
   }
 }
 
-variable "lambda_provisioned_concurrency_type" {
-  description = "aws-lambda-configuration only. 'unprovisioned' (default AWS behavior) or 'provisioned' (set a specific limit via lambda_provisioned_concurrency_value)."
+variable "lambda_null_agent_layer_arn" {
+  description = "aws-lambda only. ARN of the nullplatform agent Lambda layer. Only needed when the scope sets USE_NULL_AGENT=true."
   type        = string
-  default     = "unprovisioned"
-
-  validation {
-    condition     = contains(["unprovisioned", "provisioned"], var.lambda_provisioned_concurrency_type)
-    error_message = "lambda_provisioned_concurrency_type must be one of: unprovisioned, provisioned."
-  }
-
-  validation {
-    condition     = var.type == "aws-lambda-configuration" || var.lambda_provisioned_concurrency_type == "unprovisioned"
-    error_message = "lambda_provisioned_concurrency_type only applies when type is 'aws-lambda-configuration'."
-  }
-}
-
-variable "lambda_provisioned_concurrency_value" {
-  description = "aws-lambda-configuration only. Provisioned concurrency for this function. Required when lambda_provisioned_concurrency_type is 'provisioned'."
-  type        = number
   default     = null
 
   validation {
-    condition     = var.lambda_provisioned_concurrency_type != "provisioned" || var.lambda_provisioned_concurrency_value != null
-    error_message = "lambda_provisioned_concurrency_value is required when lambda_provisioned_concurrency_type is 'provisioned'."
+    condition     = var.type == "aws-lambda" || var.lambda_null_agent_layer_arn == null
+    error_message = "lambda_null_agent_layer_arn only applies when type is 'aws-lambda'."
   }
 }
-
-
