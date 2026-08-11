@@ -76,8 +76,15 @@ module "aks" {
 
   # attach_acr null (default) keeps the legacy "attach iff acr_id is non-null" behaviour;
   # setting it true makes the for_each key set plan-stable when acr_id is known-after-apply.
-  attached_acr_id_map                          = (var.attach_acr != null ? var.attach_acr : var.acr_id != null) ? { acr = var.acr_id } : {}
-  network_contributor_role_assigned_subnet_ids = { subnet = var.vnet_subnet_id }
+  attached_acr_id_map = (var.attach_acr != null ? var.attach_acr : var.acr_id != null) ? { acr = var.acr_id } : {}
+  # The node subnet is always needed. Anything else the cloud-provider has to
+  # write into -- typically the subnet an internal load balancer is pinned to --
+  # has to be passed in, or provisioning that LB fails with a 403 on
+  # `virtualNetworks/subnets/read`.
+  network_contributor_role_assigned_subnet_ids = merge(
+    { subnet = var.vnet_subnet_id },
+    var.additional_network_contributor_subnet_ids,
+  )
 
   ############################################
   # Tags
