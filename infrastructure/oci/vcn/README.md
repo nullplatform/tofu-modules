@@ -19,7 +19,7 @@ The module instantiates oci_core_subnet resources for public and private subnets
 
 ```hcl
 module "vcn" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/vcn?ref=v6.11.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/vcn?ref=v7.0.1"
 }
 ```
 
