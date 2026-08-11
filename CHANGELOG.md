@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.0.2](https://github.com/nullplatform/tofu-modules/compare/v7.0.1...v7.0.2) (2026-08-11)
+
+
+### Bug Fixes
+
+* **azure:** make the internal gateway LB subnet configurable and grantable ([#494](https://github.com/nullplatform/tofu-modules/issues/494)) ([38df735](https://github.com/nullplatform/tofu-modules/commit/38df735aa04122c5a2aae6eef369771b9905b6cb))
+
 ## [7.0.1](https://github.com/nullplatform/tofu-modules/compare/v7.0.0...v7.0.1) (2026-08-11)
 
 
