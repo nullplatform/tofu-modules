@@ -44,7 +44,7 @@ jobs:
           PR_JSON=$(gh api "repos/${{ github.repository }}/pulls" \
             -X GET \
             -f state=open \
-            -f "head=${REPO_OWNER}:release-please--branches--main" \
+            -f "head=${REPO_OWNER}:release-please--branches--${{ github.event.workflow_run.head_branch }}" \
             --jq '.[0] // empty')
 
           if [ -z "$PR_JSON" ]; then
