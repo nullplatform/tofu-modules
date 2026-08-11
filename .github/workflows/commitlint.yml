@@ -73,8 +73,9 @@ jobs:
           # main-only change (including the breaking change 6.x is meant to
           # be free of) into 6.x. This job checks the real git ancestry.
           # OTHER_BRANCH is derived from BASE_BRANCH (not from HEAD_BRANCH's
-          # name) so this check stays sound even if it ever runs on a branch
-          # type base-branch-check doesn't otherwise gate.
+          # name) so this check stays sound on ci/* branches too, which
+          # base-branch-check deliberately doesn't gate (it may target
+          # either line).
           if [[ "$BASE_BRANCH" == "main" ]]; then
             OTHER_BRANCH="6.x"
           else
