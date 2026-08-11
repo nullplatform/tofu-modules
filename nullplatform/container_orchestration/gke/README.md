@@ -22,7 +22,7 @@ The module constructs a structured attributes object using locals that merge clu
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v7.0.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v7.0.2"
 
   cluster_name        = "your-cluster-name"
   location            = "your-location"
