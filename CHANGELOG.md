@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.0.1](https://github.com/nullplatform/tofu-modules/compare/v7.0.0...v7.0.1) (2026-08-11)
+
+
+### Bug Fixes
+
+* **azure/aks_route_table:** stable trigger instead of timestamp() ([#474](https://github.com/nullplatform/tofu-modules/issues/474)) ([#493](https://github.com/nullplatform/tofu-modules/issues/493)) ([dad52fa](https://github.com/nullplatform/tofu-modules/commit/dad52fad010915756586d05c1915b4d5bc1d1adf))
+
 ## [7.0.0](https://github.com/nullplatform/tofu-modules/compare/v6.11.2...v7.0.0) (2026-08-10)
 
 
