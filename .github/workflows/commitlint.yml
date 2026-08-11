@@ -2,13 +2,15 @@ name: Commitlint
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ main, 6.x ]
     types: [opened, synchronize, reopened]
 
 jobs:
   branch-name:
     if: ${{ !startsWith(github.head_ref, 'release-please--') && !startsWith(github.head_ref, 'dependabot/') }}
     uses: nullplatform/actions-nullplatform/.github/workflows/branch-validation.yml@main
+    with:
+      pattern: '^(feat|feature|fix|docs|style|refactor|perf|test|build|ci|chore|revert|package)/.+$'
 
   commitlint:
     if: ${{ !startsWith(github.head_ref, 'release-please--') && !startsWith(github.head_ref, 'dependabot/') }}
