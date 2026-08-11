@@ -2,26 +2,24 @@
 
 ## Description
 
-Associates the AKS-managed kubenet route table with a specified subnet by discovering and attaching it.
-
-> **Prefer the vnet `route_table` passthrough.** When you control the node subnet through the `infrastructure/azure/vnet` module, declare the route table on that subnet via `subnets_definition[*].route_table` (#475) instead of using this module. That lets the subnet own the route table so the vnet stops proposing `routeTable -> null` on every plan, and the stack converges without a separate attach. This module remains for cases where the subnet is not managed through that vnet module.
+Attaches the AKS-managed kubenet route table to a specified subnet by discovering the route table from the node resource group and updating the subnet via the Azure API
 
 ## Architecture
 
-The module uses an azurerm_resources data source to discover the route table created by AKS in the node resource group. A terraform_data resource, keyed on the subnet id and the discovered route table id, triggers re-attachment only when that attachment actually changes. The azapi_update_resource resource then patches the subnet identified by subnet_id using the Azure Network API to attach the discovered route table, with its lifecycle tied to the terraform_data trigger.
+The module uses an azurerm_resources data source to discover the AKS-managed route table within the node resource group by filtering for Microsoft.Network/routeTables resources. A terraform_data trigger resource tracks the subnet ID and route table ID pair to detect real attachment changes without drifting on timestamps. An azapi_update_resource targets the Microsoft.Network/virtualNetworks/subnets resource at the provided subnet_id and patches its routeTable property to point to the discovered route table ID. The replace_triggered_by lifecycle hook ensures the subnet update is re-applied whenever the trigger detects a change in the attachment pairing.
 
 ## Features
 
-- Discovers the AKS-managed kubenet route table dynamically from the node resource group using azurerm_resources
-- Patches the target subnet via azapi_update_resource to associate the route table
-- Re-attaches only when the subnet id or route table id changes, via a terraform_data trigger keyed on those values (not a per-plan `timestamp()`), so it no longer prevents the stack from converging
-- Outputs the resource ID of the discovered AKS-managed route table for downstream use
+- Discovers AKS-managed kubenet route table automatically from the node resource group using azurerm_resources data source
+- Attaches the discovered route table to the specified AKS node subnet via azapi_update_resource with the 2024-01-01 API version
+- Implements stable change detection using a terraform_data trigger keyed on subnet and route table IDs to prevent unnecessary replacements
+- Outputs the discovered route table resource ID for downstream module consumption
 
 ## Basic Usage
 
 ```hcl
 module "aks_route_table" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks_route_table?ref=v6.11.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks_route_table?ref=v6.11.3"
 
   node_resource_group = "your-node-resource-group"
   subnet_id           = "your-subnet-id"
@@ -78,13 +76,13 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "aks_route_table",
-  "description": "Associates the AKS-managed kubenet route table with a specified subnet by discovering and attaching it on every apply",
-  "architecture": "The module uses an azurerm_resources data source to discover the route table created by AKS in the node resource group. A terraform_data resource with a timestamp trigger forces re-evaluation on every apply. The azapi_update_resource resource then patches the subnet identified by subnet_id using the Azure Network API to attach the discovered route table, with its lifecycle tied to the terraform_data trigger.",
+  "description": "Attaches the AKS-managed kubenet route table to a specified subnet by discovering the route table from the node resource group and updating the subnet via the Azure API",
+  "architecture": "The module uses an azurerm_resources data source to discover the AKS-managed route table within the node resource group by filtering for Microsoft.Network/routeTables resources. A terraform_data trigger resource tracks the subnet ID and route table ID pair to detect real attachment changes without drifting on timestamps. An azapi_update_resource targets the Microsoft.Network/virtualNetworks/subnets resource at the provided subnet_id and patches its routeTable property to point to the discovered route table ID. The replace_triggered_by lifecycle hook ensures the subnet update is re-applied whenever the trigger detects a change in the attachment pairing.",
   "features": [
-    "Discovers the AKS-managed kubenet route table dynamically from the node resource group using azurerm_resources",
-    "Patches the target subnet via azapi_update_resource to associate the route table on every Terraform apply",
-    "Forces re-association on every apply using a timestamp-based terraform_data trigger to prevent drift",
-    "Outputs the resource ID of the discovered AKS-managed route table for downstream use"
+    "Discovers AKS-managed kubenet route table automatically from the node resource group using azurerm_resources data source",
+    "Attaches the discovered route table to the specified AKS node subnet via azapi_update_resource with the 2024-01-01 API version",
+    "Implements stable change detection using a terraform_data trigger keyed on subnet and route table IDs to prevent unnecessary replacements",
+    "Outputs the discovered route table resource ID for downstream module consumption"
   ],
   "inputs": [
     {
@@ -101,6 +99,6 @@ resource "example_resource" "this" {
   "outputs": [
     "route_table_id"
   ],
-  "hash": "0bfb8f0027ba28042ae5c0ecda261756"
+  "hash": "ccccbed34bb0eb0f08265ac7d7a9985a"
 }
 END_AI_METADATA -->
