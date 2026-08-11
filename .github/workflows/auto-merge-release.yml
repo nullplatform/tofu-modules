@@ -40,11 +40,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPO_OWNER: ${{ github.repository_owner }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
           PR_JSON=$(gh api "repos/${{ github.repository }}/pulls" \
             -X GET \
             -f state=open \
-            -f "head=${REPO_OWNER}:release-please--branches--main" \
+            -f "head=${REPO_OWNER}:release-please--branches--${HEAD_BRANCH}" \
             --jq '.[0] // empty')
 
           if [ -z "$PR_JSON" ]; then

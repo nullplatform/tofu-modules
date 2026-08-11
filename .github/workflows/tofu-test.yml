@@ -2,7 +2,7 @@ name: Tofu Unit Tests
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ main, 6.x ]
     types: [opened, synchronize, reopened]
 
 jobs:

@@ -4,9 +4,10 @@ on:
   push:
     branches:
       - main
+      - 6.x
 
 concurrency:
-  group: main-branch-push
+  group: release-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -33,7 +34,7 @@ jobs:
         run: |
           PR_NUMBER=$(gh pr list \
             --repo ${{ github.repository }} \
-            --head release-please--branches--main \
+            --head release-please--branches--${{ github.ref_name }} \
             --state open \
             --json number \
             --jq '.[0].number // empty')
@@ -51,7 +52,7 @@ jobs:
         if: steps.check_pr.outputs.pr_exists == 'true'
         uses: actions/checkout@v6
         with:
-          ref: release-please--branches--main
+          ref: release-please--branches--${{ github.ref_name }}
           fetch-depth: 0
 
       - name: Detect changed modules
@@ -166,7 +167,7 @@ jobs:
             else
               git commit -m "docs: update version references in READMEs"
             fi
-            git push origin release-please--branches--main
+            git push origin release-please--branches--${{ github.ref_name }}
             echo "READMEs updated in Release PR #${{ steps.check_pr.outputs.pr_number }}"
           fi
         env:

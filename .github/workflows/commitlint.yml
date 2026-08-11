@@ -2,14 +2,69 @@ name: Commitlint
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ main, 6.x ]
     types: [opened, synchronize, reopened]
 
 jobs:
   branch-name:
     if: ${{ !startsWith(github.head_ref, 'release-please--') && !startsWith(github.head_ref, 'dependabot/') }}
     uses: nullplatform/actions-nullplatform/.github/workflows/branch-validation.yml@main
+    with:
+      pattern: '^(feat|feature|fix|docs|style|refactor|perf|test|build|ci|chore|revert|package)/.+$'
 
   commitlint:
     if: ${{ !startsWith(github.head_ref, 'release-please--') && !startsWith(github.head_ref, 'dependabot/') }}
     uses: nullplatform/actions-nullplatform/.github/workflows/conventional-commit.yml@main
+
+  base-branch-check:
+    name: Validate base branch for branch type
+    if: ${{ !startsWith(github.head_ref, 'release-please--') && !startsWith(github.head_ref, 'dependabot/') }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check base branch matches branch type
+        env:
+          HEAD_BRANCH: ${{ github.head_ref }}
+          BASE_BRANCH: ${{ github.base_ref }}
+        run: |
+          # ci/* queda exceptuada: los cambios de infraestructura de CI no
+          # están atados a una línea de versión, se propagan a mano entre
+          # main y 6.x cuando hace falta (ver Tarea 14 del plan de este cambio).
+          if [[ "$HEAD_BRANCH" == ci/* ]]; then
+            echo "Branch '$HEAD_BRANCH' is a CI/infra branch — base branch rule not enforced."
+            exit 0
+          fi
+
+          if [[ "$HEAD_BRANCH" == package/* ]]; then
+            if [[ "$BASE_BRANCH" != "main" ]]; then
+              echo "::error::package/* branches must target 'main', not '$BASE_BRANCH'."
+              exit 1
+            fi
+          else
+            if [[ "$BASE_BRANCH" != "6.x" ]]; then
+              echo "::error::Only package/* branches may target 'main'. '$HEAD_BRANCH' must target '6.x', not '$BASE_BRANCH'."
+              exit 1
+            fi
+          fi
+
+          echo "Base branch '$BASE_BRANCH' is correct for '$HEAD_BRANCH'."
+
+  no-breaking-changes:
+    name: Block breaking changes (temporary policy)
+    if: ${{ !startsWith(github.head_ref, 'release-please--') && !startsWith(github.head_ref, 'dependabot/') }}
+    runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: read
+    steps:
+      - name: Scan PR commits for breaking-change markers
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh api "repos/${{ github.repository }}/pulls/$PR_NUMBER/commits" --jq '.[].commit.message' > commit_messages.txt
+
+          if grep -qE '^[a-zA-Z]+(\([^)]*\))?!:' commit_messages.txt || grep -qE 'BREAKING[ -]CHANGE:' commit_messages.txt; then
+            echo "::error::Breaking changes are temporarily blocked on this repository (no '!:' headers or 'BREAKING CHANGE:'/'BREAKING-CHANGE:' footers allowed on any branch)."
+            exit 1
+          fi
+
+          echo "No breaking-change markers found."
