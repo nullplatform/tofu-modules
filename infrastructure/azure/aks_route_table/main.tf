@@ -4,7 +4,9 @@ data "azurerm_resources" "aks_route_table" {
 }
 
 resource "terraform_data" "trigger" {
-  triggers_replace = timestamp()
+  # Key on the actual attachment (subnet + route table id), not timestamp(),
+  # which replaced every plan and kept the stack from converging (#474).
+  triggers_replace = [var.subnet_id, data.azurerm_resources.aks_route_table.resources[0].id]
 }
 
 resource "azapi_update_resource" "aks_subnet_route_table" {
