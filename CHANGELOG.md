@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.0.3](https://github.com/nullplatform/tofu-modules/compare/v7.0.2...v7.0.3) (2026-08-11)
+
+
+### Bug Fixes
+
+* **ci:** correct release-please target-branch resolution for the dual release line scheme ([#504](https://github.com/nullplatform/tofu-modules/issues/504)) ([e09ff45](https://github.com/nullplatform/tofu-modules/commit/e09ff45fc88bdf88556ef8ab864077f63446a972))
+
 ## [7.0.2](https://github.com/nullplatform/tofu-modules/compare/v7.0.1...v7.0.2) (2026-08-11)
 
 
