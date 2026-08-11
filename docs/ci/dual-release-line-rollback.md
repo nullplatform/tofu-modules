@@ -35,7 +35,8 @@ commits relevantes.
 ## Lo que este rollback SÍ hace y lo que NO hace
 
 - **SÍ**: elimina los checks y triggers de CI agregados (el chequeo de base
-  branch, el bloqueo de breaking changes, el `package` en el pattern de
+  branch, el chequeo de que la rama realmente forkeó de la línea correcta,
+  el bloqueo de breaking changes, el `package` en el pattern de
   branch-validation, los triggers extra de `6.x` en todos los workflows).
 - **NO**: borra la rama `6.x` ni ninguno de sus commits/tags/releases. Todo
   el trabajo real (fixes, features, releases 6.x.x) que se haya mergeado a

@@ -50,8 +50,10 @@ jobs:
 
   fork-point-check:
     name: Validate branch actually forked from the correct line
-    if: ${{ !startsWith(github.head_ref, 'release-please--') && !startsWith(github.head_ref, 'dependabot/') && !startsWith(github.head_ref, 'ci/') }}
+    if: ${{ !startsWith(github.head_ref, 'release-please--') && !startsWith(github.head_ref, 'dependabot/') }}
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - name: Checkout head commit with full history
         uses: actions/checkout@v6
@@ -70,7 +72,10 @@ jobs:
           # would still pass that check, but merging it would smuggle every
           # main-only change (including the breaking change 6.x is meant to
           # be free of) into 6.x. This job checks the real git ancestry.
-          if [[ "$HEAD_BRANCH" == package/* ]]; then
+          # OTHER_BRANCH is derived from BASE_BRANCH (not from HEAD_BRANCH's
+          # name) so this check stays sound even if it ever runs on a branch
+          # type base-branch-check doesn't otherwise gate.
+          if [[ "$BASE_BRANCH" == "main" ]]; then
             OTHER_BRANCH="6.x"
           else
             OTHER_BRANCH="main"
@@ -82,7 +87,7 @@ jobs:
           if git merge-base --is-ancestor "$MB_OTHER" "$MB_BASE"; then
             echo "OK: '$HEAD_BRANCH' diverges from '$BASE_BRANCH', not from '$OTHER_BRANCH'."
           else
-            echo "::error::'$HEAD_BRANCH' appears to have been created from '$OTHER_BRANCH', not from '$BASE_BRANCH'. Merging this PR as-is would pull in unrelated changes from '$OTHER_BRANCH' (including any breaking changes it has that '$BASE_BRANCH' doesn't). Rebase onto 'origin/$BASE_BRANCH' before merging, e.g.: git rebase --onto origin/$BASE_BRANCH \$(git merge-base origin/main origin/6.x) $HEAD_BRANCH"
+            echo "::error::'$HEAD_BRANCH' (targeting '$BASE_BRANCH') contains commits from '$OTHER_BRANCH' that are not in '$BASE_BRANCH' — either it was created from '$OTHER_BRANCH' instead of '$BASE_BRANCH', or '$OTHER_BRANCH' was merged into it deliberately. Either way, merging this PR as-is would pull those changes (including any breaking changes '$OTHER_BRANCH' has that '$BASE_BRANCH' doesn't) into '$BASE_BRANCH'. Fix: rebase onto 'origin/$BASE_BRANCH' from this branch's real fork point — git rebase --onto origin/$BASE_BRANCH $MB_OTHER $HEAD_BRANCH — or, if '$OTHER_BRANCH' was merged in on purpose, drop that merge first."
             exit 1
           fi
 
