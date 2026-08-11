@@ -48,6 +48,44 @@ jobs:
 
           echo "Base branch '$BASE_BRANCH' is correct for '$HEAD_BRANCH'."
 
+  fork-point-check:
+    name: Validate branch actually forked from the correct line
+    if: ${{ !startsWith(github.head_ref, 'release-please--') && !startsWith(github.head_ref, 'dependabot/') && !startsWith(github.head_ref, 'ci/') }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout head commit with full history
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Check head diverges from its declared base, not from the other line
+        env:
+          HEAD_BRANCH: ${{ github.head_ref }}
+          BASE_BRANCH: ${{ github.base_ref }}
+        run: |
+          # base-branch-check only validates that the branch NAME is paired
+          # with the right base — it can't see where the branch actually
+          # forked from. A feat/* branch created from main (instead of 6.x)
+          # would still pass that check, but merging it would smuggle every
+          # main-only change (including the breaking change 6.x is meant to
+          # be free of) into 6.x. This job checks the real git ancestry.
+          if [[ "$HEAD_BRANCH" == package/* ]]; then
+            OTHER_BRANCH="6.x"
+          else
+            OTHER_BRANCH="main"
+          fi
+
+          MB_BASE=$(git merge-base HEAD "origin/${BASE_BRANCH}")
+          MB_OTHER=$(git merge-base HEAD "origin/${OTHER_BRANCH}")
+
+          if git merge-base --is-ancestor "$MB_OTHER" "$MB_BASE"; then
+            echo "OK: '$HEAD_BRANCH' diverges from '$BASE_BRANCH', not from '$OTHER_BRANCH'."
+          else
+            echo "::error::'$HEAD_BRANCH' appears to have been created from '$OTHER_BRANCH', not from '$BASE_BRANCH'. Merging this PR as-is would pull in unrelated changes from '$OTHER_BRANCH' (including any breaking changes it has that '$BASE_BRANCH' doesn't). Rebase onto 'origin/$BASE_BRANCH' before merging, e.g.: git rebase --onto origin/$BASE_BRANCH \$(git merge-base origin/main origin/6.x) $HEAD_BRANCH"
+            exit 1
+          fi
+
   no-breaking-changes:
     name: Block breaking changes (temporary policy)
     if: ${{ !startsWith(github.head_ref, 'release-please--') && !startsWith(github.head_ref, 'dependabot/') }}

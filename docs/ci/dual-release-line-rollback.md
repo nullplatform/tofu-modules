@@ -109,7 +109,8 @@ deshacer, archivo por archivo:
 - Volver `on.pull_request.branches` a `[ main ]` (sacar `6.x`).
 - Sacar el bloque `with: pattern: ...` del job `branch-name` (que vuelva a
   usar el pattern default de la reusable workflow, sin `package`).
-- Borrar los jobs `base-branch-check` y `no-breaking-changes` completos.
+- Borrar los jobs `base-branch-check`, `fork-point-check` y
+  `no-breaking-changes` completos.
 
 ### `.husky/pre-commit`
 - Volver `PATTERN` a:
