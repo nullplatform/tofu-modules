@@ -36,10 +36,23 @@ data "google_container_cluster" "this" {
   }
 }
 
+locals {
+  # google_container_cluster.subnetwork is documented as the subnetwork name,
+  # but in practice it echoes back whatever format the cluster was created
+  # with — a bare name, or (e.g. when created via a module that passes a full
+  # reference, such as terraform-google-modules/kubernetes-engine) the full
+  # "projects/.../regions/.../subnetworks/NAME" path. google_compute_subnetwork
+  # only accepts a bare name, so take the last path segment either way.
+  cluster_subnetwork_name = var.cluster_name != "" ? element(
+    split("/", data.google_container_cluster.this[0].subnetwork),
+    length(split("/", data.google_container_cluster.this[0].subnetwork)) - 1
+  ) : ""
+}
+
 # Get subnetwork info to derive CIDR
 data "google_compute_subnetwork" "this" {
   count   = var.cluster_name != "" ? 1 : 0
-  name    = data.google_container_cluster.this[0].subnetwork
+  name    = local.cluster_subnetwork_name
   region  = var.gcp_region
   project = var.gcp_project_id
 }
