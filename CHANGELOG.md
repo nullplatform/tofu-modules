@@ -1,5 +1,14 @@
 # Changelog
 
+## [6.11.3](https://github.com/nullplatform/tofu-modules/compare/v6.11.2...v6.11.3) (2026-08-11)
+
+
+### Bug Fixes
+
+* **azure/aks_route_table:** stable trigger instead of timestamp() ([#474](https://github.com/nullplatform/tofu-modules/issues/474)) ([#493](https://github.com/nullplatform/tofu-modules/issues/493)) ([8d07ed2](https://github.com/nullplatform/tofu-modules/commit/8d07ed22635586a4e30baec79fcbbe994b78ddf3))
+* **azure:** make the internal gateway LB subnet configurable and grantable ([#494](https://github.com/nullplatform/tofu-modules/issues/494)) ([36f4540](https://github.com/nullplatform/tofu-modules/commit/36f45406a7bde29126939739a19f7a9139f2d31a))
+* **ci:** correct release-please target-branch resolution for the dual release line scheme ([#504](https://github.com/nullplatform/tofu-modules/issues/504)) ([895385e](https://github.com/nullplatform/tofu-modules/commit/895385ee0c76802b1773d07cf80ba5420d766ddf))
+
 ## [6.11.2](https://github.com/nullplatform/tofu-modules/compare/v6.11.1...v6.11.2) (2026-08-07)
 
 

@@ -2,27 +2,27 @@
 
 ## Description
 
-Deploys an Azure Kubernetes Service (AKS) cluster with a system node pool, an autoscaling user node pool, workload identity, OIDC issuer, and optional ACR integration using the Azure/aks/azurerm community module
+Deploys an Azure Kubernetes Service (AKS) cluster with configurable system and user node pools, workload identity, OIDC issuer, and optional ACR integration using the Azure/aks/azurerm upstream module
 
 ## Architecture
 
-The module wraps the Azure/aks/azurerm community module (version 11.0.0) and passes all inputs into it, which internally creates an azurerm_kubernetes_cluster resource with a system agent pool and a separate user node pool via azurerm_kubernetes_cluster_node_pool. Network contributor role assignment is applied to the provided subnet, and when ACR integration is enabled the module creates an azurerm_role_assignment granting AcrPull to the cluster's managed identity. Outputs such as host, cluster_ca_certificate, client credentials, and oidc_issuer_url are surfaced directly from the inner module.
+The module wraps the Azure/aks/azurerm community module (version 11.0.0) and feeds all input variables into it, creating an AKS cluster with a system node pool and a separate autoscaling user node pool both attached to the provided vnet_subnet_id. It retrieves the current Azure client config via azurerm_client_config to wire the tenant_id into AAD RBAC settings and enables workload_identity and oidc_issuer on the cluster. Network Contributor role assignments are applied to the node subnet and any additional subnets supplied via additional_network_contributor_subnet_ids, and an optional AcrPull role binding is conditionally created on the supplied ACR when acr_id is provided.
 
 ## Features
 
-- Creates AKS cluster with separate system and autoscaling user node pools on a specified VNet subnet
-- Enables workload identity and OIDC issuer for pod-level Azure authentication
-- Assigns Network Contributor role to the AKS managed identity on the provided subnet
-- Optionally attaches an Azure Container Registry by granting the AcrPull role to the cluster identity
-- Configures availability zone distribution for both system and user node pools
-- Exposes kubeconfig credentials, OIDC issuer URL, and node resource group as outputs
+- Creates AKS cluster with RBAC, AAD integration, OIDC issuer, and workload identity enabled
+- Configures a fixed system node pool with configurable VM size, node count, and availability zones
+- Deploys an autoscaling user node pool with configurable min/max counts and availability zone spread
+- Grants Network Contributor role on the node subnet and any additional load-balancer subnets to the cluster identity
+- Optionally attaches an Azure Container Registry by granting AcrPull role to the cluster identity
+- Exposes cluster credentials and OIDC issuer URL as outputs for downstream Kubernetes provider configuration
 - Supports private cluster mode and API server authorized IP range restrictions
 
 ## Basic Usage
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v6.11.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v6.11.3"
 
   cluster_name        = "your-cluster-name"
   location            = "your-location"
@@ -73,6 +73,7 @@ resource "example_resource" "this" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_acr_id"></a> [acr\_id](#input\_acr\_id) | The ID of the Azure Container Registry. If provided, AKS will be granted AcrPull role to pull images. | `string` | `null` | no |
+| <a name="input_additional_network_contributor_subnet_ids"></a> [additional\_network\_contributor\_subnet\_ids](#input\_additional\_network\_contributor\_subnet\_ids) | Extra subnet IDs, keyed by an arbitrary stable name, where the cluster identity also needs Network Contributor. The node subnet is granted automatically; add an entry for any other subnet the cloud-provider must write into -- typically the one an internal load balancer is pinned to via service.beta.kubernetes.io/azure-load-balancer-internal-subnet, which otherwise fails to provision with a 403 on virtualNetworks/subnets/read. | `map(string)` | `{}` | no |
 | <a name="input_attach_acr"></a> [attach\_acr](#input\_attach\_acr) | Whether to grant AKS the AcrPull role on acr\_id. Null (default) preserves the legacy behaviour of attaching whenever acr\_id is non-null. Set to true for a greenfield single-apply where acr\_id is known only after apply (keeps the for\_each key set plan-stable); set to false to disable. | `bool` | `null` | no |
 | <a name="input_authorized_ip_ranges"></a> [authorized\_ip\_ranges](#input\_authorized\_ip\_ranges) | The set of authorized IP ranges allowed to access the Kubernetes API server | `set(string)` | `null` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The name of the AKS cluster | `string` | n/a | yes |
@@ -112,15 +113,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "aks",
-  "description": "Deploys an Azure Kubernetes Service (AKS) cluster with a system node pool, an autoscaling user node pool, workload identity, OIDC issuer, and optional ACR integration using the Azure/aks/azurerm community module",
-  "architecture": "The module wraps the Azure/aks/azurerm community module (version 11.0.0) and passes all inputs into it, which internally creates an azurerm_kubernetes_cluster resource with a system agent pool and a separate user node pool via azurerm_kubernetes_cluster_node_pool. Network contributor role assignment is applied to the provided subnet, and when ACR integration is enabled the module creates an azurerm_role_assignment granting AcrPull to the cluster's managed identity. Outputs such as host, cluster_ca_certificate, client credentials, and oidc_issuer_url are surfaced directly from the inner module.",
+  "description": "Deploys an Azure Kubernetes Service (AKS) cluster with configurable system and user node pools, workload identity, OIDC issuer, and optional ACR integration using the Azure/aks/azurerm upstream module",
+  "architecture": "The module wraps the Azure/aks/azurerm community module (version 11.0.0) and feeds all input variables into it, creating an AKS cluster with a system node pool and a separate autoscaling user node pool both attached to the provided vnet_subnet_id. It retrieves the current Azure client config via azurerm_client_config to wire the tenant_id into AAD RBAC settings and enables workload_identity and oidc_issuer on the cluster. Network Contributor role assignments are applied to the node subnet and any additional subnets supplied via additional_network_contributor_subnet_ids, and an optional AcrPull role binding is conditionally created on the supplied ACR when acr_id is provided.",
   "features": [
-    "Creates AKS cluster with separate system and autoscaling user node pools on a specified VNet subnet",
-    "Enables workload identity and OIDC issuer for pod-level Azure authentication",
-    "Assigns Network Contributor role to the AKS managed identity on the provided subnet",
-    "Optionally attaches an Azure Container Registry by granting the AcrPull role to the cluster identity",
-    "Configures availability zone distribution for both system and user node pools",
-    "Exposes kubeconfig credentials, OIDC issuer URL, and node resource group as outputs",
+    "Creates AKS cluster with RBAC, AAD integration, OIDC issuer, and workload identity enabled",
+    "Configures a fixed system node pool with configurable VM size, node count, and availability zones",
+    "Deploys an autoscaling user node pool with configurable min/max counts and availability zone spread",
+    "Grants Network Contributor role on the node subnet and any additional load-balancer subnets to the cluster identity",
+    "Optionally attaches an Azure Container Registry by granting AcrPull role to the cluster identity",
+    "Exposes cluster credentials and OIDC issuer URL as outputs for downstream Kubernetes provider configuration",
     "Supports private cluster mode and API server authorized IP range restrictions"
   ],
   "inputs": [
@@ -148,6 +149,11 @@ resource "example_resource" "this" {
       "name": "vnet_subnet_id",
       "description": "The ID of the subnet where AKS nodes will be deployed",
       "required": true
+    },
+    {
+      "name": "additional_network_contributor_subnet_ids",
+      "description": "Extra subnet IDs, keyed by an arbitrary stable name, where the cluster identity also needs Network Contributor. The node subnet is granted automatically; add an entry for any other subnet the cloud-provider must write into -- typically the one an internal load balancer is pinned to via service.beta.kubernetes.io/azure-load-balancer-internal-subnet, which otherwise fails to provision with a 403 on virtualNetworks/subnets/read.",
+      "required": false
     },
     {
       "name": "kubernetes_version",
@@ -237,6 +243,6 @@ resource "example_resource" "this" {
     "oidc_issuer_url",
     "node_resource_group"
   ],
-  "hash": "f5177eb49e3caf5d2155d3685be48572"
+  "hash": "eecb9a7cb8471fcdabab22199c6e4b4a"
 }
 END_AI_METADATA -->
