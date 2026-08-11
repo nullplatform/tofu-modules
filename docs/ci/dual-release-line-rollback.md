@@ -21,6 +21,17 @@ trabajo que sí requería la nueva major avanzaba de forma aislada en
 **Esto es temporal por diseño.** Este runbook describe cómo desarmarlo
 cuando el equipo decida que ya no hace falta.
 
+**Nota de un fix de seguimiento:** la primera versión de este esquema tenía
+un bug real — `release-please-action` no calculaba versión sobre `6.x`,
+sino sobre `main`, porque `target-branch` no se pasaba explícito y por
+default cae en la rama default del repo (no en la rama que disparó el
+workflow, como se asumió originalmente). Un commit de seguimiento (mismo
+substring "dual release line" en el título) lo corrigió pasando
+`target-branch: ${{ github.ref_name }}`, y de paso separó el job `release`
+de este repo del workflow reusable de `actions-nullplatform` (que no
+expone ese input) para poder setearlo. Ver Paso 1 para encontrar todos los
+commits relevantes.
+
 ## Lo que este rollback SÍ hace y lo que NO hace
 
 - **SÍ**: elimina los checks y triggers de CI agregados (el chequeo de base
@@ -36,29 +47,35 @@ cuando el equipo decida que ya no hace falta.
   una decisión de negocio/arquitectura que este runbook NO toma por vos —
   ver la sección "Decisión pendiente: destino de `6.x`" al final.
 
-## Paso 1: Encontrar el commit que introdujo este esquema
+## Paso 1: Encontrar los commits que introdujeron/ajustaron este esquema
 
-El PR que introdujo esto se tituló `"ci: temporary dual release line
-(package -> 7.x, resto -> 6.x)"` y se mergeó con `--squash`, por lo que en
-`main` quedó como un único commit con ese texto. El mismo commit se
-propagó a `6.x` vía `cherry-pick` (mismo mensaje, otro SHA).
+El esquema se introdujo en un PR titulado `"ci: temporary dual release line
+(package -> 7.x, resto -> 6.x)"`, mergeado con `--squash` (un único commit
+en `main`, propagado a `6.x` vía `cherry-pick`). Después recibió un fix de
+seguimiento (mismo substring "dual release line" en el título) que corrige
+el cálculo de versión de la línea `6.x` (ver más abajo) y agrega hardening
+adicional. Puede haber más de un commit relevante por rama — buscá todos:
 
-Run:
+Run (por separado en cada rama, para no mezclar commits que no pertenecen
+a ninguna de las dos líneas):
 ```bash
 git fetch origin -q
-git log --oneline --all --grep="dual release line"
+git log --oneline origin/main --grep="dual release line"
+git log --oneline origin/6.x --grep="dual release line"
 ```
-Esto debería mostrar dos commits: uno alcanzable desde `main`, otro desde
-`6.x`. Anotá ambos SHAs.
+Anotá los SHAs de cada comando por separado. Si hay más de uno por rama,
+revertilos en los Pasos 2/3 **del más nuevo al más viejo** (un `git revert`
+por SHA, en ese orden).
 
 ## Paso 2: Revertir en `main`
 
-Run:
+Run (repetir por cada SHA encontrado en `main`, del más nuevo al más viejo):
 ```bash
 git checkout main && git pull origin main -q
 git revert --no-edit <sha-en-main>
 ```
-Si el revert aplica limpio, seguí al Paso 4. Si hay conflictos (porque
+Cuando termines de revertir todos los SHAs encontrados en `main`, seguí al
+Paso 3/4. Si algún revert tiene conflictos (porque
 alguno de estos archivos se modificó después por otro motivo), resolvelos
 usando la sección "Fallback manual" de abajo como referencia de qué
 contenido final se espera en cada archivo, y después:
@@ -69,7 +86,7 @@ git revert --continue
 
 ## Paso 3: Revertir en `6.x`
 
-Run:
+Run (repetir por cada SHA encontrado en `6.x`, del más nuevo al más viejo):
 ```bash
 git checkout 6.x && git pull origin 6.x -q
 git revert --no-edit <sha-en-6.x>
@@ -117,11 +134,29 @@ deshacer, archivo por archivo:
     group: main-branch-push
     cancel-in-progress: false
   ```
-- Volver las 3 referencias `release-please--branches--${{ github.ref_name }}`
-  a `release-please--branches--main` (literal).
+- Volver el job `release` a delegar en el workflow reusable (un fix de
+  seguimiento lo cambió para llamar a `googleapis/release-please-action@v5`
+  directo, porque necesitaba pasarle `target-branch` y el workflow reusable
+  de `actions-nullplatform` no expone ese input):
+  ```yaml
+  release:
+    uses: nullplatform/actions-nullplatform/.github/workflows/release.yml@main
+    permissions:
+      contents: write
+      pull-requests: write
+    with:
+      update_readme_versions: false
+  ```
+- En el job `generate-readmes`, sacar los `env: REF_NAME: ${{ github.ref_name }}`
+  que el fix de seguimiento agregó en los steps "Check if Release Please PR
+  exists" y "Commit and push", y volver a interpolar `${{ github.ref_name }}`
+  directo en esos dos `run:`, con el valor final literal
+  `release-please--branches--main` en ambos.
 
 ### `.github/workflows/auto-merge-release.yml`
-- Volver `-f "head=${REPO_OWNER}:release-please--branches--${{ github.event.workflow_run.head_branch }}"`
+- Sacar `HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}` del
+  bloque `env:` del step (quedan solo `GH_TOKEN` y `REPO_OWNER`).
+- Volver `-f "head=${REPO_OWNER}:release-please--branches--${HEAD_BRANCH}"`
   a `-f "head=${REPO_OWNER}:release-please--branches--main"` (literal).
 
 ### `.github/workflows/linter.yml`, `.github/workflows/tofu-test.yml`, `.github/workflows/tflint-unused.yml`
