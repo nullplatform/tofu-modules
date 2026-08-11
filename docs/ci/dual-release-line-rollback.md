@@ -56,14 +56,16 @@ seguimiento (mismo substring "dual release line" en el título) que corrige
 el cálculo de versión de la línea `6.x` (ver más abajo) y agrega hardening
 adicional. Puede haber más de un commit relevante por rama — buscá todos:
 
-Run:
+Run (por separado en cada rama, para no mezclar commits que no pertenecen
+a ninguna de las dos líneas):
 ```bash
 git fetch origin -q
-git log --oneline --all --grep="dual release line"
+git log --oneline origin/main --grep="dual release line"
+git log --oneline origin/6.x --grep="dual release line"
 ```
-Anotá todos los SHAs que aparezcan, separados por rama (`main` y `6.x`).
-Si hay más de uno por rama, revertilos en los Pasos 2/3 **del más nuevo al
-más viejo** (un `git revert` por SHA, en ese orden).
+Anotá los SHAs de cada comando por separado. Si hay más de uno por rama,
+revertilos en los Pasos 2/3 **del más nuevo al más viejo** (un `git revert`
+por SHA, en ese orden).
 
 ## Paso 2: Revertir en `main`
 
@@ -72,7 +74,8 @@ Run (repetir por cada SHA encontrado en `main`, del más nuevo al más viejo):
 git checkout main && git pull origin main -q
 git revert --no-edit <sha-en-main>
 ```
-Si el revert aplica limpio, seguí al Paso 4. Si hay conflictos (porque
+Cuando termines de revertir todos los SHAs encontrados en `main`, seguí al
+Paso 3/4. Si algún revert tiene conflictos (porque
 alguno de estos archivos se modificó después por otro motivo), resolvelos
 usando la sección "Fallback manual" de abajo como referencia de qué
 contenido final se espera en cada archivo, y después:
