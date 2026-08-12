@@ -58,7 +58,6 @@ locals {
 
     gcp = {
       PRIVATE_GATEWAY_NAME = var.private_gateway_name
-      PRIVATE_DOMAIN       = var.private_domain
     }
 
     azure = {
@@ -74,7 +73,6 @@ locals {
 
     oci = {
       PRIVATE_GATEWAY_NAME = var.private_gateway_name
-      PRIVATE_DOMAIN       = var.private_domain
     }
   }
 

@@ -91,3 +91,11 @@ run "aws_with_ingress_type_istio_still_requires_ingress_templates" {
     terraform_data.cross_variable_validation,
   ]
 }
+
+run "oci_with_private_gateway_name_succeeds" {
+  command = plan
+
+  variables {
+    cloud_provider = "oci"
+  }
+}

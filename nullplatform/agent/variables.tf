@@ -214,11 +214,6 @@ variable "domain" {
   default     = ""
 }
 
-variable "private_domain" {
-  description = "Private domain name used for internal agent routing"
-  default     = ""
-  type        = string
-}
 # Flag to determine whether to use account slug in resource naming (required when cloud_provider is 'azure')
 variable "use_account_slug" {
   description = "Flag to determine whether to use account slug in resource naming"

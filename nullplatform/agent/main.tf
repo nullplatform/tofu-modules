@@ -29,8 +29,8 @@ resource "terraform_data" "cross_variable_validation" {
       error_message = "azure_resource_group is required when cloud_provider is 'azure'."
     }
     precondition {
-      condition     = var.cloud_provider != "azure" || var.private_gateway_name != null
-      error_message = "private_gateway_name is required when cloud_provider is 'azure'."
+      condition     = !contains(["azure", "gcp", "oci"], var.cloud_provider) || var.private_gateway_name != null
+      error_message = "private_gateway_name is required when cloud_provider is 'azure', 'gcp', or 'oci'."
     }
     precondition {
       condition     = var.cloud_provider != "azure" || var.private_hosted_zone_rg != null
