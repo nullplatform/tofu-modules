@@ -66,6 +66,8 @@ locals {
       AZURE_CLIENT_ID        = var.azure_client_id
       AZURE_TENANT_ID        = var.azure_tenant_id
     }
+
+    oci = {}
   }
 
   all_config = merge(
