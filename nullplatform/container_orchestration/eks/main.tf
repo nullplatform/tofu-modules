@@ -33,6 +33,11 @@ locals {
     var.service_account_name != "" ? { service_account_name = var.service_account_name } : {},
   )
 
+  traffic_manager = merge(
+    var.traffic_manager_version != "" ? { version = var.traffic_manager_version } : {},
+    var.traffic_manager_port != null ? { port = var.traffic_manager_port } : {},
+  )
+
   attributes = merge(
     {
       cluster = local.cluster
@@ -41,7 +46,7 @@ locals {
     length(local.network) > 0 ? { network = local.network } : {},
     length(local.resource_management) > 0 ? { resource_management = local.resource_management } : {},
     length(local.security) > 0 ? { security = local.security } : {},
-    var.traffic_manager_version != "" ? { traffic_manager = { version = var.traffic_manager_version } } : {},
+    length(local.traffic_manager) > 0 ? { traffic_manager = local.traffic_manager } : {},
     length(var.object_modifiers) > 0 ? { object_modifiers = { modifiers = var.object_modifiers } } : {},
   )
 }
