@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.12.0](https://github.com/nullplatform/tofu-modules/compare/v6.11.3...v6.12.0) (2026-08-12)
+
+
+### Features
+
+* **eks:** add traffic_manager_port variable ([#509](https://github.com/nullplatform/tofu-modules/issues/509)) ([b2165b2](https://github.com/nullplatform/tofu-modules/commit/b2165b2e0cdd922922b4eb029c9f69512c8d0e62))
+
 ## [6.11.3](https://github.com/nullplatform/tofu-modules/compare/v6.11.2...v6.11.3) (2026-08-11)
 
 
