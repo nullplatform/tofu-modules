@@ -38,21 +38,44 @@ variable "ip_range_services" {
 }
 
 ###############################################################################
-# OPTIONAL VARIABLES - NODE POOLS
+# OPTIONAL VARIABLES - AUTOPILOT
+###############################################################################
+
+variable "autopilot_enabled" {
+  type        = bool
+  description = "Create a GKE Autopilot cluster instead of a standard cluster with manually managed node pools. When true, node_pools is ignored — Autopilot provisions and scales nodes automatically per workload."
+  default     = false
+}
+
+###############################################################################
+# OPTIONAL VARIABLES - NODE POOLS (ignored when autopilot_enabled is true)
 ###############################################################################
 
 variable "node_pools" {
   type = list(object({
     name         = string
     machine_type = optional(string, "e2-medium")
-    min_count    = optional(number, 1)
-    max_count    = optional(number, 3)
     disk_size_gb = optional(number, 100)
+    # When autoscaling is true (the default), the pool scales between
+    # min_count and max_count. When false, it holds a fixed node_count.
+    autoscaling = optional(bool, true)
+    min_count   = optional(number, 1)
+    max_count   = optional(number, 3)
+    node_count  = optional(number, 1)
+    # spot and preemptible are mutually exclusive lower-cost VM options;
+    # leave both false for regular on-demand nodes.
+    spot        = optional(bool, false)
+    preemptible = optional(bool, false)
   }))
-  description = "List of node pools to create in the GKE cluster"
+  description = "List of node pools to create in the GKE cluster (ignored when autopilot_enabled is true)"
   default = [{
     name = "default"
   }]
+
+  validation {
+    condition     = alltrue([for pool in var.node_pools : !(pool.spot && pool.preemptible)])
+    error_message = "Each node pool must not set both spot and preemptible to true — they are mutually exclusive lower-cost VM options."
+  }
 }
 
 variable "authorized_ip_ranges" {
