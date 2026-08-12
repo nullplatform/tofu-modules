@@ -4,7 +4,6 @@ mock_provider "helm" {}
 variables {
   api_key        = "test-api-key"
   cluster_name   = "test-cluster"
-  nrn            = "organization=1:account=2:namespace=3"
   tags_selectors = { environment = "test" }
   image_tag      = "latest"
   cloud_provider = "gcp"
