@@ -33,3 +33,9 @@ variable "workload_identity_bindings" {
   }))
   default = []
 }
+
+variable "generate_key" {
+  type        = bool
+  description = "Generate a static JSON key for the Artifact Registry service account, exposed via the service_account_key_base64 output. Only needed for callers outside the cluster (e.g. an external system authenticating as a Docker registry client) that can't use Workload Identity. Leave false when every consumer runs in-cluster."
+  default     = false
+}

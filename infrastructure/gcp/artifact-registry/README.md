@@ -6,7 +6,7 @@ Creates a Google Artifact Registry repository with an associated service account
 
 ## Architecture
 
-The module provisions a google_artifact_registry_repository resource in the specified GCP project and location. A google_service_account is created and granted roles/artifactregistry.writer permissions via google_project_iam_member to enable push/pull operations. For each entry in workload_identity_bindings, a google_service_account_iam_member resource grants roles/iam.workloadIdentityUser to the corresponding Kubernetes service account, establishing the Workload Identity federation link between GKE pods and the GCP service account.
+The module provisions a google_artifact_registry_repository resource in the specified GCP project and location. A google_service_account is created and granted roles/artifactregistry.writer permissions via google_project_iam_member to enable push/pull operations. For each entry in workload_identity_bindings, a google_service_account_iam_member resource grants roles/iam.workloadIdentityUser to the corresponding Kubernetes service account, establishing the Workload Identity federation link between GKE pods and the GCP service account. When generate_key is true, a google_service_account_key is also created and its base64-encoded private key exposed via service_account_key_base64, for callers outside the cluster that can't use Workload Identity and need to authenticate as a Docker client instead.
 
 ## Features
 
@@ -16,6 +16,7 @@ The module provisions a google_artifact_registry_repository resource in the spec
 - Outputs fully-qualified Docker-compatible repository URL for image push/pull operations
 - Supports custom labels/tags on the Artifact Registry repository
 - Enables multi-namespace Kubernetes service account bindings through dynamic for_each configuration
+- Optionally generates a static JSON key for the service account, for non-cluster Docker clients that can't use Workload Identity
 
 ## Basic Usage
 
@@ -27,6 +28,23 @@ module "artifact-registry" {
   project_id    = "your-project-id"
   repository_id = "your-repository-id"
 }
+```
+
+### Usage with a Static Docker Credential
+
+```hcl
+module "artifact-registry" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/artifact-registry?ref=v6.11.3"
+
+  location      = "your-location"
+  project_id    = "your-project-id"
+  repository_id = "your-repository-id"
+
+  generate_key = true
+}
+
+# module.artifact-registry.service_account_key_base64 is the password for a
+# Docker client authenticating with username "_json_key_base64".
 ```
 
 ## Using Outputs
@@ -60,12 +78,14 @@ resource "example_resource" "this" {
 | [google_project_iam_member.artifact_sa_role](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/project_iam_member) | resource |
 | [google_service_account.artifact_sa](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account) | resource |
 | [google_service_account_iam_member.workload_identity](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account_iam_member) | resource |
+| [google_service_account_key.artifact_sa_key](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account_key) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_format"></a> [format](#input\_format) | The format (DOCKER, NPM, PYTHON, etc) | `string` | `"DOCKER"` | no |
+| <a name="input_generate_key"></a> [generate\_key](#input\_generate\_key) | Generate a static JSON key for the Artifact Registry service account, exposed via the service\_account\_key\_base64 output. Only needed for callers outside the cluster (e.g. an external system authenticating as a Docker registry client) that can't use Workload Identity. Leave false when every consumer runs in-cluster. | `bool` | `false` | no |
 | <a name="input_location"></a> [location](#input\_location) | The location for the repository | `string` | n/a | yes |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | The GCP project ID | `string` | n/a | yes |
 | <a name="input_repository_id"></a> [repository\_id](#input\_repository\_id) | The repository ID (name) | `string` | n/a | yes |
@@ -79,6 +99,7 @@ resource "example_resource" "this" {
 | <a name="output_repository_id"></a> [repository\_id](#output\_repository\_id) | The Artifact Registry repository ID |
 | <a name="output_repository_url"></a> [repository\_url](#output\_repository\_url) | The fully-qualified Docker-compatible URL of the Artifact Registry repository |
 | <a name="output_service_account_email"></a> [service\_account\_email](#output\_service\_account\_email) | GCP Service Account email. Annotate the Kubernetes ServiceAccount bound via workload\_identity\_bindings with iam.gke.io/gcp-service-account=<this value> to impersonate this account from pods. |
+| <a name="output_service_account_key_base64"></a> [service\_account\_key\_base64](#output\_service\_account\_key\_base64) | Base64-encoded JSON key for the Artifact Registry service account, for Docker clients that authenticate with username '\_json\_key\_base64' and this value as the password. Null unless generate\_key is true. |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
