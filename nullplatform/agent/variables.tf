@@ -168,7 +168,7 @@ variable "azure_resource_group" {
   default     = null
 }
 
-# Private gateway name for Azure networking (required when cloud_provider is 'azure')
+# Name of the private/internal gateway used for routing (defaults to "gateway-private")
 variable "private_gateway_name" {
   description = "Name of the private/internal gateway used for routing"
   type        = string
@@ -182,7 +182,7 @@ variable "private_hosted_zone_rg" {
   default     = null
 }
 
-# Public gateway name for Azure networking (required when cloud_provider is 'azure')
+# Name of the public gateway used for routing (defaults to "gateway-public")
 variable "public_gateway_name" {
   description = "Name of the public gateway used for routing"
   type        = string
