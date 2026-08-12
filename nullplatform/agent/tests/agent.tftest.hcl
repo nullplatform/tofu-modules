@@ -8,9 +8,6 @@ variables {
   tags_selectors = { environment = "test" }
   image_tag      = "latest"
   cloud_provider = "gcp"
-  # Required by the gcp branch of local.cloud_config regardless of the
-  # ingress-template preconditions under test here.
-  private_gateway_name = "gateway-private"
 }
 
 run "no_extra_envs_does_not_require_ingress_templates" {
@@ -92,7 +89,7 @@ run "aws_with_ingress_type_istio_still_requires_ingress_templates" {
   ]
 }
 
-run "oci_with_private_gateway_name_succeeds" {
+run "oci_succeeds_with_default_gateway_names" {
   command = plan
 
   variables {

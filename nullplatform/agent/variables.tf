@@ -127,7 +127,7 @@ variable "aws_iam_role_arn" {
 
 # Cloud provider to use (aws, gcp, or azure)
 variable "cloud_provider" {
-  description = "Cloud provider to use (aws, gcp, or azure)"
+  description = "Cloud provider to use (aws, gcp, oci or azure)"
   type        = string
   validation {
     condition     = contains(["aws", "gcp", "azure", "oci"], var.cloud_provider)
@@ -170,9 +170,9 @@ variable "azure_resource_group" {
 
 # Private gateway name for Azure networking (required when cloud_provider is 'azure')
 variable "private_gateway_name" {
-  description = "Private gateway name for Azure networking"
+  description = "Name of the private/internal gateway used for routing"
   type        = string
-  default     = null
+  default     = "gateway-private"
 }
 
 # Resource group for private hosted zone (required when cloud_provider is 'azure')
@@ -184,9 +184,9 @@ variable "private_hosted_zone_rg" {
 
 # Public gateway name for Azure networking (required when cloud_provider is 'azure')
 variable "public_gateway_name" {
-  description = "Public gateway name for Azure networking"
+  description = "Name of the public gateway used for routing"
   type        = string
-  default     = null
+  default     = "gateway-public"
 }
 
 # Azure tenant ID (required when cloud_provider is 'azure')
