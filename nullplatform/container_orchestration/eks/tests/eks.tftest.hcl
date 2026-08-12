@@ -196,6 +196,29 @@ run "with_traffic_manager" {
     condition     = strcontains(nullplatform_provider_config.eks_config.attributes, "latest")
     error_message = "Attributes should contain traffic manager version"
   }
+
+  assert {
+    condition     = !strcontains(nullplatform_provider_config.eks_config.attributes, "\"port\"")
+    error_message = "Attributes should not contain traffic manager port when not set"
+  }
+}
+
+run "with_traffic_manager_port" {
+  command = plan
+
+  variables {
+    traffic_manager_port = 10080
+  }
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.eks_config.attributes, "\"port\":10080")
+    error_message = "Attributes should contain the traffic manager port"
+  }
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.eks_config.attributes, "\"version\":\"latest\"")
+    error_message = "Setting the port must not drop the traffic manager version"
+  }
 }
 
 run "with_object_modifiers" {
