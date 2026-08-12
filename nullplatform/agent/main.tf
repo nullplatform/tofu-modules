@@ -45,16 +45,16 @@ resource "terraform_data" "cross_variable_validation" {
       error_message = "azure_tenant_id is required when cloud_provider is 'azure'."
     }
     precondition {
-      condition     = var.cloud_provider == "aws" || var.service_template != ""
-      error_message = "service_template is required when cloud_provider is not 'aws' — the default k8s scope template is AWS-specific and won't route traffic correctly on other clouds."
+      condition     = lookup(var.extra_envs, "INGRESS_TYPE", "") != "istio" || var.service_template != ""
+      error_message = "service_template is required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio."
     }
     precondition {
-      condition     = var.cloud_provider == "aws" || var.initial_ingress_path != ""
-      error_message = "initial_ingress_path is required when cloud_provider is not 'aws' — the default k8s scope template is AWS-specific and won't route traffic correctly on other clouds."
+      condition     = lookup(var.extra_envs, "INGRESS_TYPE", "") != "istio" || var.initial_ingress_path != ""
+      error_message = "initial_ingress_path is required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio."
     }
     precondition {
-      condition     = var.cloud_provider == "aws" || var.blue_green_ingress_path != ""
-      error_message = "blue_green_ingress_path is required when cloud_provider is not 'aws' — the default k8s scope template is AWS-specific and won't route traffic correctly on other clouds."
+      condition     = lookup(var.extra_envs, "INGRESS_TYPE", "") != "istio" || var.blue_green_ingress_path != ""
+      error_message = "blue_green_ingress_path is required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio."
     }
   }
 }
