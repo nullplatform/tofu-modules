@@ -44,6 +44,18 @@ resource "terraform_data" "cross_variable_validation" {
       condition     = var.cloud_provider != "azure" || var.azure_tenant_id != null
       error_message = "azure_tenant_id is required when cloud_provider is 'azure'."
     }
+    precondition {
+      condition     = var.cloud_provider == "aws" || var.service_template != ""
+      error_message = "service_template is required when cloud_provider is not 'aws' — the default k8s scope template is AWS-specific and won't route traffic correctly on other clouds."
+    }
+    precondition {
+      condition     = var.cloud_provider == "aws" || var.initial_ingress_path != ""
+      error_message = "initial_ingress_path is required when cloud_provider is not 'aws' — the default k8s scope template is AWS-specific and won't route traffic correctly on other clouds."
+    }
+    precondition {
+      condition     = var.cloud_provider == "aws" || var.blue_green_ingress_path != ""
+      error_message = "blue_green_ingress_path is required when cloud_provider is not 'aws' — the default k8s scope template is AWS-specific and won't route traffic correctly on other clouds."
+    }
   }
 }
 

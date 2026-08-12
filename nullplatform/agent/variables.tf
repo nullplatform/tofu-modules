@@ -238,19 +238,19 @@ variable "image_pull_secrets" {
 }
 
 variable "service_template" {
-  description = "Specifies the name or reference of the scope service template to be used for deployment."
+  description = "Specifies the name or reference of the scope service template to be used for deployment. Required when cloud_provider is not 'aws' — the k8s scope's default templates are AWS-specific (ALB Ingress annotations), so every other cloud must point this at a template that matches its own ingress mechanism (e.g. an Istio HTTPRoute template)."
   type        = string
   default     = ""
 }
 
 variable "initial_ingress_path" {
-  description = "Defines the initial ingress path used when deploying the application for the first time."
+  description = "Defines the initial ingress path used when deploying the application for the first time. Required when cloud_provider is not 'aws' — the k8s scope's default templates are AWS-specific (ALB Ingress annotations), so every other cloud must point this at a template that matches its own ingress mechanism (e.g. an Istio HTTPRoute template)."
   type        = string
   default     = ""
 }
 
 variable "blue_green_ingress_path" {
-  description = "Specifies the ingress path used for blue-green deployments to route traffic to the new version."
+  description = "Specifies the ingress path used for blue-green deployments to route traffic to the new version. Required when cloud_provider is not 'aws' — the k8s scope's default templates are AWS-specific (ALB Ingress annotations), so every other cloud must point this at a template that matches its own ingress mechanism (e.g. an Istio HTTPRoute template)."
   type        = string
   default     = ""
 }
