@@ -20,7 +20,7 @@ An aws_iam_policy resource is always created granting route53:GetChange, route53
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/cert_manager?ref=v6.11.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/cert_manager?ref=v6.12.0"
 
   cluster_name = "your-cluster-name"
 }
