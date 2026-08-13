@@ -11,6 +11,7 @@ The module wraps the Azure/aks/azurerm community module (version 11.0.0) and fee
 ## Features
 
 - Creates AKS cluster with RBAC, AAD integration, OIDC issuer, and workload identity enabled
+- Supports disabling local admin accounts, guarded by a precondition that requires an Entra ID authorization path
 - Configures a fixed system node pool with configurable VM size, node count, and availability zones
 - Deploys an autoscaling user node pool with configurable min/max counts and availability zone spread
 - Grants Network Contributor role on the node subnet and any additional load-balancer subnets to the cluster identity
@@ -29,6 +30,47 @@ module "aks" {
   resource_group_name = "your-resource-group-name"
   subscription_id     = "your-subscription-id"
   vnet_subnet_id      = "your-vnet-subnet-id"
+}
+```
+
+## Hardened Access
+
+Local admin accounts are certificate-based and bypass Entra ID, so security baselines often require
+them off. Disabling them removes the only credential that works without Entra ID, which means an
+authorization path has to be configured in the same change — the module enforces this with a
+precondition rather than letting the cluster become unreachable.
+
+```hcl
+module "aks" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v6.12.0"
+
+  cluster_name        = "your-cluster-name"
+  location            = "your-location"
+  resource_group_name = "your-resource-group-name"
+  subscription_id     = "your-subscription-id"
+  vnet_subnet_id      = "your-vnet-subnet-id"
+
+  local_account_disabled = true
+  azure_rbac_enabled     = true # grant access with Azure role assignments
+  # admin_group_object_ids = ["<entra-id-group-object-id>"] # or keep authorization in Kubernetes RBAC
+}
+```
+
+With `azure_rbac_enabled = true`, cluster access is granted outside this module with Azure role
+assignments such as `Azure Kubernetes Service RBAC Cluster Admin`. Consumers reaching the API server
+from Terraform must also authenticate through Entra ID, since the `admin_*` outputs are empty once
+local accounts are disabled:
+
+```hcl
+provider "kubernetes" {
+  host                   = module.aks.host
+  cluster_ca_certificate = base64decode(module.aks.cluster_ca_certificate)
+
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "kubelogin"
+    args        = ["get-token", "--login", "azurecli", "--server-id", "6dae42f8-4368-4678-94ff-3960e28e3630"]
+  }
 }
 ```
 
@@ -74,11 +116,14 @@ resource "example_resource" "this" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_acr_id"></a> [acr\_id](#input\_acr\_id) | The ID of the Azure Container Registry. If provided, AKS will be granted AcrPull role to pull images. | `string` | `null` | no |
 | <a name="input_additional_network_contributor_subnet_ids"></a> [additional\_network\_contributor\_subnet\_ids](#input\_additional\_network\_contributor\_subnet\_ids) | Extra subnet IDs, keyed by an arbitrary stable name, where the cluster identity also needs Network Contributor. The node subnet is granted automatically; add an entry for any other subnet the cloud-provider must write into -- typically the one an internal load balancer is pinned to via service.beta.kubernetes.io/azure-load-balancer-internal-subnet, which otherwise fails to provision with a 403 on virtualNetworks/subnets/read. | `map(string)` | `{}` | no |
+| <a name="input_admin_group_object_ids"></a> [admin\_group\_object\_ids](#input\_admin\_group\_object\_ids) | Entra ID group object IDs whose members get cluster-admin through Kubernetes RBAC. The alternative to azure\_rbac\_enabled when authorization should stay in-cluster. | `list(string)` | `null` | no |
 | <a name="input_attach_acr"></a> [attach\_acr](#input\_attach\_acr) | Whether to grant AKS the AcrPull role on acr\_id. Null (default) preserves the legacy behaviour of attaching whenever acr\_id is non-null. Set to true for a greenfield single-apply where acr\_id is known only after apply (keeps the for\_each key set plan-stable); set to false to disable. | `bool` | `null` | no |
 | <a name="input_authorized_ip_ranges"></a> [authorized\_ip\_ranges](#input\_authorized\_ip\_ranges) | The set of authorized IP ranges allowed to access the Kubernetes API server | `set(string)` | `null` | no |
+| <a name="input_azure_rbac_enabled"></a> [azure\_rbac\_enabled](#input\_azure\_rbac\_enabled) | Whether Kubernetes authorization is delegated to Azure RBAC, so cluster access is granted with Azure role assignments such as 'Azure Kubernetes Service RBAC Cluster Admin'. Defaults to false, which keeps authorization inside Kubernetes RBAC. | `bool` | `false` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The name of the AKS cluster | `string` | n/a | yes |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment name used for tagging and naming purposes | `string` | `"nullplatform"` | no |
 | <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | The version of Kubernetes to use for the AKS cluster | `string` | `"1.32.7"` | no |
+| <a name="input_local_account_disabled"></a> [local\_account\_disabled](#input\_local\_account\_disabled) | Whether to disable the AKS local (certificate-based) admin accounts. Null (default) leaves the Azure default, which keeps them enabled. When true, Entra ID becomes the only way into the API server, so an authorization path must be configured as well — see azure\_rbac\_enabled and admin\_group\_object\_ids. | `bool` | `null` | no |
 | <a name="input_location"></a> [location](#input\_location) | The Azure region where the AKS cluster will be deployed (e.g., eastus, westus2) | `string` | n/a | yes |
 | <a name="input_node_pool_zones"></a> [node\_pool\_zones](#input\_node\_pool\_zones) | Availability zones for the user node pool, e.g. ["1", "2", "3"].<br/>Null (default) leaves the pool unzoned. Set it deliberately on a live<br/>cluster: Azure treats a pool's zones as immutable, and upstream rotates the<br/>pool through `temporary_name_for_rotation` to honour the change. | `set(string)` | `null` | no |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | The prefix for resources created by the AKS module | `string` | `"aks"` | no |
@@ -117,6 +162,7 @@ resource "example_resource" "this" {
   "architecture": "The module wraps the Azure/aks/azurerm community module (version 11.0.0) and feeds all input variables into it, creating an AKS cluster with a system node pool and a separate autoscaling user node pool both attached to the provided vnet_subnet_id. It retrieves the current Azure client config via azurerm_client_config to wire the tenant_id into AAD RBAC settings and enables workload_identity and oidc_issuer on the cluster. Network Contributor role assignments are applied to the node subnet and any additional subnets supplied via additional_network_contributor_subnet_ids, and an optional AcrPull role binding is conditionally created on the supplied ACR when acr_id is provided.",
   "features": [
     "Creates AKS cluster with RBAC, AAD integration, OIDC issuer, and workload identity enabled",
+    "Supports disabling local admin accounts, guarded by a precondition that requires an Entra ID authorization path",
     "Configures a fixed system node pool with configurable VM size, node count, and availability zones",
     "Deploys an autoscaling user node pool with configurable min/max counts and availability zone spread",
     "Grants Network Contributor role on the node subnet and any additional load-balancer subnets to the cluster identity",
@@ -228,6 +274,21 @@ resource "example_resource" "this" {
     {
       "name": "system_pool_node_count",
       "description": "Fixed node count for the system pool. Defaults to 2, the upstream default this module relied on implicitly.",
+      "required": false
+    },
+    {
+      "name": "local_account_disabled",
+      "description": "Whether to disable the AKS local (certificate-based) admin accounts. Null (default) leaves the Azure default, which keeps them enabled. When true, Entra ID becomes the only way into the API server, so an authorization path must be configured as well — see azure_rbac_enabled and admin_group_object_ids.",
+      "required": false
+    },
+    {
+      "name": "azure_rbac_enabled",
+      "description": "Whether Kubernetes authorization is delegated to Azure RBAC, so cluster access is granted with Azure role assignments such as 'Azure Kubernetes Service RBAC Cluster Admin'. Defaults to false, which keeps authorization inside Kubernetes RBAC.",
+      "required": false
+    },
+    {
+      "name": "admin_group_object_ids",
+      "description": "Entra ID group object IDs whose members get cluster-admin through Kubernetes RBAC. The alternative to azure_rbac_enabled when authorization should stay in-cluster.",
       "required": false
     }
   ],
