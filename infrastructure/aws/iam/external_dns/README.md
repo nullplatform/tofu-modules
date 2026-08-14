@@ -20,7 +20,7 @@ An aws_iam_policy resource named nullplatform_external_dns_policy is always crea
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/external_dns?ref=v6.13.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/external_dns?ref=v6.14.0"
 
   cluster_name = "your-cluster-name"
 }
