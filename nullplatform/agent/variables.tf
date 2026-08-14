@@ -46,6 +46,7 @@ variable "release_name" {
   description = "Override for the Helm release name. Defaults to nullplatform-agent"
   type        = string
   default     = "nullplatform-agent"
+  nullable    = false
 }
 
 # Override for the Kubernetes ServiceAccount name. Defaults to the chart's default (nullplatform-agent)
@@ -53,6 +54,7 @@ variable "service_account_name" {
   description = "Override for the Kubernetes ServiceAccount name created by the Helm chart"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 # Version of the nullplatform agent Helm chart to deploy
@@ -89,6 +91,7 @@ variable "namespace" {
   description = "Kubernetes namespace where the nullplatform agent will run"
   type        = string
   default     = "nullplatform-tools"
+  nullable    = false
 }
 
 # Git repository URL containing agent scope configurations (format: repo#branch)
@@ -96,6 +99,7 @@ variable "agent_repos_scope" {
   description = "Git repository URL containing agent scope configurations (format: repo#branch)"
   type        = string
   default     = "https://github.com/nullplatform/scopes.git#main"
+  nullable    = false
 }
 
 # List of additional Git repositories used for extended agent configuration
@@ -103,6 +107,7 @@ variable "agent_repos_extra" {
   description = "List of additional Git repositories used for extended agent configuration"
   type        = list(string)
   default     = []
+  nullable    = false
 }
 
 # List of initialization scripts to execute during agent startup
@@ -110,6 +115,7 @@ variable "init_scripts" {
   description = "List of initialization scripts to execute during agent startup"
   type        = list(string)
   default     = []
+  nullable    = false
 }
 
 # Container image repository for the agent. Defaults to the official nullplatform image.
@@ -117,6 +123,7 @@ variable "image_repository" {
   description = "Container image repository for the agent. Defaults to the official nullplatform image."
   type        = string
   default     = ""
+  nullable    = false
 }
 
 # Flag to determine whether to use the account slug in resource naming
@@ -124,6 +131,7 @@ variable "use_account_slug" {
   description = "Flag to determine whether to use the account slug in resource naming"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 ################################################################################
@@ -135,6 +143,7 @@ variable "aws_iam_role_arn" {
   description = "ARN of the AWS IAM role assigned to the agent"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 ################################################################################
@@ -190,16 +199,18 @@ variable "azure_tenant_id" {
 
 # Name of the private/internal gateway used for routing
 variable "private_gateway_name" {
-  description = "Name of the private/internal gateway used for routing"
+  description = "Name of the private/internal gateway used for routing. Must match the Gateway the cluster actually has: nullplatform/base hardcodes the private Gateway as 'gateway-private' (templates/nullplatform_base_values.tmpl.yaml), while the k8s scope's own fallback is 'gateway-internal' — a mismatch produces HTTPRoutes with an unresolvable parentRef and deploys that die in verify_networking_reconciliation"
   type        = string
   default     = "gateway-private"
+  nullable    = false
 }
 
 # Name of the public gateway used for routing
 variable "public_gateway_name" {
-  description = "Name of the public gateway used for routing"
+  description = "Name of the public gateway used for routing. Must match nullplatform/base's gateway_public_name, which is overridable and documented to be overridden (e.g. 'internet-facing' on AKS). If base was overridden and this is left at the default, HTTPRoutes get an unresolvable parentRef and the Azure DNS record manager is handed a gateway name that does not exist"
   type        = string
   default     = "gateway-public"
+  nullable    = false
 }
 
 ################################################################################
@@ -211,6 +222,7 @@ variable "dns_type" {
   description = "Type of DNS Provider, ej: azure, route53, or external_dns"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 # Base domain name used across resources
@@ -218,6 +230,7 @@ variable "domain" {
   description = "Base domain name used across resources"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 ################################################################################
@@ -229,6 +242,7 @@ variable "image_pull_secrets" {
   description = "Image pull secrets configuration"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 ################################################################################
@@ -237,23 +251,26 @@ variable "image_pull_secrets" {
 
 # Scope service template to use for deployment (required when extra_envs.INGRESS_TYPE is 'istio')
 variable "service_template" {
-  description = "Specifies the name or reference of the scope service template to be used for deployment. Required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio, so it must be pointed at an Istio-compatible template instead."
+  description = "Specifies the name or reference of the scope service template to be used for deployment. Leave empty to use the default from the scope type's own values.yaml. Override it when the scope type's default does not match the cluster's ingress: scopes/k8s defaults to an AWS ALB Ingress template, so a GKE or AKS cluster running the k8s scope type needs all three of service_template, initial_ingress_path and blue_green_ingress_path pointed at Istio HTTPRoute templates, or deployments come up with no working route and no error. The scopes/azure and scopes/azure-aro scope types already set them and need no override"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 # Initial ingress path used on first deploy (required when extra_envs.INGRESS_TYPE is 'istio')
 variable "initial_ingress_path" {
-  description = "Defines the initial ingress path used when deploying the application for the first time. Required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio, so it must be pointed at an Istio HTTPRoute template instead."
+  description = "Defines the initial ingress path used when deploying the application for the first time. Leave empty to use the default from the scope type's own values.yaml. Override it when the scope type's default does not match the cluster's ingress: scopes/k8s defaults to an AWS ALB Ingress template, so a GKE or AKS cluster running the k8s scope type needs all three of service_template, initial_ingress_path and blue_green_ingress_path pointed at Istio HTTPRoute templates, or deployments come up with no working route and no error. The scopes/azure and scopes/azure-aro scope types already set them and need no override"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 # Blue-green ingress path used to route traffic to the new version (required when extra_envs.INGRESS_TYPE is 'istio')
 variable "blue_green_ingress_path" {
-  description = "Specifies the ingress path used for blue-green deployments to route traffic to the new version. Required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio, so it must be pointed at an Istio HTTPRoute template instead."
+  description = "Specifies the ingress path used for blue-green deployments to route traffic to the new version. Leave empty to use the default from the scope type's own values.yaml. Override it when the scope type's default does not match the cluster's ingress: scopes/k8s defaults to an AWS ALB Ingress template, so a GKE or AKS cluster running the k8s scope type needs all three of service_template, initial_ingress_path and blue_green_ingress_path pointed at Istio HTTPRoute templates, or deployments come up with no working route and no error. The scopes/azure and scopes/azure-aro scope types already set them and need no override"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 # Additional environment variables to pass to the agent
@@ -261,4 +278,33 @@ variable "extra_envs" {
   description = "Additional environment variables to pass to the agent"
   type        = map(string)
   default     = {}
+  nullable    = false
+}
+
+################################################################################
+# Deprecated inputs
+#
+# Removed in v6.14.0, restored here because removing a declared input is a
+# breaking change and 6.x is the non-breaking line: OpenTofu rejects an argument
+# for a variable that no longer exists, so every consumer passing these failed at
+# init the moment they bumped the module ref. They are intentionally unused —
+# `nrn` never was consumed (the agent resolves its own scope from the API key) and
+# PRIVATE_DOMAIN is confirmed dead in nullplatform/scopes. Drop them on the next
+# major, with a BREAKING CHANGE footer.
+################################################################################
+
+# tflint-ignore: terraform_unused_declarations
+variable "nrn" {
+  description = "DEPRECATED, accepted for compatibility and ignored. Nullplatform Resource Name; the agent resolves its own scope from the API key, so this module never consumed the value"
+  type        = string
+  default     = ""
+  nullable    = false
+}
+
+# tflint-ignore: terraform_unused_declarations
+variable "private_domain" {
+  description = "DEPRECATED, accepted for compatibility and ignored. Previously rendered as the PRIVATE_DOMAIN env var for gcp and oci, which nothing in nullplatform/scopes reads"
+  type        = string
+  default     = ""
+  nullable    = false
 }

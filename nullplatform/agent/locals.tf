@@ -70,11 +70,28 @@ locals {
     oci = {}
   }
 
-  all_config = merge(
-    local.default_config,
-    lookup(local.cloud_config, var.cloud_provider, {}),
-    var.extra_envs,
-  )
+  # Keeps the deprecated compatibility inputs referenced from the configuration, so
+  # deleting either variable fails `tofu validate` in CI rather than passing review
+  # and breaking consumers at init. Deliberately not rendered into the agent config.
+  # `tofu test` is not sufficient on its own here: it silently tolerates both a
+  # `variables` block for an undeclared variable and a `var.x` that no longer exists,
+  # so an assertion alone would not catch the removal.
+  # tflint-ignore: terraform_unused_declarations
+  deprecated_inputs_accepted = [var.nrn, var.private_domain]
+
+  # Drop null values. The azure and gcp inputs default to null, and a null reaching
+  # templatefile fails with "Invalid template interpolation value; The expression
+  # result is null" pointing at a line in the values template — an error that names
+  # no variable, and which fires before the preconditions below can report the
+  # actual missing input. Filtering here means an unset optional value simply is not
+  # rendered as an env var, and the precondition gets to speak.
+  all_config = {
+    for k, v in merge(
+      local.default_config,
+      lookup(local.cloud_config, var.cloud_provider, {}),
+      var.extra_envs,
+    ) : k => v if v != null
+  }
 
   # Template único y simple
   nullplatform_agent_values = templatefile("${path.module}/templates/nullplatform_agent_values.tmpl.yaml", {
