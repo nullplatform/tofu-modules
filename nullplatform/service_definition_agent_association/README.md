@@ -22,7 +22,7 @@ The module creates a terraform_data resource to track API key changes as a lifec
 
 ```hcl
 module "service_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v6.13.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v6.13.1"
 
   api_key                      = "your-api-key"
   repository_service_spec_repo = "your-repository-service-spec-repo"
