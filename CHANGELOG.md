@@ -1,5 +1,19 @@
 # Changelog
 
+## [6.16.0](https://github.com/nullplatform/tofu-modules/compare/v6.15.0...v6.16.0) (2026-08-14)
+
+
+### Features
+
+* **gcp/backend:** add GCS terraform state bucket module ([#511](https://github.com/nullplatform/tofu-modules/issues/511)) ([9355c6e](https://github.com/nullplatform/tofu-modules/commit/9355c6e4fcb6cb38be04f01fea264a54f7ac3c9c))
+
+## [6.15.0](https://github.com/nullplatform/tofu-modules/compare/v6.14.0...v6.15.0) (2026-08-14)
+
+
+### Features
+
+* **gcp/artifact-registry:** optional static service account key ([#514](https://github.com/nullplatform/tofu-modules/issues/514)) ([aaa9674](https://github.com/nullplatform/tofu-modules/commit/aaa96740639412dccc74b4dce56ca55f03511de5))
+
 ## [6.14.0](https://github.com/nullplatform/tofu-modules/compare/v6.13.1...v6.14.0) (2026-08-14)
 
 
