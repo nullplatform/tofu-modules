@@ -29,20 +29,24 @@ resource "terraform_data" "cross_variable_validation" {
       error_message = "azure_resource_group is required when cloud_provider is 'azure'."
     }
     precondition {
-      condition     = var.cloud_provider != "azure" || var.private_gateway_name != null
-      error_message = "private_gateway_name is required when cloud_provider is 'azure'."
-    }
-    precondition {
       condition     = var.cloud_provider != "azure" || var.private_hosted_zone_rg != null
       error_message = "private_hosted_zone_rg is required when cloud_provider is 'azure'."
     }
     precondition {
-      condition     = var.cloud_provider != "azure" || var.public_gateway_name != null
-      error_message = "public_gateway_name is required when cloud_provider is 'azure'."
-    }
-    precondition {
       condition     = var.cloud_provider != "azure" || var.azure_tenant_id != null
       error_message = "azure_tenant_id is required when cloud_provider is 'azure'."
+    }
+    precondition {
+      condition     = lookup(var.extra_envs, "INGRESS_TYPE", "") != "istio" || var.service_template != ""
+      error_message = "service_template is required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio."
+    }
+    precondition {
+      condition     = lookup(var.extra_envs, "INGRESS_TYPE", "") != "istio" || var.initial_ingress_path != ""
+      error_message = "initial_ingress_path is required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio."
+    }
+    precondition {
+      condition     = lookup(var.extra_envs, "INGRESS_TYPE", "") != "istio" || var.blue_green_ingress_path != ""
+      error_message = "blue_green_ingress_path is required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio."
     }
   }
 }
@@ -55,18 +59,9 @@ resource "helm_release" "agent" {
   namespace  = var.namespace
   version    = var.nullplatform_agent_helm_version
 
-  create_namespace  = true
-  disable_webhooks  = false
-  force_update      = true
-  wait              = true
   wait_for_jobs     = true
   timeout           = 600
-  atomic            = true
-  cleanup_on_fail   = true
-  replace           = true
-  recreate_pods     = true
   reset_values      = true
-  reuse_values      = false
   dependency_update = true
   max_history       = 10
 

@@ -9,20 +9,26 @@ variable "api_key" {
   sensitive   = true
 }
 
-# Name of the EKS cluster where the nullplatform agent will be deployed
+# Name of the Kubernetes cluster where the nullplatform agent will be deployed
 variable "cluster_name" {
-  description = "Name of the EKS cluster where the nullplatform agent will be deployed"
+  description = "Name of the Kubernetes cluster where the nullplatform agent will be deployed"
   type        = string
 }
 
-# Nullplatform Resource Name - unique identifier for nullplatform resources.
-# Kept as a required input for interface parity with the other nullplatform
-# modules; the agent resolves its own scope from the API key, so this module does
-# not consume the value directly.
-# tflint-ignore: terraform_unused_declarations
-variable "nrn" {
-  description = "Nullplatform Resource Name - unique identifier for nullplatform resources"
+# Image tag for the agent container image
+variable "image_tag" {
+  description = "Image tag for the agent container image"
   type        = string
+}
+
+# Cloud provider the cluster runs on
+variable "cloud_provider" {
+  description = "Cloud provider to use ('aws', 'gcp', 'azure', or 'oci')"
+  type        = string
+  validation {
+    condition     = contains(["aws", "gcp", "azure", "oci"], var.cloud_provider)
+    error_message = "cloud_provider must be either 'aws' , 'gcp', 'oci' or 'azure'."
+  }
 }
 
 # Map of tags used to select and filter channels and agents
@@ -106,33 +112,29 @@ variable "init_scripts" {
   default     = []
 }
 
-# Image tag for the agent container image
-variable "image_tag" {
-  description = "Image tag for the agent container image"
-  type        = string
-}
-
+# Container image repository for the agent. Defaults to the official nullplatform image.
 variable "image_repository" {
   description = "Container image repository for the agent. Defaults to the official nullplatform image."
   type        = string
   default     = ""
 }
 
+# Flag to determine whether to use the account slug in resource naming
+variable "use_account_slug" {
+  description = "Flag to determine whether to use the account slug in resource naming"
+  type        = string
+  default     = ""
+}
+
+################################################################################
+# AWS Configuration
+################################################################################
+
 # ARN of the AWS IAM role assigned to the agent (required when cloud_provider is 'aws')
 variable "aws_iam_role_arn" {
   description = "ARN of the AWS IAM role assigned to the agent"
   type        = string
   default     = ""
-}
-
-# Cloud provider to use (aws, gcp, or azure)
-variable "cloud_provider" {
-  description = "Cloud provider to use (aws, gcp, or azure)"
-  type        = string
-  validation {
-    condition     = contains(["aws", "gcp", "azure", "oci"], var.cloud_provider)
-    error_message = "cloud_provider must be either 'aws' , 'gcp', 'oci' or 'azure'."
-  }
 }
 
 ################################################################################
@@ -168,23 +170,9 @@ variable "azure_resource_group" {
   default     = null
 }
 
-# Private gateway name for Azure networking (required when cloud_provider is 'azure')
-variable "private_gateway_name" {
-  description = "Private gateway name for Azure networking"
-  type        = string
-  default     = null
-}
-
 # Resource group for private hosted zone (required when cloud_provider is 'azure')
 variable "private_hosted_zone_rg" {
   description = "Resource group for private hosted zone"
-  type        = string
-  default     = null
-}
-
-# Public gateway name for Azure networking (required when cloud_provider is 'azure')
-variable "public_gateway_name" {
-  description = "Public gateway name for Azure networking"
   type        = string
   default     = null
 }
@@ -194,6 +182,24 @@ variable "azure_tenant_id" {
   description = "Azure tenant ID"
   type        = string
   default     = null
+}
+
+################################################################################
+# Gateway Configuration
+################################################################################
+
+# Name of the private/internal gateway used for routing
+variable "private_gateway_name" {
+  description = "Name of the private/internal gateway used for routing"
+  type        = string
+  default     = "gateway-private"
+}
+
+# Name of the public gateway used for routing
+variable "public_gateway_name" {
+  description = "Name of the public gateway used for routing"
+  type        = string
+  default     = "gateway-public"
 }
 
 ################################################################################
@@ -207,21 +213,9 @@ variable "dns_type" {
   default     = ""
 }
 
-# Base domain name used across resources (required when cloud_provider is 'azure')
+# Base domain name used across resources
 variable "domain" {
   description = "Base domain name used across resources"
-  type        = string
-  default     = ""
-}
-
-variable "private_domain" {
-  description = "Private domain name used for internal agent routing"
-  default     = ""
-  type        = string
-}
-# Flag to determine whether to use account slug in resource naming (required when cloud_provider is 'azure')
-variable "use_account_slug" {
-  description = "Flag to determine whether to use account slug in resource naming"
   type        = string
   default     = ""
 }
@@ -237,24 +231,32 @@ variable "image_pull_secrets" {
   default     = ""
 }
 
+################################################################################
+# Ingress / Networking Configuration
+################################################################################
+
+# Scope service template to use for deployment (required when extra_envs.INGRESS_TYPE is 'istio')
 variable "service_template" {
-  description = "Specifies the name or reference of the scope service template to be used for deployment."
+  description = "Specifies the name or reference of the scope service template to be used for deployment. Required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio, so it must be pointed at an Istio-compatible template instead."
   type        = string
   default     = ""
 }
 
+# Initial ingress path used on first deploy (required when extra_envs.INGRESS_TYPE is 'istio')
 variable "initial_ingress_path" {
-  description = "Defines the initial ingress path used when deploying the application for the first time."
+  description = "Defines the initial ingress path used when deploying the application for the first time. Required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio, so it must be pointed at an Istio HTTPRoute template instead."
   type        = string
   default     = ""
 }
 
+# Blue-green ingress path used to route traffic to the new version (required when extra_envs.INGRESS_TYPE is 'istio')
 variable "blue_green_ingress_path" {
-  description = "Specifies the ingress path used for blue-green deployments to route traffic to the new version."
+  description = "Specifies the ingress path used for blue-green deployments to route traffic to the new version. Required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio, so it must be pointed at an Istio HTTPRoute template instead."
   type        = string
   default     = ""
 }
 
+# Additional environment variables to pass to the agent
 variable "extra_envs" {
   description = "Additional environment variables to pass to the agent"
   type        = map(string)
