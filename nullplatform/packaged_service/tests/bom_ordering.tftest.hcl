@@ -14,8 +14,13 @@ variables {
   }
 
   # 1 spec + 11 actions = 12 components, so the indices cross from 9 to 10.
-  components = concat(
-    [{
+  #
+  # Written out literally: a test file's top-level `variables` block cannot call
+  # functions, so the concat/range/format this used to build failed with
+  # "Function calls not allowed" and left `components` unset. Assertions inside a
+  # `run` block are unaffected, which is why the range/format below still work.
+  components = [
+    {
       type = "service_specification"
       resource = {
         id                    = "id-spec"
@@ -25,17 +30,107 @@ variables {
         visible_to            = ["organization=myorg:account=myaccount"]
         action_specifications = []
       }
-    }],
-    [for i in range(11) : {
+    },
+    {
       type = "action_specification"
       resource = {
-        id               = format("id-a%02d", i)
-        slug             = format("action-%02d", i)
-        last_snapshot_id = format("snap-a%02d", i)
+        id               = "id-a00"
+        slug             = "action-00"
+        last_snapshot_id = "snap-a00"
       }
       parent_resource = { id = "id-spec" }
-    }],
-  )
+    },
+    {
+      type = "action_specification"
+      resource = {
+        id               = "id-a01"
+        slug             = "action-01"
+        last_snapshot_id = "snap-a01"
+      }
+      parent_resource = { id = "id-spec" }
+    },
+    {
+      type = "action_specification"
+      resource = {
+        id               = "id-a02"
+        slug             = "action-02"
+        last_snapshot_id = "snap-a02"
+      }
+      parent_resource = { id = "id-spec" }
+    },
+    {
+      type = "action_specification"
+      resource = {
+        id               = "id-a03"
+        slug             = "action-03"
+        last_snapshot_id = "snap-a03"
+      }
+      parent_resource = { id = "id-spec" }
+    },
+    {
+      type = "action_specification"
+      resource = {
+        id               = "id-a04"
+        slug             = "action-04"
+        last_snapshot_id = "snap-a04"
+      }
+      parent_resource = { id = "id-spec" }
+    },
+    {
+      type = "action_specification"
+      resource = {
+        id               = "id-a05"
+        slug             = "action-05"
+        last_snapshot_id = "snap-a05"
+      }
+      parent_resource = { id = "id-spec" }
+    },
+    {
+      type = "action_specification"
+      resource = {
+        id               = "id-a06"
+        slug             = "action-06"
+        last_snapshot_id = "snap-a06"
+      }
+      parent_resource = { id = "id-spec" }
+    },
+    {
+      type = "action_specification"
+      resource = {
+        id               = "id-a07"
+        slug             = "action-07"
+        last_snapshot_id = "snap-a07"
+      }
+      parent_resource = { id = "id-spec" }
+    },
+    {
+      type = "action_specification"
+      resource = {
+        id               = "id-a08"
+        slug             = "action-08"
+        last_snapshot_id = "snap-a08"
+      }
+      parent_resource = { id = "id-spec" }
+    },
+    {
+      type = "action_specification"
+      resource = {
+        id               = "id-a09"
+        slug             = "action-09"
+        last_snapshot_id = "snap-a09"
+      }
+      parent_resource = { id = "id-spec" }
+    },
+    {
+      type = "action_specification"
+      resource = {
+        id               = "id-a10"
+        slug             = "action-10"
+        last_snapshot_id = "snap-a10"
+      }
+      parent_resource = { id = "id-spec" }
+    },
+  ]
 }
 
 run "bom_keeps_component_order_past_ten_components" {

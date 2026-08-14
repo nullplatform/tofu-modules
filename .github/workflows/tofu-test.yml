@@ -6,6 +6,53 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
+  # Every module that ships tests must appear in one of the `modules:` lists below,
+  # or its tests never execute and CI still reports green. That is not theoretical:
+  # infrastructure/gcp/backend lost its entry when two PRs that both edited the same
+  # single-line JSON array were merged in sequence and the conflict was resolved by
+  # taking one side whole, leaving 26 committed runs dead. Four other modules had
+  # been orphaned the same way, one of them hiding a test that had never once passed.
+  check-test-allowlist:
+    name: Every module with tests is in an allowlist
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Compare test directories against the modules lists
+        run: |
+          python3 - <<'EOF'
+          import json, os, re, sys
+
+          workflow = open(".github/workflows/tofu-test.yml").read()
+
+          listed = set()
+          for match in re.finditer(r"modules:\s*'(\[[^']*\])'", workflow):
+              try:
+                  listed.update(json.loads(match.group(1)))
+              except json.JSONDecodeError as exc:
+                  sys.exit(f"::error::a modules list is not valid JSON: {exc}")
+
+          have_tests = set()
+          for root, dirs, files in os.walk("."):
+              dirs[:] = [d for d in dirs if d not in (".git", ".terraform")]
+              if os.path.basename(root) == "tests" and any(f.endswith(".tftest.hcl") for f in files):
+                  have_tests.add(os.path.relpath(os.path.dirname(root)))
+
+          orphans = sorted(have_tests - listed)
+          ghosts = sorted(listed - have_tests)
+
+          for path in orphans:
+              print(f"::error::{path} has *.tftest.hcl files but is in no modules list, so its tests never run")
+          for path in ghosts:
+              print(f"::error::{path} is listed but has no *.tftest.hcl files")
+
+          print(f"{len(have_tests)} modules with tests, {len(listed)} listed")
+          if orphans or ghosts:
+              sys.exit(1)
+          print("every module with tests is covered")
+          EOF
+
   test-azure-modules:
     uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
     with:
@@ -19,18 +66,18 @@ jobs:
   test-aws-modules:
     uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
     with:
-      modules: '["infrastructure/aws/vpc", "infrastructure/aws/acm", "infrastructure/aws/dns", "infrastructure/aws/aws_load_balancer_controller", "infrastructure/aws/ingress", "infrastructure/aws/iam/cert_manager", "infrastructure/aws/iam/external_dns", "infrastructure/aws/iam/agent", "infrastructure/aws/iam/aws_load_balancer_controller_iam", "infrastructure/aws/backend"]'
+      modules: '["infrastructure/aws/vpc", "infrastructure/aws/acm", "infrastructure/aws/dns", "infrastructure/aws/aws_load_balancer_controller", "infrastructure/aws/ingress", "infrastructure/aws/iam/cert_manager", "infrastructure/aws/iam/cloudwatch", "infrastructure/aws/iam/external_dns", "infrastructure/aws/iam/agent", "infrastructure/aws/iam/aws_load_balancer_controller_iam", "infrastructure/aws/backend"]'
       tofu_version: '1.11.4'
 
   test-gcp-modules:
     uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
     with:
-      modules: '["infrastructure/gcp/artifact-registry", "infrastructure/gcp/cloud-dns", "infrastructure/gcp/cloud-nat", "infrastructure/gcp/gke", "infrastructure/gcp/iam", "infrastructure/gcp/security", "infrastructure/gcp/vpc"]'
+      modules: '["infrastructure/gcp/artifact-registry", "infrastructure/gcp/backend", "infrastructure/gcp/cloud-dns", "infrastructure/gcp/cloud-nat", "infrastructure/gcp/gke", "infrastructure/gcp/iam", "infrastructure/gcp/security", "infrastructure/gcp/vpc"]'
 
   test-nullplatform-modules:
     uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
     with:
-      modules: '["nullplatform/account", "nullplatform/agent", "nullplatform/api_key", "nullplatform/dimension", "nullplatform/dimension_value", "nullplatform/users", "nullplatform/metrics", "nullplatform/asset/docker_server", "nullplatform/cloud/azure/cloud", "nullplatform/cloud/gcp/cloud", "nullplatform/cloud/aws/cloud", "nullplatform/code_repository"]'
+      modules: '["nullplatform/account", "nullplatform/agent", "nullplatform/api_key", "nullplatform/base", "nullplatform/identity-access-control", "nullplatform/dimension", "nullplatform/dimension_value", "nullplatform/users", "nullplatform/metrics", "nullplatform/packaged_service", "nullplatform/asset/docker_server", "nullplatform/cloud/azure/cloud", "nullplatform/cloud/gcp/cloud", "nullplatform/cloud/aws/cloud", "nullplatform/code_repository"]'
 
   test-container-orchestration-modules:
     uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
