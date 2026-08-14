@@ -2,26 +2,27 @@
 
 ## Description
 
-Manages GCP firewall rules for Istio public and private gateways on a GKE cluster, restricting health check and HTTPS traffic appropriately
+Creates GCP firewall rules to control ingress traffic for Istio public and private gateways on a GKE cluster, restricting health check ports to VPC CIDR and GCP health check ranges while allowing HTTPS traffic
 
 ## Architecture
 
-The module uses data sources google_container_cluster and google_compute_subnetwork to derive the VPC network name and subnet CIDR from the specified GKE cluster. These derived values feed into google_compute_firewall resources that control ingress traffic for Istio gateway nodes via network tags. For the public gateway, three google_compute_firewall rules are created: one allowing HTTPS from anywhere, one allowing health checks from VPC CIDR and GCP health check ranges (35.191.0.0/16, 130.211.0.0/22), and a lower-priority deny rule blocking health check port 15021 from the internet. For the private gateway, two google_compute_firewall rules restrict both HTTPS and health check traffic to the VPC CIDR and GCP health check ranges only.
+The module uses data.google_container_cluster and data.google_compute_subnetwork to derive the VPC network name and subnet CIDR from the GKE cluster when not explicitly provided. These derived or override values feed into google_compute_firewall resources that are conditionally created based on gateways_enabled and gateway_internal_enabled boolean flags. For the public gateway, three google_compute_firewall rules are created: one allowing port 443 from 0.0.0.0/0, one allowing port 15021 from VPC CIDR plus GCP health check ranges (35.191.0.0/16, 130.211.0.0/22), and a lower-priority deny rule blocking port 15021 from the internet. For the private gateway, two google_compute_firewall rules restrict both port 443 and port 15021 to VPC CIDR plus GCP health check ranges, with target_tags scoped to cluster-specific gateway node tags.
 
 ## Features
 
-- Creates public gateway firewall rules allowing HTTPS (443) from internet and health checks (15021) restricted to VPC CIDR and GCP health checker ranges
-- Creates private gateway firewall rules restricting both HTTPS and health check traffic to internal VPC CIDR only
-- Derives VPC network name and subnet CIDR automatically from the GKE cluster using google_container_cluster and google_compute_subnetwork data sources
-- Supports overriding derived network name and CIDR with explicit input variables
-- Applies network tags to firewall rules for precise targeting of Istio gateway node pools
-- Adds explicit deny rule for health check port 15021 from internet at lower priority to block public health check exposure
+- Creates google_compute_firewall rules for Istio public gateway allowing HTTPS on port 443 from the internet
+- Creates google_compute_firewall health check rules restricting port 15021 to VPC CIDR and GCP health checker ranges (35.191.0.0/16, 130.211.0.0/22)
+- Creates google_compute_firewall deny rule for port 15021 at lower priority to block internet health check access on public gateway
+- Creates google_compute_firewall rules for private gateway restricting both HTTPS and health check traffic to VPC CIDR only
+- Derives VPC network name and subnet CIDR automatically via data.google_container_cluster and data.google_compute_subnetwork when overrides are not supplied
+- Supports explicit network name and CIDR overrides to skip cluster and subnetwork lookups, enabling use with Shared VPC or restricted IAM credentials
+- Scopes all firewall rules to cluster-specific target_tags for precise gateway node targeting
 
 ## Basic Usage
 
 ```hcl
 module "security" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/security?ref=v6.16.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/security?ref=v6.16.1"
 
   cluster_name   = "your-cluster-name"
   gcp_project_id = "your-gcp-project-id"
@@ -84,15 +85,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "security",
-  "description": "Manages GCP firewall rules for Istio public and private gateways on a GKE cluster, restricting health check and HTTPS traffic appropriately",
-  "architecture": "The module uses data sources google_container_cluster and google_compute_subnetwork to derive the VPC network name and subnet CIDR from the specified GKE cluster. These derived values feed into google_compute_firewall resources that control ingress traffic for Istio gateway nodes via network tags. For the public gateway, three google_compute_firewall rules are created: one allowing HTTPS from anywhere, one allowing health checks from VPC CIDR and GCP health check ranges (35.191.0.0/16, 130.211.0.0/22), and a lower-priority deny rule blocking health check port 15021 from the internet. For the private gateway, two google_compute_firewall rules restrict both HTTPS and health check traffic to the VPC CIDR and GCP health check ranges only.",
+  "description": "Creates GCP firewall rules to control ingress traffic for Istio public and private gateways on a GKE cluster, restricting health check ports to VPC CIDR and GCP health check ranges while allowing HTTPS traffic",
+  "architecture": "The module uses data.google_container_cluster and data.google_compute_subnetwork to derive the VPC network name and subnet CIDR from the GKE cluster when not explicitly provided. These derived or override values feed into google_compute_firewall resources that are conditionally created based on gateways_enabled and gateway_internal_enabled boolean flags. For the public gateway, three google_compute_firewall rules are created: one allowing port 443 from 0.0.0.0/0, one allowing port 15021 from VPC CIDR plus GCP health check ranges (35.191.0.0/16, 130.211.0.0/22), and a lower-priority deny rule blocking port 15021 from the internet. For the private gateway, two google_compute_firewall rules restrict both port 443 and port 15021 to VPC CIDR plus GCP health check ranges, with target_tags scoped to cluster-specific gateway node tags.",
   "features": [
-    "Creates public gateway firewall rules allowing HTTPS (443) from internet and health checks (15021) restricted to VPC CIDR and GCP health checker ranges",
-    "Creates private gateway firewall rules restricting both HTTPS and health check traffic to internal VPC CIDR only",
-    "Derives VPC network name and subnet CIDR automatically from the GKE cluster using google_container_cluster and google_compute_subnetwork data sources",
-    "Supports overriding derived network name and CIDR with explicit input variables",
-    "Applies network tags to firewall rules for precise targeting of Istio gateway node pools",
-    "Adds explicit deny rule for health check port 15021 from internet at lower priority to block public health check exposure"
+    "Creates google_compute_firewall rules for Istio public gateway allowing HTTPS on port 443 from the internet",
+    "Creates google_compute_firewall health check rules restricting port 15021 to VPC CIDR and GCP health checker ranges (35.191.0.0/16, 130.211.0.0/22)",
+    "Creates google_compute_firewall deny rule for port 15021 at lower priority to block internet health check access on public gateway",
+    "Creates google_compute_firewall rules for private gateway restricting both HTTPS and health check traffic to VPC CIDR only",
+    "Derives VPC network name and subnet CIDR automatically via data.google_container_cluster and data.google_compute_subnetwork when overrides are not supplied",
+    "Supports explicit network name and CIDR overrides to skip cluster and subnetwork lookups, enabling use with Shared VPC or restricted IAM credentials",
+    "Scopes all firewall rules to cluster-specific target_tags for precise gateway node targeting"
   ],
   "inputs": [
     {
@@ -122,12 +124,12 @@ resource "example_resource" "this" {
     },
     {
       "name": "gcp_network_name",
-      "description": "Override: The VPC network name. If empty, derived from cluster.",
+      "description": "Override: The VPC network name. If empty, derived from the cluster. Supplying this together with network_cidr skips the cluster and subnetwork lookups entirely, so the caller does not need container.clusters.get or compute.subnetworks.get. Accepts a bare name or a full projects/P/global/networks/N path — google_compute_firewall normalizes either",
       "required": false
     },
     {
       "name": "network_cidr",
-      "description": "Override: The network CIDR block. If empty, derived from subnet.",
+      "description": "Override: The network CIDR block. If empty, derived from the cluster's subnetwork. Supplying it skips the subnetwork lookup. Needed when the derived path cannot be resolved by the caller's credentials, e.g. a Shared VPC subnet in a host project the module cannot read",
       "required": false
     }
   ],
@@ -135,6 +137,6 @@ resource "example_resource" "this" {
     "public_gateway_firewall_name",
     "private_gateway_firewall_name"
   ],
-  "hash": "0c8a3ef65bda94a359c714b62a0b56a1"
+  "hash": "0d2c798a14b25be0ff52508cc3499433"
 }
 END_AI_METADATA -->
