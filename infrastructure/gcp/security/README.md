@@ -2,24 +2,26 @@
 
 ## Description
 
-Configures GCP firewall rules for Istio gateways in a GKE cluster
+Manages GCP firewall rules for Istio public and private gateways on a GKE cluster, restricting health check and HTTPS traffic appropriately
 
 ## Architecture
 
-This module uses Terraform to create GCP firewall rules for public and private Istio gateways in a GKE cluster. It utilizes the google_compute_firewall resource to define ingress rules for HTTPS and health check traffic. The module also derives the network and CIDR block from the GKE cluster information using data sources like google_container_cluster and google_compute_subnetwork. The firewall rules are then created based on the derived network and CIDR block, with specific rules for public and private gateways. The module also outputs the names of the created firewall rules for public and private gateways.
+The module uses data sources google_container_cluster and google_compute_subnetwork to derive the VPC network name and subnet CIDR from the specified GKE cluster. These derived values feed into google_compute_firewall resources that control ingress traffic for Istio gateway nodes via network tags. For the public gateway, three google_compute_firewall rules are created: one allowing HTTPS from anywhere, one allowing health checks from VPC CIDR and GCP health check ranges (35.191.0.0/16, 130.211.0.0/22), and a lower-priority deny rule blocking health check port 15021 from the internet. For the private gateway, two google_compute_firewall rules restrict both HTTPS and health check traffic to the VPC CIDR and GCP health check ranges only.
 
 ## Features
 
-- Creates GCP firewall rules for public and private Istio gateways
-- Configures ingress rules for HTTPS and health check traffic
-- Derives network and CIDR block from GKE cluster information
-- Outputs firewall rule names for public and private gateways
+- Creates public gateway firewall rules allowing HTTPS (443) from internet and health checks (15021) restricted to VPC CIDR and GCP health checker ranges
+- Creates private gateway firewall rules restricting both HTTPS and health check traffic to internal VPC CIDR only
+- Derives VPC network name and subnet CIDR automatically from the GKE cluster using google_container_cluster and google_compute_subnetwork data sources
+- Supports overriding derived network name and CIDR with explicit input variables
+- Applies network tags to firewall rules for precise targeting of Istio gateway node pools
+- Adds explicit deny rule for health check port 15021 from internet at lower priority to block public health check exposure
 
 ## Basic Usage
 
 ```hcl
 module "security" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/security?ref=v6.12.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/security?ref=v6.13.1"
 
   cluster_name   = "your-cluster-name"
   gcp_project_id = "your-gcp-project-id"
@@ -47,7 +49,7 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_google"></a> [google](#provider\_google) | ~> 5.0 |
+| <a name="provider_google"></a> [google](#provider\_google) | 5.45.2 |
 
 ## Resources
 
@@ -82,13 +84,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "security",
-  "description": "Configures GCP firewall rules for Istio gateways in a GKE cluster",
-  "architecture": "This module uses Terraform to create GCP firewall rules for public and private Istio gateways in a GKE cluster. It utilizes the google_compute_firewall resource to define ingress rules for HTTPS and health check traffic. The module also derives the network and CIDR block from the GKE cluster information using data sources like google_container_cluster and google_compute_subnetwork. The firewall rules are then created based on the derived network and CIDR block, with specific rules for public and private gateways. The module also outputs the names of the created firewall rules for public and private gateways.",
+  "description": "Manages GCP firewall rules for Istio public and private gateways on a GKE cluster, restricting health check and HTTPS traffic appropriately",
+  "architecture": "The module uses data sources google_container_cluster and google_compute_subnetwork to derive the VPC network name and subnet CIDR from the specified GKE cluster. These derived values feed into google_compute_firewall resources that control ingress traffic for Istio gateway nodes via network tags. For the public gateway, three google_compute_firewall rules are created: one allowing HTTPS from anywhere, one allowing health checks from VPC CIDR and GCP health check ranges (35.191.0.0/16, 130.211.0.0/22), and a lower-priority deny rule blocking health check port 15021 from the internet. For the private gateway, two google_compute_firewall rules restrict both HTTPS and health check traffic to the VPC CIDR and GCP health check ranges only.",
   "features": [
-    "Creates GCP firewall rules for public and private Istio gateways",
-    "Configures ingress rules for HTTPS and health check traffic",
-    "Derives network and CIDR block from GKE cluster information",
-    "Outputs firewall rule names for public and private gateways"
+    "Creates public gateway firewall rules allowing HTTPS (443) from internet and health checks (15021) restricted to VPC CIDR and GCP health checker ranges",
+    "Creates private gateway firewall rules restricting both HTTPS and health check traffic to internal VPC CIDR only",
+    "Derives VPC network name and subnet CIDR automatically from the GKE cluster using google_container_cluster and google_compute_subnetwork data sources",
+    "Supports overriding derived network name and CIDR with explicit input variables",
+    "Applies network tags to firewall rules for precise targeting of Istio gateway node pools",
+    "Adds explicit deny rule for health check port 15021 from internet at lower priority to block public health check exposure"
   ],
   "inputs": [
     {
@@ -131,6 +135,6 @@ resource "example_resource" "this" {
     "public_gateway_firewall_name",
     "private_gateway_firewall_name"
   ],
-  "hash": "d5bafc8ca7f3fae8b7757228f1d8b9d2"
+  "hash": "0c8a3ef65bda94a359c714b62a0b56a1"
 }
 END_AI_METADATA -->

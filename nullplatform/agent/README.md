@@ -22,7 +22,7 @@ The module renders a Helm values file using a templatefile() call that merges de
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.12.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.13.1"
 
   api_key        = "your-api-key"
   cloud_provider = "your-cloud-provider"
@@ -37,7 +37,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.12.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.13.1"
 
   api_key          = "your-api-key"
   aws_iam_role_arn = "your-aws-iam-role-arn"  # Required when cloud_provider = "aws"
@@ -53,7 +53,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.12.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.13.1"
 
   api_key        = "your-api-key"
   cloud_provider = "gcp"
@@ -68,7 +68,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.12.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.13.1"
 
   api_key                = "your-api-key"
   azure_client_id        = "your-azure-client-id"  # Required when cloud_provider = "azure"
@@ -91,7 +91,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.12.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.13.1"
 
   api_key        = "your-api-key"
   cloud_provider = "oci"

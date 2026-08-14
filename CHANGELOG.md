@@ -1,5 +1,19 @@
 # Changelog
 
+## [6.13.1](https://github.com/nullplatform/tofu-modules/compare/v6.13.0...v6.13.1) (2026-08-14)
+
+
+### Bug Fixes
+
+* **gcp/security:** handle full resource path in cluster subnetwork lookup ([#512](https://github.com/nullplatform/tofu-modules/issues/512)) ([e790af4](https://github.com/nullplatform/tofu-modules/commit/e790af437e4358a1e1254f00c3dba226fbc51b31))
+
+## [6.13.0](https://github.com/nullplatform/tofu-modules/compare/v6.12.0...v6.13.0) (2026-08-13)
+
+
+### Features
+
+* **aks:** support disabling local accounts with an Entra ID authorization path ([#461](https://github.com/nullplatform/tofu-modules/issues/461)) ([3e3c412](https://github.com/nullplatform/tofu-modules/commit/3e3c412b5a996241da6a904f9e86b3faf51c6487))
+
 ## [6.12.0](https://github.com/nullplatform/tofu-modules/compare/v6.11.3...v6.12.0) (2026-08-12)
 
 
