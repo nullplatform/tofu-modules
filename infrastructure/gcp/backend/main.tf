@@ -3,7 +3,8 @@ resource "random_id" "bucket_suffix" {
 }
 
 resource "google_storage_bucket" "tf_state" {
-  name          = "${var.bucket_prefix}-${lower(random_id.bucket_suffix.hex)}"
+  # GCS rejects uppercase bucket names, so the caller-supplied prefix is lowercased.
+  name          = "${lower(var.bucket_prefix)}-${random_id.bucket_suffix.hex}"
   project       = var.project_id
   location      = var.location
   storage_class = var.storage_class
@@ -16,14 +17,23 @@ resource "google_storage_bucket" "tf_state" {
     enabled = var.versioning_enabled
   }
 
+  # Empty string as well as null: an empty value reaches here whenever the key is
+  # wired from another module's output or a TF_VAR, and would emit an empty key.
   dynamic "encryption" {
-    for_each = var.kms_key_name != null ? [var.kms_key_name] : []
+    for_each = var.kms_key_name != null && var.kms_key_name != "" ? [var.kms_key_name] : []
     content {
       default_kms_key_name = encryption.value
     }
   }
 
-  labels = var.labels
+  dynamic "logging" {
+    for_each = var.log_bucket != null && var.log_bucket != "" ? [var.log_bucket] : []
+    content {
+      log_bucket = logging.value
+    }
+  }
+
+  labels = var.tags
 }
 
 resource "google_storage_bucket_iam_member" "allowed_members" {
