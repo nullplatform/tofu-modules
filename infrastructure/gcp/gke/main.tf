@@ -1,3 +1,13 @@
+# Adding `count` to a module that shipped without one moves its state address
+# from module.gke to module.gke[0]. Without this block, a consumer who only bumps
+# the module ref — leaving autopilot_enabled at its default false — gets a plan
+# that destroys and recreates the cluster, every node pool and the service
+# account, because the old address is "not in configuration".
+moved {
+  from = module.gke
+  to   = module.gke[0]
+}
+
 # Standard cluster with manually managed node pools (default mode)
 module "gke" {
   count = var.autopilot_enabled ? 0 : 1
@@ -26,14 +36,18 @@ module "gke" {
 
   master_authorized_networks = var.authorized_ip_ranges
 
-  node_pools = var.node_pools
+  node_pools        = local.node_pools
+  node_pools_taints = var.node_pools_taints
 
   cluster_resource_labels = var.tags
 
   # Service account with Artifact Registry access
   grant_registry_access  = true
   create_service_account = true
-  logging_service        = "none"
+
+  # Cloud Logging is disabled for standard clusters. Autopilot cannot disable it,
+  # so an Autopilot cluster ingests system and workload logs — see the README.
+  logging_service = "none"
 }
 
 # Autopilot cluster — GCP manages node provisioning/scaling per workload,
