@@ -200,3 +200,26 @@ variable "system_pool_node_count" {
   type        = number
   default     = 2
 }
+
+###############################################################################
+# OPTIONAL VARIABLES - CLUSTER ACCESS AND AUTHORIZATION
+###############################################################################
+
+variable "local_account_disabled" {
+  type        = bool
+  description = "Whether to disable the AKS local (certificate-based) admin accounts. Null (default) leaves the Azure default, which keeps them enabled. When true, Entra ID becomes the only way into the API server, so an authorization path must be configured as well — see azure_rbac_enabled and admin_group_object_ids."
+  default     = null
+}
+
+variable "azure_rbac_enabled" {
+  type        = bool
+  description = "Whether Kubernetes authorization is delegated to Azure RBAC, so cluster access is granted with Azure role assignments such as 'Azure Kubernetes Service RBAC Cluster Admin'. Defaults to false, which keeps authorization inside Kubernetes RBAC."
+  default     = false
+  nullable    = false
+}
+
+variable "admin_group_object_ids" {
+  type        = list(string)
+  description = "Entra ID group object IDs whose members get cluster-admin through Kubernetes RBAC. The alternative to azure_rbac_enabled when authorization should stay in-cluster."
+  default     = null
+}

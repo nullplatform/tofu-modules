@@ -9,5 +9,14 @@ resource "terraform_data" "validations" {
       condition     = var.attach_acr != true || var.acr_id != null
       error_message = "acr_id is required when attach_acr is true. Leave attach_acr null (legacy) or set it false for clusters without an ACR."
     }
+
+    # Disabling local accounts removes the certificate-based admin path, leaving Entra ID as the only
+    # way in. Without Azure RBAC or an admin group, no identity is authorized against the API server:
+    # the cluster stays reachable only through whatever admin kubeconfig was issued beforehand, and
+    # becomes unrecoverable from configuration once that credential stops working.
+    precondition {
+      condition     = var.local_account_disabled != true || var.azure_rbac_enabled || try(length(var.admin_group_object_ids), 0) > 0
+      error_message = "local_account_disabled = true removes the only certificate-based path into the cluster. Set azure_rbac_enabled = true, or provide admin_group_object_ids, so at least one Entra ID identity stays authorized."
+    }
   }
 }
