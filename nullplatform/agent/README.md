@@ -2,73 +2,70 @@
 
 ## Description
 
-Deploys the Nullplatform agent to a Kubernetes cluster via a Helm release with multi-cloud provider support
+Deploys the nullplatform agent to a Kubernetes cluster via a Helm chart, supporting AWS, GCP, Azure, and OCI cloud providers
 
 ## Architecture
 
-The module renders a Helm values file using a templatefile() call that merges default configuration, cloud-specific environment variables, and extra envs into a single locals map. A helm_release resource named 'agent' deploys the 'nullplatform-agent' chart from the official Nullplatform Helm repository into the specified Kubernetes namespace, consuming the rendered values. A terraform_data resource tracks the api_key as a replace trigger, forcing pod recreation when the API key changes. Cross-provider variable validation is enforced via terraform_data preconditions that gate cloud-specific required inputs like aws_iam_role_arn and azure_* credentials before the Helm release proceeds.
+The module creates a helm_release resource targeting the nullplatform-agent chart from the official nullplatform Helm repository, with chart values rendered from a templatefile into a YAML values document. A terraform_data resource tracks the api_key input and triggers helm_release replacement when the key changes, while a second terraform_data resource enforces cross-variable preconditions (e.g., aws_iam_role_arn for AWS, Azure credentials for Azure). Cloud-provider-specific configuration is merged into the agent's environment variables via locals, and an optional worker orchestration block is encoded as a second Helm values layer when the worker variable is non-null.
 
 ## Features
 
-- Deploys nullplatform-agent Helm chart with atomic install and automatic cleanup on failure
-- Configures multi-cloud provider support for AWS, GCP, Azure, and OCI with provider-specific environment variable injection
-- Creates Kubernetes namespace automatically if it does not already exist
-- Injects NRN-parsed organization, account, and namespace tags into the agent configuration
-- Merges scope repository, extra Git repositories, and deduplicates the final agent repo list
-- Forces pod recreation via terraform_data trigger when the API key is rotated
-- Supports custom init scripts, image pull secrets, and additional environment variables for agent customization
+- Deploys nullplatform-agent Helm chart with cloud-provider-specific environment variable injection for AWS, GCP, Azure, and OCI
+- Enforces cross-variable preconditions at plan time using terraform_data lifecycle blocks for required provider credentials
+- Triggers full Helm release replacement when the API key changes via a terraform_data input tracker
+- Configures agent Git repository scope and extra repositories by merging and deduplicating entries into a comma-separated list
+- Supports optional worker orchestration configuration including allowedRegistries, patches, idleTTL, and rules passed as a second Helm values layer
+- Renders agent arguments and environment variables from a YAML template supporting tags, API key, cluster name, domain, DNS type, and ingress paths
+- Supports Istio ingress with required service_template, initial_ingress_path, and blue_green_ingress_path via precondition validation
 
 ## Basic Usage
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.13.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.14.0"
 
   api_key        = "your-api-key"
   cloud_provider = "your-cloud-provider"
   cluster_name   = "your-cluster-name"
   image_tag      = "your-image-tag"
-  nrn            = "your-nrn"
   tags_selectors = "your-tags-selectors"
 }
 ```
 
-### Usage with AWS Cloud Provider
+### Usage with AWS
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.13.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.14.0"
 
   api_key          = "your-api-key"
   aws_iam_role_arn = "your-aws-iam-role-arn"  # Required when cloud_provider = "aws"
   cloud_provider   = "aws"
   cluster_name     = "your-cluster-name"
   image_tag        = "your-image-tag"
-  nrn              = "your-nrn"
   tags_selectors   = "your-tags-selectors"
 }
 ```
 
-### Usage with GCP Cloud Provider
+### Usage with GCP
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.13.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.14.0"
 
   api_key        = "your-api-key"
   cloud_provider = "gcp"
   cluster_name   = "your-cluster-name"
   image_tag      = "your-image-tag"
-  nrn            = "your-nrn"
   tags_selectors = "your-tags-selectors"
 }
 ```
 
-### Usage with Azure Cloud Provider
+### Usage with Azure
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.13.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.14.0"
 
   api_key                = "your-api-key"
   azure_client_id        = "your-azure-client-id"  # Required when cloud_provider = "azure"
@@ -79,25 +76,21 @@ module "agent" {
   cloud_provider         = "azure"
   cluster_name           = "your-cluster-name"
   image_tag              = "your-image-tag"
-  nrn                    = "your-nrn"
-  private_gateway_name   = "your-private-gateway-name"  # Required when cloud_provider = "azure"
   private_hosted_zone_rg = "your-private-hosted-zone-rg"  # Required when cloud_provider = "azure"
-  public_gateway_name    = "your-public-gateway-name"  # Required when cloud_provider = "azure"
   tags_selectors         = "your-tags-selectors"
 }
 ```
 
-### Usage with OCI Cloud Provider
+### Usage with OCI
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.13.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.14.0"
 
   api_key        = "your-api-key"
   cloud_provider = "oci"
   cluster_name   = "your-cluster-name"
   image_tag      = "your-image-tag"
-  nrn            = "your-nrn"
   tags_selectors = "your-tags-selectors"
 }
 ```
@@ -174,16 +167,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "agent",
-  "description": "Deploys the Nullplatform agent to a Kubernetes cluster via a Helm release with multi-cloud provider support",
-  "architecture": "The module renders a Helm values file using a templatefile() call that merges default configuration, cloud-specific environment variables, and extra envs into a single locals map. A helm_release resource named 'agent' deploys the 'nullplatform-agent' chart from the official Nullplatform Helm repository into the specified Kubernetes namespace, consuming the rendered values. A terraform_data resource tracks the api_key as a replace trigger, forcing pod recreation when the API key changes. Cross-provider variable validation is enforced via terraform_data preconditions that gate cloud-specific required inputs like aws_iam_role_arn and azure_* credentials before the Helm release proceeds.",
+  "description": "Deploys the nullplatform agent to a Kubernetes cluster via a Helm chart, supporting AWS, GCP, Azure, and OCI cloud providers",
+  "architecture": "The module creates a helm_release resource targeting the nullplatform-agent chart from the official nullplatform Helm repository, with chart values rendered from a templatefile into a YAML values document. A terraform_data resource tracks the api_key input and triggers helm_release replacement when the key changes, while a second terraform_data resource enforces cross-variable preconditions (e.g., aws_iam_role_arn for AWS, Azure credentials for Azure). Cloud-provider-specific configuration is merged into the agent's environment variables via locals, and an optional worker orchestration block is encoded as a second Helm values layer when the worker variable is non-null.",
   "features": [
-    "Deploys nullplatform-agent Helm chart with atomic install and automatic cleanup on failure",
-    "Configures multi-cloud provider support for AWS, GCP, Azure, and OCI with provider-specific environment variable injection",
-    "Creates Kubernetes namespace automatically if it does not already exist",
-    "Injects NRN-parsed organization, account, and namespace tags into the agent configuration",
-    "Merges scope repository, extra Git repositories, and deduplicates the final agent repo list",
-    "Forces pod recreation via terraform_data trigger when the API key is rotated",
-    "Supports custom init scripts, image pull secrets, and additional environment variables for agent customization"
+    "Deploys nullplatform-agent Helm chart with cloud-provider-specific environment variable injection for AWS, GCP, Azure, and OCI",
+    "Enforces cross-variable preconditions at plan time using terraform_data lifecycle blocks for required provider credentials",
+    "Triggers full Helm release replacement when the API key changes via a terraform_data input tracker",
+    "Configures agent Git repository scope and extra repositories by merging and deduplicating entries into a comma-separated list",
+    "Supports optional worker orchestration configuration including allowedRegistries, patches, idleTTL, and rules passed as a second Helm values layer",
+    "Renders agent arguments and environment variables from a YAML template supporting tags, API key, cluster name, domain, DNS type, and ingress paths",
+    "Supports Istio ingress with required service_template, initial_ingress_path, and blue_green_ingress_path via precondition validation"
   ],
   "inputs": [
     {
@@ -193,17 +186,7 @@ resource "example_resource" "this" {
     },
     {
       "name": "cluster_name",
-      "description": "Name of the EKS cluster where the nullplatform agent will be deployed",
-      "required": true
-    },
-    {
-      "name": "nrn",
-      "description": "Nullplatform Resource Name - unique identifier for nullplatform resources",
-      "required": true
-    },
-    {
-      "name": "tags_selectors",
-      "description": "Map of tags used to select and filter channels and agents",
+      "description": "Name of the Kubernetes cluster where the nullplatform agent will be deployed",
       "required": true
     },
     {
@@ -212,8 +195,13 @@ resource "example_resource" "this" {
       "required": true
     },
     {
+      "name": "tags_selectors",
+      "description": "Map of tags used to select and filter channels and agents",
+      "required": true
+    },
+    {
       "name": "cloud_provider",
-      "description": "Cloud provider to use (aws, gcp, or azure)",
+      "description": "Cloud provider to use ('aws', 'gcp', 'azure', or 'oci')",
       "required": true
     },
     {
@@ -229,6 +217,11 @@ resource "example_resource" "this" {
     {
       "name": "nullplatform_agent_helm_version",
       "description": "Version of the nullplatform agent Helm chart to deploy",
+      "required": false
+    },
+    {
+      "name": "worker",
+      "description": "",
       "required": false
     },
     {
@@ -257,6 +250,11 @@ resource "example_resource" "this" {
       "required": false
     },
     {
+      "name": "use_account_slug",
+      "description": "Flag to determine whether to use the account slug in resource naming",
+      "required": false
+    },
+    {
       "name": "aws_iam_role_arn",
       "description": "ARN of the AWS IAM role assigned to the agent",
       "required": false
@@ -282,23 +280,23 @@ resource "example_resource" "this" {
       "required": false
     },
     {
-      "name": "private_gateway_name",
-      "description": "Private gateway name for Azure networking",
-      "required": false
-    },
-    {
       "name": "private_hosted_zone_rg",
       "description": "Resource group for private hosted zone",
       "required": false
     },
     {
-      "name": "public_gateway_name",
-      "description": "Public gateway name for Azure networking",
+      "name": "azure_tenant_id",
+      "description": "Azure tenant ID",
       "required": false
     },
     {
-      "name": "azure_tenant_id",
-      "description": "Azure tenant ID",
+      "name": "private_gateway_name",
+      "description": "Name of the private/internal gateway used for routing",
+      "required": false
+    },
+    {
+      "name": "public_gateway_name",
+      "description": "Name of the public gateway used for routing",
       "required": false
     },
     {
@@ -312,33 +310,23 @@ resource "example_resource" "this" {
       "required": false
     },
     {
-      "name": "private_domain",
-      "description": "Private domain name used for internal agent routing",
-      "required": false
-    },
-    {
-      "name": "use_account_slug",
-      "description": "Flag to determine whether to use account slug in resource naming",
-      "required": false
-    },
-    {
       "name": "image_pull_secrets",
       "description": "Image pull secrets configuration",
       "required": false
     },
     {
       "name": "service_template",
-      "description": "Specifies the name or reference of the scope service template to be used for deployment.",
+      "description": "Specifies the name or reference of the scope service template to be used for deployment. Required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio, so it must be pointed at an Istio-compatible template instead.",
       "required": false
     },
     {
       "name": "initial_ingress_path",
-      "description": "Defines the initial ingress path used when deploying the application for the first time.",
+      "description": "Defines the initial ingress path used when deploying the application for the first time. Required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio, so it must be pointed at an Istio HTTPRoute template instead.",
       "required": false
     },
     {
       "name": "blue_green_ingress_path",
-      "description": "Specifies the ingress path used for blue-green deployments to route traffic to the new version.",
+      "description": "Specifies the ingress path used for blue-green deployments to route traffic to the new version. Required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio, so it must be pointed at an Istio HTTPRoute template instead.",
       "required": false
     },
     {
@@ -348,6 +336,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "e0d42905b16b6cea2f88a15d3dda544a"
+  "hash": "5d75d7c82734f313f68e95bceec85b29"
 }
 END_AI_METADATA -->
