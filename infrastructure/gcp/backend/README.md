@@ -64,6 +64,8 @@ terraform {
 
 **Changing `bucket_prefix` replaces the bucket.** The name is the only forces-replacement attribute. With `force_destroy = false` the destroy fails on a non-empty bucket, leaving a half-applied bootstrap to untangle by hand. Treat the prefix as immutable once state lives in the bucket.
 
+**Trivy reports GCP-0077 and GCP-0066 against this module, by design.** Access logging (`log_bucket`) and customer-managed encryption (`kms_key_name`) are both opt-in, because each needs a resource this module does not create — an existing log bucket and an existing KMS key. Trivy evaluates the configuration with default variable values, so it sees a bucket with neither and flags both. Setting the two inputs is the fix for a given deployment; the findings are deliberately not suppressed in `.trivyignore`, since that file is a flat ID list and would silence bucket-logging findings for every other module in the repo.
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
