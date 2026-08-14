@@ -2,75 +2,33 @@
 
 ## Description
 
-Deploys an Azure Kubernetes Service (AKS) cluster with configurable system and user node pools, workload identity, OIDC issuer, and optional ACR integration using the Azure/aks/azurerm upstream module
+Deploys an Azure Kubernetes Service (AKS) cluster using the Azure/aks/azurerm module with system and user node pools, OIDC/workload identity, Azure RBAC integration, and optional ACR attachment
 
 ## Architecture
 
-The module wraps the Azure/aks/azurerm community module (version 11.0.0) and feeds all input variables into it, creating an AKS cluster with a system node pool and a separate autoscaling user node pool both attached to the provided vnet_subnet_id. It retrieves the current Azure client config via azurerm_client_config to wire the tenant_id into AAD RBAC settings and enables workload_identity and oidc_issuer on the cluster. Network Contributor role assignments are applied to the node subnet and any additional subnets supplied via additional_network_contributor_subnet_ids, and an optional AcrPull role binding is conditionally created on the supplied ACR when acr_id is provided.
+The module wraps the Azure/aks/azurerm community module (version 11.0.0) and uses a data source (azurerm_client_config) to retrieve the current tenant ID for AAD RBAC configuration. It provisions a system node pool via the module's top-level agents_* arguments and a separate user node pool via the node_pools map, both attached to the provided vnet_subnet_id with Network Contributor role assignments handled internally. OIDC issuer and workload identity are unconditionally enabled, and ACR attachment is controlled by a conditional attached_acr_id_map derived from the attach_acr and acr_id variables. Outputs expose cluster credentials, OIDC issuer URL, and node resource group for downstream consumption.
 
 ## Features
 
-- Creates AKS cluster with RBAC, AAD integration, OIDC issuer, and workload identity enabled
-- Supports disabling local admin accounts, guarded by a precondition that requires an Entra ID authorization path
-- Configures a fixed system node pool with configurable VM size, node count, and availability zones
-- Deploys an autoscaling user node pool with configurable min/max counts and availability zone spread
-- Grants Network Contributor role on the node subnet and any additional load-balancer subnets to the cluster identity
-- Optionally attaches an Azure Container Registry by granting AcrPull role to the cluster identity
-- Exposes cluster credentials and OIDC issuer URL as outputs for downstream Kubernetes provider configuration
-- Supports private cluster mode and API server authorized IP range restrictions
+- Creates an AKS cluster with a dedicated system node pool and an autoscaling user node pool in the specified VNet subnet
+- Enables OIDC issuer and workload identity unconditionally for Kubernetes service account federation
+- Configures Azure RBAC and Entra ID admin group integration for cluster authorization
+- Assigns Network Contributor role to node subnet and any additional subnets required for internal load balancers
+- Attaches an Azure Container Registry with AcrPull role when acr_id is provided
+- Supports availability zone spread for both system and user node pools via configurable zone variables
+- Exposes cluster CA certificate, client credentials, and OIDC issuer URL as sensitive outputs
 
 ## Basic Usage
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v6.12.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v6.13.0"
 
   cluster_name        = "your-cluster-name"
   location            = "your-location"
   resource_group_name = "your-resource-group-name"
   subscription_id     = "your-subscription-id"
   vnet_subnet_id      = "your-vnet-subnet-id"
-}
-```
-
-## Hardened Access
-
-Local admin accounts are certificate-based and bypass Entra ID, so security baselines often require
-them off. Disabling them removes the only credential that works without Entra ID, which means an
-authorization path has to be configured in the same change — the module enforces this with a
-precondition rather than letting the cluster become unreachable.
-
-```hcl
-module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v6.12.0"
-
-  cluster_name        = "your-cluster-name"
-  location            = "your-location"
-  resource_group_name = "your-resource-group-name"
-  subscription_id     = "your-subscription-id"
-  vnet_subnet_id      = "your-vnet-subnet-id"
-
-  local_account_disabled = true
-  azure_rbac_enabled     = true # grant access with Azure role assignments
-  # admin_group_object_ids = ["<entra-id-group-object-id>"] # or keep authorization in Kubernetes RBAC
-}
-```
-
-With `azure_rbac_enabled = true`, cluster access is granted outside this module with Azure role
-assignments such as `Azure Kubernetes Service RBAC Cluster Admin`. Consumers reaching the API server
-from Terraform must also authenticate through Entra ID, since the `admin_*` outputs are empty once
-local accounts are disabled:
-
-```hcl
-provider "kubernetes" {
-  host                   = module.aks.host
-  cluster_ca_certificate = base64decode(module.aks.cluster_ca_certificate)
-
-  exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    command     = "kubelogin"
-    args        = ["get-token", "--login", "azurecli", "--server-id", "6dae42f8-4368-4678-94ff-3960e28e3630"]
-  }
 }
 ```
 
@@ -158,17 +116,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "aks",
-  "description": "Deploys an Azure Kubernetes Service (AKS) cluster with configurable system and user node pools, workload identity, OIDC issuer, and optional ACR integration using the Azure/aks/azurerm upstream module",
-  "architecture": "The module wraps the Azure/aks/azurerm community module (version 11.0.0) and feeds all input variables into it, creating an AKS cluster with a system node pool and a separate autoscaling user node pool both attached to the provided vnet_subnet_id. It retrieves the current Azure client config via azurerm_client_config to wire the tenant_id into AAD RBAC settings and enables workload_identity and oidc_issuer on the cluster. Network Contributor role assignments are applied to the node subnet and any additional subnets supplied via additional_network_contributor_subnet_ids, and an optional AcrPull role binding is conditionally created on the supplied ACR when acr_id is provided.",
+  "description": "Deploys an Azure Kubernetes Service (AKS) cluster using the Azure/aks/azurerm module with system and user node pools, OIDC/workload identity, Azure RBAC integration, and optional ACR attachment",
+  "architecture": "The module wraps the Azure/aks/azurerm community module (version 11.0.0) and uses a data source (azurerm_client_config) to retrieve the current tenant ID for AAD RBAC configuration. It provisions a system node pool via the module's top-level agents_* arguments and a separate user node pool via the node_pools map, both attached to the provided vnet_subnet_id with Network Contributor role assignments handled internally. OIDC issuer and workload identity are unconditionally enabled, and ACR attachment is controlled by a conditional attached_acr_id_map derived from the attach_acr and acr_id variables. Outputs expose cluster credentials, OIDC issuer URL, and node resource group for downstream consumption.",
   "features": [
-    "Creates AKS cluster with RBAC, AAD integration, OIDC issuer, and workload identity enabled",
-    "Supports disabling local admin accounts, guarded by a precondition that requires an Entra ID authorization path",
-    "Configures a fixed system node pool with configurable VM size, node count, and availability zones",
-    "Deploys an autoscaling user node pool with configurable min/max counts and availability zone spread",
-    "Grants Network Contributor role on the node subnet and any additional load-balancer subnets to the cluster identity",
-    "Optionally attaches an Azure Container Registry by granting AcrPull role to the cluster identity",
-    "Exposes cluster credentials and OIDC issuer URL as outputs for downstream Kubernetes provider configuration",
-    "Supports private cluster mode and API server authorized IP range restrictions"
+    "Creates an AKS cluster with a dedicated system node pool and an autoscaling user node pool in the specified VNet subnet",
+    "Enables OIDC issuer and workload identity unconditionally for Kubernetes service account federation",
+    "Configures Azure RBAC and Entra ID admin group integration for cluster authorization",
+    "Assigns Network Contributor role to node subnet and any additional subnets required for internal load balancers",
+    "Attaches an Azure Container Registry with AcrPull role when acr_id is provided",
+    "Supports availability zone spread for both system and user node pools via configurable zone variables",
+    "Exposes cluster CA certificate, client credentials, and OIDC issuer URL as sensitive outputs"
   ],
   "inputs": [
     {
@@ -304,6 +261,6 @@ resource "example_resource" "this" {
     "oidc_issuer_url",
     "node_resource_group"
   ],
-  "hash": "eecb9a7cb8471fcdabab22199c6e4b4a"
+  "hash": "6bc75daa678ed4082a51b6723427f95a"
 }
 END_AI_METADATA -->
