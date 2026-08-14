@@ -34,7 +34,7 @@ module "artifact-registry" {
 
 ```hcl
 module "artifact-registry" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/artifact-registry?ref=v6.11.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/artifact-registry?ref=v6.14.0"
 
   location      = "your-location"
   project_id    = "your-project-id"
@@ -46,6 +46,18 @@ module "artifact-registry" {
 # module.artifact-registry.service_account_key_base64 is the password for a
 # Docker client authenticating with username "_json_key_base64".
 ```
+
+The output is the key exactly as the provider returns it: base64-encoded JSON. That is what the `_json_key_base64` username expects, so pass it through unchanged. Docker clients using the older `_json_key` username need the decoded form instead — wrap it in `base64decode()`.
+
+#### Before enabling `generate_key`
+
+**The key material is stored in plaintext in state.** `sensitive = true` on the output redacts CLI display, not state. Anyone who can read the state backend obtains a working credential, so `generate_key = true` requires a state bucket restricted to operators. Prefer `workload_identity_bindings` for anything running in-cluster — it needs no key at all.
+
+**The credential is project-scoped, not repository-scoped.** The service account holds `roles/artifactregistry.writer` on the whole project (`google_project_iam_member`), so a leaked key can push and overwrite tags in *every* Artifact Registry repository in `project_id`, not just this one. Size the blast radius accordingly; a repository-scoped grant would need `google_artifact_registry_repository_iam_member` instead.
+
+**Rotation is manual.** GCP user-managed service account keys do not expire. Set `key_rotation_token` to any value and change it to force a new key — that is the supported rotation path. Do not derive it from `timestamp()` or `uuid()`, which would reissue the key on every apply.
+
+**The key cannot be recovered after state loss.** The provider only populates `private_key` when it creates the key, so a `state rm` plus import, or a state restore, brings the attribute back empty and the output silently becomes empty rather than erroring. Recover by forcing a new key (change `key_rotation_token`, or `tofu apply -replace`) and redistributing it.
 
 ## Using Outputs
 
@@ -85,7 +97,8 @@ resource "example_resource" "this" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_format"></a> [format](#input\_format) | The format (DOCKER, NPM, PYTHON, etc) | `string` | `"DOCKER"` | no |
-| <a name="input_generate_key"></a> [generate\_key](#input\_generate\_key) | Generate a static JSON key for the Artifact Registry service account, exposed via the service\_account\_key\_base64 output. Only needed for callers outside the cluster (e.g. an external system authenticating as a Docker registry client) that can't use Workload Identity. Leave false when every consumer runs in-cluster. | `bool` | `false` | no |
+| <a name="input_generate_key"></a> [generate\_key](#input\_generate\_key) | Generate a static JSON key for the Artifact Registry service account, exposed via the service\_account\_key\_base64 output. Only needed for callers outside the cluster (e.g. an external system authenticating as a Docker registry client) that can't use Workload Identity. Leave false when every consumer runs in-cluster. Note that the key material is stored in plaintext in Terraform/OpenTofu state, and the service account holds roles/artifactregistry.writer at PROJECT scope. | `bool` | `false` | no |
+| <a name="input_key_rotation_token"></a> [key\_rotation\_token](#input\_key\_rotation\_token) | Arbitrary value wired to the service account key's keepers. Changing it forces a new key to be issued, which is the supported way to rotate: GCP user-managed keys do not expire on their own. Leave null to never rotate. Do not derive this from timestamp() or uuid() — the key would be reissued on every apply | `string` | `null` | no |
 | <a name="input_location"></a> [location](#input\_location) | The location for the repository | `string` | n/a | yes |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | The GCP project ID | `string` | n/a | yes |
 | <a name="input_repository_id"></a> [repository\_id](#input\_repository\_id) | The repository ID (name) | `string` | n/a | yes |
