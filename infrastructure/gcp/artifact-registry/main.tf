@@ -28,3 +28,15 @@ resource "google_service_account_iam_member" "workload_identity" {
   role               = "roles/iam.workloadIdentityUser"
   member             = "serviceAccount:${var.project_id}.svc.id.goog[${each.value.namespace}/${each.value.ksa_name}]"
 }
+
+resource "google_service_account_key" "artifact_sa_key" {
+  count = var.generate_key ? 1 : 0
+
+  service_account_id = google_service_account.artifact_sa.name
+
+  # Only set when the caller opts in, so the default stays deterministic: a
+  # keepers value that changed on every apply would reissue the key every run.
+  keepers = var.key_rotation_token == null || var.key_rotation_token == "" ? null : {
+    rotation = var.key_rotation_token
+  }
+}
