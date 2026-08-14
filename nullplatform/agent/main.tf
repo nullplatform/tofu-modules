@@ -36,24 +36,36 @@ resource "terraform_data" "cross_variable_validation" {
       condition     = var.cloud_provider != "azure" || var.azure_tenant_id != null
       error_message = "azure_tenant_id is required when cloud_provider is 'azure'."
     }
-    # The three ingress-template preconditions that shipped in v6.14.0 were removed
-    # here. They keyed off extra_envs.INGRESS_TYPE == "istio", and that signal does
-    # not exist: INGRESS_TYPE appears nowhere in nullplatform/scopes. Its only
-    # consumer in the org is services-endpoint-exposer, which uses it to pick a
-    # service workflow directory.
+    # The ingress templates are all-or-nothing.
     #
-    # Re-keying on cloud_provider != "aws" does not work either. Each scope type
-    # already sets these three values in its own values.yaml — scopes/azure and
-    # scopes/azure-aro point at Istio and ARO HTTPRoute templates, scopes/k8s points
-    # at Ingress — so the agent's env vars are overrides, not the source of truth.
-    # An AKS install on the `azure` scope type needs no override and would be
-    # wrongly blocked.
+    # This replaces the three preconditions that shipped in v6.14.0. Their diagnosis
+    # was right — scopes/k8s really does default to an AWS ALB Ingress
+    # (deployment/templates/initial-ingress.yaml.tpl sets ingressClassName: alb plus
+    # eight alb.ingress.kubernetes.io annotations) — but neither of the two available
+    # signals can decide whether an override is NEEDED:
     #
-    # The real gap is a GKE/AKS cluster running the `k8s` scope type, whose default
-    # is the AWS ALB Ingress template. The agent module cannot detect that: it never
-    # learns which scope type a deployment will use. Left to documentation on the
-    # three variables until the scopes repo grows a cloud-agnostic default or a gcp
-    # scope type.
+    #   - extra_envs.INGRESS_TYPE, which they used, is not read anywhere in
+    #     nullplatform/scopes (zero occurrences on main and beta). Its only consumer
+    #     in the org is services-endpoint-exposer, for picking a workflow directory.
+    #   - cloud_provider fails too: each scope type sets these three values in its own
+    #     values.yaml, and scopes/azure and scopes/azure-aro already point at Istio and
+    #     ARO HTTPRoute templates. An AKS install on the `azure` scope type needs no
+    #     override, so keying on cloud_provider != "aws" would block a valid config.
+    #
+    # What IS checkable here is coherence, and a partial override is worse than none.
+    # finalize.yaml feeds INITIAL_INGRESS_PATH and switch_traffic.yaml feeds
+    # BLUE_GREEN_INGRESS_PATH into the same TEMPLATE slot of the same workflow, so
+    # overriding one and not the other renders an HTTPRoute on the initial deploy and
+    # an ALB Ingress on the traffic switch — the deploy gets partway through and then
+    # breaks. All three scope types set all three values; a caller overriding for a
+    # GKE or AKS cluster on the `k8s` scope type must do the same.
+    precondition {
+      condition = (
+        (var.service_template == "" && var.initial_ingress_path == "" && var.blue_green_ingress_path == "") ||
+        (var.service_template != "" && var.initial_ingress_path != "" && var.blue_green_ingress_path != "")
+      )
+      error_message = "service_template, initial_ingress_path and blue_green_ingress_path must be set together or left entirely empty. Setting only some of them mixes template flavours across a single deployment: finalize renders INITIAL_INGRESS_PATH and switch-traffic renders BLUE_GREEN_INGRESS_PATH, so a half-override breaks blue-green mid-deploy. Leave all three empty to use the scope type's own defaults (scopes/azure and scopes/azure-aro already point at HTTPRoute templates); set all three when running the k8s scope type on a cluster without an AWS ALB."
+    }
   }
 }
 

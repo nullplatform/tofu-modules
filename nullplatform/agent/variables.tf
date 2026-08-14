@@ -251,7 +251,7 @@ variable "image_pull_secrets" {
 
 # Scope service template to use for deployment (required when extra_envs.INGRESS_TYPE is 'istio')
 variable "service_template" {
-  description = "Specifies the name or reference of the scope service template to be used for deployment. Leave empty to use the default from the scope type's own values.yaml. Override it when the scope type's default does not match the cluster's ingress: scopes/k8s defaults to an AWS ALB Ingress template, so a GKE or AKS cluster running the k8s scope type needs all three of service_template, initial_ingress_path and blue_green_ingress_path pointed at Istio HTTPRoute templates, or deployments come up with no working route and no error. The scopes/azure and scopes/azure-aro scope types already set them and need no override"
+  description = "Specifies the name or reference of the scope service template to be used for deployment. Leave empty to use the default from the scope type's own values.yaml. Override it when the scope type's default does not match the cluster's ingress: scopes/k8s defaults to an AWS ALB Ingress template, so a GKE or AKS cluster running the k8s scope type needs all three of service_template, initial_ingress_path and blue_green_ingress_path pointed at Istio HTTPRoute templates, or deployments come up with no working route and no error. The scopes/azure and scopes/azure-aro scope types already set them and need no override. All three must be set together or all left empty: finalize renders INITIAL_INGRESS_PATH and switch-traffic renders BLUE_GREEN_INGRESS_PATH into the same slot, so a half-override breaks blue-green mid-deploy"
   type        = string
   default     = ""
   nullable    = false
@@ -259,7 +259,7 @@ variable "service_template" {
 
 # Initial ingress path used on first deploy (required when extra_envs.INGRESS_TYPE is 'istio')
 variable "initial_ingress_path" {
-  description = "Defines the initial ingress path used when deploying the application for the first time. Leave empty to use the default from the scope type's own values.yaml. Override it when the scope type's default does not match the cluster's ingress: scopes/k8s defaults to an AWS ALB Ingress template, so a GKE or AKS cluster running the k8s scope type needs all three of service_template, initial_ingress_path and blue_green_ingress_path pointed at Istio HTTPRoute templates, or deployments come up with no working route and no error. The scopes/azure and scopes/azure-aro scope types already set them and need no override"
+  description = "Defines the initial ingress path used when deploying the application for the first time. Leave empty to use the default from the scope type's own values.yaml. Override it when the scope type's default does not match the cluster's ingress: scopes/k8s defaults to an AWS ALB Ingress template, so a GKE or AKS cluster running the k8s scope type needs all three of service_template, initial_ingress_path and blue_green_ingress_path pointed at Istio HTTPRoute templates, or deployments come up with no working route and no error. The scopes/azure and scopes/azure-aro scope types already set them and need no override. All three must be set together or all left empty: finalize renders INITIAL_INGRESS_PATH and switch-traffic renders BLUE_GREEN_INGRESS_PATH into the same slot, so a half-override breaks blue-green mid-deploy"
   type        = string
   default     = ""
   nullable    = false
@@ -267,7 +267,7 @@ variable "initial_ingress_path" {
 
 # Blue-green ingress path used to route traffic to the new version (required when extra_envs.INGRESS_TYPE is 'istio')
 variable "blue_green_ingress_path" {
-  description = "Specifies the ingress path used for blue-green deployments to route traffic to the new version. Leave empty to use the default from the scope type's own values.yaml. Override it when the scope type's default does not match the cluster's ingress: scopes/k8s defaults to an AWS ALB Ingress template, so a GKE or AKS cluster running the k8s scope type needs all three of service_template, initial_ingress_path and blue_green_ingress_path pointed at Istio HTTPRoute templates, or deployments come up with no working route and no error. The scopes/azure and scopes/azure-aro scope types already set them and need no override"
+  description = "Specifies the ingress path used for blue-green deployments to route traffic to the new version. Leave empty to use the default from the scope type's own values.yaml. Override it when the scope type's default does not match the cluster's ingress: scopes/k8s defaults to an AWS ALB Ingress template, so a GKE or AKS cluster running the k8s scope type needs all three of service_template, initial_ingress_path and blue_green_ingress_path pointed at Istio HTTPRoute templates, or deployments come up with no working route and no error. The scopes/azure and scopes/azure-aro scope types already set them and need no override. All three must be set together or all left empty: finalize renders INITIAL_INGRESS_PATH and switch-traffic renders BLUE_GREEN_INGRESS_PATH into the same slot, so a half-override breaks blue-green mid-deploy"
   type        = string
   default     = ""
   nullable    = false

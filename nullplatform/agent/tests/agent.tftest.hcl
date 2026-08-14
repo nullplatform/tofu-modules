@@ -210,6 +210,47 @@ run "oci_gets_the_shared_config_only" {
 # pass through untouched and that leaving them empty is allowed.
 ###############################################################################
 
+run "partial_ingress_override_is_rejected_initial_without_blue_green" {
+  command = plan
+
+  variables {
+    # finalize renders INITIAL_INGRESS_PATH and switch-traffic renders
+    # BLUE_GREEN_INGRESS_PATH into the same TEMPLATE slot, so this combination gets
+    # an HTTPRoute on the initial deploy and an ALB Ingress on the traffic switch.
+    service_template     = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/service.yaml.tpl"
+    initial_ingress_path = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
+  }
+
+  expect_failures = [
+    terraform_data.cross_variable_validation,
+  ]
+}
+
+run "partial_ingress_override_is_rejected_service_only" {
+  command = plan
+
+  variables {
+    service_template = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/service.yaml.tpl"
+  }
+
+  expect_failures = [
+    terraform_data.cross_variable_validation,
+  ]
+}
+
+run "partial_ingress_override_is_rejected_routes_without_service" {
+  command = plan
+
+  variables {
+    initial_ingress_path    = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
+    blue_green_ingress_path = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
+  }
+
+  expect_failures = [
+    terraform_data.cross_variable_validation,
+  ]
+}
+
 run "empty_ingress_templates_are_allowed_on_any_cloud" {
   command = plan
 
@@ -235,6 +276,11 @@ run "ingress_templates_pass_through_when_set" {
   assert {
     condition     = local.all_config["INITIAL_INGRESS_PATH"] == "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
     error_message = "Overridden ingress templates must reach the agent config"
+  }
+
+  assert {
+    condition     = local.all_config["SERVICE_TEMPLATE"] != "" && local.all_config["BLUE_GREEN_INGRESS_PATH"] != ""
+    error_message = "Setting all three together must be accepted: this is the supported way to run the k8s scope type on Istio"
   }
 }
 
