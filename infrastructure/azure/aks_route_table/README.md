@@ -19,7 +19,7 @@ The module uses an azurerm_resources data source to discover the AKS-managed rou
 
 ```hcl
 module "aks_route_table" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks_route_table?ref=v6.15.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks_route_table?ref=v6.16.0"
 
   node_resource_group = "your-node-resource-group"
   subnet_id           = "your-subnet-id"
