@@ -25,7 +25,7 @@ jobs:
   test-gcp-modules:
     uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
     with:
-      modules: '["infrastructure/gcp/artifact-registry", "infrastructure/gcp/backend", "infrastructure/gcp/cloud-dns", "infrastructure/gcp/cloud-nat", "infrastructure/gcp/iam", "infrastructure/gcp/vpc"]'
+      modules: '["infrastructure/gcp/artifact-registry", "infrastructure/gcp/backend", "infrastructure/gcp/cloud-dns", "infrastructure/gcp/cloud-nat", "infrastructure/gcp/iam", "infrastructure/gcp/security", "infrastructure/gcp/vpc"]'
 
   test-nullplatform-modules:
     uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main

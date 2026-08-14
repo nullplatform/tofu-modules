@@ -22,7 +22,7 @@ The module first creates two kubernetes_namespace_v1 resources ('nullplatform-to
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.11.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.13.0"
 
   k8s_provider = "your-k8s-provider"
   np_api_key   = "your-np-api-key"
@@ -33,7 +33,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.11.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.13.0"
 
   k8s_provider = "eks"
   np_api_key   = "your-np-api-key"
@@ -44,7 +44,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.11.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.13.0"
 
   k8s_provider = "gke"
   np_api_key   = "your-np-api-key"
@@ -55,7 +55,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.11.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.13.0"
 
   k8s_provider = "aks"
   np_api_key   = "your-np-api-key"
@@ -66,7 +66,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.11.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.13.0"
 
   k8s_provider = "oke"
   np_api_key   = "your-np-api-key"
@@ -77,7 +77,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.11.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.13.0"
 
   k8s_provider = "aro"
   np_api_key   = "your-np-api-key"

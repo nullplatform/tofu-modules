@@ -19,7 +19,7 @@ The module iterates over the `nullplatform_accounts` input map using `for_each` 
 
 ```hcl
 module "account" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/account?ref=v6.11.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/account?ref=v6.13.0"
 
   nullplatform_accounts = "your-nullplatform-accounts"
 }

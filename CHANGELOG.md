@@ -1,5 +1,19 @@
 # Changelog
 
+## [6.13.0](https://github.com/nullplatform/tofu-modules/compare/v6.12.0...v6.13.0) (2026-08-13)
+
+
+### Features
+
+* **aks:** support disabling local accounts with an Entra ID authorization path ([#461](https://github.com/nullplatform/tofu-modules/issues/461)) ([3e3c412](https://github.com/nullplatform/tofu-modules/commit/3e3c412b5a996241da6a904f9e86b3faf51c6487))
+
+## [6.12.0](https://github.com/nullplatform/tofu-modules/compare/v6.11.3...v6.12.0) (2026-08-12)
+
+
+### Features
+
+* **eks:** add traffic_manager_port variable ([#509](https://github.com/nullplatform/tofu-modules/issues/509)) ([b2165b2](https://github.com/nullplatform/tofu-modules/commit/b2165b2e0cdd922922b4eb029c9f69512c8d0e62))
+
 ## [6.11.3](https://github.com/nullplatform/tofu-modules/compare/v6.11.2...v6.11.3) (2026-08-11)
 
 

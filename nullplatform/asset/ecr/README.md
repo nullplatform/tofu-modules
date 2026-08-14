@@ -21,7 +21,7 @@ The module reads the current AWS region via the aws_region data source and combi
 
 ```hcl
 module "ecr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v6.11.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/asset/ecr?ref=v6.13.0"
 
   application_role_arn             = "your-application-role-arn"
   build_workflow_access_key_id     = "your-build-workflow-access-key-id"
