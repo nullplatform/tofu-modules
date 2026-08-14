@@ -13,9 +13,13 @@ locals {
 # DATA SOURCES - Derive network and CIDR from cluster name
 ###############################################################################
 
-# Get GKE cluster info
+# Get GKE cluster info.
+#
+# Skipped entirely when the caller supplies both derived values, so the module does
+# not require container.clusters.get / compute.subnetworks.get just to build firewall
+# rules from values it was handed.
 data "google_container_cluster" "this" {
-  count    = var.cluster_name != "" ? 1 : 0
+  count    = var.cluster_name != "" && (var.gcp_network_name == "" || var.network_cidr == "") ? 1 : 0
   name     = var.cluster_name
   location = var.gcp_region
   project  = var.gcp_project_id
@@ -37,32 +41,59 @@ data "google_container_cluster" "this" {
 }
 
 locals {
-  # google_container_cluster.subnetwork is documented as the subnetwork name,
-  # but in practice it echoes back whatever format the cluster was created
-  # with — a bare name, or (e.g. when created via a module that passes a full
-  # reference, such as terraform-google-modules/kubernetes-engine) the full
-  # "projects/.../regions/.../subnetworks/NAME" path. google_compute_subnetwork
-  # only accepts a bare name, so take the last path segment either way.
-  cluster_subnetwork_name = var.cluster_name != "" ? element(
-    split("/", data.google_container_cluster.this[0].subnetwork),
-    length(split("/", data.google_container_cluster.this[0].subnetwork)) - 1
-  ) : ""
+  subnetwork_ref = try(one(data.google_container_cluster.this[*].subnetwork), null)
+
+  # The GKE API always returns networkConfig.subnetwork as a RELATIVE RESOURCE PATH
+  # (projects/P/regions/R/subnetworks/NAME): the provider normalizes whatever the
+  # config supplied through RelativeLink() before the call and reads the value back
+  # from cluster.NetworkConfig.Subnetwork. The field even carries
+  # DiffSuppressFunc: CompareSelfLinkOrResourceName precisely because the config and
+  # read shapes differ. So this is not "whatever format the cluster was created
+  # with" — every cluster with cluster_name set hits the path form.
+  #
+  # Capture all three segments rather than only the name. The name alone is not
+  # enough: google_compute_subnetwork resolves it against the project and region it
+  # is given, and the path may legitimately name a different region (a zonal cluster
+  # passes its ZONE as gcp_region, since that doubles as the cluster's location) or a
+  # different project (Shared VPC, where the subnet lives in the host project).
+  # Discarding them turns those cases into a 404.
+  #
+  # The regex also matches a self_link (the leading (?:.*/)? absorbs the
+  # https://www.googleapis.com/compute/v1/ prefix). A bare name matches nothing and
+  # falls through to the configured project/region below.
+  subnetwork_parts = local.subnetwork_ref == null ? null : try(
+    regex("^(?:.*/)?projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/subnetworks/(?P<name>[^/]+)$", local.subnetwork_ref),
+    null
+  )
+
+  cluster_subnetwork_name    = try(local.subnetwork_parts.name, local.subnetwork_ref, "")
+  cluster_subnetwork_region  = try(local.subnetwork_parts.region, var.gcp_region)
+  cluster_subnetwork_project = try(local.subnetwork_parts.project, var.gcp_project_id)
 }
 
 # Get subnetwork info to derive CIDR
 data "google_compute_subnetwork" "this" {
-  count   = var.cluster_name != "" ? 1 : 0
+  count   = var.cluster_name != "" && var.network_cidr == "" ? 1 : 0
   name    = local.cluster_subnetwork_name
-  region  = var.gcp_region
-  project = var.gcp_project_id
+  region  = local.cluster_subnetwork_region
+  project = local.cluster_subnetwork_project
 }
 
 locals {
-  # Derived values from data sources
-  gcp_network_name = var.cluster_name != "" ? data.google_container_cluster.this[0].network : ""
-  gcp_subnet_cidr  = var.cluster_name != "" ? data.google_compute_subnetwork.this[0].ip_cidr_range : ""
+  # Derived values from data sources. one() yields null when the data source was
+  # skipped, so the override branches below stay reachable.
+  # Not coalesce(): it discards empty strings as well as nulls and errors when every
+  # argument is empty.
+  derived_network_name = try(one(data.google_container_cluster.this[*].network), null)
+  derived_subnet_cidr  = try(one(data.google_compute_subnetwork.this[*].ip_cidr_range), null)
 
-  # Use override if provided, otherwise use derived value
+  gcp_network_name = local.derived_network_name != null ? local.derived_network_name : ""
+  gcp_subnet_cidr  = local.derived_subnet_cidr != null ? local.derived_subnet_cidr : ""
+
+  # Use override if provided, otherwise use derived value.
+  # google_compute_firewall.network runs its value through ParseGlobalFieldValue, so
+  # a full projects/P/global/networks/N path is accepted here and deliberately left
+  # unparsed — only the subnetwork data source lacks that normalization.
   effective_network_name = var.gcp_network_name != "" ? var.gcp_network_name : local.gcp_network_name
   effective_network_cidr = var.network_cidr != "" ? var.network_cidr : local.gcp_subnet_cidr
 }
