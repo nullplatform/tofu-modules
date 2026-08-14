@@ -2,62 +2,32 @@
 
 ## Description
 
-Creates a Google Artifact Registry repository with an associated service account configured for Workload Identity bindings to Kubernetes service accounts
+Creates a Google Artifact Registry repository with a dedicated service account, Workload Identity bindings for Kubernetes, and optional static key generation for external Docker clients
 
 ## Architecture
 
-The module provisions a google_artifact_registry_repository resource in the specified GCP project and location. A google_service_account is created and granted roles/artifactregistry.writer permissions via google_project_iam_member to enable push/pull operations. For each entry in workload_identity_bindings, a google_service_account_iam_member resource grants roles/iam.workloadIdentityUser to the corresponding Kubernetes service account, establishing the Workload Identity federation link between GKE pods and the GCP service account. When generate_key is true, a google_service_account_key is also created and its base64-encoded private key exposed via service_account_key_base64, for callers outside the cluster that can't use Workload Identity and need to authenticate as a Docker client instead.
+The module creates a google_artifact_registry_repository resource configured with the specified format and labels, alongside a google_service_account named artifact-registry-sa. A google_project_iam_member binds roles/artifactregistry.writer to the service account at project scope, while google_service_account_iam_member resources (one per entry in workload_identity_bindings) grant roles/iam.workloadIdentityUser to each Kubernetes ServiceAccount via GKE Workload Identity federation. An optional google_service_account_key is created when generate_key is true, with keepers wired to key_rotation_token to control forced key rotation.
 
 ## Features
 
-- Creates Google Artifact Registry repository with configurable format (DOCKER, NPM, PYTHON)
-- Provisions a dedicated GCP service account with artifactregistry.writer role for image operations
-- Configures Workload Identity bindings to allow Kubernetes service accounts to impersonate the GCP service account
-- Outputs fully-qualified Docker-compatible repository URL for image push/pull operations
-- Supports custom labels/tags on the Artifact Registry repository
-- Enables multi-namespace Kubernetes service account bindings through dynamic for_each configuration
-- Optionally generates a static JSON key for the service account, for non-cluster Docker clients that can't use Workload Identity
+- Creates a google_artifact_registry_repository supporting DOCKER, NPM, PYTHON, and other formats
+- Creates a dedicated google_service_account with roles/artifactregistry.writer bound at project scope
+- Configures Workload Identity bindings via google_service_account_iam_member for multiple Kubernetes ServiceAccounts across namespaces
+- Generates an optional static JSON service account key via google_service_account_key for external Docker registry clients
+- Supports key rotation by wiring a caller-controlled token to the key's keepers map
+- Outputs a fully-qualified Docker-compatible repository URL for immediate use in image push/pull configurations
 
 ## Basic Usage
 
 ```hcl
 module "artifact-registry" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/artifact-registry?ref=v6.14.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/artifact-registry?ref=v6.15.0"
 
   location      = "your-location"
   project_id    = "your-project-id"
   repository_id = "your-repository-id"
 }
 ```
-
-### Usage with a Static Docker Credential
-
-```hcl
-module "artifact-registry" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/artifact-registry?ref=v6.14.0"
-
-  location      = "your-location"
-  project_id    = "your-project-id"
-  repository_id = "your-repository-id"
-
-  generate_key = true
-}
-
-# module.artifact-registry.service_account_key_base64 is the password for a
-# Docker client authenticating with username "_json_key_base64".
-```
-
-The output is the key exactly as the provider returns it: base64-encoded JSON. That is what the `_json_key_base64` username expects, so pass it through unchanged. Docker clients using the older `_json_key` username need the decoded form instead — wrap it in `base64decode()`.
-
-#### Before enabling `generate_key`
-
-**The key material is stored in plaintext in state.** `sensitive = true` on the output redacts CLI display, not state. Anyone who can read the state backend obtains a working credential, so `generate_key = true` requires a state bucket restricted to operators. Prefer `workload_identity_bindings` for anything running in-cluster — it needs no key at all.
-
-**The credential is project-scoped, not repository-scoped.** The service account holds `roles/artifactregistry.writer` on the whole project (`google_project_iam_member`), so a leaked key can push and overwrite tags in *every* Artifact Registry repository in `project_id`, not just this one. Size the blast radius accordingly; a repository-scoped grant would need `google_artifact_registry_repository_iam_member` instead.
-
-**Rotation is manual.** GCP user-managed service account keys do not expire. Set `key_rotation_token` to any value and change it to force a new key — that is the supported rotation path. Do not derive it from `timestamp()` or `uuid()`, which would reissue the key on every apply.
-
-**The key cannot be recovered after state loss.** The provider only populates `private_key` when it creates the key, so a `state rm` plus import, or a state restore, brings the attribute back empty and the output silently becomes empty rather than erroring. Recover by forcing a new key (change `key_rotation_token`, or `tofu apply -replace`) and redistributing it.
 
 ## Using Outputs
 
@@ -118,15 +88,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "artifact-registry",
-  "description": "Creates a Google Artifact Registry repository with an associated service account configured for Workload Identity bindings to Kubernetes service accounts",
-  "architecture": "The module provisions a google_artifact_registry_repository resource in the specified GCP project and location. A google_service_account is created and granted roles/artifactregistry.writer permissions via google_project_iam_member to enable push/pull operations. For each entry in workload_identity_bindings, a google_service_account_iam_member resource grants roles/iam.workloadIdentityUser to the corresponding Kubernetes service account, establishing the Workload Identity federation link between GKE pods and the GCP service account.",
+  "description": "Creates a Google Artifact Registry repository with a dedicated service account, Workload Identity bindings for Kubernetes, and optional static key generation for external Docker clients",
+  "architecture": "The module creates a google_artifact_registry_repository resource configured with the specified format and labels, alongside a google_service_account named artifact-registry-sa. A google_project_iam_member binds roles/artifactregistry.writer to the service account at project scope, while google_service_account_iam_member resources (one per entry in workload_identity_bindings) grant roles/iam.workloadIdentityUser to each Kubernetes ServiceAccount via GKE Workload Identity federation. An optional google_service_account_key is created when generate_key is true, with keepers wired to key_rotation_token to control forced key rotation.",
   "features": [
-    "Creates Google Artifact Registry repository with configurable format (DOCKER, NPM, PYTHON)",
-    "Provisions a dedicated GCP service account with artifactregistry.writer role for image operations",
-    "Configures Workload Identity bindings to allow Kubernetes service accounts to impersonate the GCP service account",
-    "Outputs fully-qualified Docker-compatible repository URL for image push/pull operations",
-    "Supports custom labels/tags on the Artifact Registry repository",
-    "Enables multi-namespace Kubernetes service account bindings through dynamic for_each configuration"
+    "Creates a google_artifact_registry_repository supporting DOCKER, NPM, PYTHON, and other formats",
+    "Creates a dedicated google_service_account with roles/artifactregistry.writer bound at project scope",
+    "Configures Workload Identity bindings via google_service_account_iam_member for multiple Kubernetes ServiceAccounts across namespaces",
+    "Generates an optional static JSON service account key via google_service_account_key for external Docker registry clients",
+    "Supports key rotation by wiring a caller-controlled token to the key's keepers map",
+    "Outputs a fully-qualified Docker-compatible repository URL for immediate use in image push/pull configurations"
   ],
   "inputs": [
     {
@@ -158,13 +128,24 @@ resource "example_resource" "this" {
       "name": "workload_identity_bindings",
       "description": "Kubernetes ServiceAccounts allowed to impersonate the GCP Service Account via Workload Identity. Each entry grants roles/iam.workloadIdentityUser on the GSA to the KSA identified by namespace/ksa_name.",
       "required": false
+    },
+    {
+      "name": "generate_key",
+      "description": "Generate a static JSON key for the Artifact Registry service account, exposed via the service_account_key_base64 output. Only needed for callers outside the cluster (e.g. an external system authenticating as a Docker registry client) that can't use Workload Identity. Leave false when every consumer runs in-cluster. Note that the key material is stored in plaintext in Terraform/OpenTofu state, and the service account holds roles/artifactregistry.writer at PROJECT scope.",
+      "required": false
+    },
+    {
+      "name": "key_rotation_token",
+      "description": "Arbitrary value wired to the service account key's keepers. Changing it forces a new key to be issued, which is the supported way to rotate: GCP user-managed keys do not expire on their own. Leave null to never rotate. Do not derive this from timestamp() or uuid() — the key would be reissued on every apply",
+      "required": false
     }
   ],
   "outputs": [
     "repository_id",
     "repository_url",
-    "service_account_email"
+    "service_account_email",
+    "service_account_key_base64"
   ],
-  "hash": "e6e32f1a52d8a476263e13e1a9684bdd"
+  "hash": "98650a4313945da06253fd16d10cedec"
 }
 END_AI_METADATA -->
