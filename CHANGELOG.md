@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.14.0](https://github.com/nullplatform/tofu-modules/compare/v6.13.1...v6.14.0) (2026-08-14)
+
+
+### Features
+
+* **nullplatform/agent:** require ingress templates for non-aws clouds ([#515](https://github.com/nullplatform/tofu-modules/issues/515)) ([fbb4198](https://github.com/nullplatform/tofu-modules/commit/fbb4198d33b1da084e033e7b371d35d9509c6ed9))
+
 ## [6.13.1](https://github.com/nullplatform/tofu-modules/compare/v6.13.0...v6.13.1) (2026-08-14)
 
 
