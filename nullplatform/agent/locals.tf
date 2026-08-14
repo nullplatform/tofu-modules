@@ -49,6 +49,8 @@ locals {
     SERVICE_TEMPLATE        = var.service_template
     INITIAL_INGRESS_PATH    = var.initial_ingress_path
     BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
+    PRIVATE_GATEWAY_NAME    = var.private_gateway_name
+    PUBLIC_GATEWAY_NAME     = var.public_gateway_name
   }
 
   cloud_config = {
@@ -56,15 +58,8 @@ locals {
       AWS_IAM_ROLE_ARN = var.aws_iam_role_arn
     }
 
-    gcp = {
-      PRIVATE_GATEWAY_NAME = var.private_gateway_name
-      PRIVATE_DOMAIN       = var.private_domain
-    }
-
     azure = {
       PRIVATE_HOSTED_ZONE_RG = var.private_hosted_zone_rg
-      PRIVATE_GATEWAY_NAME   = var.private_gateway_name
-      PUBLIC_GATEWAY_NAME    = var.public_gateway_name
       RESOURCE_GROUP         = var.azure_resource_group
       AZURE_SUBSCRIPTION_ID  = var.azure_subscription_id
       AZURE_CLIENT_SECRET    = var.azure_client_secret
@@ -72,10 +67,7 @@ locals {
       AZURE_TENANT_ID        = var.azure_tenant_id
     }
 
-    oci = {
-      PRIVATE_GATEWAY_NAME = var.private_gateway_name
-      PRIVATE_DOMAIN       = var.private_domain
-    }
+    oci = {}
   }
 
   all_config = merge(
