@@ -21,7 +21,7 @@ The module uses data sources google_container_cluster and google_compute_subnetw
 
 ```hcl
 module "security" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/security?ref=v6.14.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/security?ref=v6.15.0"
 
   cluster_name   = "your-cluster-name"
   gcp_project_id = "your-gcp-project-id"

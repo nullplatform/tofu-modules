@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.15.0](https://github.com/nullplatform/tofu-modules/compare/v6.14.0...v6.15.0) (2026-08-14)
+
+
+### Features
+
+* **gcp/artifact-registry:** optional static service account key ([#514](https://github.com/nullplatform/tofu-modules/issues/514)) ([aaa9674](https://github.com/nullplatform/tofu-modules/commit/aaa96740639412dccc74b4dce56ca55f03511de5))
+
 ## [6.14.0](https://github.com/nullplatform/tofu-modules/compare/v6.13.1...v6.14.0) (2026-08-14)
 
 
