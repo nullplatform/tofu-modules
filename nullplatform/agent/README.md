@@ -22,7 +22,7 @@ The module creates a helm_release resource targeting the nullplatform-agent char
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.15.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.16.0"
 
   api_key        = "your-api-key"
   cloud_provider = "your-cloud-provider"
@@ -36,7 +36,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.15.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.16.0"
 
   api_key          = "your-api-key"
   aws_iam_role_arn = "your-aws-iam-role-arn"  # Required when cloud_provider = "aws"
@@ -51,7 +51,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.15.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.16.0"
 
   api_key        = "your-api-key"
   cloud_provider = "gcp"
@@ -65,7 +65,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.15.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.16.0"
 
   api_key                = "your-api-key"
   azure_client_id        = "your-azure-client-id"  # Required when cloud_provider = "azure"
@@ -85,7 +85,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.15.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.16.0"
 
   api_key        = "your-api-key"
   cloud_provider = "oci"
