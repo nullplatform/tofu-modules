@@ -36,6 +36,45 @@ locals {
   } : {}
 
   package_visible_to = local.package_enabled ? coalesce(var.package.visible_to, [var.nrn]) : []
+
+  # ── Default-created actions (use_default_actions = true) ────────────────────
+  # When a spec uses default actions, the platform creates them server-side —
+  # they are NOT nullplatform_action_specification resources, so the explicit
+  # `from_templates` block below never sees them. The provider exposes them via
+  # the spec's computed `action_specifications`; expand those into the BOM so a
+  # service that relies on default actions still pins them (this is what the
+  # standalone packaged_service module does).
+  #
+  # NOTE: these are known only once the spec exists (server-side ids/snapshots).
+  # On a first apply that CREATES the spec they are not yet known, so pin them on
+  # a subsequent apply (or create specs first, then package) — same two-step the
+  # packaged_service module formalizes.
+
+  # Explicit actions (from available_actions) win over the same action arriving
+  # through a spec's default expansion — its name/parent are author-chosen and
+  # stable from the first apply.
+  package_explicit_action_ids = local.package_enabled ? toset([
+    for r in nullplatform_action_specification.from_templates : r.id
+  ]) : toset([])
+
+  # Default actions on the SERVICE spec, keyed by slug (unique within the spec).
+  package_service_default_actions = local.package_enabled ? {
+    for a in nullplatform_service_specification.from_template.action_specifications :
+    a.slug => { id = a.id, snap = a.last_snapshot_id, parent = nullplatform_service_specification.from_template.id }
+    if try(a.last_snapshot_id, "") != "" && !contains(local.package_explicit_action_ids, a.id)
+  } : {}
+
+  # Default actions on EACH link, name-spaced by link key so slugs never clash
+  # across links (or with the service's own actions). parent = the link's id.
+  package_link_default_actions = local.package_enabled ? merge([
+    for lk, lr in nullplatform_link_specification.from_templates : {
+      for a in lr.action_specifications :
+      "${lk}/${a.slug}" => { id = a.id, snap = a.last_snapshot_id, parent = lr.id }
+      if try(a.last_snapshot_id, "") != "" && !contains(local.package_explicit_action_ids, a.id)
+    }
+  ]...) : {}
+
+  package_default_actions = merge(local.package_service_default_actions, local.package_link_default_actions)
 }
 
 # New artifact revisions declared inline on the package.
@@ -88,6 +127,21 @@ resource "nullplatform_package" "this" {
       resource_id          = components.value.id
       resource_revision_id = components.value.last_snapshot_id
       parent_id            = nullplatform_service_specification.from_template.id
+    }
+  }
+
+  # Default-created action specifications (use_default_actions), expanded from the
+  # service spec's and each link's computed action_specifications. Only pins
+  # actions that already have a snapshot (known once the spec exists) — see the
+  # two-step note in locals above.
+  dynamic "components" {
+    for_each = local.package_default_actions
+    content {
+      name                 = components.key
+      resource_type        = "action_specification"
+      resource_id          = components.value.id
+      resource_revision_id = components.value.snap
+      parent_id            = components.value.parent
     }
   }
 
