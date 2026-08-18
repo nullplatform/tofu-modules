@@ -35,7 +35,46 @@ locals {
 
   all_args = concat(local.default_args, lookup(local.cloud_args, var.cloud_provider, []))
 
-  default_config = {
+  # Template paths for the Istio flavour of the k8s scope type. These are the exact
+  # values scopes/azure and scopes/azure-aro already hardcode in their own values.yaml,
+  # against the same $SERVICE_PATH the agent expands — not new paths invented here.
+  # scopes/k8s instead defaults to an AWS ALB Ingress (deployment/templates/
+  # initial-ingress.yaml.tpl sets ingressClassName: alb), which is why a GKE or AKS
+  # cluster running the k8s scope type needs the override at all.
+  istio_ingress_templates = {
+    service_template        = "$SERVICE_PATH/deployment/templates/istio/service.yaml.tpl"
+    initial_ingress_path    = "$SERVICE_PATH/deployment/templates/istio/initial-httproute.yaml.tpl"
+    blue_green_ingress_path = "$SERVICE_PATH/deployment/templates/istio/blue-green-httproute.yaml.tpl"
+  }
+
+  # An explicit path always wins: stacks were passing all three long before
+  # ingress_type existed, sometimes at their own template copies. ingress_type only
+  # fills the gaps, and only for istio — 'alb' resolves to empty so the scope type's
+  # own values.yaml keeps deciding, exactly as before this variable existed.
+  ingress_template_defaults = var.ingress_type == "istio" ? local.istio_ingress_templates : {
+    service_template        = ""
+    initial_ingress_path    = ""
+    blue_green_ingress_path = ""
+  }
+
+  resolved_ingress_templates = {
+    for k, explicit in {
+      service_template        = var.service_template
+      initial_ingress_path    = var.initial_ingress_path
+      blue_green_ingress_path = var.blue_green_ingress_path
+    } : k => explicit != "" ? explicit : local.ingress_template_defaults[k]
+  }
+
+  # INGRESS_TYPE is rendered only for istio, on purpose. It is read nowhere in
+  # nullplatform/scopes; its only consumer is services-endpoint-exposer, as a directory
+  # name ($SERVICE_PATH/workflows/$INGRESS_TYPE/$ACTION.yaml). That repo ships only
+  # workflows/istio, and its service entrypoint already defaults to istio — so
+  # rendering 'alb' would point it at a directory that does not exist and break
+  # installs that work today. Its link entrypoint defaults to 'alb' instead, which is
+  # why an Istio install does want the value stated explicitly.
+  ingress_type_config = var.ingress_type == "istio" ? { INGRESS_TYPE = "istio" } : {}
+
+  default_config = merge({
     NP_API_KEY              = local.api_key
     TAGS                    = local.tags
     AGENT_REPOS             = local.agent_repos
@@ -46,12 +85,12 @@ locals {
     DNS_TYPE                = var.dns_type
     USE_ACCOUNT_SLUG        = var.use_account_slug
     IMAGE_PULL_SECRETS      = var.image_pull_secrets
-    SERVICE_TEMPLATE        = var.service_template
-    INITIAL_INGRESS_PATH    = var.initial_ingress_path
-    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
+    SERVICE_TEMPLATE        = local.resolved_ingress_templates.service_template
+    INITIAL_INGRESS_PATH    = local.resolved_ingress_templates.initial_ingress_path
+    BLUE_GREEN_INGRESS_PATH = local.resolved_ingress_templates.blue_green_ingress_path
     PRIVATE_GATEWAY_NAME    = var.private_gateway_name
     PUBLIC_GATEWAY_NAME     = var.public_gateway_name
-  }
+  }, local.ingress_type_config)
 
   cloud_config = {
     aws = {

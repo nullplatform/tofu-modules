@@ -303,6 +303,135 @@ run "setting_ingress_type_does_not_block_aws" {
 }
 
 ###############################################################################
+# ingress_type
+#
+# The scope type is the real source of truth for the three template paths, and the
+# agent module cannot read it. ingress_type is the caller's explicit declaration of
+# which flavour the k8s scope type is running on, replacing the two signals v6.14.0
+# tried and could not make correct (extra_envs.INGRESS_TYPE, which nullplatform/scopes
+# never reads, and cloud_provider, which blocks valid azure-scope installs).
+###############################################################################
+
+run "invalid_ingress_type_is_rejected" {
+  command = plan
+
+  variables {
+    ingress_type = "nginx"
+  }
+
+  expect_failures = [var.ingress_type]
+}
+
+run "istio_ingress_type_autofills_the_three_templates" {
+  command = plan
+
+  variables {
+    ingress_type = "istio"
+  }
+
+  assert {
+    condition     = local.all_config["SERVICE_TEMPLATE"] == "$SERVICE_PATH/deployment/templates/istio/service.yaml.tpl"
+    error_message = "ingress_type istio must supply the same service template scopes/azure hardcodes in its own values.yaml"
+  }
+
+  assert {
+    condition     = local.all_config["INITIAL_INGRESS_PATH"] == "$SERVICE_PATH/deployment/templates/istio/initial-httproute.yaml.tpl"
+    error_message = "ingress_type istio must supply the Istio HTTPRoute template for the initial deploy, not scopes/k8s's AWS ALB Ingress"
+  }
+
+  assert {
+    condition     = local.all_config["BLUE_GREEN_INGRESS_PATH"] == "$SERVICE_PATH/deployment/templates/istio/blue-green-httproute.yaml.tpl"
+    error_message = "ingress_type istio must supply the blue-green HTTPRoute template, or switch-traffic renders an ALB Ingress mid-deploy"
+  }
+}
+
+run "istio_ingress_type_renders_the_env_var" {
+  command = plan
+
+  variables {
+    ingress_type = "istio"
+  }
+
+  assert {
+    condition     = local.all_config["INGRESS_TYPE"] == "istio"
+    error_message = "ingress_type istio must also reach the agent as INGRESS_TYPE: services-endpoint-exposer's link entrypoint defaults it to 'alb' and would then look for workflows/alb, which does not exist in that repo"
+  }
+}
+
+run "alb_ingress_type_renders_no_env_var" {
+  command = plan
+
+  assert {
+    condition     = !contains(keys(local.all_config), "INGRESS_TYPE")
+    error_message = "The default must not render INGRESS_TYPE. services-endpoint-exposer resolves $SERVICE_PATH/workflows/$INGRESS_TYPE/ and only ships workflows/istio, so injecting 'alb' would break every install whose service entrypoint currently relies on its own istio fallback"
+  }
+
+  assert {
+    condition     = local.all_config["SERVICE_TEMPLATE"] == "" && local.all_config["INITIAL_INGRESS_PATH"] == ""
+    error_message = "The default must leave the templates empty so the scope type's own values.yaml decides"
+  }
+}
+
+run "explicit_templates_win_over_istio_autofill" {
+  command = plan
+
+  variables {
+    ingress_type            = "istio"
+    service_template        = "/custom/service.yaml.tpl"
+    initial_ingress_path    = "/custom/initial.yaml.tpl"
+    blue_green_ingress_path = "/custom/blue-green.yaml.tpl"
+  }
+
+  assert {
+    condition     = local.all_config["SERVICE_TEMPLATE"] == "/custom/service.yaml.tpl"
+    error_message = "An explicit override must win over the istio autofill: stacks pinned to their own template copies were passing all three long before ingress_type existed"
+  }
+}
+
+run "istio_autofill_completes_a_partial_override" {
+  command = plan
+
+  variables {
+    ingress_type     = "istio"
+    service_template = "/custom/service.yaml.tpl"
+  }
+
+  assert {
+    condition = (local.all_config["SERVICE_TEMPLATE"] == "/custom/service.yaml.tpl" &&
+    local.all_config["BLUE_GREEN_INGRESS_PATH"] == "$SERVICE_PATH/deployment/templates/istio/blue-green-httproute.yaml.tpl")
+    error_message = "With ingress_type istio a partial override is completed rather than rejected: the unset paths fall back to the Istio defaults, so the deploy stays on one template flavour"
+  }
+}
+
+run "istio_with_conflicting_extra_envs_is_rejected" {
+  command = plan
+
+  variables {
+    ingress_type = "istio"
+    # Contradicts ingress_type, and extra_envs is merged last so it would silently win.
+    extra_envs = { INGRESS_TYPE = "alb" }
+  }
+
+  expect_failures = [
+    terraform_data.cross_variable_validation,
+  ]
+}
+
+run "istio_with_redundant_matching_extra_envs_is_allowed" {
+  command = plan
+
+  variables {
+    ingress_type = "istio"
+    extra_envs   = { INGRESS_TYPE = "istio" }
+  }
+
+  assert {
+    condition     = local.all_config["INGRESS_TYPE"] == "istio"
+    error_message = "Restating the same value in extra_envs is redundant but harmless and must keep planning: consumers already have it in their configs"
+  }
+}
+
+###############################################################################
 # Existing cross-variable validations still hold
 ###############################################################################
 

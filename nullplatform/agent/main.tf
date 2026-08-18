@@ -36,13 +36,14 @@ resource "terraform_data" "cross_variable_validation" {
       condition     = var.cloud_provider != "azure" || var.azure_tenant_id != null
       error_message = "azure_tenant_id is required when cloud_provider is 'azure'."
     }
-    # The ingress templates are all-or-nothing.
+    # The ingress templates are all-or-nothing, evaluated on the RESOLVED values so
+    # ingress_type's autofill counts as set.
     #
     # This replaces the three preconditions that shipped in v6.14.0. Their diagnosis
     # was right — scopes/k8s really does default to an AWS ALB Ingress
     # (deployment/templates/initial-ingress.yaml.tpl sets ingressClassName: alb plus
-    # eight alb.ingress.kubernetes.io annotations) — but neither of the two available
-    # signals can decide whether an override is NEEDED:
+    # eight alb.ingress.kubernetes.io annotations) — but neither of the two signals
+    # they reached for can decide whether an override is NEEDED:
     #
     #   - extra_envs.INGRESS_TYPE, which they used, is not read anywhere in
     #     nullplatform/scopes (zero occurrences on main and beta). Its only consumer
@@ -52,19 +53,33 @@ resource "terraform_data" "cross_variable_validation" {
     #     ARO HTTPRoute templates. An AKS install on the `azure` scope type needs no
     #     override, so keying on cloud_provider != "aws" would block a valid config.
     #
-    # What IS checkable here is coherence, and a partial override is worse than none.
-    # finalize.yaml feeds INITIAL_INGRESS_PATH and switch_traffic.yaml feeds
-    # BLUE_GREEN_INGRESS_PATH into the same TEMPLATE slot of the same workflow, so
-    # overriding one and not the other renders an HTTPRoute on the initial deploy and
-    # an ALB Ingress on the traffic switch — the deploy gets partway through and then
-    # breaks. All three scope types set all three values; a caller overriding for a
-    # GKE or AKS cluster on the `k8s` scope type must do the same.
+    # var.ingress_type is the caller declaring the flavour outright, which is the only
+    # reliable signal at this layer. What stays checkable is coherence, and a partial
+    # override is worse than none: finalize.yaml feeds INITIAL_INGRESS_PATH and
+    # switch_traffic.yaml feeds BLUE_GREEN_INGRESS_PATH into the same TEMPLATE slot of
+    # the same workflow, so overriding one and not the other renders an HTTPRoute on the
+    # initial deploy and an ALB Ingress on the traffic switch — the deploy gets partway
+    # through and then breaks. With ingress_type = "istio" the unset paths are filled in
+    # rather than rejected, so this only fires on a partial override under "alb".
     precondition {
       condition = (
-        (var.service_template == "" && var.initial_ingress_path == "" && var.blue_green_ingress_path == "") ||
-        (var.service_template != "" && var.initial_ingress_path != "" && var.blue_green_ingress_path != "")
+        (local.resolved_ingress_templates.service_template == "" && local.resolved_ingress_templates.initial_ingress_path == "" && local.resolved_ingress_templates.blue_green_ingress_path == "") ||
+        (local.resolved_ingress_templates.service_template != "" && local.resolved_ingress_templates.initial_ingress_path != "" && local.resolved_ingress_templates.blue_green_ingress_path != "")
       )
-      error_message = "service_template, initial_ingress_path and blue_green_ingress_path must be set together or left entirely empty. Setting only some of them mixes template flavours across a single deployment: finalize renders INITIAL_INGRESS_PATH and switch-traffic renders BLUE_GREEN_INGRESS_PATH, so a half-override breaks blue-green mid-deploy. Leave all three empty to use the scope type's own defaults (scopes/azure and scopes/azure-aro already point at HTTPRoute templates); set all three when running the k8s scope type on a cluster without an AWS ALB."
+      error_message = "service_template, initial_ingress_path and blue_green_ingress_path must be set together or left entirely empty. Setting only some of them mixes template flavours across a single deployment: finalize renders INITIAL_INGRESS_PATH and switch-traffic renders BLUE_GREEN_INGRESS_PATH, so a half-override breaks blue-green mid-deploy. Leave all three empty to use the scope type's own defaults (scopes/azure and scopes/azure-aro already point at HTTPRoute templates), set ingress_type = \"istio\" to have them filled in for you, or set all three explicitly."
+    }
+
+    # extra_envs is merged last, so an INGRESS_TYPE in there silently outranks
+    # ingress_type. Contradicting values are never a valid combination: with
+    # ingress_type = "istio" the scope renders Istio HTTPRoutes, while
+    # services-endpoint-exposer resolves $SERVICE_PATH/workflows/$INGRESS_TYPE/ and only
+    # ships workflows/istio, so any other value fails every link and service action with
+    # a missing workflow file. Fail loudly here instead of at deploy time. Under
+    # ingress_type = "alb" extra_envs stays the sole authority and is left untouched:
+    # an EKS/ALB scope running endpoint-exposer legitimately sets INGRESS_TYPE=istio.
+    precondition {
+      condition     = var.ingress_type != "istio" || lookup(var.extra_envs, "INGRESS_TYPE", "istio") == "istio"
+      error_message = "ingress_type is 'istio' but extra_envs.INGRESS_TYPE overrides it with a different value, and extra_envs is merged last so the override would win silently. services-endpoint-exposer resolves its workflow directory from INGRESS_TYPE ($SERVICE_PATH/workflows/$INGRESS_TYPE/) and only ships workflows/istio, so any other value makes every link and service action fail with a missing workflow file. Drop the extra_envs entry, or set ingress_type = \"alb\" if the scope really uses the ALB templates."
     }
   }
 }

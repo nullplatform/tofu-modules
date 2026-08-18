@@ -249,6 +249,40 @@ variable "image_pull_secrets" {
 # Ingress / Networking Configuration
 ################################################################################
 
+# Ingress flavour the k8s scope type runs on
+variable "ingress_type" {
+  description = <<-EOT
+    Ingress flavour of the cluster, for the `k8s` scope type only: 'alb' (default) or
+    'istio'.
+
+    'alb' keeps today's behaviour exactly — the three template paths stay empty and
+    the scope type's own values.yaml decides, and INGRESS_TYPE is deliberately NOT
+    rendered as an env var (see below).
+
+    'istio' fills service_template, initial_ingress_path and blue_green_ingress_path
+    with the Istio HTTPRoute templates and renders INGRESS_TYPE=istio. Set it when
+    running the `k8s` scope type on a cluster with no AWS ALB controller (GKE, or AKS
+    not using the dedicated `azure` scope type): scopes/k8s defaults those three to an
+    ALB Ingress template, so leaving them alone yields a deploy with no working route
+    and no error. The `azure` and `azure-aro` scope types already point at Istio
+    templates in their own values.yaml and need no override.
+
+    On why 'alb' renders no env var: INGRESS_TYPE is not read anywhere in
+    nullplatform/scopes. Its only consumer is services-endpoint-exposer, which uses it
+    as a directory name ($SERVICE_PATH/workflows/$INGRESS_TYPE/) and ships only
+    workflows/istio. Its service entrypoint already defaults to istio, so rendering
+    'alb' would break installs that work today. Overriding the three template paths
+    explicitly always wins over this variable.
+  EOT
+  type        = string
+  default     = "alb"
+  nullable    = false
+  validation {
+    condition     = contains(["alb", "istio"], var.ingress_type)
+    error_message = "ingress_type must be either 'alb' or 'istio'."
+  }
+}
+
 # Scope service template to use for deployment (required when extra_envs.INGRESS_TYPE is 'istio')
 variable "service_template" {
   description = "Specifies the name or reference of the scope service template to be used for deployment. Leave empty to use the default from the scope type's own values.yaml. Override it when the scope type's default does not match the cluster's ingress: scopes/k8s defaults to an AWS ALB Ingress template, so a GKE or AKS cluster running the k8s scope type needs all three of service_template, initial_ingress_path and blue_green_ingress_path pointed at Istio HTTPRoute templates, or deployments come up with no working route and no error. The scopes/azure and scopes/azure-aro scope types already set them and need no override. All three must be set together or all left empty: finalize renders INITIAL_INGRESS_PATH and switch-traffic renders BLUE_GREEN_INGRESS_PATH into the same slot, so a half-override breaks blue-green mid-deploy"
