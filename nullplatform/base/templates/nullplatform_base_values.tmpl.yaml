@@ -82,7 +82,7 @@ nullplatform:
 controlPlane:
   enabled: ${controlPlane_enabled}
   agent:
-    image: "public.ecr.aws/nullplatform/controlplane-agent:latest"
+    image: "public.ecr.aws/nullplatform/controlplane-agent:0.9.2"
     resources:
       requests:
         cpu: 50m
@@ -96,7 +96,7 @@ logging:
     enabled: ${logging_application_logs_enabled}
   mountDockerContainers: ${logging_mount_docker_containers}
   controller:
-    image: "public.ecr.aws/nullplatform/k8s-logs-controller:latest"
+    image: "public.ecr.aws/nullplatform/k8s-logs-controller:1.6.0"
     resources:
       requests:
         cpu: 100m
