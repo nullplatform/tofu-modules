@@ -310,3 +310,66 @@ run "internal_azure_load_balancer_subnet" {
     error_message = "internal gateway azure subnet should be wired into the rendered internal block"
   }
 }
+
+############################################
+# Container image repository/tag overrides
+############################################
+
+run "logs_controller_image_defaults_to_pinned_tag" {
+  command = plan
+
+  assert {
+    condition     = strcontains(output.rendered_values, "image: \"public.ecr.aws/nullplatform/k8s-logs-controller:1.6.0\"")
+    error_message = "logs controller image should default to the pinned repository:tag"
+  }
+}
+
+run "logs_controller_image_tag_overridden" {
+  command = plan
+
+  variables {
+    logging_controller_image_tag = "1.7.0"
+  }
+
+  assert {
+    condition     = strcontains(output.rendered_values, "image: \"public.ecr.aws/nullplatform/k8s-logs-controller:1.7.0\"")
+    error_message = "logs controller tag should be overridable without touching the repository"
+  }
+}
+
+run "logs_controller_image_repository_overridden" {
+  command = plan
+
+  # Redirect to a private mirror/ECR pull-through cache without needing to also
+  # know or restate the tag.
+  variables {
+    logging_controller_image_repository = "123456789012.dkr.ecr.us-east-1.amazonaws.com/k8s-logs-controller"
+  }
+
+  assert {
+    condition     = strcontains(output.rendered_values, "image: \"123456789012.dkr.ecr.us-east-1.amazonaws.com/k8s-logs-controller:1.6.0\"")
+    error_message = "logs controller repository should be overridable without touching the tag"
+  }
+}
+
+run "control_plane_agent_image_defaults_to_pinned_tag" {
+  command = plan
+
+  assert {
+    condition     = strcontains(output.rendered_values, "image: \"public.ecr.aws/nullplatform/controlplane-agent:0.9.2\"")
+    error_message = "control plane agent image should default to the pinned repository:tag"
+  }
+}
+
+run "control_plane_agent_image_tag_overridden" {
+  command = plan
+
+  variables {
+    control_plane_agent_image_tag = "0.9.3"
+  }
+
+  assert {
+    condition     = strcontains(output.rendered_values, "image: \"public.ecr.aws/nullplatform/controlplane-agent:0.9.3\"")
+    error_message = "control plane agent tag should be overridable without touching the repository"
+  }
+}
