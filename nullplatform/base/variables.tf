@@ -124,6 +124,18 @@ variable "control_plane_enabled" {
   default     = false
 }
 
+variable "control_plane_agent_image_repository" {
+  type        = string
+  description = "Container image repository for the control plane agent."
+  default     = "public.ecr.aws/nullplatform/controlplane-agent"
+}
+
+variable "control_plane_agent_image_tag" {
+  type        = string
+  description = "Container image tag for the control plane agent."
+  default     = "0.9.2"
+}
+
 ############################################
 # Logging (global flag)
 ############################################
@@ -144,6 +156,18 @@ variable "logging_mount_docker_containers" {
   type        = bool
   description = "Mount Docker container log paths. Enable when using Docker container runtime (e.g. Minikube)."
   default     = false
+}
+
+variable "logging_controller_image_repository" {
+  type        = string
+  description = "Container image repository for the logs controller DaemonSet."
+  default     = "public.ecr.aws/nullplatform/k8s-logs-controller"
+}
+
+variable "logging_controller_image_tag" {
+  type        = string
+  description = "Container image tag for the logs controller DaemonSet."
+  default     = "1.6.0"
 }
 
 ############################################
