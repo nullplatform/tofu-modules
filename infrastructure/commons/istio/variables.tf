@@ -31,6 +31,17 @@ variable "istiod_replicas" {
   }
 }
 
+variable "istio_ingressgateway_replicas" {
+  description = "Number of istio-ingressgateway replicas. Set to 2+ to avoid PDB blocking node drains. Applied to both replicaCount and autoscaling.minReplicas to prevent the HPA from scaling back to 1. The Istio gateway Helm chart installs the gateway with a default PodDisruptionBudget (minAvailable=1), so a single replica blocks node rolling updates with PodEvictionFailure — same class of bug as the istiod single-replica issue."
+  type        = number
+  default     = 2
+
+  validation {
+    condition     = var.istio_ingressgateway_replicas >= 1
+    error_message = "istio_ingressgateway_replicas must be at least 1."
+  }
+}
+
 ###############################################################################
 # SERVICE CONFIGURATION
 ###############################################################################

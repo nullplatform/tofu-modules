@@ -88,5 +88,14 @@ resource "helm_release" "istio_ingressgateway" {
 
   values = [local.helm_values]
 
-
+  set = [
+    {
+      name  = "replicaCount"
+      value = var.istio_ingressgateway_replicas
+    },
+    {
+      name  = "autoscaling.minReplicas"
+      value = var.istio_ingressgateway_replicas
+    },
+  ]
 }
