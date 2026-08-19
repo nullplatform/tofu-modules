@@ -113,7 +113,7 @@ variable "tags_selectors" {
 variable "description" {
   description = "Description shown for the notification channel."
   type        = string
-  default     = ""
+  default     = "Routes Containers deployments agent"
 }
 
 variable "extra_filters" {

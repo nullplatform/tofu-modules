@@ -1,5 +1,61 @@
 # Changelog
 
+## [6.17.0](https://github.com/nullplatform/tofu-modules/compare/v6.16.1...v6.17.0) (2026-08-19)
+
+
+### Features
+
+* **base:** make logs controller and control plane agent image tags configurable ([#527](https://github.com/nullplatform/tofu-modules/issues/527)) ([1c892a5](https://github.com/nullplatform/tofu-modules/commit/1c892a566950b81a9201dc0d89e1c091dbbd6eb6))
+
+## [6.16.1](https://github.com/nullplatform/tofu-modules/compare/v6.16.0...v6.16.1) (2026-08-14)
+
+
+### Bug Fixes
+
+* **gcp/security:** resolve the subnetwork in its own project and region ([#520](https://github.com/nullplatform/tofu-modules/issues/520)) ([0b8f322](https://github.com/nullplatform/tofu-modules/commit/0b8f322f600de9e80630bd09764a421cc5249c20))
+
+## [6.16.0](https://github.com/nullplatform/tofu-modules/compare/v6.15.0...v6.16.0) (2026-08-14)
+
+
+### Features
+
+* **gcp/backend:** add GCS terraform state bucket module ([#511](https://github.com/nullplatform/tofu-modules/issues/511)) ([9355c6e](https://github.com/nullplatform/tofu-modules/commit/9355c6e4fcb6cb38be04f01fea264a54f7ac3c9c))
+
+## [6.15.0](https://github.com/nullplatform/tofu-modules/compare/v6.14.0...v6.15.0) (2026-08-14)
+
+
+### Features
+
+* **gcp/artifact-registry:** optional static service account key ([#514](https://github.com/nullplatform/tofu-modules/issues/514)) ([aaa9674](https://github.com/nullplatform/tofu-modules/commit/aaa96740639412dccc74b4dce56ca55f03511de5))
+
+## [6.14.0](https://github.com/nullplatform/tofu-modules/compare/v6.13.1...v6.14.0) (2026-08-14)
+
+
+### Features
+
+* **nullplatform/agent:** require ingress templates for non-aws clouds ([#515](https://github.com/nullplatform/tofu-modules/issues/515)) ([fbb4198](https://github.com/nullplatform/tofu-modules/commit/fbb4198d33b1da084e033e7b371d35d9509c6ed9))
+
+## [6.13.1](https://github.com/nullplatform/tofu-modules/compare/v6.13.0...v6.13.1) (2026-08-14)
+
+
+### Bug Fixes
+
+* **gcp/security:** handle full resource path in cluster subnetwork lookup ([#512](https://github.com/nullplatform/tofu-modules/issues/512)) ([e790af4](https://github.com/nullplatform/tofu-modules/commit/e790af437e4358a1e1254f00c3dba226fbc51b31))
+
+## [6.13.0](https://github.com/nullplatform/tofu-modules/compare/v6.12.0...v6.13.0) (2026-08-13)
+
+
+### Features
+
+* **aks:** support disabling local accounts with an Entra ID authorization path ([#461](https://github.com/nullplatform/tofu-modules/issues/461)) ([3e3c412](https://github.com/nullplatform/tofu-modules/commit/3e3c412b5a996241da6a904f9e86b3faf51c6487))
+
+## [6.12.0](https://github.com/nullplatform/tofu-modules/compare/v6.11.3...v6.12.0) (2026-08-12)
+
+
+### Features
+
+* **eks:** add traffic_manager_port variable ([#509](https://github.com/nullplatform/tofu-modules/issues/509)) ([b2165b2](https://github.com/nullplatform/tofu-modules/commit/b2165b2e0cdd922922b4eb029c9f69512c8d0e62))
+
 ## [6.11.3](https://github.com/nullplatform/tofu-modules/compare/v6.11.2...v6.11.3) (2026-08-11)
 
 

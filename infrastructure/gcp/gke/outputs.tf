@@ -1,16 +1,16 @@
 output "cluster_name" {
   description = "The name of the GKE cluster"
-  value       = module.gke.name
+  value       = var.autopilot_enabled ? module.gke_autopilot[0].name : module.gke[0].name
 }
 
 output "host" {
   description = "The API server endpoint"
-  value       = module.gke.endpoint
+  value       = var.autopilot_enabled ? module.gke_autopilot[0].endpoint : module.gke[0].endpoint
   sensitive   = true
 }
 
 output "cluster_ca_certificate" {
   description = "The cluster CA certificate in base64"
-  value       = module.gke.ca_certificate
+  value       = var.autopilot_enabled ? module.gke_autopilot[0].ca_certificate : module.gke[0].ca_certificate
   sensitive   = true
 }
