@@ -22,7 +22,7 @@ The module creates two kubernetes_namespace_v1 resources ('nullplatform-tools' a
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.17.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.18.0"
 
   k8s_provider = "your-k8s-provider"
   np_api_key   = "your-np-api-key"
@@ -33,7 +33,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.17.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.18.0"
 
   aws_region                             = "your-aws-region"  # Required when k8s_provider = "eks"
   cloudwatch_service_account_annotations = "your-cloudwatch-service-account-annotations"  # Required when k8s_provider = "eks"
@@ -52,7 +52,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.17.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.18.0"
 
   gateway_private_gcp_firewall_name = "your-gateway-private-gcp-firewall-name"  # Required when k8s_provider = "gke"
   gateway_public_gcp_firewall_name  = "your-gateway-public-gcp-firewall-name"  # Required when k8s_provider = "gke"
@@ -65,7 +65,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.17.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.18.0"
 
   gateway_private_azure_nsg_id              = "your-gateway-private-azure-nsg-id"  # Required when k8s_provider = "aks"
   gateway_public_azure_load_balancer_subnet = "your-gateway-public-azure-load-balancer-subnet"  # Required when k8s_provider = "aks"
@@ -80,7 +80,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.17.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.18.0"
 
   gateway_private_oci_security_list_management_mode = "your-gateway-private-oci-security-list-management-mode"  # Required when k8s_provider = "oke"
   gateway_private_oci_subnet                        = "your-gateway-private-oci-subnet"  # Required when k8s_provider = "oke"
@@ -95,7 +95,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.17.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.18.0"
 
   gateway_private_azure_nsg_id              = "your-gateway-private-azure-nsg-id"  # Required when k8s_provider = "aro"
   gateway_public_azure_load_balancer_subnet = "your-gateway-public-azure-load-balancer-subnet"  # Required when k8s_provider = "aro"
