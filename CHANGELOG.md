@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.18.0](https://github.com/nullplatform/tofu-modules/compare/v6.17.0...v6.18.0) (2026-08-19)
+
+
+### Features
+
+* **istio:** expose istio_ingressgateway_replicas to guarantee HA for node drains ([#379](https://github.com/nullplatform/tofu-modules/issues/379)) ([058986c](https://github.com/nullplatform/tofu-modules/commit/058986c7c5aaf8a998bd25bcf021fc40c2fd0dce))
+
 ## [6.17.0](https://github.com/nullplatform/tofu-modules/compare/v6.16.1...v6.17.0) (2026-08-19)
 
 
