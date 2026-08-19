@@ -21,7 +21,7 @@ The module creates an azurerm_user_assigned_identity resource in the specified r
 
 ```hcl
 module "iam" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/iam?ref=v7.0.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/iam?ref=v7.1.0"
 
   location             = "your-location"
   name                 = "your-name"

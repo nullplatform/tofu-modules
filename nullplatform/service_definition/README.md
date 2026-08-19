@@ -2,27 +2,27 @@
 
 ## Description
 
-Provisions a Nullplatform service specification with its associated action and link specifications by fetching JSON templates from GitHub, GitLab, Bitbucket, or a local filesystem
+Registers a Nullplatform service specification with its action and link specifications by fetching JSON templates from a remote Git provider (GitHub, GitLab, Bitbucket) or local filesystem
 
 ## Architecture
 
-The module uses data.http resources to fetch service-spec, action, and link JSON templates from a remote git provider (GitHub, GitLab, or Bitbucket) or reads them from local files when git_provider is set to 'local'. Parsed template data flows into a nullplatform_service_specification resource, which is created first and provides its ID to nullplatform_action_specification and nullplatform_link_specification resources via depends_on. Authentication headers are constructed per-provider in locals (Bearer for GitHub, PRIVATE-TOKEN for GitLab, Basic or Bearer for Bitbucket) and passed to each data.http request.
+The module uses `data.http` resources to fetch service-spec, action, and link JSON templates from GitHub, GitLab, or Bitbucket raw/API endpoints, with provider-specific authentication headers computed in locals. Parsed templates are fed into `nullplatform_service_specification`, `nullplatform_action_specification` (one per entry in `available_actions`), and `nullplatform_link_specification` (one per entry in `available_links`) resources, all wired together via the service specification ID. When `var.package` is set, the module additionally creates `nullplatform_package` and `nullplatform_artifact` resources to publish an immutable versioned revision of the service definition.
 
 ## Features
 
-- Creates a nullplatform_service_specification resource from a JSON template with configurable name, type, attributes, selectors, and dimensions
-- Fetches service, action, and link spec templates from GitHub, GitLab, Bitbucket, or local filesystem based on git_provider
-- Creates nullplatform_action_specification resources for each entry in available_actions list using fetched templates
-- Creates nullplatform_link_specification resources for each entry in available_links list using fetched templates
-- Configures provider-specific authentication headers including Bearer tokens, GitLab PRIVATE-TOKEN, and Bitbucket HTTP Basic auth
-- Supports visibility scoping via NRN list combining the required nrn with optional extra_visibile_to_nrns
-- Outputs service specification ID and slug for use by downstream modules
+- Creates a nullplatform_service_specification from a remote or local JSON template with configurable visibility and dimensions
+- Fetches and registers multiple nullplatform_action_specification resources dynamically from template files per action name
+- Fetches and registers multiple nullplatform_link_specification resources dynamically from template files per link name
+- Supports GitHub, GitLab, Bitbucket, and local filesystem as template sources with provider-specific authentication
+- Configures GitHub ref resolution to support branches, tags, or raw commit SHAs via repository_ref_type
+- Publishes an optional versioned nullplatform_package with artifact bill-of-materials when the package variable is set
+- Outputs service specification ID, slug, and package metadata for downstream consumption
 
 ## Basic Usage
 
 ```hcl
 module "service_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v7.0.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v7.1.0"
 
   nrn          = "your-nrn"
   service_name = "your-service-name"
@@ -59,7 +59,9 @@ resource "example_resource" "this" {
 | Name | Type |
 |------|------|
 | [nullplatform_action_specification.from_templates](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/action_specification) | resource |
+| [nullplatform_artifact.package](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/artifact) | resource |
 | [nullplatform_link_specification.from_templates](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/link_specification) | resource |
+| [nullplatform_package.this](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/package) | resource |
 | [nullplatform_service_specification.from_template](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/service_specification) | resource |
 
 ## Inputs
@@ -75,6 +77,7 @@ resource "example_resource" "this" {
 | <a name="input_gitlab_host"></a> [gitlab\_host](#input\_gitlab\_host) | GitLab host. Only used when git\_provider = "gitlab". Override for self-hosted instances (e.g. "gitlab.mycompany.com"). | `string` | `"gitlab.com"` | no |
 | <a name="input_local_specs_path"></a> [local\_specs\_path](#input\_local\_specs\_path) | Absolute path to the local service directory containing specs/. Required when git\_provider = "local". The directory must contain specs/service-spec.json.tpl and optionally specs/links/*.json.tpl and specs/actions/*.json.tpl. | `string` | `null` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name (organization:account format) | `string` | n/a | yes |
+| <a name="input_package"></a> [package](#input\_package) | Register this service definition as a versioned PACKAGE. When set, the module<br/>publishes a package revision whose bill of materials pins the service<br/>specification, every action specification, every LINK specification, and the<br/>artifacts you list — so consumers bind to an immutable revision and later<br/>template changes never mutate what already runs.<br/><br/>artifacts: each entry does ONE of:<br/>  • register a new artifact revision — set `meta` (JSON-able object, e.g.<br/>    { url = "https://github.com/acme/svc.git", reference = "main" } for a<br/>    git\_repository, or { registry, repository, digest } for an oci\_image);<br/>  • look up one registered elsewhere BY IDENTITY (no ids needed) — set<br/>    `lookup = true` + `meta` with the identity fields (add digest/reference<br/>    to pin a specific revision, otherwise the latest revision is used);<br/>  • pin explicit ids — set `resource_id` + `resource_revision_id`.<br/><br/>Null (the default) keeps the classic module behavior — no package. | <pre>object({<br/>    slug       = optional(string)          # default: the service specification slug<br/>    name       = optional(string)          # default: var.service_name<br/>    version    = string                    # semver of the revision this configuration publishes<br/>    default    = optional(bool, true)      # promote each published revision to the package default<br/>    tags       = optional(map(string), {}) # release tags: name => version (requires an API with the package release-tag routes)<br/>    visible_to = optional(list(string))    # default: [var.nrn]<br/>    artifacts = optional(list(object({<br/>      name                 = string<br/>      type                 = optional(string, "oci_image") # oci_image | oras_artifact | git_repository | blob<br/>      meta                 = optional(any)                 # register (lookup=false) or find (lookup=true)<br/>      lookup               = optional(bool, false)         # true: resolve an EXISTING artifact by meta identity<br/>      resource_id          = optional(string)              # …or pin explicit ids<br/>      resource_revision_id = optional(string)<br/>    })), [])<br/>  })</pre> | `null` | no |
 | <a name="input_repository_branch"></a> [repository\_branch](#input\_repository\_branch) | Branch of the service spec repository to use. Must be a short branch name (e.g. "main"), not a full ref. | `string` | `"main"` | no |
 | <a name="input_repository_name"></a> [repository\_name](#input\_repository\_name) | Repository name containing the service spec templates. | `string` | `"service"` | no |
 | <a name="input_repository_org"></a> [repository\_org](#input\_repository\_org) | GitHub organization or GitLab group owning the service spec repository. | `string` | `"nullplatform"` | no |
@@ -87,6 +90,10 @@ resource "example_resource" "this" {
 
 | Name | Description |
 |------|-------------|
+| <a name="output_package_artifacts"></a> [package\_artifacts](#output\_package\_artifacts) | Artifacts registered by this module: name => { resource\_id, resource\_revision\_id }. |
+| <a name="output_package_default_version"></a> [package\_default\_version](#output\_package\_default\_version) | The package's default version after apply, or null. |
+| <a name="output_package_id"></a> [package\_id](#output\_package\_id) | ID of the package registered from this service definition, or null when packaging is disabled. |
+| <a name="output_package_published_revision_id"></a> [package\_published\_revision\_id](#output\_package\_published\_revision\_id) | Revision UUID published for the configured package version, or null. |
 | <a name="output_service_specification_id"></a> [service\_specification\_id](#output\_service\_specification\_id) | The ID of the created service specification |
 | <a name="output_service_specification_slug"></a> [service\_specification\_slug](#output\_service\_specification\_slug) | The slug of the created service specification |
 <!-- END_TF_DOCS -->
@@ -94,16 +101,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "service_definition",
-  "description": "Provisions a Nullplatform service specification with its associated action and link specifications by fetching JSON templates from GitHub, GitLab, Bitbucket, or a local filesystem",
-  "architecture": "The module uses data.http resources to fetch service-spec, action, and link JSON templates from a remote git provider (GitHub, GitLab, or Bitbucket) or reads them from local files when git_provider is set to 'local'. Parsed template data flows into a nullplatform_service_specification resource, which is created first and provides its ID to nullplatform_action_specification and nullplatform_link_specification resources via depends_on. Authentication headers are constructed per-provider in locals (Bearer for GitHub, PRIVATE-TOKEN for GitLab, Basic or Bearer for Bitbucket) and passed to each data.http request.",
+  "description": "Registers a Nullplatform service specification with its action and link specifications by fetching JSON templates from a remote Git provider (GitHub, GitLab, Bitbucket) or local filesystem",
+  "architecture": "The module uses `data.http` resources to fetch service-spec, action, and link JSON templates from GitHub, GitLab, or Bitbucket raw/API endpoints, with provider-specific authentication headers computed in locals. Parsed templates are fed into `nullplatform_service_specification`, `nullplatform_action_specification` (one per entry in `available_actions`), and `nullplatform_link_specification` (one per entry in `available_links`) resources, all wired together via the service specification ID. When `var.package` is set, the module additionally creates `nullplatform_package` and `nullplatform_artifact` resources to publish an immutable versioned revision of the service definition.",
   "features": [
-    "Creates a nullplatform_service_specification resource from a JSON template with configurable name, type, attributes, selectors, and dimensions",
-    "Fetches service, action, and link spec templates from GitHub, GitLab, Bitbucket, or local filesystem based on git_provider",
-    "Creates nullplatform_action_specification resources for each entry in available_actions list using fetched templates",
-    "Creates nullplatform_link_specification resources for each entry in available_links list using fetched templates",
-    "Configures provider-specific authentication headers including Bearer tokens, GitLab PRIVATE-TOKEN, and Bitbucket HTTP Basic auth",
-    "Supports visibility scoping via NRN list combining the required nrn with optional extra_visibile_to_nrns",
-    "Outputs service specification ID and slug for use by downstream modules"
+    "Creates a nullplatform_service_specification from a remote or local JSON template with configurable visibility and dimensions",
+    "Fetches and registers multiple nullplatform_action_specification resources dynamically from template files per action name",
+    "Fetches and registers multiple nullplatform_link_specification resources dynamically from template files per link name",
+    "Supports GitHub, GitLab, Bitbucket, and local filesystem as template sources with provider-specific authentication",
+    "Configures GitHub ref resolution to support branches, tags, or raw commit SHAs via repository_ref_type",
+    "Publishes an optional versioned nullplatform_package with artifact bill-of-materials when the package variable is set",
+    "Outputs service specification ID, slug, and package metadata for downstream consumption"
   ],
   "inputs": [
     {
@@ -124,6 +131,16 @@ resource "example_resource" "this" {
     {
       "name": "git_provider",
       "description": "Git provider to fetch service specs from. Supported values: \\",
+      "required": false
+    },
+    {
+      "name": "repository_ref_type",
+      "description": "Git ref namespace for `repository_branch` on GitHub: \\",
+      "required": false
+    },
+    {
+      "name": "package",
+      "description": "",
       "required": false
     },
     {
@@ -184,8 +201,12 @@ resource "example_resource" "this" {
   ],
   "outputs": [
     "service_specification_id",
-    "service_specification_slug"
+    "service_specification_slug",
+    "package_id",
+    "package_published_revision_id",
+    "package_default_version",
+    "package_artifacts"
   ],
-  "hash": "0a2d08fcd9c6399fe76d2cb845333039"
+  "hash": "4512e457b1930d56b92fa3594a9c6748"
 }
 END_AI_METADATA -->
