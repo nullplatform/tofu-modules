@@ -22,14 +22,14 @@ fi
 
 # Validate branch name
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
-PATTERN="^(feat|feature|fix|docs|style|refactor|perf|test|build|ci|chore|revert)/.+$"
+PATTERN="^(feat|feature|fix|docs|style|refactor|perf|test|build|ci|chore|revert|package)/.+$"
 
-if [ "$BRANCH" != "main" ] && ! echo "$BRANCH" | grep -Eq "$PATTERN"; then
+if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "6.x" ] && ! echo "$BRANCH" | grep -Eq "$PATTERN"; then
   echo "Invalid branch name: $BRANCH"
   echo ""
   echo "Branch name must follow the pattern: type/description"
-  echo "  Examples: feat/add-login, fix/bug-123, docs/readme"
+  echo "  Examples: feat/add-login, fix/bug-123, docs/readme, package/add-lambda"
   echo ""
-  echo "Valid types: feat, feature, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+  echo "Valid types: feat, feature, fix, docs, style, refactor, perf, test, build, ci, chore, revert, package"
   exit 1
 fi
