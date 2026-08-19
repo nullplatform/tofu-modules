@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.17.0](https://github.com/nullplatform/tofu-modules/compare/v6.16.1...v6.17.0) (2026-08-19)
+
+
+### Features
+
+* **base:** make logs controller and control plane agent image tags configurable ([#527](https://github.com/nullplatform/tofu-modules/issues/527)) ([1c892a5](https://github.com/nullplatform/tofu-modules/commit/1c892a566950b81a9201dc0d89e1c091dbbd6eb6))
+
 ## [6.16.1](https://github.com/nullplatform/tofu-modules/compare/v6.16.0...v6.16.1) (2026-08-14)
 
 
