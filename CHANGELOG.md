@@ -1,5 +1,18 @@
 # Changelog
 
+## [7.1.0](https://github.com/nullplatform/tofu-modules/compare/v7.0.3...v7.1.0) (2026-08-19)
+
+
+### Features
+
+* **service_definition:** package block (mirrors scope_definition + links) ([2a943ec](https://github.com/nullplatform/tofu-modules/commit/2a943ec30ed7230241fb756b9e7cdb58824148ce))
+* **service_definition:** package block (mirrors scope_definition + links) ([#530](https://github.com/nullplatform/tofu-modules/issues/530)) ([16aaed3](https://github.com/nullplatform/tofu-modules/commit/16aaed31c1f0507406739477e2857a3d4ad210f4))
+
+
+### Bug Fixes
+
+* **service_definition:** pin default (use_default_actions) actions into the package BOM ([c1493b5](https://github.com/nullplatform/tofu-modules/commit/c1493b5a1024094606a4a67cd6c05d5812daab90))
+
 ## [7.0.3](https://github.com/nullplatform/tofu-modules/compare/v7.0.2...v7.0.3) (2026-08-11)
 
 
