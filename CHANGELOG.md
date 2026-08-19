@@ -1,5 +1,26 @@
 # Changelog
 
+## [6.18.0](https://github.com/nullplatform/tofu-modules/compare/v6.17.0...v6.18.0) (2026-08-19)
+
+
+### Features
+
+* **istio:** expose istio_ingressgateway_replicas to guarantee HA for node drains ([#379](https://github.com/nullplatform/tofu-modules/issues/379)) ([058986c](https://github.com/nullplatform/tofu-modules/commit/058986c7c5aaf8a998bd25bcf021fc40c2fd0dce))
+
+## [6.17.0](https://github.com/nullplatform/tofu-modules/compare/v6.16.1...v6.17.0) (2026-08-19)
+
+
+### Features
+
+* **base:** make logs controller and control plane agent image tags configurable ([#527](https://github.com/nullplatform/tofu-modules/issues/527)) ([1c892a5](https://github.com/nullplatform/tofu-modules/commit/1c892a566950b81a9201dc0d89e1c091dbbd6eb6))
+
+## [6.16.1](https://github.com/nullplatform/tofu-modules/compare/v6.16.0...v6.16.1) (2026-08-14)
+
+
+### Bug Fixes
+
+* **gcp/security:** resolve the subnetwork in its own project and region ([#520](https://github.com/nullplatform/tofu-modules/issues/520)) ([0b8f322](https://github.com/nullplatform/tofu-modules/commit/0b8f322f600de9e80630bd09764a421cc5249c20))
+
 ## [6.16.0](https://github.com/nullplatform/tofu-modules/compare/v6.15.0...v6.16.0) (2026-08-14)
 
 
