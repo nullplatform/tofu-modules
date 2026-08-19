@@ -22,7 +22,7 @@ The module creates a random_id resource to generate a unique 8-byte hex suffix, 
 
 ```hcl
 module "backend" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/backend?ref=v6.16.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/backend?ref=v6.17.0"
 
   project_id = "your-project-id"
 }

@@ -22,7 +22,7 @@ This module creates a terraform-aws-modules/vpc/aws module resource with DNS hos
 
 ```hcl
 module "vpc" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v6.16.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v6.17.0"
 
   account      = "your-account"
   organization = "your-organization"
