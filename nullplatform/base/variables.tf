@@ -1,7 +1,7 @@
 variable "nullplatform_base_helm_version" {
   description = "Helm chart version for the nullplatform base."
   type        = string
-  default     = "2.40.0"
+  default     = "2.44.0"
 }
 
 variable "namespace" {
