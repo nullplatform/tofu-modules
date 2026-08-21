@@ -107,6 +107,20 @@ module "external_dns" {
 }
 ```
 
+### Google Cloud DNS
+
+```hcl
+module "external_dns" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v6.18.0"
+
+  dns_provider_name         = "google"
+  domain_filters            = "your-domain-filters"
+  gcp_project_id            = "your-gcp-project-id"              # Required when dns_provider_name = "google"
+  gcp_service_account_email = "your-gcp-service-account-email"   # Required when dns_provider_name = "google"; must already exist with Workload Identity bound to the external-dns Kubernetes ServiceAccount
+  zone_type                 = "public"                           # or "private" — required when dns_provider_name = "google"
+}
+```
+
 ## Using Outputs
 
 ```hcl
