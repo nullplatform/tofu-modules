@@ -22,7 +22,7 @@ The module uses data.google_container_cluster and data.google_compute_subnetwork
 
 ```hcl
 module "security" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/security?ref=v6.19.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/security?ref=v6.19.1"
 
   cluster_name   = "your-cluster-name"
   gcp_project_id = "your-gcp-project-id"
