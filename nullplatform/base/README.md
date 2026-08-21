@@ -2,27 +2,27 @@
 
 ## Description
 
-Deploys the nullplatform base Helm chart onto a Kubernetes cluster across multiple cloud providers, configuring gateways, ingress controllers, logging integrations, and the control plane agent via a rendered values template
+Deploys the nullplatform base Helm chart onto a Kubernetes cluster across multiple cloud providers with configurable networking, logging, and observability integrations
 
 ## Architecture
 
-The module creates two kubernetes_namespace_v1 resources ('nullplatform-tools' and 'nullplatform') to avoid Helm lookup race conditions, then deploys a single helm_release resource ('nullplatform-base') from the nullplatform Helm repository with a templatefile-rendered values YAML. All input variables flow through the locals.tf templatefile into the helm_release values block, which configures sub-charts for gateways, ingress controllers, logging pipelines, metrics, and the control plane agent. Outputs expose cloud-specific security resource identifiers (AWS security group IDs, Azure NSG IDs, GCP firewall names) that were passed in from upstream security submodules.
+The module creates two kubernetes_namespace_v1 resources (nullplatform-tools and nullplatform) to pre-seed namespaces before chart installation, then deploys a helm_release resource pointing to the nullplatform-base chart from the nullplatform GitHub Helm registry. A templatefile-rendered local (nullplatform_base_values) merges all input variables into a YAML values file that is passed directly to the helm_release, controlling everything from gateway topology and ingress controllers to logging backends and observability pipelines. Outputs surface provider-specific security resource identifiers (AWS security group IDs, Azure NSG IDs, GCP firewall names) that are expected to originate from companion security submodules.
 
 ## Features
 
-- Creates kubernetes_namespace_v1 resources for nullplatform-tools and nullplatform to prevent Helm chart race conditions
-- Deploys nullplatform-base helm_release with fully rendered YAML values supporting EKS, GKE, AKS, OKE, and ARO providers
-- Configures public and private Gateway API resources with per-cloud security group, NSG, firewall, and OCI subnet annotations
-- Enables pluggable observability backends including Prometheus, Loki, GELF, Dynatrace, Datadog, New Relic, and CloudWatch
-- Supports internal and external public load balancer modes for Cloudflare Tunnel / VPN or direct internet exposure
-- Configures control plane agent deployment with configurable image repository and tag
-- Creates image pull secrets and ingress controller resources for both public and private traffic scopes
+- Creates kubernetes_namespace_v1 resources for nullplatform-tools and nullplatform to prevent Helm lookup race conditions
+- Deploys nullplatform-base helm_release with full values rendered from a templatefile covering gateways, ingress, logging, and observability
+- Configures public and private gateway resources with per-cloud security group, NSG, firewall, and OCI subnet annotations
+- Supports multi-provider observability integrations including Prometheus, Loki, GELF, Dynatrace, Datadog, New Relic, and CloudWatch
+- Configures ingress controllers with independent public and private scopes, names, and domains
+- Enables optional control plane agent deployment with configurable image repository and tag
+- Supports image pull secrets for private container registries across all Kubernetes providers
 
 ## Basic Usage
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.19.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.19.1"
 
   k8s_provider = "your-k8s-provider"
   np_api_key   = "your-np-api-key"
@@ -33,18 +33,10 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.19.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.19.1"
 
-  aws_region                             = "your-aws-region"  # Required when k8s_provider = "eks"
-  cloudwatch_service_account_annotations = "your-cloudwatch-service-account-annotations"  # Required when k8s_provider = "eks"
-  gateway_internal_aws_name              = "your-gateway-internal-aws-name"  # Required when k8s_provider = "eks"
-  gateway_private_aws_dns_name           = "your-gateway-private-aws-dns-name"  # Required when k8s_provider = "eks"
-  gateway_private_aws_security_group_id  = "your-gateway-private-aws-security-group-id"  # Required when k8s_provider = "eks"
-  gateway_public_aws_dns_name            = "your-gateway-public-aws-dns-name"  # Required when k8s_provider = "eks"
-  gateway_public_aws_name                = "your-gateway-public-aws-name"  # Required when k8s_provider = "eks"
-  gateway_public_aws_security_group_id   = "your-gateway-public-aws-security-group-id"  # Required when k8s_provider = "eks"
-  k8s_provider                           = "eks"
-  np_api_key                             = "your-np-api-key"
+  k8s_provider = "eks"
+  np_api_key   = "your-np-api-key"
 }
 ```
 
@@ -52,12 +44,10 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.19.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.19.1"
 
-  gateway_private_gcp_firewall_name = "your-gateway-private-gcp-firewall-name"  # Required when k8s_provider = "gke"
-  gateway_public_gcp_firewall_name  = "your-gateway-public-gcp-firewall-name"  # Required when k8s_provider = "gke"
-  k8s_provider                      = "gke"
-  np_api_key                        = "your-np-api-key"
+  k8s_provider = "gke"
+  np_api_key   = "your-np-api-key"
 }
 ```
 
@@ -65,14 +55,10 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.19.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.19.1"
 
-  gateway_private_azure_nsg_id              = "your-gateway-private-azure-nsg-id"  # Required when k8s_provider = "aks"
-  gateway_public_azure_load_balancer_subnet = "your-gateway-public-azure-load-balancer-subnet"  # Required when k8s_provider = "aks"
-  gateway_public_azure_nsg_id               = "your-gateway-public-azure-nsg-id"  # Required when k8s_provider = "aks"
-  internal_azure_load_balancer_subnet       = "your-internal-azure-load-balancer-subnet"  # Required when k8s_provider = "aks"
-  k8s_provider                              = "aks"
-  np_api_key                                = "your-np-api-key"
+  k8s_provider = "aks"
+  np_api_key   = "your-np-api-key"
 }
 ```
 
@@ -80,29 +66,21 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.19.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.19.1"
 
-  gateway_private_oci_security_list_management_mode = "your-gateway-private-oci-security-list-management-mode"  # Required when k8s_provider = "oke"
-  gateway_private_oci_subnet                        = "your-gateway-private-oci-subnet"  # Required when k8s_provider = "oke"
-  gateway_public_oci_security_list_management_mode  = "your-gateway-public-oci-security-list-management-mode"  # Required when k8s_provider = "oke"
-  gateway_public_oci_subnet                         = "your-gateway-public-oci-subnet"  # Required when k8s_provider = "oke"
-  k8s_provider                                      = "oke"
-  np_api_key                                        = "your-np-api-key"
+  k8s_provider = "oke"
+  np_api_key   = "your-np-api-key"
 }
 ```
 
-### Usage with Azure ARO
+### Usage with Azure Red Hat OpenShift (ARO)
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.19.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.19.1"
 
-  gateway_private_azure_nsg_id              = "your-gateway-private-azure-nsg-id"  # Required when k8s_provider = "aro"
-  gateway_public_azure_load_balancer_subnet = "your-gateway-public-azure-load-balancer-subnet"  # Required when k8s_provider = "aro"
-  gateway_public_azure_nsg_id               = "your-gateway-public-azure-nsg-id"  # Required when k8s_provider = "aro"
-  internal_azure_load_balancer_subnet       = "your-internal-azure-load-balancer-subnet"  # Required when k8s_provider = "aro"
-  k8s_provider                              = "aro"
-  np_api_key                                = "your-np-api-key"
+  k8s_provider = "aro"
+  np_api_key   = "your-np-api-key"
 }
 ```
 
@@ -217,7 +195,7 @@ resource "example_resource" "this" {
 | <a name="input_newrelic_metrics_enabled"></a> [newrelic\_metrics\_enabled](#input\_newrelic\_metrics\_enabled) | Enable metrics forwarding to New Relic. Set to false to send only logs. | `bool` | `true` | no |
 | <a name="input_newrelic_region"></a> [newrelic\_region](#input\_newrelic\_region) | New Relic region (e.g., US, EU). | `string` | `""` | no |
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | Nullplatform API key for authentication (account level). | `string` | n/a | yes |
-| <a name="input_nullplatform_base_helm_version"></a> [nullplatform\_base\_helm\_version](#input\_nullplatform\_base\_helm\_version) | Helm chart version for the nullplatform base. | `string` | `"2.40.0"` | no |
+| <a name="input_nullplatform_base_helm_version"></a> [nullplatform\_base\_helm\_version](#input\_nullplatform\_base\_helm\_version) | Helm chart version for the nullplatform base. | `string` | `"2.44.0"` | no |
 | <a name="input_prometheus_enabled"></a> [prometheus\_enabled](#input\_prometheus\_enabled) | Enable the Prometheus exporter. | `bool` | `true` | no |
 | <a name="input_tls_required"></a> [tls\_required](#input\_tls\_required) | Whether TLS is required. | `bool` | `true` | no |
 
@@ -237,16 +215,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "base",
-  "description": "Deploys the nullplatform base Helm chart onto a Kubernetes cluster across multiple cloud providers, configuring gateways, ingress controllers, logging integrations, and the control plane agent via a rendered values template",
-  "architecture": "The module creates two kubernetes_namespace_v1 resources ('nullplatform-tools' and 'nullplatform') to avoid Helm lookup race conditions, then deploys a single helm_release resource ('nullplatform-base') from the nullplatform Helm repository with a templatefile-rendered values YAML. All input variables flow through the locals.tf templatefile into the helm_release values block, which configures sub-charts for gateways, ingress controllers, logging pipelines, metrics, and the control plane agent. Outputs expose cloud-specific security resource identifiers (AWS security group IDs, Azure NSG IDs, GCP firewall names) that were passed in from upstream security submodules.",
+  "description": "Deploys the nullplatform base Helm chart onto a Kubernetes cluster across multiple cloud providers with configurable networking, logging, and observability integrations",
+  "architecture": "The module creates two kubernetes_namespace_v1 resources (nullplatform-tools and nullplatform) to pre-seed namespaces before chart installation, then deploys a helm_release resource pointing to the nullplatform-base chart from the nullplatform GitHub Helm registry. A templatefile-rendered local (nullplatform_base_values) merges all input variables into a YAML values file that is passed directly to the helm_release, controlling everything from gateway topology and ingress controllers to logging backends and observability pipelines. Outputs surface provider-specific security resource identifiers (AWS security group IDs, Azure NSG IDs, GCP firewall names) that are expected to originate from companion security submodules.",
   "features": [
-    "Creates kubernetes_namespace_v1 resources for nullplatform-tools and nullplatform to prevent Helm chart race conditions",
-    "Deploys nullplatform-base helm_release with fully rendered YAML values supporting EKS, GKE, AKS, OKE, and ARO providers",
-    "Configures public and private Gateway API resources with per-cloud security group, NSG, firewall, and OCI subnet annotations",
-    "Enables pluggable observability backends including Prometheus, Loki, GELF, Dynatrace, Datadog, New Relic, and CloudWatch",
-    "Supports internal and external public load balancer modes for Cloudflare Tunnel / VPN or direct internet exposure",
-    "Configures control plane agent deployment with configurable image repository and tag",
-    "Creates image pull secrets and ingress controller resources for both public and private traffic scopes"
+    "Creates kubernetes_namespace_v1 resources for nullplatform-tools and nullplatform to prevent Helm lookup race conditions",
+    "Deploys nullplatform-base helm_release with full values rendered from a templatefile covering gateways, ingress, logging, and observability",
+    "Configures public and private gateway resources with per-cloud security group, NSG, firewall, and OCI subnet annotations",
+    "Supports multi-provider observability integrations including Prometheus, Loki, GELF, Dynatrace, Datadog, New Relic, and CloudWatch",
+    "Configures ingress controllers with independent public and private scopes, names, and domains",
+    "Enables optional control plane agent deployment with configurable image repository and tag",
+    "Supports image pull secrets for private container registries across all Kubernetes providers"
   ],
   "inputs": [
     {
@@ -649,6 +627,6 @@ resource "example_resource" "this" {
     "public_gateway_firewall_name",
     "private_gateway_firewall_name"
   ],
-  "hash": "cd894a542fd88afe96f93e9ff2cb93d9"
+  "hash": "8a17309ca495ecfdd1006c8044ee2aee"
 }
 END_AI_METADATA -->
