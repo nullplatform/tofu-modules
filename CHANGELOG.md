@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.19.0](https://github.com/nullplatform/tofu-modules/compare/v6.18.0...v6.19.0) (2026-08-21)
+
+
+### Features
+
+* **external_dns:** add google provider support ([#532](https://github.com/nullplatform/tofu-modules/issues/532)) ([222ff52](https://github.com/nullplatform/tofu-modules/commit/222ff522601d3b4f5c85cc016e79981fa58cd5c4))
+
 ## [6.18.0](https://github.com/nullplatform/tofu-modules/compare/v6.17.0...v6.18.0) (2026-08-19)
 
 
