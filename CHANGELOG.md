@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.19.1](https://github.com/nullplatform/tofu-modules/compare/v6.19.0...v6.19.1) (2026-08-21)
+
+
+### Bug Fixes
+
+* **base:** bump default nullplatform_base_helm_version to 2.44.0 ([#534](https://github.com/nullplatform/tofu-modules/issues/534)) ([a7e91b7](https://github.com/nullplatform/tofu-modules/commit/a7e91b7ad613da19de3a653c497152480e33f15d))
+
 ## [6.19.0](https://github.com/nullplatform/tofu-modules/compare/v6.18.0...v6.19.0) (2026-08-21)
 
 
