@@ -123,12 +123,26 @@ locals {
     ]
   }
 
+  google_config = {
+    provider = { name = "google" }
+    google   = { project = var.gcp_project_id }
+    serviceAccount = {
+      create = true
+      name   = var.gcp_service_account_name
+      annotations = {
+        "iam.gke.io/gcp-service-account" = var.gcp_service_account_email
+      }
+    }
+    extraArgs = ["--google-zone-visibility=${var.zone_type}"]
+  }
+
   provider_configs = {
     cloudflare          = local.cloudflare_config
     aws                 = local.route53_config
     oci                 = local.oci_config
     azure               = local.azure_config
     "azure-private-dns" = local.azure_config
+    google              = local.google_config
   }
 
   external_dns_values = merge(local.base_config, local.provider_configs[var.dns_provider_name])
