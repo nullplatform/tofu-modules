@@ -125,7 +125,6 @@ locals {
 
   google_config = {
     provider = { name = "google" }
-    google   = { project = var.gcp_project_id }
     serviceAccount = {
       create = true
       name   = var.gcp_service_account_name
@@ -133,7 +132,10 @@ locals {
         "iam.gke.io/gcp-service-account" = var.gcp_service_account_email
       }
     }
-    extraArgs = ["--google-zone-visibility=${var.zone_type}"]
+    extraArgs = [
+      "--google-project=${var.gcp_project_id}",
+      "--google-zone-visibility=${lower(var.zone_type)}",
+    ]
   }
 
   provider_configs = {

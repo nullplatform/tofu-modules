@@ -112,7 +112,7 @@ variable "zone_id_filter" {
 }
 
 variable "zone_type" {
-  description = "The Route53 hosted zone type for ExternalDNS to manage (public or private)"
+  description = "The DNS zone type/visibility for ExternalDNS to manage (public or private). Used by the 'aws' (--aws-zone-type) and 'google' (--google-zone-visibility) providers."
   type        = string
   default     = ""
   nullable    = false
@@ -238,5 +238,6 @@ variable "gcp_service_account_name" {
   description = "The Kubernetes service account name for GCP Workload Identity"
   type        = string
   default     = "external-dns"
+  nullable    = false
 }
 
