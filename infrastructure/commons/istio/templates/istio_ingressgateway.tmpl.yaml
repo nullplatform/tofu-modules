@@ -1,5 +1,8 @@
 service:
   type: ${service_type}
+%{ if load_balancer_class != "" ~}
+  loadBalancerClass: ${load_balancer_class}
+%{ endif ~}
 %{ if cloud_provider == "oci" && length(oci_load_balancer_subnet_ids) > 0 ~}
   annotations:
     service.beta.kubernetes.io/oci-load-balancer-subnet1: "${join(",", oci_load_balancer_subnet_ids)}"

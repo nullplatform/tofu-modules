@@ -53,6 +53,12 @@ variable "service_type" {
   default     = "LoadBalancer"
 }
 
+variable "service_load_balancer_class" {
+  type        = string
+  description = "Explicit value for spec.loadBalancerClass on the ingress gateway Service. Kubernetes treats this field as immutable once set — if a cloud controller (e.g. the AWS Load Balancer Controller's mutating webhook) has already assigned it on the live Service, every future Helm upgrade must keep declaring the same value or the API server rejects the patch with 'may not change once set'. Defaults to 'service.k8s.aws/nlb' when cloud_provider is 'aws' and service_type is 'LoadBalancer'; pass an empty string to opt out of managing this field."
+  default     = null
+}
+
 variable "status_port" {
   type        = number
   description = "The status port used (status-port)"
