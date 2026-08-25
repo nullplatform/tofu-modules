@@ -4,6 +4,15 @@ variables {
   project_id = "myorg-project"
 }
 
+run "no_sleep_without_workload_identity_bindings" {
+  command = plan
+
+  assert {
+    condition     = length(time_sleep.wait_for_service_account_propagation) == 0
+    error_message = "Should not create a propagation sleep when there are no workload identity bindings"
+  }
+}
+
 run "no_resources_with_empty_defaults" {
   command = plan
 }
@@ -58,6 +67,11 @@ run "workload_identity_binding_format" {
   assert {
     condition     = google_service_account_iam_member.workload_identity["cert-manager-cert-manager"].member == "serviceAccount:myorg-project.svc.id.goog[cert-manager/cert-manager]"
     error_message = "WI member should follow serviceAccount:{project}.svc.id.goog[{ns}/{ksa}] format"
+  }
+
+  assert {
+    condition     = length(time_sleep.wait_for_service_account_propagation) == 1
+    error_message = "Should create a propagation sleep before binding workload identity"
   }
 }
 
