@@ -4,7 +4,7 @@ locals {
   # the field is immutable afterwards — so it must be declared explicitly on
   # every subsequent upgrade or the API server rejects the patch.
   default_service_load_balancer_class = var.cloud_provider == "aws" && var.service_type == "LoadBalancer" ? "service.k8s.aws/nlb" : ""
-  service_load_balancer_class         = coalesce(var.service_load_balancer_class, local.default_service_load_balancer_class)
+  service_load_balancer_class         = var.service_load_balancer_class != null ? var.service_load_balancer_class : local.default_service_load_balancer_class
 
   helm_values = templatefile("${path.module}/templates/istio_ingressgateway.tmpl.yaml", {
     service_type                 = var.service_type
