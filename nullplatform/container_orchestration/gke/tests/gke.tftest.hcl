@@ -1,10 +1,11 @@
 mock_provider "nullplatform" {}
 
 variables {
-  nrn                 = "organization=myorg:account=myaccount"
-  cluster_name        = "my-gke-cluster"
-  location            = "us-central1-a"
-  public_gateway_name = "public-gateway"
+  nrn                     = "organization=myorg:account=myaccount"
+  cluster_name            = "my-gke-cluster"
+  location                = "us-central1-a"
+  public_gateway_name     = "public-gateway"
+  traffic_manager_version = "1.8.0"
 }
 
 run "gke_provider_type" {
@@ -72,10 +73,6 @@ run "optional_fields_excluded_when_empty" {
     error_message = "Attributes should not contain security when not set"
   }
 
-  assert {
-    condition     = !strcontains(nullplatform_provider_config.gke_config.attributes, "traffic_manager")
-    error_message = "Attributes should not contain traffic_manager when not set"
-  }
 
   assert {
     condition     = !strcontains(nullplatform_provider_config.gke_config.attributes, "object_modifiers")
@@ -150,7 +147,7 @@ run "with_traffic_manager" {
   command = plan
 
   variables {
-    traffic_manager_version = "latest"
+    traffic_manager_version = "1.8.0"
   }
 
   assert {
@@ -159,7 +156,7 @@ run "with_traffic_manager" {
   }
 
   assert {
-    condition     = strcontains(nullplatform_provider_config.gke_config.attributes, "latest")
+    condition     = strcontains(nullplatform_provider_config.gke_config.attributes, "1.8.0")
     error_message = "Attributes should contain traffic manager version"
   }
 }

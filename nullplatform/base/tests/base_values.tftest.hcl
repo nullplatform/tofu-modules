@@ -2,8 +2,11 @@ mock_provider "helm" {}
 mock_provider "kubernetes" {}
 
 variables {
-  np_api_key   = "test-api-key"
-  k8s_provider = "eks"
+  np_api_key                     = "test-api-key"
+  k8s_provider                   = "eks"
+  nullplatform_base_helm_version = "2.44.0"
+  logging_controller_image_tag   = "1.6.0"
+  control_plane_agent_image_tag  = "0.9.2"
 }
 
 ############################################
@@ -144,10 +147,10 @@ run "dynatrace_logs_disabled" {
   command = plan
 
   variables {
-    dynatrace_enabled      = true
-    dynatrace_api_key      = "dt-test-key"
+    dynatrace_enabled        = true
+    dynatrace_api_key        = "dt-test-key"
     dynatrace_environment_id = "dt-env-123"
-    dynatrace_logs_enabled = false
+    dynatrace_logs_enabled   = false
   }
 
   assert {

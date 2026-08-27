@@ -1,5 +1,9 @@
 mock_provider "helm" {}
 
+variables {
+  cert_manager_version = "v1.21.1"
+}
+
 # Validates invalid cloud_provider is rejected
 run "rejects_invalid_provider" {
   command = plan

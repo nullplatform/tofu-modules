@@ -33,8 +33,18 @@ variable "repository_name" {
 
 variable "repository_branch" {
   type        = string
-  default     = "main"
-  description = "Branch of the service spec repository to use. Must be a short branch name (e.g. \"main\"), not a full ref."
+  description = <<-EOT
+    Git ref of the service spec repository to read, as a short name and not a full ref
+    (e.g. "v1.4.0"). No default and no recommended value: which spec repository an install
+    points at is its own choice, so there is no version anyone could pick for it.
+
+    Combine with repository_ref_type, which selects the namespace this name lives in.
+  EOT
+
+  validation {
+    condition     = var.repository_branch != "" && !contains(["main", "master", "head", "latest"], lower(var.repository_branch))
+    error_message = "repository_branch must be a non-empty pinned ref, not empty and not a moving branch."
+  }
 }
 
 variable "service_path" {
@@ -92,7 +102,7 @@ variable "dimensions" {
 
 variable "repository_ref_type" {
   type        = string
-  default     = "heads"
+  default     = "tags"
   description = "Git ref namespace for `repository_branch` on GitHub: \"heads\" for a branch, \"tags\" for a tag, or \"\" to treat it as a raw commit SHA. Defaults to \"heads\", preserving previous behaviour."
   validation {
     condition     = contains(["heads", "tags", ""], var.repository_ref_type)
