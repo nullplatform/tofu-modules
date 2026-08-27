@@ -2,6 +2,13 @@
 # REQUIRED VARIABLES
 ###############################################################################
 
+# Nothing in this module reads it, so tflint's terraform_unused_declarations
+# flags it -- the subscription is selected by the caller's azurerm provider, and
+# a module has no business declaring that provider. It is NOT removed: it is
+# required (no default), so every caller passes it today and dropping it would
+# break them all with "Unsupported argument". Whether the module should keep
+# demanding a value it never sends anywhere is a separate, breaking change.
+# tflint-ignore: terraform_unused_declarations
 variable "subscription_id" {
   type        = string
   description = "The ID of the Azure subscription"
@@ -25,6 +32,12 @@ variable "cluster_name" {
 variable "vnet_subnet_id" {
   type        = string
   description = "The ID of the subnet where AKS nodes will be deployed"
+}
+
+variable "additional_network_contributor_subnet_ids" {
+  type        = map(string)
+  description = "Extra subnet IDs, keyed by an arbitrary stable name, where the cluster identity also needs Network Contributor. The node subnet is granted automatically; add an entry for any other subnet the cloud-provider must write into -- typically the one an internal load balancer is pinned to via service.beta.kubernetes.io/azure-load-balancer-internal-subnet, which otherwise fails to provision with a 403 on virtualNetworks/subnets/read."
+  default     = {}
 }
 
 ###############################################################################
@@ -89,6 +102,11 @@ variable "tags" {
   default     = {}
 }
 
+# Same story: declared for tagging and naming, never actually merged into `tags`
+# or any name, so tflint flags it. Folding it into the tags now would add a tag
+# to every cluster already built by this module -- a diff for every consumer --
+# and removing it would break the ones that pass it. Left as-is deliberately.
+# tflint-ignore: terraform_unused_declarations
 variable "environment" {
   type        = string
   description = "The environment name used for tagging and naming purposes"
@@ -109,4 +127,76 @@ variable "attach_acr" {
   type        = bool
   description = "Whether to grant AKS the AcrPull role on acr_id. Null (default) preserves the legacy behaviour of attaching whenever acr_id is non-null. Set to true for a greenfield single-apply where acr_id is known only after apply (keeps the for_each key set plan-stable); set to false to disable."
   default     = null
+}
+
+# ==============================================================================
+# Availability zones
+#
+# `node_pools` in the upstream module (Azure/aks/azurerm) declares the field as
+# `zones`. This module passed `availability_zones`, and Terraform DISCARDS
+# attributes that are absent from an object({...}) type rather than failing, so
+# the value never reached Azure: pools created by this module have no zone
+# spread. The system pool had no zones either -- upstream takes those through
+# the top-level `agents_availability_zones`, which was never set.
+#
+# Both default to null, which is exactly what the clusters got until now, so
+# existing deployments see no diff -- verified against a live cluster: the plan
+# is byte-identical with the defaults, and setting them is what finally makes
+# `zones` show up in the diff.
+# ==============================================================================
+
+variable "node_pool_zones" {
+  description = <<-EOT
+    Availability zones for the user node pool, e.g. ["1", "2", "3"].
+    Null (default) leaves the pool unzoned. Set it deliberately on a live
+    cluster: Azure treats a pool's zones as immutable, and upstream rotates the
+    pool through `temporary_name_for_rotation` to honour the change.
+  EOT
+  type        = set(string)
+  default     = null
+}
+
+# list, not set: upstream declares `agents_availability_zones` as list(string),
+# while `node_pools.zones` is set(string). Matching each exactly avoids relying
+# on an implicit conversion whose ordering is not guaranteed.
+variable "system_pool_zones" {
+  description = <<-EOT
+    Availability zones for the system node pool, e.g. ["1", "2", "3"].
+    Null (default) leaves the pool unzoned. Set it deliberately on a live
+    cluster: Azure treats a pool's zones as immutable, and upstream rotates the
+    pool through `temporary_name_for_rotation` to honour the change.
+  EOT
+  type        = list(string)
+  default     = null
+}
+
+# ==============================================================================
+# Node counts
+#
+# These were hardcoded (user pool min=1/max=5, system pool implicitly 2 via the
+# upstream default). Hardcoding min=1 capped baseline HA: at rest the user pool
+# runs a single node in a single zone, so zone spread only kicks in once
+# autoscaling grows it. Exposing the counts lets a consumer set a multi-node
+# floor that actually spans the zones above.
+#
+# Defaults equal the previous hardcoded values, so this is behaviour-preserving:
+# existing consumers see no diff until they raise the floor deliberately.
+# ==============================================================================
+
+variable "user_pool_min_count" {
+  description = "Minimum node count for the autoscaling user pool. Raise to >=2 (with node_pool_zones set) for a multi-zone baseline."
+  type        = number
+  default     = 1
+}
+
+variable "user_pool_max_count" {
+  description = "Maximum node count for the autoscaling user pool."
+  type        = number
+  default     = 5
+}
+
+variable "system_pool_node_count" {
+  description = "Fixed node count for the system pool. Defaults to 2, the upstream default this module relied on implicitly."
+  type        = number
+  default     = 2
 }

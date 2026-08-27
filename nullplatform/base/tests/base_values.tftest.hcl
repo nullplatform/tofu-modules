@@ -283,3 +283,30 @@ run "gateway_public_azure_load_balancer_subnet" {
     error_message = "public gateway azure subnet should be wired into the rendered public.azure block"
   }
 }
+
+run "internal_azure_load_balancer_subnet_defaults_to_empty" {
+  command = plan
+
+  # The old default was the literal "load_balancer", which is the key a subnet
+  # usually has in a subnets_definition map rather than its resource name. That
+  # annotated the internal gateway with a subnet that does not exist, and Azure
+  # answers a missing scope with 403 AuthorizationFailed, which reads like an
+  # RBAC problem instead of a wrong name. Empty lets Azure pick the subnet.
+  assert {
+    condition     = strcontains(output.rendered_values, "azure_load_balancer_subnet: \"\"")
+    error_message = "internal gateway azure subnet should default to empty so Azure selects the subnet"
+  }
+}
+
+run "internal_azure_load_balancer_subnet" {
+  command = plan
+
+  variables {
+    internal_azure_load_balancer_subnet = "subnet-4"
+  }
+
+  assert {
+    condition     = strcontains(output.rendered_values, "azure_load_balancer_subnet: \"subnet-4\"")
+    error_message = "internal gateway azure subnet should be wired into the rendered internal block"
+  }
+}

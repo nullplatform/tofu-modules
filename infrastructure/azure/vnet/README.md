@@ -18,7 +18,7 @@ This module creates an Azure virtual network using the azurerm provider and conf
 
 ```hcl
 module "vnet" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/vnet?ref=v6.8.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/vnet?ref=v7.1.0"
 
   address_space       = "your-address-space"
   location            = "your-location"
@@ -59,7 +59,7 @@ resource "example_resource" "this" {
 | <a name="input_address_space"></a> [address\_space](#input\_address\_space) | The address space (CIDR blocks) for the virtual network (e.g., ["10.0.0.0/16"]) | `set(string)` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | The Azure region where the virtual network will be created (e.g., eastus, westus2) | `string` | n/a | yes |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | The name of the resource group where the virtual network will be created | `string` | n/a | yes |
-| <a name="input_subnets_definition"></a> [subnets\_definition](#input\_subnets\_definition) | A map of subnets to create within the virtual network. Each subnet requires a name and address\_prefixes. | <pre>map(object({<br/>    name             = string<br/>    address_prefixes = list(string)<br/>  }))</pre> | n/a | yes |
+| <a name="input_subnets_definition"></a> [subnets\_definition](#input\_subnets\_definition) | A map of subnets to create within the virtual network. Each subnet requires<br/>a name and address\_prefixes, and may set route\_table to associate an<br/>existing route table. | <pre>map(object({<br/>    name             = string<br/>    address_prefixes = list(string)<br/><br/>    # The AVM submodule accepts this and always renders the field, so leaving it<br/>    # out is an explicit `routeTable: null` -- i.e. a detach -- not an omission.<br/>    # On an AKS kubenet subnet that means every plan proposes to strip the route<br/>    # table AKS attached, which is why `aks_route_table` has to keep putting it<br/>    # back. Declaring it here lets the subnet own what it actually has.<br/>    route_table = optional(object({<br/>      id = string<br/>    }))<br/>  }))</pre> | n/a | yes |
 | <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | The ID of the Azure subscription | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to the virtual network resources | `map(string)` | `{}` | no |
 | <a name="input_vnet_name"></a> [vnet\_name](#input\_vnet\_name) | The name of the virtual network | `string` | n/a | yes |

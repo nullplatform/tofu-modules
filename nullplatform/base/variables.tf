@@ -76,9 +76,9 @@ variable "gateway_public_name" {
 }
 
 variable "internal_azure_load_balancer_subnet" {
-  description = "The name of the subnet to use in azure private load balancer"
+  description = "Name of the subnet for the internal gateway's Azure load balancer. Empty by default, in which case Azure picks the subnet automatically. Must be the subnet's resource name (e.g. \"subnet-4\"), not the key it has in a subnets_definition map."
   type        = string
-  default     = "load_balancer"
+  default     = ""
 }
 
 variable "gateway_public_load_balancer_type" {

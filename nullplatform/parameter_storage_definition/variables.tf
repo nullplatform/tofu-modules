@@ -3,6 +3,9 @@ variable "nrn" {
   type        = string
 }
 
+# Unused here (the provider is configured at the root) but passed by consumers, so
+# deleting it is a breaking interface change.
+# tflint-ignore: terraform_unused_declarations
 variable "np_api_key" {
   description = "nullplatform API key. Kept for interface consistency across the parameter-storage modules; the provider is configured at the root."
   type        = string

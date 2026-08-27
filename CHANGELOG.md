@@ -1,5 +1,81 @@
 # Changelog
 
+## [7.1.0](https://github.com/nullplatform/tofu-modules/compare/v7.0.3...v7.1.0) (2026-08-19)
+
+
+### Features
+
+* **service_definition:** package block (mirrors scope_definition + links) ([2a943ec](https://github.com/nullplatform/tofu-modules/commit/2a943ec30ed7230241fb756b9e7cdb58824148ce))
+* **service_definition:** package block (mirrors scope_definition + links) ([#530](https://github.com/nullplatform/tofu-modules/issues/530)) ([16aaed3](https://github.com/nullplatform/tofu-modules/commit/16aaed31c1f0507406739477e2857a3d4ad210f4))
+
+
+### Bug Fixes
+
+* **service_definition:** pin default (use_default_actions) actions into the package BOM ([c1493b5](https://github.com/nullplatform/tofu-modules/commit/c1493b5a1024094606a4a67cd6c05d5812daab90))
+
+## [7.0.3](https://github.com/nullplatform/tofu-modules/compare/v7.0.2...v7.0.3) (2026-08-11)
+
+
+### Bug Fixes
+
+* **ci:** correct release-please target-branch resolution for the dual release line scheme ([#504](https://github.com/nullplatform/tofu-modules/issues/504)) ([e09ff45](https://github.com/nullplatform/tofu-modules/commit/e09ff45fc88bdf88556ef8ab864077f63446a972))
+
+## [7.0.2](https://github.com/nullplatform/tofu-modules/compare/v7.0.1...v7.0.2) (2026-08-11)
+
+
+### Bug Fixes
+
+* **azure:** make the internal gateway LB subnet configurable and grantable ([#494](https://github.com/nullplatform/tofu-modules/issues/494)) ([38df735](https://github.com/nullplatform/tofu-modules/commit/38df735aa04122c5a2aae6eef369771b9905b6cb))
+
+## [7.0.1](https://github.com/nullplatform/tofu-modules/compare/v7.0.0...v7.0.1) (2026-08-11)
+
+
+### Bug Fixes
+
+* **azure/aks_route_table:** stable trigger instead of timestamp() ([#474](https://github.com/nullplatform/tofu-modules/issues/474)) ([#493](https://github.com/nullplatform/tofu-modules/issues/493)) ([dad52fa](https://github.com/nullplatform/tofu-modules/commit/dad52fad010915756586d05c1915b4d5bc1d1adf))
+
+## [7.0.0](https://github.com/nullplatform/tofu-modules/compare/v6.11.2...v7.0.0) (2026-08-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* **scope_configuration:** target the aws-lambda scope configuration ([#491](https://github.com/nullplatform/tofu-modules/issues/491))
+
+### Bug Fixes
+
+* **scope_configuration:** target the aws-lambda scope configuration ([#491](https://github.com/nullplatform/tofu-modules/issues/491)) ([ab61fc6](https://github.com/nullplatform/tofu-modules/commit/ab61fc60346bad27ad6bd174c49370f09f739555))
+
+## [6.11.2](https://github.com/nullplatform/tofu-modules/compare/v6.11.1...v6.11.2) (2026-08-07)
+
+
+### Bug Fixes
+
+* **azure/aks:** make node pools HA-capable (zones + counts) ([#473](https://github.com/nullplatform/tofu-modules/issues/473)) ([dc453bf](https://github.com/nullplatform/tofu-modules/commit/dc453bfa7b9d85e6b851ea0704175d6600acb3bd))
+
+## [6.11.1](https://github.com/nullplatform/tofu-modules/compare/v6.11.0...v6.11.1) (2026-08-07)
+
+
+### Bug Fixes
+
+* **docs:** bump usage example ref to current release tag ([b685c35](https://github.com/nullplatform/tofu-modules/commit/b685c35369d0a98f2d0e23fe7a216da822184ed3))
+* **docs:** bump usage example ref to current release tag ([#486](https://github.com/nullplatform/tofu-modules/issues/486)) ([6feea3d](https://github.com/nullplatform/tofu-modules/commit/6feea3d238d3428a5847f3893c1183f03856e554))
+
+## [6.11.0](https://github.com/nullplatform/tofu-modules/compare/v6.10.0...v6.11.0) (2026-08-07)
+
+
+### Features
+
+* **agent:** worker orchestration passthrough + chart 2.37.0 ([#478](https://github.com/nullplatform/tofu-modules/issues/478)) ([6758a95](https://github.com/nullplatform/tofu-modules/commit/6758a9566e9e0623dec4d91172e8793ed8234c68))
+* **service_definition:** allow pinning specs to a tag or commit SHA ([#470](https://github.com/nullplatform/tofu-modules/issues/470)) ([15b6d47](https://github.com/nullplatform/tofu-modules/commit/15b6d473375031b31f7c8b17049e315bef4fc879))
+
+
+### Bug Fixes
+
+* **azure/vnet:** let a subnet declare its route table ([#475](https://github.com/nullplatform/tofu-modules/issues/475)) ([d2a5faf](https://github.com/nullplatform/tofu-modules/commit/d2a5faf83e8f3297503f961e30a0a3d5b60ae015))
+* **docs:** update usage example to a current release tag ([a167934](https://github.com/nullplatform/tofu-modules/commit/a167934eaa22e97d3a704c1cb1f00ffe731d8ca3))
+* **docs:** update usage example to a current release tag ([#484](https://github.com/nullplatform/tofu-modules/issues/484)) ([ed6f5b0](https://github.com/nullplatform/tofu-modules/commit/ed6f5b06a907ef538c3cb44cb1614e9474414de9))
+* **nullplatform:** fail template fetches that do not return 200 ([#482](https://github.com/nullplatform/tofu-modules/issues/482)) ([c47b78b](https://github.com/nullplatform/tofu-modules/commit/c47b78bcf1c46f40304208637d50b3eb81577844))
+
 ## [6.10.0](https://github.com/nullplatform/tofu-modules/compare/v6.9.0...v6.10.0) (2026-08-07)
 
 
