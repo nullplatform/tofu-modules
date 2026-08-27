@@ -30,7 +30,7 @@ Reference any module via its Git source, pinned to a release tag:
 
 ```hcl
 module "vpc" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v6.11.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v6.19.1"
 
   # module inputs ...
 }
@@ -45,6 +45,11 @@ tofu apply
 ```
 
 See the [latest releases](https://github.com/nullplatform/tofu-modules/releases) for available versions.
+
+Several modules require you to pin a chart version, an image tag or a git ref, with no
+default. **[VERSIONS.md](VERSIONS.md) lists every one of them with its current value and a
+ready-to-paste block** — read it before your first apply rather than hunting the numbers down
+one variable at a time.
 
 ## Versioning
 

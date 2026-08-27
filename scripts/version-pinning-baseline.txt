@@ -1,0 +1,26 @@
+# Deliberately deferred version-pinning violations. Each group says why.
+# This file should only ever shrink.
+#
+# Format: <path>:<variable name | helm_release.NAME>
+
+# The scopes and service-spec repositories, read through ten paths across three
+# modules, all defaulting to a moving branch. Fixable without a breaking change;
+# deferred for its own review.
+nullplatform/parameter_storage_definition/variables.tf:repository_parameter_storage_spec
+nullplatform/parameter_storage_definition/variables.tf:repository_parameter_storage_spec_branch
+nullplatform/scope_definition/variables.tf:repository_action_templates
+nullplatform/scope_definition/variables.tf:repository_action_templates_branch
+nullplatform/scope_definition/variables.tf:repository_scope_template
+nullplatform/scope_definition/variables.tf:repository_scope_template_branch
+nullplatform/scope_definition/variables.tf:repository_service_spec
+nullplatform/scope_definition/variables.tf:repository_service_spec_branch
+nullplatform/scope_definition_agent_association/variables.tf:repository_notification_channel
+nullplatform/scope_definition_agent_association/variables.tf:repository_notification_channel_branch
+
+# Fixed by the "require an explicit version" PR, whose base does not contain this
+# file. Remove these when it merges.
+infrastructure/commons/cert_manager/main.tf:helm_release.cert_manager
+infrastructure/commons/prometheus/main.tf:helm_release.prometheus
+nullplatform/agent/variables.tf:agent_repos_scope
+nullplatform/container_orchestration/eks/variables.tf:traffic_manager_version
+nullplatform/service_definition/variables.tf:repository_branch
