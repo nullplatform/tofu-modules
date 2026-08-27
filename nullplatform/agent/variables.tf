@@ -95,10 +95,19 @@ variable "namespace" {
 variable "agent_repos_scope" {
   description = "Git repository URL containing agent scope configurations (format: repo#branch)"
   type        = string
-  default     = "https://github.com/nullplatform/scopes.git#main"
+  # Pinned to the last tagged release rather than the branch tip. main has moved past
+  # v1.15.1, so this is a deliberate step back to a ref that cannot change under a running
+  # agent -- see VERSIONS.md.
+  default = "https://github.com/nullplatform/scopes.git#v1.15.1"
 }
 
 # List of additional Git repositories used for extended agent configuration
+variable "agent_traffic_manager_tag" {
+  description = "Image tag for the traffic manager, published to the agent as TRAFFIC_CONTAINER_IMAGE. Pinning this used to mean passing the whole image string through extra_envs; the registry lives here so only the tag is exposed. extra_envs still takes precedence for anyone who needs a digest or a mirrored path."
+  type        = string
+  default     = "1.8.0"
+}
+
 variable "agent_repos_extra" {
   description = "List of additional Git repositories used for extended agent configuration"
   type        = list(string)

@@ -42,6 +42,7 @@ locals {
     CLUSTER_NAME            = var.cluster_name
     NAMESPACE               = var.namespace
     IMAGE_TAG               = var.image_tag
+    TRAFFIC_CONTAINER_IMAGE = "public.ecr.aws/nullplatform/k8s-traffic-manager:${var.agent_traffic_manager_tag}"
     DOMAIN                  = var.domain
     DNS_TYPE                = var.dns_type
     USE_ACCOUNT_SLUG        = var.use_account_slug

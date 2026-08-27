@@ -216,7 +216,7 @@ run "with_traffic_manager_port" {
   }
 
   assert {
-    condition     = strcontains(nullplatform_provider_config.eks_config.attributes, "\"version\":\"latest\"")
+    condition     = strcontains(nullplatform_provider_config.eks_config.attributes, "\"version\":\"1.8.0\"")
     error_message = "Setting the port must not drop the traffic manager version"
   }
 }
@@ -340,5 +340,26 @@ run "with_all_options" {
   assert {
     condition     = nullplatform_provider_config.eks_config.dimensions["Environment"] == "staging"
     error_message = "Dimensions should contain Environment=staging"
+  }
+}
+
+################################################################################
+# Version pinning
+################################################################################
+
+# The default was "latest", so an apply with no code change could move the deployed
+# traffic manager. Nothing in the module surface changed -- callers who already pass a
+# version are unaffected -- but the default no longer drifts.
+run "traffic_manager_version_default_is_pinned" {
+  command = plan
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.eks_config.attributes, "\"version\":\"1.8.0\"")
+    error_message = "the default traffic manager version must be a fixed release, not latest"
+  }
+
+  assert {
+    condition     = !strcontains(nullplatform_provider_config.eks_config.attributes, "latest")
+    error_message = "no attribute may reference a moving tag"
   }
 }

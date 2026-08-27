@@ -100,3 +100,19 @@ run "rejects_invalid_aws_identity_mode" {
 
   expect_failures = [var.aws_identity_mode]
 }
+
+################################################################################
+# Version pinning
+################################################################################
+
+# cert_manager_version was declared with a default and never referenced: grep found one
+# occurrence, its own declaration. The helm_release had no version argument, so installs
+# tracked whatever charts.jetstack.io served while the README showed a number.
+run "cert_manager_version_reaches_the_release" {
+  command = plan
+
+  assert {
+    condition     = helm_release.cert_manager.version == "v1.21.1"
+    error_message = "cert_manager_version must be wired to the helm_release, not merely declared"
+  }
+}

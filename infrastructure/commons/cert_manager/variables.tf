@@ -62,9 +62,9 @@ variable "private_domain_name" {
 ###############################################################################
 
 variable "cert_manager_version" {
-  description = "The version of cert-manager Helm chart to deploy"
+  description = "The version of cert-manager Helm chart to deploy. Was declared but never wired to the helm_release, so installs tracked whatever the chart repository served; the default is the version that resolved to as of 2026-08-27, which keeps behaviour unchanged while removing the drift."
   type        = string
-  default     = "1.18.2"
+  default     = "v1.21.1"
 }
 
 variable "cert_manager_namespace" {

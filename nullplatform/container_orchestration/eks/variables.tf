@@ -112,9 +112,9 @@ variable "service_account_name" {
 }
 
 variable "traffic_manager_version" {
-  description = "Tag for the traffic manager sidecar container"
+  description = "Pinned rather than tracking latest: a moving tag means a pod restart can pull a different build with no apply in between. Tag for the traffic manager sidecar container"
   type        = string
-  default     = "latest"
+  default     = "1.8.0"
 }
 
 variable "traffic_manager_port" {
