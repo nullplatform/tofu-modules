@@ -30,7 +30,7 @@ locals {
     },
     length(local.resource_management) > 0 ? { resource_management = local.resource_management } : {},
     length(local.security) > 0 ? { security = local.security } : {},
-    var.traffic_manager_version != "" ? { traffic_manager = { version = var.traffic_manager_version } } : {},
+    { traffic_manager = { version = var.traffic_manager_version } },
     length(var.object_modifiers) > 0 ? { object_modifiers = { modifiers = var.object_modifiers } } : {},
   )
 }
