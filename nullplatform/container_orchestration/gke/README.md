@@ -2,32 +2,75 @@
 
 ## Description
 
-Configures a GKE provider configuration resource in Nullplatform by encoding cluster, gateway, resource management, and security settings as a typed provider config
+Configures a GKE cluster provider in Nullplatform by creating a nullplatform_provider_config resource with cluster, gateway, resource management, security, and traffic manager settings
 
 ## Architecture
 
-The module constructs a structured attributes object using locals that merge cluster identity, gateway configuration, optional resource management ratios, security settings, and object modifiers. A single nullplatform_provider_config resource of type 'gke-configuration' is created, binding the NRN and dimensions to the JSON-encoded attributes. Input variables flow into conditional merges within locals so that optional fields like private_gateway_name, service_account_name, and traffic_manager_version are only included when non-empty. The resulting resource acts as a configuration record in the Nullplatform platform for GKE cluster integration.
+The module constructs a set of locals that merge optional inputs (gateway namespace, private gateway, resource management ratios, image pull secrets, service account, object modifiers) into a structured attributes map. A single nullplatform_provider_config resource of type 'gke-configuration' is created, binding the NRN and optional dimensions to the JSON-encoded attributes map. The cluster identity (name, location, namespace), gateway configuration, traffic manager version, and security settings all flow through locals into the jsonencode(local.attributes) argument of the provider config resource.
 
 ## Features
 
-- Creates a nullplatform_provider_config resource of type gke-configuration with cluster identity and location
-- Configures public and optional private gateway references with namespace support
-- Encodes resource management settings including memory/CPU ratios and max milicores when provided
-- Attaches image pull secrets and Kubernetes service account name for secure workload identity
-- Includes optional traffic manager sidecar version tagging
-- Supports dynamic Kubernetes object modifiers for patching deployed resources
-- Conditionally omits optional fields from the encoded attributes when left as empty defaults
+- Creates a nullplatform_provider_config resource of type 'gke-configuration' scoped to a specific NRN
+- Configures GKE cluster identity including name, location, and default application namespace
+- Configures public and optionally private Istio gateway references with a configurable namespace
+- Sets resource management parameters including memory-to-CPU ratio, request-to-limit ratios, and max milicores
+- Pins traffic manager sidecar container to an explicit fixed version tag, rejecting moving references like latest/main/master
+- Supports image pull secrets and custom Kubernetes service account name for secure workload deployments
+- Applies dynamic Kubernetes object modifiers via a structured list of selector, action, type, and value entries
 
 ## Basic Usage
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v6.19.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v6.20.0"
 
-  cluster_name        = "your-cluster-name"
-  location            = "your-location"
-  nrn                 = "your-nrn"
-  public_gateway_name = "your-public-gateway-name"
+  cluster_name            = "your-cluster-name"
+  location                = "your-location"
+  nrn                     = "your-nrn"
+  public_gateway_name     = "your-public-gateway-name"
+  traffic_manager_version = "your-traffic-manager-version"
+}
+```
+
+### Usage with Latest Version (Disallowed)
+
+```hcl
+module "gke" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v6.20.0"
+
+  cluster_name            = "your-cluster-name"
+  location                = "your-location"
+  nrn                     = "your-nrn"
+  public_gateway_name     = "your-public-gateway-name"
+  traffic_manager_version = "latest"
+}
+```
+
+### Usage with Main Branch (Disallowed)
+
+```hcl
+module "gke" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v6.20.0"
+
+  cluster_name            = "your-cluster-name"
+  location                = "your-location"
+  nrn                     = "your-nrn"
+  public_gateway_name     = "your-public-gateway-name"
+  traffic_manager_version = "main"
+}
+```
+
+### Usage with Master Branch (Disallowed)
+
+```hcl
+module "gke" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v6.20.0"
+
+  cluster_name            = "your-cluster-name"
+  location                = "your-location"
+  nrn                     = "your-nrn"
+  public_gateway_name     = "your-public-gateway-name"
+  traffic_manager_version = "master"
 }
 ```
 
@@ -78,22 +121,22 @@ resource "example_resource" "this" {
 | <a name="input_private_gateway_name"></a> [private\_gateway\_name](#input\_private\_gateway\_name) | Name of the private gateway | `string` | `""` | no |
 | <a name="input_public_gateway_name"></a> [public\_gateway\_name](#input\_public\_gateway\_name) | Name of the public gateway | `string` | n/a | yes |
 | <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | The name of the Kubernetes service account used for deployments | `string` | `""` | no |
-| <a name="input_traffic_manager_version"></a> [traffic\_manager\_version](#input\_traffic\_manager\_version) | Tag for the traffic manager sidecar container | `string` | `""` | no |
+| <a name="input_traffic_manager_version"></a> [traffic\_manager\_version](#input\_traffic\_manager\_version) | No default: every install pins this deliberately — see VERSIONS.md. Tag for the traffic manager sidecar container | `string` | n/a | yes |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
 {
   "name": "gke",
-  "description": "Configures a GKE provider configuration resource in Nullplatform by encoding cluster, gateway, resource management, and security settings as a typed provider config",
-  "architecture": "The module constructs a structured attributes object using locals that merge cluster identity, gateway configuration, optional resource management ratios, security settings, and object modifiers. A single nullplatform_provider_config resource of type 'gke-configuration' is created, binding the NRN and dimensions to the JSON-encoded attributes. Input variables flow into conditional merges within locals so that optional fields like private_gateway_name, service_account_name, and traffic_manager_version are only included when non-empty. The resulting resource acts as a configuration record in the Nullplatform platform for GKE cluster integration.",
+  "description": "Configures a GKE cluster provider in Nullplatform by creating a nullplatform_provider_config resource with cluster, gateway, resource management, security, and traffic manager settings",
+  "architecture": "The module constructs a set of locals that merge optional inputs (gateway namespace, private gateway, resource management ratios, image pull secrets, service account, object modifiers) into a structured attributes map. A single nullplatform_provider_config resource of type 'gke-configuration' is created, binding the NRN and optional dimensions to the JSON-encoded attributes map. The cluster identity (name, location, namespace), gateway configuration, traffic manager version, and security settings all flow through locals into the jsonencode(local.attributes) argument of the provider config resource.",
   "features": [
-    "Creates a nullplatform_provider_config resource of type gke-configuration with cluster identity and location",
-    "Configures public and optional private gateway references with namespace support",
-    "Encodes resource management settings including memory/CPU ratios and max milicores when provided",
-    "Attaches image pull secrets and Kubernetes service account name for secure workload identity",
-    "Includes optional traffic manager sidecar version tagging",
-    "Supports dynamic Kubernetes object modifiers for patching deployed resources",
-    "Conditionally omits optional fields from the encoded attributes when left as empty defaults"
+    "Creates a nullplatform_provider_config resource of type 'gke-configuration' scoped to a specific NRN",
+    "Configures GKE cluster identity including name, location, and default application namespace",
+    "Configures public and optionally private Istio gateway references with a configurable namespace",
+    "Sets resource management parameters including memory-to-CPU ratio, request-to-limit ratios, and max milicores",
+    "Pins traffic manager sidecar container to an explicit fixed version tag, rejecting moving references like latest/main/master",
+    "Supports image pull secrets and custom Kubernetes service account name for secure workload deployments",
+    "Applies dynamic Kubernetes object modifiers via a structured list of selector, action, type, and value entries"
   ],
   "inputs": [
     {
@@ -114,6 +157,11 @@ resource "example_resource" "this" {
     {
       "name": "public_gateway_name",
       "description": "Name of the public gateway",
+      "required": true
+    },
+    {
+      "name": "traffic_manager_version",
+      "description": "No default: every install pins this deliberately — see VERSIONS.md. Tag for the traffic manager sidecar container",
       "required": true
     },
     {
@@ -167,17 +215,12 @@ resource "example_resource" "this" {
       "required": false
     },
     {
-      "name": "traffic_manager_version",
-      "description": "Tag for the traffic manager sidecar container",
-      "required": false
-    },
-    {
       "name": "object_modifiers",
       "description": "List of modifications to dynamically modify k8s objects",
       "required": false
     }
   ],
   "outputs": [],
-  "hash": "3468ee6b8ab9a5b7883cd4c973373a2f"
+  "hash": "3807d94c8072975cb9bfdbadd93ff2f3"
 }
 END_AI_METADATA -->
