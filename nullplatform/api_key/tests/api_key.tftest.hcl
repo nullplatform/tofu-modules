@@ -18,6 +18,19 @@ run "agent_api_key" {
   }
 }
 
+run "base_api_key" {
+  command = plan
+
+  variables {
+    type = "base"
+  }
+
+  assert {
+    condition     = nullplatform_api_key.this.name == "BASE"
+    error_message = "Base API key name should be 'BASE'"
+  }
+}
+
 run "scope_notification_api_key" {
   command = plan
 
@@ -144,6 +157,35 @@ run "agent_grants_include_controlplane_agent" {
   assert {
     condition     = length([for g in nullplatform_api_key.this.grants : g if g.role_slug == "controlplane:agent"]) == 1
     error_message = "Agent API key should have grant for role 'controlplane:agent'"
+  }
+}
+
+run "base_grants_exclude_secrets_reader" {
+  command = plan
+
+  variables {
+    type = "base"
+  }
+
+  # The base chart does not read secrets, so it must not carry secrets-reader.
+  # Everything else matches the agent key so a single install can swap one for
+  # the other without losing a capability.
+  assert {
+    condition     = length(nullplatform_api_key.this.grants) == 4
+    error_message = "Base API key should have 4 grants (controlplane:agent, developer, ops, secops)"
+  }
+
+  assert {
+    condition     = length([for g in nullplatform_api_key.this.grants : g if g.role_slug == "secrets-reader"]) == 0
+    error_message = "Base API key must not grant secrets-reader"
+  }
+
+  assert {
+    condition = length(setsubtract(
+      toset([for g in nullplatform_api_key.this.grants : g.role_slug]),
+      toset(["controlplane:agent", "developer", "ops", "secops"]),
+    )) == 0
+    error_message = "Base API key grants should be exactly the agent roles minus secrets-reader"
   }
 }
 
