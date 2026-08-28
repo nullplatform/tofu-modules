@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.21.0](https://github.com/nullplatform/tofu-modules/compare/v6.20.0...v6.21.0) (2026-08-28)
+
+
+### Features
+
+* **api_key:** add base type ([#538](https://github.com/nullplatform/tofu-modules/issues/538)) ([272cbd0](https://github.com/nullplatform/tofu-modules/commit/272cbd08410dd78183363e1642c8a79478266cbd))
+
 ## [6.20.0](https://github.com/nullplatform/tofu-modules/compare/v6.19.1...v6.20.0) (2026-08-28)
 
 
