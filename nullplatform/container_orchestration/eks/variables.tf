@@ -112,9 +112,14 @@ variable "service_account_name" {
 }
 
 variable "traffic_manager_version" {
-  description = "Tag for the traffic manager sidecar container"
+  # example: 1.8.0
+  description = "No default: every install pins this deliberately — see VERSIONS.md. Pinned rather than tracking latest: a moving tag means a pod restart can pull a different build with no apply in between. Tag for the traffic manager sidecar container"
   type        = string
-  default     = "latest"
+
+  validation {
+    condition     = var.traffic_manager_version != "" && !contains(["latest", "main", "master"], lower(var.traffic_manager_version))
+    error_message = "traffic_manager_version must be a non-empty fixed version, not empty and not a moving reference."
+  }
 }
 
 variable "traffic_manager_port" {

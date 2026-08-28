@@ -100,8 +100,8 @@ run "tags_merge_custom_tags" {
   command = plan
 
   variables {
-    type        = "custom"
-    custom_name = "MY-KEY"
+    type              = "custom"
+    custom_name       = "MY-KEY"
     custom_role_slugs = ["developer"]
     custom_tags = [
       { key = "team", value = "platform" },

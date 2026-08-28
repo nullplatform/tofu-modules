@@ -8,6 +8,7 @@ variables {
   oci_compartment_ocid = "ocid1.compartment.oc1..aaaaaaaatest"
   oci_sa_ocid          = "ocid1.principal.oc1..aaaaaaaatest"
   oci_region           = "us-ashburn-1"
+  cert_manager_version = "v1.21.1"
 }
 
 # Validates OCI provider config plans successfully
