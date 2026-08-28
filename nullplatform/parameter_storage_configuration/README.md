@@ -20,7 +20,7 @@ The module delegates entirely to a remote `scope_configuration` module sourced f
 
 ```hcl
 module "parameter_storage_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=v6.19.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=v6.20.0"
 
   attributes                  = "your-attributes"
   np_api_key                  = "your-np-api-key"
