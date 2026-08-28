@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.20.0](https://github.com/nullplatform/tofu-modules/compare/v6.19.1...v6.20.0) (2026-08-28)
+
+
+### Features
+
+* require an explicit version for everything the modules deploy ([#540](https://github.com/nullplatform/tofu-modules/issues/540)) ([868ad98](https://github.com/nullplatform/tofu-modules/commit/868ad989663aa15e4dbdea98fa940e668e4994c2))
+
 ## [6.19.1](https://github.com/nullplatform/tofu-modules/compare/v6.19.0...v6.19.1) (2026-08-21)
 
 
