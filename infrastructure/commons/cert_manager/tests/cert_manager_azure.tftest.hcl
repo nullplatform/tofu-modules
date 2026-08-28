@@ -11,6 +11,7 @@ variables {
   azure_resource_group_name     = "rg-test"
   azure_tenant_id               = "11111111-2222-3333-4444-555555555555"
   azure_hosted_zone_name        = "myorg.nullimplementation.com"
+  cert_manager_version          = "v1.21.1"
 }
 
 # Validates Azure provider config plans successfully

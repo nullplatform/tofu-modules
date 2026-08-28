@@ -3,6 +3,7 @@ resource "helm_release" "cert_manager" {
   repository = "https://charts.jetstack.io"
   chart      = "cert-manager"
   namespace  = var.cert_manager_namespace
+  version    = var.cert_manager_version
 
   create_namespace  = true
   disable_webhooks  = false

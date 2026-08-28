@@ -1,7 +1,12 @@
 variable "nullplatform_base_helm_version" {
-  description = "Helm chart version for the nullplatform base."
+  # example: 2.44.0
+  description = "No default: every install pins this deliberately — see VERSIONS.md. Helm chart version for the nullplatform base."
   type        = string
-  default     = "2.44.0"
+
+  validation {
+    condition     = var.nullplatform_base_helm_version != "" && !contains(["latest", "main", "master"], lower(var.nullplatform_base_helm_version))
+    error_message = "nullplatform_base_helm_version must be a non-empty fixed version, not empty and not a moving reference."
+  }
 }
 
 variable "namespace" {
@@ -131,9 +136,14 @@ variable "control_plane_agent_image_repository" {
 }
 
 variable "control_plane_agent_image_tag" {
+  # example: 0.9.2
   type        = string
-  description = "Container image tag for the control plane agent."
-  default     = "0.9.2"
+  description = "No default: every install pins this deliberately — see VERSIONS.md. Container image tag for the control plane agent."
+
+  validation {
+    condition     = var.control_plane_agent_image_tag != "" && !contains(["latest", "main", "master"], lower(var.control_plane_agent_image_tag))
+    error_message = "control_plane_agent_image_tag must be a non-empty fixed version, not empty and not a moving reference."
+  }
 }
 
 ############################################
@@ -165,9 +175,14 @@ variable "logging_controller_image_repository" {
 }
 
 variable "logging_controller_image_tag" {
+  # example: 1.6.0
   type        = string
-  description = "Container image tag for the logs controller DaemonSet."
-  default     = "1.6.0"
+  description = "No default: every install pins this deliberately — see VERSIONS.md. Container image tag for the logs controller DaemonSet."
+
+  validation {
+    condition     = var.logging_controller_image_tag != "" && !contains(["latest", "main", "master"], lower(var.logging_controller_image_tag))
+    error_message = "logging_controller_image_tag must be a non-empty fixed version, not empty and not a moving reference."
+  }
 }
 
 ############################################
