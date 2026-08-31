@@ -39,8 +39,8 @@ variable "install_gateway_v2_crd" {
 
 variable "gateway_api_crd_ref" {
   type        = string
-  description = "Git ref (tag or commit) of kubernetes-sigs/gateway-api to install when install_gateway_v2_crd is true. Ignored on chart versions older than the one that introduced global.gatewayApiCrdRef."
-  default     = "444631bfe06f3bcca5d0eadf1857eac1d369421d"
+  description = "Git ref (tag or commit) of kubernetes-sigs/gateway-api to install when install_gateway_v2_crd is true. Ignored on chart versions older than the one that introduced global.gatewayApiCrdRef. Default (v1.3.0) matches what Istio 1.27 documents installing; re-check istio.io's version-pinned docs when bumping Istio."
+  default     = "v1.3.0"
 }
 
 ############################################

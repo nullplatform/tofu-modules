@@ -10,12 +10,12 @@ variables {
 # Gateway API CRD ref
 ############################################
 
-run "gateway_api_crd_ref_defaults_to_pinned_commit" {
+run "gateway_api_crd_ref_defaults_to_istio_1_27_ref" {
   command = plan
 
   assert {
-    condition     = strcontains(output.rendered_values, "gatewayApiCrdRef: \"444631bfe06f3bcca5d0eadf1857eac1d369421d\"")
-    error_message = "gatewayApiCrdRef should default to the chart's pinned commit ref"
+    condition     = strcontains(output.rendered_values, "gatewayApiCrdRef: \"v1.3.0\"")
+    error_message = "gatewayApiCrdRef should default to v1.3.0, matching Istio 1.27"
   }
 }
 
@@ -23,11 +23,11 @@ run "gateway_api_crd_ref_override" {
   command = plan
 
   variables {
-    gateway_api_crd_ref = "v1.3.0"
+    gateway_api_crd_ref = "v1.6.0"
   }
 
   assert {
-    condition     = strcontains(output.rendered_values, "gatewayApiCrdRef: \"v1.3.0\"")
+    condition     = strcontains(output.rendered_values, "gatewayApiCrdRef: \"v1.6.0\"")
     error_message = "gatewayApiCrdRef should reflect the overridden ref"
   }
 }
