@@ -1,6 +1,7 @@
 # Global settings
 global:
   installGatewayV2Crd: ${installGatewayV2Crd}
+  gatewayApiCrdRef: "${gatewayApiCrdRef}"
   # Kubernetes provider (options: "oke", "gke", "eks", "aks", "aro")
   provider: "${k8s_provider}"
   # AWS region (applicable for EKS provider)

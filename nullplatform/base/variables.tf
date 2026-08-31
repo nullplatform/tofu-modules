@@ -37,6 +37,12 @@ variable "install_gateway_v2_crd" {
   default     = false
 }
 
+variable "gateway_api_crd_ref" {
+  type        = string
+  description = "Git ref (tag or commit) of kubernetes-sigs/gateway-api to install when install_gateway_v2_crd is true. Ignored on chart versions older than the one that introduced global.gatewayApiCrdRef."
+  default     = "444631bfe06f3bcca5d0eadf1857eac1d369421d"
+}
+
 ############################################
 # TLS
 ############################################

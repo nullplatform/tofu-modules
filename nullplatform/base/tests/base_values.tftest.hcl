@@ -7,6 +7,32 @@ variables {
 }
 
 ############################################
+# Gateway API CRD ref
+############################################
+
+run "gateway_api_crd_ref_defaults_to_pinned_commit" {
+  command = plan
+
+  assert {
+    condition     = strcontains(output.rendered_values, "gatewayApiCrdRef: \"444631bfe06f3bcca5d0eadf1857eac1d369421d\"")
+    error_message = "gatewayApiCrdRef should default to the chart's pinned commit ref"
+  }
+}
+
+run "gateway_api_crd_ref_override" {
+  command = plan
+
+  variables {
+    gateway_api_crd_ref = "v1.3.0"
+  }
+
+  assert {
+    condition     = strcontains(output.rendered_values, "gatewayApiCrdRef: \"v1.3.0\"")
+    error_message = "gatewayApiCrdRef should reflect the overridden ref"
+  }
+}
+
+############################################
 # applicationLogs toggle
 ############################################
 
@@ -144,10 +170,10 @@ run "dynatrace_logs_disabled" {
   command = plan
 
   variables {
-    dynatrace_enabled      = true
-    dynatrace_api_key      = "dt-test-key"
+    dynatrace_enabled        = true
+    dynatrace_api_key        = "dt-test-key"
     dynatrace_environment_id = "dt-env-123"
-    dynatrace_logs_enabled = false
+    dynatrace_logs_enabled   = false
   }
 
   assert {
