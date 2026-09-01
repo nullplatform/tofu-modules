@@ -77,17 +77,6 @@ locals {
     var.extra_envs,
   )
 
-  # Template único y simple
-  nullplatform_agent_values = templatefile("${path.module}/templates/nullplatform_agent_values.tmpl.yaml", {
-    args                 = local.all_args
-    config_values        = local.all_config
-    image_tag            = var.image_tag
-    image_repository     = var.image_repository
-    aws_iam_role_arn     = var.cloud_provider == "aws" ? var.aws_iam_role_arn : ""
-    init_scripts         = var.init_scripts
-    service_account_name = var.service_account_name
-  })
-
   # Deploy-template/DNS values consumed by the worker when it renders a scope's
   # k8s deployment, not by the agent's own control loop.
   worker_env = {
@@ -101,41 +90,51 @@ locals {
     BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
   }
 
-  worker_service_account_name = var.service_account_name
-
+  # The worker container has no identity of its own — it always runs as the
+  # agent's own service account.
   worker_container_patch = {
     target = { package = "containers" }
     merge = {
       spec = merge(
-        local.worker_service_account_name != "" ? { serviceAccountName = local.worker_service_account_name } : {},
+        var.service_account_name != "" ? { serviceAccountName = var.service_account_name } : {},
         {
           containers = [
-            merge(
-              { name = "worker" },
-              var.worker_memory_limit != null ? { resources = { limits = { memory = var.worker_memory_limit } } } : {},
-              { env = [for k, v in local.worker_env : { name = k, value = v }] }
-            )
+            {
+              name      = "worker"
+              resources = { limits = { memory = "2Gi" } }
+              env       = [for k, v in local.worker_env : { name = k, value = v }]
+            }
           ]
         }
       )
     }
   }
 
-  # Computed base merged with var.worker as an extra/override layer, so the
-  # escape hatch keeps working without dropping the computed worker-container
-  # patch (patches are concatenated, not replaced).
-  worker_base = merge(
-    { backend = var.worker_backend },
-    var.worker_allowed_registries != null ? { allowedRegistries = var.worker_allowed_registries } : {},
-    { patches = concat([local.worker_container_patch], try(var.worker.patches, [])) }
-  )
+  # Sane module defaults, merged with var.worker as an extra/override layer —
+  # var.worker's own patches are concatenated (not replaced), so a caller who
+  # wants a different memory limit adds their own patch targeting the same
+  # container rather than the module inventing a dedicated override key for it.
+  worker_defaults = {
+    backend = "kubernetes"
+    patches = [local.worker_container_patch]
+  }
 
   worker_final = merge(
-    local.worker_base,
-    try({ for k, v in var.worker : k => v if k != "patches" }, {})
+    local.worker_defaults,
+    try({ for k, v in var.worker : k => v if k != "patches" }, {}),
+    { patches = concat(local.worker_defaults.patches, try(var.worker.patches, [])) }
   )
 
-  # Always emitted (unlike the agent's own values) so these env vars never
-  # silently disappear for callers who don't otherwise set var.worker.
-  worker_values = yamlencode({ worker = local.worker_final })
+  # Single combined values document — worker is just another top-level key
+  # of the same agent chart values, not a second Helm values layer.
+  nullplatform_agent_values = templatefile("${path.module}/templates/nullplatform_agent_values.tmpl.yaml", {
+    args                 = local.all_args
+    config_values        = local.all_config
+    image_tag            = var.image_tag
+    image_repository     = var.image_repository
+    aws_iam_role_arn     = var.cloud_provider == "aws" ? var.aws_iam_role_arn : ""
+    init_scripts         = var.init_scripts
+    service_account_name = var.service_account_name
+    worker               = local.worker_final
+  })
 }
