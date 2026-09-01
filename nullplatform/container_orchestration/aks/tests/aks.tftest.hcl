@@ -1,10 +1,11 @@
 mock_provider "nullplatform" {}
 
 variables {
-  nrn                 = "organization=myorg:account=myaccount"
-  cluster_name        = "my-aks-cluster"
-  resource_group      = "my-aks-resource-group"
-  public_gateway_name = "istio-ingress"
+  nrn                     = "organization=myorg:account=myaccount"
+  cluster_name            = "my-aks-cluster"
+  resource_group          = "my-aks-resource-group"
+  public_gateway_name     = "istio-ingress"
+  traffic_manager_version = "1.8.0"
 }
 
 run "aks_provider_type" {
@@ -77,10 +78,6 @@ run "optional_fields_excluded_when_empty" {
     error_message = "Attributes should not contain security when not set"
   }
 
-  assert {
-    condition     = !strcontains(nullplatform_provider_config.aks_config.attributes, "traffic_manager")
-    error_message = "Attributes should not contain traffic_manager when not set"
-  }
 
   assert {
     condition     = !strcontains(nullplatform_provider_config.aks_config.attributes, "object_modifiers")
@@ -227,7 +224,7 @@ run "with_traffic_manager" {
   command = plan
 
   variables {
-    traffic_manager_version = "latest"
+    traffic_manager_version = "1.8.0"
   }
 
   assert {
@@ -236,7 +233,7 @@ run "with_traffic_manager" {
   }
 
   assert {
-    condition     = strcontains(nullplatform_provider_config.aks_config.attributes, "latest")
+    condition     = strcontains(nullplatform_provider_config.aks_config.attributes, "1.8.0")
     error_message = "Attributes should contain traffic manager version"
   }
 }

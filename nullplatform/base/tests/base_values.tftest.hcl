@@ -2,8 +2,59 @@ mock_provider "helm" {}
 mock_provider "kubernetes" {}
 
 variables {
-  np_api_key   = "test-api-key"
-  k8s_provider = "eks"
+  np_api_key                     = "test-api-key"
+  k8s_provider                   = "eks"
+  nullplatform_base_helm_version = "2.44.0"
+  logging_controller_image_tag   = "1.6.0"
+  control_plane_agent_image_tag  = "0.9.2"
+}
+
+############################################
+# Gateway API CRD ref
+############################################
+
+run "gateway_api_crd_ref_defaults_to_istio_1_27_ref" {
+  command = plan
+
+  assert {
+    condition     = strcontains(output.rendered_values, "gatewayApiCrdRef: \"v1.3.0\"")
+    error_message = "gatewayApiCrdRef should default to v1.3.0, matching Istio 1.27"
+  }
+}
+
+run "gateway_api_crd_ref_override" {
+  command = plan
+
+  variables {
+    gateway_api_crd_ref = "v1.6.0"
+  }
+
+  assert {
+    condition     = strcontains(output.rendered_values, "gatewayApiCrdRef: \"v1.6.0\"")
+    error_message = "gatewayApiCrdRef should reflect the overridden ref"
+  }
+}
+
+run "install_gateway_v2_crd_defaults_to_true" {
+  command = plan
+
+  assert {
+    condition     = strcontains(output.rendered_values, "installGatewayV2Crd: true")
+    error_message = "install_gateway_v2_crd should default to true so CRDs actually reconcile to gateway_api_crd_ref"
+  }
+}
+
+run "install_gateway_v2_crd_override" {
+  command = plan
+
+  variables {
+    install_gateway_v2_crd = false
+  }
+
+  assert {
+    condition     = strcontains(output.rendered_values, "installGatewayV2Crd: false")
+    error_message = "install_gateway_v2_crd should still be overridable to false"
+  }
 }
 
 ############################################
@@ -144,10 +195,10 @@ run "dynatrace_logs_disabled" {
   command = plan
 
   variables {
-    dynatrace_enabled      = true
-    dynatrace_api_key      = "dt-test-key"
+    dynatrace_enabled        = true
+    dynatrace_api_key        = "dt-test-key"
     dynatrace_environment_id = "dt-env-123"
-    dynatrace_logs_enabled = false
+    dynatrace_logs_enabled   = false
   }
 
   assert {

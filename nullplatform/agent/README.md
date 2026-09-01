@@ -2,96 +2,163 @@
 
 ## Description
 
-Deploys the nullplatform agent to a Kubernetes cluster via a Helm chart, supporting AWS, GCP, Azure, and OCI cloud providers
+Deploys the nullplatform agent to a Kubernetes cluster via a Helm chart, configuring it for a specific cloud provider with pinned versions for all components
 
 ## Architecture
 
-The module creates a helm_release resource targeting the nullplatform-agent chart from the official nullplatform Helm repository, with chart values rendered from a templatefile into a YAML values document. A terraform_data resource tracks the api_key input and triggers helm_release replacement when the key changes, while a second terraform_data resource enforces cross-variable preconditions (e.g., aws_iam_role_arn for AWS, Azure credentials for Azure). Cloud-provider-specific configuration is merged into the agent's environment variables via locals, and an optional worker orchestration block is encoded as a second Helm values layer when the worker variable is non-null.
+The module creates a `helm_release` resource named `agent` that deploys the `nullplatform-agent` chart from the nullplatform Helm repository, with values templated from `nullplatform_agent_values.tmpl.yaml` using `templatefile()`. A `terraform_data.api_key_trigger` resource monitors the API key and forces a `helm_release` replacement when it changes, while a second `terraform_data.cross_variable_validation` resource enforces cross-variable preconditions at plan time. Cloud-provider-specific configuration (AWS IAM role ARN, Azure credentials) is merged into the Helm values via `locals.all_config`, and an optional `worker` block is encoded with `yamlencode` and appended as a second Helm values layer.
 
 ## Features
 
-- Deploys nullplatform-agent Helm chart with cloud-provider-specific environment variable injection for AWS, GCP, Azure, and OCI
-- Enforces cross-variable preconditions at plan time using terraform_data lifecycle blocks for required provider credentials
-- Triggers full Helm release replacement when the API key changes via a terraform_data input tracker
-- Configures agent Git repository scope and extra repositories by merging and deduplicating entries into a comma-separated list
-- Supports optional worker orchestration configuration including allowedRegistries, patches, idleTTL, and rules passed as a second Helm values layer
-- Renders agent arguments and environment variables from a YAML template supporting tags, API key, cluster name, domain, DNS type, and ingress paths
-- Supports Istio ingress with required service_template, initial_ingress_path, and blue_green_ingress_path via precondition validation
+- Deploys nullplatform-agent Helm chart with strictly pinned chart version, agent image tag, and traffic manager image tag to prevent unintended drift
+- Configures cloud-provider-specific environment variables for AWS (IAM role ARN), Azure (client credentials, subscription, resource group, tenant), GCP, and OCI
+- Assembles agent repository list from a primary scope repo with pinned git tag and optional extra repos, each requiring a fixed ref fragment
+- Enforces cross-variable preconditions at plan time ensuring required cloud credentials are present and Istio ingress paths are configured when needed
+- Supports worker orchestration configuration via a structured `worker` block merged as a second Helm values layer for allowedRegistries, patches, and idleTTL
+- Triggers full Helm release replacement when the API key changes via a `terraform_data` lifecycle dependency
+- Accepts arbitrary extra environment variables via `extra_envs` to override or extend the default agent configuration
 
 ## Basic Usage
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.18.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.0"
 
-  api_key        = "your-api-key"
-  cloud_provider = "your-cloud-provider"
-  cluster_name   = "your-cluster-name"
-  image_tag      = "your-image-tag"
-  tags_selectors = "your-tags-selectors"
+  agent_repos_scope_tag           = "your-agent-repos-scope-tag"
+  agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
+  api_key                         = "your-api-key"
+  cloud_provider                  = "your-cloud-provider"
+  cluster_name                    = "your-cluster-name"
+  image_tag                       = "your-image-tag"
+  nullplatform_agent_helm_version = "your-nullplatform-agent-helm-version"
+  tags_selectors                  = "your-tags-selectors"
 }
 ```
 
-### Usage with AWS
+### Usage with AWS Cloud Provider
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.18.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.0"
 
-  api_key          = "your-api-key"
-  aws_iam_role_arn = "your-aws-iam-role-arn"  # Required when cloud_provider = "aws"
-  cloud_provider   = "aws"
-  cluster_name     = "your-cluster-name"
-  image_tag        = "your-image-tag"
-  tags_selectors   = "your-tags-selectors"
+  agent_repos_scope_tag           = "your-agent-repos-scope-tag"
+  agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
+  api_key                         = "your-api-key"
+  aws_iam_role_arn                = "your-aws-iam-role-arn"  # Required when cloud_provider = "aws"
+  cloud_provider                  = "aws"
+  cluster_name                    = "your-cluster-name"
+  image_tag                       = "your-image-tag"
+  nullplatform_agent_helm_version = "your-nullplatform-agent-helm-version"
+  tags_selectors                  = "your-tags-selectors"
 }
 ```
 
-### Usage with GCP
+### Usage with GCP Cloud Provider
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.18.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.0"
 
-  api_key        = "your-api-key"
-  cloud_provider = "gcp"
-  cluster_name   = "your-cluster-name"
-  image_tag      = "your-image-tag"
-  tags_selectors = "your-tags-selectors"
+  agent_repos_scope_tag           = "your-agent-repos-scope-tag"
+  agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
+  api_key                         = "your-api-key"
+  cloud_provider                  = "gcp"
+  cluster_name                    = "your-cluster-name"
+  image_tag                       = "your-image-tag"
+  nullplatform_agent_helm_version = "your-nullplatform-agent-helm-version"
+  tags_selectors                  = "your-tags-selectors"
 }
 ```
 
-### Usage with Azure
+### Usage with Azure Cloud Provider
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.18.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.0"
 
-  api_key                = "your-api-key"
-  azure_client_id        = "your-azure-client-id"  # Required when cloud_provider = "azure"
-  azure_client_secret    = "your-azure-client-secret"  # Required when cloud_provider = "azure"
-  azure_resource_group   = "your-azure-resource-group"  # Required when cloud_provider = "azure"
-  azure_subscription_id  = "your-azure-subscription-id"  # Required when cloud_provider = "azure"
-  azure_tenant_id        = "your-azure-tenant-id"  # Required when cloud_provider = "azure"
-  cloud_provider         = "azure"
-  cluster_name           = "your-cluster-name"
-  image_tag              = "your-image-tag"
-  private_hosted_zone_rg = "your-private-hosted-zone-rg"  # Required when cloud_provider = "azure"
-  tags_selectors         = "your-tags-selectors"
+  agent_repos_scope_tag           = "your-agent-repos-scope-tag"
+  agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
+  api_key                         = "your-api-key"
+  azure_client_id                 = "your-azure-client-id"  # Required when cloud_provider = "azure"
+  azure_client_secret             = "your-azure-client-secret"  # Required when cloud_provider = "azure"
+  azure_resource_group            = "your-azure-resource-group"  # Required when cloud_provider = "azure"
+  azure_subscription_id           = "your-azure-subscription-id"  # Required when cloud_provider = "azure"
+  azure_tenant_id                 = "your-azure-tenant-id"  # Required when cloud_provider = "azure"
+  cloud_provider                  = "azure"
+  cluster_name                    = "your-cluster-name"
+  image_tag                       = "your-image-tag"
+  nullplatform_agent_helm_version = "your-nullplatform-agent-helm-version"
+  private_hosted_zone_rg          = "your-private-hosted-zone-rg"  # Required when cloud_provider = "azure"
+  tags_selectors                  = "your-tags-selectors"
 }
 ```
 
-### Usage with OCI
+### Usage with OCI Cloud Provider
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.18.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.0"
 
-  api_key        = "your-api-key"
-  cloud_provider = "oci"
-  cluster_name   = "your-cluster-name"
-  image_tag      = "your-image-tag"
-  tags_selectors = "your-tags-selectors"
+  agent_repos_scope_tag           = "your-agent-repos-scope-tag"
+  agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
+  api_key                         = "your-api-key"
+  cloud_provider                  = "oci"
+  cluster_name                    = "your-cluster-name"
+  image_tag                       = "your-image-tag"
+  nullplatform_agent_helm_version = "your-nullplatform-agent-helm-version"
+  tags_selectors                  = "your-tags-selectors"
+}
+```
+
+### Usage with Pinned Helm Chart Version
+
+```hcl
+module "agent" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.0"
+
+  agent_repos_scope_tag           = "your-agent-repos-scope-tag"
+  agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
+  api_key                         = "your-api-key"
+  cloud_provider                  = "your-cloud-provider"
+  cluster_name                    = "your-cluster-name"
+  image_tag                       = "your-image-tag"
+  nullplatform_agent_helm_version = "fixed semver (e.g. 2.37.0)"
+  tags_selectors                  = "your-tags-selectors"
+}
+```
+
+### Usage with Pinned Scope Repository Tag
+
+```hcl
+module "agent" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.0"
+
+  agent_repos_scope               = "your-agent-repos-scope"  # Required when agent_repos_scope_tag = "fixed git tag (e.g. v1.15.1)"
+  agent_repos_scope_tag           = "fixed git tag (e.g. v1.15.1)"
+  agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
+  api_key                         = "your-api-key"
+  cloud_provider                  = "your-cloud-provider"
+  cluster_name                    = "your-cluster-name"
+  image_tag                       = "your-image-tag"
+  nullplatform_agent_helm_version = "your-nullplatform-agent-helm-version"
+  tags_selectors                  = "your-tags-selectors"
+}
+```
+
+### Usage with Pinned Traffic Manager Tag
+
+```hcl
+module "agent" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.0"
+
+  agent_repos_scope_tag           = "your-agent-repos-scope-tag"
+  agent_traffic_manager_tag       = "fixed semver (e.g. 1.8.0)"
+  api_key                         = "your-api-key"
+  cloud_provider                  = "your-cloud-provider"
+  cluster_name                    = "your-cluster-name"
+  image_tag                       = "your-image-tag"
+  nullplatform_agent_helm_version = "your-nullplatform-agent-helm-version"
+  tags_selectors                  = "your-tags-selectors"
 }
 ```
 
@@ -131,8 +198,11 @@ resource "example_resource" "this" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_agent_repos_extra"></a> [agent\_repos\_extra](#input\_agent\_repos\_extra) | List of additional Git repositories used for extended agent configuration | `list(string)` | `[]` | no |
-| <a name="input_agent_repos_scope"></a> [agent\_repos\_scope](#input\_agent\_repos\_scope) | Git repository URL containing agent scope configurations (format: repo#branch) | `string` | `"https://github.com/nullplatform/scopes.git#main"` | no |
+| <a name="input_agent_repos_extra"></a> [agent\_repos\_extra](#input\_agent\_repos\_extra) | List of additional Git repositories used for extended agent configuration. Each entry MUST carry a pinned ref fragment (repo.git#v1.2.3); moving refs are rejected. Covers scopes-* and services-* without enumerating them. | `list(string)` | `[]` | no |
+| <a name="input_agent_repos_scope"></a> [agent\_repos\_scope](#input\_agent\_repos\_scope) | Git repository URL containing agent scope configurations, WITHOUT the ref fragment. The ref goes in agent\_repos\_scope\_tag. | `string` | `"https://github.com/nullplatform/scopes.git"` | no |
+| <a name="input_agent_repos_scope_tag"></a> [agent\_repos\_scope\_tag](#input\_agent\_repos\_scope\_tag) | Git tag of the scopes repository to clone. No default: every install pins this deliberately so the agent cannot pick up scope changes it was never rolled out with — see VERSIONS.md. | `string` | n/a | yes |
+| <a name="input_agent_traffic_manager_repository"></a> [agent\_traffic\_manager\_repository](#input\_agent\_traffic\_manager\_repository) | Container image repository for the traffic manager. Defaults to the official nullplatform image; override to pull from a mirror. Matches the pattern nullplatform/base uses for its own images. | `string` | `"public.ecr.aws/nullplatform/k8s-traffic-manager"` | no |
+| <a name="input_agent_traffic_manager_tag"></a> [agent\_traffic\_manager\_tag](#input\_agent\_traffic\_manager\_tag) | No default: every install pins this deliberately — see VERSIONS.md. Image tag for the traffic manager, published to the agent as TRAFFIC\_CONTAINER\_IMAGE. Pinning this used to mean passing the whole image string through extra\_envs; the registry lives here so only the tag is exposed. extra\_envs still takes precedence for anyone who needs a digest or a mirrored path. | `string` | n/a | yes |
 | <a name="input_api_key"></a> [api\_key](#input\_api\_key) | API key for authenticating with the nullplatform API | `string` | n/a | yes |
 | <a name="input_aws_iam_role_arn"></a> [aws\_iam\_role\_arn](#input\_aws\_iam\_role\_arn) | ARN of the AWS IAM role assigned to the agent | `string` | `""` | no |
 | <a name="input_azure_client_id"></a> [azure\_client\_id](#input\_azure\_client\_id) | Azure client ID for authentication | `string` | `null` | no |
@@ -155,7 +225,7 @@ resource "example_resource" "this" {
 | <a name="input_initial_ingress_path"></a> [initial\_ingress\_path](#input\_initial\_ingress\_path) | Ingress template path for the initial deploy. Empty (default) uses the scope type's own values.yaml. All three must be set together or all left empty, or the deploy changes template flavour mid-way; see ingress\_type for the Istio preset. | `string` | `""` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Kubernetes namespace where the nullplatform agent will run | `string` | `"nullplatform-tools"` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | DEPRECATED, accepted for compatibility and ignored. Nullplatform Resource Name; the agent resolves its own scope from the API key, so this module never consumed the value | `string` | `""` | no |
-| <a name="input_nullplatform_agent_helm_version"></a> [nullplatform\_agent\_helm\_version](#input\_nullplatform\_agent\_helm\_version) | Version of the nullplatform agent Helm chart to deploy | `string` | `"2.37.0"` | no |
+| <a name="input_nullplatform_agent_helm_version"></a> [nullplatform\_agent\_helm\_version](#input\_nullplatform\_agent\_helm\_version) | No default: every install pins this deliberately — see VERSIONS.md. Version of the nullplatform agent Helm chart to deploy | `string` | n/a | yes |
 | <a name="input_private_domain"></a> [private\_domain](#input\_private\_domain) | DEPRECATED, accepted for compatibility and ignored. Previously rendered as the PRIVATE\_DOMAIN env var for gcp and oci, which nothing in nullplatform/scopes reads | `string` | `""` | no |
 | <a name="input_private_gateway_name"></a> [private\_gateway\_name](#input\_private\_gateway\_name) | Name of the private/internal gateway used for routing. Must match the Gateway the cluster actually has: nullplatform/base hardcodes 'gateway-private', and a mismatch produces HTTPRoutes with an unresolvable parentRef that die in verify\_networking\_reconciliation. | `string` | `"gateway-private"` | no |
 | <a name="input_private_hosted_zone_rg"></a> [private\_hosted\_zone\_rg](#input\_private\_hosted\_zone\_rg) | Resource group for private hosted zone | `string` | `null` | no |
@@ -171,16 +241,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "agent",
-  "description": "Deploys the nullplatform agent to a Kubernetes cluster via a Helm chart, supporting AWS, GCP, Azure, and OCI cloud providers",
-  "architecture": "The module creates a helm_release resource targeting the nullplatform-agent chart from the official nullplatform Helm repository, with chart values rendered from a templatefile into a YAML values document. A terraform_data resource tracks the api_key input and triggers helm_release replacement when the key changes, while a second terraform_data resource enforces cross-variable preconditions (e.g., aws_iam_role_arn for AWS, Azure credentials for Azure). Cloud-provider-specific configuration is merged into the agent's environment variables via locals, and an optional worker orchestration block is encoded as a second Helm values layer when the worker variable is non-null.",
+  "description": "Deploys the nullplatform agent to a Kubernetes cluster via a Helm chart, configuring it for a specific cloud provider with pinned versions for all components",
+  "architecture": "The module creates a `helm_release` resource named `agent` that deploys the `nullplatform-agent` chart from the nullplatform Helm repository, with values templated from `nullplatform_agent_values.tmpl.yaml` using `templatefile()`. A `terraform_data.api_key_trigger` resource monitors the API key and forces a `helm_release` replacement when it changes, while a second `terraform_data.cross_variable_validation` resource enforces cross-variable preconditions at plan time. Cloud-provider-specific configuration (AWS IAM role ARN, Azure credentials) is merged into the Helm values via `locals.all_config`, and an optional `worker` block is encoded with `yamlencode` and appended as a second Helm values layer.",
   "features": [
-    "Deploys nullplatform-agent Helm chart with cloud-provider-specific environment variable injection for AWS, GCP, Azure, and OCI",
-    "Enforces cross-variable preconditions at plan time using terraform_data lifecycle blocks for required provider credentials",
-    "Triggers full Helm release replacement when the API key changes via a terraform_data input tracker",
-    "Configures agent Git repository scope and extra repositories by merging and deduplicating entries into a comma-separated list",
-    "Supports optional worker orchestration configuration including allowedRegistries, patches, idleTTL, and rules passed as a second Helm values layer",
-    "Renders agent arguments and environment variables from a YAML template supporting tags, API key, cluster name, domain, DNS type, and ingress paths",
-    "Supports Istio ingress with required service_template, initial_ingress_path, and blue_green_ingress_path via precondition validation"
+    "Deploys nullplatform-agent Helm chart with strictly pinned chart version, agent image tag, and traffic manager image tag to prevent unintended drift",
+    "Configures cloud-provider-specific environment variables for AWS (IAM role ARN), Azure (client credentials, subscription, resource group, tenant), GCP, and OCI",
+    "Assembles agent repository list from a primary scope repo with pinned git tag and optional extra repos, each requiring a fixed ref fragment",
+    "Enforces cross-variable preconditions at plan time ensuring required cloud credentials are present and Istio ingress paths are configured when needed",
+    "Supports worker orchestration configuration via a structured `worker` block merged as a second Helm values layer for allowedRegistries, patches, and idleTTL",
+    "Triggers full Helm release replacement when the API key changes via a `terraform_data` lifecycle dependency",
+    "Accepts arbitrary extra environment variables via `extra_envs` to override or extend the default agent configuration"
   ],
   "inputs": [
     {
@@ -209,6 +279,31 @@ resource "example_resource" "this" {
       "required": true
     },
     {
+      "name": "nullplatform_agent_helm_version",
+      "description": "No default: every install pins this deliberately — see VERSIONS.md. Version of the nullplatform agent Helm chart to deploy",
+      "required": true
+    },
+    {
+      "name": "agent_repos_scope_tag",
+      "description": "Git tag of the scopes repository to clone. No default: every install pins this deliberately so the agent cannot pick up scope changes it was never rolled out with — see VERSIONS.md.",
+      "required": true
+    },
+    {
+      "name": "agent_traffic_manager_tag",
+      "description": "No default: every install pins this deliberately — see VERSIONS.md. Image tag for the traffic manager, published to the agent as TRAFFIC_CONTAINER_IMAGE. Pinning this used to mean passing the whole image string through extra_envs; the registry lives here so only the tag is exposed. extra_envs still takes precedence for anyone who needs a digest or a mirrored path.",
+      "required": true
+    },
+    {
+      "name": "agent_repos_scope",
+      "description": "Git repository URL containing agent scope configurations, WITHOUT the ref fragment. The ref goes in agent_repos_scope_tag.",
+      "required": false
+    },
+    {
+      "name": "agent_repos_extra",
+      "description": "List of additional Git repositories used for extended agent configuration. Each entry MUST carry a pinned ref fragment (repo.git#v1.2.3); moving refs are rejected. Covers scopes-* and services-* without enumerating them.",
+      "required": false
+    },
+    {
       "name": "release_name",
       "description": "Override for the Helm release name. Defaults to nullplatform-agent",
       "required": false
@@ -216,11 +311,6 @@ resource "example_resource" "this" {
     {
       "name": "service_account_name",
       "description": "Override for the Kubernetes ServiceAccount name created by the Helm chart",
-      "required": false
-    },
-    {
-      "name": "nullplatform_agent_helm_version",
-      "description": "Version of the nullplatform agent Helm chart to deploy",
       "required": false
     },
     {
@@ -234,13 +324,8 @@ resource "example_resource" "this" {
       "required": false
     },
     {
-      "name": "agent_repos_scope",
-      "description": "Git repository URL containing agent scope configurations (format: repo#branch)",
-      "required": false
-    },
-    {
-      "name": "agent_repos_extra",
-      "description": "List of additional Git repositories used for extended agent configuration",
+      "name": "agent_traffic_manager_repository",
+      "description": "Container image repository for the traffic manager. Defaults to the official nullplatform image; override to pull from a mirror. Matches the pattern nullplatform/base uses for its own images.",
       "required": false
     },
     {
@@ -340,6 +425,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "5d75d7c82734f313f68e95bceec85b29"
+  "hash": "e35c51a226389be6d4a4fefad857475d"
 }
 END_AI_METADATA -->

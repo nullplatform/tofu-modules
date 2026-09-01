@@ -5,6 +5,7 @@ locals {
       # ---- global ----
       k8s_provider        = var.k8s_provider
       installGatewayV2Crd = var.install_gateway_v2_crd ? "true" : "false"
+      gatewayApiCrdRef    = var.gateway_api_crd_ref
       awsRegion           = var.aws_region
 
       # ---- tls ----

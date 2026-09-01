@@ -4,7 +4,13 @@
 
 locals {
 
-  scope_list = compact([trimspace(coalesce(var.agent_repos_scope, ""))])
+  # The repository lives here and only the tag is exposed, so a version bump is a variable
+
+  # change instead of a hand-assembled URL.
+
+  scope_repo = trimspace(coalesce(var.agent_repos_scope, ""))
+
+  scope_list = compact([local.scope_repo != "" ? "${local.scope_repo}#${trimspace(var.agent_repos_scope_tag)}" : ""])
   # Parse comma-separated extra repositories and clean whitespace
   repos_extra = compact([for s in var.agent_repos_extra : trimspace(s)])
 
@@ -69,6 +75,7 @@ locals {
     CLUSTER_NAME            = var.cluster_name
     NAMESPACE               = var.namespace
     IMAGE_TAG               = var.image_tag
+    TRAFFIC_CONTAINER_IMAGE = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
     DOMAIN                  = var.domain
     DNS_TYPE                = var.dns_type
     USE_ACCOUNT_SLUG        = var.use_account_slug

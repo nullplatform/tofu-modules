@@ -2,11 +2,14 @@ mock_provider "nullplatform" {}
 mock_provider "helm" {}
 
 variables {
-  api_key        = "test-api-key"
-  cluster_name   = "test-cluster"
-  tags_selectors = { environment = "test" }
-  image_tag      = "latest"
-  cloud_provider = "gcp"
+  api_key                         = "test-api-key"
+  cluster_name                    = "test-cluster"
+  tags_selectors                  = { environment = "test" }
+  image_tag                       = "latest"
+  cloud_provider                  = "gcp"
+  nullplatform_agent_helm_version = "2.37.0"
+  agent_traffic_manager_tag       = "1.8.0"
+  agent_repos_scope_tag           = "v1.15.1"
 }
 
 ###############################################################################

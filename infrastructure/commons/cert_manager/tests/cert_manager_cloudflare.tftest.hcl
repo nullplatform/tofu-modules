@@ -1,11 +1,12 @@
 mock_provider "helm" {}
 
 variables {
-  cloud_provider      = "cloudflare"
-  hosted_zone_name    = "myorg.nullimplementation.com"
-  account_slug        = "myorg"
-  private_domain_name = "myorg.nullimplementation.com"
-  cloudflare_token    = "fake-cloudflare-token-for-testing"
+  cloud_provider       = "cloudflare"
+  hosted_zone_name     = "myorg.nullimplementation.com"
+  account_slug         = "myorg"
+  private_domain_name  = "myorg.nullimplementation.com"
+  cloudflare_token     = "fake-cloudflare-token-for-testing"
+  cert_manager_version = "v1.21.1"
 }
 
 # Validates Cloudflare provider config plans successfully

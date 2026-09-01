@@ -112,7 +112,7 @@ variable "zone_id_filter" {
 }
 
 variable "zone_type" {
-  description = "The Route53 hosted zone type for ExternalDNS to manage (public or private)"
+  description = "The DNS zone type/visibility for ExternalDNS to manage (public or private). Used by the 'aws' (--aws-zone-type) and 'google' (--google-zone-visibility) providers."
   type        = string
   default     = ""
   nullable    = false
@@ -164,8 +164,8 @@ variable "dns_provider_name" {
   type        = string
   description = "The DNS provider to use with ExternalDNS. Use 'azure' for Azure Public DNS zones and 'azure-private-dns' for Azure Private DNS zones — both share the same auth, secret, and ServiceAccount wiring."
   validation {
-    condition     = contains(["cloudflare", "aws", "oci", "azure", "azure-private-dns"], var.dns_provider_name)
-    error_message = "dns_provider_name must be one of: 'cloudflare', 'aws', 'oci', 'azure', 'azure-private-dns'."
+    condition     = contains(["cloudflare", "aws", "oci", "azure", "azure-private-dns", "google"], var.dns_provider_name)
+    error_message = "dns_provider_name must be one of: 'cloudflare', 'aws', 'oci', 'azure', 'azure-private-dns', 'google'."
   }
 }
 
@@ -214,5 +214,30 @@ variable "azure_tenant_id" {
   description = "Azure tenant ID (required when dns_provider_name is 'azure')"
   type        = string
   default     = ""
+}
+
+###############################################################################
+# GCP CONFIGURATION
+###############################################################################
+
+variable "gcp_project_id" {
+  description = "The GCP project ID where the Cloud DNS zones are located (required when dns_provider_name is 'google')"
+  type        = string
+  default     = ""
+  nullable    = false
+}
+
+variable "gcp_service_account_email" {
+  description = "Email of the GCP service account bound via Workload Identity for Cloud DNS access (required when dns_provider_name is 'google'). Create the service account and the Workload Identity binding outside this module (e.g. with infrastructure/gcp/iam) and pass its email here."
+  type        = string
+  default     = ""
+  nullable    = false
+}
+
+variable "gcp_service_account_name" {
+  description = "The Kubernetes service account name for GCP Workload Identity"
+  type        = string
+  default     = "external-dns"
+  nullable    = false
 }
 

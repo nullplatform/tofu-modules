@@ -1,5 +1,40 @@
 # Changelog
 
+## [6.22.0](https://github.com/nullplatform/tofu-modules/compare/v6.21.0...v6.22.0) (2026-09-01)
+
+
+### Features
+
+* **istio:** remove legacy istio-ingressgateway helm release ([#543](https://github.com/nullplatform/tofu-modules/issues/543)) ([957dbc4](https://github.com/nullplatform/tofu-modules/commit/957dbc4b7f9ed1346511f49042fd939143d3831f))
+
+## [6.21.0](https://github.com/nullplatform/tofu-modules/compare/v6.20.0...v6.21.0) (2026-08-28)
+
+
+### Features
+
+* **api_key:** add base type ([#538](https://github.com/nullplatform/tofu-modules/issues/538)) ([272cbd0](https://github.com/nullplatform/tofu-modules/commit/272cbd08410dd78183363e1642c8a79478266cbd))
+
+## [6.20.0](https://github.com/nullplatform/tofu-modules/compare/v6.19.1...v6.20.0) (2026-08-28)
+
+
+### Features
+
+* require an explicit version for everything the modules deploy ([#540](https://github.com/nullplatform/tofu-modules/issues/540)) ([868ad98](https://github.com/nullplatform/tofu-modules/commit/868ad989663aa15e4dbdea98fa940e668e4994c2))
+
+## [6.19.1](https://github.com/nullplatform/tofu-modules/compare/v6.19.0...v6.19.1) (2026-08-21)
+
+
+### Bug Fixes
+
+* **base:** bump default nullplatform_base_helm_version to 2.44.0 ([#534](https://github.com/nullplatform/tofu-modules/issues/534)) ([a7e91b7](https://github.com/nullplatform/tofu-modules/commit/a7e91b7ad613da19de3a653c497152480e33f15d))
+
+## [6.19.0](https://github.com/nullplatform/tofu-modules/compare/v6.18.0...v6.19.0) (2026-08-21)
+
+
+### Features
+
+* **external_dns:** add google provider support ([#532](https://github.com/nullplatform/tofu-modules/issues/532)) ([222ff52](https://github.com/nullplatform/tofu-modules/commit/222ff522601d3b4f5c85cc016e79981fa58cd5c4))
+
 ## [6.18.0](https://github.com/nullplatform/tofu-modules/compare/v6.17.0...v6.18.0) (2026-08-19)
 
 

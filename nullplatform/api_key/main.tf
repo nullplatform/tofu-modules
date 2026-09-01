@@ -36,7 +36,7 @@ resource "nullplatform_api_key" "this" {
 
     precondition {
       condition     = var.type == "custom" || var.nrn != null
-      error_message = "nrn is required for predefined types (agent, scope_notification, service_notification)"
+      error_message = "nrn is required for predefined types (agent, base, scope_notification, service_notification)"
     }
 
     precondition {
