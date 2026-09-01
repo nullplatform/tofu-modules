@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.22.1](https://github.com/nullplatform/tofu-modules/compare/v6.22.0...v6.22.1) (2026-09-01)
+
+
+### Bug Fixes
+
+* **base:** expose gateway_api_crd_ref, default to v1.3.0 for Istio 1.27 ([#544](https://github.com/nullplatform/tofu-modules/issues/544)) ([4bf8323](https://github.com/nullplatform/tofu-modules/commit/4bf8323b32716944411b745e2f15aae8da1a64d2))
+
 ## [6.22.0](https://github.com/nullplatform/tofu-modules/compare/v6.21.0...v6.22.0) (2026-09-01)
 
 
