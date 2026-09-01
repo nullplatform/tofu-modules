@@ -14,16 +14,28 @@
 locals {
   package_enabled = var.package != null
 
+  # oci_image is the only artifact type where "registry"/"repository" mean
+  # anything — other types (git_repository, blob, oras_artifact) have an
+  # unrelated meta shape, so this default never applies to them.
+  package_oci_meta_defaults = {
+    registry   = "public.ecr.aws"
+    repository = "nullplatform/scopes/containers"
+  }
+
   # Artifacts split by intent:
   #   create — `meta` given, lookup=false: register a new revision here
   #   lookup — `meta` given, lookup=true: resolve an existing artifact by identity
   #   pinned — explicit resource ids, taken as-is
   package_artifacts_to_create = local.package_enabled ? {
-    for a in var.package.artifacts : a.name => a if a.meta != null && !a.lookup
+    for a in var.package.artifacts : a.name => merge(a, {
+      meta = a.type == "oci_image" ? merge(local.package_oci_meta_defaults, a.meta) : a.meta
+    }) if a.meta != null && !a.lookup
   } : {}
 
   package_artifacts_to_lookup = local.package_enabled ? {
-    for a in var.package.artifacts : a.name => a if a.meta != null && a.lookup
+    for a in var.package.artifacts : a.name => merge(a, {
+      meta = a.type == "oci_image" ? merge(local.package_oci_meta_defaults, a.meta) : a.meta
+    }) if a.meta != null && a.lookup
   } : {}
 
   package_artifacts_existing = local.package_enabled ? {

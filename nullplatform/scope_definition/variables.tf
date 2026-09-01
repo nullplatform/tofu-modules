@@ -193,6 +193,13 @@ variable "package" {
         the latest revision is used);
       • pin explicit ids — set `resource_id` + `resource_revision_id`.
 
+    For an "oci_image" artifact (the default type), `name` defaults to
+    "worker-image" and meta.registry/meta.repository default to
+    "public.ecr.aws"/"nullplatform/scopes/containers" — the platform's own
+    container-scope worker image — when omitted from `meta`. Only meta.digest
+    needs setting on every release; every other artifact type gets no meta
+    defaults (their meta shape is unrelated to a container registry).
+
     Null (the default) keeps the classic module behavior — no package.
   EOT
   type = object({
@@ -203,7 +210,7 @@ variable "package" {
     tags       = optional(map(string), {}) # release tags: name => version (requires an API with the package release-tag routes)
     visible_to = optional(list(string))    # default: [var.nrn]
     artifacts = optional(list(object({
-      name                 = string
+      name                 = optional(string, "worker-image")
       type                 = optional(string, "oci_image") # oci_image | oras_artifact | git_repository | blob
       meta                 = optional(any)                 # register (lookup=false) or find (lookup=true)
       lookup               = optional(bool, false)         # true: resolve an EXISTING artifact by meta identity
