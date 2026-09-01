@@ -18,7 +18,7 @@ This module creates an azurerm_resource_group resource and outputs its name and 
 
 ```hcl
 module "resource_group" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/resource_group?ref=v6.21.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/resource_group?ref=v6.22.0"
 
   location            = "your-location"
   resource_group_name = "your-resource-group-name"
