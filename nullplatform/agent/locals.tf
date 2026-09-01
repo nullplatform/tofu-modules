@@ -54,6 +54,15 @@ locals {
     IMAGE_PULL_SECRETS      = var.image_pull_secrets
     PRIVATE_GATEWAY_NAME    = var.private_gateway_name
     PUBLIC_GATEWAY_NAME     = var.public_gateway_name
+    # Deploy-template/DNS values — read by the worker when it renders a
+    # scope's k8s deployment, and also exposed to the agent's own config.
+    DNS_TYPE                = var.dns_type
+    DOMAIN                  = var.domain
+    USE_ACCOUNT_SLUG        = var.use_account_slug
+    K8S_NAMESPACE           = var.namespace
+    SERVICE_TEMPLATE        = var.service_template
+    INITIAL_INGRESS_PATH    = var.initial_ingress_path
+    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
   }
 
   cloud_config = {
@@ -73,30 +82,13 @@ locals {
     oci = {}
   }
 
+  # Single shared env: the agent's own configuration.values AND the worker's
+  # env are now the same map — the worker needs DNS_TYPE/DOMAIN/USE_ACCOUNT_SLUG/
+  # K8S_NAMESPACE/SERVICE_TEMPLATE/INITIAL_INGRESS_PATH/BLUE_GREEN_INGRESS_PATH
+  # (deploy-template rendering) and the agent needs the rest; simpler to give
+  # both everything than to keep two maps in sync.
   all_config = merge(
     local.default_config,
-    lookup(local.cloud_config, var.cloud_provider, {}),
-    var.extra_envs,
-  )
-
-  # Deploy-template/DNS values consumed by the worker when it renders a scope's
-  # k8s deployment, not by the agent's own control loop.
-  worker_default_config = {
-    DNS_TYPE                = var.dns_type
-    DOMAIN                  = var.domain
-    USE_ACCOUNT_SLUG        = var.use_account_slug
-    K8S_NAMESPACE           = var.namespace
-    SERVICE_TEMPLATE        = var.service_template
-    INITIAL_INGRESS_PATH    = var.initial_ingress_path
-    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
-    TRAFFIC_CONTAINER_IMAGE = local.traffic_container_image
-  }
-
-  # Same layering as all_config: cloud-specific values, then extra_envs last
-  # so a caller can override or add to what the worker sees, same as they
-  # already can for the agent's own config.
-  worker_env = merge(
-    local.worker_default_config,
     lookup(local.cloud_config, var.cloud_provider, {}),
     var.extra_envs,
   )
@@ -113,7 +105,7 @@ locals {
             {
               name      = "worker"
               resources = { limits = { memory = "2Gi" } }
-              env       = [for k, v in local.worker_env : { name = k, value = v }]
+              env       = [for k, v in local.all_config : { name = k, value = v }]
             }
           ]
         }
