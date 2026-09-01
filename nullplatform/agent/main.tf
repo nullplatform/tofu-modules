@@ -65,10 +65,7 @@ resource "helm_release" "agent" {
   dependency_update = true
   max_history       = 10
 
-  values = [
-    local.nullplatform_agent_values,
-    local.worker_values,
-  ]
+  values = [local.nullplatform_agent_values]
 
   lifecycle {
     replace_triggered_by = [terraform_data.api_key_trigger]

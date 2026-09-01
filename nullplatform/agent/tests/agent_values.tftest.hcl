@@ -108,7 +108,11 @@ run "agent_repos_scope_rejects_an_inline_fragment" {
 # DNS_TYPE/DOMAIN/USE_ACCOUNT_SLUG/SERVICE_TEMPLATE/INITIAL_INGRESS_PATH/
 # BLUE_GREEN_INGRESS_PATH are consumed by the worker when it renders a scope's
 # k8s deployment, not by the agent's own control loop — they live on the
-# worker's env only. CLUSTER_NAME/NAMESPACE are needed by both.
+# worker's env only. CLUSTER_NAME/NAMESPACE are needed by both. There is a
+# single combined values document now (worker is just another top-level key
+# of it, not a second Helm values layer), so "not in the agent's own config"
+# is checked via the configuration.values rendering (`KEY: "value"`, no
+# leading quote on the key) rather than absence from the whole document.
 run "moved_deploy_vars_are_worker_only_cluster_and_namespace_are_shared" {
   command = plan
 
@@ -122,18 +126,18 @@ run "moved_deploy_vars_are_worker_only_cluster_and_namespace_are_shared" {
     condition = alltrue([
       for key in ["DNS_TYPE", "DOMAIN", "USE_ACCOUNT_SLUG", "SERVICE_TEMPLATE",
       "INITIAL_INGRESS_PATH", "BLUE_GREEN_INGRESS_PATH"] :
-      !strcontains(helm_release.agent.values[0], key)
+      !strcontains(helm_release.agent.values[0], "\n    ${key}:")
     ])
-    error_message = "deploy/DNS vars must not leak into the agent pod's own values"
+    error_message = "deploy/DNS vars must not leak into the agent pod's own configuration.values"
   }
 
   assert {
-    condition     = strcontains(helm_release.agent.values[0], "CLUSTER_NAME") && strcontains(helm_release.agent.values[0], "NAMESPACE")
-    error_message = "CLUSTER_NAME and NAMESPACE must stay in the agent's own values"
+    condition     = strcontains(helm_release.agent.values[0], "\n    CLUSTER_NAME:") && strcontains(helm_release.agent.values[0], "\n    NAMESPACE:")
+    error_message = "CLUSTER_NAME and NAMESPACE must stay in the agent's own configuration.values"
   }
 }
 
-run "worker_layer_always_present_with_expected_env" {
+run "worker_block_always_present_with_expected_env" {
   command = plan
 
   variables {
@@ -143,39 +147,42 @@ run "worker_layer_always_present_with_expected_env" {
   }
 
   assert {
-    condition     = strcontains(helm_release.agent.values[1], "\"backend\": \"kubernetes\"")
-    error_message = "worker layer must always be emitted, even without var.worker or any worker_* override"
+    condition     = strcontains(helm_release.agent.values[0], "\"backend\": \"kubernetes\"")
+    error_message = "worker block must always be emitted, even without var.worker set"
   }
 
   assert {
     condition = (
-      strcontains(helm_release.agent.values[1], "\"name\": \"DNS_TYPE\"") &&
-      strcontains(helm_release.agent.values[1], "\"value\": \"external_dns\"") &&
-      strcontains(helm_release.agent.values[1], "\"name\": \"DOMAIN\"") &&
-      strcontains(helm_release.agent.values[1], "\"value\": \"playground.nullapps.io\"") &&
-      strcontains(helm_release.agent.values[1], "\"name\": \"K8S_NAMESPACE\"") &&
-      strcontains(helm_release.agent.values[1], "\"value\": \"nullplatform\"") &&
-      strcontains(helm_release.agent.values[1], "\"name\": \"CLUSTER_NAME\"")
+      strcontains(helm_release.agent.values[0], "\"name\": \"DNS_TYPE\"") &&
+      strcontains(helm_release.agent.values[0], "\"value\": \"external_dns\"") &&
+      strcontains(helm_release.agent.values[0], "\"name\": \"DOMAIN\"") &&
+      strcontains(helm_release.agent.values[0], "\"value\": \"playground.nullapps.io\"") &&
+      strcontains(helm_release.agent.values[0], "\"name\": \"K8S_NAMESPACE\"") &&
+      strcontains(helm_release.agent.values[0], "\"value\": \"nullplatform\"") &&
+      strcontains(helm_release.agent.values[0], "\"name\": \"CLUSTER_NAME\"")
     )
     error_message = "worker env must carry the deploy/DNS vars plus cluster/namespace"
   }
 }
 
-run "worker_typed_overrides_are_applied" {
+# backend/allowedRegistries have no dedicated variables — they're just keys
+# on var.worker, same as idleTTL or any other chart field.
+run "worker_backend_and_allowed_registries_are_overridable_via_var_worker" {
   command = plan
 
   variables {
-    worker_backend            = "kubernetes"
-    worker_allowed_registries = ["public.ecr.aws/nullplatform/scopes*"]
-    worker_memory_limit       = "3Gi"
+    worker = {
+      backend           = "nomad"
+      allowedRegistries = ["public.ecr.aws/nullplatform/scopes*"]
+    }
   }
 
   assert {
     condition = (
-      strcontains(helm_release.agent.values[1], "public.ecr.aws/nullplatform/scopes*") &&
-      strcontains(helm_release.agent.values[1], "\"memory\": \"3Gi\"")
+      strcontains(helm_release.agent.values[0], "\"backend\": \"nomad\"") &&
+      strcontains(helm_release.agent.values[0], "public.ecr.aws/nullplatform/scopes*")
     )
-    error_message = "worker_allowed_registries/worker_memory_limit must reach the worker patch"
+    error_message = "var.worker.backend/allowedRegistries must override the module defaults"
   }
 }
 
@@ -189,7 +196,7 @@ run "worker_service_account_mirrors_service_account_name" {
   }
 
   assert {
-    condition     = strcontains(helm_release.agent.values[1], "\"serviceAccountName\": \"my-sa\"")
+    condition     = strcontains(helm_release.agent.values[0], "\"serviceAccountName\": \"my-sa\"")
     error_message = "worker's serviceAccountName should mirror service_account_name"
   }
 }
@@ -198,24 +205,25 @@ run "worker_defaults" {
   command = plan
 
   assert {
-    condition     = !strcontains(helm_release.agent.values[1], "allowedRegistries")
-    error_message = "allowedRegistries must be omitted (not an empty list) when worker_allowed_registries is left at its null default"
+    condition     = !strcontains(helm_release.agent.values[0], "allowedRegistries")
+    error_message = "allowedRegistries must be omitted (not an empty list) when var.worker doesn't set it"
   }
 
   assert {
-    condition     = strcontains(helm_release.agent.values[1], "\"memory\": \"2Gi\"")
-    error_message = "worker_memory_limit must default to 2Gi, not be omitted"
+    condition     = strcontains(helm_release.agent.values[0], "\"memory\": \"2Gi\"")
+    error_message = "the worker container's memory limit must default to 2Gi"
   }
 
   assert {
-    condition     = strcontains(helm_release.agent.values[1], "\"serviceAccountName\": \"nullplatform-agent\"")
+    condition     = strcontains(helm_release.agent.values[0], "\"serviceAccountName\": \"nullplatform-agent\"")
     error_message = "the worker's serviceAccountName must default to service_account_name's default (nullplatform-agent)"
   }
 }
 
 # var.worker stays available as an extra/override layer on top of the computed
-# base: its own patches are concatenated (not dropped), and its other top-level
-# keys (e.g. idleTTL) pass through.
+# defaults: its own patches are concatenated (not dropped, so a caller wanting
+# a different memory limit adds their own patch rather than replacing ours),
+# and its other top-level keys (e.g. idleTTL) pass through.
 run "worker_extra_patches_and_overrides_are_merged_not_replaced" {
   command = plan
 
@@ -230,9 +238,9 @@ run "worker_extra_patches_and_overrides_are_merged_not_replaced" {
 
   assert {
     condition = (
-      strcontains(helm_release.agent.values[1], "\"idleTTL\": \"30m\"") &&
-      strcontains(helm_release.agent.values[1], "\"package\": \"my-pkg\"") &&
-      strcontains(helm_release.agent.values[1], "\"name\": \"worker\"")
+      strcontains(helm_release.agent.values[0], "\"idleTTL\": \"30m\"") &&
+      strcontains(helm_release.agent.values[0], "\"package\": \"my-pkg\"") &&
+      strcontains(helm_release.agent.values[0], "\"name\": \"worker\"")
     )
     error_message = "var.worker's own patches/keys must be merged alongside the computed worker-container patch, not replace it"
   }

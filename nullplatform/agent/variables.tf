@@ -72,40 +72,26 @@ variable "nullplatform_agent_helm_version" {
 variable "worker" {
   description = <<-EOT
     Extra worker-orchestration config, merged on top of the module's own computed
-    worker block (backend, allowedRegistries, and the worker container's patch —
-    see worker_backend/worker_allowed_registries/worker_memory_limit; the worker
-    container's serviceAccountName always mirrors service_account_name). Use this
-    for anything not covered by those: security, idleTTL (reap idle workers), the
-    legacy defaults/rules/pins, or additional patches (concatenated with, not
-    replacing, the computed one). See the nullplatform-agent chart values
-    (>= 2.37.0) for the full shape. null = nothing extra.
+    worker block: backend ("kubernetes" by default) and a patch for the worker
+    container (2Gi memory limit, the deploy/DNS env vars below, and a
+    serviceAccountName that always mirrors service_account_name). Set backend or
+    allowedRegistries here to override the module default; add your own entries
+    to patches to layer more on top of the computed one (concatenated, not
+    replaced — e.g. a different memory limit via your own patch targeting the
+    same "worker" container). Anything else — security, idleTTL (reap idle
+    workers), the legacy defaults/rules/pins — passes through as-is. See the
+    nullplatform-agent chart values (>= 2.37.0) for the full shape. null =
+    nothing extra.
 
     Example:
       worker = {
-        patches = [{ target = { package = "my-pkg" }, merge = { spec = { serviceAccountName = "np-agent-sa" } } }]
-        idleTTL = "30m"
+        allowedRegistries = ["public.ecr.aws/your-org/*"]
+        patches           = [{ target = { package = "my-pkg" }, merge = { spec = { serviceAccountName = "np-agent-sa" } } }]
+        idleTTL           = "30m"
       }
   EOT
   type        = any
   default     = null
-}
-
-variable "worker_backend" {
-  description = "Backend the worker orchestrator uses to run scope workers."
-  type        = string
-  default     = "kubernetes"
-}
-
-variable "worker_allowed_registries" {
-  description = "Deny-by-default guardrail: container image registries workers may pull from. null leaves the chart's own default."
-  type        = list(string)
-  default     = null
-}
-
-variable "worker_memory_limit" {
-  description = "Memory limit for the worker container (e.g. \"2Gi\")."
-  type        = string
-  default     = "2Gi"
 }
 
 # Kubernetes namespace where the nullplatform agent will run
