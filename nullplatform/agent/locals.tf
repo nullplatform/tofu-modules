@@ -41,12 +41,16 @@ locals {
 
   all_args = concat(local.default_args, lookup(local.cloud_args, var.cloud_provider, []))
 
+  # Consumed by both the agent's own config and the worker's — the worker
+  # needs it for traffic-management actions (blue-green switches, etc.).
+  traffic_container_image = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
+
   default_config = {
     NP_API_KEY              = local.api_key
     TAGS                    = local.tags
     AGENT_REPOS             = local.agent_repos
     IMAGE_TAG               = var.image_tag
-    TRAFFIC_CONTAINER_IMAGE = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
+    TRAFFIC_CONTAINER_IMAGE = local.traffic_container_image
     IMAGE_PULL_SECRETS      = var.image_pull_secrets
     PRIVATE_GATEWAY_NAME    = var.private_gateway_name
     PUBLIC_GATEWAY_NAME     = var.public_gateway_name
@@ -85,7 +89,7 @@ locals {
     SERVICE_TEMPLATE        = var.service_template
     INITIAL_INGRESS_PATH    = var.initial_ingress_path
     BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
-    TRAFFIC_CONTAINER_IMAGE = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
+    TRAFFIC_CONTAINER_IMAGE = local.traffic_container_image
   }
 
   # Same layering as all_config: cloud-specific values, then extra_envs last
