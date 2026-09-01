@@ -22,7 +22,7 @@ The module defines a single nullplatform_api_key resource whose name, grants, an
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v6.21.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v6.22.0"
 
   type = "your-type"
 }
@@ -32,7 +32,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v6.21.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v6.22.0"
 
   nrn  = "your-nrn"  # Required when type = "agent"
   type = "agent"
@@ -43,7 +43,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v6.21.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v6.22.0"
 
   nrn  = "your-nrn"  # Required when type = "base"
   type = "base"
@@ -54,7 +54,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v6.21.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v6.22.0"
 
   nrn                = "your-nrn"  # Required when type = "scope_notification"
   specification_slug = "your-specification-slug"  # Required when type = "scope_notification"
@@ -66,7 +66,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v6.21.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v6.22.0"
 
   nrn                = "your-nrn"  # Required when type = "service_notification"
   specification_slug = "your-specification-slug"  # Required when type = "service_notification"
@@ -78,7 +78,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v6.21.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v6.22.0"
 
   custom_name       = "your-custom-name"  # Required when type = "custom"
   custom_role_slugs = "your-custom-role-slugs"  # Required when type = "custom"
