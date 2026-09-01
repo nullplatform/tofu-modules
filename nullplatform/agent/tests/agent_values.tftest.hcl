@@ -57,9 +57,8 @@ run "extra_envs_still_overrides_the_traffic_manager_image" {
   }
 }
 
-# worker_env goes through the same default -> cloud_config -> extra_envs
-# layering as the agent's own all_config, so an extra_envs override reaches
-# the worker too, not just the agent.
+# The worker's env is all_config (same shared map as the agent's own
+# configuration.values), so an extra_envs override reaches the worker too.
 run "extra_envs_also_reaches_the_worker" {
   command = plan
 
@@ -123,14 +122,11 @@ run "agent_repos_scope_rejects_an_inline_fragment" {
 ################################################################################
 
 # DNS_TYPE/DOMAIN/USE_ACCOUNT_SLUG/SERVICE_TEMPLATE/INITIAL_INGRESS_PATH/
-# BLUE_GREEN_INGRESS_PATH/NAMESPACE are consumed by the worker when it renders
-# a scope's k8s deployment, not by the agent's own control loop — they live on
-# the worker's env only (NAMESPACE as K8S_NAMESPACE). There is a single
-# combined values document now (worker is just another top-level key of it,
-# not a second Helm values layer), so "not in the agent's own config" is
-# checked via the configuration.values rendering (`KEY: "value"`, no leading
-# quote on the key) rather than absence from the whole document.
-run "moved_deploy_vars_are_worker_only" {
+# BLUE_GREEN_INGRESS_PATH/K8S_NAMESPACE are consumed by the worker when it
+# renders a scope's k8s deployment. The agent's own configuration.values and
+# the worker's env are the same shared map now, so these also show up in the
+# agent's own config — that's expected, not a leak.
+run "deploy_dns_vars_reach_both_agent_and_worker" {
   command = plan
 
   variables {
@@ -142,10 +138,10 @@ run "moved_deploy_vars_are_worker_only" {
   assert {
     condition = alltrue([
       for key in ["DNS_TYPE", "DOMAIN", "USE_ACCOUNT_SLUG", "SERVICE_TEMPLATE",
-      "INITIAL_INGRESS_PATH", "BLUE_GREEN_INGRESS_PATH", "NAMESPACE"] :
-      !strcontains(helm_release.agent.values[0], "\n    ${key}:")
+      "INITIAL_INGRESS_PATH", "BLUE_GREEN_INGRESS_PATH", "K8S_NAMESPACE"] :
+      strcontains(helm_release.agent.values[0], "\n    ${key}:")
     ])
-    error_message = "deploy/DNS vars and NAMESPACE must not leak into the agent pod's own configuration.values"
+    error_message = "deploy/DNS vars and K8S_NAMESPACE must be present in the agent's own configuration.values"
   }
 }
 
