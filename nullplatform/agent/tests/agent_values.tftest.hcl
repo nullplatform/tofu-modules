@@ -165,23 +165,23 @@ run "worker_typed_overrides_are_applied" {
   command = plan
 
   variables {
-    worker_backend              = "kubernetes"
-    worker_allowed_registries   = ["public.ecr.aws/nullplatform/scopes*"]
-    worker_memory_limit         = "2Gi"
-    worker_service_account_name = "nullplatform-agent"
+    worker_backend            = "kubernetes"
+    worker_allowed_registries = ["public.ecr.aws/nullplatform/scopes*"]
+    worker_memory_limit       = "3Gi"
   }
 
   assert {
     condition = (
       strcontains(helm_release.agent.values[1], "public.ecr.aws/nullplatform/scopes*") &&
-      strcontains(helm_release.agent.values[1], "\"memory\": \"2Gi\"") &&
-      strcontains(helm_release.agent.values[1], "\"serviceAccountName\": \"nullplatform-agent\"")
+      strcontains(helm_release.agent.values[1], "\"memory\": \"3Gi\"")
     )
-    error_message = "worker_allowed_registries/worker_memory_limit/worker_service_account_name must reach the worker patch"
+    error_message = "worker_allowed_registries/worker_memory_limit must reach the worker patch"
   }
 }
 
-run "worker_service_account_falls_back_to_service_account_name" {
+# The worker container has no service-account concept of its own — it always
+# mirrors the agent's own service_account_name.
+run "worker_service_account_mirrors_service_account_name" {
   command = plan
 
   variables {
@@ -190,11 +190,11 @@ run "worker_service_account_falls_back_to_service_account_name" {
 
   assert {
     condition     = strcontains(helm_release.agent.values[1], "\"serviceAccountName\": \"my-sa\"")
-    error_message = "worker's serviceAccountName should fall back to service_account_name when worker_service_account_name is unset"
+    error_message = "worker's serviceAccountName should mirror service_account_name"
   }
 }
 
-run "worker_defaults_omit_unset_optional_fields" {
+run "worker_defaults" {
   command = plan
 
   assert {
@@ -203,8 +203,13 @@ run "worker_defaults_omit_unset_optional_fields" {
   }
 
   assert {
-    condition     = !strcontains(helm_release.agent.values[1], "resources")
-    error_message = "resources.limits.memory must be omitted when worker_memory_limit is left at its null default"
+    condition     = strcontains(helm_release.agent.values[1], "\"memory\": \"2Gi\"")
+    error_message = "worker_memory_limit must default to 2Gi, not be omitted"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[1], "\"serviceAccountName\": \"nullplatform-agent\"")
+    error_message = "the worker's serviceAccountName must default to service_account_name's default (nullplatform-agent)"
   }
 }
 
