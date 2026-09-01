@@ -38,8 +38,14 @@ variable "aws_region" {
 
 variable "install_gateway_v2_crd" {
   type        = bool
-  description = "Install Gateway API v2 CRDs."
-  default     = false
+  description = "Install/reconcile the Gateway API CRDs (see gateway_api_crd_ref) via the base chart's pre-install/pre-upgrade Job. Defaults to true so CRDs actually track gateway_api_crd_ref instead of staying frozen at whatever was present on first install — matches the base chart's own default. Safe on chart versions before global.gatewayApiCrdRef too: those only install when the CRD is missing, so pre-existing CRDs from another source are left untouched."
+  default     = true
+}
+
+variable "gateway_api_crd_ref" {
+  type        = string
+  description = "Git ref (tag or commit) of kubernetes-sigs/gateway-api to install when install_gateway_v2_crd is true. Ignored on chart versions older than the one that introduced global.gatewayApiCrdRef. Default (v1.3.0) matches what Istio 1.27 documents installing; re-check istio.io's version-pinned docs when bumping Istio."
+  default     = "v1.3.0"
 }
 
 ############################################
