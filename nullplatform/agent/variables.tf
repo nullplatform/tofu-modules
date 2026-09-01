@@ -71,22 +71,47 @@ variable "nullplatform_agent_helm_version" {
 
 variable "worker" {
   description = <<-EOT
-    Worker-orchestration config, merged into the agent chart's `worker` block:
-    backend, security, allowedRegistries (deny-by-default registry guardrail),
-    patches (standard k8s patching of workers — the preferred way to shape them),
-    idleTTL (reap idle workers), and the legacy defaults/rules/pins. See the
-    nullplatform-agent chart values (>= 2.37.0) for the full shape. null = chart
-    defaults.
+    Extra worker-orchestration config, merged on top of the module's own computed
+    worker block (backend, allowedRegistries, and the worker container's patch —
+    see worker_backend/worker_allowed_registries/worker_memory_limit/
+    worker_service_account_name). Use this for anything not covered by those:
+    security, idleTTL (reap idle workers), the legacy defaults/rules/pins, or
+    additional patches (concatenated with, not replacing, the computed one). See
+    the nullplatform-agent chart values (>= 2.37.0) for the full shape. null =
+    nothing extra.
 
     Example:
       worker = {
-        allowedRegistries = ["public.ecr.aws/your-org/*"]
-        patches           = [{ target = { package = "my-pkg" }, merge = { spec = { serviceAccountName = "np-agent-sa" } } }]
-        idleTTL           = "30m"
+        patches = [{ target = { package = "my-pkg" }, merge = { spec = { serviceAccountName = "np-agent-sa" } } }]
+        idleTTL = "30m"
       }
   EOT
   type        = any
   default     = null
+}
+
+variable "worker_backend" {
+  description = "Backend the worker orchestrator uses to run scope workers."
+  type        = string
+  default     = "kubernetes"
+}
+
+variable "worker_allowed_registries" {
+  description = "Deny-by-default guardrail: container image registries workers may pull from. null leaves the chart's own default."
+  type        = list(string)
+  default     = null
+}
+
+variable "worker_memory_limit" {
+  description = "Memory limit for the worker container (e.g. \"2Gi\"). null leaves the chart default."
+  type        = string
+  default     = null
+}
+
+variable "worker_service_account_name" {
+  description = "ServiceAccount name for worker pods. Empty falls back to service_account_name, then the chart default."
+  type        = string
+  default     = ""
 }
 
 # Kubernetes namespace where the nullplatform agent will run

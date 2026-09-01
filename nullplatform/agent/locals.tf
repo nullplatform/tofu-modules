@@ -49,13 +49,7 @@ locals {
     NAMESPACE               = var.namespace
     IMAGE_TAG               = var.image_tag
     TRAFFIC_CONTAINER_IMAGE = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
-    DOMAIN                  = var.domain
-    DNS_TYPE                = var.dns_type
-    USE_ACCOUNT_SLUG        = var.use_account_slug
     IMAGE_PULL_SECRETS      = var.image_pull_secrets
-    SERVICE_TEMPLATE        = var.service_template
-    INITIAL_INGRESS_PATH    = var.initial_ingress_path
-    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
     PRIVATE_GATEWAY_NAME    = var.private_gateway_name
     PUBLIC_GATEWAY_NAME     = var.public_gateway_name
   }
@@ -94,7 +88,54 @@ locals {
     service_account_name = var.service_account_name
   })
 
-  # Worker-orchestration config as a second Helm values layer, so the nested
-  # shape (allowedRegistries/patches/rules/pins) passes through verbatim.
-  worker_values = var.worker != null ? yamlencode({ worker = var.worker }) : null
+  # Deploy-template/DNS values consumed by the worker when it renders a scope's
+  # k8s deployment, not by the agent's own control loop.
+  worker_env = {
+    DNS_TYPE                = var.dns_type
+    DOMAIN                  = var.domain
+    USE_ACCOUNT_SLUG        = var.use_account_slug
+    K8S_NAMESPACE           = var.namespace
+    CLUSTER_NAME            = var.cluster_name
+    SERVICE_TEMPLATE        = var.service_template
+    INITIAL_INGRESS_PATH    = var.initial_ingress_path
+    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
+  }
+
+  worker_service_account_name = var.worker_service_account_name != "" ? var.worker_service_account_name : var.service_account_name
+
+  worker_container_patch = {
+    target = { package = "containers" }
+    merge = {
+      spec = merge(
+        local.worker_service_account_name != "" ? { serviceAccountName = local.worker_service_account_name } : {},
+        {
+          containers = [
+            merge(
+              { name = "worker" },
+              var.worker_memory_limit != null ? { resources = { limits = { memory = var.worker_memory_limit } } } : {},
+              { env = [for k, v in local.worker_env : { name = k, value = v }] }
+            )
+          ]
+        }
+      )
+    }
+  }
+
+  # Computed base merged with var.worker as an extra/override layer, so the
+  # escape hatch keeps working without dropping the computed worker-container
+  # patch (patches are concatenated, not replaced).
+  worker_base = merge(
+    { backend = var.worker_backend },
+    var.worker_allowed_registries != null ? { allowedRegistries = var.worker_allowed_registries } : {},
+    { patches = concat([local.worker_container_patch], try(var.worker.patches, [])) }
+  )
+
+  worker_final = merge(
+    local.worker_base,
+    try({ for k, v in var.worker : k => v if k != "patches" }, {})
+  )
+
+  # Always emitted (unlike the agent's own values) so these env vars never
+  # silently disappear for callers who don't otherwise set var.worker.
+  worker_values = yamlencode({ worker = local.worker_final })
 }

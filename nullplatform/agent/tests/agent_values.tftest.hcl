@@ -100,3 +100,135 @@ run "agent_repos_scope_rejects_an_inline_fragment" {
   # otherwise render repo.git#v1.15.1#v1.15.1.
   expect_failures = [var.agent_repos_scope]
 }
+
+################################################################################
+# Worker orchestration
+################################################################################
+
+# DNS_TYPE/DOMAIN/USE_ACCOUNT_SLUG/SERVICE_TEMPLATE/INITIAL_INGRESS_PATH/
+# BLUE_GREEN_INGRESS_PATH are consumed by the worker when it renders a scope's
+# k8s deployment, not by the agent's own control loop — they live on the
+# worker's env only. CLUSTER_NAME/NAMESPACE are needed by both.
+run "moved_deploy_vars_are_worker_only_cluster_and_namespace_are_shared" {
+  command = plan
+
+  variables {
+    domain    = "playground.nullapps.io"
+    dns_type  = "external_dns"
+    namespace = "nullplatform"
+  }
+
+  assert {
+    condition = alltrue([
+      for key in ["DNS_TYPE", "DOMAIN", "USE_ACCOUNT_SLUG", "SERVICE_TEMPLATE",
+      "INITIAL_INGRESS_PATH", "BLUE_GREEN_INGRESS_PATH"] :
+      !strcontains(helm_release.agent.values[0], key)
+    ])
+    error_message = "deploy/DNS vars must not leak into the agent pod's own values"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "CLUSTER_NAME") && strcontains(helm_release.agent.values[0], "NAMESPACE")
+    error_message = "CLUSTER_NAME and NAMESPACE must stay in the agent's own values"
+  }
+}
+
+run "worker_layer_always_present_with_expected_env" {
+  command = plan
+
+  variables {
+    domain    = "playground.nullapps.io"
+    dns_type  = "external_dns"
+    namespace = "nullplatform"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[1], "\"backend\": \"kubernetes\"")
+    error_message = "worker layer must always be emitted, even without var.worker or any worker_* override"
+  }
+
+  assert {
+    condition = (
+      strcontains(helm_release.agent.values[1], "\"name\": \"DNS_TYPE\"") &&
+      strcontains(helm_release.agent.values[1], "\"value\": \"external_dns\"") &&
+      strcontains(helm_release.agent.values[1], "\"name\": \"DOMAIN\"") &&
+      strcontains(helm_release.agent.values[1], "\"value\": \"playground.nullapps.io\"") &&
+      strcontains(helm_release.agent.values[1], "\"name\": \"K8S_NAMESPACE\"") &&
+      strcontains(helm_release.agent.values[1], "\"value\": \"nullplatform\"") &&
+      strcontains(helm_release.agent.values[1], "\"name\": \"CLUSTER_NAME\"")
+    )
+    error_message = "worker env must carry the deploy/DNS vars plus cluster/namespace"
+  }
+}
+
+run "worker_typed_overrides_are_applied" {
+  command = plan
+
+  variables {
+    worker_backend              = "kubernetes"
+    worker_allowed_registries   = ["public.ecr.aws/nullplatform/scopes*"]
+    worker_memory_limit         = "2Gi"
+    worker_service_account_name = "nullplatform-agent"
+  }
+
+  assert {
+    condition = (
+      strcontains(helm_release.agent.values[1], "public.ecr.aws/nullplatform/scopes*") &&
+      strcontains(helm_release.agent.values[1], "\"memory\": \"2Gi\"") &&
+      strcontains(helm_release.agent.values[1], "\"serviceAccountName\": \"nullplatform-agent\"")
+    )
+    error_message = "worker_allowed_registries/worker_memory_limit/worker_service_account_name must reach the worker patch"
+  }
+}
+
+run "worker_service_account_falls_back_to_service_account_name" {
+  command = plan
+
+  variables {
+    service_account_name = "my-sa"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[1], "\"serviceAccountName\": \"my-sa\"")
+    error_message = "worker's serviceAccountName should fall back to service_account_name when worker_service_account_name is unset"
+  }
+}
+
+run "worker_defaults_omit_unset_optional_fields" {
+  command = plan
+
+  assert {
+    condition     = !strcontains(helm_release.agent.values[1], "allowedRegistries")
+    error_message = "allowedRegistries must be omitted (not an empty list) when worker_allowed_registries is left at its null default"
+  }
+
+  assert {
+    condition     = !strcontains(helm_release.agent.values[1], "resources")
+    error_message = "resources.limits.memory must be omitted when worker_memory_limit is left at its null default"
+  }
+}
+
+# var.worker stays available as an extra/override layer on top of the computed
+# base: its own patches are concatenated (not dropped), and its other top-level
+# keys (e.g. idleTTL) pass through.
+run "worker_extra_patches_and_overrides_are_merged_not_replaced" {
+  command = plan
+
+  variables {
+    worker = {
+      idleTTL = "30m"
+      patches = [
+        { target = { package = "my-pkg" }, merge = { spec = { serviceAccountName = "np-agent-sa" } } }
+      ]
+    }
+  }
+
+  assert {
+    condition = (
+      strcontains(helm_release.agent.values[1], "\"idleTTL\": \"30m\"") &&
+      strcontains(helm_release.agent.values[1], "\"package\": \"my-pkg\"") &&
+      strcontains(helm_release.agent.values[1], "\"name\": \"worker\"")
+    )
+    error_message = "var.worker's own patches/keys must be merged alongside the computed worker-container patch, not replace it"
+  }
+}
