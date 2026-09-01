@@ -107,19 +107,25 @@ locals {
     }
   }
 
-  # Sane module defaults, merged with var.worker as an extra/override layer —
-  # var.worker's own patches are concatenated (not replaced), so a caller who
-  # wants a different memory limit adds their own patch targeting the same
-  # container rather than the module inventing a dedicated override key for it.
+  # Sane module defaults, merged with var.worker as an extra/override layer.
+  # patches and allowedRegistries are concatenated (not replaced) with
+  # var.worker's own entries: a caller wanting a different memory limit adds
+  # their own patch targeting the same container rather than the module
+  # inventing a dedicated override key for it, and a caller needing extra
+  # registries adds to the default instead of having to repeat it.
   worker_defaults = {
-    backend = "kubernetes"
-    patches = [local.worker_container_patch]
+    backend           = "kubernetes"
+    allowedRegistries = ["public.ecr.aws/nullplatform/*"]
+    patches           = [local.worker_container_patch]
   }
 
   worker_final = merge(
     local.worker_defaults,
-    try({ for k, v in var.worker : k => v if k != "patches" }, {}),
-    { patches = concat(local.worker_defaults.patches, try(var.worker.patches, [])) }
+    try({ for k, v in var.worker : k => v if !contains(["patches", "allowedRegistries"], k) }, {}),
+    {
+      patches           = concat(local.worker_defaults.patches, try(var.worker.patches, []))
+      allowedRegistries = distinct(concat(local.worker_defaults.allowedRegistries, try(var.worker.allowedRegistries, [])))
+    }
   )
 
   # Single combined values document — worker is just another top-level key
