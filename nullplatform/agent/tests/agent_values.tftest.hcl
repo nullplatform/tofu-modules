@@ -57,6 +57,24 @@ run "extra_envs_still_overrides_the_traffic_manager_image" {
   }
 }
 
+# worker_env goes through the same default -> cloud_config -> extra_envs
+# layering as the agent's own all_config, so an extra_envs override reaches
+# the worker too, not just the agent.
+run "extra_envs_also_reaches_the_worker" {
+  command = plan
+
+  variables {
+    extra_envs = {
+      TRAFFIC_CONTAINER_IMAGE = "public.ecr.aws/nullplatform/k8s-traffic-manager@sha256:abc123"
+    }
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "\"name\": \"TRAFFIC_CONTAINER_IMAGE\"") && strcontains(helm_release.agent.values[0], "\"value\": \"public.ecr.aws/nullplatform/k8s-traffic-manager@sha256:abc123\"")
+    error_message = "extra_envs overrides must also reach the worker's env"
+  }
+}
+
 ################################################################################
 # Scope repository
 ################################################################################

@@ -77,7 +77,7 @@ locals {
 
   # Deploy-template/DNS values consumed by the worker when it renders a scope's
   # k8s deployment, not by the agent's own control loop.
-  worker_env = {
+  worker_default_config = {
     DNS_TYPE                = var.dns_type
     DOMAIN                  = var.domain
     USE_ACCOUNT_SLUG        = var.use_account_slug
@@ -87,6 +87,15 @@ locals {
     BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
     TRAFFIC_CONTAINER_IMAGE = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
   }
+
+  # Same layering as all_config: cloud-specific values, then extra_envs last
+  # so a caller can override or add to what the worker sees, same as they
+  # already can for the agent's own config.
+  worker_env = merge(
+    local.worker_default_config,
+    lookup(local.cloud_config, var.cloud_provider, {}),
+    var.extra_envs,
+  )
 
   # The worker container has no identity of its own — it always runs as the
   # agent's own service account.
