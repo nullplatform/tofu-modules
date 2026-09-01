@@ -14,7 +14,7 @@ jobs:
   test-commons-modules:
     uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
     with:
-      modules: '["infrastructure/commons/cert_manager", "infrastructure/commons/external_dns", "infrastructure/commons/istio"]'
+      modules: '["infrastructure/commons/cert_manager", "infrastructure/commons/external_dns", "infrastructure/commons/istio", "infrastructure/commons/prometheus"]'
 
   test-aws-modules:
     uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
@@ -25,12 +25,12 @@ jobs:
   test-gcp-modules:
     uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
     with:
-      modules: '["infrastructure/gcp/artifact-registry", "infrastructure/gcp/cloud-dns", "infrastructure/gcp/cloud-nat", "infrastructure/gcp/iam", "infrastructure/gcp/vpc"]'
+      modules: '["infrastructure/gcp/artifact-registry", "infrastructure/gcp/cloud-dns", "infrastructure/gcp/cloud-nat", "infrastructure/gcp/gke", "infrastructure/gcp/iam", "infrastructure/gcp/security", "infrastructure/gcp/vpc"]'
 
   test-nullplatform-modules:
     uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
     with:
-      modules: '["nullplatform/account", "nullplatform/api_key", "nullplatform/dimension", "nullplatform/dimension_value", "nullplatform/users", "nullplatform/metrics", "nullplatform/asset/docker_server", "nullplatform/cloud/azure/cloud", "nullplatform/cloud/gcp/cloud", "nullplatform/cloud/aws/cloud", "nullplatform/code_repository"]'
+      modules: '["nullplatform/account", "nullplatform/agent", "nullplatform/api_key", "nullplatform/dimension", "nullplatform/dimension_value", "nullplatform/users", "nullplatform/metrics", "nullplatform/asset/docker_server", "nullplatform/cloud/azure/cloud", "nullplatform/cloud/gcp/cloud", "nullplatform/cloud/aws/cloud", "nullplatform/code_repository", "nullplatform/base", "nullplatform/agent"]'
 
   test-container-orchestration-modules:
     uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main

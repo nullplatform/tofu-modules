@@ -4,7 +4,13 @@
 
 locals {
 
-  scope_list = compact([trimspace(coalesce(var.agent_repos_scope, ""))])
+  # The repository lives here and only the tag is exposed, so a version bump is a variable
+
+  # change instead of a hand-assembled URL.
+
+  scope_repo = trimspace(coalesce(var.agent_repos_scope, ""))
+
+  scope_list = compact([local.scope_repo != "" ? "${local.scope_repo}#${trimspace(var.agent_repos_scope_tag)}" : ""])
   # Parse comma-separated extra repositories and clean whitespace
   repos_extra = compact([for s in var.agent_repos_extra : trimspace(s)])
 
@@ -42,6 +48,7 @@ locals {
     CLUSTER_NAME            = var.cluster_name
     NAMESPACE               = var.namespace
     IMAGE_TAG               = var.image_tag
+    TRAFFIC_CONTAINER_IMAGE = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
     DOMAIN                  = var.domain
     DNS_TYPE                = var.dns_type
     USE_ACCOUNT_SLUG        = var.use_account_slug
@@ -49,6 +56,8 @@ locals {
     SERVICE_TEMPLATE        = var.service_template
     INITIAL_INGRESS_PATH    = var.initial_ingress_path
     BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
+    PRIVATE_GATEWAY_NAME    = var.private_gateway_name
+    PUBLIC_GATEWAY_NAME     = var.public_gateway_name
   }
 
   cloud_config = {
@@ -56,15 +65,8 @@ locals {
       AWS_IAM_ROLE_ARN = var.aws_iam_role_arn
     }
 
-    gcp = {
-      PRIVATE_GATEWAY_NAME = var.private_gateway_name
-      PRIVATE_DOMAIN       = var.private_domain
-    }
-
     azure = {
       PRIVATE_HOSTED_ZONE_RG = var.private_hosted_zone_rg
-      PRIVATE_GATEWAY_NAME   = var.private_gateway_name
-      PUBLIC_GATEWAY_NAME    = var.public_gateway_name
       RESOURCE_GROUP         = var.azure_resource_group
       AZURE_SUBSCRIPTION_ID  = var.azure_subscription_id
       AZURE_CLIENT_SECRET    = var.azure_client_secret
@@ -72,10 +74,7 @@ locals {
       AZURE_TENANT_ID        = var.azure_tenant_id
     }
 
-    oci = {
-      PRIVATE_GATEWAY_NAME = var.private_gateway_name
-      PRIVATE_DOMAIN       = var.private_domain
-    }
+    oci = {}
   }
 
   all_config = merge(

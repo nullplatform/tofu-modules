@@ -62,9 +62,14 @@ variable "private_domain_name" {
 ###############################################################################
 
 variable "cert_manager_version" {
-  description = "The version of cert-manager Helm chart to deploy"
+  # example: v1.21.1
+  description = "No default: every install pins this deliberately — see VERSIONS.md. The version of cert-manager Helm chart to deploy. Was declared but never wired to the helm_release, so installs tracked whatever the chart repository served; the default is the version that resolved to as of 2026-08-27, which keeps behaviour unchanged while removing the drift."
   type        = string
-  default     = "1.18.2"
+
+  validation {
+    condition     = var.cert_manager_version != "" && !contains(["latest", "main", "master"], lower(var.cert_manager_version))
+    error_message = "cert_manager_version must be a non-empty fixed version, not empty and not a moving reference."
+  }
 }
 
 variable "cert_manager_namespace" {

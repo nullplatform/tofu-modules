@@ -111,4 +111,9 @@ run "all_providers_in_config_map" {
     condition     = contains(keys(local.provider_configs), "oci")
     error_message = "provider_configs should contain oci"
   }
+
+  assert {
+    condition     = contains(keys(local.provider_configs), "google")
+    error_message = "provider_configs should contain google"
+  }
 }

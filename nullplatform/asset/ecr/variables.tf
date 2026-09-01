@@ -3,12 +3,6 @@ variable "nrn" {
   type        = string
 }
 
-variable "dimensions" {
-  description = "Dimensions to segment the nullplatform provider config (e.g. by region, environment)"
-  type        = map(string)
-  default     = {}
-}
-
 variable "application_role_arn" {
   description = "ARN of the IAM role used by applications to pull ECR images"
   type        = string

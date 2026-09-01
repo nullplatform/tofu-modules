@@ -196,12 +196,12 @@ variable "package" {
     Null (the default) keeps the classic module behavior — no package.
   EOT
   type = object({
-    slug       = optional(string)            # default: the service specification slug
-    name       = optional(string)            # default: var.service_spec_name
-    version    = string                      # semver of the revision this configuration publishes
-    default    = optional(bool, true)        # promote each published revision to the package default
-    tags       = optional(map(string), {})   # release tags: name => version (requires an API with the package release-tag routes)
-    visible_to = optional(list(string))      # default: [var.nrn]
+    slug       = optional(string)          # default: the service specification slug
+    name       = optional(string)          # default: var.service_spec_name
+    version    = string                    # semver of the revision this configuration publishes
+    default    = optional(bool, true)      # promote each published revision to the package default
+    tags       = optional(map(string), {}) # release tags: name => version (requires an API with the package release-tag routes)
+    visible_to = optional(list(string))    # default: [var.nrn]
     artifacts = optional(list(object({
       name                 = string
       type                 = optional(string, "oci_image") # oci_image | oras_artifact | git_repository | blob

@@ -30,8 +30,10 @@ module "aks" {
   # RBAC / AAD / OIDC / Workload Identity
   ############################################
   role_based_access_control_enabled = true
-  rbac_aad_azure_rbac_enabled       = false
+  rbac_aad_azure_rbac_enabled       = var.azure_rbac_enabled
+  rbac_aad_admin_group_object_ids   = var.admin_group_object_ids
   rbac_aad_tenant_id                = data.azurerm_client_config.current.tenant_id
+  local_account_disabled            = var.local_account_disabled
   workload_identity_enabled         = true
   oidc_issuer_enabled               = true
 

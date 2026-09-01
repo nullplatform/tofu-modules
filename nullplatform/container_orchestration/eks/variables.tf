@@ -112,9 +112,25 @@ variable "service_account_name" {
 }
 
 variable "traffic_manager_version" {
-  description = "Tag for the traffic manager sidecar container"
+  # example: 1.8.0
+  description = "No default: every install pins this deliberately — see VERSIONS.md. Pinned rather than tracking latest: a moving tag means a pod restart can pull a different build with no apply in between. Tag for the traffic manager sidecar container"
   type        = string
-  default     = "latest"
+
+  validation {
+    condition     = var.traffic_manager_version != "" && !contains(["latest", "main", "master"], lower(var.traffic_manager_version))
+    error_message = "traffic_manager_version must be a non-empty fixed version, not empty and not a moving reference."
+  }
+}
+
+variable "traffic_manager_port" {
+  description = "Port the traffic manager sidecar binds inside the pod. Defaults to 80 when unset. Set a different port (10080 recommended) when the cluster does not allow pod-to-pod traffic on port 80, which surfaces as a healthy pod that receives no traffic because kubelet probes are node-local and bypass the filtering. Open the port for pod-to-pod traffic before setting this value"
+  type        = number
+  default     = null
+  nullable    = true
+  validation {
+    condition     = var.traffic_manager_port == null || (var.traffic_manager_port >= 1 && var.traffic_manager_port <= 65535)
+    error_message = "traffic_manager_port must be between 1 and 65535."
+  }
 }
 
 variable "object_modifiers" {

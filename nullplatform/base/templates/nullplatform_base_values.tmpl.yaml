@@ -1,6 +1,7 @@
 # Global settings
 global:
   installGatewayV2Crd: ${installGatewayV2Crd}
+  gatewayApiCrdRef: "${gatewayApiCrdRef}"
   # Kubernetes provider (options: "oke", "gke", "eks", "aks", "aro")
   provider: "${k8s_provider}"
   # AWS region (applicable for EKS provider)
@@ -82,7 +83,7 @@ nullplatform:
 controlPlane:
   enabled: ${controlPlane_enabled}
   agent:
-    image: "public.ecr.aws/nullplatform/controlplane-agent:latest"
+    image: "${control_plane_agent_image_repository}:${control_plane_agent_image_tag}"
     resources:
       requests:
         cpu: 50m
@@ -96,7 +97,7 @@ logging:
     enabled: ${logging_application_logs_enabled}
   mountDockerContainers: ${logging_mount_docker_containers}
   controller:
-    image: "public.ecr.aws/nullplatform/k8s-logs-controller:latest"
+    image: "${logging_controller_image_repository}:${logging_controller_image_tag}"
     resources:
       requests:
         cpu: 100m

@@ -23,6 +23,13 @@ repos:
       require_serial: true
       exclude: '\.terraform/|\.terragrunt-cache/'
 
+    - id: check-version-pinning
+      name: check version pinning
+      entry: scripts/check-version-pinning.sh
+      language: script
+      files: '\.tf$'
+      exclude: '\.terraform/|\.terragrunt-cache/'
+
     - id: block-superpowers-files
       name: block superpowers files
       entry: >-

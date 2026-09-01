@@ -19,6 +19,19 @@ locals {
         "secrets-reader",
       ]
     }
+    # Same roles as the agent key minus secrets-reader: the base chart deploys
+    # the logs controller and the control plane agent, neither of which reads
+    # secrets. Keeping the rest aligned means an install can hand base its own
+    # credential without losing a capability the agent key had.
+    base = {
+      name = "BASE"
+      role_slugs = [
+        "controlplane:agent",
+        "developer",
+        "ops",
+        "secops",
+      ]
+    }
     scope_notification = {
       name = "SCOPE-NOTIFICATION-CHANNEL-${local.slug}"
       role_slugs = [
