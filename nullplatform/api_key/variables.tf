@@ -3,17 +3,17 @@
 ################################################################################
 
 variable "type" {
-  description = "Type of API key to create. Determines the pre-configured grants and tags. Use 'custom' to define your own roles and tags."
+  description = "Type of API key to create. Determines the pre-configured grants and tags. 'base' carries the agent roles minus secrets-reader, for the nullplatform base module. Use 'custom' to define your own roles and tags."
   type        = string
 
   validation {
-    condition     = contains(["agent", "scope_notification", "service_notification", "custom"], var.type)
-    error_message = "type must be one of: agent, scope_notification, service_notification, custom"
+    condition     = contains(["agent", "base", "scope_notification", "service_notification", "custom"], var.type)
+    error_message = "type must be one of: agent, base, scope_notification, service_notification, custom"
   }
 }
 
 variable "nrn" {
-  description = "Nullplatform Resource Name (e.g., organization=123:account=456:namespace=789). Required for predefined types (agent, scope_notification, service_notification). Optional for custom type when using custom_grants."
+  description = "Nullplatform Resource Name (e.g., organization=123:account=456:namespace=789). Required for predefined types (agent, base, scope_notification, service_notification). Optional for custom type when using custom_grants."
   type        = string
   default     = null
 }

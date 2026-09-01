@@ -1,5 +1,47 @@
 # Changelog
 
+## [6.22.1](https://github.com/nullplatform/tofu-modules/compare/v6.22.0...v6.22.1) (2026-09-01)
+
+
+### Bug Fixes
+
+* **base:** expose gateway_api_crd_ref, default to v1.3.0 for Istio 1.27 ([#544](https://github.com/nullplatform/tofu-modules/issues/544)) ([4bf8323](https://github.com/nullplatform/tofu-modules/commit/4bf8323b32716944411b745e2f15aae8da1a64d2))
+
+## [6.22.0](https://github.com/nullplatform/tofu-modules/compare/v6.21.0...v6.22.0) (2026-09-01)
+
+
+### Features
+
+* **istio:** remove legacy istio-ingressgateway helm release ([#543](https://github.com/nullplatform/tofu-modules/issues/543)) ([957dbc4](https://github.com/nullplatform/tofu-modules/commit/957dbc4b7f9ed1346511f49042fd939143d3831f))
+
+## [6.21.0](https://github.com/nullplatform/tofu-modules/compare/v6.20.0...v6.21.0) (2026-08-28)
+
+
+### Features
+
+* **api_key:** add base type ([#538](https://github.com/nullplatform/tofu-modules/issues/538)) ([272cbd0](https://github.com/nullplatform/tofu-modules/commit/272cbd08410dd78183363e1642c8a79478266cbd))
+
+## [6.20.0](https://github.com/nullplatform/tofu-modules/compare/v6.19.1...v6.20.0) (2026-08-28)
+
+
+### Features
+
+* require an explicit version for everything the modules deploy ([#540](https://github.com/nullplatform/tofu-modules/issues/540)) ([868ad98](https://github.com/nullplatform/tofu-modules/commit/868ad989663aa15e4dbdea98fa940e668e4994c2))
+
+## [6.19.1](https://github.com/nullplatform/tofu-modules/compare/v6.19.0...v6.19.1) (2026-08-21)
+
+
+### Bug Fixes
+
+* **base:** bump default nullplatform_base_helm_version to 2.44.0 ([#534](https://github.com/nullplatform/tofu-modules/issues/534)) ([a7e91b7](https://github.com/nullplatform/tofu-modules/commit/a7e91b7ad613da19de3a653c497152480e33f15d))
+
+## [6.19.0](https://github.com/nullplatform/tofu-modules/compare/v6.18.0...v6.19.0) (2026-08-21)
+
+
+### Features
+
+* **external_dns:** add google provider support ([#532](https://github.com/nullplatform/tofu-modules/issues/532)) ([222ff52](https://github.com/nullplatform/tofu-modules/commit/222ff522601d3b4f5c85cc016e79981fa58cd5c4))
+
 ## [7.1.0](https://github.com/nullplatform/tofu-modules/compare/v7.0.3...v7.1.0) (2026-08-19)
 
 
@@ -12,6 +54,69 @@
 ### Bug Fixes
 
 * **service_definition:** pin default (use_default_actions) actions into the package BOM ([c1493b5](https://github.com/nullplatform/tofu-modules/commit/c1493b5a1024094606a4a67cd6c05d5812daab90))
+
+## [6.18.0](https://github.com/nullplatform/tofu-modules/compare/v6.17.0...v6.18.0) (2026-08-19)
+
+
+### Features
+
+* **istio:** expose istio_ingressgateway_replicas to guarantee HA for node drains ([#379](https://github.com/nullplatform/tofu-modules/issues/379)) ([058986c](https://github.com/nullplatform/tofu-modules/commit/058986c7c5aaf8a998bd25bcf021fc40c2fd0dce))
+
+## [6.17.0](https://github.com/nullplatform/tofu-modules/compare/v6.16.1...v6.17.0) (2026-08-19)
+
+
+### Features
+
+* **base:** make logs controller and control plane agent image tags configurable ([#527](https://github.com/nullplatform/tofu-modules/issues/527)) ([1c892a5](https://github.com/nullplatform/tofu-modules/commit/1c892a566950b81a9201dc0d89e1c091dbbd6eb6))
+
+## [6.16.1](https://github.com/nullplatform/tofu-modules/compare/v6.16.0...v6.16.1) (2026-08-14)
+
+
+### Bug Fixes
+
+* **gcp/security:** resolve the subnetwork in its own project and region ([#520](https://github.com/nullplatform/tofu-modules/issues/520)) ([0b8f322](https://github.com/nullplatform/tofu-modules/commit/0b8f322f600de9e80630bd09764a421cc5249c20))
+
+## [6.16.0](https://github.com/nullplatform/tofu-modules/compare/v6.15.0...v6.16.0) (2026-08-14)
+
+
+### Features
+
+* **gcp/backend:** add GCS terraform state bucket module ([#511](https://github.com/nullplatform/tofu-modules/issues/511)) ([9355c6e](https://github.com/nullplatform/tofu-modules/commit/9355c6e4fcb6cb38be04f01fea264a54f7ac3c9c))
+
+## [6.15.0](https://github.com/nullplatform/tofu-modules/compare/v6.14.0...v6.15.0) (2026-08-14)
+
+
+### Features
+
+* **gcp/artifact-registry:** optional static service account key ([#514](https://github.com/nullplatform/tofu-modules/issues/514)) ([aaa9674](https://github.com/nullplatform/tofu-modules/commit/aaa96740639412dccc74b4dce56ca55f03511de5))
+
+## [6.14.0](https://github.com/nullplatform/tofu-modules/compare/v6.13.1...v6.14.0) (2026-08-14)
+
+
+### Features
+
+* **nullplatform/agent:** require ingress templates for non-aws clouds ([#515](https://github.com/nullplatform/tofu-modules/issues/515)) ([fbb4198](https://github.com/nullplatform/tofu-modules/commit/fbb4198d33b1da084e033e7b371d35d9509c6ed9))
+
+## [6.13.1](https://github.com/nullplatform/tofu-modules/compare/v6.13.0...v6.13.1) (2026-08-14)
+
+
+### Bug Fixes
+
+* **gcp/security:** handle full resource path in cluster subnetwork lookup ([#512](https://github.com/nullplatform/tofu-modules/issues/512)) ([e790af4](https://github.com/nullplatform/tofu-modules/commit/e790af437e4358a1e1254f00c3dba226fbc51b31))
+
+## [6.13.0](https://github.com/nullplatform/tofu-modules/compare/v6.12.0...v6.13.0) (2026-08-13)
+
+
+### Features
+
+* **aks:** support disabling local accounts with an Entra ID authorization path ([#461](https://github.com/nullplatform/tofu-modules/issues/461)) ([3e3c412](https://github.com/nullplatform/tofu-modules/commit/3e3c412b5a996241da6a904f9e86b3faf51c6487))
+
+## [6.12.0](https://github.com/nullplatform/tofu-modules/compare/v6.11.3...v6.12.0) (2026-08-12)
+
+
+### Features
+
+* **eks:** add traffic_manager_port variable ([#509](https://github.com/nullplatform/tofu-modules/issues/509)) ([b2165b2](https://github.com/nullplatform/tofu-modules/commit/b2165b2e0cdd922922b4eb029c9f69512c8d0e62))
 
 ## [7.0.3](https://github.com/nullplatform/tofu-modules/compare/v7.0.2...v7.0.3) (2026-08-11)
 
@@ -33,6 +138,15 @@
 ### Bug Fixes
 
 * **azure/aks_route_table:** stable trigger instead of timestamp() ([#474](https://github.com/nullplatform/tofu-modules/issues/474)) ([#493](https://github.com/nullplatform/tofu-modules/issues/493)) ([dad52fa](https://github.com/nullplatform/tofu-modules/commit/dad52fad010915756586d05c1915b4d5bc1d1adf))
+
+## [6.11.3](https://github.com/nullplatform/tofu-modules/compare/v6.11.2...v6.11.3) (2026-08-11)
+
+
+### Bug Fixes
+
+* **azure/aks_route_table:** stable trigger instead of timestamp() ([#474](https://github.com/nullplatform/tofu-modules/issues/474)) ([#493](https://github.com/nullplatform/tofu-modules/issues/493)) ([8d07ed2](https://github.com/nullplatform/tofu-modules/commit/8d07ed22635586a4e30baec79fcbbe994b78ddf3))
+* **azure:** make the internal gateway LB subnet configurable and grantable ([#494](https://github.com/nullplatform/tofu-modules/issues/494)) ([36f4540](https://github.com/nullplatform/tofu-modules/commit/36f45406a7bde29126939739a19f7a9139f2d31a))
+* **ci:** correct release-please target-branch resolution for the dual release line scheme ([#504](https://github.com/nullplatform/tofu-modules/issues/504)) ([895385e](https://github.com/nullplatform/tofu-modules/commit/895385ee0c76802b1773d07cf80ba5420d766ddf))
 
 ## [7.0.0](https://github.com/nullplatform/tofu-modules/compare/v6.11.2...v7.0.0) (2026-08-10)
 

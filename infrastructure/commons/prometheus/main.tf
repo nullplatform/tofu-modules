@@ -3,6 +3,7 @@ resource "helm_release" "prometheus" {
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "prometheus"
   namespace  = var.prometheus_namespace
+  version    = var.prometheus_version
 
   create_namespace  = true
   disable_webhooks  = false
