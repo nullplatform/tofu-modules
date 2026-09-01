@@ -1,5 +1,26 @@
 # Changelog
 
+## [6.22.0](https://github.com/nullplatform/tofu-modules/compare/v6.21.0...v6.22.0) (2026-09-01)
+
+
+### Features
+
+* **istio:** remove legacy istio-ingressgateway helm release ([#543](https://github.com/nullplatform/tofu-modules/issues/543)) ([957dbc4](https://github.com/nullplatform/tofu-modules/commit/957dbc4b7f9ed1346511f49042fd939143d3831f))
+
+## [6.21.0](https://github.com/nullplatform/tofu-modules/compare/v6.20.0...v6.21.0) (2026-08-28)
+
+
+### Features
+
+* **api_key:** add base type ([#538](https://github.com/nullplatform/tofu-modules/issues/538)) ([272cbd0](https://github.com/nullplatform/tofu-modules/commit/272cbd08410dd78183363e1642c8a79478266cbd))
+
+## [6.20.0](https://github.com/nullplatform/tofu-modules/compare/v6.19.1...v6.20.0) (2026-08-28)
+
+
+### Features
+
+* require an explicit version for everything the modules deploy ([#540](https://github.com/nullplatform/tofu-modules/issues/540)) ([868ad98](https://github.com/nullplatform/tofu-modules/commit/868ad989663aa15e4dbdea98fa940e668e4994c2))
+
 ## [6.19.1](https://github.com/nullplatform/tofu-modules/compare/v6.19.0...v6.19.1) (2026-08-21)
 
 

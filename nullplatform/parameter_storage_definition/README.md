@@ -20,7 +20,7 @@ A data.http resource fetches the raw specification template from a configurable 
 
 ```hcl
 module "parameter_storage_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_definition?ref=v6.19.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_definition?ref=v6.22.0"
 
   np_api_key    = "your-np-api-key"
   nrn           = "your-nrn"

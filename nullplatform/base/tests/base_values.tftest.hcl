@@ -2,8 +2,11 @@ mock_provider "helm" {}
 mock_provider "kubernetes" {}
 
 variables {
-  np_api_key   = "test-api-key"
-  k8s_provider = "eks"
+  np_api_key                     = "test-api-key"
+  k8s_provider                   = "eks"
+  nullplatform_base_helm_version = "2.44.0"
+  logging_controller_image_tag   = "1.6.0"
+  control_plane_agent_image_tag  = "0.9.2"
 }
 
 ############################################

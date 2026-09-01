@@ -2,31 +2,75 @@
 
 ## Description
 
-Configures an AKS cluster in the Nullplatform by creating a provider configuration resource that encapsulates cluster settings, gateway configuration, resource management policies, and security parameters
+Configures an AKS cluster provider configuration in Nullplatform by encoding cluster, gateway, resource management, security, and traffic manager settings into a nullplatform_provider_config resource
 
 ## Architecture
 
-The module builds a local.attributes map that aggregates cluster metadata, gateway specs, resource limits, and security settings, then passes this JSON-encoded structure to the nullplatform_provider_config resource of type aks-configuration. Inputs like cluster_name, resource_group, and gateway names flow into the attributes map, while optional blocks for resource_management and security are conditionally included based on non-empty variables. The resulting provider configuration is registered against the given NRN in the Nullplatform.
+The module constructs a set of locals that merge optional and required inputs into structured maps representing cluster identity, gateway configuration, resource management ratios, and security settings. These locals are JSON-encoded and passed as the attributes argument to a single nullplatform_provider_config resource of type aks-configuration, keyed by the provided NRN and optional dimensions. The traffic_manager_version is always included in the attributes payload, while fields like authentication_mode, private_gateway_name, image_pull_secrets, service_account_name, resource_management ratios, and object_modifiers are conditionally included only when non-empty values are provided.
 
 ## Features
 
-- Creates Nullplatform provider configuration for AKS clusters
-- Configures public and optional private Application Gateway references
-- Supports resource quotas for CPU/memory ratios and core limits
-- Manages image pull secrets and service account mappings
-- Enables traffic manager sidecar version specification
-- Applies dynamic object modifiers for Kubernetes resources
+- Creates a nullplatform_provider_config resource of type aks-configuration scoped to a Nullplatform NRN
+- Encodes AKS cluster identity including name, resource group, and default application namespace
+- Configures public and optionally private Application Gateway references within the Istio ingress namespace
+- Pins traffic manager sidecar container to a fixed, explicitly declared version tag
+- Conditionally includes resource management tuning parameters such as memory-to-CPU ratio and max milicores
+- Supports optional Kubernetes security settings including image pull secrets and service account name
+- Applies dynamic Kubernetes object modifiers when object_modifiers list is provided
 
 ## Basic Usage
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v6.19.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v6.22.0"
 
-  cluster_name        = "your-cluster-name"
-  nrn                 = "your-nrn"
-  public_gateway_name = "your-public-gateway-name"
-  resource_group      = "your-resource-group"
+  cluster_name            = "your-cluster-name"
+  nrn                     = "your-nrn"
+  public_gateway_name     = "your-public-gateway-name"
+  resource_group          = "your-resource-group"
+  traffic_manager_version = "your-traffic-manager-version"
+}
+```
+
+### Usage with Fixed Version Tag
+
+```hcl
+module "aks" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v6.22.0"
+
+  cluster_name            = "your-cluster-name"
+  nrn                     = "your-nrn"
+  public_gateway_name     = "your-public-gateway-name"
+  resource_group          = "your-resource-group"
+  traffic_manager_version = "latest"
+}
+```
+
+### Usage with Fixed Version Tag
+
+```hcl
+module "aks" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v6.22.0"
+
+  cluster_name            = "your-cluster-name"
+  nrn                     = "your-nrn"
+  public_gateway_name     = "your-public-gateway-name"
+  resource_group          = "your-resource-group"
+  traffic_manager_version = "main"
+}
+```
+
+### Usage with Fixed Version Tag
+
+```hcl
+module "aks" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v6.22.0"
+
+  cluster_name            = "your-cluster-name"
+  nrn                     = "your-nrn"
+  public_gateway_name     = "your-public-gateway-name"
+  resource_group          = "your-resource-group"
+  traffic_manager_version = "master"
 }
 ```
 
@@ -78,21 +122,22 @@ resource "example_resource" "this" {
 | <a name="input_public_gateway_name"></a> [public\_gateway\_name](#input\_public\_gateway\_name) | Name of the public Application Gateway in AKS | `string` | n/a | yes |
 | <a name="input_resource_group"></a> [resource\_group](#input\_resource\_group) | Name of the resource group containing the AKS cluster | `string` | n/a | yes |
 | <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | The name of the Kubernetes service account used for deployments | `string` | `""` | no |
-| <a name="input_traffic_manager_version"></a> [traffic\_manager\_version](#input\_traffic\_manager\_version) | Tag for the traffic manager sidecar container | `string` | `""` | no |
+| <a name="input_traffic_manager_version"></a> [traffic\_manager\_version](#input\_traffic\_manager\_version) | No default: every install pins this deliberately — see VERSIONS.md. Tag for the traffic manager sidecar container | `string` | n/a | yes |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
 {
   "name": "aks",
-  "description": "Configures an AKS cluster in the Nullplatform by creating a provider configuration resource that encapsulates cluster settings, gateway configuration, resource management policies, and security parameters",
-  "architecture": "The module builds a local.attributes map that aggregates cluster metadata, gateway specs, resource limits, and security settings, then passes this JSON-encoded structure to the nullplatform_provider_config resource of type aks-configuration. Inputs like cluster_name, resource_group, and gateway names flow into the attributes map, while optional blocks for resource_management and security are conditionally included based on non-empty variables. The resulting provider configuration is registered against the given NRN in the Nullplatform.",
+  "description": "Configures an AKS cluster provider configuration in Nullplatform by encoding cluster, gateway, resource management, security, and traffic manager settings into a nullplatform_provider_config resource",
+  "architecture": "The module constructs a set of locals that merge optional and required inputs into structured maps representing cluster identity, gateway configuration, resource management ratios, and security settings. These locals are JSON-encoded and passed as the attributes argument to a single nullplatform_provider_config resource of type aks-configuration, keyed by the provided NRN and optional dimensions. The traffic_manager_version is always included in the attributes payload, while fields like authentication_mode, private_gateway_name, image_pull_secrets, service_account_name, resource_management ratios, and object_modifiers are conditionally included only when non-empty values are provided.",
   "features": [
-    "Creates Nullplatform provider configuration for AKS clusters",
-    "Configures public and optional private Application Gateway references",
-    "Supports resource quotas for CPU/memory ratios and core limits",
-    "Manages image pull secrets and service account mappings",
-    "Enables traffic manager sidecar version specification",
-    "Applies dynamic object modifiers for Kubernetes resources"
+    "Creates a nullplatform_provider_config resource of type aks-configuration scoped to a Nullplatform NRN",
+    "Encodes AKS cluster identity including name, resource group, and default application namespace",
+    "Configures public and optionally private Application Gateway references within the Istio ingress namespace",
+    "Pins traffic manager sidecar container to a fixed, explicitly declared version tag",
+    "Conditionally includes resource management tuning parameters such as memory-to-CPU ratio and max milicores",
+    "Supports optional Kubernetes security settings including image pull secrets and service account name",
+    "Applies dynamic Kubernetes object modifiers when object_modifiers list is provided"
   ],
   "inputs": [
     {
@@ -113,6 +158,11 @@ resource "example_resource" "this" {
     {
       "name": "public_gateway_name",
       "description": "Name of the public Application Gateway in AKS",
+      "required": true
+    },
+    {
+      "name": "traffic_manager_version",
+      "description": "No default: every install pins this deliberately — see VERSIONS.md. Tag for the traffic manager sidecar container",
       "required": true
     },
     {
@@ -171,17 +221,12 @@ resource "example_resource" "this" {
       "required": false
     },
     {
-      "name": "traffic_manager_version",
-      "description": "Tag for the traffic manager sidecar container",
-      "required": false
-    },
-    {
       "name": "object_modifiers",
       "description": "List of modifications to dynamically modify k8s objects",
       "required": false
     }
   ],
   "outputs": [],
-  "hash": "2168cb7d36e77d4e500f63cf042628ee"
+  "hash": "65a7d6c6c893cb43c077bae43b2e11c3"
 }
 END_AI_METADATA -->
