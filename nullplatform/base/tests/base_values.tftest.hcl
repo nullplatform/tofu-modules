@@ -10,6 +10,54 @@ variables {
 }
 
 ############################################
+# Gateway API CRD ref
+############################################
+
+run "gateway_api_crd_ref_defaults_to_istio_1_27_ref" {
+  command = plan
+
+  assert {
+    condition     = strcontains(output.rendered_values, "gatewayApiCrdRef: \"v1.3.0\"")
+    error_message = "gatewayApiCrdRef should default to v1.3.0, matching Istio 1.27"
+  }
+}
+
+run "gateway_api_crd_ref_override" {
+  command = plan
+
+  variables {
+    gateway_api_crd_ref = "v1.6.0"
+  }
+
+  assert {
+    condition     = strcontains(output.rendered_values, "gatewayApiCrdRef: \"v1.6.0\"")
+    error_message = "gatewayApiCrdRef should reflect the overridden ref"
+  }
+}
+
+run "install_gateway_v2_crd_defaults_to_true" {
+  command = plan
+
+  assert {
+    condition     = strcontains(output.rendered_values, "installGatewayV2Crd: true")
+    error_message = "install_gateway_v2_crd should default to true so CRDs actually reconcile to gateway_api_crd_ref"
+  }
+}
+
+run "install_gateway_v2_crd_override" {
+  command = plan
+
+  variables {
+    install_gateway_v2_crd = false
+  }
+
+  assert {
+    condition     = strcontains(output.rendered_values, "installGatewayV2Crd: false")
+    error_message = "install_gateway_v2_crd should still be overridable to false"
+  }
+}
+
+############################################
 # applicationLogs toggle
 ############################################
 
