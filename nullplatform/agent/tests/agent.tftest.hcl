@@ -11,39 +11,9 @@ variables {
 
 ###############################################################################
 # Deprecated-but-accepted inputs
-#
-# Removing a declared input breaks every consumer that passes it, since OpenTofu
-# rejects an argument for a variable that does not exist. These runs fail if the
-# variables are deleted again.
 ###############################################################################
 
-run "nrn_is_still_accepted" {
-  command = plan
-
-  variables {
-    nrn = "organization=1:account=2"
-  }
-
-  assert {
-    condition     = local.deprecated_inputs_accepted[0] == "organization=1:account=2"
-    error_message = "nrn must remain a declared input on the 6.x line: consumers pass it and OpenTofu errors on an argument for an undeclared variable"
-  }
-}
-
-run "private_domain_is_still_accepted" {
-  command = plan
-
-  variables {
-    private_domain = "internal.example.com"
-  }
-
-  assert {
-    condition     = local.deprecated_inputs_accepted[1] == "internal.example.com"
-    error_message = "private_domain must remain a declared input on the 6.x line"
-  }
-}
-
-run "deprecated_inputs_are_not_rendered_into_the_agent_config" {
+run "deprecated_inputs_are_accepted_and_not_rendered" {
   command = plan
 
   variables {
@@ -52,13 +22,18 @@ run "deprecated_inputs_are_not_rendered_into_the_agent_config" {
   }
 
   assert {
-    condition     = !contains(keys(local.all_config), "NRN")
-    error_message = "nrn is accepted for compatibility only and must not reach the agent config"
+    condition     = local.deprecated_inputs_accepted[0] == "organization=1:account=2"
+    error_message = "nrn must stay declared: OpenTofu errors on an argument for an undeclared variable"
   }
 
   assert {
-    condition     = !contains(keys(local.all_config), "PRIVATE_DOMAIN")
-    error_message = "PRIVATE_DOMAIN is dead in nullplatform/scopes and must not be rendered"
+    condition     = local.deprecated_inputs_accepted[1] == "internal.example.com"
+    error_message = "private_domain must stay declared on the 6.x line"
+  }
+
+  assert {
+    condition     = !contains(keys(local.all_config), "NRN") && !contains(keys(local.all_config), "PRIVATE_DOMAIN")
+    error_message = "Both are accepted for compatibility only and must not reach the agent config"
   }
 }
 
@@ -66,42 +41,48 @@ run "deprecated_inputs_are_not_rendered_into_the_agent_config" {
 # Helm release lifecycle
 ###############################################################################
 
-run "namespace_is_created" {
+run "release_flags_are_not_left_at_the_provider_defaults" {
   command = plan
 
   assert {
     condition     = helm_release.agent.create_namespace == true
-    error_message = "create_namespace must stay true: the provider defaults it to false, and the release fails with 'namespaces not found' on any cluster where nullplatform/base has not already created it"
+    error_message = "create_namespace defaults to false in the provider, and the release then fails with 'namespaces not found' on a fresh cluster"
   }
-}
-
-run "failed_upgrades_roll_back" {
-  command = plan
 
   assert {
     condition     = helm_release.agent.atomic == true && helm_release.agent.cleanup_on_fail == true
-    error_message = "atomic and cleanup_on_fail must stay true, or a failed upgrade leaves the release in `failed` with orphaned resources instead of rolling back"
+    error_message = "Without atomic and cleanup_on_fail a failed upgrade sticks in `failed` with orphaned resources"
+  }
+}
+
+run "namespace_creation_can_be_handed_to_another_module" {
+  command = plan
+
+  variables {
+    create_namespace = false
+  }
+
+  assert {
+    condition     = helm_release.agent.create_namespace == false
+    error_message = "Stacks where nullplatform/base owns the namespace must be able to opt out"
   }
 }
 
 ###############################################################################
 # Env-var surface per cloud provider
-#
-# The whole point of the module is what it renders into the agent's config, and
-# nothing covered it. A key silently gained or lost per cloud is a routing outage.
 ###############################################################################
 
-run "gateway_names_are_rendered_for_gcp" {
+run "gateway_names_are_rendered" {
   command = plan
 
   assert {
     condition     = local.all_config["PRIVATE_GATEWAY_NAME"] == "gateway-private"
-    error_message = "The private gateway default must match the Gateway nullplatform/base actually creates"
+    error_message = "The private gateway default must match the Gateway nullplatform/base creates"
   }
 
   assert {
     condition     = local.all_config["PUBLIC_GATEWAY_NAME"] == "gateway-public"
-    error_message = "The public gateway default must match nullplatform/base's gateway_public_name default"
+    error_message = "The public gateway default must match nullplatform/base's default"
   }
 }
 
@@ -115,28 +96,21 @@ run "gateway_names_are_rendered_for_aws_too" {
 
   assert {
     condition     = local.all_config["PRIVATE_GATEWAY_NAME"] == "gateway-private"
-    error_message = "AWS must receive the gateway names too: base creates gateway-private while the k8s scope falls back to gateway-internal, and that mismatch is a confirmed internal-traffic outage"
+    error_message = "AWS needs them too: base creates gateway-private while the k8s scope falls back to gateway-internal, a confirmed internal-traffic outage"
   }
 }
 
-run "caller_can_override_gateway_names" {
+run "caller_overrides_and_extra_envs_win" {
   command = plan
 
   variables {
     public_gateway_name = "internet-facing"
+    extra_envs          = { PRIVATE_GATEWAY_NAME = "gateway-custom" }
   }
 
   assert {
     condition     = local.all_config["PUBLIC_GATEWAY_NAME"] == "internet-facing"
-    error_message = "An overridden gateway name must reach the agent: AKS installs commonly name the public Gateway internet-facing"
-  }
-}
-
-run "extra_envs_win_over_defaults" {
-  command = plan
-
-  variables {
-    extra_envs = { PRIVATE_GATEWAY_NAME = "gateway-custom" }
+    error_message = "An overridden gateway name must reach the agent: AKS installs commonly use internet-facing"
   }
 
   assert {
@@ -203,96 +177,67 @@ run "oci_gets_the_shared_config_only" {
 
 ###############################################################################
 # Ingress templates
-#
-# No precondition gates these: the scope type's own values.yaml supplies defaults
-# (scopes/azure and scopes/azure-aro already point at Istio templates), so the
-# agent cannot tell whether an override is needed. These runs pin that the values
-# pass through untouched and that leaving them empty is allowed.
 ###############################################################################
 
-run "partial_ingress_override_is_rejected_initial_without_blue_green" {
+run "defaults_leave_the_templates_to_the_scope_type" {
   command = plan
 
-  variables {
-    # finalize renders INITIAL_INGRESS_PATH and switch-traffic renders
-    # BLUE_GREEN_INGRESS_PATH into the same TEMPLATE slot, so this combination gets
-    # an HTTPRoute on the initial deploy and an ALB Ingress on the traffic switch.
-    service_template     = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/service.yaml.tpl"
-    initial_ingress_path = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
-  }
-
-  expect_failures = [
-    terraform_data.cross_variable_validation,
-  ]
-}
-
-run "partial_ingress_override_is_rejected_service_only" {
-  command = plan
-
-  variables {
-    service_template = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/service.yaml.tpl"
-  }
-
-  expect_failures = [
-    terraform_data.cross_variable_validation,
-  ]
-}
-
-run "partial_ingress_override_is_rejected_routes_without_service" {
-  command = plan
-
-  variables {
-    initial_ingress_path    = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
-    blue_green_ingress_path = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
-  }
-
-  expect_failures = [
-    terraform_data.cross_variable_validation,
-  ]
-}
-
-run "empty_ingress_templates_are_allowed_on_any_cloud" {
-  command = plan
-
-  variables {
-    cloud_provider = "gcp"
+  assert {
+    condition     = local.all_config["SERVICE_TEMPLATE"] == "" && local.all_config["INITIAL_INGRESS_PATH"] == ""
+    error_message = "Empty templates must pass through so the scope type's own values.yaml decides"
   }
 
   assert {
-    condition     = local.all_config["SERVICE_TEMPLATE"] == ""
-    error_message = "An empty template must pass through so the scope type's own default applies"
+    condition     = !contains(keys(local.all_config), "INGRESS_TYPE")
+    error_message = "The default must not render INGRESS_TYPE: services-endpoint-exposer ships only workflows/istio, so injecting 'alb' breaks installs that work today"
   }
 }
 
-run "ingress_templates_pass_through_when_set" {
+run "ingress_templates_pass_through_when_all_three_are_set" {
   command = plan
 
   variables {
-    service_template        = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/service.yaml.tpl"
-    initial_ingress_path    = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
-    blue_green_ingress_path = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
+    service_template        = "/custom/service.yaml.tpl"
+    initial_ingress_path    = "/custom/initial-httproute.yaml.tpl"
+    blue_green_ingress_path = "/custom/blue-green-httproute.yaml.tpl"
   }
 
   assert {
-    condition     = local.all_config["INITIAL_INGRESS_PATH"] == "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
+    condition     = local.all_config["INITIAL_INGRESS_PATH"] == "/custom/initial-httproute.yaml.tpl"
     error_message = "Overridden ingress templates must reach the agent config"
   }
-
-  assert {
-    condition     = local.all_config["SERVICE_TEMPLATE"] != "" && local.all_config["BLUE_GREEN_INGRESS_PATH"] != ""
-    error_message = "Setting all three together must be accepted: this is the supported way to run the k8s scope type on Istio"
-  }
 }
 
-run "setting_ingress_type_does_not_block_aws" {
+run "partial_ingress_override_is_rejected_without_blue_green" {
+  command = plan
+
+  variables {
+    service_template     = "/custom/service.yaml.tpl"
+    initial_ingress_path = "/custom/initial-httproute.yaml.tpl"
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "partial_ingress_override_is_rejected_without_service" {
+  command = plan
+
+  variables {
+    initial_ingress_path    = "/custom/initial-httproute.yaml.tpl"
+    blue_green_ingress_path = "/custom/blue-green-httproute.yaml.tpl"
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "extra_envs_ingress_type_does_not_block_an_alb_scope" {
   command = plan
 
   variables {
     cloud_provider   = "aws"
     aws_iam_role_arn = "arn:aws:iam::123456789012:role/test-role"
-    # A real pattern: INGRESS_TYPE is consumed by services-endpoint-exposer to pick
-    # a workflow directory. v6.14.0 turned it into a hard plan failure that demanded
-    # Istio templates an EKS/ALB scope does not want.
+    # v6.14.0 turned this into a hard plan failure that demanded Istio templates an
+    # EKS/ALB scope does not want.
     extra_envs = { INGRESS_TYPE = "istio" }
   }
 
@@ -304,12 +249,6 @@ run "setting_ingress_type_does_not_block_aws" {
 
 ###############################################################################
 # ingress_type
-#
-# The scope type is the real source of truth for the three template paths, and the
-# agent module cannot read it. ingress_type is the caller's explicit declaration of
-# which flavour the k8s scope type is running on, replacing the two signals v6.14.0
-# tried and could not make correct (extra_envs.INGRESS_TYPE, which nullplatform/scopes
-# never reads, and cloud_provider, which blocks valid azure-scope installs).
 ###############################################################################
 
 run "invalid_ingress_type_is_rejected" {
@@ -322,7 +261,7 @@ run "invalid_ingress_type_is_rejected" {
   expect_failures = [var.ingress_type]
 }
 
-run "istio_ingress_type_autofills_the_three_templates" {
+run "istio_autofills_the_three_templates_and_the_env_var" {
   command = plan
 
   variables {
@@ -330,49 +269,19 @@ run "istio_ingress_type_autofills_the_three_templates" {
   }
 
   assert {
-    condition     = local.all_config["SERVICE_TEMPLATE"] == "$SERVICE_PATH/deployment/templates/istio/service.yaml.tpl"
-    error_message = "ingress_type istio must supply the same service template scopes/azure hardcodes in its own values.yaml"
-  }
-
-  assert {
-    condition     = local.all_config["INITIAL_INGRESS_PATH"] == "$SERVICE_PATH/deployment/templates/istio/initial-httproute.yaml.tpl"
-    error_message = "ingress_type istio must supply the Istio HTTPRoute template for the initial deploy, not scopes/k8s's AWS ALB Ingress"
-  }
-
-  assert {
-    condition     = local.all_config["BLUE_GREEN_INGRESS_PATH"] == "$SERVICE_PATH/deployment/templates/istio/blue-green-httproute.yaml.tpl"
-    error_message = "ingress_type istio must supply the blue-green HTTPRoute template, or switch-traffic renders an ALB Ingress mid-deploy"
-  }
-}
-
-run "istio_ingress_type_renders_the_env_var" {
-  command = plan
-
-  variables {
-    ingress_type = "istio"
+    condition = (local.all_config["SERVICE_TEMPLATE"] == "$SERVICE_PATH/deployment/templates/istio/service.yaml.tpl" &&
+      local.all_config["INITIAL_INGRESS_PATH"] == "$SERVICE_PATH/deployment/templates/istio/initial-httproute.yaml.tpl" &&
+    local.all_config["BLUE_GREEN_INGRESS_PATH"] == "$SERVICE_PATH/deployment/templates/istio/blue-green-httproute.yaml.tpl")
+    error_message = "ingress_type istio must supply the same three Istio templates scopes/azure hardcodes, or the deploy renders an ALB Ingress"
   }
 
   assert {
     condition     = local.all_config["INGRESS_TYPE"] == "istio"
-    error_message = "ingress_type istio must also reach the agent as INGRESS_TYPE: services-endpoint-exposer's link entrypoint defaults it to 'alb' and would then look for workflows/alb, which does not exist in that repo"
+    error_message = "services-endpoint-exposer's link entrypoint defaults to 'alb', so an Istio install needs the value stated"
   }
 }
 
-run "alb_ingress_type_renders_no_env_var" {
-  command = plan
-
-  assert {
-    condition     = !contains(keys(local.all_config), "INGRESS_TYPE")
-    error_message = "The default must not render INGRESS_TYPE. services-endpoint-exposer resolves $SERVICE_PATH/workflows/$INGRESS_TYPE/ and only ships workflows/istio, so injecting 'alb' would break every install whose service entrypoint currently relies on its own istio fallback"
-  }
-
-  assert {
-    condition     = local.all_config["SERVICE_TEMPLATE"] == "" && local.all_config["INITIAL_INGRESS_PATH"] == ""
-    error_message = "The default must leave the templates empty so the scope type's own values.yaml decides"
-  }
-}
-
-run "explicit_templates_win_over_istio_autofill" {
+run "explicit_templates_win_over_the_istio_autofill" {
   command = plan
 
   variables {
@@ -384,7 +293,7 @@ run "explicit_templates_win_over_istio_autofill" {
 
   assert {
     condition     = local.all_config["SERVICE_TEMPLATE"] == "/custom/service.yaml.tpl"
-    error_message = "An explicit override must win over the istio autofill: stacks pinned to their own template copies were passing all three long before ingress_type existed"
+    error_message = "Stacks pinned to their own template copies were passing all three before ingress_type existed"
   }
 }
 
@@ -399,7 +308,7 @@ run "istio_autofill_completes_a_partial_override" {
   assert {
     condition = (local.all_config["SERVICE_TEMPLATE"] == "/custom/service.yaml.tpl" &&
     local.all_config["BLUE_GREEN_INGRESS_PATH"] == "$SERVICE_PATH/deployment/templates/istio/blue-green-httproute.yaml.tpl")
-    error_message = "With ingress_type istio a partial override is completed rather than rejected: the unset paths fall back to the Istio defaults, so the deploy stays on one template flavour"
+    error_message = "Under istio the unset paths are filled in rather than rejected, keeping the deploy on one flavour"
   }
 }
 
@@ -408,16 +317,13 @@ run "istio_with_conflicting_extra_envs_is_rejected" {
 
   variables {
     ingress_type = "istio"
-    # Contradicts ingress_type, and extra_envs is merged last so it would silently win.
-    extra_envs = { INGRESS_TYPE = "alb" }
+    extra_envs   = { INGRESS_TYPE = "alb" }
   }
 
-  expect_failures = [
-    terraform_data.cross_variable_validation,
-  ]
+  expect_failures = [terraform_data.cross_variable_validation]
 }
 
-run "istio_with_redundant_matching_extra_envs_is_allowed" {
+run "istio_with_matching_extra_envs_is_allowed" {
   command = plan
 
   variables {
@@ -427,7 +333,7 @@ run "istio_with_redundant_matching_extra_envs_is_allowed" {
 
   assert {
     condition     = local.all_config["INGRESS_TYPE"] == "istio"
-    error_message = "Restating the same value in extra_envs is redundant but harmless and must keep planning: consumers already have it in their configs"
+    error_message = "Restating the same value is redundant but harmless and must keep planning"
   }
 }
 
@@ -442,9 +348,7 @@ run "aws_requires_the_role_arn" {
     cloud_provider = "aws"
   }
 
-  expect_failures = [
-    terraform_data.cross_variable_validation,
-  ]
+  expect_failures = [terraform_data.cross_variable_validation]
 }
 
 run "azure_requires_its_credentials" {
@@ -454,9 +358,7 @@ run "azure_requires_its_credentials" {
     cloud_provider = "azure"
   }
 
-  expect_failures = [
-    terraform_data.cross_variable_validation,
-  ]
+  expect_failures = [terraform_data.cross_variable_validation]
 }
 
 run "invalid_cloud_provider_is_rejected" {

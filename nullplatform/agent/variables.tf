@@ -61,9 +61,9 @@ variable "service_account_name" {
 variable "nullplatform_agent_helm_version" {
   description = "Version of the nullplatform agent Helm chart to deploy"
   type        = string
-  # 2.37.0+ ships the worker orchestrator (patches, per-install isolation, idle
-  # reaper, insecure default).
-  default = "2.37.0"
+  # 2.37.0+ ships the worker orchestrator.
+  default  = "2.37.0"
+  nullable = false
 }
 
 variable "worker" {
@@ -91,6 +91,14 @@ variable "namespace" {
   description = "Kubernetes namespace where the nullplatform agent will run"
   type        = string
   default     = "nullplatform-tools"
+  nullable    = false
+}
+
+# Whether the Helm release creates the namespace
+variable "create_namespace" {
+  description = "Create the namespace if it does not exist. Leave true unless another module already owns it: nullplatform/base declares the same namespace with Helm ownership metadata, so with no ordering edge between the two whichever applies second fails."
+  type        = bool
+  default     = true
   nullable    = false
 }
 
@@ -199,7 +207,7 @@ variable "azure_tenant_id" {
 
 # Name of the private/internal gateway used for routing
 variable "private_gateway_name" {
-  description = "Name of the private/internal gateway used for routing. Must match the Gateway the cluster actually has: nullplatform/base hardcodes the private Gateway as 'gateway-private' (templates/nullplatform_base_values.tmpl.yaml), while the k8s scope's own fallback is 'gateway-internal' — a mismatch produces HTTPRoutes with an unresolvable parentRef and deploys that die in verify_networking_reconciliation"
+  description = "Name of the private/internal gateway used for routing. Must match the Gateway the cluster actually has: nullplatform/base hardcodes 'gateway-private', and a mismatch produces HTTPRoutes with an unresolvable parentRef that die in verify_networking_reconciliation."
   type        = string
   default     = "gateway-private"
   nullable    = false
@@ -207,7 +215,7 @@ variable "private_gateway_name" {
 
 # Name of the public gateway used for routing
 variable "public_gateway_name" {
-  description = "Name of the public gateway used for routing. Must match nullplatform/base's gateway_public_name, which is overridable and documented to be overridden (e.g. 'internet-facing' on AKS). If base was overridden and this is left at the default, HTTPRoutes get an unresolvable parentRef and the Azure DNS record manager is handed a gateway name that does not exist"
+  description = "Name of the public gateway used for routing. Must match nullplatform/base's gateway_public_name, which is commonly overridden (e.g. 'internet-facing' on AKS); leaving this at the default when base was overridden breaks HTTPRoute routing and Azure DNS records."
   type        = string
   default     = "gateway-public"
   nullable    = false
@@ -251,29 +259,7 @@ variable "image_pull_secrets" {
 
 # Ingress flavour the k8s scope type runs on
 variable "ingress_type" {
-  description = <<-EOT
-    Ingress flavour of the cluster, for the `k8s` scope type only: 'alb' (default) or
-    'istio'.
-
-    'alb' keeps today's behaviour exactly — the three template paths stay empty and
-    the scope type's own values.yaml decides, and INGRESS_TYPE is deliberately NOT
-    rendered as an env var (see below).
-
-    'istio' fills service_template, initial_ingress_path and blue_green_ingress_path
-    with the Istio HTTPRoute templates and renders INGRESS_TYPE=istio. Set it when
-    running the `k8s` scope type on a cluster with no AWS ALB controller (GKE, or AKS
-    not using the dedicated `azure` scope type): scopes/k8s defaults those three to an
-    ALB Ingress template, so leaving them alone yields a deploy with no working route
-    and no error. The `azure` and `azure-aro` scope types already point at Istio
-    templates in their own values.yaml and need no override.
-
-    On why 'alb' renders no env var: INGRESS_TYPE is not read anywhere in
-    nullplatform/scopes. Its only consumer is services-endpoint-exposer, which uses it
-    as a directory name ($SERVICE_PATH/workflows/$INGRESS_TYPE/) and ships only
-    workflows/istio. Its service entrypoint already defaults to istio, so rendering
-    'alb' would break installs that work today. Overriding the three template paths
-    explicitly always wins over this variable.
-  EOT
+  description = "Ingress flavour of the cluster, for the `k8s` scope type only: 'alb' (default) or 'istio'. 'istio' fills service_template, initial_ingress_path and blue_green_ingress_path with the Istio HTTPRoute templates and renders INGRESS_TYPE=istio; set it when running the `k8s` scope type without an AWS ALB controller (GKE, or AKS not on the dedicated `azure` scope type), whose ALB Ingress default yields a deploy with no working route and no error. 'alb' keeps today's behaviour: the three paths stay empty so the scope type's own values.yaml decides, and INGRESS_TYPE is not rendered — services-endpoint-exposer ships only workflows/istio and would break on 'alb'. Explicit template paths always win over this variable."
   type        = string
   default     = "alb"
   nullable    = false
@@ -283,25 +269,25 @@ variable "ingress_type" {
   }
 }
 
-# Scope service template to use for deployment (required when extra_envs.INGRESS_TYPE is 'istio')
+# Scope service template to use for deployment
 variable "service_template" {
-  description = "Specifies the name or reference of the scope service template to be used for deployment. Leave empty to use the default from the scope type's own values.yaml. Override it when the scope type's default does not match the cluster's ingress: scopes/k8s defaults to an AWS ALB Ingress template, so a GKE or AKS cluster running the k8s scope type needs all three of service_template, initial_ingress_path and blue_green_ingress_path pointed at Istio HTTPRoute templates, or deployments come up with no working route and no error. The scopes/azure and scopes/azure-aro scope types already set them and need no override. All three must be set together or all left empty: finalize renders INITIAL_INGRESS_PATH and switch-traffic renders BLUE_GREEN_INGRESS_PATH into the same slot, so a half-override breaks blue-green mid-deploy"
+  description = "Scope service template path. Empty (default) uses the scope type's own values.yaml. All three must be set together or all left empty, or the deploy changes template flavour mid-way; see ingress_type for the Istio preset."
   type        = string
   default     = ""
   nullable    = false
 }
 
-# Initial ingress path used on first deploy (required when extra_envs.INGRESS_TYPE is 'istio')
+# Initial ingress path used on first deploy
 variable "initial_ingress_path" {
-  description = "Defines the initial ingress path used when deploying the application for the first time. Leave empty to use the default from the scope type's own values.yaml. Override it when the scope type's default does not match the cluster's ingress: scopes/k8s defaults to an AWS ALB Ingress template, so a GKE or AKS cluster running the k8s scope type needs all three of service_template, initial_ingress_path and blue_green_ingress_path pointed at Istio HTTPRoute templates, or deployments come up with no working route and no error. The scopes/azure and scopes/azure-aro scope types already set them and need no override. All three must be set together or all left empty: finalize renders INITIAL_INGRESS_PATH and switch-traffic renders BLUE_GREEN_INGRESS_PATH into the same slot, so a half-override breaks blue-green mid-deploy"
+  description = "Ingress template path for the initial deploy. Empty (default) uses the scope type's own values.yaml. All three must be set together or all left empty, or the deploy changes template flavour mid-way; see ingress_type for the Istio preset."
   type        = string
   default     = ""
   nullable    = false
 }
 
-# Blue-green ingress path used to route traffic to the new version (required when extra_envs.INGRESS_TYPE is 'istio')
+# Blue-green ingress path used to route traffic to the new version
 variable "blue_green_ingress_path" {
-  description = "Specifies the ingress path used for blue-green deployments to route traffic to the new version. Leave empty to use the default from the scope type's own values.yaml. Override it when the scope type's default does not match the cluster's ingress: scopes/k8s defaults to an AWS ALB Ingress template, so a GKE or AKS cluster running the k8s scope type needs all three of service_template, initial_ingress_path and blue_green_ingress_path pointed at Istio HTTPRoute templates, or deployments come up with no working route and no error. The scopes/azure and scopes/azure-aro scope types already set them and need no override. All three must be set together or all left empty: finalize renders INITIAL_INGRESS_PATH and switch-traffic renders BLUE_GREEN_INGRESS_PATH into the same slot, so a half-override breaks blue-green mid-deploy"
+  description = "Ingress template path for the blue-green traffic switch. Empty (default) uses the scope type's own values.yaml. All three must be set together or all left empty, or the deploy changes template flavour mid-way; see ingress_type for the Istio preset."
   type        = string
   default     = ""
   nullable    = false
@@ -318,13 +304,9 @@ variable "extra_envs" {
 ################################################################################
 # Deprecated inputs
 #
-# Removed in v6.14.0, restored here because removing a declared input is a
-# breaking change and 6.x is the non-breaking line: OpenTofu rejects an argument
-# for a variable that no longer exists, so every consumer passing these failed at
-# init the moment they bumped the module ref. They are intentionally unused —
-# `nrn` never was consumed (the agent resolves its own scope from the API key) and
-# PRIVATE_DOMAIN is confirmed dead in nullplatform/scopes. Drop them on the next
-# major, with a BREAKING CHANGE footer.
+# Restored: OpenTofu rejects an argument for a variable that does not exist, so
+# removing them in v6.14.0 broke every consumer passing them. Intentionally
+# unused. Drop them on the next major, with a BREAKING CHANGE footer.
 ################################################################################
 
 # tflint-ignore: terraform_unused_declarations
