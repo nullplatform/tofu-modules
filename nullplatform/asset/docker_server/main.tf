@@ -1,7 +1,6 @@
 resource "nullplatform_provider_config" "docker_server" {
-  nrn        = var.nrn
-  type       = "docker-server"
-  dimensions = var.dimensions
+  nrn  = var.nrn
+  type = "docker-server"
   attributes = jsonencode({
     "setup" : {
       "server" : var.login_server,
