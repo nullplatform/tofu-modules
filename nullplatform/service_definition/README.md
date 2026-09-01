@@ -22,7 +22,7 @@ The module uses `data.http` resources to fetch `service-spec.json.tpl`, `actions
 
 ```hcl
 module "service_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v6.22.1"
 
   nrn               = "your-nrn"
   repository_branch = "your-repository-branch"
@@ -35,7 +35,7 @@ module "service_definition" {
 
 ```hcl
 module "service_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v6.22.1"
 
   nrn               = "your-nrn"
   repository_branch = "main"
@@ -48,7 +48,7 @@ module "service_definition" {
 
 ```hcl
 module "service_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v6.22.1"
 
   git_provider        = "your-git-provider"  # Required when repository_branch = "v1.4.0"
   nrn                 = "your-nrn"

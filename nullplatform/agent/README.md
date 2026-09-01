@@ -22,7 +22,7 @@ The module creates a `helm_release` resource named `agent` that deploys the `nul
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.1"
 
   agent_repos_scope_tag           = "your-agent-repos-scope-tag"
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
@@ -39,7 +39,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.1"
 
   agent_repos_scope_tag           = "your-agent-repos-scope-tag"
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
@@ -57,7 +57,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.1"
 
   agent_repos_scope_tag           = "your-agent-repos-scope-tag"
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
@@ -74,7 +74,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.1"
 
   agent_repos_scope_tag           = "your-agent-repos-scope-tag"
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
@@ -97,7 +97,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.1"
 
   agent_repos_scope_tag           = "your-agent-repos-scope-tag"
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
@@ -114,7 +114,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.1"
 
   agent_repos_scope_tag           = "your-agent-repos-scope-tag"
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
@@ -131,7 +131,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.1"
 
   agent_repos_scope               = "your-agent-repos-scope"  # Required when agent_repos_scope_tag = "fixed git tag (e.g. v1.15.1)"
   agent_repos_scope_tag           = "fixed git tag (e.g. v1.15.1)"
@@ -149,7 +149,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.22.1"
 
   agent_repos_scope_tag           = "your-agent-repos-scope-tag"
   agent_traffic_manager_tag       = "fixed semver (e.g. 1.8.0)"
