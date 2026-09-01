@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.22.0](https://github.com/nullplatform/tofu-modules/compare/v6.21.0...v6.22.0) (2026-09-01)
+
+
+### Features
+
+* **istio:** remove legacy istio-ingressgateway helm release ([#543](https://github.com/nullplatform/tofu-modules/issues/543)) ([957dbc4](https://github.com/nullplatform/tofu-modules/commit/957dbc4b7f9ed1346511f49042fd939143d3831f))
+
 ## [6.21.0](https://github.com/nullplatform/tofu-modules/compare/v6.20.0...v6.21.0) (2026-08-28)
 
 
