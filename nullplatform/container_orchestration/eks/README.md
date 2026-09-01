@@ -22,7 +22,7 @@ The module assembles multiple local maps (cluster, balancer, network, resource_m
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v6.22.1"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -34,7 +34,7 @@ module "eks" {
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v6.22.1"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -46,7 +46,7 @@ module "eks" {
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v6.22.1"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -58,7 +58,7 @@ module "eks" {
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v6.22.1"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
