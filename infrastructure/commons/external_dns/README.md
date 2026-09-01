@@ -22,7 +22,7 @@ The module creates an optional kubernetes_namespace_v1 resource and a helm_relea
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v6.22.1"
 
   dns_provider_name = "your-dns-provider-name"
   domain_filters    = "your-domain-filters"
@@ -33,7 +33,7 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v6.22.1"
 
   cloudflare_token  = "your-cloudflare-token"  # Required when dns_provider_name = "cloudflare"
   dns_provider_name = "cloudflare"
@@ -45,7 +45,7 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v6.22.1"
 
   aws_iam_role_arn  = "your-aws-iam-role-arn"  # Required when dns_provider_name = "aws"
   aws_identity_mode = "your-aws-identity-mode"  # Required when dns_provider_name = "aws"
@@ -61,7 +61,7 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v6.22.1"
 
   dns_provider_name        = "oci"
   domain_filters           = "your-domain-filters"
@@ -76,7 +76,7 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v6.22.1"
 
   azure_client_id                 = "your-azure-client-id"  # Required when dns_provider_name = "azure"
   azure_resource_group            = "your-azure-resource-group"  # Required when dns_provider_name = "azure"
@@ -92,7 +92,7 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v6.22.1"
 
   azure_client_id                 = "your-azure-client-id"  # Required when dns_provider_name = "azure-private-dns"
   azure_resource_group            = "your-azure-resource-group"  # Required when dns_provider_name = "azure-private-dns"
@@ -108,7 +108,7 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v6.22.1"
 
   dns_provider_name         = "google"
   domain_filters            = "your-domain-filters"
