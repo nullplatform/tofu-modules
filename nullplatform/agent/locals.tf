@@ -101,7 +101,7 @@ locals {
     BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
   }
 
-  worker_service_account_name = var.worker_service_account_name != "" ? var.worker_service_account_name : var.service_account_name
+  worker_service_account_name = var.service_account_name
 
   worker_container_patch = {
     target = { package = "containers" }

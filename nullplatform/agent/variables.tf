@@ -53,7 +53,7 @@ variable "release_name" {
 variable "service_account_name" {
   description = "Override for the Kubernetes ServiceAccount name created by the Helm chart"
   type        = string
-  default     = ""
+  default     = "nullplatform-agent"
 }
 
 # Version of the nullplatform agent Helm chart to deploy
@@ -73,12 +73,12 @@ variable "worker" {
   description = <<-EOT
     Extra worker-orchestration config, merged on top of the module's own computed
     worker block (backend, allowedRegistries, and the worker container's patch —
-    see worker_backend/worker_allowed_registries/worker_memory_limit/
-    worker_service_account_name). Use this for anything not covered by those:
-    security, idleTTL (reap idle workers), the legacy defaults/rules/pins, or
-    additional patches (concatenated with, not replacing, the computed one). See
-    the nullplatform-agent chart values (>= 2.37.0) for the full shape. null =
-    nothing extra.
+    see worker_backend/worker_allowed_registries/worker_memory_limit; the worker
+    container's serviceAccountName always mirrors service_account_name). Use this
+    for anything not covered by those: security, idleTTL (reap idle workers), the
+    legacy defaults/rules/pins, or additional patches (concatenated with, not
+    replacing, the computed one). See the nullplatform-agent chart values
+    (>= 2.37.0) for the full shape. null = nothing extra.
 
     Example:
       worker = {
@@ -103,15 +103,9 @@ variable "worker_allowed_registries" {
 }
 
 variable "worker_memory_limit" {
-  description = "Memory limit for the worker container (e.g. \"2Gi\"). null leaves the chart default."
+  description = "Memory limit for the worker container (e.g. \"2Gi\")."
   type        = string
-  default     = null
-}
-
-variable "worker_service_account_name" {
-  description = "ServiceAccount name for worker pods. Empty falls back to service_account_name, then the chart default."
-  type        = string
-  default     = ""
+  default     = "2Gi"
 }
 
 # Kubernetes namespace where the nullplatform agent will run
