@@ -85,6 +85,7 @@ locals {
     SERVICE_TEMPLATE        = var.service_template
     INITIAL_INGRESS_PATH    = var.initial_ingress_path
     BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
+    TRAFFIC_CONTAINER_IMAGE = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
   }
 
   # The worker container has no identity of its own — it always runs as the

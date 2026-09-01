@@ -152,9 +152,11 @@ run "worker_block_always_present_with_expected_env" {
       strcontains(helm_release.agent.values[0], "\"name\": \"DOMAIN\"") &&
       strcontains(helm_release.agent.values[0], "\"value\": \"playground.nullapps.io\"") &&
       strcontains(helm_release.agent.values[0], "\"name\": \"K8S_NAMESPACE\"") &&
-      strcontains(helm_release.agent.values[0], "\"value\": \"nullplatform\"")
+      strcontains(helm_release.agent.values[0], "\"value\": \"nullplatform\"") &&
+      strcontains(helm_release.agent.values[0], "\"name\": \"TRAFFIC_CONTAINER_IMAGE\"") &&
+      strcontains(helm_release.agent.values[0], "\"value\": \"public.ecr.aws/nullplatform/k8s-traffic-manager:1.8.0\"")
     )
-    error_message = "worker env must carry the deploy/DNS vars plus namespace"
+    error_message = "worker env must carry the deploy/DNS vars plus namespace and the traffic-manager image"
   }
 }
 
