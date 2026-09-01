@@ -45,8 +45,6 @@ locals {
     NP_API_KEY              = local.api_key
     TAGS                    = local.tags
     AGENT_REPOS             = local.agent_repos
-    CLUSTER_NAME            = var.cluster_name
-    NAMESPACE               = var.namespace
     IMAGE_TAG               = var.image_tag
     TRAFFIC_CONTAINER_IMAGE = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
     IMAGE_PULL_SECRETS      = var.image_pull_secrets
@@ -84,7 +82,6 @@ locals {
     DOMAIN                  = var.domain
     USE_ACCOUNT_SLUG        = var.use_account_slug
     K8S_NAMESPACE           = var.namespace
-    CLUSTER_NAME            = var.cluster_name
     SERVICE_TEMPLATE        = var.service_template
     INITIAL_INGRESS_PATH    = var.initial_ingress_path
     BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path

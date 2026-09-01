@@ -3,7 +3,6 @@ mock_provider "nullplatform" {}
 
 variables {
   api_key                         = "test-api-key"
-  cluster_name                    = "my-cluster"
   tags_selectors                  = { dimension = "prod" }
   cloud_provider                  = "aws"
   aws_iam_role_arn                = "arn:aws:iam::123456789012:role/agent"
@@ -106,14 +105,14 @@ run "agent_repos_scope_rejects_an_inline_fragment" {
 ################################################################################
 
 # DNS_TYPE/DOMAIN/USE_ACCOUNT_SLUG/SERVICE_TEMPLATE/INITIAL_INGRESS_PATH/
-# BLUE_GREEN_INGRESS_PATH are consumed by the worker when it renders a scope's
-# k8s deployment, not by the agent's own control loop — they live on the
-# worker's env only. CLUSTER_NAME/NAMESPACE are needed by both. There is a
-# single combined values document now (worker is just another top-level key
-# of it, not a second Helm values layer), so "not in the agent's own config"
-# is checked via the configuration.values rendering (`KEY: "value"`, no
-# leading quote on the key) rather than absence from the whole document.
-run "moved_deploy_vars_are_worker_only_cluster_and_namespace_are_shared" {
+# BLUE_GREEN_INGRESS_PATH/NAMESPACE are consumed by the worker when it renders
+# a scope's k8s deployment, not by the agent's own control loop — they live on
+# the worker's env only (NAMESPACE as K8S_NAMESPACE). There is a single
+# combined values document now (worker is just another top-level key of it,
+# not a second Helm values layer), so "not in the agent's own config" is
+# checked via the configuration.values rendering (`KEY: "value"`, no leading
+# quote on the key) rather than absence from the whole document.
+run "moved_deploy_vars_are_worker_only" {
   command = plan
 
   variables {
@@ -125,15 +124,10 @@ run "moved_deploy_vars_are_worker_only_cluster_and_namespace_are_shared" {
   assert {
     condition = alltrue([
       for key in ["DNS_TYPE", "DOMAIN", "USE_ACCOUNT_SLUG", "SERVICE_TEMPLATE",
-      "INITIAL_INGRESS_PATH", "BLUE_GREEN_INGRESS_PATH"] :
+      "INITIAL_INGRESS_PATH", "BLUE_GREEN_INGRESS_PATH", "NAMESPACE"] :
       !strcontains(helm_release.agent.values[0], "\n    ${key}:")
     ])
-    error_message = "deploy/DNS vars must not leak into the agent pod's own configuration.values"
-  }
-
-  assert {
-    condition     = strcontains(helm_release.agent.values[0], "\n    CLUSTER_NAME:") && strcontains(helm_release.agent.values[0], "\n    NAMESPACE:")
-    error_message = "CLUSTER_NAME and NAMESPACE must stay in the agent's own configuration.values"
+    error_message = "deploy/DNS vars and NAMESPACE must not leak into the agent pod's own configuration.values"
   }
 }
 
@@ -158,10 +152,9 @@ run "worker_block_always_present_with_expected_env" {
       strcontains(helm_release.agent.values[0], "\"name\": \"DOMAIN\"") &&
       strcontains(helm_release.agent.values[0], "\"value\": \"playground.nullapps.io\"") &&
       strcontains(helm_release.agent.values[0], "\"name\": \"K8S_NAMESPACE\"") &&
-      strcontains(helm_release.agent.values[0], "\"value\": \"nullplatform\"") &&
-      strcontains(helm_release.agent.values[0], "\"name\": \"CLUSTER_NAME\"")
+      strcontains(helm_release.agent.values[0], "\"value\": \"nullplatform\"")
     )
-    error_message = "worker env must carry the deploy/DNS vars plus cluster/namespace"
+    error_message = "worker env must carry the deploy/DNS vars plus namespace"
   }
 }
 

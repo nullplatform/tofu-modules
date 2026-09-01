@@ -9,12 +9,6 @@ variable "api_key" {
   sensitive   = true
 }
 
-# Name of the Kubernetes cluster where the nullplatform agent will be deployed
-variable "cluster_name" {
-  description = "Name of the Kubernetes cluster where the nullplatform agent will be deployed"
-  type        = string
-}
-
 # Image tag for the agent container image
 variable "image_tag" {
   # example: 0.9.2
