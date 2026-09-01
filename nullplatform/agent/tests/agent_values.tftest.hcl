@@ -160,22 +160,33 @@ run "worker_block_always_present_with_expected_env" {
 
 # backend/allowedRegistries have no dedicated variables — they're just keys
 # on var.worker, same as idleTTL or any other chart field.
-run "worker_backend_and_allowed_registries_are_overridable_via_var_worker" {
+# backend is a plain override (var.worker's value wins outright); allowedRegistries
+# is additive like patches — var.worker's entries join the default rather than
+# replacing it, so the platform's own scope images keep pulling.
+run "worker_backend_overrides_allowed_registries_extends" {
   command = plan
 
   variables {
     worker = {
       backend           = "nomad"
-      allowedRegistries = ["public.ecr.aws/nullplatform/scopes*"]
+      allowedRegistries = ["123456789012.dkr.ecr.us-east-1.amazonaws.com/my-org/*"]
     }
   }
 
   assert {
     condition = (
       strcontains(helm_release.agent.values[0], "\"backend\": \"nomad\"") &&
-      strcontains(helm_release.agent.values[0], "public.ecr.aws/nullplatform/scopes*")
+      !strcontains(helm_release.agent.values[0], "\"backend\": \"kubernetes\"")
     )
-    error_message = "var.worker.backend/allowedRegistries must override the module defaults"
+    error_message = "var.worker.backend must override the module default outright"
+  }
+
+  assert {
+    condition = (
+      strcontains(helm_release.agent.values[0], "public.ecr.aws/nullplatform/*") &&
+      strcontains(helm_release.agent.values[0], "123456789012.dkr.ecr.us-east-1.amazonaws.com/my-org/*")
+    )
+    error_message = "var.worker.allowedRegistries must extend the default registry list, not replace it"
   }
 }
 
@@ -198,8 +209,8 @@ run "worker_defaults" {
   command = plan
 
   assert {
-    condition     = !strcontains(helm_release.agent.values[0], "allowedRegistries")
-    error_message = "allowedRegistries must be omitted (not an empty list) when var.worker doesn't set it"
+    condition     = strcontains(helm_release.agent.values[0], "public.ecr.aws/nullplatform/*")
+    error_message = "allowedRegistries must default to public.ecr.aws/nullplatform/* so the platform's own scope images keep pulling"
   }
 
   assert {

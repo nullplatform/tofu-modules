@@ -66,20 +66,21 @@ variable "nullplatform_agent_helm_version" {
 variable "worker" {
   description = <<-EOT
     Extra worker-orchestration config, merged on top of the module's own computed
-    worker block: backend ("kubernetes" by default) and a patch for the worker
-    container (2Gi memory limit, the deploy/DNS env vars below, and a
-    serviceAccountName that always mirrors service_account_name). Set backend or
-    allowedRegistries here to override the module default; add your own entries
-    to patches to layer more on top of the computed one (concatenated, not
-    replaced — e.g. a different memory limit via your own patch targeting the
-    same "worker" container). Anything else — security, idleTTL (reap idle
-    workers), the legacy defaults/rules/pins — passes through as-is. See the
-    nullplatform-agent chart values (>= 2.37.0) for the full shape. null =
-    nothing extra.
+    worker block: backend ("kubernetes" by default), allowedRegistries
+    (["public.ecr.aws/nullplatform/*"] by default, so the platform's own scope
+    images keep working), and a patch for the worker container (2Gi memory
+    limit, the deploy/DNS env vars below, and a serviceAccountName that always
+    mirrors service_account_name). allowedRegistries and patches set here are
+    concatenated with (not replacing) the module defaults — add your own
+    registries or an extra patch rather than having to repeat the defaults;
+    set backend here to override it outright. Anything else — security, idleTTL
+    (reap idle workers), the legacy defaults/rules/pins — passes through as-is.
+    See the nullplatform-agent chart values (>= 2.37.0) for the full shape.
+    null = nothing extra.
 
     Example:
       worker = {
-        allowedRegistries = ["public.ecr.aws/your-org/*"]
+        allowedRegistries = ["123456789012.dkr.ecr.us-east-1.amazonaws.com/your-org/*"]
         patches           = [{ target = { package = "my-pkg" }, merge = { spec = { serviceAccountName = "np-agent-sa" } } }]
         idleTTL           = "30m"
       }
