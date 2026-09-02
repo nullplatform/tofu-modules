@@ -235,16 +235,26 @@ run "encryption_block_when_kms_key_provided" {
   }
 }
 
-run "no_logging_block_by_default" {
+run "log_bucket_is_self_provisioned_by_default" {
   command = plan
 
   assert {
-    condition     = length(google_storage_bucket.tf_state.logging) == 0
-    error_message = "Access logging should not be configured when log_bucket is not set"
+    condition     = length(google_storage_bucket.tf_state.logging) == 1
+    error_message = "Access logging should be configured even when log_bucket is not set — the module provisions its own log bucket"
+  }
+
+  assert {
+    condition     = length(google_storage_bucket.logs) == 1
+    error_message = "The module should create its own log bucket when log_bucket is not set"
+  }
+
+  assert {
+    condition     = length(google_storage_bucket_iam_member.logs_writer) == 1
+    error_message = "The GCS service agent should be granted write access to the self-provisioned log bucket"
   }
 }
 
-run "empty_log_bucket_emits_no_logging_block" {
+run "empty_log_bucket_also_self_provisions" {
   command = plan
 
   variables {
@@ -252,8 +262,13 @@ run "empty_log_bucket_emits_no_logging_block" {
   }
 
   assert {
-    condition     = length(google_storage_bucket.tf_state.logging) == 0
-    error_message = "An empty log_bucket must not emit a logging block with an empty target"
+    condition     = length(google_storage_bucket.tf_state.logging) == 1
+    error_message = "An empty log_bucket should be treated the same as unset: the module self-provisions a log bucket"
+  }
+
+  assert {
+    condition     = length(google_storage_bucket.logs) == 1
+    error_message = "The module should create its own log bucket when log_bucket is an empty string"
   }
 }
 
@@ -267,6 +282,11 @@ run "logging_block_when_log_bucket_provided" {
   assert {
     condition     = google_storage_bucket.tf_state.logging[0].log_bucket == "myorg-access-logs"
     error_message = "Logging block should target the provided log bucket"
+  }
+
+  assert {
+    condition     = length(google_storage_bucket.logs) == 0
+    error_message = "The module should not self-provision a log bucket when the caller already provided one"
   }
 }
 
