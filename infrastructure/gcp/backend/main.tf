@@ -30,6 +30,10 @@ resource "google_storage_bucket" "logs" {
   uniform_bucket_level_access = var.uniform_bucket_level_access
   public_access_prevention    = var.public_access_prevention
 
+  versioning {
+    enabled = var.versioning_enabled
+  }
+
   labels = var.tags
 }
 
