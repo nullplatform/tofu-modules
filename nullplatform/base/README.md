@@ -22,7 +22,7 @@ The module pre-creates two kubernetes_namespace_v1 resources (nullplatform-tools
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.23.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.23.1"
 
   control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "your-k8s-provider"
@@ -36,7 +36,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.23.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.23.1"
 
   control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "eks"
@@ -50,7 +50,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.23.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.23.1"
 
   control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "gke"
@@ -64,7 +64,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.23.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.23.1"
 
   control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "aks"
@@ -78,7 +78,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.23.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.23.1"
 
   control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "oke"
@@ -92,7 +92,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.23.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.23.1"
 
   control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "aro"
@@ -106,7 +106,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.23.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.23.1"
 
   control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "your-k8s-provider"
@@ -120,7 +120,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.23.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.23.1"
 
   control_plane_agent_image_tag  = "latest"
   k8s_provider                   = "your-k8s-provider"
@@ -134,7 +134,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.23.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.23.1"
 
   control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "your-k8s-provider"

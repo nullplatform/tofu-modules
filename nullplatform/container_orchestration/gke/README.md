@@ -22,7 +22,7 @@ The module constructs a set of locals that merge optional inputs (gateway namesp
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v6.23.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v6.23.1"
 
   cluster_name            = "your-cluster-name"
   location                = "your-location"
@@ -36,7 +36,7 @@ module "gke" {
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v6.23.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v6.23.1"
 
   cluster_name            = "your-cluster-name"
   location                = "your-location"
@@ -50,7 +50,7 @@ module "gke" {
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v6.23.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v6.23.1"
 
   cluster_name            = "your-cluster-name"
   location                = "your-location"
@@ -64,7 +64,7 @@ module "gke" {
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v6.23.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v6.23.1"
 
   cluster_name            = "your-cluster-name"
   location                = "your-location"
