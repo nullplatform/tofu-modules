@@ -4,7 +4,7 @@
 
 locals {
 
-  tags        = join(",", [for k in sort(keys(var.tags_selectors)) : "${k}:${var.tags_selectors[k]}"])
+  tags = join(",", [for k in sort(keys(var.tags_selectors)) : "${k}:${var.tags_selectors[k]}"])
 
   api_key = var.api_key
 
@@ -15,6 +15,7 @@ locals {
     "--command-executor-env=NP_API_KEY=$(NP_API_KEY)",
     "--command-executor-debug",
     "--webserver-enabled",
+    "--command-executor-git-command-repos $(AGENT_REPO)"
   ]
 
   cloud_args = {
@@ -26,11 +27,11 @@ locals {
 
   all_args = concat(local.default_args, lookup(local.cloud_args, var.cloud_provider, []))
 
-
   default_config = {
-    NP_API_KEY              = local.api_key
-    TAGS                    = local.tags
-    IMAGE_TAG               = var.image_tag
+    NP_API_KEY = local.api_key
+    TAGS       = local.tags
+    IMAGE_TAG  = var.image_tag
+    AGENT_REPO = var.agent_repo
   }
 
   cloud_config = {
@@ -38,18 +39,16 @@ locals {
       AWS_IAM_ROLE_ARN = var.aws_iam_role_arn
     }
 
-    gcp = {}
+    gcp   = {}
     azure = {}
-    oci = {}
+    oci   = {}
   }
-
 
   all_config = merge(
     local.default_config,
     lookup(local.cloud_config, var.cloud_provider, {}),
     var.extra_envs,
   )
-
 
   worker_default_env = {
     DNS_TYPE                = var.dns_type
@@ -63,7 +62,6 @@ locals {
     IMAGE_PULL_SECRETS      = var.image_pull_secrets
     PRIVATE_GATEWAY_NAME    = var.private_gateway_name
     PUBLIC_GATEWAY_NAME     = var.public_gateway_name
-
   }
 
   worker_cloud_config = {
@@ -76,7 +74,6 @@ locals {
       AZURE_TENANT_ID        = var.azure_tenant_id
     }
   }
-
 
   worker_all_config = merge(
     local.worker_default_env,
@@ -101,7 +98,7 @@ locals {
       )
     }
   }
-  
+
   worker_defaults = {
     backend           = "kubernetes"
     allowedRegistries = ["public.ecr.aws/nullplatform/*"]

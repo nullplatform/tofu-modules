@@ -32,6 +32,12 @@ variable "tags_selectors" {
   type        = map(string)
 }
 
+variable "agent_repo" {
+  description = "Git repository (with ref) the agent clones for its legacy command-executor exec flow, e.g. \"https://github.com/nullplatform/scopes.git#v1.15.1\". Empty when every scope uses worker_orchestrator instead."
+  type        = string
+  default     = ""
+}
+
 ################################################################################
 # Agent configuration
 ################################################################################
