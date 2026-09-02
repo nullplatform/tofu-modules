@@ -91,7 +91,7 @@ variable "kms_key_name" {
 }
 
 variable "log_bucket" {
-  description = "Name of an existing GCS bucket to receive this bucket's access logs. Leave null or empty to disable access logging. Recommended for a state bucket, so reads of state objects leave an audit trail"
+  description = "Name of an existing GCS bucket to receive this bucket's access logs. Leave null or empty and the module creates its own dedicated log bucket (and grants the GCS service agent write access to it) — access logging is always on, so reads of state objects leave an audit trail."
   type        = string
   default     = null
 }
