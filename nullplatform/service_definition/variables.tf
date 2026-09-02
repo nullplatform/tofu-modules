@@ -123,8 +123,12 @@ variable "package" {
         { url = "https://github.com/acme/svc.git", reference = "main" } for a
         git_repository, or { registry, repository, digest } for an oci_image);
       • look up one registered elsewhere BY IDENTITY (no ids needed) — set
-        `lookup = true` + `meta` with the identity fields (add digest/reference
-        to pin a specific revision, otherwise the latest revision is used);
+        `lookup = true` + `meta` with the identity fields (url for
+        git_repository, or registry+repository for oci_image); add the
+        type's own per-revision field to pin a specific revision (reference,
+        e.g. a tag, for git_repository; digest, formatted "sha256:<64-hex>",
+        for oci_image — the API rejects the other type's field name),
+        otherwise the latest revision is used;
       • pin explicit ids — set `resource_id` + `resource_revision_id`.
 
     An artifact's `name` defaults to "impl" and `type` to "git_repository" —

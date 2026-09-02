@@ -88,8 +88,11 @@ resource "nullplatform_artifact" "package" {
 }
 
 # Existing artifacts resolved by identity — no ids in your configuration.
-# Identity meta (e.g. registry+repository, or url) selects the artifact; include
-# per-revision fields (digest/reference) to pin a revision, else latest wins.
+# Identity meta (e.g. registry+repository for oci_image, or url for
+# git_repository) selects the artifact; include the type's own per-revision
+# field to pin a revision — digest ("sha256:<64-hex>") for oci_image,
+# reference (e.g. a tag) for git_repository; the API rejects the other
+# type's field name — else latest wins.
 data "nullplatform_artifact" "package" {
   for_each = local.package_artifacts_to_lookup
 

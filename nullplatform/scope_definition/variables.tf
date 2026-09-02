@@ -189,8 +189,11 @@ variable "package" {
         { registry = "ghcr.io", repository = "acme/img", digest = "sha256:…" });
       • look up one registered elsewhere BY IDENTITY (no ids needed) — set
         `lookup = true` + `meta` with the identity fields (e.g. registry +
-        repository; add digest/reference to pin a specific revision, otherwise
-        the latest revision is used);
+        repository for oci_image, or url for git_repository); add the
+        type's own per-revision field to pin a specific revision (digest,
+        formatted "sha256:<64-hex>", for oci_image; reference, e.g. a tag,
+        for git_repository — the API rejects the other type's field name),
+        otherwise the latest revision is used;
       • pin explicit ids — set `resource_id` + `resource_revision_id`.
 
     For an "oci_image" artifact (the default type), `name` defaults to
