@@ -22,7 +22,7 @@ The module conditionally creates one of two mutually-exclusive submodules based 
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/gke?ref=v6.22.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/gke?ref=v6.23.0"
 
   cluster_name      = "your-cluster-name"
   ip_range_pods     = "your-ip-range-pods"
@@ -38,7 +38,7 @@ module "gke" {
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/gke?ref=v6.22.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/gke?ref=v6.23.0"
 
   cluster_name      = "your-cluster-name"
   ip_range_pods     = "your-ip-range-pods"
@@ -73,7 +73,7 @@ module "gke" {
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/gke?ref=v6.22.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/gke?ref=v6.23.0"
 
   cluster_name      = "your-cluster-name"
   ip_range_pods     = "your-ip-range-pods"

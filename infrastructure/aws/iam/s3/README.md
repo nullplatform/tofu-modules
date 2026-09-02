@@ -18,7 +18,7 @@ The module creates an aws_iam_policy resource that allows s3:PutObject and s3:Ge
 
 ```hcl
 module "s3" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/s3?ref=v6.22.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/s3?ref=v6.23.0"
 
   bucket                    = "your-bucket"
   build_workflow_group_name = "your-build-workflow-group-name"
