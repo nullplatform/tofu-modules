@@ -57,3 +57,13 @@ variable "custom_tags" {
   }))
   default = []
 }
+
+################################################################################
+# Visibility
+################################################################################
+
+variable "internal" {
+  description = "Marks the API key as internal to nullplatform, keeping it out of the API key listing (`GET /api_key` and the UI) while it stays readable by ID — for the plumbing credentials this module creates (agents, notification channels) rather than keys a person manages. Create-only in the API, so changing it replaces the key and rotates its secret. Leave unset for the platform default (not internal)."
+  type        = bool
+  default     = null
+}

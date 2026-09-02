@@ -212,3 +212,30 @@ run "custom_grants_explicit_nrn" {
     error_message = "Should have grant for organization=myorg:account=myaccount with role developer"
   }
 }
+
+run "internal_reaches_the_api_key" {
+  command = plan
+
+  variables {
+    internal = true
+  }
+
+  assert {
+    condition     = nullplatform_api_key.this.internal == true
+    error_message = "internal = true should reach the nullplatform_api_key resource"
+  }
+}
+
+# An explicit false still travels; the module never decides the mark on the caller's behalf.
+run "internal_off_is_explicit" {
+  command = plan
+
+  variables {
+    internal = false
+  }
+
+  assert {
+    condition     = nullplatform_api_key.this.internal == false
+    error_message = "internal = false should reach the nullplatform_api_key resource"
+  }
+}

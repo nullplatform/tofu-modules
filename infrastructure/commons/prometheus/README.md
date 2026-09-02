@@ -21,7 +21,7 @@ A single helm_release resource named 'prometheus' installs the prometheus-commun
 
 ```hcl
 module "prometheus" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v6.22.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v6.23.0"
 
   prometheus_version = "your-prometheus-version"
 }
@@ -31,7 +31,7 @@ module "prometheus" {
 
 ```hcl
 module "prometheus" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v6.22.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v6.23.0"
 
   prometheus_version = "latest"
 }
@@ -41,7 +41,7 @@ module "prometheus" {
 
 ```hcl
 module "prometheus" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v6.22.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v6.23.0"
 
   prometheus_version = "main"
 }
@@ -51,7 +51,7 @@ module "prometheus" {
 
 ```hcl
 module "prometheus" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v6.22.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v6.23.0"
 
   prometheus_version = "master"
 }

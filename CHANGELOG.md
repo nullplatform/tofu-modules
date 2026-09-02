@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.23.0](https://github.com/nullplatform/tofu-modules/compare/v6.22.1...v6.23.0) (2026-09-02)
+
+
+### Features
+
+* **api_key:** add the internal option ([#547](https://github.com/nullplatform/tofu-modules/issues/547)) ([1189c56](https://github.com/nullplatform/tofu-modules/commit/1189c569e54ef3336843f782e5f2aa68a543f40e))
+
 ## [6.22.1](https://github.com/nullplatform/tofu-modules/compare/v6.22.0...v6.22.1) (2026-09-01)
 
 
