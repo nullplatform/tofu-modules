@@ -47,6 +47,7 @@ variable "release_name" {
   description = "Override for the Helm release name. Defaults to nullplatform-agent"
   type        = string
   default     = "nullplatform-agent"
+  nullable    = false
 }
 
 # Override for the Kubernetes ServiceAccount name. Defaults to the chart's default (nullplatform-agent)
@@ -54,6 +55,7 @@ variable "service_account_name" {
   description = "Override for the Kubernetes ServiceAccount name created by the Helm chart"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 # Version of the nullplatform agent Helm chart to deploy
@@ -61,8 +63,6 @@ variable "nullplatform_agent_helm_version" {
   # example: 2.37.0
   description = "No default: every install pins this deliberately — see VERSIONS.md. Version of the nullplatform agent Helm chart to deploy"
   type        = string
-  # 2.37.0+ ships the worker orchestrator (patches, per-install isolation, idle
-
   validation {
     condition     = var.nullplatform_agent_helm_version != "" && !contains(["latest", "main", "master"], lower(var.nullplatform_agent_helm_version))
     error_message = "nullplatform_agent_helm_version must be a non-empty fixed version, not empty and not a moving reference."
@@ -94,6 +94,15 @@ variable "namespace" {
   description = "Kubernetes namespace where the nullplatform agent will run"
   type        = string
   default     = "nullplatform-tools"
+  nullable    = false
+}
+
+# Whether the Helm release creates the namespace
+variable "create_namespace" {
+  description = "Create the namespace if it does not exist. Leave true unless another module already owns it: nullplatform/base declares the same namespace with Helm ownership metadata, so with no ordering edge between the two whichever applies second fails."
+  type        = bool
+  default     = true
+  nullable    = false
 }
 
 # Git repository URL containing agent scope configurations (format: repo#branch)
@@ -101,6 +110,7 @@ variable "agent_repos_scope" {
   description = "Git repository URL containing agent scope configurations, WITHOUT the ref fragment. The ref goes in agent_repos_scope_tag."
   type        = string
   default     = "https://github.com/nullplatform/scopes.git"
+  nullable    = false
 
   # Without this, migrating by pasting the old value (repo.git#v1.15.1) produces
   # repo.git#v1.15.1#<tag>, which fails inside the pod at clone time instead of during plan.
@@ -143,6 +153,7 @@ variable "agent_repos_extra" {
   description = "List of additional Git repositories used for extended agent configuration. Each entry MUST carry a pinned ref fragment (repo.git#v1.2.3); moving refs are rejected. Covers scopes-* and services-* without enumerating them."
   type        = list(string)
   default     = []
+  nullable    = false
 
   # Two validations rather than one so the error names which rule was broken.
   validation {
@@ -167,6 +178,7 @@ variable "init_scripts" {
   description = "List of initialization scripts to execute during agent startup"
   type        = list(string)
   default     = []
+  nullable    = false
 }
 
 # Container image repository for the agent. Defaults to the official nullplatform image.
@@ -174,6 +186,7 @@ variable "image_repository" {
   description = "Container image repository for the agent. Defaults to the official nullplatform image."
   type        = string
   default     = ""
+  nullable    = false
 }
 
 # Flag to determine whether to use the account slug in resource naming
@@ -181,6 +194,7 @@ variable "use_account_slug" {
   description = "Flag to determine whether to use the account slug in resource naming"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 ################################################################################
@@ -192,6 +206,7 @@ variable "aws_iam_role_arn" {
   description = "ARN of the AWS IAM role assigned to the agent"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 ################################################################################
@@ -247,16 +262,18 @@ variable "azure_tenant_id" {
 
 # Name of the private/internal gateway used for routing
 variable "private_gateway_name" {
-  description = "Name of the private/internal gateway used for routing"
+  description = "Name of the private/internal gateway used for routing. Must match the Gateway the cluster actually has: nullplatform/base hardcodes 'gateway-private', and a mismatch produces HTTPRoutes with an unresolvable parentRef that die in verify_networking_reconciliation."
   type        = string
   default     = "gateway-private"
+  nullable    = false
 }
 
 # Name of the public gateway used for routing
 variable "public_gateway_name" {
-  description = "Name of the public gateway used for routing"
+  description = "Name of the public gateway used for routing. Must match nullplatform/base's gateway_public_name, which is commonly overridden (e.g. 'internet-facing' on AKS); leaving this at the default when base was overridden breaks HTTPRoute routing and Azure DNS records."
   type        = string
   default     = "gateway-public"
+  nullable    = false
 }
 
 ################################################################################
@@ -268,6 +285,7 @@ variable "dns_type" {
   description = "Type of DNS Provider, ej: azure, route53, or external_dns"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 # Base domain name used across resources
@@ -275,6 +293,7 @@ variable "domain" {
   description = "Base domain name used across resources"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 ################################################################################
@@ -286,31 +305,47 @@ variable "image_pull_secrets" {
   description = "Image pull secrets configuration"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 ################################################################################
 # Ingress / Networking Configuration
 ################################################################################
 
-# Scope service template to use for deployment (required when extra_envs.INGRESS_TYPE is 'istio')
+# Ingress flavour the k8s scope type runs on
+variable "ingress_type" {
+  description = "Ingress flavour of the cluster, for the `k8s` scope type only: 'alb' (default) or 'istio'. 'istio' fills service_template, initial_ingress_path and blue_green_ingress_path with the Istio HTTPRoute templates and renders INGRESS_TYPE=istio; set it when running the `k8s` scope type without an AWS ALB controller (GKE, or AKS not on the dedicated `azure` scope type), whose ALB Ingress default yields a deploy with no working route and no error. 'alb' keeps today's behaviour: the three paths stay empty so the scope type's own values.yaml decides, and INGRESS_TYPE is not rendered — services-endpoint-exposer ships only workflows/istio and would break on 'alb'. Explicit template paths always win over this variable."
+  type        = string
+  default     = "alb"
+  nullable    = false
+  validation {
+    condition     = contains(["alb", "istio"], var.ingress_type)
+    error_message = "ingress_type must be either 'alb' or 'istio'."
+  }
+}
+
+# Scope service template to use for deployment
 variable "service_template" {
-  description = "Specifies the name or reference of the scope service template to be used for deployment. Required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio, so it must be pointed at an Istio-compatible template instead."
+  description = "Scope service template path. Empty (default) uses the scope type's own values.yaml. All three must be set together or all left empty, or the deploy changes template flavour mid-way; see ingress_type for the Istio preset."
   type        = string
   default     = ""
+  nullable    = false
 }
 
-# Initial ingress path used on first deploy (required when extra_envs.INGRESS_TYPE is 'istio')
+# Initial ingress path used on first deploy
 variable "initial_ingress_path" {
-  description = "Defines the initial ingress path used when deploying the application for the first time. Required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio, so it must be pointed at an Istio HTTPRoute template instead."
+  description = "Ingress template path for the initial deploy. Empty (default) uses the scope type's own values.yaml. All three must be set together or all left empty, or the deploy changes template flavour mid-way; see ingress_type for the Istio preset."
   type        = string
   default     = ""
+  nullable    = false
 }
 
-# Blue-green ingress path used to route traffic to the new version (required when extra_envs.INGRESS_TYPE is 'istio')
+# Blue-green ingress path used to route traffic to the new version
 variable "blue_green_ingress_path" {
-  description = "Specifies the ingress path used for blue-green deployments to route traffic to the new version. Required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio, so it must be pointed at an Istio HTTPRoute template instead."
+  description = "Ingress template path for the blue-green traffic switch. Empty (default) uses the scope type's own values.yaml. All three must be set together or all left empty, or the deploy changes template flavour mid-way; see ingress_type for the Istio preset."
   type        = string
   default     = ""
+  nullable    = false
 }
 
 # Additional environment variables to pass to the agent
@@ -318,4 +353,29 @@ variable "extra_envs" {
   description = "Additional environment variables to pass to the agent"
   type        = map(string)
   default     = {}
+  nullable    = false
+}
+
+################################################################################
+# Deprecated inputs
+#
+# Restored: OpenTofu rejects an argument for a variable that does not exist, so
+# removing them in v6.14.0 broke every consumer passing them. Intentionally
+# unused. Drop them on the next major, with a BREAKING CHANGE footer.
+################################################################################
+
+# tflint-ignore: terraform_unused_declarations
+variable "nrn" {
+  description = "DEPRECATED, accepted for compatibility and ignored. Nullplatform Resource Name; the agent resolves its own scope from the API key, so this module never consumed the value"
+  type        = string
+  default     = ""
+  nullable    = false
+}
+
+# tflint-ignore: terraform_unused_declarations
+variable "private_domain" {
+  description = "DEPRECATED, accepted for compatibility and ignored. Previously rendered as the PRIVATE_DOMAIN env var for gcp and oci, which nothing in nullplatform/scopes reads"
+  type        = string
+  default     = ""
+  nullable    = false
 }

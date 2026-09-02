@@ -36,17 +36,23 @@ resource "terraform_data" "cross_variable_validation" {
       condition     = var.cloud_provider != "azure" || var.azure_tenant_id != null
       error_message = "azure_tenant_id is required when cloud_provider is 'azure'."
     }
+
+    # Checked on the resolved values, so ingress_type's autofill counts as set.
+    # A half-override switches template flavour mid-deploy: finalize renders
+    # INITIAL_INGRESS_PATH and switch-traffic renders BLUE_GREEN_INGRESS_PATH.
     precondition {
-      condition     = lookup(var.extra_envs, "INGRESS_TYPE", "") != "istio" || var.service_template != ""
-      error_message = "service_template is required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio."
+      condition = (
+        (local.resolved_ingress_templates.service_template == "" && local.resolved_ingress_templates.initial_ingress_path == "" && local.resolved_ingress_templates.blue_green_ingress_path == "") ||
+        (local.resolved_ingress_templates.service_template != "" && local.resolved_ingress_templates.initial_ingress_path != "" && local.resolved_ingress_templates.blue_green_ingress_path != "")
+      )
+      error_message = "service_template, initial_ingress_path and blue_green_ingress_path must be set together or left entirely empty: a half-override renders one template flavour on the initial deploy and another on the traffic switch. Leave all three empty to use the scope type's defaults, or set ingress_type = \"istio\" to have them filled in."
     }
+
+    # extra_envs is merged last, so an INGRESS_TYPE there silently outranks
+    # ingress_type. Under ingress_type = "alb" extra_envs stays the sole authority.
     precondition {
-      condition     = lookup(var.extra_envs, "INGRESS_TYPE", "") != "istio" || var.initial_ingress_path != ""
-      error_message = "initial_ingress_path is required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio."
-    }
-    precondition {
-      condition     = lookup(var.extra_envs, "INGRESS_TYPE", "") != "istio" || var.blue_green_ingress_path != ""
-      error_message = "blue_green_ingress_path is required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio."
+      condition     = var.ingress_type != "istio" || lookup(var.extra_envs, "INGRESS_TYPE", "istio") == "istio"
+      error_message = "ingress_type is 'istio' but extra_envs.INGRESS_TYPE sets a different value, and extra_envs is merged last so it would win silently. Drop the extra_envs entry, or set ingress_type = \"alb\" if the scope really uses the ALB templates."
     }
   }
 }
@@ -58,6 +64,14 @@ resource "helm_release" "agent" {
   repository = "https://nullplatform.github.io/helm-charts"
   namespace  = var.namespace
   version    = var.nullplatform_agent_helm_version
+
+  # The provider defaults these three to false. Without create_namespace a fresh
+  # install dies with `namespaces "nullplatform-tools" not found`; without
+  # atomic/cleanup_on_fail a failed upgrade sticks in `failed` with orphaned
+  # resources instead of rolling back.
+  create_namespace = var.create_namespace
+  atomic           = true
+  cleanup_on_fail  = true
 
   wait_for_jobs     = true
   timeout           = 600

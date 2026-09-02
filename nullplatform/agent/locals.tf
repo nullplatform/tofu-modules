@@ -41,7 +41,34 @@ locals {
 
   all_args = concat(local.default_args, lookup(local.cloud_args, var.cloud_provider, []))
 
-  default_config = {
+  # The paths scopes/azure and scopes/azure-aro already hardcode in their own
+  # values.yaml. scopes/k8s instead defaults to an AWS ALB Ingress.
+  istio_ingress_templates = {
+    service_template        = "$SERVICE_PATH/deployment/templates/istio/service.yaml.tpl"
+    initial_ingress_path    = "$SERVICE_PATH/deployment/templates/istio/initial-httproute.yaml.tpl"
+    blue_green_ingress_path = "$SERVICE_PATH/deployment/templates/istio/blue-green-httproute.yaml.tpl"
+  }
+
+  # 'alb' resolves to empty, so the scope type's own values.yaml keeps deciding.
+  ingress_template_defaults = var.ingress_type == "istio" ? local.istio_ingress_templates : {
+    service_template        = ""
+    initial_ingress_path    = ""
+    blue_green_ingress_path = ""
+  }
+
+  resolved_ingress_templates = {
+    for k, explicit in {
+      service_template        = var.service_template
+      initial_ingress_path    = var.initial_ingress_path
+      blue_green_ingress_path = var.blue_green_ingress_path
+    } : k => explicit != "" ? explicit : local.ingress_template_defaults[k]
+  }
+
+  # Rendered only for istio: its one consumer, services-endpoint-exposer, resolves
+  # $SERVICE_PATH/workflows/$INGRESS_TYPE/ and ships only workflows/istio.
+  ingress_type_config = var.ingress_type == "istio" ? { INGRESS_TYPE = "istio" } : {}
+
+  default_config = merge({
     NP_API_KEY              = local.api_key
     TAGS                    = local.tags
     AGENT_REPOS             = local.agent_repos
@@ -53,12 +80,12 @@ locals {
     DNS_TYPE                = var.dns_type
     USE_ACCOUNT_SLUG        = var.use_account_slug
     IMAGE_PULL_SECRETS      = var.image_pull_secrets
-    SERVICE_TEMPLATE        = var.service_template
-    INITIAL_INGRESS_PATH    = var.initial_ingress_path
-    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
+    SERVICE_TEMPLATE        = local.resolved_ingress_templates.service_template
+    INITIAL_INGRESS_PATH    = local.resolved_ingress_templates.initial_ingress_path
+    BLUE_GREEN_INGRESS_PATH = local.resolved_ingress_templates.blue_green_ingress_path
     PRIVATE_GATEWAY_NAME    = var.private_gateway_name
     PUBLIC_GATEWAY_NAME     = var.public_gateway_name
-  }
+  }, local.ingress_type_config)
 
   cloud_config = {
     aws = {
@@ -77,11 +104,21 @@ locals {
     oci = {}
   }
 
-  all_config = merge(
-    local.default_config,
-    lookup(local.cloud_config, var.cloud_provider, {}),
-    var.extra_envs,
-  )
+  # Referenced so that deleting either variable fails `tofu validate` in CI.
+  # `tofu test` alone would not catch it: it tolerates a `var.x` that no longer exists.
+  # tflint-ignore: terraform_unused_declarations
+  deprecated_inputs_accepted = [var.nrn, var.private_domain]
+
+  # Drop nulls: the optional azure inputs default to null, and a null reaching
+  # templatefile fails with an error that names no variable, before the
+  # preconditions get to report the actual missing input.
+  all_config = {
+    for k, v in merge(
+      local.default_config,
+      lookup(local.cloud_config, var.cloud_provider, {}),
+      var.extra_envs,
+    ) : k => v if v != null
+  }
 
   # Template único y simple
   nullplatform_agent_values = templatefile("${path.module}/templates/nullplatform_agent_values.tmpl.yaml", {
@@ -94,7 +131,6 @@ locals {
     service_account_name = var.service_account_name
   })
 
-  # Worker-orchestration config as a second Helm values layer, so the nested
-  # shape (allowedRegistries/patches/rules/pins) passes through verbatim.
+  # Second Helm values layer, so the nested worker shape passes through verbatim.
   worker_values = var.worker != null ? yamlencode({ worker = var.worker }) : null
 }
