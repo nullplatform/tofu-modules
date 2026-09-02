@@ -4,20 +4,6 @@
 
 locals {
 
-  # The repository lives here and only the tag is exposed, so a version bump is a variable
-
-  # change instead of a hand-assembled URL.
-
-  scope_repo = trimspace(coalesce(var.agent_repos_scope, ""))
-
-  scope_list = compact([local.scope_repo != "" ? "${local.scope_repo}#${trimspace(var.agent_repos_scope_tag)}" : ""])
-  # Parse comma-separated extra repositories and clean whitespace
-  repos_extra = compact([for s in var.agent_repos_extra : trimspace(s)])
-
-  # Merge scope and extra repositories, removing duplicates
-  final_repo_list = distinct(concat(local.scope_list, local.repos_extra))
-
-  agent_repos = join(",", local.final_repo_list)
   tags        = join(",", [for k in sort(keys(var.tags_selectors)) : "${k}:${var.tags_selectors[k]}"])
 
   api_key = var.api_key
@@ -29,7 +15,6 @@ locals {
     "--command-executor-env=NP_API_KEY=$(NP_API_KEY)",
     "--command-executor-debug",
     "--webserver-enabled",
-    "--command-executor-git-command-repos $(AGENT_REPOS)"
   ]
 
   cloud_args = {
@@ -41,19 +26,11 @@ locals {
 
   all_args = concat(local.default_args, lookup(local.cloud_args, var.cloud_provider, []))
 
-  # Consumed by both the agent's own config and the worker's — the worker
-  # needs it for traffic-management actions (blue-green switches, etc.).
-  traffic_container_image = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
 
   default_config = {
     NP_API_KEY              = local.api_key
     TAGS                    = local.tags
-    AGENT_REPOS             = local.agent_repos
     IMAGE_TAG               = var.image_tag
-    TRAFFIC_CONTAINER_IMAGE = local.traffic_container_image
-    IMAGE_PULL_SECRETS      = var.image_pull_secrets
-    PRIVATE_GATEWAY_NAME    = var.private_gateway_name
-    PUBLIC_GATEWAY_NAME     = var.public_gateway_name
   }
 
   cloud_config = {
@@ -61,6 +38,35 @@ locals {
       AWS_IAM_ROLE_ARN = var.aws_iam_role_arn
     }
 
+    gcp = {}
+    azure = {}
+    oci = {}
+  }
+
+
+  all_config = merge(
+    local.default_config,
+    lookup(local.cloud_config, var.cloud_provider, {}),
+    var.extra_envs,
+  )
+
+
+  worker_default_env = {
+    DNS_TYPE                = var.dns_type
+    DOMAIN                  = var.domain
+    USE_ACCOUNT_SLUG        = var.use_account_slug
+    K8S_NAMESPACE           = var.namespace
+    SERVICE_TEMPLATE        = var.service_template
+    INITIAL_INGRESS_PATH    = var.initial_ingress_path
+    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
+    TRAFFIC_CONTAINER_IMAGE = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
+    IMAGE_PULL_SECRETS      = var.image_pull_secrets
+    PRIVATE_GATEWAY_NAME    = var.private_gateway_name
+    PUBLIC_GATEWAY_NAME     = var.public_gateway_name
+
+  }
+
+  worker_cloud_config = {
     azure = {
       PRIVATE_HOSTED_ZONE_RG = var.private_hosted_zone_rg
       RESOURCE_GROUP         = var.azure_resource_group
@@ -69,40 +75,15 @@ locals {
       AZURE_CLIENT_ID        = var.azure_client_id
       AZURE_TENANT_ID        = var.azure_tenant_id
     }
-
-    oci = {}
   }
 
-  all_config = merge(
-    local.default_config,
-    lookup(local.cloud_config, var.cloud_provider, {}),
+
+  worker_all_config = merge(
+    local.worker_default_env,
+    lookup(local.worker_cloud_config, var.cloud_provider, {}),
     var.extra_envs,
   )
 
-  # Deploy-template/DNS values consumed by the worker when it renders a scope's
-  # k8s deployment, not by the agent's own control loop.
-  worker_default_config = {
-    DNS_TYPE                = var.dns_type
-    DOMAIN                  = var.domain
-    USE_ACCOUNT_SLUG        = var.use_account_slug
-    K8S_NAMESPACE           = var.namespace
-    SERVICE_TEMPLATE        = var.service_template
-    INITIAL_INGRESS_PATH    = var.initial_ingress_path
-    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
-    TRAFFIC_CONTAINER_IMAGE = local.traffic_container_image
-  }
-
-  # Same layering as all_config: cloud-specific values, then extra_envs last
-  # so a caller can override or add to what the worker sees, same as they
-  # already can for the agent's own config.
-  worker_env = merge(
-    local.worker_default_config,
-    lookup(local.cloud_config, var.cloud_provider, {}),
-    var.extra_envs,
-  )
-
-  # The worker container has no identity of its own — it always runs as the
-  # agent's own service account.
   worker_container_patch = {
     target = { package = "containers" }
     merge = {
@@ -113,20 +94,14 @@ locals {
             {
               name      = "worker"
               resources = { limits = { memory = "2Gi" } }
-              env       = [for k, v in local.worker_env : { name = k, value = v }]
+              env       = [for k, v in local.worker_all_config : { name = k, value = v }]
             }
           ]
         }
       )
     }
   }
-
-  # Sane module defaults, merged with var.worker as an extra/override layer.
-  # patches and allowedRegistries are concatenated (not replaced) with
-  # var.worker's own entries: a caller wanting a different memory limit adds
-  # their own patch targeting the same container rather than the module
-  # inventing a dedicated override key for it, and a caller needing extra
-  # registries adds to the default instead of having to repeat it.
+  
   worker_defaults = {
     backend           = "kubernetes"
     allowedRegistries = ["public.ecr.aws/nullplatform/*"]

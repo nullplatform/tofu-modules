@@ -9,7 +9,6 @@ variables {
   image_tag                       = "0.9.2"
   nullplatform_agent_helm_version = "2.37.0"
   agent_traffic_manager_tag       = "1.8.0"
-  agent_repos_scope_tag           = "v1.15.1"
 }
 
 ################################################################################
@@ -18,12 +17,14 @@ variables {
 
 # Pinning the traffic manager used to mean passing the whole image string through
 # extra_envs. The registry now lives in the module and only the tag is exposed.
+# TRAFFIC_CONTAINER_IMAGE is a worker-only var (worker_default_env), so it
+# renders as an env list entry, not a flat configuration.values key.
 run "traffic_manager_image_is_assembled_from_the_tag" {
   command = plan
 
   assert {
-    condition     = strcontains(helm_release.agent.values[0], "TRAFFIC_CONTAINER_IMAGE: \"public.ecr.aws/nullplatform/k8s-traffic-manager:1.8.0\"")
-    error_message = "TRAFFIC_CONTAINER_IMAGE should be built from the repository default and the pinned tag"
+    condition     = strcontains(helm_release.agent.values[0], "\"name\": \"TRAFFIC_CONTAINER_IMAGE\"") && strcontains(helm_release.agent.values[0], "\"value\": \"public.ecr.aws/nullplatform/k8s-traffic-manager:1.8.0\"")
+    error_message = "TRAFFIC_CONTAINER_IMAGE should be built from the repository default and the pinned tag, and reach the worker's env"
   }
 }
 
@@ -35,7 +36,7 @@ run "traffic_manager_repository_is_overridable" {
   }
 
   assert {
-    condition     = strcontains(helm_release.agent.values[0], "TRAFFIC_CONTAINER_IMAGE: \"my-mirror.example.com/nullplatform/k8s-traffic-manager:1.8.0\"")
+    condition     = strcontains(helm_release.agent.values[0], "\"name\": \"TRAFFIC_CONTAINER_IMAGE\"") && strcontains(helm_release.agent.values[0], "\"value\": \"my-mirror.example.com/nullplatform/k8s-traffic-manager:1.8.0\"")
     error_message = "the registry must be overridable for a mirrored path"
   }
 }
@@ -57,9 +58,8 @@ run "extra_envs_still_overrides_the_traffic_manager_image" {
   }
 }
 
-# worker_env goes through the same default -> cloud_config -> extra_envs
-# layering as the agent's own all_config, so an extra_envs override reaches
-# the worker too, not just the agent.
+# The worker has its own env map (worker_all_config), layered with extra_envs
+# the same way all_config is for the agent, so an override reaches both.
 run "extra_envs_also_reaches_the_worker" {
   command = plan
 
@@ -76,60 +76,14 @@ run "extra_envs_also_reaches_the_worker" {
 }
 
 ################################################################################
-# Scope repository
-################################################################################
-
-run "scope_repo_is_pinned_to_a_tag" {
-  command = plan
-
-  assert {
-    condition     = !strcontains(helm_release.agent.values[0], "#main")
-    error_message = "the scope repo default must not point at a moving branch"
-  }
-
-  assert {
-    condition     = strcontains(helm_release.agent.values[0], "scopes.git#v1.15.1")
-    error_message = "the scope repo default should be pinned to the released tag"
-  }
-}
-
-run "scope_repo_is_overridable" {
-  command = plan
-
-  variables {
-    agent_repos_scope_tag = "v1.14.0"
-  }
-
-  assert {
-    condition     = strcontains(helm_release.agent.values[0], "scopes.git#v1.14.0")
-    error_message = "callers must still be able to choose their own ref"
-  }
-}
-
-run "agent_repos_scope_rejects_an_inline_fragment" {
-  command = plan
-
-  variables {
-    agent_repos_scope = "https://github.com/nullplatform/scopes.git#v1.15.1"
-  }
-
-  # Catches the most likely migration mistake: pasting the old value verbatim, which would
-  # otherwise render repo.git#v1.15.1#v1.15.1.
-  expect_failures = [var.agent_repos_scope]
-}
-
-################################################################################
 # Worker orchestration
 ################################################################################
 
 # DNS_TYPE/DOMAIN/USE_ACCOUNT_SLUG/SERVICE_TEMPLATE/INITIAL_INGRESS_PATH/
-# BLUE_GREEN_INGRESS_PATH/NAMESPACE are consumed by the worker when it renders
-# a scope's k8s deployment, not by the agent's own control loop — they live on
-# the worker's env only (NAMESPACE as K8S_NAMESPACE). There is a single
-# combined values document now (worker is just another top-level key of it,
-# not a second Helm values layer), so "not in the agent's own config" is
-# checked via the configuration.values rendering (`KEY: "value"`, no leading
-# quote on the key) rather than absence from the whole document.
+# BLUE_GREEN_INGRESS_PATH are consumed by the worker when it renders a scope's
+# k8s deployment, not by the agent's own control loop — they live on the
+# worker's env only (worker_default_env), never in the agent's own
+# configuration.values (default_config).
 run "moved_deploy_vars_are_worker_only" {
   command = plan
 
