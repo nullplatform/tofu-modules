@@ -82,15 +82,26 @@ locals {
     var.extra_envs,
   )
 
-  # Generic IRSA identity — one patch per package in var.worker_orchestrated_packages,
-  # so any worker-orchestrated package's pod (not just "containers") gets the
-  # agent's own ServiceAccount and can assume its role's trusted AWS roles.
-  worker_service_account_patches = var.service_account_name != "" ? [
+  # Generic identity + resources — one patch per package in
+  # var.worker_orchestrated_packages, so any worker-orchestrated package's pod
+  # (not just "containers") gets the agent's own ServiceAccount (to assume its
+  # role's trusted AWS roles) and enough memory to run its own tooling (e.g.
+  # tofu init/apply), instead of the chart's own thin defaults.
+  worker_common_patches = [
     for pkg in var.worker_orchestrated_packages : {
       target = { package = pkg }
-      merge  = { spec = { serviceAccountName = var.service_account_name } }
+      merge = {
+        spec = merge(
+          var.service_account_name != "" ? { serviceAccountName = var.service_account_name } : {},
+          {
+            containers = [
+              { name = "worker", resources = { limits = { memory = var.worker_memory_limit } } }
+            ]
+          }
+        )
+      }
     }
-  ] : []
+  ]
 
   # k8s-deployment template env vars — specific to the "containers" scope's
   # worker only, regardless of what's in var.worker_orchestrated_packages.
@@ -100,9 +111,8 @@ locals {
       spec = {
         containers = [
           {
-            name      = "worker"
-            resources = { limits = { memory = "2Gi" } }
-            env       = [for k, v in local.worker_all_config : { name = k, value = v }]
+            name = "worker"
+            env  = [for k, v in local.worker_all_config : { name = k, value = v }]
           }
         ]
       }
@@ -112,7 +122,7 @@ locals {
   worker_defaults = {
     backend           = "kubernetes"
     allowedRegistries = ["public.ecr.aws/nullplatform/*"]
-    patches           = concat(local.worker_service_account_patches, [local.worker_container_patch])
+    patches           = concat(local.worker_common_patches, [local.worker_container_patch])
   }
 
   worker_final = merge(

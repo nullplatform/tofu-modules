@@ -195,6 +195,25 @@ run "worker_orchestrated_packages_gets_its_own_service_account_patch" {
     condition     = length(regexall("\"serviceAccountName\": \"nullplatform-agent\"", helm_release.agent.values[0])) == 2
     error_message = "each package in worker_orchestrated_packages must get its own serviceAccountName patch (one per package, here 2)"
   }
+
+  assert {
+    condition     = length(regexall("\"memory\": \"2Gi\"", helm_release.agent.values[0])) == 2
+    error_message = "each package in worker_orchestrated_packages must get its own memory limit patch (one per package, here 2) — a package left out would silently OOM on the chart's thin default"
+  }
+}
+
+run "worker_memory_limit_is_overridable" {
+  command = plan
+
+  variables {
+    worker_orchestrated_packages = ["containers", "aws-s3-bucket"]
+    worker_memory_limit          = "4Gi"
+  }
+
+  assert {
+    condition     = length(regexall("\"memory\": \"4Gi\"", helm_release.agent.values[0])) == 2
+    error_message = "worker_memory_limit must apply to every package in worker_orchestrated_packages"
+  }
 }
 
 run "worker_defaults" {

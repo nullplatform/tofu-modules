@@ -69,11 +69,12 @@ variable "service_account_name" {
 variable "worker_orchestrated_packages" {
   description = <<-EOT
     Package slugs whose worker-orchestrator (package-exec) pods should run
-    under var.service_account_name — the same IRSA identity as the agent
-    itself — via a per-package worker-container patch. Add a package's slug
-    here whenever its worker needs to assume an AWS role (or otherwise needs
-    the agent's ServiceAccount) to do its job; a worker for a package not
-    listed here falls back to the namespace's default ServiceAccount.
+    under var.service_account_name (the same IRSA identity as the agent
+    itself) and var.worker_memory_limit, via a per-package worker-container
+    patch. Add a package's slug here whenever its worker needs to assume an
+    AWS role, or needs more memory than the chart's own default (e.g. to run
+    tofu/terraform); a worker for a package not listed here falls back to the
+    namespace's default ServiceAccount and the chart's own memory default.
 
     This is separate from the "containers" scope's own k8s-deployment env
     vars (DNS_TYPE, DOMAIN, etc.), which remain specific to that package
@@ -81,6 +82,12 @@ variable "worker_orchestrated_packages" {
   EOT
   type        = list(string)
   default     = ["containers"]
+}
+
+variable "worker_memory_limit" {
+  description = "Memory limit for a worker-orchestrated package's pod (packages in var.worker_orchestrated_packages). The chart's own default is small enough to OOM mid-tofu-apply for packages that run real IaC tooling."
+  type        = string
+  default     = "2Gi"
 }
 
 # Version of the nullplatform agent Helm chart to deploy
