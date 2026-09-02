@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.23.1](https://github.com/nullplatform/tofu-modules/compare/v6.23.0...v6.23.1) (2026-09-02)
+
+
+### Bug Fixes
+
+* **nullplatform/agent:** restore the inputs and Helm flags dropped in v6.14.0 ([#519](https://github.com/nullplatform/tofu-modules/issues/519)) ([747cb46](https://github.com/nullplatform/tofu-modules/commit/747cb4613e728d4bca121914511e219796d00dd7))
+
 ## [6.23.0](https://github.com/nullplatform/tofu-modules/compare/v6.22.1...v6.23.0) (2026-09-02)
 
 

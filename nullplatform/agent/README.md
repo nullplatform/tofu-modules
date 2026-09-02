@@ -2,27 +2,27 @@
 
 ## Description
 
-Deploys the nullplatform agent to a Kubernetes cluster via a Helm chart, configuring it for a specific cloud provider with pinned versions for all components
+Deploys the nullplatform agent to a Kubernetes cluster via a Helm release, configured for AWS, GCP, Azure, or OCI cloud providers with pinned versions and cloud-specific credentials
 
 ## Architecture
 
-The module creates a `helm_release` resource named `agent` that deploys the `nullplatform-agent` chart from the nullplatform Helm repository, with values templated from `nullplatform_agent_values.tmpl.yaml` using `templatefile()`. A `terraform_data.api_key_trigger` resource monitors the API key and forces a `helm_release` replacement when it changes, while a second `terraform_data.cross_variable_validation` resource enforces cross-variable preconditions at plan time. Cloud-provider-specific configuration (AWS IAM role ARN, Azure credentials) is merged into the Helm values via `locals.all_config`, and an optional `worker` block is encoded with `yamlencode` and appended as a second Helm values layer.
+The module renders a Helm values YAML using templatefile() from locals.tf, merging cloud-provider-specific config maps, ingress templates, and extra environment variables into a single all_config map. A helm_release resource deploys the nullplatform-agent chart to the target Kubernetes cluster using the rendered values, with an optional second values layer for worker configuration via yamlencode(). A terraform_data resource enforces cross-variable preconditions (cloud-provider-specific required vars, ingress template consistency) and a second terraform_data resource triggers helm_release replacement when the API key changes. Agent repository URLs are assembled in locals by concatenating the scope repo with its pinned tag and any extra repos, then joined into a comma-separated AGENT_REPOS string passed as a chart config value.
 
 ## Features
 
-- Deploys nullplatform-agent Helm chart with strictly pinned chart version, agent image tag, and traffic manager image tag to prevent unintended drift
-- Configures cloud-provider-specific environment variables for AWS (IAM role ARN), Azure (client credentials, subscription, resource group, tenant), GCP, and OCI
-- Assembles agent repository list from a primary scope repo with pinned git tag and optional extra repos, each requiring a fixed ref fragment
-- Enforces cross-variable preconditions at plan time ensuring required cloud credentials are present and Istio ingress paths are configured when needed
-- Supports worker orchestration configuration via a structured `worker` block merged as a second Helm values layer for allowedRegistries, patches, and idleTTL
-- Triggers full Helm release replacement when the API key changes via a `terraform_data` lifecycle dependency
-- Accepts arbitrary extra environment variables via `extra_envs` to override or extend the default agent configuration
+- Deploys nullplatform-agent Helm chart with atomic install, cleanup-on-fail, and rollback guarantees
+- Configures cloud-provider-specific environment variables for AWS (IAM role ARN), Azure (client ID, secret, tenant, subscription, resource group), GCP, and OCI
+- Assembles pinned agent repository list from a primary scopes repo plus additional repos, rejecting moving refs like main/master/latest at plan time
+- Configures Istio HTTPRoute ingress templates (service, initial, blue-green) or defers to ALB scope-type defaults based on ingress_type
+- Enforces version pinning for Helm chart version, agent image tag, traffic manager tag, and scopes repository tag via validation rules
+- Supports worker orchestration configuration block passed verbatim as a second Helm values layer
+- Injects traffic manager container image reference as TRAFFIC_CONTAINER_IMAGE, with extra_envs override support for digest or mirrored paths
 
 ## Basic Usage
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.23.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.23.1"
 
   agent_repos_scope_tag           = "your-agent-repos-scope-tag"
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
@@ -39,7 +39,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.23.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.23.1"
 
   agent_repos_scope_tag           = "your-agent-repos-scope-tag"
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
@@ -57,7 +57,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.23.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.23.1"
 
   agent_repos_scope_tag           = "your-agent-repos-scope-tag"
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
@@ -74,7 +74,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.23.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.23.1"
 
   agent_repos_scope_tag           = "your-agent-repos-scope-tag"
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
@@ -97,64 +97,12 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.23.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.23.1"
 
   agent_repos_scope_tag           = "your-agent-repos-scope-tag"
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
   api_key                         = "your-api-key"
   cloud_provider                  = "oci"
-  cluster_name                    = "your-cluster-name"
-  image_tag                       = "your-image-tag"
-  nullplatform_agent_helm_version = "your-nullplatform-agent-helm-version"
-  tags_selectors                  = "your-tags-selectors"
-}
-```
-
-### Usage with Pinned Helm Chart Version
-
-```hcl
-module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.23.0"
-
-  agent_repos_scope_tag           = "your-agent-repos-scope-tag"
-  agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
-  api_key                         = "your-api-key"
-  cloud_provider                  = "your-cloud-provider"
-  cluster_name                    = "your-cluster-name"
-  image_tag                       = "your-image-tag"
-  nullplatform_agent_helm_version = "fixed semver (e.g. 2.37.0)"
-  tags_selectors                  = "your-tags-selectors"
-}
-```
-
-### Usage with Pinned Scope Repository Tag
-
-```hcl
-module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.23.0"
-
-  agent_repos_scope               = "your-agent-repos-scope"  # Required when agent_repos_scope_tag = "fixed git tag (e.g. v1.15.1)"
-  agent_repos_scope_tag           = "fixed git tag (e.g. v1.15.1)"
-  agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
-  api_key                         = "your-api-key"
-  cloud_provider                  = "your-cloud-provider"
-  cluster_name                    = "your-cluster-name"
-  image_tag                       = "your-image-tag"
-  nullplatform_agent_helm_version = "your-nullplatform-agent-helm-version"
-  tags_selectors                  = "your-tags-selectors"
-}
-```
-
-### Usage with Pinned Traffic Manager Tag
-
-```hcl
-module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v6.23.0"
-
-  agent_repos_scope_tag           = "your-agent-repos-scope-tag"
-  agent_traffic_manager_tag       = "fixed semver (e.g. 1.8.0)"
-  api_key                         = "your-api-key"
-  cloud_provider                  = "your-cloud-provider"
   cluster_name                    = "your-cluster-name"
   image_tag                       = "your-image-tag"
   nullplatform_agent_helm_version = "your-nullplatform-agent-helm-version"
@@ -241,16 +189,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "agent",
-  "description": "Deploys the nullplatform agent to a Kubernetes cluster via a Helm chart, configuring it for a specific cloud provider with pinned versions for all components",
-  "architecture": "The module creates a `helm_release` resource named `agent` that deploys the `nullplatform-agent` chart from the nullplatform Helm repository, with values templated from `nullplatform_agent_values.tmpl.yaml` using `templatefile()`. A `terraform_data.api_key_trigger` resource monitors the API key and forces a `helm_release` replacement when it changes, while a second `terraform_data.cross_variable_validation` resource enforces cross-variable preconditions at plan time. Cloud-provider-specific configuration (AWS IAM role ARN, Azure credentials) is merged into the Helm values via `locals.all_config`, and an optional `worker` block is encoded with `yamlencode` and appended as a second Helm values layer.",
+  "description": "Deploys the nullplatform agent to a Kubernetes cluster via a Helm release, configured for AWS, GCP, Azure, or OCI cloud providers with pinned versions and cloud-specific credentials",
+  "architecture": "The module renders a Helm values YAML using templatefile() from locals.tf, merging cloud-provider-specific config maps, ingress templates, and extra environment variables into a single all_config map. A helm_release resource deploys the nullplatform-agent chart to the target Kubernetes cluster using the rendered values, with an optional second values layer for worker configuration via yamlencode(). A terraform_data resource enforces cross-variable preconditions (cloud-provider-specific required vars, ingress template consistency) and a second terraform_data resource triggers helm_release replacement when the API key changes. Agent repository URLs are assembled in locals by concatenating the scope repo with its pinned tag and any extra repos, then joined into a comma-separated AGENT_REPOS string passed as a chart config value.",
   "features": [
-    "Deploys nullplatform-agent Helm chart with strictly pinned chart version, agent image tag, and traffic manager image tag to prevent unintended drift",
-    "Configures cloud-provider-specific environment variables for AWS (IAM role ARN), Azure (client credentials, subscription, resource group, tenant), GCP, and OCI",
-    "Assembles agent repository list from a primary scope repo with pinned git tag and optional extra repos, each requiring a fixed ref fragment",
-    "Enforces cross-variable preconditions at plan time ensuring required cloud credentials are present and Istio ingress paths are configured when needed",
-    "Supports worker orchestration configuration via a structured `worker` block merged as a second Helm values layer for allowedRegistries, patches, and idleTTL",
-    "Triggers full Helm release replacement when the API key changes via a `terraform_data` lifecycle dependency",
-    "Accepts arbitrary extra environment variables via `extra_envs` to override or extend the default agent configuration"
+    "Deploys nullplatform-agent Helm chart with atomic install, cleanup-on-fail, and rollback guarantees",
+    "Configures cloud-provider-specific environment variables for AWS (IAM role ARN), Azure (client ID, secret, tenant, subscription, resource group), GCP, and OCI",
+    "Assembles pinned agent repository list from a primary scopes repo plus additional repos, rejecting moving refs like main/master/latest at plan time",
+    "Configures Istio HTTPRoute ingress templates (service, initial, blue-green) or defers to ALB scope-type defaults based on ingress_type",
+    "Enforces version pinning for Helm chart version, agent image tag, traffic manager tag, and scopes repository tag via validation rules",
+    "Supports worker orchestration configuration block passed verbatim as a second Helm values layer",
+    "Injects traffic manager container image reference as TRAFFIC_CONTAINER_IMAGE, with extra_envs override support for digest or mirrored paths"
   ],
   "inputs": [
     {
@@ -304,6 +252,11 @@ resource "example_resource" "this" {
       "required": false
     },
     {
+      "name": "ingress_type",
+      "description": "Ingress flavour of the cluster, for the `k8s` scope type only: 'alb' (default) or 'istio'. 'istio' fills service_template, initial_ingress_path and blue_green_ingress_path with the Istio HTTPRoute templates and renders INGRESS_TYPE=istio; set it when running the `k8s` scope type without an AWS ALB controller (GKE, or AKS not on the dedicated `azure` scope type), whose ALB Ingress default yields a deploy with no working route and no error. 'alb' keeps today's behaviour: the three paths stay empty so the scope type's own values.yaml decides, and INGRESS_TYPE is not rendered — services-endpoint-exposer ships only workflows/istio and would break on 'alb'. Explicit template paths always win over this variable.",
+      "required": false
+    },
+    {
       "name": "release_name",
       "description": "Override for the Helm release name. Defaults to nullplatform-agent",
       "required": false
@@ -321,6 +274,11 @@ resource "example_resource" "this" {
     {
       "name": "namespace",
       "description": "Kubernetes namespace where the nullplatform agent will run",
+      "required": false
+    },
+    {
+      "name": "create_namespace",
+      "description": "Create the namespace if it does not exist. Leave true unless another module already owns it: nullplatform/base declares the same namespace with Helm ownership metadata, so with no ordering edge between the two whichever applies second fails.",
       "required": false
     },
     {
@@ -380,12 +338,12 @@ resource "example_resource" "this" {
     },
     {
       "name": "private_gateway_name",
-      "description": "Name of the private/internal gateway used for routing",
+      "description": "Name of the private/internal gateway used for routing. Must match the Gateway the cluster actually has: nullplatform/base hardcodes 'gateway-private', and a mismatch produces HTTPRoutes with an unresolvable parentRef that die in verify_networking_reconciliation.",
       "required": false
     },
     {
       "name": "public_gateway_name",
-      "description": "Name of the public gateway used for routing",
+      "description": "Name of the public gateway used for routing. Must match nullplatform/base's gateway_public_name, which is commonly overridden (e.g. 'internet-facing' on AKS); leaving this at the default when base was overridden breaks HTTPRoute routing and Azure DNS records.",
       "required": false
     },
     {
@@ -405,26 +363,36 @@ resource "example_resource" "this" {
     },
     {
       "name": "service_template",
-      "description": "Specifies the name or reference of the scope service template to be used for deployment. Required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio, so it must be pointed at an Istio-compatible template instead.",
+      "description": "Scope service template path. Empty (default) uses the scope type's own values.yaml. All three must be set together or all left empty, or the deploy changes template flavour mid-way; see ingress_type for the Istio preset.",
       "required": false
     },
     {
       "name": "initial_ingress_path",
-      "description": "Defines the initial ingress path used when deploying the application for the first time. Required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio, so it must be pointed at an Istio HTTPRoute template instead.",
+      "description": "Ingress template path for the initial deploy. Empty (default) uses the scope type's own values.yaml. All three must be set together or all left empty, or the deploy changes template flavour mid-way; see ingress_type for the Istio preset.",
       "required": false
     },
     {
       "name": "blue_green_ingress_path",
-      "description": "Specifies the ingress path used for blue-green deployments to route traffic to the new version. Required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio, so it must be pointed at an Istio HTTPRoute template instead.",
+      "description": "Ingress template path for the blue-green traffic switch. Empty (default) uses the scope type's own values.yaml. All three must be set together or all left empty, or the deploy changes template flavour mid-way; see ingress_type for the Istio preset.",
       "required": false
     },
     {
       "name": "extra_envs",
       "description": "Additional environment variables to pass to the agent",
       "required": false
+    },
+    {
+      "name": "nrn",
+      "description": "DEPRECATED, accepted for compatibility and ignored. Nullplatform Resource Name; the agent resolves its own scope from the API key, so this module never consumed the value",
+      "required": false
+    },
+    {
+      "name": "private_domain",
+      "description": "DEPRECATED, accepted for compatibility and ignored. Previously rendered as the PRIVATE_DOMAIN env var for gcp and oci, which nothing in nullplatform/scopes reads",
+      "required": false
     }
   ],
   "outputs": [],
-  "hash": "e35c51a226389be6d4a4fefad857475d"
+  "hash": "f0a903b72d1f9e20c6fa429fe34bd9b4"
 }
 END_AI_METADATA -->
