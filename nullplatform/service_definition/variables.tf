@@ -127,6 +127,12 @@ variable "package" {
         to pin a specific revision, otherwise the latest revision is used);
       • pin explicit ids — set `resource_id` + `resource_revision_id`.
 
+    An artifact's `name` defaults to "impl" and `type` to "git_repository" —
+    a service package is typically a single artifact pointing at the
+    service's own implementation repo, so only `meta` (url/reference) needs
+    setting on every release. Every other field, at every level, is
+    caller-configurable with no other defaults baked in.
+
     Null (the default) keeps the classic module behavior — no package.
   EOT
   type = object({
@@ -137,11 +143,11 @@ variable "package" {
     tags       = optional(map(string), {}) # release tags: name => version (requires an API with the package release-tag routes)
     visible_to = optional(list(string))    # default: [var.nrn]
     artifacts = optional(list(object({
-      name                 = string
-      type                 = optional(string, "oci_image") # oci_image | oras_artifact | git_repository | blob
-      meta                 = optional(any)                 # register (lookup=false) or find (lookup=true)
-      lookup               = optional(bool, false)         # true: resolve an EXISTING artifact by meta identity
-      resource_id          = optional(string)              # …or pin explicit ids
+      name                 = optional(string, "impl")           # default: a single service-implementation artifact
+      type                 = optional(string, "git_repository") # oci_image | oras_artifact | git_repository | blob
+      meta                 = optional(any)                      # register (lookup=false) or find (lookup=true)
+      lookup               = optional(bool, false)              # true: resolve an EXISTING artifact by meta identity
+      resource_id          = optional(string)                   # …or pin explicit ids
       resource_revision_id = optional(string)
     })), [])
   })
