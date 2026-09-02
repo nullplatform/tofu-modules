@@ -6,7 +6,8 @@ locals {
 
   tags = join(",", [for k in sort(keys(var.tags_selectors)) : "${k}:${var.tags_selectors[k]}"])
 
-  api_key = var.api_key
+  api_key    = var.api_key
+  agent_repo = join(",", var.agent_repo)
 
   default_args = [
     "--tags=$(TAGS)",
@@ -31,7 +32,7 @@ locals {
     NP_API_KEY = local.api_key
     TAGS       = local.tags
     IMAGE_TAG  = var.image_tag
-    AGENT_REPO = var.agent_repo
+    AGENT_REPO = local.agent_repo
   }
 
   cloud_config = {

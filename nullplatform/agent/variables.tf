@@ -33,9 +33,19 @@ variable "tags_selectors" {
 }
 
 variable "agent_repo" {
-  description = "Git repository (with ref) the agent clones for its legacy command-executor exec flow, e.g. \"https://github.com/nullplatform/scopes.git#v1.15.1\". Empty when every scope uses worker_orchestrator instead."
-  type        = string
-  default     = ""
+  description = <<-EOT
+    Git repositories (each with a ref) the agent clones for its legacy
+    command-executor exec flow. Joined into a comma-separated AGENT_REPO
+    value, no spaces. Empty when every scope uses worker_orchestrator instead.
+
+    Example:
+      agent_repo = [
+        "https://github.com/nullplatform/scopes.git#v1.15.1",
+        "https://github.com/nullplatform/services-s-3.git#v0.3.0",
+      ]
+  EOT
+  type        = list(string)
+  default     = []
 }
 
 ################################################################################
