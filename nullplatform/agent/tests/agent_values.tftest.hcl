@@ -223,3 +223,32 @@ run "worker_extra_patches_and_overrides_are_merged_not_replaced" {
     error_message = "var.worker's own patches/keys must be merged alongside the computed worker-container patch, not replace it"
   }
 }
+
+################################################################################
+# Legacy exec repos
+################################################################################
+
+run "agent_repo_joins_multiple_repos_with_no_spaces" {
+  command = plan
+
+  variables {
+    agent_repo = [
+      "https://github.com/nullplatform/scopes.git#v1.15.1",
+      "https://github.com/nullplatform/services-s-3.git#v0.3.0",
+    ]
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "AGENT_REPO: \"https://github.com/nullplatform/scopes.git#v1.15.1,https://github.com/nullplatform/services-s-3.git#v0.3.0\"")
+    error_message = "agent_repo entries must be joined with a comma and no spaces"
+  }
+}
+
+run "agent_repo_defaults_to_empty" {
+  command = plan
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "AGENT_REPO: \"\"")
+    error_message = "agent_repo must default to an empty list, joining to an empty string"
+  }
+}
