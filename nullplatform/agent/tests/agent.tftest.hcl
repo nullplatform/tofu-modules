@@ -8,7 +8,6 @@ variables {
   cloud_provider                  = "gcp"
   nullplatform_agent_helm_version = "2.37.0"
   agent_traffic_manager_tag       = "1.8.0"
-  agent_repos_scope_tag           = "v1.15.1"
 }
 
 run "no_extra_envs_does_not_require_ingress_templates" {
