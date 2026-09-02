@@ -35,24 +35,26 @@ variable "service_specification_slug" {
 
 variable "repository_service_spec_repo" {
   type        = string
-  description = "GitHub repository name containing the service specs (used to build the agent cmdline path)"
+  default     = ""
+  description = "GitHub repository name containing the service specs (used to build the agent cmdline path). Required when worker_orchestrator = false; unused (the worker's baked entrypoint is used instead) when true."
 }
 
 variable "base_clone_path" {
   type        = string
   default     = "/home/agent/.np"
-  description = "Base path where the service repository is cloned inside the agent pod"
+  description = "Base path where the service repository is cloned inside the agent pod. Unused when worker_orchestrator = true."
 }
 
 variable "service_path" {
   type        = string
-  description = "Path to the service directory within the repository (e.g., databases/postgres/k8s)"
+  default     = ""
+  description = "Path to the service directory within the repository (e.g., databases/postgres/k8s). Only consulted when worker_orchestrator = false — empty omits the path segment."
 }
 
 variable "agent_arguments" {
   type        = list(string)
   default     = []
-  description = "Arguments to pass to the agent entrypoint command"
+  description = "Arguments to pass to the agent entrypoint command. Unused when worker_orchestrator = true."
 }
 
 variable "description" {

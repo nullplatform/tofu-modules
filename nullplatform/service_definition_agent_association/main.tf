@@ -52,5 +52,9 @@ resource "nullplatform_notification_channel" "channel_from_template" {
       condition     = !var.worker_orchestrator || var.package_slug != ""
       error_message = "package_slug is required when worker_orchestrator = true."
     }
+    precondition {
+      condition     = var.worker_orchestrator || var.repository_service_spec_repo != ""
+      error_message = "repository_service_spec_repo is required when worker_orchestrator = false."
+    }
   }
 }
