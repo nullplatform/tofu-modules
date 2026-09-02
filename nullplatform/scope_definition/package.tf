@@ -16,10 +16,11 @@ locals {
 
   # oci_image is the only artifact type where "registry"/"repository" mean
   # anything — other types (git_repository, blob, oras_artifact) have an
-  # unrelated meta shape, so this default never applies to them.
+  # unrelated meta shape, so this default never applies to them. Overridable
+  # per implementing module via var.package_oci_default_registry/repository.
   package_oci_meta_defaults = {
-    registry   = "public.ecr.aws"
-    repository = "nullplatform/scopes/containers"
+    registry   = var.package_oci_default_registry
+    repository = var.package_oci_default_repository
   }
 
   # Artifacts split by intent:

@@ -134,8 +134,14 @@ variable "package" {
     An artifact's `name` defaults to "impl" and `type` to "git_repository" —
     a service package is typically a single artifact pointing at the
     service's own implementation repo, so only `meta` (url/reference) needs
-    setting on every release. Every other field, at every level, is
-    caller-configurable with no other defaults baked in.
+    setting on every release.
+
+    For an artifact with `type = "oci_image"` (opt-in — not the default
+    here), meta.registry/meta.repository default to
+    var.package_oci_default_registry/var.package_oci_default_repository
+    when omitted from `meta`. Only meta.digest needs setting on every
+    release in that case; every other artifact type gets no meta defaults
+    (their meta shape is unrelated to a container registry).
 
     Null (the default) keeps the classic module behavior — no package.
   EOT
@@ -171,4 +177,16 @@ variable "package" {
     ])
     error_message = "`lookup = true` requires `meta` with the identity fields of the existing artifact."
   }
+}
+
+variable "package_oci_default_registry" {
+  description = "Default meta.registry for an oci_image package artifact whose own meta omits it. See var.package's artifacts docs."
+  type        = string
+  default     = "public.ecr.aws"
+}
+
+variable "package_oci_default_repository" {
+  description = "Default meta.repository for an oci_image package artifact whose own meta omits it. See var.package's artifacts docs."
+  type        = string
+  default     = "nullplatform/scopes/containers"
 }

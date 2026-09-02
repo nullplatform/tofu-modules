@@ -198,10 +198,11 @@ variable "package" {
 
     For an "oci_image" artifact (the default type), `name` defaults to
     "worker-image" and meta.registry/meta.repository default to
-    "public.ecr.aws"/"nullplatform/scopes/containers" — the platform's own
-    container-scope worker image — when omitted from `meta`. Only meta.digest
-    needs setting on every release; every other artifact type gets no meta
-    defaults (their meta shape is unrelated to a container registry).
+    var.package_oci_default_registry/var.package_oci_default_repository —
+    the platform's own container-scope worker image — when omitted from
+    `meta`. Only meta.digest needs setting on every release; every other
+    artifact type gets no meta defaults (their meta shape is unrelated to a
+    container registry).
 
     Null (the default) keeps the classic module behavior — no package.
   EOT
@@ -237,4 +238,16 @@ variable "package" {
     ])
     error_message = "`lookup = true` requires `meta` with the identity fields of the existing artifact."
   }
+}
+
+variable "package_oci_default_registry" {
+  description = "Default meta.registry for an oci_image package artifact whose own meta omits it. See var.package's artifacts docs."
+  type        = string
+  default     = "public.ecr.aws"
+}
+
+variable "package_oci_default_repository" {
+  description = "Default meta.repository for an oci_image package artifact whose own meta omits it — the platform's own container-scope worker image. See var.package's artifacts docs."
+  type        = string
+  default     = "nullplatform/scopes/containers"
 }
