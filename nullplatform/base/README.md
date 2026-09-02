@@ -2,27 +2,27 @@
 
 ## Description
 
-Deploys the nullplatform base Helm chart to a Kubernetes cluster with pre-created namespaces and multi-cloud gateway, logging, and observability configuration across EKS, GKE, AKS, OKE, and ARO providers
+Deploys the nullplatform base Helm chart onto a Kubernetes cluster across multiple cloud providers, wiring up gateways, ingress controllers, logging pipelines, and observability integrations via a single helm_release resource
 
 ## Architecture
 
-The module creates two kubernetes_namespace_v1 resources ('nullplatform-tools' and 'nullplatform') before deploying a helm_release named 'nullplatform-base' from the nullplatform Helm repository, using a templatefile-rendered locals block to produce the chart values. All provider-specific gateway settings (AWS security groups, Azure NSGs, GCP firewall rules, OCI subnets), logging backends (Loki, GELF, Datadog, Dynatrace, New Relic, CloudWatch), ingress controllers, and control plane agent image coordinates are wired from input variables into the template and passed as the helm_release values argument. Outputs expose the rendered Helm values and cloud-specific gateway security resource identifiers (security group IDs, NSG IDs, firewall names) for consumption by upstream modules.
+The module pre-creates two kubernetes_namespace_v1 resources (nullplatform-tools and nullplatform) to avoid Helm lookup race conditions, then renders a YAML values file from a templatefile() call in locals.tf that maps all input variables to chart values. A single helm_release resource named 'nullplatform-base' deploys the chart from the nullplatform GitHub Helm repository into the pre-created namespace, with the rendered values controlling every subsystem including gateways, ingress controllers, control plane agent, logging DaemonSet, and observability exporters. Outputs surface the rendered values and cloud-specific security resource IDs (AWS security groups, Azure NSGs, GCP firewall names) that were passed in from upstream security submodules.
 
 ## Features
 
-- Creates kubernetes_namespace_v1 resources for 'nullplatform-tools' and 'nullplatform' with Helm-compatible labels and annotations before chart installation
-- Deploys helm_release 'nullplatform-base' with pinned chart version, 600-second timeout, and job completion waiting to ensure deterministic installs
-- Configures multi-cloud gateway resources (AWS, Azure, GCP, OCI) with provider-specific security groups, NSGs, firewall rules, and subnet annotations
-- Supports multiple observability backends including Prometheus, GELF, Loki, Dynatrace, Datadog, New Relic, and CloudWatch with per-backend enable flags
-- Renders all Helm values via a templatefile from a YAML template, converting Terraform booleans and variables into chart-compatible strings
-- Enforces pinned non-moving version references for Helm chart version, control plane agent image tag, and logging controller image tag via validation rules
-- Configures public and private ingress controllers and Gateway API resources with per-controller scope, domain, and enablement settings
+- Creates two Kubernetes namespaces (nullplatform-tools and nullplatform) with Helm-managed labels and annotations before chart installation
+- Deploys the nullplatform-base Helm chart with a pinned version via helm_release, enforcing non-moving version references through input validation
+- Configures public and private gateways with per-cloud security integration for AWS security groups, Azure NSGs, GCP firewall rules, and OCI security lists
+- Enables pluggable observability backends including Prometheus, Loki, GELF, Dynatrace, Datadog, New Relic, and CloudWatch via feature-flag variables
+- Deploys a logging controller DaemonSet and control plane agent with pinned container image tags enforced by validation rules
+- Supports multi-cloud Kubernetes providers (EKS, GKE, AKS, OKE, ARO) with provider-specific gateway and load balancer configuration
+- Configures Gateway API CRD installation, ingress controllers, TLS requirements, metrics server, and image pull secrets through a single templatefile-rendered values block
 
 ## Basic Usage
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.22.1"
 
   control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "your-k8s-provider"
@@ -36,7 +36,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.22.1"
 
   control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "eks"
@@ -50,7 +50,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.22.1"
 
   control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "gke"
@@ -64,7 +64,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.22.1"
 
   control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "aks"
@@ -78,7 +78,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.22.1"
 
   control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "oke"
@@ -92,11 +92,53 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.22.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.22.1"
 
   control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "aro"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
+  np_api_key                     = "your-np-api-key"
+  nullplatform_base_helm_version = "your-nullplatform-base-helm-version"
+}
+```
+
+### Usage with Pinned Helm Chart Version
+
+```hcl
+module "base" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.22.1"
+
+  control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
+  k8s_provider                   = "your-k8s-provider"
+  logging_controller_image_tag   = "your-logging-controller-image-tag"
+  np_api_key                     = "your-np-api-key"
+  nullplatform_base_helm_version = "latest"
+}
+```
+
+### Usage with Pinned Control Plane Agent Image
+
+```hcl
+module "base" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.22.1"
+
+  control_plane_agent_image_tag  = "latest"
+  k8s_provider                   = "your-k8s-provider"
+  logging_controller_image_tag   = "your-logging-controller-image-tag"
+  np_api_key                     = "your-np-api-key"
+  nullplatform_base_helm_version = "your-nullplatform-base-helm-version"
+}
+```
+
+### Usage with Pinned Logging Controller Image
+
+```hcl
+module "base" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v6.22.1"
+
+  control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
+  k8s_provider                   = "your-k8s-provider"
+  logging_controller_image_tag   = "latest"
   np_api_key                     = "your-np-api-key"
   nullplatform_base_helm_version = "your-nullplatform-base-helm-version"
 }
@@ -159,6 +201,7 @@ resource "example_resource" "this" {
 | <a name="input_dynatrace_logs_enabled"></a> [dynatrace\_logs\_enabled](#input\_dynatrace\_logs\_enabled) | Enable log forwarding to Dynatrace. Set to false to send only metrics. | `bool` | `true` | no |
 | <a name="input_dynatrace_metrics_enabled"></a> [dynatrace\_metrics\_enabled](#input\_dynatrace\_metrics\_enabled) | Enable metrics forwarding to Dynatrace. Set to false to send only logs. | `bool` | `true` | no |
 | <a name="input_exporter_prometheus_port"></a> [exporter\_prometheus\_port](#input\_exporter\_prometheus\_port) | Port Number to Prometheus exporter. | `string` | `"2021"` | no |
+| <a name="input_gateway_api_crd_ref"></a> [gateway\_api\_crd\_ref](#input\_gateway\_api\_crd\_ref) | Git ref (tag or commit) of kubernetes-sigs/gateway-api to install when install\_gateway\_v2\_crd is true. Ignored on chart versions older than the one that introduced global.gatewayApiCrdRef. Default (v1.3.0) matches what Istio 1.27 documents installing; re-check istio.io's version-pinned docs when bumping Istio. | `string` | `"v1.3.0"` | no |
 | <a name="input_gateway_api_crds_install"></a> [gateway\_api\_crds\_install](#input\_gateway\_api\_crds\_install) | Install Gateway API CRDs. | `bool` | `false` | no |
 | <a name="input_gateway_api_enabled"></a> [gateway\_api\_enabled](#input\_gateway\_api\_enabled) | Enable the Gateway API. | `bool` | `false` | no |
 | <a name="input_gateway_enabled"></a> [gateway\_enabled](#input\_gateway\_enabled) | Enable the HTTP gateway. | `bool` | `false` | no |
@@ -191,7 +234,7 @@ resource "example_resource" "this" {
 | <a name="input_image_pull_secrets_registry"></a> [image\_pull\_secrets\_registry](#input\_image\_pull\_secrets\_registry) | Registry URL for the image pull secret. | `string` | `""` | no |
 | <a name="input_image_pull_secrets_username"></a> [image\_pull\_secrets\_username](#input\_image\_pull\_secrets\_username) | Registry username. | `string` | `""` | no |
 | <a name="input_ingressControllers"></a> [ingressControllers](#input\_ingressControllers) | Configuración de los IngressControllers públicos y privados | <pre>object({<br/>    public = object({<br/>      name    = string<br/>      enabled = bool<br/>      scope   = string<br/>      domain  = string<br/>    })<br/>    private = object({<br/>      name    = string<br/>      enabled = bool<br/>      scope   = string<br/>      domain  = string<br/>    })<br/>  })</pre> | <pre>{<br/>  "private": {<br/>    "domain": "",<br/>    "enabled": false,<br/>    "name": "internal",<br/>    "scope": "Internal"<br/>  },<br/>  "public": {<br/>    "domain": "",<br/>    "enabled": false,<br/>    "name": "internet-facing",<br/>    "scope": "External"<br/>  }<br/>}</pre> | no |
-| <a name="input_install_gateway_v2_crd"></a> [install\_gateway\_v2\_crd](#input\_install\_gateway\_v2\_crd) | Install Gateway API v2 CRDs. | `bool` | `false` | no |
+| <a name="input_install_gateway_v2_crd"></a> [install\_gateway\_v2\_crd](#input\_install\_gateway\_v2\_crd) | Install/reconcile the Gateway API CRDs (see gateway\_api\_crd\_ref) via the base chart's pre-install/pre-upgrade Job. Defaults to true so CRDs actually track gateway\_api\_crd\_ref instead of staying frozen at whatever was present on first install — matches the base chart's own default. Safe on chart versions before global.gatewayApiCrdRef too: those only install when the CRD is missing, so pre-existing CRDs from another source are left untouched. | `bool` | `true` | no |
 | <a name="input_internal_azure_load_balancer_subnet"></a> [internal\_azure\_load\_balancer\_subnet](#input\_internal\_azure\_load\_balancer\_subnet) | Name of the subnet for the internal gateway's Azure load balancer. Empty by default, in which case Azure picks the subnet automatically. Must be the subnet's resource name (e.g. "subnet-4"), not the key it has in a subnets\_definition map. | `string` | `""` | no |
 | <a name="input_k8s_provider"></a> [k8s\_provider](#input\_k8s\_provider) | Cloud provider (eks, gke, aks, oke and aro). | `string` | n/a | yes |
 | <a name="input_logging_application_logs_enabled"></a> [logging\_application\_logs\_enabled](#input\_logging\_application\_logs\_enabled) | Enable application log forwarding. Set to false to keep only http/sys metrics pipelines active across all providers. | `bool` | `true` | no |
@@ -233,16 +276,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "base",
-  "description": "Deploys the nullplatform base Helm chart to a Kubernetes cluster with pre-created namespaces and multi-cloud gateway, logging, and observability configuration across EKS, GKE, AKS, OKE, and ARO providers",
-  "architecture": "The module creates two kubernetes_namespace_v1 resources ('nullplatform-tools' and 'nullplatform') before deploying a helm_release named 'nullplatform-base' from the nullplatform Helm repository, using a templatefile-rendered locals block to produce the chart values. All provider-specific gateway settings (AWS security groups, Azure NSGs, GCP firewall rules, OCI subnets), logging backends (Loki, GELF, Datadog, Dynatrace, New Relic, CloudWatch), ingress controllers, and control plane agent image coordinates are wired from input variables into the template and passed as the helm_release values argument. Outputs expose the rendered Helm values and cloud-specific gateway security resource identifiers (security group IDs, NSG IDs, firewall names) for consumption by upstream modules.",
+  "description": "Deploys the nullplatform base Helm chart onto a Kubernetes cluster across multiple cloud providers, wiring up gateways, ingress controllers, logging pipelines, and observability integrations via a single helm_release resource",
+  "architecture": "The module pre-creates two kubernetes_namespace_v1 resources (nullplatform-tools and nullplatform) to avoid Helm lookup race conditions, then renders a YAML values file from a templatefile() call in locals.tf that maps all input variables to chart values. A single helm_release resource named 'nullplatform-base' deploys the chart from the nullplatform GitHub Helm repository into the pre-created namespace, with the rendered values controlling every subsystem including gateways, ingress controllers, control plane agent, logging DaemonSet, and observability exporters. Outputs surface the rendered values and cloud-specific security resource IDs (AWS security groups, Azure NSGs, GCP firewall names) that were passed in from upstream security submodules.",
   "features": [
-    "Creates kubernetes_namespace_v1 resources for 'nullplatform-tools' and 'nullplatform' with Helm-compatible labels and annotations before chart installation",
-    "Deploys helm_release 'nullplatform-base' with pinned chart version, 600-second timeout, and job completion waiting to ensure deterministic installs",
-    "Configures multi-cloud gateway resources (AWS, Azure, GCP, OCI) with provider-specific security groups, NSGs, firewall rules, and subnet annotations",
-    "Supports multiple observability backends including Prometheus, GELF, Loki, Dynatrace, Datadog, New Relic, and CloudWatch with per-backend enable flags",
-    "Renders all Helm values via a templatefile from a YAML template, converting Terraform booleans and variables into chart-compatible strings",
-    "Enforces pinned non-moving version references for Helm chart version, control plane agent image tag, and logging controller image tag via validation rules",
-    "Configures public and private ingress controllers and Gateway API resources with per-controller scope, domain, and enablement settings"
+    "Creates two Kubernetes namespaces (nullplatform-tools and nullplatform) with Helm-managed labels and annotations before chart installation",
+    "Deploys the nullplatform-base Helm chart with a pinned version via helm_release, enforcing non-moving version references through input validation",
+    "Configures public and private gateways with per-cloud security integration for AWS security groups, Azure NSGs, GCP firewall rules, and OCI security lists",
+    "Enables pluggable observability backends including Prometheus, Loki, GELF, Dynatrace, Datadog, New Relic, and CloudWatch via feature-flag variables",
+    "Deploys a logging controller DaemonSet and control plane agent with pinned container image tags enforced by validation rules",
+    "Supports multi-cloud Kubernetes providers (EKS, GKE, AKS, OKE, ARO) with provider-specific gateway and load balancer configuration",
+    "Configures Gateway API CRD installation, ingress controllers, TLS requirements, metrics server, and image pull secrets through a single templatefile-rendered values block"
   ],
   "inputs": [
     {
@@ -287,7 +330,12 @@ resource "example_resource" "this" {
     },
     {
       "name": "install_gateway_v2_crd",
-      "description": "Install Gateway API v2 CRDs.",
+      "description": "Install/reconcile the Gateway API CRDs (see gateway_api_crd_ref) via the base chart's pre-install/pre-upgrade Job. Defaults to true so CRDs actually track gateway_api_crd_ref instead of staying frozen at whatever was present on first install — matches the base chart's own default. Safe on chart versions before global.gatewayApiCrdRef too: those only install when the CRD is missing, so pre-existing CRDs from another source are left untouched.",
+      "required": false
+    },
+    {
+      "name": "gateway_api_crd_ref",
+      "description": "Git ref (tag or commit) of kubernetes-sigs/gateway-api to install when install_gateway_v2_crd is true. Ignored on chart versions older than the one that introduced global.gatewayApiCrdRef. Default (v1.3.0) matches what Istio 1.27 documents installing; re-check istio.io's version-pinned docs when bumping Istio.",
       "required": false
     },
     {
@@ -645,6 +693,6 @@ resource "example_resource" "this" {
     "public_gateway_firewall_name",
     "private_gateway_firewall_name"
   ],
-  "hash": "2f372f2ca6f6a8339df7f04c6e630f69"
+  "hash": "ccf1297b02af9c659c444be960d56d9b"
 }
 END_AI_METADATA -->
