@@ -22,7 +22,7 @@ The module constructs a set of locals that merge optional and required inputs in
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v6.22.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v6.23.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -36,7 +36,7 @@ module "aks" {
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v6.22.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v6.23.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -50,7 +50,7 @@ module "aks" {
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v6.22.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v6.23.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -64,7 +64,7 @@ module "aks" {
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v6.22.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v6.23.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
