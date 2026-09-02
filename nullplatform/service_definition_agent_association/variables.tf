@@ -40,7 +40,7 @@ variable "repository_service_spec_repo" {
 
 variable "base_clone_path" {
   type        = string
-  default     = "/root/.np"
+  default     = "/home/agent/.np"
   description = "Base path where the service repository is cloned inside the agent pod"
 }
 
