@@ -16,7 +16,7 @@ locals {
     "--command-executor-env=NP_API_KEY=$(NP_API_KEY)",
     "--command-executor-debug",
     "--webserver-enabled",
-    "--command-executor-git-command-repos $(AGENT_REPO)"
+    "--command-executor-git-command-repos=$(AGENT_REPO)"
   ]
 
   cloud_args = {
