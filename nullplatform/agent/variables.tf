@@ -66,6 +66,23 @@ variable "service_account_name" {
   default     = "nullplatform-agent"
 }
 
+variable "worker_orchestrated_packages" {
+  description = <<-EOT
+    Package slugs whose worker-orchestrator (package-exec) pods should run
+    under var.service_account_name — the same IRSA identity as the agent
+    itself — via a per-package worker-container patch. Add a package's slug
+    here whenever its worker needs to assume an AWS role (or otherwise needs
+    the agent's ServiceAccount) to do its job; a worker for a package not
+    listed here falls back to the namespace's default ServiceAccount.
+
+    This is separate from the "containers" scope's own k8s-deployment env
+    vars (DNS_TYPE, DOMAIN, etc.), which remain specific to that package
+    regardless of what's listed here.
+  EOT
+  type        = list(string)
+  default     = ["containers"]
+}
+
 # Version of the nullplatform agent Helm chart to deploy
 variable "nullplatform_agent_helm_version" {
   # example: 2.37.0

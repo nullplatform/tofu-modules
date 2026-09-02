@@ -179,6 +179,24 @@ run "worker_service_account_mirrors_service_account_name" {
   }
 }
 
+run "worker_orchestrated_packages_gets_its_own_service_account_patch" {
+  command = plan
+
+  variables {
+    worker_orchestrated_packages = ["containers", "aws-s3-bucket"]
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "\"package\": \"aws-s3-bucket\"")
+    error_message = "a package listed in worker_orchestrated_packages must get its own patch target"
+  }
+
+  assert {
+    condition     = length(regexall("\"serviceAccountName\": \"nullplatform-agent\"", helm_release.agent.values[0])) == 2
+    error_message = "each package in worker_orchestrated_packages must get its own serviceAccountName patch (one per package, here 2)"
+  }
+}
+
 run "worker_defaults" {
   command = plan
 
