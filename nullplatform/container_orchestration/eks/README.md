@@ -2,29 +2,67 @@
 
 ## Description
 
-Configures Nullplatform provider settings for Amazon EKS clusters with application deployment, load balancing, and resource management capabilities
+Configures a Nullplatform EKS provider configuration resource that registers an Amazon EKS cluster with the Nullplatform platform, including load balancer, networking, resource management, security, and traffic manager sidecar settings
 
 ## Architecture
 
-Creates a nullplatform_provider_config resource with type 'eks-configuration' that aggregates cluster, balancer, network, resource management, and security settings. The module accepts EKS cluster configuration through input variables, constructs nested attribute maps using conditional logic to filter empty values, and encodes them as JSON attributes for the provider configuration. Internal locals merge cluster identity, load balancer names (public/private with additional balancers), namespace settings, resource quotas, and security configurations before passing them to the provider resource.
+The module constructs a structured attributes map from input variables using Terraform locals, merging cluster identity, balancer configuration, network settings, resource management ratios, security credentials, and traffic manager sidecar parameters. A single nullplatform_provider_config resource of type eks-configuration is created, encoding the merged attributes map as JSON and binding it to a specific NRN and optional dimension set. Input variables are conditionally included in the attributes payload only when non-empty or non-null, ensuring the provider config reflects only explicitly configured values. The resource output exposes the resulting provider configuration for downstream Nullplatform platform integration.
 
 ## Features
 
-- Configures EKS cluster identity and default Kubernetes namespace for application deployments
-- Manages public and private Application Load Balancer naming with support for additional balancers beyond the 100-rule limit
-- Sets ALB capacity thresholds (50-99%) to reserve slots for concurrent deployments
-- Controls resource allocation ratios for memory-to-CPU, memory request-to-limit, and CPU multipliers
-- Configures image pull secrets and service account associations for secure container image access
-- Supports traffic manager sidecar versioning and dynamic Kubernetes object modifications
+- Creates a nullplatform_provider_config resource of type eks-configuration that registers an EKS cluster with the Nullplatform platform
+- Configures public and private ALB routing with support for additional load balancers beyond the 100-rule limit and configurable capacity thresholds
+- Pins the traffic manager sidecar container to a fixed, explicit version tag to prevent unintended image drift on pod restarts
+- Supports custom traffic manager sidecar port binding to accommodate clusters that restrict pod-to-pod traffic on port 80
+- Manages Kubernetes resource allocation ratios including memory-to-CPU ratio, memory request-to-limit ratio, and maximum milicores per pod
+- Configures Kubernetes security context including image pull secrets and service account name for private registry access
+- Applies dynamic Kubernetes object modifiers to patch arbitrary k8s resources at deploy time via a structured selector-action-type-value list
 
 ## Basic Usage
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v7.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v8.0.0"
 
-  cluster_name = "your-cluster-name"
-  nrn          = "your-nrn"
+  cluster_name            = "your-cluster-name"
+  nrn                     = "your-nrn"
+  traffic_manager_version = "your-traffic-manager-version"
+}
+```
+
+### Usage with Pinned Release Version
+
+```hcl
+module "eks" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v8.0.0"
+
+  cluster_name            = "your-cluster-name"
+  nrn                     = "your-nrn"
+  traffic_manager_version = "latest"
+}
+```
+
+### Usage with Pinned Release Version
+
+```hcl
+module "eks" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v8.0.0"
+
+  cluster_name            = "your-cluster-name"
+  nrn                     = "your-nrn"
+  traffic_manager_version = "main"
+}
+```
+
+### Usage with Pinned Release Version
+
+```hcl
+module "eks" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v8.0.0"
+
+  cluster_name            = "your-cluster-name"
+  nrn                     = "your-nrn"
+  traffic_manager_version = "master"
 }
 ```
 
@@ -77,22 +115,24 @@ resource "example_resource" "this" {
 | <a name="input_private_balancer_name"></a> [private\_balancer\_name](#input\_private\_balancer\_name) | The name of the private load balancer for internal traffic routing | `string` | `""` | no |
 | <a name="input_public_balancer_name"></a> [public\_balancer\_name](#input\_public\_balancer\_name) | The name of the public-facing load balancer for external traffic routing | `string` | `""` | no |
 | <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | The name of the Kubernetes service account used for deployments | `string` | `""` | no |
-| <a name="input_traffic_manager_version"></a> [traffic\_manager\_version](#input\_traffic\_manager\_version) | Tag for the traffic manager sidecar container | `string` | `"latest"` | no |
+| <a name="input_traffic_manager_port"></a> [traffic\_manager\_port](#input\_traffic\_manager\_port) | Port the traffic manager sidecar binds inside the pod. Defaults to 80 when unset. Set a different port (10080 recommended) when the cluster does not allow pod-to-pod traffic on port 80, which surfaces as a healthy pod that receives no traffic because kubelet probes are node-local and bypass the filtering. Open the port for pod-to-pod traffic before setting this value | `number` | `null` | no |
+| <a name="input_traffic_manager_version"></a> [traffic\_manager\_version](#input\_traffic\_manager\_version) | No default: every install pins this deliberately — see VERSIONS.md. Pinned rather than tracking latest: a moving tag means a pod restart can pull a different build with no apply in between. Tag for the traffic manager sidecar container | `string` | n/a | yes |
 | <a name="input_use_nullplatform_namespace"></a> [use\_nullplatform\_namespace](#input\_use\_nullplatform\_namespace) | When enabled, uses the nullplatform system namespace instead of a custom namespace | `bool` | `false` | no |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
 {
   "name": "eks",
-  "description": "Configures Nullplatform provider settings for Amazon EKS clusters with application deployment, load balancing, and resource management capabilities",
-  "architecture": "Creates a nullplatform_provider_config resource with type 'eks-configuration' that aggregates cluster, balancer, network, resource management, and security settings. The module accepts EKS cluster configuration through input variables, constructs nested attribute maps using conditional logic to filter empty values, and encodes them as JSON attributes for the provider configuration. Internal locals merge cluster identity, load balancer names (public/private with additional balancers), namespace settings, resource quotas, and security configurations before passing them to the provider resource.",
+  "description": "Configures a Nullplatform EKS provider configuration resource that registers an Amazon EKS cluster with the Nullplatform platform, including load balancer, networking, resource management, security, and traffic manager sidecar settings",
+  "architecture": "The module constructs a structured attributes map from input variables using Terraform locals, merging cluster identity, balancer configuration, network settings, resource management ratios, security credentials, and traffic manager sidecar parameters. A single nullplatform_provider_config resource of type eks-configuration is created, encoding the merged attributes map as JSON and binding it to a specific NRN and optional dimension set. Input variables are conditionally included in the attributes payload only when non-empty or non-null, ensuring the provider config reflects only explicitly configured values. The resource output exposes the resulting provider configuration for downstream Nullplatform platform integration.",
   "features": [
-    "Configures EKS cluster identity and default Kubernetes namespace for application deployments",
-    "Manages public and private Application Load Balancer naming with support for additional balancers beyond the 100-rule limit",
-    "Sets ALB capacity thresholds (50-99%) to reserve slots for concurrent deployments",
-    "Controls resource allocation ratios for memory-to-CPU, memory request-to-limit, and CPU multipliers",
-    "Configures image pull secrets and service account associations for secure container image access",
-    "Supports traffic manager sidecar versioning and dynamic Kubernetes object modifications"
+    "Creates a nullplatform_provider_config resource of type eks-configuration that registers an EKS cluster with the Nullplatform platform",
+    "Configures public and private ALB routing with support for additional load balancers beyond the 100-rule limit and configurable capacity thresholds",
+    "Pins the traffic manager sidecar container to a fixed, explicit version tag to prevent unintended image drift on pod restarts",
+    "Supports custom traffic manager sidecar port binding to accommodate clusters that restrict pod-to-pod traffic on port 80",
+    "Manages Kubernetes resource allocation ratios including memory-to-CPU ratio, memory request-to-limit ratio, and maximum milicores per pod",
+    "Configures Kubernetes security context including image pull secrets and service account name for private registry access",
+    "Applies dynamic Kubernetes object modifiers to patch arbitrary k8s resources at deploy time via a structured selector-action-type-value list"
   ],
   "inputs": [
     {
@@ -103,6 +143,11 @@ resource "example_resource" "this" {
     {
       "name": "cluster_name",
       "description": "The name of the Amazon EKS cluster",
+      "required": true
+    },
+    {
+      "name": "traffic_manager_version",
+      "description": "No default: every install pins this deliberately — see VERSIONS.md. Pinned rather than tracking latest: a moving tag means a pod restart can pull a different build with no apply in between. Tag for the traffic manager sidecar container",
       "required": true
     },
     {
@@ -118,6 +163,11 @@ resource "example_resource" "this" {
     {
       "name": "alb_capacity_threshold",
       "description": "Maximum ALB rule usage percentage (50-99). The remaining capacity reserves slots for concurrent deployments. Higher values maximize ALB utilization but increase the risk of hitting the rule limit",
+      "required": false
+    },
+    {
+      "name": "traffic_manager_port",
+      "description": "Port the traffic manager sidecar binds inside the pod. Defaults to 80 when unset. Set a different port (10080 recommended) when the cluster does not allow pod-to-pod traffic on port 80, which surfaces as a healthy pod that receives no traffic because kubelet probes are node-local and bypass the filtering. Open the port for pod-to-pod traffic before setting this value",
       "required": false
     },
     {
@@ -181,17 +231,12 @@ resource "example_resource" "this" {
       "required": false
     },
     {
-      "name": "traffic_manager_version",
-      "description": "Tag for the traffic manager sidecar container",
-      "required": false
-    },
-    {
       "name": "object_modifiers",
       "description": "List of modifications to dynamically modify k8s objects",
       "required": false
     }
   ],
   "outputs": [],
-  "hash": "c7a281d93492ea563b142d1bedd94b38"
+  "hash": "e610f9fe4ab54f6b090e558e1546c149"
 }
 END_AI_METADATA -->

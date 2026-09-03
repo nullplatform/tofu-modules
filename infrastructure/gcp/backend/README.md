@@ -2,27 +2,27 @@
 
 ## Description
 
-Creates a GCS bucket for storing Terraform/OpenTofu remote state with configurable storage class, versioning, encryption, access control, and audit logging
+Creates a GCS bucket for Terraform/OpenTofu remote state with access logging, versioning, optional KMS encryption, and IAM member bindings
 
 ## Architecture
 
-The module creates a random_id resource to generate a unique 8-byte hex suffix, which is appended to the lowercased bucket_prefix to form the globally unique name of a google_storage_bucket resource. Optional CMEK encryption is wired via a dynamic encryption block that activates only when kms_key_name is non-null and non-empty, and optional access logging is wired via a dynamic logging block that activates only when log_bucket is non-null and non-empty. Zero or more google_storage_bucket_iam_member resources are created via for_each over the allowed_members list, each granting roles/storage.objectAdmin on the bucket. Outputs expose the bucket name, gs:// URL, self-link, and location for use by remote state backend configurations.
+The module creates a primary google_storage_bucket (tf_state) with a random_id suffix for global uniqueness, and conditionally creates a second google_storage_bucket (logs) when no external log bucket is provided. A data source google_storage_project_service_account retrieves the GCS service agent, and a google_storage_bucket_iam_member (logs_writer) grants it objectCreator on the auto-created log bucket. Additional google_storage_bucket_iam_member resources (allowed_members) are created via for_each to grant objectAdmin to any caller-supplied IAM principals on the state bucket.
 
 ## Features
 
-- Creates a google_storage_bucket with a globally unique name by appending a random 16-character hex suffix to a caller-supplied prefix
-- Enables object versioning on the bucket so previous Terraform state revisions can be recovered
-- Configures uniform bucket-level access and public access prevention to enforce IAM-only access controls
-- Attaches optional Cloud KMS customer-managed encryption key via a dynamic encryption block on the bucket
-- Enables optional GCS access logging to a separate audit log bucket via a dynamic logging block
-- Grants roles/storage.objectAdmin to an arbitrary list of IAM members via google_storage_bucket_iam_member resources
-- Supports configurable storage class across standard, nearline, coldline, archive, and legacy GCS storage tiers
+- Creates a globally unique GCS bucket for Terraform/OpenTofu state with a random 16-character hex suffix appended to a caller-supplied prefix
+- Enables object versioning by default so previous state revisions can be recovered
+- Enforces public access prevention and uniform bucket-level access (IAM-only) by default
+- Automatically creates a dedicated access-log bucket and grants the GCS service agent write access when no external log bucket is provided
+- Supports optional customer-managed KMS encryption via an existing Cloud KMS key
+- Grants additional IAM members roles/storage.objectAdmin on the state bucket via additive IAM bindings
+- Applies caller-supplied labels to both the state bucket and the auto-created log bucket
 
 ## Basic Usage
 
 ```hcl
 module "backend" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/backend?ref=v6.22.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/backend?ref=v8.0.0"
 
   project_id = "your-project-id"
 }
@@ -57,8 +57,10 @@ resource "example_resource" "this" {
 
 | Name | Type |
 |------|------|
+| [google_storage_bucket.logs](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket) | resource |
 | [google_storage_bucket.tf_state](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket) | resource |
 | [google_storage_bucket_iam_member.allowed_members](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket_iam_member) | resource |
+| [google_storage_bucket_iam_member.logs_writer](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket_iam_member) | resource |
 | [random_id.bucket_suffix](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id) | resource |
 
 ## Inputs
@@ -70,7 +72,7 @@ resource "example_resource" "this" {
 | <a name="input_force_destroy"></a> [force\_destroy](#input\_force\_destroy) | Allow destruction of the bucket even if it contains objects. Leave false to protect Terraform/OpenTofu state from accidental deletion | `bool` | `false` | no |
 | <a name="input_kms_key_name"></a> [kms\_key\_name](#input\_kms\_key\_name) | Full resource name of an existing Cloud KMS key used to encrypt the bucket's contents. Leave null or empty to use Google-managed encryption. When set, the project's GCS service agent must already hold roles/cloudkms.cryptoKeyEncrypterDecrypter on the key — this module does not grant it | `string` | `null` | no |
 | <a name="input_location"></a> [location](#input\_location) | GCS location for the bucket (e.g. a multi-region like US, or a region like us-central1) | `string` | `"US"` | no |
-| <a name="input_log_bucket"></a> [log\_bucket](#input\_log\_bucket) | Name of an existing GCS bucket to receive this bucket's access logs. Leave null or empty to disable access logging. Recommended for a state bucket, so reads of state objects leave an audit trail | `string` | `null` | no |
+| <a name="input_log_bucket"></a> [log\_bucket](#input\_log\_bucket) | Name of an existing GCS bucket to receive this bucket's access logs. Leave null or empty and the module creates its own dedicated log bucket (and grants the GCS service agent write access to it) — access logging is always on, so reads of state objects leave an audit trail. | `string` | `null` | no |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | The GCP project ID where the state bucket will be created | `string` | n/a | yes |
 | <a name="input_public_access_prevention"></a> [public\_access\_prevention](#input\_public\_access\_prevention) | Public access prevention setting for the bucket (enforced or inherited) | `string` | `"enforced"` | no |
 | <a name="input_storage_class"></a> [storage\_class](#input\_storage\_class) | Storage class for the bucket | `string` | `"STANDARD"` | no |
@@ -86,21 +88,22 @@ resource "example_resource" "this" {
 | <a name="output_bucket_self_link"></a> [bucket\_self\_link](#output\_bucket\_self\_link) | Self-link of the GCS bucket |
 | <a name="output_bucket_url"></a> [bucket\_url](#output\_bucket\_url) | gs:// URL of the GCS bucket |
 | <a name="output_location"></a> [location](#output\_location) | Location of the GCS bucket |
+| <a name="output_log_bucket_name"></a> [log\_bucket\_name](#output\_log\_bucket\_name) | Name of the bucket receiving access logs — either var.log\_bucket, or the module's own auto-created log bucket when that's left unset |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
 {
   "name": "backend",
-  "description": "Creates a GCS bucket for storing Terraform/OpenTofu remote state with configurable storage class, versioning, encryption, access control, and audit logging",
-  "architecture": "The module creates a random_id resource to generate a unique 8-byte hex suffix, which is appended to the lowercased bucket_prefix to form the globally unique name of a google_storage_bucket resource. Optional CMEK encryption is wired via a dynamic encryption block that activates only when kms_key_name is non-null and non-empty, and optional access logging is wired via a dynamic logging block that activates only when log_bucket is non-null and non-empty. Zero or more google_storage_bucket_iam_member resources are created via for_each over the allowed_members list, each granting roles/storage.objectAdmin on the bucket. Outputs expose the bucket name, gs:// URL, self-link, and location for use by remote state backend configurations.",
+  "description": "Creates a GCS bucket for Terraform/OpenTofu remote state with access logging, versioning, optional KMS encryption, and IAM member bindings",
+  "architecture": "The module creates a primary google_storage_bucket (tf_state) with a random_id suffix for global uniqueness, and conditionally creates a second google_storage_bucket (logs) when no external log bucket is provided. A data source google_storage_project_service_account retrieves the GCS service agent, and a google_storage_bucket_iam_member (logs_writer) grants it objectCreator on the auto-created log bucket. Additional google_storage_bucket_iam_member resources (allowed_members) are created via for_each to grant objectAdmin to any caller-supplied IAM principals on the state bucket.",
   "features": [
-    "Creates a google_storage_bucket with a globally unique name by appending a random 16-character hex suffix to a caller-supplied prefix",
-    "Enables object versioning on the bucket so previous Terraform state revisions can be recovered",
-    "Configures uniform bucket-level access and public access prevention to enforce IAM-only access controls",
-    "Attaches optional Cloud KMS customer-managed encryption key via a dynamic encryption block on the bucket",
-    "Enables optional GCS access logging to a separate audit log bucket via a dynamic logging block",
-    "Grants roles/storage.objectAdmin to an arbitrary list of IAM members via google_storage_bucket_iam_member resources",
-    "Supports configurable storage class across standard, nearline, coldline, archive, and legacy GCS storage tiers"
+    "Creates a globally unique GCS bucket for Terraform/OpenTofu state with a random 16-character hex suffix appended to a caller-supplied prefix",
+    "Enables object versioning by default so previous state revisions can be recovered",
+    "Enforces public access prevention and uniform bucket-level access (IAM-only) by default",
+    "Automatically creates a dedicated access-log bucket and grants the GCS service agent write access when no external log bucket is provided",
+    "Supports optional customer-managed KMS encryption via an existing Cloud KMS key",
+    "Grants additional IAM members roles/storage.objectAdmin on the state bucket via additive IAM bindings",
+    "Applies caller-supplied labels to both the state bucket and the auto-created log bucket"
   ],
   "inputs": [
     {
@@ -150,7 +153,7 @@ resource "example_resource" "this" {
     },
     {
       "name": "log_bucket",
-      "description": "Name of an existing GCS bucket to receive this bucket's access logs. Leave null or empty to disable access logging. Recommended for a state bucket, so reads of state objects leave an audit trail",
+      "description": "Name of an existing GCS bucket to receive this bucket's access logs. Leave null or empty and the module creates its own dedicated log bucket (and grants the GCS service agent write access to it) — access logging is always on, so reads of state objects leave an audit trail.",
       "required": false
     },
     {
@@ -168,8 +171,9 @@ resource "example_resource" "this" {
     "bucket_name",
     "bucket_url",
     "bucket_self_link",
-    "location"
+    "location",
+    "log_bucket_name"
   ],
-  "hash": "e6762175e722a765952fb63e536ebf48"
+  "hash": "84e54ab29197e3da7c98e46bd01a5c4a"
 }
 END_AI_METADATA -->

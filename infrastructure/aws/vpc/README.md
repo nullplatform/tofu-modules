@@ -2,27 +2,26 @@
 
 ## Description
 
-Creates an AWS VPC with public and private subnets across multiple availability zones, configured for Kubernetes workloads with NAT gateway for private subnet internet access
+Creates an AWS VPC with public and private subnets across multiple availability zones, configured for Kubernetes workloads with NAT gateway support
 
 ## Architecture
 
-This module creates a terraform-aws-modules/vpc/aws module resource with DNS hostnames enabled. It provisions public subnets tagged for external load balancers and private subnets tagged for internal load balancers, both tagged for Kubernetes integration. A single NAT gateway is created in a public subnet to enable outbound internet access for resources in private subnets. The VPC name is derived from organization and account variables, and outputs include the VPC ID, subnet IDs, and default security group ID.
+The module wraps the terraform-aws-modules/vpc/aws community module to provision an aws_vpc resource along with public and private aws_subnet resources distributed across the specified availability zones. A single aws_nat_gateway is created to provide outbound internet access for private subnets, while an aws_internet_gateway handles public subnet routing. Subnet tags for Kubernetes ELB roles are applied automatically, and outputs expose the vpc_id, subnet IDs, and default security group ID for consumption by downstream modules.
 
 ## Features
 
-- Creates VPC with configurable CIDR block and availability zones
-- Provisions public subnets with Kubernetes external load balancer tags
-- Provisions private subnets with Kubernetes internal load balancer tags
-- Configures single NAT gateway for private subnet internet egress
-- Enables DNS hostnames for VPC resources
-- Tags subnets with nullplatform identifiers for infrastructure management
-- Outputs VPC ID, subnet IDs, and default security group for downstream resource integration
+- Creates a VPC with configurable CIDR block named after the organization and account
+- Provisions public and private subnets across multiple availability zones for high availability
+- Deploys a single NAT gateway to provide cost-effective outbound internet access for private subnets
+- Applies Kubernetes ELB and internal-ELB subnet tags to enable automatic load balancer subnet discovery
+- Applies nullplatform subnet-type tags to distinguish public and private subnets
+- Enables DNS hostnames within the VPC to support service discovery and EKS node registration
 
 ## Basic Usage
 
 ```hcl
 module "vpc" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v7.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v8.0.0"
 
   account      = "your-account"
   organization = "your-organization"
@@ -73,16 +72,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "vpc",
-  "description": "Creates an AWS VPC with public and private subnets across multiple availability zones, configured for Kubernetes workloads with NAT gateway for private subnet internet access",
-  "architecture": "This module creates a terraform-aws-modules/vpc/aws module resource with DNS hostnames enabled. It provisions public subnets tagged for external load balancers and private subnets tagged for internal load balancers, both tagged for Kubernetes integration. A single NAT gateway is created in a public subnet to enable outbound internet access for resources in private subnets. The VPC name is derived from organization and account variables, and outputs include the VPC ID, subnet IDs, and default security group ID.",
+  "description": "Creates an AWS VPC with public and private subnets across multiple availability zones, configured for Kubernetes workloads with NAT gateway support",
+  "architecture": "The module wraps the terraform-aws-modules/vpc/aws community module to provision an aws_vpc resource along with public and private aws_subnet resources distributed across the specified availability zones. A single aws_nat_gateway is created to provide outbound internet access for private subnets, while an aws_internet_gateway handles public subnet routing. Subnet tags for Kubernetes ELB roles are applied automatically, and outputs expose the vpc_id, subnet IDs, and default security group ID for consumption by downstream modules.",
   "features": [
-    "Creates VPC with configurable CIDR block and availability zones",
-    "Provisions public subnets with Kubernetes external load balancer tags",
-    "Provisions private subnets with Kubernetes internal load balancer tags",
-    "Configures single NAT gateway for private subnet internet egress",
-    "Enables DNS hostnames for VPC resources",
-    "Tags subnets with nullplatform identifiers for infrastructure management",
-    "Outputs VPC ID, subnet IDs, and default security group for downstream resource integration"
+    "Creates a VPC with configurable CIDR block named after the organization and account",
+    "Provisions public and private subnets across multiple availability zones for high availability",
+    "Deploys a single NAT gateway to provide cost-effective outbound internet access for private subnets",
+    "Applies Kubernetes ELB and internal-ELB subnet tags to enable automatic load balancer subnet discovery",
+    "Applies nullplatform subnet-type tags to distinguish public and private subnets",
+    "Enables DNS hostnames within the VPC to support service discovery and EKS node registration"
   ],
   "inputs": [
     {
@@ -107,6 +105,6 @@ resource "example_resource" "this" {
     "public_subnets",
     "security_group_ids"
   ],
-  "hash": "c0c6e91682b6bb694696874d8f69aed6"
+  "hash": "fca46061782a682001b91d42d94497cd"
 }
 END_AI_METADATA -->
