@@ -33,8 +33,18 @@ variable "repository_name" {
 
 variable "repository_branch" {
   type        = string
-  default     = "main"
-  description = "Branch of the service spec repository to use. Must be a short branch name (e.g. \"main\"), not a full ref."
+  description = <<-EOT
+    Git ref of the service spec repository to read, as a short name and not a full ref
+    (e.g. "v1.4.0"). No default and no recommended value: which spec repository an install
+    points at is its own choice, so there is no version anyone could pick for it.
+
+    Combine with repository_ref_type, which selects the namespace this name lives in.
+  EOT
+
+  validation {
+    condition     = var.repository_branch != "" && !contains(["main", "master", "head", "latest"], lower(var.repository_branch))
+    error_message = "repository_branch must be a non-empty pinned ref, not empty and not a moving branch."
+  }
 }
 
 variable "service_path" {
@@ -92,7 +102,7 @@ variable "dimensions" {
 
 variable "repository_ref_type" {
   type        = string
-  default     = "heads"
+  default     = "tags"
   description = "Git ref namespace for `repository_branch` on GitHub: \"heads\" for a branch, \"tags\" for a tag, or \"\" to treat it as a raw commit SHA. Defaults to \"heads\", preserving previous behaviour."
   validation {
     condition     = contains(["heads", "tags", ""], var.repository_ref_type)
@@ -113,9 +123,25 @@ variable "package" {
         { url = "https://github.com/acme/svc.git", reference = "main" } for a
         git_repository, or { registry, repository, digest } for an oci_image);
       • look up one registered elsewhere BY IDENTITY (no ids needed) — set
-        `lookup = true` + `meta` with the identity fields (add digest/reference
-        to pin a specific revision, otherwise the latest revision is used);
+        `lookup = true` + `meta` with the identity fields (url for
+        git_repository, or registry+repository for oci_image); add the
+        type's own per-revision field to pin a specific revision (reference,
+        e.g. a tag, for git_repository; digest, formatted "sha256:<64-hex>",
+        for oci_image — the API rejects the other type's field name),
+        otherwise the latest revision is used;
       • pin explicit ids — set `resource_id` + `resource_revision_id`.
+
+    An artifact's `name` defaults to "impl" and `type` to "git_repository" —
+    a service package is typically a single artifact pointing at the
+    service's own implementation repo, so only `meta` (url/reference) needs
+    setting on every release.
+
+    For an artifact with `type = "oci_image"` (opt-in — not the default
+    here), meta.registry/meta.repository default to
+    var.package_oci_default_registry/var.package_oci_default_repository
+    when omitted from `meta`. Only meta.digest needs setting on every
+    release in that case; every other artifact type gets no meta defaults
+    (their meta shape is unrelated to a container registry).
 
     Null (the default) keeps the classic module behavior — no package.
   EOT
@@ -127,11 +153,11 @@ variable "package" {
     tags       = optional(map(string), {}) # release tags: name => version (requires an API with the package release-tag routes)
     visible_to = optional(list(string))    # default: [var.nrn]
     artifacts = optional(list(object({
-      name                 = string
-      type                 = optional(string, "oci_image") # oci_image | oras_artifact | git_repository | blob
-      meta                 = optional(any)                 # register (lookup=false) or find (lookup=true)
-      lookup               = optional(bool, false)         # true: resolve an EXISTING artifact by meta identity
-      resource_id          = optional(string)              # …or pin explicit ids
+      name                 = optional(string, "impl")           # default: a single service-implementation artifact
+      type                 = optional(string, "git_repository") # oci_image | oras_artifact | git_repository | blob
+      meta                 = optional(any)                      # register (lookup=false) or find (lookup=true)
+      lookup               = optional(bool, false)              # true: resolve an EXISTING artifact by meta identity
+      resource_id          = optional(string)                   # …or pin explicit ids
       resource_revision_id = optional(string)
     })), [])
   })
@@ -151,4 +177,16 @@ variable "package" {
     ])
     error_message = "`lookup = true` requires `meta` with the identity fields of the existing artifact."
   }
+}
+
+variable "package_oci_default_registry" {
+  description = "Default meta.registry for an oci_image package artifact whose own meta omits it. See var.package's artifacts docs."
+  type        = string
+  default     = "public.ecr.aws"
+}
+
+variable "package_oci_default_repository" {
+  description = "Default meta.repository for an oci_image package artifact whose own meta omits it. See var.package's artifacts docs."
+  type        = string
+  default     = "nullplatform/scopes/containers"
 }

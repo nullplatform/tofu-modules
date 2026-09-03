@@ -2,8 +2,59 @@ mock_provider "helm" {}
 mock_provider "kubernetes" {}
 
 variables {
-  np_api_key   = "test-api-key"
-  k8s_provider = "eks"
+  np_api_key                     = "test-api-key"
+  k8s_provider                   = "eks"
+  nullplatform_base_helm_version = "2.44.0"
+  logging_controller_image_tag   = "1.6.0"
+  control_plane_agent_image_tag  = "0.9.2"
+}
+
+############################################
+# Gateway API CRD ref
+############################################
+
+run "gateway_api_crd_ref_defaults_to_istio_1_27_ref" {
+  command = plan
+
+  assert {
+    condition     = strcontains(output.rendered_values, "gatewayApiCrdRef: \"v1.3.0\"")
+    error_message = "gatewayApiCrdRef should default to v1.3.0, matching Istio 1.27"
+  }
+}
+
+run "gateway_api_crd_ref_override" {
+  command = plan
+
+  variables {
+    gateway_api_crd_ref = "v1.6.0"
+  }
+
+  assert {
+    condition     = strcontains(output.rendered_values, "gatewayApiCrdRef: \"v1.6.0\"")
+    error_message = "gatewayApiCrdRef should reflect the overridden ref"
+  }
+}
+
+run "install_gateway_v2_crd_defaults_to_true" {
+  command = plan
+
+  assert {
+    condition     = strcontains(output.rendered_values, "installGatewayV2Crd: true")
+    error_message = "install_gateway_v2_crd should default to true so CRDs actually reconcile to gateway_api_crd_ref"
+  }
+}
+
+run "install_gateway_v2_crd_override" {
+  command = plan
+
+  variables {
+    install_gateway_v2_crd = false
+  }
+
+  assert {
+    condition     = strcontains(output.rendered_values, "installGatewayV2Crd: false")
+    error_message = "install_gateway_v2_crd should still be overridable to false"
+  }
 }
 
 ############################################
@@ -144,10 +195,10 @@ run "dynatrace_logs_disabled" {
   command = plan
 
   variables {
-    dynatrace_enabled      = true
-    dynatrace_api_key      = "dt-test-key"
+    dynatrace_enabled        = true
+    dynatrace_api_key        = "dt-test-key"
     dynatrace_environment_id = "dt-env-123"
-    dynatrace_logs_enabled = false
+    dynatrace_logs_enabled   = false
   }
 
   assert {
@@ -308,5 +359,68 @@ run "internal_azure_load_balancer_subnet" {
   assert {
     condition     = strcontains(output.rendered_values, "azure_load_balancer_subnet: \"subnet-4\"")
     error_message = "internal gateway azure subnet should be wired into the rendered internal block"
+  }
+}
+
+############################################
+# Container image repository/tag overrides
+############################################
+
+run "logs_controller_image_defaults_to_pinned_tag" {
+  command = plan
+
+  assert {
+    condition     = strcontains(output.rendered_values, "image: \"public.ecr.aws/nullplatform/k8s-logs-controller:1.6.0\"")
+    error_message = "logs controller image should default to the pinned repository:tag"
+  }
+}
+
+run "logs_controller_image_tag_overridden" {
+  command = plan
+
+  variables {
+    logging_controller_image_tag = "1.7.0"
+  }
+
+  assert {
+    condition     = strcontains(output.rendered_values, "image: \"public.ecr.aws/nullplatform/k8s-logs-controller:1.7.0\"")
+    error_message = "logs controller tag should be overridable without touching the repository"
+  }
+}
+
+run "logs_controller_image_repository_overridden" {
+  command = plan
+
+  # Redirect to a private mirror/ECR pull-through cache without needing to also
+  # know or restate the tag.
+  variables {
+    logging_controller_image_repository = "123456789012.dkr.ecr.us-east-1.amazonaws.com/k8s-logs-controller"
+  }
+
+  assert {
+    condition     = strcontains(output.rendered_values, "image: \"123456789012.dkr.ecr.us-east-1.amazonaws.com/k8s-logs-controller:1.6.0\"")
+    error_message = "logs controller repository should be overridable without touching the tag"
+  }
+}
+
+run "control_plane_agent_image_defaults_to_pinned_tag" {
+  command = plan
+
+  assert {
+    condition     = strcontains(output.rendered_values, "image: \"public.ecr.aws/nullplatform/controlplane-agent:0.9.2\"")
+    error_message = "control plane agent image should default to the pinned repository:tag"
+  }
+}
+
+run "control_plane_agent_image_tag_overridden" {
+  command = plan
+
+  variables {
+    control_plane_agent_image_tag = "0.9.3"
+  }
+
+  assert {
+    condition     = strcontains(output.rendered_values, "image: \"public.ecr.aws/nullplatform/controlplane-agent:0.9.3\"")
+    error_message = "control plane agent tag should be overridable without touching the repository"
   }
 }

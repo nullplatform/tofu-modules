@@ -29,6 +29,18 @@ resource "terraform_data" "provider_validation" {
       error_message = "oci_region is required when dns_provider_name is 'oci'."
     }
     precondition {
+      condition     = var.dns_provider_name != "google" || length(var.gcp_project_id) > 0
+      error_message = "gcp_project_id is required when dns_provider_name is 'google'."
+    }
+    precondition {
+      condition     = var.dns_provider_name != "google" || length(var.gcp_service_account_email) > 0
+      error_message = "gcp_service_account_email is required when dns_provider_name is 'google'."
+    }
+    precondition {
+      condition     = var.dns_provider_name != "google" || (var.zone_type != "" && contains(["public", "private"], lower(var.zone_type)))
+      error_message = "When dns_provider_name is 'google', zone_type must be 'public' or 'private'."
+    }
+    precondition {
       condition     = !local.azure_family_active || length(var.azure_client_id) > 0
       error_message = "azure_client_id is required when dns_provider_name is 'azure' or 'azure-private-dns'."
     }

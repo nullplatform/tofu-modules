@@ -1,8 +1,9 @@
 mock_provider "nullplatform" {}
 
 variables {
-  nrn          = "organization=myorg:account=myaccount"
-  cluster_name = "my-eks-cluster"
+  nrn                     = "organization=myorg:account=myaccount"
+  cluster_name            = "my-eks-cluster"
+  traffic_manager_version = "1.8.0"
 }
 
 run "eks_provider_type" {
@@ -184,7 +185,7 @@ run "with_traffic_manager" {
   command = plan
 
   variables {
-    traffic_manager_version = "latest"
+    traffic_manager_version = "1.8.0"
   }
 
   assert {
@@ -193,8 +194,31 @@ run "with_traffic_manager" {
   }
 
   assert {
-    condition     = strcontains(nullplatform_provider_config.eks_config.attributes, "latest")
+    condition     = strcontains(nullplatform_provider_config.eks_config.attributes, "1.8.0")
     error_message = "Attributes should contain traffic manager version"
+  }
+
+  assert {
+    condition     = !strcontains(nullplatform_provider_config.eks_config.attributes, "\"port\"")
+    error_message = "Attributes should not contain traffic manager port when not set"
+  }
+}
+
+run "with_traffic_manager_port" {
+  command = plan
+
+  variables {
+    traffic_manager_port = 10080
+  }
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.eks_config.attributes, "\"port\":10080")
+    error_message = "Attributes should contain the traffic manager port"
+  }
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.eks_config.attributes, "\"version\":\"1.8.0\"")
+    error_message = "Setting the port must not drop the traffic manager version"
   }
 }
 
@@ -317,5 +341,26 @@ run "with_all_options" {
   assert {
     condition     = nullplatform_provider_config.eks_config.dimensions["Environment"] == "staging"
     error_message = "Dimensions should contain Environment=staging"
+  }
+}
+
+################################################################################
+# Version pinning
+################################################################################
+
+# The default used to be "latest", so an apply with no code change could move the deployed
+# version. There is no default now -- the caller has to name one -- and this is the guard
+# that a moving reference cannot reach the provider config by any route.
+run "no_moving_reference_reaches_the_provider_config" {
+  command = plan
+
+  assert {
+    condition     = !strcontains(nullplatform_provider_config.eks_config.attributes, "latest")
+    error_message = "no attribute may reference a moving tag"
+  }
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.eks_config.attributes, "\"version\":\"1.8.0\"")
+    error_message = "the version the caller supplied must reach the provider config"
   }
 }

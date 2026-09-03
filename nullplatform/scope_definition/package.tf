@@ -14,16 +14,29 @@
 locals {
   package_enabled = var.package != null
 
+  # oci_image is the only artifact type where "registry"/"repository" mean
+  # anything — other types (git_repository, blob, oras_artifact) have an
+  # unrelated meta shape, so this default never applies to them. Overridable
+  # per implementing module via var.package_oci_default_registry/repository.
+  package_oci_meta_defaults = {
+    registry   = var.package_oci_default_registry
+    repository = var.package_oci_default_repository
+  }
+
   # Artifacts split by intent:
   #   create — `meta` given, lookup=false: register a new revision here
   #   lookup — `meta` given, lookup=true: resolve an existing artifact by identity
   #   pinned — explicit resource ids, taken as-is
   package_artifacts_to_create = local.package_enabled ? {
-    for a in var.package.artifacts : a.name => a if a.meta != null && !a.lookup
+    for a in var.package.artifacts : a.name => merge(a, {
+      meta = a.type == "oci_image" ? merge(local.package_oci_meta_defaults, a.meta) : a.meta
+    }) if a.meta != null && !a.lookup
   } : {}
 
   package_artifacts_to_lookup = local.package_enabled ? {
-    for a in var.package.artifacts : a.name => a if a.meta != null && a.lookup
+    for a in var.package.artifacts : a.name => merge(a, {
+      meta = a.type == "oci_image" ? merge(local.package_oci_meta_defaults, a.meta) : a.meta
+    }) if a.meta != null && a.lookup
   } : {}
 
   package_artifacts_existing = local.package_enabled ? {
@@ -44,8 +57,11 @@ resource "nullplatform_artifact" "package" {
 }
 
 # Existing artifacts resolved by identity — no ids in your configuration.
-# Identity meta (e.g. registry+repository) selects the artifact; include
-# per-revision fields (digest/reference) to pin a revision, else latest wins.
+# Identity meta (e.g. registry+repository for oci_image, url for
+# git_repository) selects the artifact; include the type's own per-revision
+# field to pin a revision — digest ("sha256:<64-hex>") for oci_image,
+# reference (e.g. a tag) for git_repository; the API rejects the other
+# type's field name — else latest wins.
 data "nullplatform_artifact" "package" {
   for_each = local.package_artifacts_to_lookup
 

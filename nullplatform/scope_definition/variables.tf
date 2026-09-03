@@ -189,21 +189,32 @@ variable "package" {
         { registry = "ghcr.io", repository = "acme/img", digest = "sha256:…" });
       • look up one registered elsewhere BY IDENTITY (no ids needed) — set
         `lookup = true` + `meta` with the identity fields (e.g. registry +
-        repository; add digest/reference to pin a specific revision, otherwise
-        the latest revision is used);
+        repository for oci_image, or url for git_repository); add the
+        type's own per-revision field to pin a specific revision (digest,
+        formatted "sha256:<64-hex>", for oci_image; reference, e.g. a tag,
+        for git_repository — the API rejects the other type's field name),
+        otherwise the latest revision is used;
       • pin explicit ids — set `resource_id` + `resource_revision_id`.
+
+    For an "oci_image" artifact (the default type), `name` defaults to
+    "worker-image" and meta.registry/meta.repository default to
+    var.package_oci_default_registry/var.package_oci_default_repository —
+    the platform's own container-scope worker image — when omitted from
+    `meta`. Only meta.digest needs setting on every release; every other
+    artifact type gets no meta defaults (their meta shape is unrelated to a
+    container registry).
 
     Null (the default) keeps the classic module behavior — no package.
   EOT
   type = object({
-    slug       = optional(string)            # default: the service specification slug
-    name       = optional(string)            # default: var.service_spec_name
-    version    = string                      # semver of the revision this configuration publishes
-    default    = optional(bool, true)        # promote each published revision to the package default
-    tags       = optional(map(string), {})   # release tags: name => version (requires an API with the package release-tag routes)
-    visible_to = optional(list(string))      # default: [var.nrn]
+    slug       = optional(string)          # default: the service specification slug
+    name       = optional(string)          # default: var.service_spec_name
+    version    = string                    # semver of the revision this configuration publishes
+    default    = optional(bool, true)      # promote each published revision to the package default
+    tags       = optional(map(string), {}) # release tags: name => version (requires an API with the package release-tag routes)
+    visible_to = optional(list(string))    # default: [var.nrn]
     artifacts = optional(list(object({
-      name                 = string
+      name                 = optional(string, "worker-image")
       type                 = optional(string, "oci_image") # oci_image | oras_artifact | git_repository | blob
       meta                 = optional(any)                 # register (lookup=false) or find (lookup=true)
       lookup               = optional(bool, false)         # true: resolve an EXISTING artifact by meta identity
@@ -227,4 +238,16 @@ variable "package" {
     ])
     error_message = "`lookup = true` requires `meta` with the identity fields of the existing artifact."
   }
+}
+
+variable "package_oci_default_registry" {
+  description = "Default meta.registry for an oci_image package artifact whose own meta omits it. See var.package's artifacts docs."
+  type        = string
+  default     = "public.ecr.aws"
+}
+
+variable "package_oci_default_repository" {
+  description = "Default meta.repository for an oci_image package artifact whose own meta omits it — the platform's own container-scope worker image. See var.package's artifacts docs."
+  type        = string
+  default     = "nullplatform/scopes/containers"
 }

@@ -35,3 +35,8 @@ initScripts:
   %{ endfor }
   %{ endif }
 
+worker:
+  %{ for line in split("\n", yamlencode(worker)) }
+  ${line}
+  %{ endfor }
+

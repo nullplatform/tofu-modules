@@ -1,4 +1,4 @@
-name: tflint-unused-declarations
+name: terraform-lint
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   check:
-    name: Check for unused declarations
+    name: Lint changed Terraform
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
@@ -52,3 +52,15 @@ jobs:
             echo "::error::tflint found unused declarations in one or more changed modules (see groups above)."
             exit 1
           fi
+
+      # CI backstop for the local pre-commit hook.
+      - name: Check version pinning
+        if: steps.changed.outputs.dirs != ''
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          files="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- '*.tf' || true)"
+          [ -z "$files" ] && exit 0
+          # shellcheck disable=SC2086
+          ./scripts/check-version-pinning.sh $files

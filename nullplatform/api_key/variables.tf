@@ -3,17 +3,17 @@
 ################################################################################
 
 variable "type" {
-  description = "Type of API key to create. Determines the pre-configured grants and tags. Use 'custom' to define your own roles and tags."
+  description = "Type of API key to create. Determines the pre-configured grants and tags. 'base' carries the agent roles minus secrets-reader, for the nullplatform base module. Use 'custom' to define your own roles and tags."
   type        = string
 
   validation {
-    condition     = contains(["agent", "scope_notification", "service_notification", "custom"], var.type)
-    error_message = "type must be one of: agent, scope_notification, service_notification, custom"
+    condition     = contains(["agent", "base", "scope_notification", "service_notification", "custom"], var.type)
+    error_message = "type must be one of: agent, base, scope_notification, service_notification, custom"
   }
 }
 
 variable "nrn" {
-  description = "Nullplatform Resource Name (e.g., organization=123:account=456:namespace=789). Required for predefined types (agent, scope_notification, service_notification). Optional for custom type when using custom_grants."
+  description = "Nullplatform Resource Name (e.g., organization=123:account=456:namespace=789). Required for predefined types (agent, base, scope_notification, service_notification). Optional for custom type when using custom_grants."
   type        = string
   default     = null
 }
@@ -56,4 +56,14 @@ variable "custom_tags" {
     value = string
   }))
   default = []
+}
+
+################################################################################
+# Visibility
+################################################################################
+
+variable "internal" {
+  description = "Marks the API key as internal to nullplatform, keeping it out of the API key listing (`GET /api_key` and the UI) while it stays readable by ID — for the plumbing credentials this module creates (agents, notification channels) rather than keys a person manages. Create-only in the API, so changing it replaces the key and rotates its secret. Leave unset for the platform default (not internal)."
+  type        = bool
+  default     = null
 }

@@ -13,14 +13,9 @@ run "default_config" {
     condition     = helm_release.istiod.namespace == "istio-system"
     error_message = "Istiod should deploy to istio-system namespace"
   }
-
-  assert {
-    condition     = helm_release.istio_ingressgateway.namespace == "istio-system"
-    error_message = "Ingress gateway should deploy to istio-system namespace"
-  }
 }
 
-# Validates all three components have correct chart names
+# Validates both components have correct chart names
 run "correct_chart_names" {
   command = plan
 
@@ -33,11 +28,6 @@ run "correct_chart_names" {
     condition     = helm_release.istiod.chart == "istiod"
     error_message = "Istiod chart should be 'istiod'"
   }
-
-  assert {
-    condition     = helm_release.istio_ingressgateway.chart == "gateway"
-    error_message = "Ingress gateway chart should be 'gateway'"
-  }
 }
 
 # Validates consistent versions across all components
@@ -45,9 +35,8 @@ run "consistent_versions" {
   command = plan
 
   variables {
-    istio_base_version           = "1.27.1"
-    istiod_version               = "1.27.1"
-    istio_ingressgateway_version = "1.27.1"
+    istio_base_version = "1.27.1"
+    istiod_version     = "1.27.1"
   }
 
   assert {
@@ -58,11 +47,6 @@ run "consistent_versions" {
   assert {
     condition     = helm_release.istiod.version == "1.27.1"
     error_message = "Istiod version should match"
-  }
-
-  assert {
-    condition     = helm_release.istio_ingressgateway.version == "1.27.1"
-    error_message = "Ingress gateway version should match"
   }
 }
 
@@ -83,11 +67,6 @@ run "custom_namespace" {
     condition     = helm_release.istiod.namespace == "custom-istio"
     error_message = "Istiod should use custom namespace"
   }
-
-  assert {
-    condition     = helm_release.istio_ingressgateway.namespace == "custom-istio"
-    error_message = "Ingress gateway should use custom namespace"
-  }
 }
 
 # Validates all releases use atomic deployments
@@ -102,11 +81,6 @@ run "atomic_deployments" {
   assert {
     condition     = helm_release.istiod.atomic == true
     error_message = "Istiod should use atomic deployment"
-  }
-
-  assert {
-    condition     = helm_release.istio_ingressgateway.atomic == true
-    error_message = "Ingress gateway should use atomic deployment"
   }
 }
 

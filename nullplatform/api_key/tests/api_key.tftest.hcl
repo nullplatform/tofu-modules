@@ -18,6 +18,19 @@ run "agent_api_key" {
   }
 }
 
+run "base_api_key" {
+  command = plan
+
+  variables {
+    type = "base"
+  }
+
+  assert {
+    condition     = nullplatform_api_key.this.name == "BASE"
+    error_message = "Base API key name should be 'BASE'"
+  }
+}
+
 run "scope_notification_api_key" {
   command = plan
 
@@ -100,8 +113,8 @@ run "tags_merge_custom_tags" {
   command = plan
 
   variables {
-    type        = "custom"
-    custom_name = "MY-KEY"
+    type              = "custom"
+    custom_name       = "MY-KEY"
     custom_role_slugs = ["developer"]
     custom_tags = [
       { key = "team", value = "platform" },
@@ -147,6 +160,35 @@ run "agent_grants_include_controlplane_agent" {
   }
 }
 
+run "base_grants_exclude_secrets_reader" {
+  command = plan
+
+  variables {
+    type = "base"
+  }
+
+  # The base chart does not read secrets, so it must not carry secrets-reader.
+  # Everything else matches the agent key so a single install can swap one for
+  # the other without losing a capability.
+  assert {
+    condition     = length(nullplatform_api_key.this.grants) == 4
+    error_message = "Base API key should have 4 grants (controlplane:agent, developer, ops, secops)"
+  }
+
+  assert {
+    condition     = length([for g in nullplatform_api_key.this.grants : g if g.role_slug == "secrets-reader"]) == 0
+    error_message = "Base API key must not grant secrets-reader"
+  }
+
+  assert {
+    condition = length(setsubtract(
+      toset([for g in nullplatform_api_key.this.grants : g.role_slug]),
+      toset(["controlplane:agent", "developer", "ops", "secops"]),
+    )) == 0
+    error_message = "Base API key grants should be exactly the agent roles minus secrets-reader"
+  }
+}
+
 run "custom_grants_explicit_nrn" {
   command = plan
 
@@ -168,5 +210,32 @@ run "custom_grants_explicit_nrn" {
   assert {
     condition     = length([for g in nullplatform_api_key.this.grants : g if g.nrn == "organization=myorg:account=myaccount" && g.role_slug == "developer"]) == 1
     error_message = "Should have grant for organization=myorg:account=myaccount with role developer"
+  }
+}
+
+run "internal_reaches_the_api_key" {
+  command = plan
+
+  variables {
+    internal = true
+  }
+
+  assert {
+    condition     = nullplatform_api_key.this.internal == true
+    error_message = "internal = true should reach the nullplatform_api_key resource"
+  }
+}
+
+# An explicit false still travels; the module never decides the mark on the caller's behalf.
+run "internal_off_is_explicit" {
+  command = plan
+
+  variables {
+    internal = false
+  }
+
+  assert {
+    condition     = nullplatform_api_key.this.internal == false
+    error_message = "internal = false should reach the nullplatform_api_key resource"
   }
 }

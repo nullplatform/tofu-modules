@@ -12,7 +12,7 @@ resource "nullplatform_provider_config" "ecr" {
   nrn      = var.nrn
   type     = "ecr"
   attributes = jsonencode({
-    ci    = {
+    ci = {
       region     = data.aws_region.current.region
       access_key = var.build_workflow_access_key_id
       secret_key = var.build_workflow_access_key_secret

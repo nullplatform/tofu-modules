@@ -5,6 +5,7 @@ locals {
       # ---- global ----
       k8s_provider        = var.k8s_provider
       installGatewayV2Crd = var.install_gateway_v2_crd ? "true" : "false"
+      gatewayApiCrdRef    = var.gateway_api_crd_ref
       awsRegion           = var.aws_region
 
       # ---- tls ----
@@ -58,12 +59,16 @@ locals {
       # You left secretName empty in the template; if you want to make it configurable, add var.nullplatform_secret_name
 
       # ---- controlPlane ----
-      controlPlane_enabled = var.control_plane_enabled ? "true" : "false"
+      controlPlane_enabled                 = var.control_plane_enabled ? "true" : "false"
+      control_plane_agent_image_repository = var.control_plane_agent_image_repository
+      control_plane_agent_image_tag        = var.control_plane_agent_image_tag
 
       # ---- logging ----
-      logging_enabled                  = var.logging_enabled ? "true" : "false"
-      logging_application_logs_enabled = var.logging_application_logs_enabled ? "true" : "false"
-      logging_mount_docker_containers  = var.logging_mount_docker_containers ? "true" : "false"
+      logging_enabled                     = var.logging_enabled ? "true" : "false"
+      logging_application_logs_enabled    = var.logging_application_logs_enabled ? "true" : "false"
+      logging_mount_docker_containers     = var.logging_mount_docker_containers ? "true" : "false"
+      logging_controller_image_repository = var.logging_controller_image_repository
+      logging_controller_image_tag        = var.logging_controller_image_tag
 
       prometheus_enabled       = var.prometheus_enabled ? "true" : "false"
       exporter_prometheus_port = var.exporter_prometheus_port

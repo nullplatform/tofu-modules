@@ -33,3 +33,16 @@ variable "workload_identity_bindings" {
   }))
   default = []
 }
+
+variable "generate_key" {
+  type        = bool
+  description = "Generate a static JSON key for the Artifact Registry service account, exposed via the service_account_key_base64 output. Only needed for callers outside the cluster (e.g. an external system authenticating as a Docker registry client) that can't use Workload Identity. Leave false when every consumer runs in-cluster. Note that the key material is stored in plaintext in Terraform/OpenTofu state, and the service account holds roles/artifactregistry.writer at PROJECT scope."
+  default     = false
+  nullable    = false
+}
+
+variable "key_rotation_token" {
+  type        = string
+  description = "Arbitrary value wired to the service account key's keepers. Changing it forces a new key to be issued, which is the supported way to rotate: GCP user-managed keys do not expire on their own. Leave null to never rotate. Do not derive this from timestamp() or uuid() — the key would be reissued on every apply"
+  default     = null
+}

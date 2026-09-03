@@ -1,7 +1,12 @@
 variable "nullplatform_base_helm_version" {
-  description = "Helm chart version for the nullplatform base."
+  # example: 2.44.0
+  description = "No default: every install pins this deliberately — see VERSIONS.md. Helm chart version for the nullplatform base."
   type        = string
-  default     = "2.40.0"
+
+  validation {
+    condition     = var.nullplatform_base_helm_version != "" && !contains(["latest", "main", "master"], lower(var.nullplatform_base_helm_version))
+    error_message = "nullplatform_base_helm_version must be a non-empty fixed version, not empty and not a moving reference."
+  }
 }
 
 variable "namespace" {
@@ -33,8 +38,14 @@ variable "aws_region" {
 
 variable "install_gateway_v2_crd" {
   type        = bool
-  description = "Install Gateway API v2 CRDs."
-  default     = false
+  description = "Install/reconcile the Gateway API CRDs (see gateway_api_crd_ref) via the base chart's pre-install/pre-upgrade Job. Defaults to true so CRDs actually track gateway_api_crd_ref instead of staying frozen at whatever was present on first install — matches the base chart's own default. Safe on chart versions before global.gatewayApiCrdRef too: those only install when the CRD is missing, so pre-existing CRDs from another source are left untouched."
+  default     = true
+}
+
+variable "gateway_api_crd_ref" {
+  type        = string
+  description = "Git ref (tag or commit) of kubernetes-sigs/gateway-api to install when install_gateway_v2_crd is true. Ignored on chart versions older than the one that introduced global.gatewayApiCrdRef. Default (v1.3.0) matches what Istio 1.27 documents installing; re-check istio.io's version-pinned docs when bumping Istio."
+  default     = "v1.3.0"
 }
 
 ############################################
@@ -124,6 +135,23 @@ variable "control_plane_enabled" {
   default     = false
 }
 
+variable "control_plane_agent_image_repository" {
+  type        = string
+  description = "Container image repository for the control plane agent."
+  default     = "public.ecr.aws/nullplatform/controlplane-agent"
+}
+
+variable "control_plane_agent_image_tag" {
+  # example: 0.9.2
+  type        = string
+  description = "No default: every install pins this deliberately — see VERSIONS.md. Container image tag for the control plane agent."
+
+  validation {
+    condition     = var.control_plane_agent_image_tag != "" && !contains(["latest", "main", "master"], lower(var.control_plane_agent_image_tag))
+    error_message = "control_plane_agent_image_tag must be a non-empty fixed version, not empty and not a moving reference."
+  }
+}
+
 ############################################
 # Logging (global flag)
 ############################################
@@ -144,6 +172,23 @@ variable "logging_mount_docker_containers" {
   type        = bool
   description = "Mount Docker container log paths. Enable when using Docker container runtime (e.g. Minikube)."
   default     = false
+}
+
+variable "logging_controller_image_repository" {
+  type        = string
+  description = "Container image repository for the logs controller DaemonSet."
+  default     = "public.ecr.aws/nullplatform/k8s-logs-controller"
+}
+
+variable "logging_controller_image_tag" {
+  # example: 1.6.0
+  type        = string
+  description = "No default: every install pins this deliberately — see VERSIONS.md. Container image tag for the logs controller DaemonSet."
+
+  validation {
+    condition     = var.logging_controller_image_tag != "" && !contains(["latest", "main", "master"], lower(var.logging_controller_image_tag))
+    error_message = "logging_controller_image_tag must be a non-empty fixed version, not empty and not a moving reference."
+  }
 }
 
 ############################################

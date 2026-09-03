@@ -35,28 +35,54 @@ variable "service_specification_slug" {
 
 variable "repository_service_spec_repo" {
   type        = string
-  description = "GitHub repository name containing the service specs (used to build the agent cmdline path)"
+  default     = ""
+  description = "GitHub repository name containing the service specs (used to build the agent cmdline path). Required when worker_orchestrator = false; unused (the worker's baked entrypoint is used instead) when true."
 }
 
 variable "base_clone_path" {
   type        = string
-  default     = "/root/.np"
-  description = "Base path where the service repository is cloned inside the agent pod"
+  default     = "/home/agent/.np"
+  description = "Base path where the service repository is cloned inside the agent pod. Unused when worker_orchestrator = true."
 }
 
 variable "service_path" {
   type        = string
-  description = "Path to the service directory within the repository (e.g., databases/postgres/k8s)"
+  default     = ""
+  description = "Path to the service directory within the repository (e.g., databases/postgres/k8s). Only consulted when worker_orchestrator = false — empty omits the path segment."
 }
 
 variable "agent_arguments" {
   type        = list(string)
   default     = []
-  description = "Arguments to pass to the agent entrypoint command"
+  description = "Arguments to pass to the agent entrypoint command. Unused when worker_orchestrator = true."
 }
 
 variable "description" {
   description = "Description shown for the notification channel."
+  type        = string
+  default     = ""
+}
+
+variable "worker_orchestrator" {
+  description = <<-EOT
+    Emit a worker-orchestrator (package-exec) channel instead of the legacy
+    git-clone exec channel. When true, the channel routes package-exec commands
+    to an agent that spawns the package's worker image and runs its baked
+    entrypoint — matching what `np package publish` registers. Requires
+    package_slug; set tags_selectors to select the agent (e.g. {package = slug}).
+  EOT
+  type        = bool
+  default     = false
+}
+
+variable "package_slug" {
+  description = "Package/service slug — the package-exec NP_PLUGIN and default entrypoint path. Required when worker_orchestrator = true."
+  type        = string
+  default     = ""
+}
+
+variable "entrypoint" {
+  description = "Override the worker's baked entrypoint path. Defaults to /app/packages/<package_slug>/entrypoint."
   type        = string
   default     = ""
 }

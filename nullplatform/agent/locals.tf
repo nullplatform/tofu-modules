@@ -4,17 +4,10 @@
 
 locals {
 
-  scope_list = compact([trimspace(coalesce(var.agent_repos_scope, ""))])
-  # Parse comma-separated extra repositories and clean whitespace
-  repos_extra = compact([for s in var.agent_repos_extra : trimspace(s)])
+  tags = join(",", [for k in sort(keys(var.tags_selectors)) : "${k}:${var.tags_selectors[k]}"])
 
-  # Merge scope and extra repositories, removing duplicates
-  final_repo_list = distinct(concat(local.scope_list, local.repos_extra))
-
-  agent_repos = join(",", local.final_repo_list)
-  tags        = join(",", [for k in sort(keys(var.tags_selectors)) : "${k}:${var.tags_selectors[k]}"])
-
-  api_key = var.api_key
+  api_key    = var.api_key
+  agent_repo = join(",", var.agent_repo)
 
   default_args = [
     "--tags=$(TAGS)",
@@ -23,7 +16,7 @@ locals {
     "--command-executor-env=NP_API_KEY=$(NP_API_KEY)",
     "--command-executor-debug",
     "--webserver-enabled",
-    "--command-executor-git-command-repos $(AGENT_REPOS)"
+    "--command-executor-git-command-repos=$(AGENT_REPO)"
   ]
 
   cloud_args = {
@@ -36,19 +29,10 @@ locals {
   all_args = concat(local.default_args, lookup(local.cloud_args, var.cloud_provider, []))
 
   default_config = {
-    NP_API_KEY              = local.api_key
-    TAGS                    = local.tags
-    AGENT_REPOS             = local.agent_repos
-    CLUSTER_NAME            = var.cluster_name
-    NAMESPACE               = var.namespace
-    IMAGE_TAG               = var.image_tag
-    DOMAIN                  = var.domain
-    DNS_TYPE                = var.dns_type
-    USE_ACCOUNT_SLUG        = var.use_account_slug
-    IMAGE_PULL_SECRETS      = var.image_pull_secrets
-    SERVICE_TEMPLATE        = var.service_template
-    INITIAL_INGRESS_PATH    = var.initial_ingress_path
-    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
+    NP_API_KEY = local.api_key
+    TAGS       = local.tags
+    IMAGE_TAG  = var.image_tag
+    AGENT_REPO = local.agent_repo
   }
 
   cloud_config = {
@@ -56,35 +40,106 @@ locals {
       AWS_IAM_ROLE_ARN = var.aws_iam_role_arn
     }
 
-    gcp = {
-      PRIVATE_GATEWAY_NAME = var.private_gateway_name
-      PRIVATE_DOMAIN       = var.private_domain
-    }
+    gcp   = {}
+    azure = {}
+    oci   = {}
+  }
 
+  # Drop nulls: a null reaching templatefile fails with an error that names no
+  # variable, before any precondition gets to report the actual missing input.
+  all_config = {
+    for k, v in merge(
+      local.default_config,
+      lookup(local.cloud_config, var.cloud_provider, {}),
+      var.extra_envs,
+    ) : k => v if v != null
+  }
+
+  worker_default_env = {
+    DNS_TYPE                = var.dns_type
+    DOMAIN                  = var.domain
+    USE_ACCOUNT_SLUG        = var.use_account_slug
+    K8S_NAMESPACE           = var.namespace
+    SERVICE_TEMPLATE        = var.service_template
+    INITIAL_INGRESS_PATH    = var.initial_ingress_path
+    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
+    TRAFFIC_CONTAINER_IMAGE = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
+    IMAGE_PULL_SECRETS      = var.image_pull_secrets
+    PRIVATE_GATEWAY_NAME    = var.private_gateway_name
+    PUBLIC_GATEWAY_NAME     = var.public_gateway_name
+  }
+
+  worker_cloud_config = {
     azure = {
       PRIVATE_HOSTED_ZONE_RG = var.private_hosted_zone_rg
-      PRIVATE_GATEWAY_NAME   = var.private_gateway_name
-      PUBLIC_GATEWAY_NAME    = var.public_gateway_name
       RESOURCE_GROUP         = var.azure_resource_group
       AZURE_SUBSCRIPTION_ID  = var.azure_subscription_id
       AZURE_CLIENT_SECRET    = var.azure_client_secret
       AZURE_CLIENT_ID        = var.azure_client_id
       AZURE_TENANT_ID        = var.azure_tenant_id
     }
-
-    oci = {
-      PRIVATE_GATEWAY_NAME = var.private_gateway_name
-      PRIVATE_DOMAIN       = var.private_domain
-    }
   }
 
-  all_config = merge(
-    local.default_config,
-    lookup(local.cloud_config, var.cloud_provider, {}),
+  worker_all_config = merge(
+    local.worker_default_env,
+    lookup(local.worker_cloud_config, var.cloud_provider, {}),
     var.extra_envs,
   )
 
-  # Template único y simple
+  # Generic identity + resources — one patch per package in
+  # var.worker_orchestrated_packages, so any worker-orchestrated package's pod
+  # (not just "containers") gets the agent's own ServiceAccount (to assume its
+  # role's trusted AWS roles) and enough memory to run its own tooling (e.g.
+  # tofu init/apply), instead of the chart's own thin defaults.
+  worker_common_patches = [
+    for pkg in var.worker_orchestrated_packages : {
+      target = { package = pkg }
+      merge = {
+        spec = merge(
+          var.service_account_name != "" ? { serviceAccountName = var.service_account_name } : {},
+          {
+            containers = [
+              { name = "worker", resources = { limits = { memory = var.worker_memory_limit } } }
+            ]
+          }
+        )
+      }
+    }
+  ]
+
+  # k8s-deployment template env vars — specific to the "containers" scope's
+  # worker only, regardless of what's in var.worker_orchestrated_packages.
+  worker_container_patch = {
+    target = { package = "containers" }
+    merge = {
+      spec = {
+        containers = [
+          {
+            name = "worker"
+            env  = [for k, v in local.worker_all_config : { name = k, value = v }]
+          }
+        ]
+      }
+    }
+  }
+
+  worker_defaults = {
+    backend           = "kubernetes"
+    allowedRegistries = ["public.ecr.aws/nullplatform/*"]
+    patches           = concat(local.worker_common_patches, [local.worker_container_patch])
+  }
+
+  worker_final = merge(
+    local.worker_defaults,
+    try({ for k, v in var.worker : k => v if !contains(["patches", "allowedRegistries"], k) }, {}),
+    {
+      patches           = concat(local.worker_defaults.patches, try(var.worker.patches, []))
+      allowedRegistries = distinct(concat(local.worker_defaults.allowedRegistries, try(var.worker.allowedRegistries, [])))
+    }
+  )
+
+  # Single combined values document — worker is just another top-level key
+  # of the same agent chart values, not a second Helm values layer.
   nullplatform_agent_values = templatefile("${path.module}/templates/nullplatform_agent_values.tmpl.yaml", {
     args                 = local.all_args
     config_values        = local.all_config
@@ -93,9 +148,6 @@ locals {
     aws_iam_role_arn     = var.cloud_provider == "aws" ? var.aws_iam_role_arn : ""
     init_scripts         = var.init_scripts
     service_account_name = var.service_account_name
+    worker               = local.worker_final
   })
-
-  # Worker-orchestration config as a second Helm values layer, so the nested
-  # shape (allowedRegistries/patches/rules/pins) passes through verbatim.
-  worker_values = var.worker != null ? yamlencode({ worker = var.worker }) : null
 }
