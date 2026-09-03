@@ -26,7 +26,7 @@ Verified 2026-08-27.
 | `controlplane-agent` | `0.9.2` | `control_plane_agent_image_tag` | `nullplatform/base` |
 | `k8s-traffic-manager` | `1.8.0` | `agent_traffic_manager_tag` | `nullplatform/agent` |
 | traffic manager (provider config) | `1.8.0` | `traffic_manager_version` | `container_orchestration/eks` |
-| `scopes` repository | `v1.15.1` | `agent_repos_scope` | `nullplatform/agent` |
+| `scopes` repository | `v1.15.1` | `agent_repo` (as `"https://github.com/nullplatform/scopes.git#v1.15.1"`) | `nullplatform/agent` |
 
 **Read your cluster before copying these.** The rule is to pin what you are already running,
 so the change stays functionally inert. Four of these were previously unpinnable and resolved
