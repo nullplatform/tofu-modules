@@ -17,7 +17,7 @@ spec updates / republish correctly.
 
 ```hcl
 module "packaged_service" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/packaged_service?ref=v8.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/packaged_service?ref=v7.2.0"
 
   nrn = "organization=…:account=…:namespace=…"
 
