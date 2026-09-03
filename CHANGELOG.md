@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.2.1](https://github.com/nullplatform/tofu-modules/compare/v7.2.0...v7.2.1) (2026-09-03)
+
+
+### Bug Fixes
+
+* **docs:** correct VERSIONS.md's stale agent_repos_scope reference ([#559](https://github.com/nullplatform/tofu-modules/issues/559)) ([1d9da83](https://github.com/nullplatform/tofu-modules/commit/1d9da833b12806d806b0b7324adcbe1c86c28271))
+
 ## [7.2.0](https://github.com/nullplatform/tofu-modules/compare/v8.0.0...v7.2.0) (2026-09-03)
 
 
