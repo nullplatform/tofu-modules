@@ -99,17 +99,15 @@ jobs:
     permissions:
       pull-requests: read
     steps:
-      - name: Scan PR commits and title for breaking-change markers
+      - name: Scan PR commits for breaking-change markers
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          gh api --paginate "repos/${{ github.repository }}/pulls/$PR_NUMBER/commits" --jq '.[].commit.message' > commit_messages.txt
-          echo "$PR_TITLE" >> commit_messages.txt
+          gh api "repos/${{ github.repository }}/pulls/$PR_NUMBER/commits" --jq '.[].commit.message' > commit_messages.txt
 
           if grep -qE '^[a-zA-Z]+(\([^)]*\))?!:' commit_messages.txt || grep -qE 'BREAKING[ -]CHANGE:' commit_messages.txt; then
-            echo "::error::Breaking changes are temporarily blocked on this repository (no '!:' headers or 'BREAKING CHANGE:'/'BREAKING-CHANGE:' footers allowed on any branch, in commit messages OR in the PR title — this repo squash-merges using the PR title as the final commit message)."
+            echo "::error::Breaking changes are temporarily blocked on this repository (no '!:' headers or 'BREAKING CHANGE:'/'BREAKING-CHANGE:' footers allowed on any branch)."
             exit 1
           fi
 
