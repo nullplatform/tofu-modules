@@ -1,5 +1,16 @@
 # Changelog
 
+## [8.0.0](https://github.com/nullplatform/tofu-modules/compare/v7.1.0...v8.0.0) (2026-09-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* DNS_TYPE, DOMAIN, USE_ACCOUNT_SLUG, SERVICE_TEMPLATE, INITIAL_INGRESS_PATH, and BLUE_GREEN_INGRESS_PATH are no longer set on the agent pod's own env — only on the worker's. Callers relying on those keys being present in the agent pod's configuration.values must move that dependency to the worker.
+
+### Miscellaneous Chores
+
+* merge 6.x into main + worker-orchestrator support for services ([#554](https://github.com/nullplatform/tofu-modules/issues/554)) ([34238fd](https://github.com/nullplatform/tofu-modules/commit/34238fd257ee791fdc8e9f79842ed8d921505a1c))
+
 ## [6.22.1](https://github.com/nullplatform/tofu-modules/compare/v6.22.0...v6.22.1) (2026-09-01)
 
 
