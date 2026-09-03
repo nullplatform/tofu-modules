@@ -2,7 +2,7 @@ name: terraform-lint
 
 on:
   pull_request:
-    branches: [ main, 6.x ]
+    branches: [ main ]
     types: [opened, synchronize, reopened]
 
 jobs:
