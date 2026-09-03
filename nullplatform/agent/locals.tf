@@ -45,11 +45,20 @@ locals {
     oci   = {}
   }
 
-  all_config = merge(
-    local.default_config,
-    lookup(local.cloud_config, var.cloud_provider, {}),
-    var.extra_envs,
-  )
+  # Referenced so that deleting either variable fails `tofu validate` in CI.
+  # `tofu test` alone would not catch it: it tolerates a `var.x` that no longer exists.
+  # tflint-ignore: terraform_unused_declarations
+  deprecated_inputs_accepted = [var.nrn, var.private_domain]
+
+  # Drop nulls: a null reaching templatefile fails with an error that names no
+  # variable, before any precondition gets to report the actual missing input.
+  all_config = {
+    for k, v in merge(
+      local.default_config,
+      lookup(local.cloud_config, var.cloud_provider, {}),
+      var.extra_envs,
+    ) : k => v if v != null
+  }
 
   worker_default_env = {
     DNS_TYPE                = var.dns_type

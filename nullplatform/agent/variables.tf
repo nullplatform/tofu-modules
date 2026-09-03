@@ -136,6 +136,12 @@ variable "namespace" {
   default     = "nullplatform-tools"
 }
 
+variable "create_namespace" {
+  description = "Create the namespace if it does not exist. Leave true unless another module already owns it: nullplatform/base declares the same namespace with Helm ownership metadata, so with no ordering edge between the two whichever applies second fails."
+  type        = bool
+  default     = true
+}
+
 variable "agent_traffic_manager_repository" {
   description = "Container image repository for the traffic manager. Defaults to the official nullplatform image; override to pull from a mirror. Matches the pattern nullplatform/base uses for its own images."
   type        = string
@@ -310,4 +316,27 @@ variable "extra_envs" {
   description = "Additional environment variables to pass to the agent"
   type        = map(string)
   default     = {}
+}
+
+################################################################################
+# Deprecated inputs
+#
+# Restored: OpenTofu rejects an argument for a variable that does not exist, so
+# a caller still passing these on an older module version fails at init the
+# moment it bumps up. Intentionally unused. Drop them on the next major, with a
+# BREAKING CHANGE footer.
+################################################################################
+
+# tflint-ignore: terraform_unused_declarations
+variable "nrn" {
+  description = "DEPRECATED, accepted for compatibility and ignored. Nullplatform Resource Name; the agent resolves its own scope from the API key, so this module never consumed the value"
+  type        = string
+  default     = ""
+}
+
+# tflint-ignore: terraform_unused_declarations
+variable "private_domain" {
+  description = "DEPRECATED, accepted for compatibility and ignored. Previously rendered as the PRIVATE_DOMAIN env var for gcp and oci, which nothing in nullplatform/scopes reads"
+  type        = string
+  default     = ""
 }

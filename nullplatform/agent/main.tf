@@ -59,6 +59,14 @@ resource "helm_release" "agent" {
   namespace  = var.namespace
   version    = var.nullplatform_agent_helm_version
 
+  # The provider defaults these three to false. Without create_namespace a fresh
+  # install dies with `namespaces "<namespace>" not found`; without
+  # atomic/cleanup_on_fail a failed upgrade sticks in `failed` with orphaned
+  # resources instead of rolling back.
+  create_namespace = var.create_namespace
+  atomic           = true
+  cleanup_on_fail  = true
+
   wait_for_jobs     = true
   timeout           = 600
   reset_values      = true

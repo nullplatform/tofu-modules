@@ -289,3 +289,39 @@ run "agent_repo_defaults_to_empty" {
     error_message = "agent_repo must default to an empty list, joining to an empty string"
   }
 }
+
+# atomic/cleanup_on_fail default to false in the provider — without them a
+# failed upgrade sticks in "failed" with orphaned resources instead of rolling
+# back (observed in production: an "Error upgrading chart" left the release
+# stuck until a manual retry).
+run "helm_release_rolls_back_failed_upgrades" {
+  command = plan
+
+  assert {
+    condition     = helm_release.agent.atomic == true
+    error_message = "atomic must be true so a failed upgrade rolls back instead of sticking in failed"
+  }
+
+  assert {
+    condition     = helm_release.agent.cleanup_on_fail == true
+    error_message = "cleanup_on_fail must be true so a failed upgrade cleans up orphaned resources"
+  }
+
+  assert {
+    condition     = helm_release.agent.create_namespace == true
+    error_message = "create_namespace must default to true (the pre-existing behavior) so a fresh install doesn't die on a missing namespace"
+  }
+}
+
+run "create_namespace_is_overridable" {
+  command = plan
+
+  variables {
+    create_namespace = false
+  }
+
+  assert {
+    condition     = helm_release.agent.create_namespace == false
+    error_message = "create_namespace must be overridable to false for stacks where another module already owns the namespace"
+  }
+}
