@@ -2,27 +2,27 @@
 
 ## Description
 
-Deploys an Azure Kubernetes Service (AKS) cluster with a system node pool and an autoscaling user node pool using the official Azure/aks/azurerm Terraform module
+Deploys an Azure Kubernetes Service (AKS) cluster with configurable system and user node pools, OIDC/workload identity, Azure RBAC integration, and optional ACR attachment using the Azure/aks/azurerm upstream module
 
 ## Architecture
 
-The module wraps the Azure/aks/azurerm community module (version 11.0.0) and reads the current client config via azurerm_client_config to inject the tenant ID for AAD RBAC. It wires the provided vnet_subnet_id into both the system pool (agents_size, agents_count, agents_availability_zones) and a separate user node_pool entry with auto-scaling enabled, assigning Network Contributor role to all required subnets via network_contributor_role_assigned_subnet_ids. Optional ACR integration is handled through attached_acr_id_map, which conditionally maps acr_id based on the attach_acr flag, and OIDC/workload identity is always enabled on the control plane.
+The module wraps the Azure/aks/azurerm community module (version 11.0.0) and wires all inputs into it as a single module block. A data.azurerm_client_config resource is used to resolve the current tenant ID for AAD/RBAC configuration. The module creates a system node pool via agents_* parameters and a separate autoscaling user node pool via the node_pools map, both attached to the provided vnet_subnet_id. Network Contributor role assignments are applied to the node subnet and any additional subnets, and an optional AcrPull role binding is conditionally created based on attach_acr and acr_id inputs.
 
 ## Features
 
-- Deploys AKS cluster with OIDC issuer and workload identity enabled for pod-level Azure authentication
-- Configures a fixed-size system node pool and a separate autoscaling user node pool with configurable min/max counts
-- Grants Network Contributor role on the node subnet and any additional subnets required for internal load balancers
-- Attaches an Azure Container Registry with AcrPull role when acr_id is provided
-- Supports availability zone distribution for both system and user node pools
+- Creates AKS cluster with a fixed system node pool and an autoscaling user node pool across configurable availability zones
+- Enables OIDC issuer and workload identity on the cluster for Kubernetes service account federation
+- Configures Azure AD RBAC integration with tenant-scoped admin group object IDs and optional Azure RBAC delegation
+- Attaches Azure Container Registry with AcrPull role assignment when acr_id is provided
+- Assigns Network Contributor role to the node subnet and any additional subnets required for internal load balancer provisioning
 - Exposes cluster credentials and OIDC issuer URL as outputs for downstream Kubernetes provider configuration
-- Allows optional private cluster mode and API server IP allowlisting for network security hardening
+- Supports private cluster mode and API server authorized IP range restrictions
 
 ## Basic Usage
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v7.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v8.0.0"
 
   cluster_name        = "your-cluster-name"
   location            = "your-location"
@@ -74,11 +74,14 @@ resource "example_resource" "this" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_acr_id"></a> [acr\_id](#input\_acr\_id) | The ID of the Azure Container Registry. If provided, AKS will be granted AcrPull role to pull images. | `string` | `null` | no |
 | <a name="input_additional_network_contributor_subnet_ids"></a> [additional\_network\_contributor\_subnet\_ids](#input\_additional\_network\_contributor\_subnet\_ids) | Extra subnet IDs, keyed by an arbitrary stable name, where the cluster identity also needs Network Contributor. The node subnet is granted automatically; add an entry for any other subnet the cloud-provider must write into -- typically the one an internal load balancer is pinned to via service.beta.kubernetes.io/azure-load-balancer-internal-subnet, which otherwise fails to provision with a 403 on virtualNetworks/subnets/read. | `map(string)` | `{}` | no |
+| <a name="input_admin_group_object_ids"></a> [admin\_group\_object\_ids](#input\_admin\_group\_object\_ids) | Entra ID group object IDs whose members get cluster-admin through Kubernetes RBAC. The alternative to azure\_rbac\_enabled when authorization should stay in-cluster. | `list(string)` | `null` | no |
 | <a name="input_attach_acr"></a> [attach\_acr](#input\_attach\_acr) | Whether to grant AKS the AcrPull role on acr\_id. Null (default) preserves the legacy behaviour of attaching whenever acr\_id is non-null. Set to true for a greenfield single-apply where acr\_id is known only after apply (keeps the for\_each key set plan-stable); set to false to disable. | `bool` | `null` | no |
 | <a name="input_authorized_ip_ranges"></a> [authorized\_ip\_ranges](#input\_authorized\_ip\_ranges) | The set of authorized IP ranges allowed to access the Kubernetes API server | `set(string)` | `null` | no |
+| <a name="input_azure_rbac_enabled"></a> [azure\_rbac\_enabled](#input\_azure\_rbac\_enabled) | Whether Kubernetes authorization is delegated to Azure RBAC, so cluster access is granted with Azure role assignments such as 'Azure Kubernetes Service RBAC Cluster Admin'. Defaults to false, which keeps authorization inside Kubernetes RBAC. | `bool` | `false` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The name of the AKS cluster | `string` | n/a | yes |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment name used for tagging and naming purposes | `string` | `"nullplatform"` | no |
 | <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | The version of Kubernetes to use for the AKS cluster | `string` | `"1.32.7"` | no |
+| <a name="input_local_account_disabled"></a> [local\_account\_disabled](#input\_local\_account\_disabled) | Whether to disable the AKS local (certificate-based) admin accounts. Null (default) leaves the Azure default, which keeps them enabled. When true, Entra ID becomes the only way into the API server, so an authorization path must be configured as well — see azure\_rbac\_enabled and admin\_group\_object\_ids. | `bool` | `null` | no |
 | <a name="input_location"></a> [location](#input\_location) | The Azure region where the AKS cluster will be deployed (e.g., eastus, westus2) | `string` | n/a | yes |
 | <a name="input_node_pool_zones"></a> [node\_pool\_zones](#input\_node\_pool\_zones) | Availability zones for the user node pool, e.g. ["1", "2", "3"].<br/>Null (default) leaves the pool unzoned. Set it deliberately on a live<br/>cluster: Azure treats a pool's zones as immutable, and upstream rotates the<br/>pool through `temporary_name_for_rotation` to honour the change. | `set(string)` | `null` | no |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | The prefix for resources created by the AKS module | `string` | `"aks"` | no |
@@ -113,16 +116,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "aks",
-  "description": "Deploys an Azure Kubernetes Service (AKS) cluster with a system node pool and an autoscaling user node pool using the official Azure/aks/azurerm Terraform module",
-  "architecture": "The module wraps the Azure/aks/azurerm community module (version 11.0.0) and reads the current client config via azurerm_client_config to inject the tenant ID for AAD RBAC. It wires the provided vnet_subnet_id into both the system pool (agents_size, agents_count, agents_availability_zones) and a separate user node_pool entry with auto-scaling enabled, assigning Network Contributor role to all required subnets via network_contributor_role_assigned_subnet_ids. Optional ACR integration is handled through attached_acr_id_map, which conditionally maps acr_id based on the attach_acr flag, and OIDC/workload identity is always enabled on the control plane.",
+  "description": "Deploys an Azure Kubernetes Service (AKS) cluster with configurable system and user node pools, OIDC/workload identity, Azure RBAC integration, and optional ACR attachment using the Azure/aks/azurerm upstream module",
+  "architecture": "The module wraps the Azure/aks/azurerm community module (version 11.0.0) and wires all inputs into it as a single module block. A data.azurerm_client_config resource is used to resolve the current tenant ID for AAD/RBAC configuration. The module creates a system node pool via agents_* parameters and a separate autoscaling user node pool via the node_pools map, both attached to the provided vnet_subnet_id. Network Contributor role assignments are applied to the node subnet and any additional subnets, and an optional AcrPull role binding is conditionally created based on attach_acr and acr_id inputs.",
   "features": [
-    "Deploys AKS cluster with OIDC issuer and workload identity enabled for pod-level Azure authentication",
-    "Configures a fixed-size system node pool and a separate autoscaling user node pool with configurable min/max counts",
-    "Grants Network Contributor role on the node subnet and any additional subnets required for internal load balancers",
-    "Attaches an Azure Container Registry with AcrPull role when acr_id is provided",
-    "Supports availability zone distribution for both system and user node pools",
+    "Creates AKS cluster with a fixed system node pool and an autoscaling user node pool across configurable availability zones",
+    "Enables OIDC issuer and workload identity on the cluster for Kubernetes service account federation",
+    "Configures Azure AD RBAC integration with tenant-scoped admin group object IDs and optional Azure RBAC delegation",
+    "Attaches Azure Container Registry with AcrPull role assignment when acr_id is provided",
+    "Assigns Network Contributor role to the node subnet and any additional subnets required for internal load balancer provisioning",
     "Exposes cluster credentials and OIDC issuer URL as outputs for downstream Kubernetes provider configuration",
-    "Allows optional private cluster mode and API server IP allowlisting for network security hardening"
+    "Supports private cluster mode and API server authorized IP range restrictions"
   ],
   "inputs": [
     {
@@ -229,6 +232,21 @@ resource "example_resource" "this" {
       "name": "system_pool_node_count",
       "description": "Fixed node count for the system pool. Defaults to 2, the upstream default this module relied on implicitly.",
       "required": false
+    },
+    {
+      "name": "local_account_disabled",
+      "description": "Whether to disable the AKS local (certificate-based) admin accounts. Null (default) leaves the Azure default, which keeps them enabled. When true, Entra ID becomes the only way into the API server, so an authorization path must be configured as well — see azure_rbac_enabled and admin_group_object_ids.",
+      "required": false
+    },
+    {
+      "name": "azure_rbac_enabled",
+      "description": "Whether Kubernetes authorization is delegated to Azure RBAC, so cluster access is granted with Azure role assignments such as 'Azure Kubernetes Service RBAC Cluster Admin'. Defaults to false, which keeps authorization inside Kubernetes RBAC.",
+      "required": false
+    },
+    {
+      "name": "admin_group_object_ids",
+      "description": "Entra ID group object IDs whose members get cluster-admin through Kubernetes RBAC. The alternative to azure_rbac_enabled when authorization should stay in-cluster.",
+      "required": false
     }
   ],
   "outputs": [
@@ -243,6 +261,6 @@ resource "example_resource" "this" {
     "oidc_issuer_url",
     "node_resource_group"
   ],
-  "hash": "eecb9a7cb8471fcdabab22199c6e4b4a"
+  "hash": "6bc75daa678ed4082a51b6723427f95a"
 }
 END_AI_METADATA -->

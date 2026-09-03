@@ -22,7 +22,7 @@ The module creates a single nullplatform_provider_config resource that encodes p
 
 ```hcl
 module "scope_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v7.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v8.0.0"
 
   nrn  = "your-nrn"
   type = "your-type"
@@ -33,7 +33,7 @@ module "scope_configuration" {
 
 ```hcl
 module "scope_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v7.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v8.0.0"
 
   aws_distribution          = "your-aws-distribution"  # Required when type = "static-files"
   aws_hosted_public_zone_id = "your-aws-hosted-public-zone-id"  # Required when type = "static-files"
@@ -52,7 +52,7 @@ module "scope_configuration" {
 
 ```hcl
 module "scope_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v7.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v8.0.0"
 
   lambda_null_agent_layer_arn  = "your-lambda-null-agent-layer-arn"  # Required when type = "aws-lambda"
   lambda_placeholder_image_uri = "your-lambda-placeholder-image-uri"  # Required when type = "aws-lambda"
