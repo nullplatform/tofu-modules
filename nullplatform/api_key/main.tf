@@ -3,7 +3,8 @@
 ################################################################################
 
 resource "nullplatform_api_key" "this" {
-  name = local.config.name
+  name     = local.config.name
+  internal = var.internal
 
   dynamic "grants" {
     for_each = tomap({ for idx, grant in local.grants : tostring(idx) => grant })
