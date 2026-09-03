@@ -95,9 +95,9 @@ variable "extra_visibile_to_nrns" {
 }
 
 variable "dimensions" {
-  type        = map(string)
+  type        = any
   default     = {}
-  description = "Key-value pairs for dimensions to be associated with the service specification"
+  description = "Dimensions for the service specification, used when the spec template does not declare its own. The API accepts both a map of values and the required-flag form, e.g. {\"environment\": {\"required\": true}}, so this is intentionally untyped."
 }
 
 variable "repository_ref_type" {
