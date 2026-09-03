@@ -22,7 +22,7 @@ The module uses local boolean flags (is_gitlab, is_github, is_azure, is_bitbucke
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v7.2.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v7.2.1"
 
   git_provider = "your-git-provider"
   nrn          = "your-nrn"
@@ -33,7 +33,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v7.2.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v7.2.1"
 
   git_provider           = "github"
   github_installation_id = "your-github-installation-id"  # Required when git_provider = "github"
@@ -46,7 +46,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v7.2.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v7.2.1"
 
   git_provider             = "gitlab"
   gitlab_access_token      = "your-gitlab-access-token"  # Required when git_provider = "gitlab"
@@ -62,7 +62,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v7.2.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v7.2.1"
 
   azure_access_token = "your-azure-access-token"  # Required when git_provider = "azure"
   azure_agent_pool   = "your-azure-agent-pool"  # Required when git_provider = "azure"
@@ -76,7 +76,7 @@ module "code_repository" {
 
 ```hcl
 module "code_repository" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v7.2.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/code_repository?ref=v7.2.1"
 
   bitbucket_collaborators    = "your-bitbucket-collaborators"  # Required when git_provider = "bitbucket"
   bitbucket_installation_url = "your-bitbucket-installation-url"  # Required when git_provider = "bitbucket"
