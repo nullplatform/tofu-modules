@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.2.0](https://github.com/nullplatform/tofu-modules/compare/v8.0.0...v7.2.0) (2026-09-03)
+
+
+### Miscellaneous Chores
+
+* force release version to 7.2.0 ([#556](https://github.com/nullplatform/tofu-modules/issues/556)) ([3abfc8c](https://github.com/nullplatform/tofu-modules/commit/3abfc8ce3b2649d7519e3dea3dc9da83af734a66))
+
 ## [8.0.0](https://github.com/nullplatform/tofu-modules/compare/v7.1.0...v8.0.0) (2026-09-03)
 
 
