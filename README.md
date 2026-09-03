@@ -30,7 +30,7 @@ Reference any module via its Git source, pinned to a release tag:
 
 ```hcl
 module "vpc" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v6.19.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v7.2.0"
 
   # module inputs ...
 }
