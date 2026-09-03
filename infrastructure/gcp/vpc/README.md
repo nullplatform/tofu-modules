@@ -20,7 +20,7 @@ The module invokes the terraform-google-modules/network/google module to create 
 
 ```hcl
 module "vpc" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/vpc?ref=v7.2.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/vpc?ref=v7.2.1"
 
   network_name = "your-network-name"
   project_id   = "your-project-id"
