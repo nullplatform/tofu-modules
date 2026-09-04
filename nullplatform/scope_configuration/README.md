@@ -11,7 +11,7 @@ The module creates a single nullplatform_provider_config resource that encodes p
 ## Features
 
 - Creates a nullplatform_provider_config resource with type-dispatched JSON attributes for static-files or aws-lambda provider specs
-- Configures AWS CloudFront distribution settings with optional WAF WebACL attachment for static file delivery
+- Configures AWS CloudFront distribution settings with optional WAF WebACL attachment and Lambda@Edge function associations for static file delivery
 - Configures Route53 DNS network settings including public hosted zone binding for static-files deployments
 - Configures OpenTofu remote state bucket and placeholder ECR image URI for aws-lambda scope deployments
 - Optionally attaches a nullplatform agent Lambda layer ARN when USE_NULL_AGENT is enabled on the scope
@@ -46,6 +46,16 @@ module "scope_configuration" {
   nrn                       = "your-nrn"
   type                      = "static-files"
 }
+```
+
+Lambda@Edge functions on the CloudFront default cache behavior are declared with
+`aws_lambda_associations`, one entry per CloudFront event. The key is only sent
+when the list is non-empty, so configurations without associations do not drift:
+
+```hcl
+  aws_lambda_associations = [
+    { event_type = "viewer-response", function_arn = "arn:aws:lambda:us-east-1:123456789012:function:edge-headers:1" },
+  ]
 ```
 
 ### Usage with AWS Lambda
