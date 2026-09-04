@@ -20,7 +20,7 @@ The module renders a YAML values file via templatefile() in locals.tf, injecting
 
 ```hcl
 module "prometheus" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v7.3.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v7.3.1"
 
   prometheus_version = "your-prometheus-version"
 }
@@ -30,7 +30,7 @@ module "prometheus" {
 
 ```hcl
 module "prometheus" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v7.3.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v7.3.1"
 
   prometheus_version = "latest"
 }
@@ -40,7 +40,7 @@ module "prometheus" {
 
 ```hcl
 module "prometheus" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v7.3.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v7.3.1"
 
   prometheus_version = "main"
 }
@@ -50,7 +50,7 @@ module "prometheus" {
 
 ```hcl
 module "prometheus" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v7.3.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v7.3.1"
 
   prometheus_version = "master"
 }

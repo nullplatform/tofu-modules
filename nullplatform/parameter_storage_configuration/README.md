@@ -21,7 +21,7 @@ The module creates a single nullplatform_provider_config resource named paramete
 
 ```hcl
 module "parameter_storage_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=v7.3.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=v7.3.1"
 
   nrn  = "your-nrn"
   type = "your-type"
@@ -32,7 +32,7 @@ module "parameter_storage_configuration" {
 
 ```hcl
 module "parameter_storage_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=v7.3.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=v7.3.1"
 
   nrn  = "your-nrn"
   type = "aws-secrets-manager"
@@ -43,7 +43,7 @@ module "parameter_storage_configuration" {
 
 ```hcl
 module "parameter_storage_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=v7.3.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=v7.3.1"
 
   nrn  = "your-nrn"
   tier = "your-tier"  # Required when type = "aws-parameter-store"

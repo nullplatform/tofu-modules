@@ -22,7 +22,7 @@ The module creates a primary google_storage_bucket (tf_state) with a random_id s
 
 ```hcl
 module "backend" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/backend?ref=v7.3.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/backend?ref=v7.3.1"
 
   project_id = "your-project-id"
 }
