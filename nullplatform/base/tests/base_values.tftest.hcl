@@ -13,12 +13,12 @@ variables {
 # Gateway API CRD ref
 ############################################
 
-run "gateway_api_crd_ref_defaults_to_istio_1_27_ref" {
+run "gateway_api_crd_ref_defaults_to_istio_1_30_ref" {
   command = plan
 
   assert {
-    condition     = strcontains(output.rendered_values, "gatewayApiCrdRef: \"v1.3.0\"")
-    error_message = "gatewayApiCrdRef should default to v1.3.0, matching Istio 1.27"
+    condition     = strcontains(output.rendered_values, "gatewayApiCrdRef: \"v1.5.1\"")
+    error_message = "gatewayApiCrdRef should default to v1.5.1, matching Istio 1.30"
   }
 }
 

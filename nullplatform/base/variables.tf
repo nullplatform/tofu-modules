@@ -44,8 +44,8 @@ variable "install_gateway_v2_crd" {
 
 variable "gateway_api_crd_ref" {
   type        = string
-  description = "Git ref (tag or commit) of kubernetes-sigs/gateway-api to install when install_gateway_v2_crd is true. Ignored on chart versions older than the one that introduced global.gatewayApiCrdRef. Default (v1.3.0) matches what Istio 1.27 documents installing; re-check istio.io's version-pinned docs when bumping Istio."
-  default     = "v1.3.0"
+  description = "Git ref (tag or commit) of kubernetes-sigs/gateway-api to install when install_gateway_v2_crd is true. Ignored on chart versions older than the one that introduced global.gatewayApiCrdRef. Default (v1.5.1) matches what Istio 1.30 documents installing; re-check istio.io's version-pinned docs when bumping Istio. Istio 1.30's own release notes warn that upgrading without also upgrading these CRDs leaves TLSRoute/ReferenceGrant invisible to istiod."
+  default     = "v1.5.1"
 }
 
 ############################################
