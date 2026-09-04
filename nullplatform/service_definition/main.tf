@@ -11,7 +11,7 @@ resource "nullplatform_service_specification" "from_template" {
     provider     = local.service_spec_parsed.selectors.provider
     sub_category = local.service_spec_parsed.selectors.sub_category
   }
-  dimensions = jsonencode(var.dimensions)
+  dimensions = jsonencode(try(local.service_spec_parsed.dimensions, var.dimensions))
 }
 
 resource "nullplatform_action_specification" "from_templates" {
