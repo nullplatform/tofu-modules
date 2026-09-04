@@ -8,30 +8,48 @@ variable "type" {
   type        = string
 
   validation {
-    condition     = contains(["aws-secrets-manager"], var.type)
-    error_message = "type must be one of: aws-secrets-manager."
+    condition     = contains(["aws-secrets-manager", "aws-parameter-store"], var.type)
+    error_message = "type must be one of: aws-secrets-manager, aws-parameter-store."
   }
 }
 
 variable "kms_key_id" {
-  description = "aws-secrets-manager only. Customer-managed KMS key ARN or alias. If empty, the default aws/secretsmanager managed key is used."
+  description = "Customer-managed KMS key ARN or alias. If empty, the service's AWS-managed key is used (aws/secretsmanager for aws-secrets-manager, alias/aws/ssm for aws-parameter-store)."
   type        = string
   default     = ""
-
-  validation {
-    condition     = var.type == "aws-secrets-manager" || var.kms_key_id == ""
-    error_message = "kms_key_id only applies when type is 'aws-secrets-manager'."
-  }
 }
 
 variable "applies_to" {
-  description = "aws-secrets-manager only. Resource types this parameter storage configuration applies to."
+  description = "Which parameters this backend stores: any of secret, non_secret. Defaults to the spec's own default for the type — [\"secret\"] for aws-secrets-manager, [\"non_secret\"] for aws-parameter-store."
   type        = list(string)
-  default     = ["secret"]
+  default     = null
 
   validation {
-    condition     = var.type == "aws-secrets-manager" || var.applies_to == ["secret"]
-    error_message = "applies_to only applies when type is 'aws-secrets-manager'."
+    condition = var.applies_to == null || alltrue([
+      for v in coalesce(var.applies_to, []) : contains(["secret", "non_secret"], v)
+    ])
+    error_message = "applies_to entries must be one of: secret, non_secret."
+  }
+
+  validation {
+    condition     = var.applies_to == null || length(var.applies_to) > 0
+    error_message = "applies_to must list at least one parameter kind when set."
+  }
+}
+
+variable "tier" {
+  description = "aws-parameter-store only. SSM parameter tier: Standard (free up to 10,000 parameters), Advanced (larger values, billed per parameter) or Intelligent-Tiering. Defaults to Standard."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.tier == null || contains(["Standard", "Advanced", "Intelligent-Tiering"], var.tier)
+    error_message = "tier must be one of: Standard, Advanced, Intelligent-Tiering."
+  }
+
+  validation {
+    condition     = var.type == "aws-parameter-store" || var.tier == null
+    error_message = "tier only applies when type is 'aws-parameter-store'."
   }
 }
 

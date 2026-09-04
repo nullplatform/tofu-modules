@@ -42,12 +42,12 @@ resource "example_resource" "this" {
 
 `type` selects the provider specification this configuration targets. Each type has its own payload and its own set of type-specific variables; adding a new type means adding it to the list below along with its variables.
 
-### aws-secrets-manager (default)
+### aws-secrets-manager
 
-| Variable | Maps to |
-|----------|---------|
-| `applies_to` | `sensibility.applies_to` |
-| `kms_key_id` | `setup.kms_key_id` |
+| Variable | Maps to | Default |
+|----------|---------|---------|
+| `applies_to` | `sensibility.applies_to` | `["secret"]` |
+| `kms_key_id` | `setup.kms_key_id` | `""` (aws/secretsmanager managed key) |
 
 ```hcl
 module "parameter_storage_configuration" {
@@ -59,6 +59,30 @@ module "parameter_storage_configuration" {
 
   applies_to = ["secret"]
   kms_key_id = "" # empty = default aws/secretsmanager managed key
+}
+```
+
+### aws-parameter-store
+
+Stores parameters in AWS SSM Parameter Store (spec declared by
+`nullplatform/parameters-provider`, `aws-parameter-store-configuration.json.tpl`).
+
+| Variable | Maps to | Default |
+|----------|---------|---------|
+| `applies_to` | `sensibility.applies_to` | `["non_secret"]` |
+| `kms_key_id` | `setup.kms_key_id` | `""` (alias/aws/ssm managed key) |
+| `tier` | `setup.tier` | `"Standard"` (also `Advanced`, `Intelligent-Tiering`) |
+
+```hcl
+module "parameter_storage_configuration" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=vX.Y.Z"
+
+  nrn  = "your-nrn"
+  type = "aws-parameter-store"
+
+  applies_to = ["non_secret"]
+  tier       = "Standard"
+  dimensions = { environment = "development" }
 }
 ```
 
