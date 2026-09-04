@@ -30,7 +30,13 @@ locals {
         aws_region       = var.aws_region
         aws_state_bucket = var.aws_state_bucket
       }
-      distribution = merge(local.static_files_defaults.distribution, { aws_distribution = var.aws_distribution })
+      # lambda_associations has no default in the spec: only sent when the
+      # caller declares some, so a config without them never drifts.
+      distribution = merge(
+        local.static_files_defaults.distribution,
+        { aws_distribution = var.aws_distribution },
+        length(var.aws_lambda_associations) > 0 ? { lambda_associations = var.aws_lambda_associations } : {},
+      )
       network = merge(local.static_files_defaults.network, {
         aws_network               = var.aws_network
         aws_hosted_public_zone_id = var.aws_hosted_public_zone_id
