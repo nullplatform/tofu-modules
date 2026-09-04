@@ -2,30 +2,52 @@
 
 ## Description
 
-Provisions a nullplatform parameter-storage provider configuration instance by wrapping the scope_configuration module with a validated provider specification slug
+Configures a nullplatform provider config resource for AWS parameter storage backends, supporting both AWS Secrets Manager and AWS Systems Manager Parameter Store
 
 ## Architecture
 
-The module delegates entirely to a remote `scope_configuration` module sourced from the nullplatform tofu-modules repository. Input variables `nrn`, `np_api_key`, `provider_specification_slug`, `dimensions`, and `attributes` are forwarded directly into that child module. The child module creates a nullplatform provider config resource anchored to the given NRN and associated with the specified provider specification. The resulting `provider_config_id` is surfaced as an output from the child module back to the caller.
+The module creates a single nullplatform_provider_config resource named parameter_store_configuration, wiring the nrn, type, and dimensions inputs directly into the resource. Type-specific attribute defaults are defined in local.type_defaults and merged with caller-supplied overrides in local.type_overrides, then serialized via jsonencode() into the resource's attributes field. The resolved provider_config_id is surfaced as an output for downstream consumption.
 
 ## Features
 
-- Creates a nullplatform parameter-storage provider configuration instance anchored to a specified NRN
-- Validates that provider_specification_slug is non-empty before provisioning
-- Forwards provider-specific attributes matching the provider specification schema to the underlying scope_configuration module
-- Supports dimension-based scoping via a configurable map of dimension key-value pairs
-- Exposes the created provider config ID as an output for downstream module consumption
+- Creates a nullplatform_provider_config resource anchored to a given NRN with type-aware attribute defaults
+- Supports AWS Secrets Manager backend with secret-scoped sensibility defaults and optional customer-managed KMS key
+- Supports AWS Systems Manager Parameter Store backend with non_secret sensibility and configurable SSM tier (Standard, Advanced, Intelligent-Tiering)
+- Merges caller-supplied overrides on top of per-type defaults to prevent attribute drift
+- Restricts applies_to values to valid entries (secret, non_secret) with non-empty list enforcement
+- Accepts dimension map for environment-scoped or multi-tenant provider config targeting
 
 ## Basic Usage
 
 ```hcl
 module "parameter_storage_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=v7.2.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=v7.3.0"
 
-  attributes                  = "your-attributes"
-  np_api_key                  = "your-np-api-key"
-  nrn                         = "your-nrn"
-  provider_specification_slug = "your-provider-specification-slug"
+  nrn  = "your-nrn"
+  type = "your-type"
+}
+```
+
+### Usage with AWS Secrets Manager
+
+```hcl
+module "parameter_storage_configuration" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=v7.3.0"
+
+  nrn  = "your-nrn"
+  type = "aws-secrets-manager"
+}
+```
+
+### Usage with AWS Parameter Store
+
+```hcl
+module "parameter_storage_configuration" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=v7.3.0"
+
+  nrn  = "your-nrn"
+  tier = "your-tier"  # Required when type = "aws-parameter-store"
+  type = "aws-parameter-store"
 }
 ```
 
@@ -35,54 +57,6 @@ module "parameter_storage_configuration" {
 # Reference outputs in other resources
 resource "example_resource" "this" {
   example_attribute = module.parameter_storage_configuration.provider_config_id
-}
-```
-
-## Supported Types
-
-`type` selects the provider specification this configuration targets. Each type has its own payload and its own set of type-specific variables; adding a new type means adding it to the list below along with its variables.
-
-### aws-secrets-manager
-
-| Variable | Maps to | Default |
-|----------|---------|---------|
-| `applies_to` | `sensibility.applies_to` | `["secret"]` |
-| `kms_key_id` | `setup.kms_key_id` | `""` (aws/secretsmanager managed key) |
-
-```hcl
-module "parameter_storage_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=vX.Y.Z"
-
-  np_api_key = "your-np-api-key"
-  nrn        = "your-nrn"
-  type       = "aws-secrets-manager"
-
-  applies_to = ["secret"]
-  kms_key_id = "" # empty = default aws/secretsmanager managed key
-}
-```
-
-### aws-parameter-store
-
-Stores parameters in AWS SSM Parameter Store (spec declared by
-`nullplatform/parameters-provider`, `aws-parameter-store-configuration.json.tpl`).
-
-| Variable | Maps to | Default |
-|----------|---------|---------|
-| `applies_to` | `sensibility.applies_to` | `["non_secret"]` |
-| `kms_key_id` | `setup.kms_key_id` | `""` (alias/aws/ssm managed key) |
-| `tier` | `setup.tier` | `"Standard"` (also `Advanced`, `Intelligent-Tiering`) |
-
-```hcl
-module "parameter_storage_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_configuration?ref=vX.Y.Z"
-
-  nrn  = "your-nrn"
-  type = "aws-parameter-store"
-
-  applies_to = ["non_secret"]
-  tier       = "Standard"
-  dimensions = { environment = "development" }
 }
 ```
 
@@ -109,10 +83,11 @@ module "parameter_storage_configuration" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_applies_to"></a> [applies\_to](#input\_applies\_to) | aws-secrets-manager only. Resource types this parameter storage configuration applies to. | `list(string)` | <pre>[<br/>  "secret"<br/>]</pre> | no |
+| <a name="input_applies_to"></a> [applies\_to](#input\_applies\_to) | Which parameters this backend stores: any of secret, non\_secret. Defaults to the spec's own default for the type — ["secret"] for aws-secrets-manager, ["non\_secret"] for aws-parameter-store. | `list(string)` | `null` | no |
 | <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Dimension values for this instance (e.g. { environment = "production" }). | `map(string)` | `{}` | no |
-| <a name="input_kms_key_id"></a> [kms\_key\_id](#input\_kms\_key\_id) | aws-secrets-manager only. Customer-managed KMS key ARN or alias. If empty, the default aws/secretsmanager managed key is used. | `string` | `""` | no |
+| <a name="input_kms_key_id"></a> [kms\_key\_id](#input\_kms\_key\_id) | Customer-managed KMS key ARN or alias. If empty, the service's AWS-managed key is used (aws/secretsmanager for aws-secrets-manager, alias/aws/ssm for aws-parameter-store). | `string` | `""` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | NRN where this parameter-storage instance (provider config) is anchored. | `string` | n/a | yes |
+| <a name="input_tier"></a> [tier](#input\_tier) | aws-parameter-store only. SSM parameter tier: Standard (free up to 10,000 parameters), Advanced (larger values, billed per parameter) or Intelligent-Tiering. Defaults to Standard. | `string` | `null` | no |
 | <a name="input_type"></a> [type](#input\_type) | Provider specification slug this configuration targets. Determines which default attribute shape is applied — see README for the supported types and their payloads. | `string` | n/a | yes |
 
 ## Outputs
@@ -125,35 +100,41 @@ module "parameter_storage_configuration" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "parameter_storage_configuration",
-  "description": "Provisions a nullplatform parameter-storage provider configuration instance by wrapping the scope_configuration module with a validated provider specification slug",
-  "architecture": "The module delegates entirely to a remote `scope_configuration` module sourced from the nullplatform tofu-modules repository. Input variables `nrn`, `np_api_key`, `provider_specification_slug`, `dimensions`, and `attributes` are forwarded directly into that child module. The child module creates a nullplatform provider config resource anchored to the given NRN and associated with the specified provider specification. The resulting `provider_config_id` is surfaced as an output from the child module back to the caller.",
+  "description": "Configures a nullplatform provider config resource for AWS parameter storage backends, supporting both AWS Secrets Manager and AWS Systems Manager Parameter Store",
+  "architecture": "The module creates a single nullplatform_provider_config resource named parameter_store_configuration, wiring the nrn, type, and dimensions inputs directly into the resource. Type-specific attribute defaults are defined in local.type_defaults and merged with caller-supplied overrides in local.type_overrides, then serialized via jsonencode() into the resource's attributes field. The resolved provider_config_id is surfaced as an output for downstream consumption.",
   "features": [
-    "Creates a nullplatform parameter-storage provider configuration instance anchored to a specified NRN",
-    "Validates that provider_specification_slug is non-empty before provisioning",
-    "Forwards provider-specific attributes matching the provider specification schema to the underlying scope_configuration module",
-    "Supports dimension-based scoping via a configurable map of dimension key-value pairs",
-    "Exposes the created provider config ID as an output for downstream module consumption"
+    "Creates a nullplatform_provider_config resource anchored to a given NRN with type-aware attribute defaults",
+    "Supports AWS Secrets Manager backend with secret-scoped sensibility defaults and optional customer-managed KMS key",
+    "Supports AWS Systems Manager Parameter Store backend with non_secret sensibility and configurable SSM tier (Standard, Advanced, Intelligent-Tiering)",
+    "Merges caller-supplied overrides on top of per-type defaults to prevent attribute drift",
+    "Restricts applies_to values to valid entries (secret, non_secret) with non-empty list enforcement",
+    "Accepts dimension map for environment-scoped or multi-tenant provider config targeting"
   ],
   "inputs": [
-    {
-      "name": "np_api_key",
-      "description": "nullplatform API key. Forwarded to the wrapped scope_configuration module; the provider is configured at the root.",
-      "required": true
-    },
     {
       "name": "nrn",
       "description": "NRN where this parameter-storage instance (provider config) is anchored.",
       "required": true
     },
     {
-      "name": "attributes",
-      "description": "Provider-specific configuration matching the provider specification schema (e.g. sensibility.applies_to, setup.kms_key_id).",
+      "name": "type",
+      "description": "Provider specification slug this configuration targets. Determines which default attribute shape is applied — see README for the supported types and their payloads.",
       "required": true
     },
     {
-      "name": "provider_specification_slug",
-      "description": "Slug of the parameter-storage provider specification to associate with. Typically the `slug` output of the parameter_storage_definition module.",
-      "required": true
+      "name": "applies_to",
+      "description": "Which parameters this backend stores: any of secret, non_secret. Defaults to the spec's own default for the type — [\\",
+      "required": false
+    },
+    {
+      "name": "tier",
+      "description": "aws-parameter-store only. SSM parameter tier: Standard (free up to 10,000 parameters), Advanced (larger values, billed per parameter) or Intelligent-Tiering. Defaults to Standard.",
+      "required": false
+    },
+    {
+      "name": "kms_key_id",
+      "description": "Customer-managed KMS key ARN or alias. If empty, the service's AWS-managed key is used (aws/secretsmanager for aws-secrets-manager, alias/aws/ssm for aws-parameter-store).",
+      "required": false
     },
     {
       "name": "dimensions",
@@ -164,6 +145,6 @@ module "parameter_storage_configuration" {
   "outputs": [
     "provider_config_id"
   ],
-  "hash": "c1c5d0629292f004340d1feb4dd1931c"
+  "hash": "89bf33550a4e5fa808cad573cb6fdfa2"
 }
 END_AI_METADATA -->

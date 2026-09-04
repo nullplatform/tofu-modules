@@ -2,27 +2,26 @@
 
 ## Description
 
-Creates and configures a nullplatform provider scope configuration resource for either static-files or aws-lambda deployment types
+Creates and manages a nullplatform provider scope configuration resource for either static-files (CloudFront/S3/Route53) or aws-lambda deployment types
 
 ## Architecture
 
-The module creates a single nullplatform_provider_config resource that encodes provider-specific attributes as a JSON blob via jsonencode(). Locals compute type-specific default and override maps — static_files_defaults/static_files_cloud_overrides for static-files and aws_lambda_defaults/aws_lambda_overrides for aws-lambda — then merge them based on the selected type. The merged attributes object is dispatched through a type_defaults/type_overrides map keyed by var.type, allowing a single resource declaration to serve both provider types without conditional resource blocks. The resulting provider_config_id output exposes the created resource's ID for downstream consumption.
+The module creates a single nullplatform_provider_config resource, wiring the nrn, type, and dimensions inputs directly into it. The attributes payload is built by merging type-specific default maps with override maps computed in locals.tf — for static-files, cloud-provider-keyed overrides assemble distribution, network, security, and provider sub-objects; for aws-lambda, state and deployment objects are merged with an optional agent block when lambda_null_agent_layer_arn is provided. The final merged map is JSON-encoded and passed as the attributes argument, while the resource id is surfaced as the provider_config_id output.
 
 ## Features
 
-- Creates a nullplatform_provider_config resource with type-dispatched JSON attributes for static-files or aws-lambda provider specs
-- Configures AWS CloudFront distribution settings with optional WAF WebACL attachment and Lambda@Edge function associations for static file delivery
-- Configures Route53 DNS network settings including public hosted zone binding for static-files deployments
-- Configures OpenTofu remote state bucket and placeholder ECR image URI for aws-lambda scope deployments
-- Optionally attaches a nullplatform agent Lambda layer ARN when USE_NULL_AGENT is enabled on the scope
-- Merges provider-specific defaults with user overrides to prevent drift against the nullplatform provider spec schema
-- Supports dimension-based targeting to scope configurations to specific deployment dimensions
+- Creates a nullplatform_provider_config resource encoding provider-specific attributes as a JSON payload
+- Configures static-files scope with CloudFront distribution, Route53 DNS, optional WAF WebACL attachment, and Lambda@Edge associations
+- Configures aws-lambda scope with OpenTofu state bucket, ECR placeholder image URI, and optional nullplatform agent Lambda layer
+- Merges provider-type defaults with caller-supplied overrides to prevent drift against unset optional fields
+- Conditionally includes lambda_associations and agent blocks only when their inputs are non-empty, avoiding drift on configs that never declared them
+- Validates each variable's applicability to the selected type and cloud provider to prevent misconfiguration
 
 ## Basic Usage
 
 ```hcl
 module "scope_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v7.2.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v7.3.0"
 
   nrn  = "your-nrn"
   type = "your-type"
@@ -33,38 +32,23 @@ module "scope_configuration" {
 
 ```hcl
 module "scope_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v7.2.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v7.3.0"
 
-  aws_distribution          = "your-aws-distribution"  # Required when type = "static-files"
   aws_hosted_public_zone_id = "your-aws-hosted-public-zone-id"  # Required when type = "static-files"
-  aws_network               = "your-aws-network"  # Required when type = "static-files"
   aws_region                = "your-aws-region"  # Required when type = "static-files"
-  aws_security              = "your-aws-security"  # Required when type = "static-files"
   aws_state_bucket          = "your-aws-state-bucket"  # Required when type = "static-files"
-  aws_web_acl_name          = "your-aws-web-acl-name"  # Required when type = "static-files"
   cloud_provider            = "your-cloud-provider"  # Required when type = "static-files"
   nrn                       = "your-nrn"
   type                      = "static-files"
 }
 ```
 
-Lambda@Edge functions on the CloudFront default cache behavior are declared with
-`aws_lambda_associations`, one entry per CloudFront event. The key is only sent
-when the list is non-empty, so configurations without associations do not drift:
-
-```hcl
-  aws_lambda_associations = [
-    { event_type = "viewer-response", function_arn = "arn:aws:lambda:us-east-1:123456789012:function:edge-headers:1" },
-  ]
-```
-
 ### Usage with AWS Lambda
 
 ```hcl
 module "scope_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v7.2.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v7.3.0"
 
-  lambda_null_agent_layer_arn  = "your-lambda-null-agent-layer-arn"  # Required when type = "aws-lambda"
   lambda_placeholder_image_uri = "your-lambda-placeholder-image-uri"  # Required when type = "aws-lambda"
   lambda_tofu_state_bucket     = "your-lambda-tofu-state-bucket"  # Required when type = "aws-lambda"
   nrn                          = "your-nrn"
@@ -106,6 +90,7 @@ resource "example_resource" "this" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_aws_distribution"></a> [aws\_distribution](#input\_aws\_distribution) | CDN distribution for serving static files. | `string` | `"cloudfront"` | no |
 | <a name="input_aws_hosted_public_zone_id"></a> [aws\_hosted\_public\_zone\_id](#input\_aws\_hosted\_public\_zone\_id) | Public hosted zone ID for DNS records (e.g., Z1234567890ABC). | `string` | `null` | no |
+| <a name="input_aws_lambda_associations"></a> [aws\_lambda\_associations](#input\_aws\_lambda\_associations) | Lambda@Edge functions attached to the CloudFront default cache behavior, one entry per CloudFront event. function\_arn must include a published version. Empty (the default) leaves distribution.lambda\_associations out of the payload, matching a spec that never declared it. | <pre>list(object({<br/>    event_type   = string<br/>    function_arn = string<br/>  }))</pre> | `[]` | no |
 | <a name="input_aws_network"></a> [aws\_network](#input\_aws\_network) | DNS provider for managing records. | `string` | `"route53"` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region where resources will be deployed. | `string` | `null` | no |
 | <a name="input_aws_security"></a> [aws\_security](#input\_aws\_security) | Optional WAF attachment for the CloudFront distribution. Choose 'none' to skip, or 'waf' to attach an existing AWS WAF WebACL. | `string` | `"none"` | no |
@@ -129,16 +114,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "scope_configuration",
-  "description": "Creates and configures a nullplatform provider scope configuration resource for either static-files or aws-lambda deployment types",
-  "architecture": "The module creates a single nullplatform_provider_config resource that encodes provider-specific attributes as a JSON blob via jsonencode(). Locals compute type-specific default and override maps — static_files_defaults/static_files_cloud_overrides for static-files and aws_lambda_defaults/aws_lambda_overrides for aws-lambda — then merge them based on the selected type. The merged attributes object is dispatched through a type_defaults/type_overrides map keyed by var.type, allowing a single resource declaration to serve both provider types without conditional resource blocks. The resulting provider_config_id output exposes the created resource's ID for downstream consumption.",
+  "description": "Creates and manages a nullplatform provider scope configuration resource for either static-files (CloudFront/S3/Route53) or aws-lambda deployment types",
+  "architecture": "The module creates a single nullplatform_provider_config resource, wiring the nrn, type, and dimensions inputs directly into it. The attributes payload is built by merging type-specific default maps with override maps computed in locals.tf — for static-files, cloud-provider-keyed overrides assemble distribution, network, security, and provider sub-objects; for aws-lambda, state and deployment objects are merged with an optional agent block when lambda_null_agent_layer_arn is provided. The final merged map is JSON-encoded and passed as the attributes argument, while the resource id is surfaced as the provider_config_id output.",
   "features": [
-    "Creates a nullplatform_provider_config resource with type-dispatched JSON attributes for static-files or aws-lambda provider specs",
-    "Configures AWS CloudFront distribution settings with optional WAF WebACL attachment for static file delivery",
-    "Configures Route53 DNS network settings including public hosted zone binding for static-files deployments",
-    "Configures OpenTofu remote state bucket and placeholder ECR image URI for aws-lambda scope deployments",
-    "Optionally attaches a nullplatform agent Lambda layer ARN when USE_NULL_AGENT is enabled on the scope",
-    "Merges provider-specific defaults with user overrides to prevent drift against the nullplatform provider spec schema",
-    "Supports dimension-based targeting to scope configurations to specific deployment dimensions"
+    "Creates a nullplatform_provider_config resource encoding provider-specific attributes as a JSON payload",
+    "Configures static-files scope with CloudFront distribution, Route53 DNS, optional WAF WebACL attachment, and Lambda@Edge associations",
+    "Configures aws-lambda scope with OpenTofu state bucket, ECR placeholder image URI, and optional nullplatform agent Lambda layer",
+    "Merges provider-type defaults with caller-supplied overrides to prevent drift against unset optional fields",
+    "Conditionally includes lambda_associations and agent blocks only when their inputs are non-empty, avoiding drift on configs that never declared them",
+    "Validates each variable's applicability to the selected type and cloud provider to prevent misconfiguration"
   ],
   "inputs": [
     {
@@ -192,6 +176,11 @@ resource "example_resource" "this" {
       "required": false
     },
     {
+      "name": "aws_lambda_associations",
+      "description": "Lambda@Edge functions attached to the CloudFront default cache behavior, one entry per CloudFront event. function_arn must include a published version. Empty (the default) leaves distribution.lambda_associations out of the payload, matching a spec that never declared it.",
+      "required": false
+    },
+    {
       "name": "lambda_tofu_state_bucket",
       "description": "aws-lambda only. S3 bucket where each Lambda scope writes its OpenTofu state. Scopes use distinct key prefixes, so one bucket can be shared.",
       "required": false
@@ -215,6 +204,6 @@ resource "example_resource" "this" {
   "outputs": [
     "provider_config_id"
   ],
-  "hash": "407e9471efdbfc4b305567a0968a9517"
+  "hash": "885bdbf292f2722184b800974f0fb101"
 }
 END_AI_METADATA -->
