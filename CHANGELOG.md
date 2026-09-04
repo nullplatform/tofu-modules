@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.3.0](https://github.com/nullplatform/tofu-modules/compare/v7.2.1...v7.3.0) (2026-09-04)
+
+
+### Features
+
+* **nullplatform:** cover Lambda@Edge associations and aws-parameter-store in the provider_config modules ([#562](https://github.com/nullplatform/tofu-modules/issues/562)) ([bdb03e0](https://github.com/nullplatform/tofu-modules/commit/bdb03e0955eee89c6d3551f2b6035e11da6dc49f))
+
 ## [7.2.1](https://github.com/nullplatform/tofu-modules/compare/v7.2.0...v7.2.1) (2026-09-03)
 
 
