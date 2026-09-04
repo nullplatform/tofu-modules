@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.3.1](https://github.com/nullplatform/tofu-modules/compare/v7.3.0...v7.3.1) (2026-09-04)
+
+
+### Bug Fixes
+
+* **istio:** bump default Istio version to 1.30.4 ([#564](https://github.com/nullplatform/tofu-modules/issues/564)) ([4af4e9b](https://github.com/nullplatform/tofu-modules/commit/4af4e9be19ca54ebdb49f82440862882bbfa4a64))
+
 ## [7.3.0](https://github.com/nullplatform/tofu-modules/compare/v7.2.1...v7.3.0) (2026-09-04)
 
 
