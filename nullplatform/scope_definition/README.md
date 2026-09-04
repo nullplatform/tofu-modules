@@ -22,7 +22,7 @@ The module uses `data.http` to fetch Jinja/gomplate templates for service specs,
 
 ```hcl
 module "scope_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v7.2.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v7.3.0"
 
   np_api_key = "your-np-api-key"
   nrn        = "your-nrn"

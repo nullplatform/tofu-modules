@@ -22,7 +22,7 @@ The module creates up to two kubernetes_ingress_v1 resources — one for an inte
 
 ```hcl
 module "ingress" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/ingress?ref=v7.2.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/ingress?ref=v7.3.0"
 
   certificate_arn = "your-certificate-arn"
 }
