@@ -325,3 +325,36 @@ run "create_namespace_is_overridable" {
     error_message = "create_namespace must be overridable to false for stacks where another module already owns the namespace"
   }
 }
+
+# yamlencode folds strings longer than ~80 characters at a space, as YAML
+# allows. The values template used to re-emit the encoded block line by line,
+# leaving an empty line between every two lines; inside a folded string an
+# empty line is a literal newline, so a long patch command reached the chart
+# split in two. Decoding the rendered values must give the string back intact.
+run "long_worker_patch_strings_survive_rendering" {
+  command = plan
+
+  variables {
+    worker = {
+      patches = [{
+        target = { package = "scopes-lambda" }
+        merge = {
+          spec = {
+            containers = [{
+              name    = "worker"
+              command = ["sh", "-c", "wget -qO- https://github.com/nullplatform/scopes-networking/archive/refs/tags/v0.1.0.tar.gz | tar -xz --strip-components=1 -C /overrides"]
+            }]
+          }
+        }
+      }]
+    }
+  }
+
+  assert {
+    condition = anytrue([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+      try(p.merge.spec.containers[0].command[2], "") == "wget -qO- https://github.com/nullplatform/scopes-networking/archive/refs/tags/v0.1.0.tar.gz | tar -xz --strip-components=1 -C /overrides"
+    ])
+    error_message = "a worker patch string longer than the yamlencode fold width must not pick up a newline when the values are rendered"
+  }
+}
