@@ -36,7 +36,5 @@ initScripts:
   %{ endif }
 
 worker:
-  %{ for line in split("\n", yamlencode(worker)) }
-  ${line}
-  %{ endfor }
+  ${indent(2, yamlencode(worker))}
 
