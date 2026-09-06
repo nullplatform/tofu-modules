@@ -597,3 +597,12 @@ variable "ingressControllers" {
     }
   }
 }
+
+# Surfaces the deprecation at plan time (a check failure is a warning, never an
+# error) instead of silently ignoring values callers still pass.
+check "control_plane_agent_inputs_deprecated" {
+  assert {
+    condition     = var.control_plane_agent_image_tag == null && var.control_plane_agent_image_repository == null
+    error_message = "control_plane_agent_image_tag and control_plane_agent_image_repository are deprecated and ignored: the base chart no longer runs a control plane agent. Remove them; the agent image is image_tag in nullplatform/agent."
+  }
+}

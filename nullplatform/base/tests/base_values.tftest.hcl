@@ -422,6 +422,9 @@ run "deprecated_control_plane_agent_inputs_are_still_accepted" {
     control_plane_agent_image_repository = "public.ecr.aws/nullplatform/controlplane-agent"
   }
 
+  # Passing them is accepted but flagged: the deprecation check must fire.
+  expect_failures = [check.control_plane_agent_inputs_deprecated]
+
   assert {
     condition     = !strcontains(output.rendered_values, "controlplane-agent")
     error_message = "the deprecated inputs must be ignored, not rendered"
