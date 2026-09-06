@@ -135,21 +135,20 @@ variable "control_plane_enabled" {
   default     = false
 }
 
+# Deprecated, no-op. The base chart stopped running a control plane agent
+# sidecar (helm-charts ddf5332); the agent is installed by nullplatform/agent,
+# whose image_tag is the one that matters. Kept so existing callers keep
+# planning; remove them from your configuration.
 variable "control_plane_agent_image_repository" {
   type        = string
-  description = "Container image repository for the control plane agent."
-  default     = "public.ecr.aws/nullplatform/controlplane-agent"
+  description = "Deprecated, ignored: the base chart no longer runs a control plane agent. Configure the agent image in nullplatform/agent."
+  default     = null
 }
 
 variable "control_plane_agent_image_tag" {
-  # example: 0.9.2
   type        = string
-  description = "No default: every install pins this deliberately — see VERSIONS.md. Container image tag for the control plane agent."
-
-  validation {
-    condition     = var.control_plane_agent_image_tag != "" && !contains(["latest", "main", "master"], lower(var.control_plane_agent_image_tag))
-    error_message = "control_plane_agent_image_tag must be a non-empty fixed version, not empty and not a moving reference."
-  }
+  description = "Deprecated, ignored: the base chart no longer runs a control plane agent. Configure the agent image in nullplatform/agent (image_tag)."
+  default     = null
 }
 
 ############################################

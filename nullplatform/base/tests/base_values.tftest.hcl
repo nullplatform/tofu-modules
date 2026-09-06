@@ -6,7 +6,6 @@ variables {
   k8s_provider                   = "eks"
   nullplatform_base_helm_version = "2.44.0"
   logging_controller_image_tag   = "1.6.0"
-  control_plane_agent_image_tag  = "0.9.2"
 }
 
 ############################################
@@ -403,24 +402,28 @@ run "logs_controller_image_repository_overridden" {
   }
 }
 
-run "control_plane_agent_image_defaults_to_pinned_tag" {
+# The chart dropped the control plane agent sidecar (helm-charts ddf5332), so
+# the module must not render an image for it, and the old inputs must stay
+# accepted so existing configurations keep planning.
+run "control_plane_agent_image_is_not_rendered" {
   command = plan
 
   assert {
-    condition     = strcontains(output.rendered_values, "image: \"public.ecr.aws/nullplatform/controlplane-agent:0.9.2\"")
-    error_message = "control plane agent image should default to the pinned repository:tag"
+    condition     = !strcontains(output.rendered_values, "controlplane-agent")
+    error_message = "the base values must not carry a control plane agent image: the chart no longer runs one"
   }
 }
 
-run "control_plane_agent_image_tag_overridden" {
+run "deprecated_control_plane_agent_inputs_are_still_accepted" {
   command = plan
 
   variables {
-    control_plane_agent_image_tag = "0.9.3"
+    control_plane_agent_image_tag        = "0.9.2"
+    control_plane_agent_image_repository = "public.ecr.aws/nullplatform/controlplane-agent"
   }
 
   assert {
-    condition     = strcontains(output.rendered_values, "image: \"public.ecr.aws/nullplatform/controlplane-agent:0.9.3\"")
-    error_message = "control plane agent tag should be overridable without touching the repository"
+    condition     = !strcontains(output.rendered_values, "controlplane-agent")
+    error_message = "the deprecated inputs must be ignored, not rendered"
   }
 }
