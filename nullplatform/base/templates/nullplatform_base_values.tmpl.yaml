@@ -75,22 +75,7 @@ gateway:
       minReplicas: 2
       maxReplicas: 10
     loadBalancerType: "${gateway_public_load_balancer_type}"
-# Nullplatform configurations
-nullplatform:
-  apiKey: "${np_api_key}"
-  secretName: "" #If provided will mount it from an existing secret
 # Logging configurations
-controlPlane:
-  enabled: ${controlPlane_enabled}
-  agent:
-    image: "${control_plane_agent_image_repository}:${control_plane_agent_image_tag}"
-    resources:
-      requests:
-        cpu: 50m
-        memory: 100Mi
-      limits:
-        cpu: 100m
-        memory: 150Mi
 logging:
   enabled: ${logging_enabled}
   applicationLogs:

@@ -24,10 +24,8 @@ The module creates two kubernetes_namespace_v1 resources (nullplatform-tools and
 module "base" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.3.1"
 
-  control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "your-k8s-provider"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
-  np_api_key                     = "your-np-api-key"
   nullplatform_base_helm_version = "your-nullplatform-base-helm-version"
 }
 ```
@@ -38,10 +36,8 @@ module "base" {
 module "base" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.3.1"
 
-  control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "eks"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
-  np_api_key                     = "your-np-api-key"
   nullplatform_base_helm_version = "your-nullplatform-base-helm-version"
 }
 ```
@@ -52,10 +48,8 @@ module "base" {
 module "base" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.3.1"
 
-  control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "gke"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
-  np_api_key                     = "your-np-api-key"
   nullplatform_base_helm_version = "your-nullplatform-base-helm-version"
 }
 ```
@@ -66,10 +60,8 @@ module "base" {
 module "base" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.3.1"
 
-  control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "aks"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
-  np_api_key                     = "your-np-api-key"
   nullplatform_base_helm_version = "your-nullplatform-base-helm-version"
 }
 ```
@@ -80,10 +72,8 @@ module "base" {
 module "base" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.3.1"
 
-  control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "oke"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
-  np_api_key                     = "your-np-api-key"
   nullplatform_base_helm_version = "your-nullplatform-base-helm-version"
 }
 ```
@@ -94,10 +84,8 @@ module "base" {
 module "base" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.3.1"
 
-  control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "aro"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
-  np_api_key                     = "your-np-api-key"
   nullplatform_base_helm_version = "your-nullplatform-base-helm-version"
 }
 ```
@@ -108,10 +96,8 @@ module "base" {
 module "base" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.3.1"
 
-  control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "your-k8s-provider"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
-  np_api_key                     = "your-np-api-key"
   nullplatform_base_helm_version = "2.44.0"
 }
 ```
@@ -122,10 +108,8 @@ module "base" {
 module "base" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.3.1"
 
-  control_plane_agent_image_tag  = "0.9.2"
   k8s_provider                   = "your-k8s-provider"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
-  np_api_key                     = "your-np-api-key"
   nullplatform_base_helm_version = "your-nullplatform-base-helm-version"
 }
 ```
@@ -136,10 +120,8 @@ module "base" {
 module "base" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.3.1"
 
-  control_plane_agent_image_tag  = "your-control-plane-agent-image-tag"
   k8s_provider                   = "your-k8s-provider"
   logging_controller_image_tag   = "1.6.0"
-  np_api_key                     = "your-np-api-key"
   nullplatform_base_helm_version = "your-nullplatform-base-helm-version"
 }
 ```
