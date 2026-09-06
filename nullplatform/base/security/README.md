@@ -27,7 +27,6 @@ module "base_security" {
 module "base" {
   source       = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=<version>"
   nrn          = var.nrn
-  np_api_key   = var.np_api_key
   k8s_provider = "eks"
 
   gateway_public_aws_security_group_id  = module.base_security.public_gateway_security_group_id
@@ -50,7 +49,6 @@ module "base_security" {
 module "base" {
   source                       = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=<version>"
   nrn                          = var.nrn
-  np_api_key                   = var.np_api_key
   k8s_provider                 = "aks"
   gateway_internal_enabled     = true
 
@@ -72,7 +70,6 @@ module "base_security" {
 module "base" {
   source       = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=<version>"
   nrn          = var.nrn
-  np_api_key   = var.np_api_key
   k8s_provider = "gke"
 
   gateway_public_gcp_firewall_name  = module.base_security.public_gateway_firewall_name

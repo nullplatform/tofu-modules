@@ -2,7 +2,6 @@ mock_provider "helm" {}
 mock_provider "kubernetes" {}
 
 variables {
-  np_api_key                     = "test-api-key"
   k8s_provider                   = "eks"
   nullplatform_base_helm_version = "2.44.0"
   logging_controller_image_tag   = "1.6.0"
@@ -409,8 +408,8 @@ run "control_plane_agent_image_is_not_rendered" {
   command = plan
 
   assert {
-    condition     = !strcontains(output.rendered_values, "controlplane-agent")
-    error_message = "the base values must not carry a control plane agent image: the chart no longer runs one"
+    condition     = !strcontains(output.rendered_values, "controlplane-agent") && !strcontains(output.rendered_values, "controlPlane:") && !strcontains(output.rendered_values, "nullplatform:\n  apiKey")
+    error_message = "the base values must carry neither a control plane block nor an API key: the chart uses neither"
   }
 }
 
@@ -418,15 +417,17 @@ run "deprecated_control_plane_agent_inputs_are_still_accepted" {
   command = plan
 
   variables {
+    control_plane_enabled                = false
     control_plane_agent_image_tag        = "0.9.2"
     control_plane_agent_image_repository = "public.ecr.aws/nullplatform/controlplane-agent"
+    np_api_key                           = "test-api-key"
   }
 
   # Passing them is accepted but flagged: the deprecation check must fire.
   expect_failures = [check.control_plane_agent_inputs_deprecated]
 
   assert {
-    condition     = !strcontains(output.rendered_values, "controlplane-agent")
-    error_message = "the deprecated inputs must be ignored, not rendered"
+    condition     = !strcontains(output.rendered_values, "controlplane-agent") && !strcontains(output.rendered_values, "controlPlane:") && !strcontains(output.rendered_values, "test-api-key")
+    error_message = "the deprecated inputs must be ignored: no control plane block and no API key in the values"
   }
 }

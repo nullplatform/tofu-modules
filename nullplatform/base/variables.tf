@@ -15,10 +15,15 @@ variable "namespace" {
   default     = "nullplatform-tools"
 }
 
+# Deprecated, no-op. The base chart only used the API key to build the
+# nullplatform-secret Secret for the control plane agent sidecar it no longer
+# runs (helm-charts ddf5332); nothing in the chart mounts that Secret. Kept so
+# existing callers keep planning; remove it from your configuration.
 variable "np_api_key" {
   type        = string
   sensitive   = true
-  description = "Nullplatform API key for authentication (account level)."
+  default     = null
+  description = "Deprecated, ignored: the base chart no longer needs an API key. The agent's key is api_key in nullplatform/agent."
 }
 
 variable "k8s_provider" {
@@ -131,14 +136,15 @@ variable "gateway_private_aws_dns_name" {
 
 variable "control_plane_enabled" {
   type        = bool
-  description = "Enable the control plane."
-  default     = false
+  default     = null
+  description = "Deprecated, ignored: the base chart no longer runs a control plane agent; the flag only created an unused Secret."
 }
 
 # Deprecated, no-op. The base chart stopped running a control plane agent
 # sidecar (helm-charts ddf5332); the agent is installed by nullplatform/agent,
-# whose image_tag is the one that matters. Kept so existing callers keep
-# planning; remove them from your configuration.
+# whose image_tag is the one that matters. Kept, like control_plane_enabled and
+# np_api_key, so existing callers keep planning; remove them from your
+# configuration.
 variable "control_plane_agent_image_repository" {
   type        = string
   description = "Deprecated, ignored: the base chart no longer runs a control plane agent. Configure the agent image in nullplatform/agent."
@@ -602,7 +608,7 @@ variable "ingressControllers" {
 # error) instead of silently ignoring values callers still pass.
 check "control_plane_agent_inputs_deprecated" {
   assert {
-    condition     = var.control_plane_agent_image_tag == null && var.control_plane_agent_image_repository == null
-    error_message = "control_plane_agent_image_tag and control_plane_agent_image_repository are deprecated and ignored: the base chart no longer runs a control plane agent. Remove them; the agent image is image_tag in nullplatform/agent."
+    condition     = var.control_plane_agent_image_tag == null && var.control_plane_agent_image_repository == null && var.control_plane_enabled == null && var.np_api_key == null
+    error_message = "control_plane_enabled, control_plane_agent_image_tag, control_plane_agent_image_repository and np_api_key are deprecated and ignored: the base chart no longer runs a control plane agent nor needs an API key. Remove them; the agent image and key live in nullplatform/agent (image_tag, api_key)."
   }
 }
