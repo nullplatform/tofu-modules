@@ -9,7 +9,9 @@ set -euo pipefail
 #
 # Exit 0 when every pin is current, 1 when something is behind or unreadable.
 
-DOC="$(dirname "$0")/../VERSIONS.md"
+# VERSIONS_DOC lets CI run this script against a checkout of another ref, and
+# lets a test point it at a fixture.
+DOC="${VERSIONS_DOC:-$(dirname "$0")/../VERSIONS.md}"
 MARKDOWN=0
 WRITE=0
 

@@ -26,7 +26,17 @@ jobs:
       - name: Check upstream versions
         id: check
         run: |
-          ./scripts/check-versions-upstream.sh --markdown > report.md || echo "drift=1" >> "$GITHUB_OUTPUT"
+          # Exit 1 means drift or an unreadable row, which is a result. Anything
+          # else means the check itself did not run, and must not pass silently.
+          set +e
+          ./scripts/check-versions-upstream.sh --markdown > report.md
+          rc=$?
+          set -e
+          case "$rc" in
+            0) echo "drift=0" >> "$GITHUB_OUTPUT" ;;
+            1) echo "drift=1" >> "$GITHUB_OUTPUT" ;;
+            *) echo "::error::check-versions-upstream.sh did not run (exit $rc)"; exit 1 ;;
+          esac
 
       - name: Publish report
         run: |
@@ -56,33 +66,50 @@ jobs:
       group: versions-bump
       cancel-in-progress: true
     steps:
-      # Branch off main, never off the pull request: the bump has to stand alone.
       - uses: actions/checkout@v4
         with:
-          ref: main
           fetch-depth: 0
+
+      # What has to come from main is the document being bumped, not the checker.
+      # Running this ref's checker means a change to it is exercised by its own
+      # pull request, and that this workflow works before it reaches main.
+      - name: Take the checker aside and move to main
+        run: |
+          set -euo pipefail
+          cp scripts/check-versions-upstream.sh /tmp/check-versions-upstream.sh
+          git fetch --quiet origin main
+          git switch --quiet -c chore/versions-bump origin/main
 
       - name: Apply bumps
         id: apply
+        env:
+          VERSIONS_DOC: VERSIONS.md
         run: |
-          ./scripts/check-versions-upstream.sh --write > /dev/null || true
+          set +e
+          /tmp/check-versions-upstream.sh --write > /dev/null
+          rc=$?
+          set -e
+          if [ "$rc" -gt 1 ]; then
+            echo "::error::check-versions-upstream.sh did not run (exit $rc)"
+            exit 1
+          fi
           if git diff --quiet -- VERSIONS.md; then
             echo "changed=0" >> "$GITHUB_OUTPUT"
           else
             echo "changed=1" >> "$GITHUB_OUTPUT"
-            ./scripts/check-versions-upstream.sh --markdown > /tmp/report.md || true
+            /tmp/check-versions-upstream.sh --markdown > /tmp/report.md || true
           fi
 
       - name: Open or update the pull request
         if: steps.apply.outputs.changed == '1'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSIONS_DOC: VERSIONS.md
         run: |
           set -euo pipefail
           BRANCH=chore/versions-bump
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git checkout -B "$BRANCH"
           git add VERSIONS.md
           git commit -m 'chore(versions): bump documented versions to current upstream'
           git push -f origin "$BRANCH"
