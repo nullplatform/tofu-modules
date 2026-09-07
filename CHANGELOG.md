@@ -1,5 +1,18 @@
 # Changelog
 
+## [7.4.0](https://github.com/nullplatform/tofu-modules/compare/v7.3.1...v7.4.0) (2026-09-07)
+
+
+### Features
+
+* **packages:** artifact lookup by tag and across visibility (provider 0.0.102) ([fa51676](https://github.com/nullplatform/tofu-modules/commit/fa5167646f60077975e7b88a72cc32173fd36b4b))
+* **packages:** artifact lookup by tag and across visibility (provider 0.0.102) ([#568](https://github.com/nullplatform/tofu-modules/issues/568)) ([1a13ec9](https://github.com/nullplatform/tofu-modules/commit/1a13ec9f5d228ab91c51f09c2459d66a64abd36e))
+
+
+### Bug Fixes
+
+* restore the two tracked .terraform.lock.hcl files deleted by accident ([8e728a8](https://github.com/nullplatform/tofu-modules/commit/8e728a86292454da0325650a1d82152cecdaf2a8))
+
 ## [7.3.1](https://github.com/nullplatform/tofu-modules/compare/v7.3.0...v7.3.1) (2026-09-04)
 
 
