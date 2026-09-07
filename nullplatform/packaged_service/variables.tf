@@ -22,6 +22,11 @@ variable "components" {
       look up   { type = "oci_image", meta = {…}, lookup = true }   # resolve by identity
       pin       { resource_id = "…", resource_revision_id = "…" }   # existing ids
     `type` defaults to "oci_image"; `name` (optional) labels it in the BOM/outputs.
+    Lookup resolves artifacts VISIBLE at the nrn — owned, ancestor-shared, or
+    global ("organization=*") — and the lookup meta may pin a revision by
+    digest, by reference (git), or by tag (oci_image: the NEWEST revision
+    registered with that tag wins; a moved tag drifts to the new digest by
+    design). Requires provider >= 0.0.102.
   EOT
   # `any`, not list(object({... resource = any ...})): inside a homogeneous list
   # Terraform unifies the `any` across every element, so a service_specification

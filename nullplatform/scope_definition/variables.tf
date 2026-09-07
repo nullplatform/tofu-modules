@@ -191,9 +191,13 @@ variable "package" {
         `lookup = true` + `meta` with the identity fields (e.g. registry +
         repository for oci_image, or url for git_repository); add the
         type's own per-revision field to pin a specific revision (digest,
-        formatted "sha256:<64-hex>", for oci_image; reference, e.g. a tag,
-        for git_repository — the API rejects the other type's field name),
-        otherwise the latest revision is used;
+        formatted "sha256:<64-hex>", or tag, resolving the NEWEST revision
+        registered with it, for oci_image — a moved tag drifts to the new
+        digest by design; reference, e.g. a tag, for git_repository),
+        otherwise the latest revision is used. Lookup resolves artifacts
+        VISIBLE at var.nrn — owned there, shared by ancestors, or published
+        globally with "organization=*" (nullplatform's own scope images) —
+        requiring provider >= 0.0.102;
       • pin explicit ids — set `resource_id` + `resource_revision_id`.
 
     For an "oci_image" artifact (the default type), `name` defaults to
