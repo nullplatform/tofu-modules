@@ -108,15 +108,20 @@ mutable ref from a fixed one by name alone.
 
 ## Keeping this current
 
-There is no automation that bumps these numbers, on purpose. Bumping a documented version to
-whatever is newest would put the drift back in documentation form, and it contradicts the rule
-above about pinning what you already run. When a new version ships, someone decides and edits
-this table.
+These numbers are never bumped without someone deciding. What is automated is the typing, not
+the decision: `scripts/check-versions-upstream.sh` compares every row against its upstream, and
+`.github/workflows/versions-drift.yml` runs it on each pull request and monthly. On drift it
+opens one dedicated pull request with the bump already written, and updates that same pull
+request in place rather than touching anyone else's branch. Merging it is the decision. Nothing
+reaches `main` on its own, a row held back on purpose is reported as frozen and left unedited,
+and a row whose upstream could not be read blocks the rewrite instead of guessing. Bumping a
+documented version to whatever is newest *unreviewed* is what would put the drift back in
+documentation form, and would contradict the rule above about pinning what you already run.
 
-What is automated is the opposite direction: `scripts/check-version-pinning.sh` rejects a *new*
-moving default, a repository URL pinned to a branch, or a `helm_release` with no `version`. It
-runs in pre-commit and again as a step in the `terraform-lint` workflow, so skipping the local
-hook does not skip the check. Deliberately deferred violations live in
+The opposite direction is enforced rather than merely reported: `scripts/check-version-pinning.sh`
+rejects a *new* moving default, a repository URL pinned to a branch, or a `helm_release` with no
+`version`. It runs in pre-commit and again as a step in the `terraform-lint` workflow, so
+skipping the local hook does not skip the check. Deliberately deferred violations live in
 `scripts/version-pinning-baseline.txt` with the reason; that file should only ever shrink.
 
 One trap worth knowing before bumping an image by hand: **`k8s-traffic-manager` publishes a
