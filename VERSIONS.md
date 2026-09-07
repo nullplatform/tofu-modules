@@ -117,6 +117,18 @@ rather than bumped: Istio 1.30's release notes warn that upgrading these CRDs wi
 Istio leaves `TLSRoute` and `ReferenceGrant` invisible to istiod. Bump it together with
 `istio_base_version` and `istiod_version`, after re-reading istio.io for that release.
 
+It is also applied on every install *and upgrade*, not only on first install: the base chart runs
+`kubectl kustomize "github.com/kubernetes-sigs/gateway-api/config/crd?ref=<ref>" | kubectl apply
+--server-side --force-conflicts`, so the ref is resolved against GitHub on each apply and the
+cluster's CRDs are reconciled to it. A branch there would be followed silently on every upgrade.
+
+**Two places set that ref, and they do not agree.** The `nullplatform/base` module always passes
+its own value through (`locals.tf`), so a module user gets the `v1.5.1` in the table above. The
+chart's own default is still `v1.3.0`, which is what Istio 1.27 documented — so installing
+`nullplatform-base` directly, without the module, lands Gateway API `v1.3.0` CRDs under the Istio
+`1.30.4` these modules deploy, which is the mismatch the paragraph above warns about. The table
+tracks the module value; the chart default is a separate fix in `nullplatform/helm-charts`.
+
 **A name cannot prove immutability.** The checks below reject `latest`, `main`, `master` and
 `HEAD`. A tag called `beta` or a branch called `develop` passes. Nothing distinguishes a
 mutable ref from a fixed one by name alone.
