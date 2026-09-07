@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.4.1](https://github.com/nullplatform/tofu-modules/compare/v7.4.0...v7.4.1) (2026-09-07)
+
+
+### Bug Fixes
+
+* **agent:** render the worker block with indent so long strings keep no newline ([#566](https://github.com/nullplatform/tofu-modules/issues/566)) ([1c838e5](https://github.com/nullplatform/tofu-modules/commit/1c838e5085aac0310ba8a98d0b0c5e5bed42898b))
+
 ## [7.4.0](https://github.com/nullplatform/tofu-modules/compare/v7.3.1...v7.4.0) (2026-09-07)
 
 

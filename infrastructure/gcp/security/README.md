@@ -22,7 +22,7 @@ The module uses data.google_container_cluster to derive the VPC network name and
 
 ```hcl
 module "security" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/security?ref=v7.4.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/gcp/security?ref=v7.4.1"
 
   cluster_name   = "your-cluster-name"
   gcp_project_id = "your-gcp-project-id"
