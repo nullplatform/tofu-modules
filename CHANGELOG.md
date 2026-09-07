@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.4.2](https://github.com/nullplatform/tofu-modules/compare/v7.4.1...v7.4.2) (2026-09-07)
+
+
+### Bug Fixes
+
+* **base:** stop requiring a control plane image and an API key the chart no longer uses ([#567](https://github.com/nullplatform/tofu-modules/issues/567)) ([a0d6865](https://github.com/nullplatform/tofu-modules/commit/a0d68658c75fd062953320163030b3063707847c))
+
 ## [7.4.1](https://github.com/nullplatform/tofu-modules/compare/v7.4.0...v7.4.1) (2026-09-07)
 
 
