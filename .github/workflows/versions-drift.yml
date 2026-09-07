@@ -1,9 +1,9 @@
 name: Versions Drift
 
-# The versions in VERSIONS.md move upstream, not here, so this looks for newer
-# releases on every pull request as well as on a schedule. The bump never lands
-# on the contributor's branch: it goes to one dedicated pull request, updated in
-# place, so an unrelated review never has to adjudicate a version bump.
+# The versions in VERSIONS.md move upstream, not here, so this reports newer
+# releases on every pull request and weekly. It only reports: the table itself is
+# refreshed in the release pull request by the generate-readmes job in
+# release.yml, the same place the module READMEs are regenerated.
 
 on:
   pull_request:
@@ -28,6 +28,8 @@ jobs:
 
       - name: Check upstream versions
         id: check
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           # Exit 1 means drift or an unreadable row, which is a result. Anything
           # else means the check itself did not run, and must not pass silently.
@@ -49,102 +51,8 @@ jobs:
             cat report.md
             echo
             if [ "${{ steps.check.outputs.drift }}" = "1" ]; then
-              echo 'Something is behind. The bump lands in its own pull request, not this one.'
+              echo 'Something is behind. The table is refreshed in the release pull request.'
             else
               echo 'Every pin is current.'
             fi
           } >> "$GITHUB_STEP_SUMMARY"
-
-  bump:
-    name: Open bump pull request
-    runs-on: ubuntu-latest
-    # A fork pull request gets a read-only token, so it can report but not push.
-    if: >-
-      github.event_name != 'pull_request' ||
-      github.event.pull_request.head.repo.full_name == github.repository
-    permissions:
-      contents: write
-      pull-requests: write
-    concurrency:
-      group: versions-bump
-      cancel-in-progress: true
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      # What has to come from main is the document being bumped, not the checker.
-      # Running this ref's checker means a change to it is exercised by its own
-      # pull request, and that this workflow works before it reaches main.
-      - name: Take the checker aside and move to main
-        id: prepare
-        run: |
-          set -euo pipefail
-          cp scripts/check-versions-upstream.sh /tmp/check-versions-upstream.sh
-          git fetch --quiet origin main
-          # A pull request that already edits VERSIONS.md is handling the versions
-          # itself. Opening a bump pull request next to it would leave two open
-          # proposals for the same rows.
-          if [ "${{ github.event_name }}" = 'pull_request' ] &&
-             git diff --name-only origin/main...HEAD | grep -qx VERSIONS.md; then
-            echo 'This pull request edits VERSIONS.md, so no separate bump is opened.' \
-              >> "$GITHUB_STEP_SUMMARY"
-            echo "skip=1" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          git switch --quiet -c chore/versions-bump origin/main
-
-      - name: Apply bumps
-        id: apply
-        if: steps.prepare.outputs.skip != '1'
-        env:
-          VERSIONS_DOC: VERSIONS.md
-        run: |
-          set +e
-          /tmp/check-versions-upstream.sh --write > /dev/null
-          rc=$?
-          set -e
-          if [ "$rc" -gt 1 ]; then
-            echo "::error::check-versions-upstream.sh did not run (exit $rc)"
-            exit 1
-          fi
-          if git diff --quiet -- VERSIONS.md; then
-            echo "changed=0" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=1" >> "$GITHUB_OUTPUT"
-            /tmp/check-versions-upstream.sh --markdown > /tmp/report.md || true
-          fi
-
-      - name: Open or update the pull request
-        if: steps.apply.outputs.changed == '1'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSIONS_DOC: VERSIONS.md
-        run: |
-          set -euo pipefail
-          BRANCH=chore/versions-bump
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add VERSIONS.md
-          git commit -m 'chore(versions): bump documented versions to current upstream'
-          git push -f origin "$BRANCH"
-
-          {
-            echo 'Upstream has newer releases than the versions documented in `VERSIONS.md`.'
-            echo
-            cat /tmp/report.md
-            echo
-            echo 'Merging is the deliberate decision the document asks for. Before merging:'
-            echo
-            echo '- Check the build dates, not the version numbers. A higher number can be an older build.'
-            echo '- A row held back on purpose is reported as frozen and is not edited here.'
-            echo '- These are the versions we recommend pinning, so a bump changes what customers copy.'
-          } > /tmp/body.md
-
-          if [ -z "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[].number')" ]; then
-            gh pr create --base main --head "$BRANCH" \
-              --title 'chore(versions): bump documented versions to current upstream' \
-              --body-file /tmp/body.md
-          else
-            gh pr edit "$BRANCH" --body-file /tmp/body.md
-          fi

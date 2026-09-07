@@ -33,6 +33,9 @@ upstream_for() {
     '`nullplatform-agent` chart')       echo 'gh-tag:nullplatform/helm-charts:nullplatform-agent-' ;;
     '`cert-manager` chart')             echo 'gh-release:cert-manager/cert-manager' ;;
     '`prometheus` chart')               echo 'helm-index:https://prometheus-community.github.io/helm-charts/index.yaml:prometheus' ;;
+    '`istio-base` chart')               echo 'helm-index:https://istio-release.storage.googleapis.com/charts/index.yaml:base' ;;
+    '`istiod` chart')                   echo 'helm-index:https://istio-release.storage.googleapis.com/charts/index.yaml:istiod' ;;
+    '`gateway-api` CRDs')               echo 'frozen:kubernetes-sigs/gateway-api' ;;
     '`k8s-logs-controller`')            echo 'ecr:nullplatform/k8s-logs-controller' ;;
     '`controlplane-agent`')             echo 'ecr:nullplatform/controlplane-agent' ;;
     '`k8s-traffic-manager`')            echo 'ecr:nullplatform/k8s-traffic-manager' ;;
@@ -48,6 +51,9 @@ hcl_vars_for() {
     '`nullplatform-agent` chart')       echo 'nullplatform_agent_helm_version' ;;
     '`cert-manager` chart')             echo 'cert_manager_version' ;;
     '`prometheus` chart')               echo 'prometheus_version' ;;
+    '`istio-base` chart')               echo 'istio_base_version' ;;
+    '`istiod` chart')                   echo 'istiod_version' ;;
+    '`gateway-api` CRDs')               echo 'gateway_api_crd_ref' ;;
     '`k8s-logs-controller`')            echo 'logging_controller_image_tag' ;;
     '`controlplane-agent`')             echo 'control_plane_agent_image_tag image_tag' ;;
     '`k8s-traffic-manager`')            echo 'agent_traffic_manager_tag' ;;
@@ -69,6 +75,7 @@ exempt_var() {
 frozen_reason() {
   case "$1" in
     '`scopes` repository') echo 'pinned deliberately to the ref named in the migration request; see Caveats' ;;
+    '`gateway-api` CRDs') echo 'follows the version Istio documents installing, not its own latest; bump it with Istio' ;;
     *) echo 'held by hand' ;;
   esac
 }

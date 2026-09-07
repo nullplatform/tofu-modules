@@ -22,6 +22,9 @@ Verified 2026-09-07.
 | `nullplatform-agent` chart | `3.0.0` | `nullplatform_agent_helm_version` | `nullplatform/agent` |
 | `cert-manager` chart | `v1.21.1` | `cert_manager_version` | `infrastructure/commons/cert_manager` |
 | `prometheus` chart | `29.27.2` | `prometheus_version` | `infrastructure/commons/prometheus` |
+| `istio-base` chart | `1.30.4` | `istio_base_version` | `infrastructure/commons/istio` |
+| `istiod` chart | `1.30.4` | `istiod_version` | `infrastructure/commons/istio` |
+| `gateway-api` CRDs | `v1.5.1` | `gateway_api_crd_ref` | `nullplatform/base` |
 | `k8s-logs-controller` | `1.6.1` | `logging_controller_image_tag` | `nullplatform/base` |
 | `k8s-traffic-manager` | `1.8.0` | `agent_traffic_manager_tag` | `nullplatform/agent` |
 | traffic manager (provider config) | `1.8.0` | `traffic_manager_version` | `container_orchestration/eks` |
@@ -38,6 +41,7 @@ at deploy time, so what you run may not match the table: `cert_manager_version`,
 module "base" {
   nullplatform_base_helm_version = "2.44.5"
   logging_controller_image_tag   = "1.6.1"
+  gateway_api_crd_ref            = "v1.5.1"
 }
 
 module "agent" {
@@ -63,6 +67,11 @@ module "cert_manager" {
 
 module "prometheus" {
   prometheus_version = "29.27.2"
+}
+
+module "istio" {
+  istio_base_version = "1.30.4"
+  istiod_version     = "1.30.4"
 }
 
 module "service_definition" {
@@ -102,21 +111,33 @@ branch. Pinning `agent_repos_scope` does not cover them: the agent clones the re
 definition modules read the branch. They are listed in
 `scripts/version-pinning-baseline.txt` with the reason.
 
+**The gateway-api CRD ref follows Istio, not its own latest.** `gateway_api_crd_ref` is pinned to
+the version Istio's own version-pinned docs document installing, so it is reported as frozen
+rather than bumped: Istio 1.30's release notes warn that upgrading these CRDs without upgrading
+Istio leaves `TLSRoute` and `ReferenceGrant` invisible to istiod. Bump it together with
+`istio_base_version` and `istiod_version`, after re-reading istio.io for that release.
+
 **A name cannot prove immutability.** The checks below reject `latest`, `main`, `master` and
 `HEAD`. A tag called `beta` or a branch called `develop` passes. Nothing distinguishes a
 mutable ref from a fixed one by name alone.
 
 ## Keeping this current
 
-These numbers are never bumped without someone deciding. What is automated is the typing, not
-the decision: `scripts/check-versions-upstream.sh` compares every row against its upstream, and
-`.github/workflows/versions-drift.yml` runs it on each pull request and every Monday. On drift it
-opens one dedicated pull request with the bump already written, and updates that same pull
-request in place rather than touching anyone else's branch. Merging it is the decision. Nothing
-reaches `main` on its own, a row held back on purpose is reported as frozen and left unedited,
-and a row whose upstream could not be read blocks the rewrite instead of guessing. Bumping a
-documented version to whatever is newest *unreviewed* is what would put the drift back in
-documentation form, and would contradict the rule above about pinning what you already run.
+This table is refreshed the same way the module READMEs are, and for the same reason: it is
+derived from state that lives outside this repository. The `generate-readmes` job in
+`release.yml` runs `scripts/check-versions-upstream.sh --write` against the open release pull
+request on every push to `main`, so the release carries an up-to-date table and merging it is
+the decision. Nothing reaches `main` on its own.
+
+What is automated is the typing, not the decision. A row held back on purpose is reported as
+frozen and left unedited; a row whose upstream could not be read blocks the rewrite instead of
+guessing; a newest build carrying a lower version number than the pin is reported rather than
+written. Bumping a documented version to whatever is newest *unreviewed* is what would put the
+drift back in documentation form, and would contradict the rule above about pinning what you
+already run.
+
+`.github/workflows/versions-drift.yml` reports the same comparison on each pull request and every
+Monday, so drift is visible between releases without waiting for one.
 
 The opposite direction is enforced rather than merely reported: `scripts/check-version-pinning.sh`
 rejects a *new* moving default, a repository URL pinned to a branch, or a `helm_release` with no
