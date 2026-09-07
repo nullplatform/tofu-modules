@@ -55,13 +55,7 @@ locals {
       gateway_private_oci_subnet                        = var.gateway_private_oci_subnet
 
       # ---- nullplatform ----
-      np_api_key = var.np_api_key
       # You left secretName empty in the template; if you want to make it configurable, add var.nullplatform_secret_name
-
-      # ---- controlPlane ----
-      controlPlane_enabled                 = var.control_plane_enabled ? "true" : "false"
-      control_plane_agent_image_repository = var.control_plane_agent_image_repository
-      control_plane_agent_image_tag        = var.control_plane_agent_image_tag
 
       # ---- logging ----
       logging_enabled                     = var.logging_enabled ? "true" : "false"

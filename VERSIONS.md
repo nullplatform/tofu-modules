@@ -23,7 +23,6 @@ Verified 2026-08-27.
 | `cert-manager` chart | `v1.21.1` | `cert_manager_version` | `infrastructure/commons/cert_manager` |
 | `prometheus` chart | `29.27.0` | `prometheus_version` | `infrastructure/commons/prometheus` |
 | `k8s-logs-controller` | `1.6.0` | `logging_controller_image_tag` | `nullplatform/base` |
-| `controlplane-agent` | `0.9.2` | `control_plane_agent_image_tag` | `nullplatform/base` |
 | `k8s-traffic-manager` | `1.8.0` | `agent_traffic_manager_tag` | `nullplatform/agent` |
 | traffic manager (provider config) | `1.8.0` | `traffic_manager_version` | `container_orchestration/eks` |
 | `scopes` repository | `v1.15.1` | `agent_repo` (as `"https://github.com/nullplatform/scopes.git#v1.15.1"`) | `nullplatform/agent` |
@@ -39,7 +38,6 @@ at deploy time, so what you run may not match the table: `cert_manager_version`,
 module "base" {
   nullplatform_base_helm_version = "2.44.0"
   logging_controller_image_tag   = "1.6.0"
-  control_plane_agent_image_tag  = "0.9.2"
 }
 
 module "agent" {
