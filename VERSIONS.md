@@ -110,7 +110,7 @@ mutable ref from a fixed one by name alone.
 
 These numbers are never bumped without someone deciding. What is automated is the typing, not
 the decision: `scripts/check-versions-upstream.sh` compares every row against its upstream, and
-`.github/workflows/versions-drift.yml` runs it on each pull request and monthly. On drift it
+`.github/workflows/versions-drift.yml` runs it on each pull request and every Monday. On drift it
 opens one dedicated pull request with the bump already written, and updates that same pull
 request in place rather than touching anyone else's branch. Merging it is the decision. Nothing
 reaches `main` on its own, a row held back on purpose is reported as frozen and left unedited,

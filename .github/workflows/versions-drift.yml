@@ -10,7 +10,10 @@ on:
     branches: [ main ]
     types: [opened, synchronize, reopened]
   schedule:
-    - cron: '0 6 1 * *'
+    # Mondays 09:00 in GMT-3, which has no daylight saving, so 12:00 UTC all year.
+    # GitHub can delay a scheduled run under load, so treat the day as the promise,
+    # not the minute.
+    - cron: '0 12 * * 1'
   workflow_dispatch:
 
 permissions:
