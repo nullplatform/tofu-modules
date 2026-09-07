@@ -39,11 +39,16 @@ variable "repository_branch" {
     points at is its own choice, so there is no version anyone could pick for it.
 
     Combine with repository_ref_type, which selects the namespace this name lives in.
+
+    Not read when git_provider = "local": specs come from local_specs_path and no
+    spec repository is fetched, so the pinned-ref rule below does not apply there.
   EOT
 
   validation {
-    condition     = var.repository_branch != "" && !contains(["main", "master", "head", "latest"], lower(var.repository_branch))
-    error_message = "repository_branch must be a non-empty pinned ref, not empty and not a moving branch."
+    condition = var.git_provider == "local" || (
+      var.repository_branch != "" && !contains(["main", "master", "head", "latest"], lower(var.repository_branch))
+    )
+    error_message = "repository_branch must be a non-empty pinned ref, not empty and not a moving branch. Only git_provider = \"local\" is exempt, since it reads no spec repository."
   }
 }
 
