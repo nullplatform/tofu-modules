@@ -52,7 +52,16 @@ hcl_vars_for() {
     '`controlplane-agent`')             echo 'control_plane_agent_image_tag image_tag' ;;
     '`k8s-traffic-manager`')            echo 'agent_traffic_manager_tag' ;;
     'traffic manager (provider config)') echo 'traffic_manager_version' ;;
+    '`scopes` repository')              echo 'agent_repos_scope_tag' ;;
     *) echo '' ;;
+  esac
+}
+
+# Variables in the paste block that no table row is expected to govern.
+exempt_var() {
+  case "$1" in
+    repository_branch) return 0 ;;
+    *) return 1 ;;
   esac
 }
 
@@ -213,6 +222,22 @@ while IFS='|' read -r _ component pinned _; do
   fi
 done < <(awk '/^\| /{print}' "$DOC")
 
+# A version in the Ready-to-paste block with no row governing it drifts silently:
+# nothing compares it against upstream. Reported, but it does not block a bump,
+# because the versions themselves were read fine.
+NOTES=()
+COVERED=" "
+for row in "${ROWS[@]}"; do
+  IFS='|' read -r c _ _ _ <<<"$row"
+  for v in $(hcl_vars_for "$c"); do COVERED="$COVERED$v "; done
+done
+while read -r var; do
+  [ -n "$var" ] || continue
+  exempt_var "$var" && continue
+  case "$COVERED" in *" $var "*) continue ;; esac
+  NOTES+=("\`$var\` is set in the Ready-to-paste block but no table row governs it, so nothing checks it against upstream")
+done < <(awk '/^```hcl/{inblock=1; next} inblock && /^```/{inblock=0} inblock && match($0, /^[[:space:]]+[a-z_]+[[:space:]]*=[[:space:]]*"[^"]+"/) {print $1}' "$DOC")
+
 if [ "$MARKDOWN" = 1 ]; then
   echo '| Component | Pinned | Latest upstream | Status |'
   echo '| --- | --- | --- | --- |'
@@ -220,12 +245,17 @@ if [ "$MARKDOWN" = 1 ]; then
     IFS='|' read -r c p l s <<<"$row"
     echo "| $c | \`$p\` | \`$l\` | $s |"
   done
+  if [ "${#NOTES[@]}" -gt 0 ]; then
+    echo
+    for n in "${NOTES[@]}"; do echo "- $n"; done
+  fi
 else
   printf '%-38s %-10s %-10s %s\n' 'COMPONENT' 'PINNED' 'LATEST' 'STATUS'
   for row in "${ROWS[@]}"; do
     IFS='|' read -r c p l s <<<"$row"
     printf '%-38s %-10s %-10s %s\n' "$c" "$p" "$l" "$s"
   done
+  for n in "${NOTES[@]-}"; do [ -n "$n" ] && echo "note: $n"; done
 fi
 
 # Any unreadable or unmapped row leaves the table's real state uncertain, so no
