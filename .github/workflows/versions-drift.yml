@@ -1,0 +1,58 @@
+name: Versions Drift
+
+# The versions in VERSIONS.md move upstream, not here, so this reports newer
+# releases on every pull request and weekly. It only reports: the table itself is
+# refreshed in the release pull request by the generate-readmes job in
+# release.yml, the same place the module READMEs are regenerated.
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened]
+  schedule:
+    # Mondays 09:00 in GMT-3, which has no daylight saving, so 12:00 UTC all year.
+    # GitHub can delay a scheduled run under load, so treat the day as the promise,
+    # not the minute.
+    - cron: '0 12 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    name: Report drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check upstream versions
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          # Exit 1 means drift or an unreadable row, which is a result. Anything
+          # else means the check itself did not run, and must not pass silently.
+          set +e
+          ./scripts/check-versions-upstream.sh --markdown > report.md
+          rc=$?
+          set -e
+          case "$rc" in
+            0) echo "drift=0" >> "$GITHUB_OUTPUT" ;;
+            1) echo "drift=1" >> "$GITHUB_OUTPUT" ;;
+            *) echo "::error::check-versions-upstream.sh did not run (exit $rc)"; exit 1 ;;
+          esac
+
+      - name: Publish report
+        run: |
+          {
+            echo '## Pinned versions vs upstream'
+            echo
+            cat report.md
+            echo
+            if [ "${{ steps.check.outputs.drift }}" = "1" ]; then
+              echo 'Something is behind. The table is refreshed in the release pull request.'
+            else
+              echo 'Every pin is current.'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
