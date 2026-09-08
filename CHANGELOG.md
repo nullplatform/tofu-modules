@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.6.0](https://github.com/nullplatform/tofu-modules/compare/v7.5.0...v7.6.0) (2026-09-08)
+
+
+### Features
+
+* **agent:** select the worker ingress stack with worker_ingress instead of three template paths ([#576](https://github.com/nullplatform/tofu-modules/issues/576)) ([1579cb5](https://github.com/nullplatform/tofu-modules/commit/1579cb593842619f76fc48bcd6e2a04e82e449ac))
+
 ## [7.5.0](https://github.com/nullplatform/tofu-modules/compare/v7.4.2...v7.5.0) (2026-09-08)
 
 
