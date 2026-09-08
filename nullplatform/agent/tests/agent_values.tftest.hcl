@@ -358,3 +358,78 @@ run "long_worker_patch_strings_survive_rendering" {
     error_message = "a worker patch string longer than the yamlencode fold width must not pick up a newline when the values are rendered"
   }
 }
+
+################################################################################
+# worker_ingress
+################################################################################
+
+# The k8s scope only knows which ingress stack to deploy through the three
+# template paths; nothing reads an INGRESS_TYPE. The default keeps the scope's
+# own (ALB Ingress) templates by sending empty values.
+run "worker_ingress_defaults_to_alb_and_leaves_the_scope_templates" {
+  command = plan
+
+  assert {
+    condition = alltrue([
+      for key in ["SERVICE_TEMPLATE", "INITIAL_INGRESS_PATH", "BLUE_GREEN_INGRESS_PATH"] :
+      anytrue([
+        for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+        anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == key && e.value == ""])
+        if try(p.target.package, "") == "containers"
+      ])
+    ])
+    error_message = "with worker_ingress = alb the three template paths must render empty so the k8s scope uses its own templates"
+  }
+}
+
+run "worker_ingress_istio_derives_the_gateway_api_template_paths" {
+  command = plan
+
+  variables {
+    worker_ingress = "istio"
+  }
+
+  assert {
+    condition = alltrue([
+      for key, want in {
+        SERVICE_TEMPLATE        = "/app/pkg/k8s/deployment/templates/istio/service.yaml.tpl"
+        INITIAL_INGRESS_PATH    = "/app/pkg/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
+        BLUE_GREEN_INGRESS_PATH = "/app/pkg/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
+      } :
+      anytrue([
+        for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+        anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == key && e.value == want])
+        if try(p.target.package, "") == "containers"
+      ])
+    ])
+    error_message = "worker_ingress = istio must point the containers worker at the istio templates baked in the image"
+  }
+}
+
+run "explicit_template_paths_override_worker_ingress" {
+  command = plan
+
+  variables {
+    worker_ingress   = "istio"
+    service_template = "/custom/service.yaml.tpl"
+  }
+
+  assert {
+    condition = anytrue([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+      anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == "SERVICE_TEMPLATE" && e.value == "/custom/service.yaml.tpl"])
+      if try(p.target.package, "") == "containers"
+    ])
+    error_message = "an explicit service_template must win over the path worker_ingress derives"
+  }
+}
+
+run "worker_ingress_rejects_unknown_stacks" {
+  command = plan
+
+  variables {
+    worker_ingress = "nginx"
+  }
+
+  expect_failures = [var.worker_ingress]
+}
