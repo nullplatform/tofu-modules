@@ -55,14 +55,33 @@ locals {
     ) : k => v if v != null
   }
 
+  # Template paths per ingress stack. "alb" sends empty values so the k8s scope
+  # falls back to its own defaults (AWS Load Balancer Controller Ingress);
+  # "istio" points at the Gateway API templates the scopes/containers image
+  # bakes under /app/pkg/k8s/deployment/templates/istio. An explicit
+  # service_template / initial_ingress_path / blue_green_ingress_path wins.
+  worker_ingress_templates = {
+    alb = {
+      SERVICE_TEMPLATE        = ""
+      INITIAL_INGRESS_PATH    = ""
+      BLUE_GREEN_INGRESS_PATH = ""
+    }
+    istio = {
+      SERVICE_TEMPLATE        = "/app/pkg/k8s/deployment/templates/istio/service.yaml.tpl"
+      INITIAL_INGRESS_PATH    = "/app/pkg/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
+      BLUE_GREEN_INGRESS_PATH = "/app/pkg/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
+    }
+  }
+  worker_templates = local.worker_ingress_templates[var.worker_ingress]
+
   worker_default_env = {
     DNS_TYPE                = var.dns_type
     DOMAIN                  = var.domain
     USE_ACCOUNT_SLUG        = var.use_account_slug
     K8S_NAMESPACE           = var.namespace
-    SERVICE_TEMPLATE        = var.service_template
-    INITIAL_INGRESS_PATH    = var.initial_ingress_path
-    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
+    SERVICE_TEMPLATE        = var.service_template != "" ? var.service_template : local.worker_templates.SERVICE_TEMPLATE
+    INITIAL_INGRESS_PATH    = var.initial_ingress_path != "" ? var.initial_ingress_path : local.worker_templates.INITIAL_INGRESS_PATH
+    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path != "" ? var.blue_green_ingress_path : local.worker_templates.BLUE_GREEN_INGRESS_PATH
     TRAFFIC_CONTAINER_IMAGE = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
     IMAGE_PULL_SECRETS      = var.image_pull_secrets
     PRIVATE_GATEWAY_NAME    = var.private_gateway_name
