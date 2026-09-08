@@ -14,11 +14,11 @@ a specific release, so an upgrade is something someone decides.
 
 ## What to pin
 
-Verified 2026-09-07.
+Verified 2026-09-08.
 
 | Component | Current | Variable | Module |
 | --- | --- | --- | --- |
-| `nullplatform-base` chart | `2.44.5` | `nullplatform_base_helm_version` | `nullplatform/base` |
+| `nullplatform-base` chart | `2.44.6` | `nullplatform_base_helm_version` | `nullplatform/base` |
 | `nullplatform-agent` chart | `3.0.0` | `nullplatform_agent_helm_version` | `nullplatform/agent` |
 | `cert-manager` chart | `v1.21.1` | `cert_manager_version` | `infrastructure/commons/cert_manager` |
 | `prometheus` chart | `29.27.2` | `prometheus_version` | `infrastructure/commons/prometheus` |
@@ -39,7 +39,7 @@ at deploy time, so what you run may not match the table: `cert_manager_version`,
 
 ```hcl
 module "base" {
-  nullplatform_base_helm_version = "2.44.5"
+  nullplatform_base_helm_version = "2.44.6"
   logging_controller_image_tag   = "1.6.1"
   gateway_api_crd_ref            = "v1.5.1"
 }
