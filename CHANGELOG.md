@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.5.0](https://github.com/nullplatform/tofu-modules/compare/v7.4.2...v7.5.0) (2026-09-08)
+
+
+### Features
+
+* **ci:** keep VERSIONS.md current in the release PR ([#572](https://github.com/nullplatform/tofu-modules/issues/572)) ([8491cc3](https://github.com/nullplatform/tofu-modules/commit/8491cc3c35be7c42dbdd1c72c17060eb9838c258))
+
 ## [7.4.2](https://github.com/nullplatform/tofu-modules/compare/v7.4.1...v7.4.2) (2026-09-07)
 
 
