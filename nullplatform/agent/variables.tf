@@ -84,6 +84,25 @@ variable "worker_orchestrated_packages" {
   default     = ["containers"]
 }
 
+# Which worker-orchestrated packages run the k8s scope code and therefore need
+# its env (deploy/DNS templates, namespace, cluster name). "containers" is the
+# scope itself; overlays that run the same code from their own image, such as
+# scheduled task or datadog, need the very same variables and belong here too.
+variable "worker_k8s_packages" {
+  description = "Package slugs whose worker runs the k8s scope code and receives its env (DNS_TYPE, K8S_NAMESPACE, the template paths, TRAFFIC_CONTAINER_IMAGE, CLUSTER_NAME, extra_envs). Defaults to the containers scope; add overlays such as scheduled-task so they stop needing a hand-written patch."
+  type        = list(string)
+  default     = ["containers"]
+}
+
+# EKS cluster name for the k8s scope's create_role (it resolves the OIDC
+# provider from it). Previously it could only reach the worker through
+# extra_envs.
+variable "cluster_name" {
+  description = "Kubernetes cluster name the k8s scope's create_role uses to find the EKS OIDC provider. Published to the k8s workers as CLUSTER_NAME when set."
+  type        = string
+  default     = ""
+}
+
 variable "worker_memory_limit" {
   description = "Memory limit for a worker-orchestrated package's pod (packages in var.worker_orchestrated_packages). The chart's own default is small enough to OOM mid-tofu-apply for packages that run real IaC tooling."
   type        = string

@@ -74,19 +74,25 @@ locals {
   }
   worker_templates = local.worker_ingress_templates[var.worker_ingress]
 
-  worker_default_env = {
-    DNS_TYPE                = var.dns_type
-    DOMAIN                  = var.domain
-    USE_ACCOUNT_SLUG        = var.use_account_slug
-    K8S_NAMESPACE           = var.namespace
-    SERVICE_TEMPLATE        = var.service_template != "" ? var.service_template : local.worker_templates.SERVICE_TEMPLATE
-    INITIAL_INGRESS_PATH    = var.initial_ingress_path != "" ? var.initial_ingress_path : local.worker_templates.INITIAL_INGRESS_PATH
-    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path != "" ? var.blue_green_ingress_path : local.worker_templates.BLUE_GREEN_INGRESS_PATH
-    TRAFFIC_CONTAINER_IMAGE = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
-    IMAGE_PULL_SECRETS      = var.image_pull_secrets
-    PRIVATE_GATEWAY_NAME    = var.private_gateway_name
-    PUBLIC_GATEWAY_NAME     = var.public_gateway_name
-  }
+  worker_default_env = merge(
+    {
+      DNS_TYPE                = var.dns_type
+      DOMAIN                  = var.domain
+      USE_ACCOUNT_SLUG        = var.use_account_slug
+      K8S_NAMESPACE           = var.namespace
+      SERVICE_TEMPLATE        = var.service_template != "" ? var.service_template : local.worker_templates.SERVICE_TEMPLATE
+      INITIAL_INGRESS_PATH    = var.initial_ingress_path != "" ? var.initial_ingress_path : local.worker_templates.INITIAL_INGRESS_PATH
+      BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path != "" ? var.blue_green_ingress_path : local.worker_templates.BLUE_GREEN_INGRESS_PATH
+      TRAFFIC_CONTAINER_IMAGE = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
+      IMAGE_PULL_SECRETS      = var.image_pull_secrets
+      PRIVATE_GATEWAY_NAME    = var.private_gateway_name
+      PUBLIC_GATEWAY_NAME     = var.public_gateway_name
+    },
+    # scope/iam/create_role reads the cluster name from the env to find the EKS
+    # OIDC provider; only sent when set so an empty value cannot shadow one
+    # still passed through extra_envs.
+    var.cluster_name != "" ? { CLUSTER_NAME = var.cluster_name } : {},
+  )
 
   worker_cloud_config = {
     azure = {
@@ -126,26 +132,30 @@ locals {
     }
   ]
 
-  # k8s-deployment template env vars — specific to the "containers" scope's
-  # worker only, regardless of what's in var.worker_orchestrated_packages.
-  worker_container_patch = {
-    target = { package = "containers" }
-    merge = {
-      spec = {
-        containers = [
-          {
-            name = "worker"
-            env  = [for k, v in local.worker_all_config : { name = k, value = v }]
-          }
-        ]
+  # k8s scope env (deploy/DNS templates, namespace, cluster) — one patch per
+  # package in var.worker_k8s_packages: the "containers" worker by default,
+  # plus any package that runs the k8s scope code under an overlay (scheduled
+  # task, datadog, ...). Packages outside that list get none of it.
+  worker_k8s_env_patches = [
+    for pkg in var.worker_k8s_packages : {
+      target = { package = pkg }
+      merge = {
+        spec = {
+          containers = [
+            {
+              name = "worker"
+              env  = [for k, v in local.worker_all_config : { name = k, value = v }]
+            }
+          ]
+        }
       }
     }
-  }
+  ]
 
   worker_defaults = {
     backend           = "kubernetes"
     allowedRegistries = ["public.ecr.aws/nullplatform/*"]
-    patches           = concat(local.worker_common_patches, [local.worker_container_patch])
+    patches           = concat(local.worker_common_patches, local.worker_k8s_env_patches)
   }
 
   worker_final = merge(

@@ -433,3 +433,84 @@ run "worker_ingress_rejects_unknown_stacks" {
 
   expect_failures = [var.worker_ingress]
 }
+
+################################################################################
+# worker_k8s_packages / cluster_name
+################################################################################
+
+# Helper shape reused below: does the patch targeting `pkg` carry env `key`?
+run "k8s_env_reaches_only_the_containers_worker_by_default" {
+  command = plan
+
+  variables {
+    dns_type = "external_dns"
+  }
+
+  assert {
+    condition = anytrue([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+      anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == "DNS_TYPE" && e.value == "external_dns"])
+      if try(p.target.package, "") == "containers"
+    ])
+    error_message = "the containers worker must keep receiving the k8s scope env by default"
+  }
+
+  assert {
+    condition = length([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches : p
+      if try(p.target.package, "") != "containers" && length(try(p.merge.spec.containers[0].env, [])) > 0
+    ]) == 0
+    error_message = "no other package should receive the k8s scope env unless listed in worker_k8s_packages"
+  }
+}
+
+run "k8s_env_reaches_every_listed_package" {
+  command = plan
+
+  variables {
+    dns_type                     = "external_dns"
+    worker_orchestrated_packages = ["containers", "scheduled-task"]
+    worker_k8s_packages          = ["containers", "scheduled-task"]
+  }
+
+  assert {
+    condition = alltrue([
+      for pkg in ["containers", "scheduled-task"] :
+      anytrue([
+        for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+        anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == "DNS_TYPE" && e.value == "external_dns"])
+        if try(p.target.package, "") == pkg
+      ])
+    ])
+    error_message = "every package in worker_k8s_packages must get the k8s scope env, not just containers"
+  }
+}
+
+run "cluster_name_is_published_to_the_k8s_workers_when_set" {
+  command = plan
+
+  variables {
+    cluster_name = "my-eks"
+  }
+
+  assert {
+    condition = anytrue([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+      anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == "CLUSTER_NAME" && e.value == "my-eks"])
+      if try(p.target.package, "") == "containers"
+    ])
+    error_message = "cluster_name must reach the k8s worker as CLUSTER_NAME"
+  }
+}
+
+run "cluster_name_is_omitted_when_empty" {
+  command = plan
+
+  assert {
+    condition = !anytrue([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+      anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == "CLUSTER_NAME"])
+    ])
+    error_message = "an unset cluster_name must not publish an empty CLUSTER_NAME that would shadow extra_envs"
+  }
+}
