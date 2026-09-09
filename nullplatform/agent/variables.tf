@@ -84,21 +84,32 @@ variable "worker_orchestrated_packages" {
   default     = ["containers"]
 }
 
-# Which worker-orchestrated packages run the k8s scope code and therefore need
-# its env (deploy/DNS templates, namespace, cluster name). "containers" is the
-# scope itself; overlays that run the same code from their own image, such as
-# scheduled task or datadog, need the very same variables and belong here too.
+# Packages whose worker runs the k8s scope.
+#
+# The k8s scope is configured through env vars (DNS_TYPE, K8S_NAMESPACE, the
+# template paths, CLUSTER_NAME, ...). The module injects those vars into the
+# worker pod of every package listed here. "containers" is the k8s scope
+# itself. Other packages run the same k8s code from their own image with a
+# few steps replaced (scheduled-task, containers-datadog); they read the same
+# vars, so they belong in this list too.
+#
+#   worker_k8s_packages = ["containers", "scheduled-task"]
+#
+# Packages not listed here (s3, rds, lambda, ...) do not get these vars.
 variable "worker_k8s_packages" {
-  description = "Package slugs whose worker runs the k8s scope code and receives its env (DNS_TYPE, K8S_NAMESPACE, the template paths, TRAFFIC_CONTAINER_IMAGE, CLUSTER_NAME, extra_envs). Defaults to the containers scope; add overlays such as scheduled-task so they stop needing a hand-written patch."
+  description = "Package slugs whose worker runs the k8s scope and must receive its env vars (DNS_TYPE, K8S_NAMESPACE, template paths, CLUSTER_NAME, extra_envs). Add every package that runs the k8s scope code, e.g. [\"containers\", \"scheduled-task\"]."
   type        = list(string)
   default     = ["containers"]
 }
 
-# EKS cluster name for the k8s scope's create_role (it resolves the OIDC
-# provider from it). Previously it could only reach the worker through
-# extra_envs.
+# Name of the Kubernetes cluster the scopes are deployed to.
+#
+# The k8s scope uses it to find the cluster's OIDC provider when it creates
+# the IAM role for a scope. It reaches the workers as the CLUSTER_NAME env var.
+#
+#   cluster_name = module.eks.eks_cluster_name
 variable "cluster_name" {
-  description = "Kubernetes cluster name the k8s scope's create_role uses to find the EKS OIDC provider. Published to the k8s workers as CLUSTER_NAME."
+  description = "Name of the Kubernetes cluster the scopes run in. Sent to the k8s workers as CLUSTER_NAME; the k8s scope uses it to find the EKS OIDC provider when creating IAM roles."
   type        = string
   default     = ""
 }
