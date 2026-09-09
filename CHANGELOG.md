@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.7.0](https://github.com/nullplatform/tofu-modules/compare/v7.6.0...v7.7.0) (2026-09-09)
+
+
+### Features
+
+* **agent:** publish the k8s scope env to every k8s worker and take cluster_name as input ([#578](https://github.com/nullplatform/tofu-modules/issues/578)) ([cd1fc41](https://github.com/nullplatform/tofu-modules/commit/cd1fc41141f148123089d262f5105bf126e0f63f))
+
 ## [7.6.0](https://github.com/nullplatform/tofu-modules/compare/v7.5.0...v7.6.0) (2026-09-08)
 
 
