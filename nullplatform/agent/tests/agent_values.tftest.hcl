@@ -6,6 +6,7 @@ variables {
   tags_selectors                  = { dimension = "prod" }
   cloud_provider                  = "aws"
   aws_iam_role_arn                = "arn:aws:iam::123456789012:role/agent"
+  cluster_name                    = "test-cluster"
   image_tag                       = "0.9.2"
   nullplatform_agent_helm_version = "2.37.0"
   agent_traffic_manager_tag       = "1.8.0"
@@ -503,15 +504,32 @@ run "cluster_name_is_published_to_the_k8s_workers_when_set" {
   }
 }
 
-run "cluster_name_defaults_to_empty_like_the_other_scope_env" {
+run "cluster_name_is_required_on_aws" {
   command = plan
+
+  variables {
+    cluster_name = ""
+  }
+
+  expect_failures = [
+    terraform_data.cross_variable_validation,
+  ]
+}
+
+run "cluster_name_can_still_arrive_through_extra_envs" {
+  command = plan
+
+  variables {
+    cluster_name = ""
+    extra_envs   = { CLUSTER_NAME = "legacy-eks" }
+  }
 
   assert {
     condition = anytrue([
       for p in yamldecode(helm_release.agent.values[0]).worker.patches :
-      anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == "CLUSTER_NAME" && e.value == ""])
+      anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == "CLUSTER_NAME" && e.value == "legacy-eks"])
       if try(p.target.package, "") == "containers"
     ])
-    error_message = "an unset cluster_name renders as an empty CLUSTER_NAME, the same as every other unset scope variable"
+    error_message = "an existing installation passing CLUSTER_NAME through extra_envs must keep working"
   }
 }
