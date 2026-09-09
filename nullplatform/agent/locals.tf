@@ -86,6 +86,9 @@ locals {
     IMAGE_PULL_SECRETS      = var.image_pull_secrets
     PRIVATE_GATEWAY_NAME    = var.private_gateway_name
     PUBLIC_GATEWAY_NAME     = var.public_gateway_name
+    # Name of the EKS cluster. The k8s scope needs it to look up the cluster's
+    # OIDC provider when it creates the IAM role for a scope.
+    CLUSTER_NAME = var.cluster_name
   }
 
   worker_cloud_config = {
@@ -126,26 +129,49 @@ locals {
     }
   ]
 
-  # k8s-deployment template env vars — specific to the "containers" scope's
-  # worker only, regardless of what's in var.worker_orchestrated_packages.
-  worker_container_patch = {
-    target = { package = "containers" }
-    merge = {
-      spec = {
-        containers = [
-          {
-            name = "worker"
-            env  = [for k, v in local.worker_all_config : { name = k, value = v }]
-          }
-        ]
+  # Environment variables for the workers that run the k8s scope.
+  #
+  # The k8s scope reads its settings from env vars (DNS_TYPE, K8S_NAMESPACE,
+  # the template paths, CLUSTER_NAME, ...). local.worker_all_config holds all
+  # of them. This block turns that map into one pod patch per package listed
+  # in var.worker_k8s_packages, so every one of those workers boots with the
+  # same variables.
+  #
+  # With the default, var.worker_k8s_packages = ["containers"], the result is
+  # a single patch:
+  #
+  #   - target: { package: containers }
+  #     merge:
+  #       spec:
+  #         containers:
+  #           - name: worker
+  #             env:
+  #               - { name: DNS_TYPE, value: external_dns }
+  #               - { name: K8S_NAMESPACE, value: nullplatform }
+  #               ...
+  #
+  # With ["containers", "scheduled-task"] you get two patches with the same
+  # env, one per package. Packages not in the list get none of these vars.
+  worker_k8s_env_patches = [
+    for pkg in var.worker_k8s_packages : {
+      target = { package = pkg }
+      merge = {
+        spec = {
+          containers = [
+            {
+              name = "worker"
+              env  = [for k, v in local.worker_all_config : { name = k, value = v }]
+            }
+          ]
+        }
       }
     }
-  }
+  ]
 
   worker_defaults = {
     backend           = "kubernetes"
     allowedRegistries = ["public.ecr.aws/nullplatform/*"]
-    patches           = concat(local.worker_common_patches, [local.worker_container_patch])
+    patches           = concat(local.worker_common_patches, local.worker_k8s_env_patches)
   }
 
   worker_final = merge(

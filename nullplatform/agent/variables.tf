@@ -84,6 +84,38 @@ variable "worker_orchestrated_packages" {
   default     = ["containers"]
 }
 
+# Packages whose worker runs the k8s scope.
+#
+# The k8s scope is configured through env vars (DNS_TYPE, K8S_NAMESPACE, the
+# template paths, CLUSTER_NAME, ...). The module injects those vars into the
+# worker pod of every package listed here. "containers" is the k8s scope
+# itself. Other packages run the same k8s code from their own image with a
+# few steps replaced (scheduled-task, containers-datadog); they read the same
+# vars, so they belong in this list too.
+#
+#   worker_k8s_packages = ["containers", "scheduled-task"]
+#
+# Packages not listed here (s3, rds, lambda, ...) do not get these vars.
+variable "worker_k8s_packages" {
+  description = "Package slugs whose worker runs the k8s scope and must receive its env vars (DNS_TYPE, K8S_NAMESPACE, template paths, CLUSTER_NAME, extra_envs). Add every package that runs the k8s scope code, e.g. [\"containers\", \"scheduled-task\"]."
+  type        = list(string)
+  default     = ["containers"]
+}
+
+# Name of the Kubernetes cluster the scopes are deployed to.
+#
+# The k8s scope uses it to find the cluster's OIDC provider when it creates
+# the IAM role for a scope. It reaches the workers as the CLUSTER_NAME env var.
+# Required when cloud_provider is "aws" (enforced by a precondition in main.tf,
+# so a missing value fails at plan time instead of inside create-scope).
+#
+#   cluster_name = module.eks.eks_cluster_name
+variable "cluster_name" {
+  description = "Name of the Kubernetes cluster the scopes run in. Sent to the k8s workers as CLUSTER_NAME; the k8s scope uses it to find the EKS OIDC provider when creating IAM roles. Required when cloud_provider is 'aws'."
+  type        = string
+  default     = ""
+}
+
 variable "worker_memory_limit" {
   description = "Memory limit for a worker-orchestrated package's pod (packages in var.worker_orchestrated_packages). The chart's own default is small enough to OOM mid-tofu-apply for packages that run real IaC tooling."
   type        = string
