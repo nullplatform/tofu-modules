@@ -22,7 +22,7 @@ The module creates two kubernetes_namespace_v1 resources (nullplatform-tools and
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.7.0"
 
   k8s_provider                   = "your-k8s-provider"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
@@ -34,7 +34,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.7.0"
 
   k8s_provider                   = "eks"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
@@ -46,7 +46,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.7.0"
 
   k8s_provider                   = "gke"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
@@ -58,7 +58,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.7.0"
 
   k8s_provider                   = "aks"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
@@ -70,7 +70,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.7.0"
 
   k8s_provider                   = "oke"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
@@ -82,7 +82,7 @@ module "base" {
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.7.0"
 
   k8s_provider                   = "aro"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
