@@ -98,7 +98,7 @@ variable "worker_k8s_packages" {
 # provider from it). Previously it could only reach the worker through
 # extra_envs.
 variable "cluster_name" {
-  description = "Kubernetes cluster name the k8s scope's create_role uses to find the EKS OIDC provider. Published to the k8s workers as CLUSTER_NAME when set."
+  description = "Kubernetes cluster name the k8s scope's create_role uses to find the EKS OIDC provider. Published to the k8s workers as CLUSTER_NAME."
   type        = string
   default     = ""
 }

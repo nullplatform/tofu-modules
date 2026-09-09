@@ -503,14 +503,15 @@ run "cluster_name_is_published_to_the_k8s_workers_when_set" {
   }
 }
 
-run "cluster_name_is_omitted_when_empty" {
+run "cluster_name_defaults_to_empty_like_the_other_scope_env" {
   command = plan
 
   assert {
-    condition = !anytrue([
+    condition = anytrue([
       for p in yamldecode(helm_release.agent.values[0]).worker.patches :
-      anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == "CLUSTER_NAME"])
+      anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == "CLUSTER_NAME" && e.value == ""])
+      if try(p.target.package, "") == "containers"
     ])
-    error_message = "an unset cluster_name must not publish an empty CLUSTER_NAME that would shadow extra_envs"
+    error_message = "an unset cluster_name renders as an empty CLUSTER_NAME, the same as every other unset scope variable"
   }
 }
