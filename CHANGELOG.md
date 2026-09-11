@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.9.0](https://github.com/nullplatform/tofu-modules/compare/v7.8.1...v7.9.0) (2026-09-11)
+
+
+### Features
+
+* **agent:** default worker idleTTL to 30m so stale workers get reaped ([#580](https://github.com/nullplatform/tofu-modules/issues/580)) ([83aaefb](https://github.com/nullplatform/tofu-modules/commit/83aaefb24aaadf1f88b78147163eed7acf7b335b))
+
 ## [7.8.1](https://github.com/nullplatform/tofu-modules/compare/v7.8.0...v7.8.1) (2026-09-11)
 
 
