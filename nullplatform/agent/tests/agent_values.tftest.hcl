@@ -233,6 +233,32 @@ run "worker_defaults" {
     condition     = strcontains(helm_release.agent.values[0], "\"serviceAccountName\": \"nullplatform-agent\"")
     error_message = "the worker's serviceAccountName must default to service_account_name's default (nullplatform-agent)"
   }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "\"idleTTL\": \"30m\"")
+    error_message = "idleTTL must default to 30m so worker Deployments from an old/removed package revision get reaped instead of accumulating forever"
+  }
+}
+
+# idleTTL is a plain override (like backend), not additive (like
+# allowedRegistries/patches) — var.worker's value must win outright,
+# including the empty string, which disables the reaper.
+run "worker_idle_ttl_override_wins_outright" {
+  command = plan
+
+  variables {
+    worker = {
+      idleTTL = ""
+    }
+  }
+
+  assert {
+    condition = (
+      strcontains(helm_release.agent.values[0], "\"idleTTL\": \"\"") &&
+      !strcontains(helm_release.agent.values[0], "\"idleTTL\": \"30m\"")
+    )
+    error_message = "var.worker.idleTTL must override the module default outright, including disabling it with an empty string"
+  }
 }
 
 # var.worker stays available as an extra/override layer on top of the computed

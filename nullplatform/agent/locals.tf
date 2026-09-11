@@ -127,6 +127,13 @@ locals {
     backend           = "kubernetes"
     allowedRegistries = ["public.ecr.aws/nullplatform/*"]
     patches           = concat(local.worker_common_patches, [local.worker_container_patch])
+    # Reap worker-orchestrated pods (and their Deployments) after 30m with no
+    # activity. Previously unset (NP_WORKER_IDLE_TTL empty), which disables
+    # the reaper entirely — stale workers from old package revisions or
+    # removed packages accumulate forever instead of being cleaned up.
+    # Override per-install via var.worker.idleTTL (see its docs for the
+    # shape) if a longer/shorter window is needed.
+    idleTTL = "30m"
   }
 
   worker_final = merge(
