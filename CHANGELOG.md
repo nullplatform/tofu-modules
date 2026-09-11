@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.8.1](https://github.com/nullplatform/tofu-modules/compare/v7.8.0...v7.8.1) (2026-09-11)
+
+
+### Bug Fixes
+
+* **service_definition:** honrar dimensions del template y admitir la forma required ([#561](https://github.com/nullplatform/tofu-modules/issues/561)) ([33fa317](https://github.com/nullplatform/tofu-modules/commit/33fa317600c5028dcb0670208272d62a15a15687))
+
 ## [7.8.0](https://github.com/nullplatform/tofu-modules/compare/v7.7.0...v7.8.0) (2026-09-11)
 
 
