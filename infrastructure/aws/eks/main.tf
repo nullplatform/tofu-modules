@@ -45,17 +45,28 @@ module "eks" {
     }
   } : {}
 
+  # An addon left out of var.addon_versions keeps the upstream default
+  # (most_recent = true), which re-reads the newest version available in EKS on
+  # every plan and shows drift whenever AWS publishes a build. Pinning it here
+  # wins over that lookup.
   addons = {
     aws-ebs-csi-driver = {
       service_account_role_arn = aws_iam_role.ebs_csi_driver.arn
+      addon_version            = lookup(var.addon_versions, "aws-ebs-csi-driver", null)
     }
-    coredns = {}
+    coredns = {
+      addon_version = lookup(var.addon_versions, "coredns", null)
+    }
     eks-pod-identity-agent = {
       before_compute = true
+      addon_version  = lookup(var.addon_versions, "eks-pod-identity-agent", null)
     }
-    kube-proxy = {}
+    kube-proxy = {
+      addon_version = lookup(var.addon_versions, "kube-proxy", null)
+    }
     vpc-cni = {
       before_compute = true
+      addon_version  = lookup(var.addon_versions, "vpc-cni", null)
     }
   }
 

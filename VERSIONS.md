@@ -14,20 +14,20 @@ a specific release, so an upgrade is something someone decides.
 
 ## What to pin
 
-Verified 2026-09-08.
+Verified 2026-09-11.
 
 | Component | Current | Variable | Module |
 | --- | --- | --- | --- |
 | `nullplatform-base` chart | `2.44.6` | `nullplatform_base_helm_version` | `nullplatform/base` |
 | `nullplatform-agent` chart | `3.0.0` | `nullplatform_agent_helm_version` | `nullplatform/agent` |
-| `cert-manager` chart | `v1.21.1` | `cert_manager_version` | `infrastructure/commons/cert_manager` |
-| `prometheus` chart | `29.27.2` | `prometheus_version` | `infrastructure/commons/prometheus` |
+| `cert-manager` chart | `v1.21.2` | `cert_manager_version` | `infrastructure/commons/cert_manager` |
+| `prometheus` chart | `29.28.1` | `prometheus_version` | `infrastructure/commons/prometheus` |
 | `istio-base` chart | `1.30.4` | `istio_base_version` | `infrastructure/commons/istio` |
 | `istiod` chart | `1.30.4` | `istiod_version` | `infrastructure/commons/istio` |
 | `gateway-api` CRDs | `v1.5.1` | `gateway_api_crd_ref` | `nullplatform/base` |
 | `k8s-logs-controller` | `1.6.1` | `logging_controller_image_tag` | `nullplatform/base` |
-| `k8s-traffic-manager` | `1.8.0` | `agent_traffic_manager_tag` | `nullplatform/agent` |
-| traffic manager (provider config) | `1.8.0` | `traffic_manager_version` | `container_orchestration/eks` |
+| `k8s-traffic-manager` | `1.8.1` | `agent_traffic_manager_tag` | `nullplatform/agent` |
+| traffic manager (provider config) | `1.8.1` | `traffic_manager_version` | `container_orchestration/eks` |
 | `scopes` repository | `v1.15.1` | `agent_repo` (as `"https://github.com/nullplatform/scopes.git#v1.15.1"`) | `nullplatform/agent` |
 
 **Read your cluster before copying these.** The rule is to pin what you are already running,
@@ -48,7 +48,7 @@ module "agent" {
   nullplatform_agent_helm_version = "3.0.0"
   image_tag                       = "0.9.2"
   agent_repos_scope_tag           = "v1.15.1"
-  agent_traffic_manager_tag       = "1.8.0"
+  agent_traffic_manager_tag       = "1.8.1"
 
   agent_repos_extra = [
     "https://github.com/nullplatform/scopes-lambda.git#v0.3.1",
@@ -58,15 +58,15 @@ module "agent" {
 
 # eks, aks and gke all take this
 module "container_orchestration" {
-  traffic_manager_version = "1.8.0"
+  traffic_manager_version = "1.8.1"
 }
 
 module "cert_manager" {
-  cert_manager_version = "v1.21.1"
+  cert_manager_version = "v1.21.2"
 }
 
 module "prometheus" {
-  prometheus_version = "29.27.2"
+  prometheus_version = "29.28.1"
 }
 
 module "istio" {

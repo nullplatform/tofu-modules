@@ -237,3 +237,31 @@ variable "aws_profile" {
   type        = string
   default     = ""
 }
+
+# Pinned versions for the cluster addons this module installs. The version
+# pinning policy (see VERSIONS.md) asks for every chart, image and ref to be
+# explicit; addons were the one thing still resolved as "whatever is newest",
+# so each release published by AWS showed up as drift in an unrelated plan.
+#
+#   addon_versions = {
+#     vpc-cni    = "v1.23.1-eksbuild.1"
+#     kube-proxy = "v1.34.6-eksbuild.25"
+#   }
+#
+# Read the current values with:
+#   aws eks describe-addon --cluster-name <cluster> --addon-name vpc-cni \
+#     --query addon.addonVersion --output text
+variable "addon_versions" {
+  description = "Pinned EKS addon versions, keyed by addon name (aws-ebs-csi-driver, coredns, eks-pod-identity-agent, kube-proxy, vpc-cni). An addon left out keeps resolving to the most recent version, which surfaces as plan drift whenever AWS publishes a new build."
+  type        = map(string)
+  default     = {}
+  nullable    = false
+
+  validation {
+    condition = alltrue([
+      for name in keys(var.addon_versions) :
+      contains(["aws-ebs-csi-driver", "coredns", "eks-pod-identity-agent", "kube-proxy", "vpc-cni"], name)
+    ])
+    error_message = "addon_versions only accepts the addons this module installs: aws-ebs-csi-driver, coredns, eks-pod-identity-agent, kube-proxy, vpc-cni."
+  }
+}

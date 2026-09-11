@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.8.0](https://github.com/nullplatform/tofu-modules/compare/v7.7.0...v7.8.0) (2026-09-11)
+
+
+### Features
+
+* **eks:** pin the cluster addon versions with addon_versions ([#581](https://github.com/nullplatform/tofu-modules/issues/581)) ([ee87a05](https://github.com/nullplatform/tofu-modules/commit/ee87a051edc39fa6201a5723f66d7e31e165662b))
+
 ## [7.7.0](https://github.com/nullplatform/tofu-modules/compare/v7.6.0...v7.7.0) (2026-09-09)
 
 
