@@ -84,6 +84,38 @@ variable "worker_orchestrated_packages" {
   default     = ["containers"]
 }
 
+# Packages whose worker runs the k8s scope.
+#
+# The k8s scope is configured through env vars (DNS_TYPE, K8S_NAMESPACE, the
+# template paths, CLUSTER_NAME, ...). The module injects those vars into the
+# worker pod of every package listed here. "containers" is the k8s scope
+# itself. Other packages run the same k8s code from their own image with a
+# few steps replaced (scheduled-task, containers-datadog); they read the same
+# vars, so they belong in this list too.
+#
+#   worker_k8s_packages = ["containers", "scheduled-task"]
+#
+# Packages not listed here (s3, rds, lambda, ...) do not get these vars.
+variable "worker_k8s_packages" {
+  description = "Package slugs whose worker runs the k8s scope and must receive its env vars (DNS_TYPE, K8S_NAMESPACE, template paths, CLUSTER_NAME, extra_envs). Add every package that runs the k8s scope code, e.g. [\"containers\", \"scheduled-task\"]."
+  type        = list(string)
+  default     = ["containers"]
+}
+
+# Name of the Kubernetes cluster the scopes are deployed to.
+#
+# The k8s scope uses it to find the cluster's OIDC provider when it creates
+# the IAM role for a scope. It reaches the workers as the CLUSTER_NAME env var.
+# Required when cloud_provider is "aws" (enforced by a precondition in main.tf,
+# so a missing value fails at plan time instead of inside create-scope).
+#
+#   cluster_name = module.eks.eks_cluster_name
+variable "cluster_name" {
+  description = "Name of the Kubernetes cluster the scopes run in. Sent to the k8s workers as CLUSTER_NAME; the k8s scope uses it to find the EKS OIDC provider when creating IAM roles. Required when cloud_provider is 'aws'."
+  type        = string
+  default     = ""
+}
+
 variable "worker_memory_limit" {
   description = "Memory limit for a worker-orchestrated package's pod (packages in var.worker_orchestrated_packages). The chart's own default is small enough to OOM mid-tofu-apply for packages that run real IaC tooling."
   type        = string
@@ -293,23 +325,39 @@ variable "image_pull_secrets" {
 # Ingress / Networking Configuration
 ################################################################################
 
-# Scope service template to use for deployment (required when extra_envs.INGRESS_TYPE is 'istio')
+
+# Which ingress stack the containers worker deploys scopes with. The k8s scope
+# ships two template sets under /app/pkg/k8s/deployment/templates: its default
+# (AWS Load Balancer Controller Ingress) and istio/ (Gateway API HTTPRoutes).
+# Nothing else selects between them: the scope does not read INGRESS_TYPE, it
+# just renders whatever SERVICE_TEMPLATE / INITIAL_INGRESS_PATH /
+# BLUE_GREEN_INGRESS_PATH point at. This input derives the three paths so a
+# root module states the decision instead of copying image paths around.
+variable "worker_ingress" {
+  description = "Ingress stack the containers worker deploys scopes with: \"alb\" keeps the k8s scope's own templates (AWS Load Balancer Controller Ingress), \"istio\" points it at the Gateway API templates baked in the scopes/containers image. service_template, initial_ingress_path and blue_green_ingress_path override the derived paths when set."
+  type        = string
+  default     = "alb"
+
+  validation {
+    condition     = contains(["alb", "istio"], var.worker_ingress)
+    error_message = "worker_ingress must be \"alb\" or \"istio\"."
+  }
+}
+
 variable "service_template" {
-  description = "Specifies the name or reference of the scope service template to be used for deployment. Required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio, so it must be pointed at an Istio-compatible template instead."
+  description = "Path, inside the worker image, of the Service template the k8s scope renders. Empty (default) uses the template worker_ingress selects; set it only to point at a custom template."
   type        = string
   default     = ""
 }
 
-# Initial ingress path used on first deploy (required when extra_envs.INGRESS_TYPE is 'istio')
 variable "initial_ingress_path" {
-  description = "Defines the initial ingress path used when deploying the application for the first time. Required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio, so it must be pointed at an Istio HTTPRoute template instead."
+  description = "Path, inside the worker image, of the ingress/route template used on a scope's first deployment. Empty (default) uses the template worker_ingress selects; set it only to point at a custom template."
   type        = string
   default     = ""
 }
 
-# Blue-green ingress path used to route traffic to the new version (required when extra_envs.INGRESS_TYPE is 'istio')
 variable "blue_green_ingress_path" {
-  description = "Specifies the ingress path used for blue-green deployments to route traffic to the new version. Required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio, so it must be pointed at an Istio HTTPRoute template instead."
+  description = "Path, inside the worker image, of the ingress/route template used to shift traffic during a blue-green deployment. Empty (default) uses the template worker_ingress selects; set it only to point at a custom template."
   type        = string
   default     = ""
 }

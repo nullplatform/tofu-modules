@@ -1,5 +1,19 @@
 # Changelog
 
+## [7.7.0](https://github.com/nullplatform/tofu-modules/compare/v7.6.0...v7.7.0) (2026-09-09)
+
+
+### Features
+
+* **agent:** publish the k8s scope env to every k8s worker and take cluster_name as input ([#578](https://github.com/nullplatform/tofu-modules/issues/578)) ([cd1fc41](https://github.com/nullplatform/tofu-modules/commit/cd1fc41141f148123089d262f5105bf126e0f63f))
+
+## [7.6.0](https://github.com/nullplatform/tofu-modules/compare/v7.5.0...v7.6.0) (2026-09-08)
+
+
+### Features
+
+* **agent:** select the worker ingress stack with worker_ingress instead of three template paths ([#576](https://github.com/nullplatform/tofu-modules/issues/576)) ([1579cb5](https://github.com/nullplatform/tofu-modules/commit/1579cb593842619f76fc48bcd6e2a04e82e449ac))
+
 ## [7.5.0](https://github.com/nullplatform/tofu-modules/compare/v7.4.2...v7.5.0) (2026-09-08)
 
 

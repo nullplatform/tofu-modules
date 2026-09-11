@@ -55,18 +55,40 @@ locals {
     ) : k => v if v != null
   }
 
+  # Template paths per ingress stack. "alb" sends empty values so the k8s scope
+  # falls back to its own defaults (AWS Load Balancer Controller Ingress);
+  # "istio" points at the Gateway API templates the scopes/containers image
+  # bakes under /app/pkg/k8s/deployment/templates/istio. An explicit
+  # service_template / initial_ingress_path / blue_green_ingress_path wins.
+  worker_ingress_templates = {
+    alb = {
+      SERVICE_TEMPLATE        = ""
+      INITIAL_INGRESS_PATH    = ""
+      BLUE_GREEN_INGRESS_PATH = ""
+    }
+    istio = {
+      SERVICE_TEMPLATE        = "/app/pkg/k8s/deployment/templates/istio/service.yaml.tpl"
+      INITIAL_INGRESS_PATH    = "/app/pkg/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
+      BLUE_GREEN_INGRESS_PATH = "/app/pkg/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
+    }
+  }
+  worker_templates = local.worker_ingress_templates[var.worker_ingress]
+
   worker_default_env = {
     DNS_TYPE                = var.dns_type
     DOMAIN                  = var.domain
     USE_ACCOUNT_SLUG        = var.use_account_slug
     K8S_NAMESPACE           = var.namespace
-    SERVICE_TEMPLATE        = var.service_template
-    INITIAL_INGRESS_PATH    = var.initial_ingress_path
-    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path
+    SERVICE_TEMPLATE        = var.service_template != "" ? var.service_template : local.worker_templates.SERVICE_TEMPLATE
+    INITIAL_INGRESS_PATH    = var.initial_ingress_path != "" ? var.initial_ingress_path : local.worker_templates.INITIAL_INGRESS_PATH
+    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path != "" ? var.blue_green_ingress_path : local.worker_templates.BLUE_GREEN_INGRESS_PATH
     TRAFFIC_CONTAINER_IMAGE = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
     IMAGE_PULL_SECRETS      = var.image_pull_secrets
     PRIVATE_GATEWAY_NAME    = var.private_gateway_name
     PUBLIC_GATEWAY_NAME     = var.public_gateway_name
+    # Name of the EKS cluster. The k8s scope needs it to look up the cluster's
+    # OIDC provider when it creates the IAM role for a scope.
+    CLUSTER_NAME = var.cluster_name
   }
 
   worker_cloud_config = {
@@ -107,26 +129,49 @@ locals {
     }
   ]
 
-  # k8s-deployment template env vars — specific to the "containers" scope's
-  # worker only, regardless of what's in var.worker_orchestrated_packages.
-  worker_container_patch = {
-    target = { package = "containers" }
-    merge = {
-      spec = {
-        containers = [
-          {
-            name = "worker"
-            env  = [for k, v in local.worker_all_config : { name = k, value = v }]
-          }
-        ]
+  # Environment variables for the workers that run the k8s scope.
+  #
+  # The k8s scope reads its settings from env vars (DNS_TYPE, K8S_NAMESPACE,
+  # the template paths, CLUSTER_NAME, ...). local.worker_all_config holds all
+  # of them. This block turns that map into one pod patch per package listed
+  # in var.worker_k8s_packages, so every one of those workers boots with the
+  # same variables.
+  #
+  # With the default, var.worker_k8s_packages = ["containers"], the result is
+  # a single patch:
+  #
+  #   - target: { package: containers }
+  #     merge:
+  #       spec:
+  #         containers:
+  #           - name: worker
+  #             env:
+  #               - { name: DNS_TYPE, value: external_dns }
+  #               - { name: K8S_NAMESPACE, value: nullplatform }
+  #               ...
+  #
+  # With ["containers", "scheduled-task"] you get two patches with the same
+  # env, one per package. Packages not in the list get none of these vars.
+  worker_k8s_env_patches = [
+    for pkg in var.worker_k8s_packages : {
+      target = { package = pkg }
+      merge = {
+        spec = {
+          containers = [
+            {
+              name = "worker"
+              env  = [for k, v in local.worker_all_config : { name = k, value = v }]
+            }
+          ]
+        }
       }
     }
-  }
+  ]
 
   worker_defaults = {
     backend           = "kubernetes"
     allowedRegistries = ["public.ecr.aws/nullplatform/*"]
-    patches           = concat(local.worker_common_patches, [local.worker_container_patch])
+    patches           = concat(local.worker_common_patches, local.worker_k8s_env_patches)
     # Reap worker-orchestrated pods (and their Deployments) after 30m with no
     # activity. Previously unset (NP_WORKER_IDLE_TTL empty), which disables
     # the reaper entirely — stale workers from old package revisions or

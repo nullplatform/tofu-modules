@@ -6,6 +6,7 @@ variables {
   tags_selectors                  = { dimension = "prod" }
   cloud_provider                  = "aws"
   aws_iam_role_arn                = "arn:aws:iam::123456789012:role/agent"
+  cluster_name                    = "test-cluster"
   image_tag                       = "0.9.2"
   nullplatform_agent_helm_version = "2.37.0"
   agent_traffic_manager_tag       = "1.8.0"
@@ -382,5 +383,179 @@ run "long_worker_patch_strings_survive_rendering" {
       try(p.merge.spec.containers[0].command[2], "") == "wget -qO- https://github.com/nullplatform/scopes-networking/archive/refs/tags/v0.1.0.tar.gz | tar -xz --strip-components=1 -C /overrides"
     ])
     error_message = "a worker patch string longer than the yamlencode fold width must not pick up a newline when the values are rendered"
+  }
+}
+
+################################################################################
+# worker_ingress
+################################################################################
+
+# The k8s scope only knows which ingress stack to deploy through the three
+# template paths; nothing reads an INGRESS_TYPE. The default keeps the scope's
+# own (ALB Ingress) templates by sending empty values.
+run "worker_ingress_defaults_to_alb_and_leaves_the_scope_templates" {
+  command = plan
+
+  assert {
+    condition = alltrue([
+      for key in ["SERVICE_TEMPLATE", "INITIAL_INGRESS_PATH", "BLUE_GREEN_INGRESS_PATH"] :
+      anytrue([
+        for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+        anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == key && e.value == ""])
+        if try(p.target.package, "") == "containers"
+      ])
+    ])
+    error_message = "with worker_ingress = alb the three template paths must render empty so the k8s scope uses its own templates"
+  }
+}
+
+run "worker_ingress_istio_derives_the_gateway_api_template_paths" {
+  command = plan
+
+  variables {
+    worker_ingress = "istio"
+  }
+
+  assert {
+    condition = alltrue([
+      for key, want in {
+        SERVICE_TEMPLATE        = "/app/pkg/k8s/deployment/templates/istio/service.yaml.tpl"
+        INITIAL_INGRESS_PATH    = "/app/pkg/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
+        BLUE_GREEN_INGRESS_PATH = "/app/pkg/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
+      } :
+      anytrue([
+        for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+        anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == key && e.value == want])
+        if try(p.target.package, "") == "containers"
+      ])
+    ])
+    error_message = "worker_ingress = istio must point the containers worker at the istio templates baked in the image"
+  }
+}
+
+run "explicit_template_paths_override_worker_ingress" {
+  command = plan
+
+  variables {
+    worker_ingress   = "istio"
+    service_template = "/custom/service.yaml.tpl"
+  }
+
+  assert {
+    condition = anytrue([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+      anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == "SERVICE_TEMPLATE" && e.value == "/custom/service.yaml.tpl"])
+      if try(p.target.package, "") == "containers"
+    ])
+    error_message = "an explicit service_template must win over the path worker_ingress derives"
+  }
+}
+
+run "worker_ingress_rejects_unknown_stacks" {
+  command = plan
+
+  variables {
+    worker_ingress = "nginx"
+  }
+
+  expect_failures = [var.worker_ingress]
+}
+
+################################################################################
+# worker_k8s_packages / cluster_name
+################################################################################
+
+# Helper shape reused below: does the patch targeting `pkg` carry env `key`?
+run "k8s_env_reaches_only_the_containers_worker_by_default" {
+  command = plan
+
+  variables {
+    dns_type = "external_dns"
+  }
+
+  assert {
+    condition = anytrue([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+      anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == "DNS_TYPE" && e.value == "external_dns"])
+      if try(p.target.package, "") == "containers"
+    ])
+    error_message = "the containers worker must keep receiving the k8s scope env by default"
+  }
+
+  assert {
+    condition = length([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches : p
+      if try(p.target.package, "") != "containers" && length(try(p.merge.spec.containers[0].env, [])) > 0
+    ]) == 0
+    error_message = "no other package should receive the k8s scope env unless listed in worker_k8s_packages"
+  }
+}
+
+run "k8s_env_reaches_every_listed_package" {
+  command = plan
+
+  variables {
+    dns_type                     = "external_dns"
+    worker_orchestrated_packages = ["containers", "scheduled-task"]
+    worker_k8s_packages          = ["containers", "scheduled-task"]
+  }
+
+  assert {
+    condition = alltrue([
+      for pkg in ["containers", "scheduled-task"] :
+      anytrue([
+        for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+        anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == "DNS_TYPE" && e.value == "external_dns"])
+        if try(p.target.package, "") == pkg
+      ])
+    ])
+    error_message = "every package in worker_k8s_packages must get the k8s scope env, not just containers"
+  }
+}
+
+run "cluster_name_is_published_to_the_k8s_workers_when_set" {
+  command = plan
+
+  variables {
+    cluster_name = "my-eks"
+  }
+
+  assert {
+    condition = anytrue([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+      anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == "CLUSTER_NAME" && e.value == "my-eks"])
+      if try(p.target.package, "") == "containers"
+    ])
+    error_message = "cluster_name must reach the k8s worker as CLUSTER_NAME"
+  }
+}
+
+run "cluster_name_is_required_on_aws" {
+  command = plan
+
+  variables {
+    cluster_name = ""
+  }
+
+  expect_failures = [
+    terraform_data.cross_variable_validation,
+  ]
+}
+
+run "cluster_name_can_still_arrive_through_extra_envs" {
+  command = plan
+
+  variables {
+    cluster_name = ""
+    extra_envs   = { CLUSTER_NAME = "legacy-eks" }
+  }
+
+  assert {
+    condition = anytrue([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+      anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == "CLUSTER_NAME" && e.value == "legacy-eks"])
+      if try(p.target.package, "") == "containers"
+    ])
+    error_message = "an existing installation passing CLUSTER_NAME through extra_envs must keep working"
   }
 }
