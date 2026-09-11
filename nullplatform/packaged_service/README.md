@@ -22,7 +22,7 @@ The module accepts a flat `components` list and partitions it into spec componen
 
 ```hcl
 module "packaged_service" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/packaged_service?ref=v7.7.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/packaged_service?ref=v7.8.0"
 
   components = "your-components"
   nrn        = "your-nrn"
