@@ -5,13 +5,13 @@
 variable "istio_base_version" {
   description = "Helm chart version for the istio-base component"
   type        = string
-  default     = "1.27.1"
+  default     = "1.30.4"
 }
 
 variable "istiod_version" {
   description = "Helm chart version for istiod (Istio control plane)"
   type        = string
-  default     = "1.27.1"
+  default     = "1.30.4"
 }
 
 variable "istiod_replicas" {

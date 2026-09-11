@@ -151,6 +151,33 @@ variable "aws_web_acl_name" {
   }
 }
 
+variable "aws_lambda_associations" {
+  description = "Lambda@Edge functions attached to the CloudFront default cache behavior, one entry per CloudFront event. function_arn must include a published version. Empty (the default) leaves distribution.lambda_associations out of the payload, matching a spec that never declared it."
+  type = list(object({
+    event_type   = string
+    function_arn = string
+  }))
+  default = []
+
+  validation {
+    condition = alltrue([
+      for a in var.aws_lambda_associations :
+      contains(["viewer-request", "viewer-response", "origin-request", "origin-response"], a.event_type)
+    ])
+    error_message = "aws_lambda_associations[*].event_type must be one of: viewer-request, viewer-response, origin-request, origin-response."
+  }
+
+  validation {
+    condition     = length(distinct([for a in var.aws_lambda_associations : a.event_type])) == length(var.aws_lambda_associations)
+    error_message = "aws_lambda_associations must not repeat an event_type: CloudFront accepts one function per event on the default cache behavior."
+  }
+
+  validation {
+    condition     = var.cloud_provider == "aws" || length(var.aws_lambda_associations) == 0
+    error_message = "aws_lambda_associations only applies when cloud_provider is 'aws'."
+  }
+}
+
 ################################################################################
 # aws-lambda
 ################################################################################

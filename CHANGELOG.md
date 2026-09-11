@@ -1,5 +1,74 @@
 # Changelog
 
+## [7.8.0](https://github.com/nullplatform/tofu-modules/compare/v7.7.0...v7.8.0) (2026-09-11)
+
+
+### Features
+
+* **eks:** pin the cluster addon versions with addon_versions ([#581](https://github.com/nullplatform/tofu-modules/issues/581)) ([ee87a05](https://github.com/nullplatform/tofu-modules/commit/ee87a051edc39fa6201a5723f66d7e31e165662b))
+
+## [7.7.0](https://github.com/nullplatform/tofu-modules/compare/v7.6.0...v7.7.0) (2026-09-09)
+
+
+### Features
+
+* **agent:** publish the k8s scope env to every k8s worker and take cluster_name as input ([#578](https://github.com/nullplatform/tofu-modules/issues/578)) ([cd1fc41](https://github.com/nullplatform/tofu-modules/commit/cd1fc41141f148123089d262f5105bf126e0f63f))
+
+## [7.6.0](https://github.com/nullplatform/tofu-modules/compare/v7.5.0...v7.6.0) (2026-09-08)
+
+
+### Features
+
+* **agent:** select the worker ingress stack with worker_ingress instead of three template paths ([#576](https://github.com/nullplatform/tofu-modules/issues/576)) ([1579cb5](https://github.com/nullplatform/tofu-modules/commit/1579cb593842619f76fc48bcd6e2a04e82e449ac))
+
+## [7.5.0](https://github.com/nullplatform/tofu-modules/compare/v7.4.2...v7.5.0) (2026-09-08)
+
+
+### Features
+
+* **ci:** keep VERSIONS.md current in the release PR ([#572](https://github.com/nullplatform/tofu-modules/issues/572)) ([8491cc3](https://github.com/nullplatform/tofu-modules/commit/8491cc3c35be7c42dbdd1c72c17060eb9838c258))
+
+## [7.4.2](https://github.com/nullplatform/tofu-modules/compare/v7.4.1...v7.4.2) (2026-09-07)
+
+
+### Bug Fixes
+
+* **base:** stop requiring a control plane image and an API key the chart no longer uses ([#567](https://github.com/nullplatform/tofu-modules/issues/567)) ([a0d6865](https://github.com/nullplatform/tofu-modules/commit/a0d68658c75fd062953320163030b3063707847c))
+
+## [7.4.1](https://github.com/nullplatform/tofu-modules/compare/v7.4.0...v7.4.1) (2026-09-07)
+
+
+### Bug Fixes
+
+* **agent:** render the worker block with indent so long strings keep no newline ([#566](https://github.com/nullplatform/tofu-modules/issues/566)) ([1c838e5](https://github.com/nullplatform/tofu-modules/commit/1c838e5085aac0310ba8a98d0b0c5e5bed42898b))
+
+## [7.4.0](https://github.com/nullplatform/tofu-modules/compare/v7.3.1...v7.4.0) (2026-09-07)
+
+
+### Features
+
+* **packages:** artifact lookup by tag and across visibility (provider 0.0.102) ([fa51676](https://github.com/nullplatform/tofu-modules/commit/fa5167646f60077975e7b88a72cc32173fd36b4b))
+* **packages:** artifact lookup by tag and across visibility (provider 0.0.102) ([#568](https://github.com/nullplatform/tofu-modules/issues/568)) ([1a13ec9](https://github.com/nullplatform/tofu-modules/commit/1a13ec9f5d228ab91c51f09c2459d66a64abd36e))
+
+
+### Bug Fixes
+
+* restore the two tracked .terraform.lock.hcl files deleted by accident ([8e728a8](https://github.com/nullplatform/tofu-modules/commit/8e728a86292454da0325650a1d82152cecdaf2a8))
+
+## [7.3.1](https://github.com/nullplatform/tofu-modules/compare/v7.3.0...v7.3.1) (2026-09-04)
+
+
+### Bug Fixes
+
+* **istio:** bump default Istio version to 1.30.4 ([#564](https://github.com/nullplatform/tofu-modules/issues/564)) ([4af4e9b](https://github.com/nullplatform/tofu-modules/commit/4af4e9be19ca54ebdb49f82440862882bbfa4a64))
+
+## [7.3.0](https://github.com/nullplatform/tofu-modules/compare/v7.2.1...v7.3.0) (2026-09-04)
+
+
+### Features
+
+* **nullplatform:** cover Lambda@Edge associations and aws-parameter-store in the provider_config modules ([#562](https://github.com/nullplatform/tofu-modules/issues/562)) ([bdb03e0](https://github.com/nullplatform/tofu-modules/commit/bdb03e0955eee89c6d3551f2b6035e11da6dc49f))
+
 ## [7.2.1](https://github.com/nullplatform/tofu-modules/compare/v7.2.0...v7.2.1) (2026-09-03)
 
 

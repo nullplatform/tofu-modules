@@ -2,30 +2,43 @@
 
 ## Description
 
-Provisions nullplatform service, action, and link specifications by fetching JSON templates from a remote Git repository (GitHub, GitLab, or Bitbucket) or local filesystem and registering them as versioned resources
+Fetches and registers Nullplatform service specifications, action specifications, and link specifications from a remote Git repository (GitHub, GitLab, Bitbucket) or local filesystem, optionally publishing them as a versioned package
 
 ## Architecture
 
-The module uses data.http resources to fetch service-spec, action, and link JSON templates from a remote Git provider (GitHub, GitLab, or Bitbucket) using provider-specific raw URLs and auth headers, or reads them from the local filesystem when git_provider is 'local'. Parsed templates are fed into nullplatform_service_specification, nullplatform_action_specification, and nullplatform_link_specification resources, with action and link specifications depending on the service specification via explicit depends_on. When var.package is set, the module additionally creates nullplatform_package and nullplatform_artifact resources to register a versioned immutable package revision pinning all specifications and artifacts.
+The module uses `data.http` resources to fetch JSON template files from GitHub, GitLab, or Bitbucket raw/API endpoints, with per-provider URL construction and authentication headers computed in locals. Parsed templates are fed into `nullplatform_service_specification`, `nullplatform_action_specification`, and `nullplatform_link_specification` resources, with action and link resources depending on the service specification and iterating over configurable name lists. When `var.package` is set, a `nullplatform_package` and associated `nullplatform_artifact` resources are created, pinning the specification and artifact revisions into an immutable versioned package.
 
 ## Features
 
-- Creates nullplatform_service_specification from a JSON template with configurable visibility, selectors, and dimensions
-- Creates nullplatform_action_specification resources for each action template fetched from the repository
-- Creates nullplatform_link_specification resources for each link template with scopes, assignability, and external config
-- Fetches specification templates from GitHub, GitLab, or Bitbucket using provider-specific raw URLs and authentication headers
-- Supports local filesystem template loading for offline or CI environments via git_provider = 'local'
-- Registers versioned nullplatform_package and nullplatform_artifact resources when package configuration is provided
-- Supports pinning to branches, tags, or raw commit SHAs via repository_ref_type and repository_branch variables
+- Creates nullplatform_service_specification from a remote or local JSON template with configurable visibility and dimensions
+- Creates nullplatform_action_specification resources for each named action template fetched from the repository
+- Creates nullplatform_link_specification resources for each named link template fetched from the repository
+- Supports GitHub, GitLab, Bitbucket, and local filesystem as template sources with per-provider URL construction and authentication
+- Configures per-provider authentication headers including Bearer tokens, GitLab PRIVATE-TOKEN, and Bitbucket Basic auth
+- Publishes versioned nullplatform_package with immutable artifact revisions when package configuration is provided
+- Validates HTTP responses with lifecycle postconditions to surface fetch errors early
 
 ## Basic Usage
 
 ```hcl
 module "service_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v7.2.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v7.8.0"
 
   nrn               = "your-nrn"
   repository_branch = "your-repository-branch"
+  service_name      = "your-service-name"
+  service_path      = "your-service-path"
+}
+```
+
+### Usage with Specific Git Tag or Commit
+
+```hcl
+module "service_definition" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v7.8.0"
+
+  nrn               = "your-nrn"
+  repository_branch = "v1.4.0"
   service_name      = "your-service-name"
   service_path      = "your-service-path"
 }
@@ -46,14 +59,14 @@ resource "example_resource" "this" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_http"></a> [http](#requirement\_http) | ~> 3.0 |
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.86 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.102 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_http"></a> [http](#provider\_http) | 3.5.0 |
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.95 |
+| <a name="provider_http"></a> [http](#provider\_http) | 3.6.1 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.102 |
 
 ## Resources
 
@@ -78,7 +91,7 @@ resource "example_resource" "this" {
 | <a name="input_gitlab_host"></a> [gitlab\_host](#input\_gitlab\_host) | GitLab host. Only used when git\_provider = "gitlab". Override for self-hosted instances (e.g. "gitlab.mycompany.com"). | `string` | `"gitlab.com"` | no |
 | <a name="input_local_specs_path"></a> [local\_specs\_path](#input\_local\_specs\_path) | Absolute path to the local service directory containing specs/. Required when git\_provider = "local". The directory must contain specs/service-spec.json.tpl and optionally specs/links/*.json.tpl and specs/actions/*.json.tpl. | `string` | `null` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name (organization:account format) | `string` | n/a | yes |
-| <a name="input_package"></a> [package](#input\_package) | Register this service definition as a versioned PACKAGE. When set, the module<br/>publishes a package revision whose bill of materials pins the service<br/>specification, every action specification, every LINK specification, and the<br/>artifacts you list — so consumers bind to an immutable revision and later<br/>template changes never mutate what already runs.<br/><br/>artifacts: each entry does ONE of:<br/>  • register a new artifact revision — set `meta` (JSON-able object, e.g.<br/>    { url = "https://github.com/acme/svc.git", reference = "main" } for a<br/>    git\_repository, or { registry, repository, digest } for an oci\_image);<br/>  • look up one registered elsewhere BY IDENTITY (no ids needed) — set<br/>    `lookup = true` + `meta` with the identity fields (url for<br/>    git\_repository, or registry+repository for oci\_image); add the<br/>    type's own per-revision field to pin a specific revision (reference,<br/>    e.g. a tag, for git\_repository; digest, formatted "sha256:<64-hex>",<br/>    for oci\_image — the API rejects the other type's field name),<br/>    otherwise the latest revision is used;<br/>  • pin explicit ids — set `resource_id` + `resource_revision_id`.<br/><br/>An artifact's `name` defaults to "impl" and `type` to "git\_repository" —<br/>a service package is typically a single artifact pointing at the<br/>service's own implementation repo, so only `meta` (url/reference) needs<br/>setting on every release.<br/><br/>For an artifact with `type = "oci_image"` (opt-in — not the default<br/>here), meta.registry/meta.repository default to<br/>var.package\_oci\_default\_registry/var.package\_oci\_default\_repository<br/>when omitted from `meta`. Only meta.digest needs setting on every<br/>release in that case; every other artifact type gets no meta defaults<br/>(their meta shape is unrelated to a container registry).<br/><br/>Null (the default) keeps the classic module behavior — no package. | <pre>object({<br/>    slug       = optional(string)          # default: the service specification slug<br/>    name       = optional(string)          # default: var.service_name<br/>    version    = string                    # semver of the revision this configuration publishes<br/>    default    = optional(bool, true)      # promote each published revision to the package default<br/>    tags       = optional(map(string), {}) # release tags: name => version (requires an API with the package release-tag routes)<br/>    visible_to = optional(list(string))    # default: [var.nrn]<br/>    artifacts = optional(list(object({<br/>      name                 = optional(string, "impl")           # default: a single service-implementation artifact<br/>      type                 = optional(string, "git_repository") # oci_image | oras_artifact | git_repository | blob<br/>      meta                 = optional(any)                      # register (lookup=false) or find (lookup=true)<br/>      lookup               = optional(bool, false)              # true: resolve an EXISTING artifact by meta identity<br/>      resource_id          = optional(string)                   # …or pin explicit ids<br/>      resource_revision_id = optional(string)<br/>    })), [])<br/>  })</pre> | `null` | no |
+| <a name="input_package"></a> [package](#input\_package) | Register this service definition as a versioned PACKAGE. When set, the module<br/>publishes a package revision whose bill of materials pins the service<br/>specification, every action specification, every LINK specification, and the<br/>artifacts you list — so consumers bind to an immutable revision and later<br/>template changes never mutate what already runs.<br/><br/>artifacts: each entry does ONE of:<br/>  • register a new artifact revision — set `meta` (JSON-able object, e.g.<br/>    { url = "https://github.com/acme/svc.git", reference = "main" } for a<br/>    git\_repository, or { registry, repository, digest } for an oci\_image);<br/>  • look up one registered elsewhere BY IDENTITY (no ids needed) — set<br/>    `lookup = true` + `meta` with the identity fields (url for<br/>    git\_repository, or registry+repository for oci\_image); add the<br/>    type's own per-revision field to pin a specific revision (reference,<br/>    e.g. a tag, for git\_repository; digest, formatted "sha256:<64-hex>",<br/>    or tag, resolving the NEWEST revision registered with it, for<br/>    oci\_image — a moved tag drifts to the new digest by design),<br/>    otherwise the latest revision is used. Lookup resolves artifacts<br/>    VISIBLE at var.nrn — owned there, shared by ancestors, or published<br/>    globally with "organization=*" (nullplatform's own scope/service<br/>    images) — requiring provider >= 0.0.102;<br/>  • pin explicit ids — set `resource_id` + `resource_revision_id`.<br/><br/>An artifact's `name` defaults to "impl" and `type` to "git\_repository" —<br/>a service package is typically a single artifact pointing at the<br/>service's own implementation repo, so only `meta` (url/reference) needs<br/>setting on every release.<br/><br/>For an artifact with `type = "oci_image"` (opt-in — not the default<br/>here), meta.registry/meta.repository default to<br/>var.package\_oci\_default\_registry/var.package\_oci\_default\_repository<br/>when omitted from `meta`. Only meta.digest needs setting on every<br/>release in that case; every other artifact type gets no meta defaults<br/>(their meta shape is unrelated to a container registry).<br/><br/>Null (the default) keeps the classic module behavior — no package. | <pre>object({<br/>    slug       = optional(string)          # default: the service specification slug<br/>    name       = optional(string)          # default: var.service_name<br/>    version    = string                    # semver of the revision this configuration publishes<br/>    default    = optional(bool, true)      # promote each published revision to the package default<br/>    tags       = optional(map(string), {}) # release tags: name => version (requires an API with the package release-tag routes)<br/>    visible_to = optional(list(string))    # default: [var.nrn]<br/>    artifacts = optional(list(object({<br/>      name                 = optional(string, "impl")           # default: a single service-implementation artifact<br/>      type                 = optional(string, "git_repository") # oci_image | oras_artifact | git_repository | blob<br/>      meta                 = optional(any)                      # register (lookup=false) or find (lookup=true)<br/>      lookup               = optional(bool, false)              # true: resolve an EXISTING artifact by meta identity<br/>      resource_id          = optional(string)                   # …or pin explicit ids<br/>      resource_revision_id = optional(string)<br/>    })), [])<br/>  })</pre> | `null` | no |
 | <a name="input_package_oci_default_registry"></a> [package\_oci\_default\_registry](#input\_package\_oci\_default\_registry) | Default meta.registry for an oci\_image package artifact whose own meta omits it. See var.package's artifacts docs. | `string` | `"public.ecr.aws"` | no |
 | <a name="input_package_oci_default_repository"></a> [package\_oci\_default\_repository](#input\_package\_oci\_default\_repository) | Default meta.repository for an oci\_image package artifact whose own meta omits it. See var.package's artifacts docs. | `string` | `"nullplatform/scopes/containers"` | no |
 | <a name="input_repository_branch"></a> [repository\_branch](#input\_repository\_branch) | Git ref of the service spec repository to read, as a short name and not a full ref<br/>(e.g. "v1.4.0"). No default and no recommended value: which spec repository an install<br/>points at is its own choice, so there is no version anyone could pick for it.<br/><br/>Combine with repository\_ref\_type, which selects the namespace this name lives in. | `string` | n/a | yes |
@@ -104,16 +117,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "service_definition",
-  "description": "Provisions nullplatform service, action, and link specifications by fetching JSON templates from a remote Git repository (GitHub, GitLab, or Bitbucket) or local filesystem and registering them as versioned resources",
-  "architecture": "The module uses data.http resources to fetch service-spec, action, and link JSON templates from a remote Git provider (GitHub, GitLab, or Bitbucket) using provider-specific raw URLs and auth headers, or reads them from the local filesystem when git_provider is 'local'. Parsed templates are fed into nullplatform_service_specification, nullplatform_action_specification, and nullplatform_link_specification resources, with action and link specifications depending on the service specification via explicit depends_on. When var.package is set, the module additionally creates nullplatform_package and nullplatform_artifact resources to register a versioned immutable package revision pinning all specifications and artifacts.",
+  "description": "Fetches and registers Nullplatform service specifications, action specifications, and link specifications from a remote Git repository (GitHub, GitLab, Bitbucket) or local filesystem, optionally publishing them as a versioned package",
+  "architecture": "The module uses `data.http` resources to fetch JSON template files from GitHub, GitLab, or Bitbucket raw/API endpoints, with per-provider URL construction and authentication headers computed in locals. Parsed templates are fed into `nullplatform_service_specification`, `nullplatform_action_specification`, and `nullplatform_link_specification` resources, with action and link resources depending on the service specification and iterating over configurable name lists. When `var.package` is set, a `nullplatform_package` and associated `nullplatform_artifact` resources are created, pinning the specification and artifact revisions into an immutable versioned package.",
   "features": [
-    "Creates nullplatform_service_specification from a JSON template with configurable visibility, selectors, and dimensions",
-    "Creates nullplatform_action_specification resources for each action template fetched from the repository",
-    "Creates nullplatform_link_specification resources for each link template with scopes, assignability, and external config",
-    "Fetches specification templates from GitHub, GitLab, or Bitbucket using provider-specific raw URLs and authentication headers",
-    "Supports local filesystem template loading for offline or CI environments via git_provider = 'local'",
-    "Registers versioned nullplatform_package and nullplatform_artifact resources when package configuration is provided",
-    "Supports pinning to branches, tags, or raw commit SHAs via repository_ref_type and repository_branch variables"
+    "Creates nullplatform_service_specification from a remote or local JSON template with configurable visibility and dimensions",
+    "Creates nullplatform_action_specification resources for each named action template fetched from the repository",
+    "Creates nullplatform_link_specification resources for each named link template fetched from the repository",
+    "Supports GitHub, GitLab, Bitbucket, and local filesystem as template sources with per-provider URL construction and authentication",
+    "Configures per-provider authentication headers including Bearer tokens, GitLab PRIVATE-TOKEN, and Bitbucket Basic auth",
+    "Publishes versioned nullplatform_package with immutable artifact revisions when package configuration is provided",
+    "Validates HTTP responses with lifecycle postconditions to surface fetch errors early"
   ],
   "inputs": [
     {
@@ -220,6 +233,6 @@ resource "example_resource" "this" {
     "package_default_version",
     "package_artifacts"
   ],
-  "hash": "039deeba22b968f85608a586af19731e"
+  "hash": "433c67df4bf4894e27cee3637ce86b68"
 }
 END_AI_METADATA -->

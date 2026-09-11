@@ -14,18 +14,20 @@ a specific release, so an upgrade is something someone decides.
 
 ## What to pin
 
-Verified 2026-08-27.
+Verified 2026-09-11.
 
 | Component | Current | Variable | Module |
 | --- | --- | --- | --- |
-| `nullplatform-base` chart | `2.44.0` | `nullplatform_base_helm_version` | `nullplatform/base` |
-| `nullplatform-agent` chart | `2.37.0` | `nullplatform_agent_helm_version` | `nullplatform/agent` |
-| `cert-manager` chart | `v1.21.1` | `cert_manager_version` | `infrastructure/commons/cert_manager` |
-| `prometheus` chart | `29.27.0` | `prometheus_version` | `infrastructure/commons/prometheus` |
-| `k8s-logs-controller` | `1.6.0` | `logging_controller_image_tag` | `nullplatform/base` |
-| `controlplane-agent` | `0.9.2` | `control_plane_agent_image_tag` | `nullplatform/base` |
-| `k8s-traffic-manager` | `1.8.0` | `agent_traffic_manager_tag` | `nullplatform/agent` |
-| traffic manager (provider config) | `1.8.0` | `traffic_manager_version` | `container_orchestration/eks` |
+| `nullplatform-base` chart | `2.44.6` | `nullplatform_base_helm_version` | `nullplatform/base` |
+| `nullplatform-agent` chart | `3.0.0` | `nullplatform_agent_helm_version` | `nullplatform/agent` |
+| `cert-manager` chart | `v1.21.2` | `cert_manager_version` | `infrastructure/commons/cert_manager` |
+| `prometheus` chart | `29.28.1` | `prometheus_version` | `infrastructure/commons/prometheus` |
+| `istio-base` chart | `1.30.4` | `istio_base_version` | `infrastructure/commons/istio` |
+| `istiod` chart | `1.30.4` | `istiod_version` | `infrastructure/commons/istio` |
+| `gateway-api` CRDs | `v1.5.1` | `gateway_api_crd_ref` | `nullplatform/base` |
+| `k8s-logs-controller` | `1.6.1` | `logging_controller_image_tag` | `nullplatform/base` |
+| `k8s-traffic-manager` | `1.8.1` | `agent_traffic_manager_tag` | `nullplatform/agent` |
+| traffic manager (provider config) | `1.8.1` | `traffic_manager_version` | `container_orchestration/eks` |
 | `scopes` repository | `v1.15.1` | `agent_repo` (as `"https://github.com/nullplatform/scopes.git#v1.15.1"`) | `nullplatform/agent` |
 
 **Read your cluster before copying these.** The rule is to pin what you are already running,
@@ -37,16 +39,16 @@ at deploy time, so what you run may not match the table: `cert_manager_version`,
 
 ```hcl
 module "base" {
-  nullplatform_base_helm_version = "2.44.0"
-  logging_controller_image_tag   = "1.6.0"
-  control_plane_agent_image_tag  = "0.9.2"
+  nullplatform_base_helm_version = "2.44.6"
+  logging_controller_image_tag   = "1.6.1"
+  gateway_api_crd_ref            = "v1.5.1"
 }
 
 module "agent" {
-  nullplatform_agent_helm_version = "2.37.0"
+  nullplatform_agent_helm_version = "3.0.0"
   image_tag                       = "0.9.2"
   agent_repos_scope_tag           = "v1.15.1"
-  agent_traffic_manager_tag       = "1.8.0"
+  agent_traffic_manager_tag       = "1.8.1"
 
   agent_repos_extra = [
     "https://github.com/nullplatform/scopes-lambda.git#v0.3.1",
@@ -56,15 +58,20 @@ module "agent" {
 
 # eks, aks and gke all take this
 module "container_orchestration" {
-  traffic_manager_version = "1.8.0"
+  traffic_manager_version = "1.8.1"
 }
 
 module "cert_manager" {
-  cert_manager_version = "v1.21.1"
+  cert_manager_version = "v1.21.2"
 }
 
 module "prometheus" {
-  prometheus_version = "29.27.0"
+  prometheus_version = "29.28.1"
+}
+
+module "istio" {
+  istio_base_version = "1.30.4"
+  istiod_version     = "1.30.4"
 }
 
 module "service_definition" {
@@ -104,21 +111,50 @@ branch. Pinning `agent_repos_scope` does not cover them: the agent clones the re
 definition modules read the branch. They are listed in
 `scripts/version-pinning-baseline.txt` with the reason.
 
+**The gateway-api CRD ref follows Istio, not its own latest.** `gateway_api_crd_ref` is pinned to
+the version Istio's own version-pinned docs document installing, so it is reported as frozen
+rather than bumped: Istio 1.30's release notes warn that upgrading these CRDs without upgrading
+Istio leaves `TLSRoute` and `ReferenceGrant` invisible to istiod. Bump it together with
+`istio_base_version` and `istiod_version`, after re-reading istio.io for that release.
+
+It is also applied on every install *and upgrade*, not only on first install: the base chart runs
+`kubectl kustomize "github.com/kubernetes-sigs/gateway-api/config/crd?ref=<ref>" | kubectl apply
+--server-side --force-conflicts`, so the ref is resolved against GitHub on each apply and the
+cluster's CRDs are reconciled to it. A branch there would be followed silently on every upgrade.
+
+**Two places set that ref, and they do not agree.** The `nullplatform/base` module always passes
+its own value through (`locals.tf`), so a module user gets the `v1.5.1` in the table above. The
+chart's own default is still `v1.3.0`, which is what Istio 1.27 documented — so installing
+`nullplatform-base` directly, without the module, lands Gateway API `v1.3.0` CRDs under the Istio
+`1.30.4` these modules deploy, which is the mismatch the paragraph above warns about. The table
+tracks the module value; the chart default is a separate fix in `nullplatform/helm-charts`.
+
 **A name cannot prove immutability.** The checks below reject `latest`, `main`, `master` and
 `HEAD`. A tag called `beta` or a branch called `develop` passes. Nothing distinguishes a
 mutable ref from a fixed one by name alone.
 
 ## Keeping this current
 
-There is no automation that bumps these numbers, on purpose. Bumping a documented version to
-whatever is newest would put the drift back in documentation form, and it contradicts the rule
-above about pinning what you already run. When a new version ships, someone decides and edits
-this table.
+This table is refreshed the same way the module READMEs are, and for the same reason: it is
+derived from state that lives outside this repository. The `generate-readmes` job in
+`release.yml` runs `scripts/check-versions-upstream.sh --write` against the open release pull
+request on every push to `main`, so the release carries an up-to-date table and merging it is
+the decision. Nothing reaches `main` on its own.
 
-What is automated is the opposite direction: `scripts/check-version-pinning.sh` rejects a *new*
-moving default, a repository URL pinned to a branch, or a `helm_release` with no `version`. It
-runs in pre-commit and again as a step in the `terraform-lint` workflow, so skipping the local
-hook does not skip the check. Deliberately deferred violations live in
+What is automated is the typing, not the decision. A row held back on purpose is reported as
+frozen and left unedited; a row whose upstream could not be read blocks the rewrite instead of
+guessing; a newest build carrying a lower version number than the pin is reported rather than
+written. Bumping a documented version to whatever is newest *unreviewed* is what would put the
+drift back in documentation form, and would contradict the rule above about pinning what you
+already run.
+
+`.github/workflows/versions-drift.yml` reports the same comparison on each pull request and every
+Monday, so drift is visible between releases without waiting for one.
+
+The opposite direction is enforced rather than merely reported: `scripts/check-version-pinning.sh`
+rejects a *new* moving default, a repository URL pinned to a branch, or a `helm_release` with no
+`version`. It runs in pre-commit and again as a step in the `terraform-lint` workflow, so
+skipping the local hook does not skip the check. Deliberately deferred violations live in
 `scripts/version-pinning-baseline.txt` with the reason; that file should only ever shrink.
 
 One trap worth knowing before bumping an image by hand: **`k8s-traffic-manager` publishes a

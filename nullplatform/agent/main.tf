@@ -13,6 +13,10 @@ resource "terraform_data" "cross_variable_validation" {
       error_message = "aws_iam_role_arn is required when cloud_provider is 'aws'."
     }
     precondition {
+      condition     = var.cloud_provider != "aws" || var.cluster_name != "" || lookup(var.extra_envs, "CLUSTER_NAME", "") != ""
+      error_message = "cluster_name is required when cloud_provider is 'aws': the k8s scope needs it to find the EKS OIDC provider when it creates IAM roles. Set cluster_name (extra_envs.CLUSTER_NAME is still accepted for existing installations)."
+    }
+    precondition {
       condition     = var.cloud_provider != "azure" || var.azure_client_id != null
       error_message = "azure_client_id is required when cloud_provider is 'azure'."
     }
