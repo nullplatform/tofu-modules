@@ -2,27 +2,27 @@
 
 ## Description
 
-Provisions an Amazon EKS cluster with managed node groups or Auto Mode, core add-ons, IRSA, and an EBS CSI driver IAM role using the terraform-aws-modules/eks module
+Provisions an Amazon EKS cluster with managed node groups or Auto Mode, core addons, IRSA, and optional KMS encryption using the terraform-aws-modules/eks/aws upstream module
 
 ## Architecture
 
-The module wraps terraform-aws-modules/eks to create the EKS cluster (aws_eks_cluster), optionally provisioning either an EKS managed node group or Auto Mode compute config based on the use_auto_mode flag. An aws_iam_role (ebs_csi_driver) is created and wired into the aws-ebs-csi-driver add-on via service_account_role_arn, while IRSA is enabled to expose an OIDC provider ARN as output. Security group additional rules for NLB health checks and HTTPS ingress are conditionally injected via security_group_additional_rules, using the VPC CIDR fetched from the aws_vpc data source combined with any additional_network_cidrs.
+The module wraps `terraform-aws-modules/eks/aws` (which internally creates `aws_eks_cluster`, `aws_eks_node_group`, `aws_iam_role`, `aws_iam_role_policy_attachment`, and `aws_eks_addon` resources) and wires a locally created `aws_iam_role` for the EBS CSI driver into the addon's `service_account_role_arn`. An `aws_vpc` data source resolves the VPC CIDR for security group rules, which are conditionally added to the cluster security group for NLB health checks and HTTPS ingress. KMS key creation is derived from `encryption_config.provider_key_arn`: when a CMK ARN is supplied the module sets `create_kms_key = false` and passes the ARN through; otherwise the upstream module auto-generates an `aws_kms_key`. When `use_auto_mode = true`, `eks_managed_node_groups` is set to empty and `compute_config` enables EKS Auto Mode with the specified node pools.
 
 ## Features
 
-- Creates EKS cluster with configurable Kubernetes version and dual endpoint access control
-- Provisions EKS managed node group with configurable AMI type, instance type, and scaling parameters
-- Enables EKS Auto Mode with configurable node pools (general-purpose and/or system) as an alternative to managed node groups
-- Installs core EKS add-ons: aws-ebs-csi-driver, coredns, eks-pod-identity-agent, kube-proxy, and vpc-cni
-- Creates IAM role for the EBS CSI driver and wires it to the add-on via IRSA with OIDC provider
-- Configures optional CloudWatch log group for EKS control plane logs with configurable retention
-- Adds conditional security group rules for NLB health checks (port 15021) and HTTPS (port 443) ingress from VPC and peered CIDRs
+- Creates EKS cluster with configurable Kubernetes version and private subnet placement
+- Installs five core addons (aws-ebs-csi-driver, coredns, eks-pod-identity-agent, kube-proxy, vpc-cni) with optional version pinning to prevent plan drift
+- Supports EKS Auto Mode with configurable node pools (general-purpose, system) as an alternative to managed node groups
+- Configures IRSA via OIDC provider and creates a dedicated IAM role for the EBS CSI driver
+- Manages KMS encryption for etcd secrets, supporting both auto-generated keys and bring-your-own CMK
+- Adds optional security group rules for NLB health checks and HTTPS traffic using VPC and additional CIDRs
+- Supports configurable API server endpoint access with public CIDR allowlisting and multiple authentication modes
 
 ## Basic Usage
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/eks?ref=v7.7.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/eks?ref=v7.8.0"
 
   aws_subnets_private_ids = "your-aws-subnets-private-ids"
   aws_vpc_vpc_id          = "your-aws-vpc-vpc-id"
@@ -75,6 +75,7 @@ resource "example_resource" "this" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_access_entries"></a> [access\_entries](#input\_access\_entries) | Map of access entries for the EKS cluster | <pre>map(object({<br/>    principal_arn     = string<br/>    user_name         = optional(string)<br/>    kubernetes_groups = optional(list(string))<br/>    type              = optional(string)<br/><br/>    policy_associations = optional(map(object({<br/>      policy_arn = string<br/>      access_scope = optional(object({<br/>        type       = optional(string)<br/>        namespaces = optional(list(string))<br/>      }))<br/>    })))<br/>  }))</pre> | `{}` | no |
 | <a name="input_additional_network_cidrs"></a> [additional\_network\_cidrs](#input\_additional\_network\_cidrs) | Additional CIDR blocks to allow in security group rules (e.g., peered VPC, on-premises network). | `list(string)` | `[]` | no |
+| <a name="input_addon_versions"></a> [addon\_versions](#input\_addon\_versions) | Pinned EKS addon versions, keyed by addon name (aws-ebs-csi-driver, coredns, eks-pod-identity-agent, kube-proxy, vpc-cni). An addon left out keeps resolving to the most recent version, which surfaces as plan drift whenever AWS publishes a new build. | `map(string)` | `{}` | no |
 | <a name="input_ami_release_version"></a> [ami\_release\_version](#input\_ami\_release\_version) | Pin a specific AMI release version for the managed node group (e.g. "1.34.6-20260415").<br/>When null, the upstream module resolves the AMI based on use\_latest\_ami\_release\_version.<br/>Set this to a fixed value when reproducible AMIs are required (e.g. to avoid plan drift<br/>every time AWS publishes a new optimized AMI). | `string` | `null` | no |
 | <a name="input_ami_type"></a> [ami\_type](#input\_ami\_type) | AMI type to use with the node | `string` | `"AL2023_x86_64_STANDARD"` | no |
 | <a name="input_attach_cluster_primary_security_group"></a> [attach\_cluster\_primary\_security\_group](#input\_attach\_cluster\_primary\_security\_group) | Attach cluster primary security group to node groups | `bool` | `true` | no |
@@ -117,16 +118,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "eks",
-  "description": "Provisions an Amazon EKS cluster with managed node groups or Auto Mode, core add-ons, IRSA, and an EBS CSI driver IAM role using the terraform-aws-modules/eks module",
-  "architecture": "The module wraps terraform-aws-modules/eks to create the EKS cluster (aws_eks_cluster), optionally provisioning either an EKS managed node group or Auto Mode compute config based on the use_auto_mode flag. An aws_iam_role (ebs_csi_driver) is created and wired into the aws-ebs-csi-driver add-on via service_account_role_arn, while IRSA is enabled to expose an OIDC provider ARN as output. Security group additional rules for NLB health checks and HTTPS ingress are conditionally injected via security_group_additional_rules, using the VPC CIDR fetched from the aws_vpc data source combined with any additional_network_cidrs.",
+  "description": "Provisions an Amazon EKS cluster with managed node groups or Auto Mode, core addons, IRSA, and optional KMS encryption using the terraform-aws-modules/eks/aws upstream module",
+  "architecture": "The module wraps `terraform-aws-modules/eks/aws` (which internally creates `aws_eks_cluster`, `aws_eks_node_group`, `aws_iam_role`, `aws_iam_role_policy_attachment`, and `aws_eks_addon` resources) and wires a locally created `aws_iam_role` for the EBS CSI driver into the addon's `service_account_role_arn`. An `aws_vpc` data source resolves the VPC CIDR for security group rules, which are conditionally added to the cluster security group for NLB health checks and HTTPS ingress. KMS key creation is derived from `encryption_config.provider_key_arn`: when a CMK ARN is supplied the module sets `create_kms_key = false` and passes the ARN through; otherwise the upstream module auto-generates an `aws_kms_key`. When `use_auto_mode = true`, `eks_managed_node_groups` is set to empty and `compute_config` enables EKS Auto Mode with the specified node pools.",
   "features": [
-    "Creates EKS cluster with configurable Kubernetes version and dual endpoint access control",
-    "Provisions EKS managed node group with configurable AMI type, instance type, and scaling parameters",
-    "Enables EKS Auto Mode with configurable node pools (general-purpose and/or system) as an alternative to managed node groups",
-    "Installs core EKS add-ons: aws-ebs-csi-driver, coredns, eks-pod-identity-agent, kube-proxy, and vpc-cni",
-    "Creates IAM role for the EBS CSI driver and wires it to the add-on via IRSA with OIDC provider",
-    "Configures optional CloudWatch log group for EKS control plane logs with configurable retention",
-    "Adds conditional security group rules for NLB health checks (port 15021) and HTTPS (port 443) ingress from VPC and peered CIDRs"
+    "Creates EKS cluster with configurable Kubernetes version and private subnet placement",
+    "Installs five core addons (aws-ebs-csi-driver, coredns, eks-pod-identity-agent, kube-proxy, vpc-cni) with optional version pinning to prevent plan drift",
+    "Supports EKS Auto Mode with configurable node pools (general-purpose, system) as an alternative to managed node groups",
+    "Configures IRSA via OIDC provider and creates a dedicated IAM role for the EBS CSI driver",
+    "Manages KMS encryption for etcd secrets, supporting both auto-generated keys and bring-your-own CMK",
+    "Adds optional security group rules for NLB health checks and HTTPS traffic using VPC and additional CIDRs",
+    "Supports configurable API server endpoint access with public CIDR allowlisting and multiple authentication modes"
   ],
   "inputs": [
     {
@@ -157,6 +158,11 @@ resource "example_resource" "this" {
     {
       "name": "authentication_mode",
       "description": "Authentication mode for the EKS cluster. Valid values: CONFIG_MAP, API, API_AND_CONFIG_MAP.",
+      "required": false
+    },
+    {
+      "name": "addon_versions",
+      "description": "Pinned EKS addon versions, keyed by addon name (aws-ebs-csi-driver, coredns, eks-pod-identity-agent, kube-proxy, vpc-cni). An addon left out keeps resolving to the most recent version, which surfaces as plan drift whenever AWS publishes a new build.",
       "required": false
     },
     {
@@ -251,7 +257,12 @@ resource "example_resource" "this" {
     },
     {
       "name": "encryption_config",
-      "description": "Encryption config for the EKS control plane (KMS encryption of etcd secrets). Default {} preserves the wrapper's pre-existing behavior: the upstream module auto-creates a KMS key. Set provider_key_arn to bring your own CMK — the wrapper then auto-disables upstream's create_kms_key so the supplied ARN is honored.",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "aws_profile",
+      "description": "Optional AWS CLI profile used by the kubernetes provider's exec plugin (`aws eks get-token`) to authenticate against the cluster. If empty, the default AWS credential chain (or the AWS_PROFILE environment variable) is used.",
       "required": false
     }
   ],
@@ -265,6 +276,6 @@ resource "example_resource" "this" {
     "eks_cluster_security_group_id",
     "eks_cluster_primary_security_group_id"
   ],
-  "hash": "a20671d0031dc3797531a0a3d823521e"
+  "hash": "3f5872e359ef0f6e03b46a812bac03db"
 }
 END_AI_METADATA -->
