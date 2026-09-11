@@ -49,6 +49,9 @@ locals {
     jsondecode(data.http.service_spec_template[0].response_body)
   )
 
+  template_dimensions  = try(local.service_spec_parsed.dimensions, {})
+  effective_dimensions = length(local.template_dimensions) > 0 ? local.template_dimensions : var.dimensions
+
   available_actions = var.available_actions
   available_links   = var.available_links
   visible_to_nrns   = concat([var.nrn], var.extra_visibile_to_nrns)
