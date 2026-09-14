@@ -14,14 +14,14 @@ a specific release, so an upgrade is something someone decides.
 
 ## What to pin
 
-Verified 2026-09-11.
+Verified 2026-09-14.
 
 | Component | Current | Variable | Module |
 | --- | --- | --- | --- |
 | `nullplatform-base` chart | `2.44.6` | `nullplatform_base_helm_version` | `nullplatform/base` |
 | `nullplatform-agent` chart | `3.0.0` | `nullplatform_agent_helm_version` | `nullplatform/agent` |
 | `cert-manager` chart | `v1.21.2` | `cert_manager_version` | `infrastructure/commons/cert_manager` |
-| `prometheus` chart | `29.28.1` | `prometheus_version` | `infrastructure/commons/prometheus` |
+| `prometheus` chart | `29.30.0` | `prometheus_version` | `infrastructure/commons/prometheus` |
 | `istio-base` chart | `1.30.4` | `istio_base_version` | `infrastructure/commons/istio` |
 | `istiod` chart | `1.30.4` | `istiod_version` | `infrastructure/commons/istio` |
 | `gateway-api` CRDs | `v1.5.1` | `gateway_api_crd_ref` | `nullplatform/base` |
@@ -66,7 +66,7 @@ module "cert_manager" {
 }
 
 module "prometheus" {
-  prometheus_version = "29.28.1"
+  prometheus_version = "29.30.0"
 }
 
 module "istio" {
