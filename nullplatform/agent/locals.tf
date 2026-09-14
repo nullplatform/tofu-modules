@@ -78,7 +78,7 @@ locals {
     DNS_TYPE                = var.dns_type
     DOMAIN                  = var.domain
     USE_ACCOUNT_SLUG        = var.use_account_slug
-    K8S_NAMESPACE           = var.namespace
+    K8S_NAMESPACE           = var.workload_namespace
     SERVICE_TEMPLATE        = var.service_template != "" ? var.service_template : local.worker_templates.SERVICE_TEMPLATE
     INITIAL_INGRESS_PATH    = var.initial_ingress_path != "" ? var.initial_ingress_path : local.worker_templates.INITIAL_INGRESS_PATH
     BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path != "" ? var.blue_green_ingress_path : local.worker_templates.BLUE_GREEN_INGRESS_PATH

@@ -166,9 +166,15 @@ variable "worker" {
 
 # Kubernetes namespace where the nullplatform agent will run
 variable "namespace" {
-  description = "Kubernetes namespace where the nullplatform agent will run"
+  description = "Kubernetes namespace where the nullplatform agent itself runs. This is NOT where scopes deploy their workloads — see var.workload_namespace."
   type        = string
   default     = "nullplatform-tools"
+}
+
+variable "workload_namespace" {
+  description = "Kubernetes namespace scopes deploy their application pods into, handed to the k8s-scope workers as K8S_NAMESPACE. Defaults to the k8s scope's own default, which is what every pre-worker agent used."
+  type        = string
+  default     = "nullplatform"
 }
 
 variable "create_namespace" {
