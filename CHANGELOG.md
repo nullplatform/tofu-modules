@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.9.1](https://github.com/nullplatform/tofu-modules/compare/v7.9.0...v7.9.1) (2026-09-14)
+
+
+### Bug Fixes
+
+* deploy workloads into their own namespace, not the agent's ([#585](https://github.com/nullplatform/tofu-modules/issues/585)) ([b99b7d0](https://github.com/nullplatform/tofu-modules/commit/b99b7d0eeaa8369ed9f01b5e872e96e7e1f64183))
+
 ## [7.9.0](https://github.com/nullplatform/tofu-modules/compare/v7.8.1...v7.9.0) (2026-09-11)
 
 
