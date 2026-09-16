@@ -2,26 +2,27 @@
 
 ## Description
 
-Configures a nullplatform AWS provider by registering account identity, region, and DNS networking settings via a nullplatform_provider_config resource
+Registers an AWS provider configuration with Nullplatform by assembling account identity and networking attributes into a nullplatform_provider_config resource
 
 ## Architecture
 
-The module uses data sources aws_caller_identity and aws_region to dynamically retrieve the current AWS account ID and region at apply time. These values, along with DNS variables, are merged into a structured attributes payload and passed to a nullplatform_provider_config resource of type aws-configuration. A local map conditionally includes hosted_public_zone_id in the networking block only when it is non-empty and non-null, preventing API rejection of empty strings. The nrn and dimensions variables control resource targeting and dimensional scoping within the nullplatform provider.
+The module conditionally fetches the AWS account ID via aws_caller_identity and the region via aws_region data sources when those values are not explicitly provided. Local values merge the resolved account identity with networking configuration, conditionally including hosted_public_zone_id only when non-empty to support private-only DNS setups. A single nullplatform_provider_config resource of type aws-configuration is created, receiving the assembled account and networking attributes as a JSON-encoded payload along with the NRN identifier and optional dimension map.
 
 ## Features
 
-- Creates a nullplatform_provider_config resource that registers AWS account and region metadata with the nullplatform API
-- Dynamically resolves AWS account ID and region using aws_caller_identity and aws_region data sources
-- Conditionally includes the public Route53 hosted zone ID in the provider config payload to support private-only DNS installations
-- Validates hosted_public_zone_id format against the Route53 zone ID pattern ^Z[A-Z0-9]{10,}$ while allowing empty or null values
-- Supports configurable dimension maps for scoping nullplatform provider configurations across environments
-- Configures private DNS networking with a required hosted_private_zone_id and optional public zone for hybrid DNS setups
+- Creates a nullplatform_provider_config resource of type aws-configuration with JSON-encoded AWS account and networking attributes
+- Resolves AWS account ID automatically from aws_caller_identity when not explicitly provided
+- Resolves AWS region automatically from aws_region data source when not explicitly provided
+- Conditionally omits hosted_public_zone_id from the networking payload to support private-only DNS installations
+- Validates Route53 hosted zone ID format using regex pattern ^Z[A-Z0-9]{10,}$ for both public and private zone IDs
+- Supports optional dimension map for multi-dimensional Nullplatform provider scoping
+- Supports optional application domain flag to include account name in domain configuration
 
 ## Basic Usage
 
 ```hcl
 module "cloud" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/cloud?ref=v7.10.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/cloud?ref=v7.11.0"
 
   domain_name            = "your-domain-name"
   hosted_private_zone_id = "your-hosted-private-zone-id"
@@ -62,26 +63,29 @@ resource "example_resource" "this" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_account_id"></a> [account\_id](#input\_account\_id) | AWS account ID to register. Asserted by the caller and only format-checked, not verified against any AWS credentials. Leave unset to read it from the AWS provider credentials (aws\_caller\_identity). | `string` | `null` | no |
 | <a name="input_application_domain"></a> [application\_domain](#input\_application\_domain) | Add account name in domain | `bool` | `false` | no |
 | <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Map of dimension values to configure nullplatform | `map(string)` | `{}` | no |
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | Domain name for the configuration | `string` | n/a | yes |
 | <a name="input_hosted_private_zone_id"></a> [hosted\_private\_zone\_id](#input\_hosted\_private\_zone\_id) | Hosted zone ID for private DNS | `string` | n/a | yes |
 | <a name="input_hosted_public_zone_id"></a> [hosted\_public\_zone\_id](#input\_hosted\_public\_zone\_id) | Hosted zone ID for public DNS. Leave empty for private-only installs: when empty it is omitted from the provider config payload (the API rejects an empty string). | `string` | `""` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Identifier Nullplatform Resources Name | `string` | n/a | yes |
+| <a name="input_region"></a> [region](#input\_region) | AWS region to register. Asserted by the caller and only format-checked, not verified against the AWS provider. Leave unset to read it from the AWS provider configuration (aws\_region). | `string` | `null` | no |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
 {
   "name": "cloud",
-  "description": "Configures a nullplatform AWS provider by registering account identity, region, and DNS networking settings via a nullplatform_provider_config resource",
-  "architecture": "The module uses data sources aws_caller_identity and aws_region to dynamically retrieve the current AWS account ID and region at apply time. These values, along with DNS variables, are merged into a structured attributes payload and passed to a nullplatform_provider_config resource of type aws-configuration. A local map conditionally includes hosted_public_zone_id in the networking block only when it is non-empty and non-null, preventing API rejection of empty strings. The nrn and dimensions variables control resource targeting and dimensional scoping within the nullplatform provider.",
+  "description": "Registers an AWS provider configuration with Nullplatform by assembling account identity and networking attributes into a nullplatform_provider_config resource",
+  "architecture": "The module conditionally fetches the AWS account ID via aws_caller_identity and the region via aws_region data sources when those values are not explicitly provided. Local values merge the resolved account identity with networking configuration, conditionally including hosted_public_zone_id only when non-empty to support private-only DNS setups. A single nullplatform_provider_config resource of type aws-configuration is created, receiving the assembled account and networking attributes as a JSON-encoded payload along with the NRN identifier and optional dimension map.",
   "features": [
-    "Creates a nullplatform_provider_config resource that registers AWS account and region metadata with the nullplatform API",
-    "Dynamically resolves AWS account ID and region using aws_caller_identity and aws_region data sources",
-    "Conditionally includes the public Route53 hosted zone ID in the provider config payload to support private-only DNS installations",
-    "Validates hosted_public_zone_id format against the Route53 zone ID pattern ^Z[A-Z0-9]{10,}$ while allowing empty or null values",
-    "Supports configurable dimension maps for scoping nullplatform provider configurations across environments",
-    "Configures private DNS networking with a required hosted_private_zone_id and optional public zone for hybrid DNS setups"
+    "Creates a nullplatform_provider_config resource of type aws-configuration with JSON-encoded AWS account and networking attributes",
+    "Resolves AWS account ID automatically from aws_caller_identity when not explicitly provided",
+    "Resolves AWS region automatically from aws_region data source when not explicitly provided",
+    "Conditionally omits hosted_public_zone_id from the networking payload to support private-only DNS installations",
+    "Validates Route53 hosted zone ID format using regex pattern ^Z[A-Z0-9]{10,}$ for both public and private zone IDs",
+    "Supports optional dimension map for multi-dimensional Nullplatform provider scoping",
+    "Supports optional application domain flag to include account name in domain configuration"
   ],
   "inputs": [
     {
@@ -105,6 +109,16 @@ resource "example_resource" "this" {
       "required": false
     },
     {
+      "name": "account_id",
+      "description": "AWS account ID to register. Asserted by the caller and only format-checked, not verified against any AWS credentials. Leave unset to read it from the AWS provider credentials (aws_caller_identity).",
+      "required": false
+    },
+    {
+      "name": "region",
+      "description": "AWS region to register. Asserted by the caller and only format-checked, not verified against the AWS provider. Leave unset to read it from the AWS provider configuration (aws_region).",
+      "required": false
+    },
+    {
       "name": "dimensions",
       "description": "Map of dimension values to configure nullplatform",
       "required": false
@@ -116,6 +130,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "da1b824db5bc97987c9007c20fd0f1e7"
+  "hash": "c93a4cb28c32766f71b88d8f07b316a4"
 }
 END_AI_METADATA -->
