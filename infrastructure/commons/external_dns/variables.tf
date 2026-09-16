@@ -162,10 +162,10 @@ variable "oci_zones_cache_duration" {
 
 variable "dns_provider_name" {
   type        = string
-  description = "The DNS provider to use with ExternalDNS. Use 'azure' for Azure Public DNS zones and 'azure-private-dns' for Azure Private DNS zones — both share the same auth, secret, and ServiceAccount wiring."
+  description = "The DNS provider to use with ExternalDNS. Use 'azure' for Azure Public DNS zones and 'azure-private-dns' for Azure Private DNS zones — both share the same auth, secret, and ServiceAccount wiring. 'pdns' and 'rfc2136' target a self-hosted PowerDNS or RFC2136-compliant DNS server, for on-premise deployments without a cloud DNS provider."
   validation {
-    condition     = contains(["cloudflare", "aws", "oci", "azure", "azure-private-dns", "google"], var.dns_provider_name)
-    error_message = "dns_provider_name must be one of: 'cloudflare', 'aws', 'oci', 'azure', 'azure-private-dns', 'google'."
+    condition     = contains(["cloudflare", "aws", "oci", "azure", "azure-private-dns", "google", "pdns", "rfc2136"], var.dns_provider_name)
+    error_message = "dns_provider_name must be one of: 'cloudflare', 'aws', 'oci', 'azure', 'azure-private-dns', 'google', 'pdns', 'rfc2136'."
   }
 }
 
@@ -241,3 +241,84 @@ variable "gcp_service_account_name" {
   nullable    = false
 }
 
+
+###############################################################################
+# PDNS (POWERDNS) CONFIGURATION
+###############################################################################
+
+variable "pdns_server" {
+  description = "The URL of the PowerDNS API server, e.g. 'http://pdns.internal:8081' (required when dns_provider_name is 'pdns')"
+  type        = string
+  default     = ""
+  nullable    = false
+}
+
+variable "pdns_server_id" {
+  description = "The PowerDNS server id to target. Should be 'localhost' except when the server sits behind a proxy."
+  type        = string
+  default     = "localhost"
+  nullable    = false
+}
+
+variable "pdns_api_key" {
+  description = "The PowerDNS API key used to authorize requests (required when dns_provider_name is 'pdns')"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "pdns_skip_tls_verify" {
+  description = "Disable TLS certificate verification against the PowerDNS API. Only for self-signed certs in non-production setups."
+  type        = bool
+  default     = false
+}
+
+###############################################################################
+# RFC2136 CONFIGURATION
+###############################################################################
+
+variable "rfc2136_host" {
+  description = "The hostname or IP of the RFC2136-compliant DNS server (required when dns_provider_name is 'rfc2136')"
+  type        = string
+  default     = ""
+  nullable    = false
+}
+
+variable "rfc2136_port" {
+  description = "The port of the RFC2136-compliant DNS server"
+  type        = number
+  default     = 53
+}
+
+variable "rfc2136_zone" {
+  description = "The DNS zone to manage via dynamic updates (required when dns_provider_name is 'rfc2136')"
+  type        = string
+  default     = ""
+  nullable    = false
+}
+
+variable "rfc2136_insecure" {
+  description = "Skip TSIG authentication against the DNS server. Only for lab/dev servers with no TSIG key configured — production RFC2136 setups should use TSIG."
+  type        = bool
+  default     = false
+}
+
+variable "rfc2136_tsig_keyname" {
+  description = "The TSIG key name attached to DNS update messages (required when dns_provider_name is 'rfc2136' and rfc2136_insecure is false)"
+  type        = string
+  default     = ""
+  nullable    = false
+}
+
+variable "rfc2136_tsig_secret" {
+  description = "The TSIG secret, base64-encoded, attached to DNS update messages (required when dns_provider_name is 'rfc2136' and rfc2136_insecure is false)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "rfc2136_tsig_secret_alg" {
+  description = "The TSIG algorithm used to sign DNS update messages"
+  type        = string
+  default     = "hmac-sha256"
+}

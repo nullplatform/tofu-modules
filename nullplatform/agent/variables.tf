@@ -18,11 +18,11 @@ variable "image_tag" {
 
 # Cloud provider the cluster runs on
 variable "cloud_provider" {
-  description = "Cloud provider to use ('aws', 'gcp', 'azure', or 'oci')"
+  description = "Cloud provider to use ('aws', 'gcp', 'azure', 'oci', or 'onprem' for self-managed/on-premise clusters)"
   type        = string
   validation {
-    condition     = contains(["aws", "gcp", "azure", "oci"], var.cloud_provider)
-    error_message = "cloud_provider must be either 'aws' , 'gcp', 'oci' or 'azure'."
+    condition     = contains(["aws", "gcp", "azure", "oci", "onprem"], var.cloud_provider)
+    error_message = "cloud_provider must be one of: 'aws', 'gcp', 'oci', 'azure' or 'onprem'."
   }
 }
 

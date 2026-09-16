@@ -113,6 +113,16 @@ run "all_providers_in_config_map" {
   }
 
   assert {
+    condition     = contains(keys(local.provider_configs), "pdns")
+    error_message = "provider_configs should contain pdns"
+  }
+
+  assert {
+    condition     = contains(keys(local.provider_configs), "rfc2136")
+    error_message = "provider_configs should contain rfc2136"
+  }
+
+  assert {
     condition     = contains(keys(local.provider_configs), "google")
     error_message = "provider_configs should contain google"
   }
