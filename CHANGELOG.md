@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.11.0](https://github.com/nullplatform/tofu-modules/compare/v7.10.1...v7.11.0) (2026-09-16)
+
+
+### Features
+
+* **cloud:** allow pinning aws account_id and region by variable ([#592](https://github.com/nullplatform/tofu-modules/issues/592)) ([c4f2c09](https://github.com/nullplatform/tofu-modules/commit/c4f2c0904e5887685bba5213cc897eb99d82f238))
+
 ## [7.10.1](https://github.com/nullplatform/tofu-modules/compare/v7.10.0...v7.10.1) (2026-09-16)
 
 
