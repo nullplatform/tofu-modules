@@ -2,27 +2,27 @@
 
 ## Description
 
-Deploys the nullplatform base Helm chart onto a Kubernetes cluster with pre-created namespaces, multi-cloud gateway configuration, and pluggable observability integrations across EKS, GKE, AKS, OKE, and ARO
+Deploys the nullplatform base Helm chart onto a Kubernetes cluster with pre-created namespaces, configurable multi-cloud gateway routing, logging integrations, and observability backends
 
 ## Architecture
 
-The module creates two kubernetes_namespace_v1 resources (nullplatform-tools and nullplatform) before deploying a helm_release named nullplatform-base from the nullplatform Helm registry, with the namespace resources declared as explicit dependencies to prevent race conditions. A templatefile local renders a YAML values file from all input variables, which is passed directly to the helm_release as its values block. Outputs surface the rendered values plus cloud-specific security resource IDs (AWS security group IDs, Azure NSG IDs, GCP firewall names) that are passed through from input variables sourced from companion security submodules.
+Two kubernetes_namespace_v1 resources are created first (nullplatform-tools and nullplatform) to avoid Helm lookup race conditions, then a single helm_release resource deploys the nullplatform-base chart from the nullplatform GitHub Helm registry with a rendered templatefile passed as its values. The templatefile in locals.tf wires all input variables into a YAML structure consumed by the chart, covering gateway topology, logging backends, metrics exporters, and cloud-provider-specific security resource IDs. Outputs surface the rendered values plus gateway security group, NSG, and firewall identifiers for downstream module consumption.
 
 ## Features
 
-- Creates two Kubernetes namespaces (nullplatform-tools and nullplatform) with Helm-compatible annotations before chart installation
-- Deploys the nullplatform-base Helm chart with pinned version enforcement that rejects empty or floating references like latest/main/master
-- Configures multi-cloud gateway resources with provider-specific security bindings for AWS security groups, Azure NSGs, GCP firewall rules, and OCI security lists
-- Enables pluggable observability backends including Prometheus, Loki, GELF, Dynatrace, Datadog, New Relic, and CloudWatch with per-provider log and metrics toggles
-- Supports public and private ingress controllers with configurable scope, domain, and load balancer type (internal for Cloudflare Tunnel/VPN or external for direct internet exposure)
-- Manages Gateway API CRD lifecycle via a chart pre-install/pre-upgrade Job with configurable kubernetes-sigs/gateway-api git ref
-- Configures image pull secrets for private container registries used by the logs controller DaemonSet
+- Creates kubernetes_namespace_v1 resources for nullplatform-tools and nullplatform ahead of Helm to prevent chart lookup race conditions
+- Deploys nullplatform-base helm_release with pinned chart version and full values templating for multi-cloud gateway configuration
+- Configures public and internal gateways with per-cloud security identifiers for AWS security groups, Azure NSGs, GCP firewall rules, and OCI security lists
+- Enables pluggable observability backends including Prometheus, Datadog, New Relic, Dynatrace, Loki, GELF, and CloudWatch via DaemonSet log controller
+- Supports multi-cloud Kubernetes providers (EKS, GKE, AKS, OKE, ARO, generic) with provider-specific load balancer and subnet annotations
+- Enforces pinned non-moving version references for both the Helm chart and logging controller image tag via input validation
+- Manages Gateway API CRD lifecycle with configurable git ref via pre-install/pre-upgrade Job in the base chart
 
 ## Basic Usage
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.9.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.10.0"
 
   k8s_provider                   = "your-k8s-provider"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
@@ -30,11 +30,11 @@ module "base" {
 }
 ```
 
-### Usage with EKS (Amazon Elastic Kubernetes Service)
+### Usage with EKS Provider
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.9.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.10.0"
 
   k8s_provider                   = "eks"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
@@ -42,11 +42,11 @@ module "base" {
 }
 ```
 
-### Usage with GKE (Google Kubernetes Engine)
+### Usage with GKE Provider
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.9.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.10.0"
 
   k8s_provider                   = "gke"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
@@ -54,11 +54,11 @@ module "base" {
 }
 ```
 
-### Usage with AKS (Azure Kubernetes Service)
+### Usage with AKS Provider
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.9.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.10.0"
 
   k8s_provider                   = "aks"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
@@ -66,11 +66,11 @@ module "base" {
 }
 ```
 
-### Usage with OKE (Oracle Container Engine for Kubernetes)
+### Usage with OKE Provider
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.9.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.10.0"
 
   k8s_provider                   = "oke"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
@@ -78,13 +78,25 @@ module "base" {
 }
 ```
 
-### Usage with ARO (Azure Red Hat OpenShift)
+### Usage with ARO Provider
 
 ```hcl
 module "base" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.9.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.10.0"
 
   k8s_provider                   = "aro"
+  logging_controller_image_tag   = "your-logging-controller-image-tag"
+  nullplatform_base_helm_version = "your-nullplatform-base-helm-version"
+}
+```
+
+### Usage with Generic Provider
+
+```hcl
+module "base" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v7.10.0"
+
+  k8s_provider                   = "generic"
   logging_controller_image_tag   = "your-logging-controller-image-tag"
   nullplatform_base_helm_version = "your-nullplatform-base-helm-version"
 }
@@ -182,7 +194,7 @@ resource "example_resource" "this" {
 | <a name="input_ingressControllers"></a> [ingressControllers](#input\_ingressControllers) | Configuración de los IngressControllers públicos y privados | <pre>object({<br/>    public = object({<br/>      name    = string<br/>      enabled = bool<br/>      scope   = string<br/>      domain  = string<br/>    })<br/>    private = object({<br/>      name    = string<br/>      enabled = bool<br/>      scope   = string<br/>      domain  = string<br/>    })<br/>  })</pre> | <pre>{<br/>  "private": {<br/>    "domain": "",<br/>    "enabled": false,<br/>    "name": "internal",<br/>    "scope": "Internal"<br/>  },<br/>  "public": {<br/>    "domain": "",<br/>    "enabled": false,<br/>    "name": "internet-facing",<br/>    "scope": "External"<br/>  }<br/>}</pre> | no |
 | <a name="input_install_gateway_v2_crd"></a> [install\_gateway\_v2\_crd](#input\_install\_gateway\_v2\_crd) | Install/reconcile the Gateway API CRDs (see gateway\_api\_crd\_ref) via the base chart's pre-install/pre-upgrade Job. Defaults to true so CRDs actually track gateway\_api\_crd\_ref instead of staying frozen at whatever was present on first install — matches the base chart's own default. Safe on chart versions before global.gatewayApiCrdRef too: those only install when the CRD is missing, so pre-existing CRDs from another source are left untouched. | `bool` | `true` | no |
 | <a name="input_internal_azure_load_balancer_subnet"></a> [internal\_azure\_load\_balancer\_subnet](#input\_internal\_azure\_load\_balancer\_subnet) | Name of the subnet for the internal gateway's Azure load balancer. Empty by default, in which case Azure picks the subnet automatically. Must be the subnet's resource name (e.g. "subnet-4"), not the key it has in a subnets\_definition map. | `string` | `""` | no |
-| <a name="input_k8s_provider"></a> [k8s\_provider](#input\_k8s\_provider) | Cloud provider (eks, gke, aks, oke and aro). | `string` | n/a | yes |
+| <a name="input_k8s_provider"></a> [k8s\_provider](#input\_k8s\_provider) | Cloud provider (eks, gke, aks, oke, aro, or generic for non-managed/on-premise clusters). | `string` | n/a | yes |
 | <a name="input_logging_application_logs_enabled"></a> [logging\_application\_logs\_enabled](#input\_logging\_application\_logs\_enabled) | Enable application log forwarding. Set to false to keep only http/sys metrics pipelines active across all providers. | `bool` | `true` | no |
 | <a name="input_logging_controller_image_repository"></a> [logging\_controller\_image\_repository](#input\_logging\_controller\_image\_repository) | Container image repository for the logs controller DaemonSet. | `string` | `"public.ecr.aws/nullplatform/k8s-logs-controller"` | no |
 | <a name="input_logging_controller_image_tag"></a> [logging\_controller\_image\_tag](#input\_logging\_controller\_image\_tag) | No default: every install pins this deliberately — see VERSIONS.md. Container image tag for the logs controller DaemonSet. | `string` | n/a | yes |
@@ -222,16 +234,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "base",
-  "description": "Deploys the nullplatform base Helm chart onto a Kubernetes cluster with pre-created namespaces, multi-cloud gateway configuration, and pluggable observability integrations across EKS, GKE, AKS, OKE, and ARO",
-  "architecture": "The module creates two kubernetes_namespace_v1 resources (nullplatform-tools and nullplatform) before deploying a helm_release named nullplatform-base from the nullplatform Helm registry, with the namespace resources declared as explicit dependencies to prevent race conditions. A templatefile local renders a YAML values file from all input variables, which is passed directly to the helm_release as its values block. Outputs surface the rendered values plus cloud-specific security resource IDs (AWS security group IDs, Azure NSG IDs, GCP firewall names) that are passed through from input variables sourced from companion security submodules.",
+  "description": "Deploys the nullplatform base Helm chart onto a Kubernetes cluster with pre-created namespaces, configurable multi-cloud gateway routing, logging integrations, and observability backends",
+  "architecture": "Two kubernetes_namespace_v1 resources are created first (nullplatform-tools and nullplatform) to avoid Helm lookup race conditions, then a single helm_release resource deploys the nullplatform-base chart from the nullplatform GitHub Helm registry with a rendered templatefile passed as its values. The templatefile in locals.tf wires all input variables into a YAML structure consumed by the chart, covering gateway topology, logging backends, metrics exporters, and cloud-provider-specific security resource IDs. Outputs surface the rendered values plus gateway security group, NSG, and firewall identifiers for downstream module consumption.",
   "features": [
-    "Creates two Kubernetes namespaces (nullplatform-tools and nullplatform) with Helm-compatible annotations before chart installation",
-    "Deploys the nullplatform-base Helm chart with pinned version enforcement that rejects empty or floating references like latest/main/master",
-    "Configures multi-cloud gateway resources with provider-specific security bindings for AWS security groups, Azure NSGs, GCP firewall rules, and OCI security lists",
-    "Enables pluggable observability backends including Prometheus, Loki, GELF, Dynatrace, Datadog, New Relic, and CloudWatch with per-provider log and metrics toggles",
-    "Supports public and private ingress controllers with configurable scope, domain, and load balancer type (internal for Cloudflare Tunnel/VPN or external for direct internet exposure)",
-    "Manages Gateway API CRD lifecycle via a chart pre-install/pre-upgrade Job with configurable kubernetes-sigs/gateway-api git ref",
-    "Configures image pull secrets for private container registries used by the logs controller DaemonSet"
+    "Creates kubernetes_namespace_v1 resources for nullplatform-tools and nullplatform ahead of Helm to prevent chart lookup race conditions",
+    "Deploys nullplatform-base helm_release with pinned chart version and full values templating for multi-cloud gateway configuration",
+    "Configures public and internal gateways with per-cloud security identifiers for AWS security groups, Azure NSGs, GCP firewall rules, and OCI security lists",
+    "Enables pluggable observability backends including Prometheus, Datadog, New Relic, Dynatrace, Loki, GELF, and CloudWatch via DaemonSet log controller",
+    "Supports multi-cloud Kubernetes providers (EKS, GKE, AKS, OKE, ARO, generic) with provider-specific load balancer and subnet annotations",
+    "Enforces pinned non-moving version references for both the Helm chart and logging controller image tag via input validation",
+    "Manages Gateway API CRD lifecycle with configurable git ref via pre-install/pre-upgrade Job in the base chart"
   ],
   "inputs": [
     {
@@ -241,7 +253,7 @@ resource "example_resource" "this" {
     },
     {
       "name": "k8s_provider",
-      "description": "Cloud provider (eks, gke, aks, oke and aro).",
+      "description": "Cloud provider (eks, gke, aks, oke, aro, or generic for non-managed/on-premise clusters).",
       "required": true
     },
     {
@@ -639,6 +651,6 @@ resource "example_resource" "this" {
     "public_gateway_firewall_name",
     "private_gateway_firewall_name"
   ],
-  "hash": "212039ec9d6a3e1dbbbfd0d70445b6da"
+  "hash": "a11630500138d384b5578578e4877c37"
 }
 END_AI_METADATA -->

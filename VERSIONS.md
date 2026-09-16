@@ -14,12 +14,12 @@ a specific release, so an upgrade is something someone decides.
 
 ## What to pin
 
-Verified 2026-09-14.
+Verified 2026-09-16.
 
 | Component | Current | Variable | Module |
 | --- | --- | --- | --- |
 | `nullplatform-base` chart | `2.44.6` | `nullplatform_base_helm_version` | `nullplatform/base` |
-| `nullplatform-agent` chart | `3.0.0` | `nullplatform_agent_helm_version` | `nullplatform/agent` |
+| `nullplatform-agent` chart | `3.1.0` | `nullplatform_agent_helm_version` | `nullplatform/agent` |
 | `cert-manager` chart | `v1.21.2` | `cert_manager_version` | `infrastructure/commons/cert_manager` |
 | `prometheus` chart | `29.30.0` | `prometheus_version` | `infrastructure/commons/prometheus` |
 | `istio-base` chart | `1.30.4` | `istio_base_version` | `infrastructure/commons/istio` |
@@ -45,7 +45,7 @@ module "base" {
 }
 
 module "agent" {
-  nullplatform_agent_helm_version = "3.0.0"
+  nullplatform_agent_helm_version = "3.1.0"
   image_tag                       = "0.9.2"
   agent_repos_scope_tag           = "v1.15.1"
   agent_traffic_manager_tag       = "1.8.1"
