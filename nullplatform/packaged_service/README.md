@@ -44,13 +44,13 @@ resource "example_resource" "this" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5 |
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.102 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.104 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | >= 0.0.102 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | >= 0.0.104 |
 
 ## Resources
 
@@ -63,7 +63,7 @@ resource "example_resource" "this" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_components"></a> [components](#input\_components) | The package's bill of materials, as one flat list that mirrors<br/>nullplatform\_package.components. Each entry:<br/><br/>  type            = "service\_specification" \| "link\_specification" \| "artifact" \| "action\_specification"<br/>  resource        = the whole TF resource to pin (for artifact: an inline object, see below)<br/>  parent\_resource = (optional) the resource this hangs off — e.g. a link's service<br/><br/>Pass whole resources, not ids — the module reads each one's id + snapshot<br/>itself. Exactly one service\_specification is required (the BOM root). For<br/>every service\_specification / link\_specification, its default<br/>action\_specifications are pinned automatically as children — don't list them.<br/><br/>An artifact's `resource` is an inline object doing exactly ONE of:<br/>  register  { type = "oci\_image", meta = {…} }                 # new revision<br/>  look up   { type = "oci\_image", meta = {…}, lookup = true }   # resolve by identity<br/>  pin       { resource\_id = "…", resource\_revision\_id = "…" }   # existing ids<br/>`type` defaults to "oci\_image"; `name` (optional) labels it in the BOM/outputs.<br/>Lookup resolves artifacts VISIBLE at the nrn — owned, ancestor-shared, or<br/>global ("organization=*") — and the lookup meta may pin a revision by<br/>digest, by reference (git), or by tag (oci\_image: the NEWEST revision<br/>registered with that tag wins; a moved tag drifts to the new digest by<br/>design). Requires provider >= 0.0.102. | `any` | n/a | yes |
+| <a name="input_components"></a> [components](#input\_components) | The package's bill of materials, as one flat list that mirrors<br/>nullplatform\_package.components. Each entry:<br/><br/>  type            = "service\_specification" \| "link\_specification" \| "artifact" \| "action\_specification"<br/>  resource        = the whole TF resource to pin (for artifact: an inline object, see below)<br/>  parent\_resource = (optional) the resource this hangs off — e.g. a link's service<br/><br/>Pass whole resources, not ids — the module reads each one's id + snapshot<br/>itself. Exactly one service\_specification is required (the BOM root). For<br/>every service\_specification / link\_specification, its default<br/>action\_specifications are pinned automatically as children — don't list them.<br/><br/>An artifact's `resource` is an inline object doing exactly ONE of:<br/>  register  { type = "oci\_image", meta = {…} }                 # new revision<br/>  look up   { type = "oci\_image", meta = {…}, lookup = true }   # resolve by identity<br/>  pin       { resource\_id = "…", resource\_revision\_id = "…" }   # existing ids<br/>`type` defaults to "oci\_image"; `name` (optional) labels it in the BOM/outputs.<br/>Lookup resolves artifacts VISIBLE at the nrn — owned, ancestor-shared, or<br/>global ("organization=*") — and the lookup meta may pin a revision by<br/>digest, by reference (git), or by tag (oci\_image: the NEWEST revision<br/>registered with that tag wins; a moved tag drifts to the new digest by<br/>design). Requires provider >= 0.0.104. | `any` | n/a | yes |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Owner NRN — the org/account/namespace the package and its artifacts live in. | `string` | n/a | yes |
 | <a name="input_release"></a> [release](#input\_release) | How this revision is published. `version` lives here (nested) because a<br/>top-level `version` is Terraform's reserved registry-module argument and<br/>errors on a git/local source. slug/name/visible\_to default to the service<br/>spec's when unset. | <pre>object({<br/>    version    = string                 # semver of the revision to publish; bump for a new revision<br/>    default    = optional(bool, true)   # promote this revision to the package default<br/>    slug       = optional(string)       # package slug — defaults to the service spec's slug<br/>    name       = optional(string)       # display name — defaults to the service spec's name<br/>    visible_to = optional(list(string)) # visibility    — defaults to the service spec's visible_to<br/>  })</pre> | n/a | yes |
 
