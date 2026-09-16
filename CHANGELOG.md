@@ -1,5 +1,13 @@
 # Changelog
 
+## [7.10.1](https://github.com/nullplatform/tofu-modules/compare/v7.10.0...v7.10.1) (2026-09-16)
+
+
+### Bug Fixes
+
+* **packages:** require provider 0.0.104 where packages are published ([44dcbef](https://github.com/nullplatform/tofu-modules/commit/44dcbef569de5067e7e62b470b86421527c9cc5b))
+* **packages:** require provider 0.0.104 where packages are published ([#590](https://github.com/nullplatform/tofu-modules/issues/590)) ([6da8e43](https://github.com/nullplatform/tofu-modules/commit/6da8e43c39b8f9989258a1c8d63f24a3211825d6))
+
 ## [7.10.0](https://github.com/nullplatform/tofu-modules/compare/v7.9.1...v7.10.0) (2026-09-16)
 
 
