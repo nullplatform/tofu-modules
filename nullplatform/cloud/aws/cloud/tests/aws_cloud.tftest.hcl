@@ -124,3 +124,92 @@ run "rejects_malformed_public_zone_id" {
     var.hosted_public_zone_id,
   ]
 }
+
+run "explicit_account_and_region_override_the_data_sources" {
+  command = plan
+
+  variables {
+    account_id = "210987654321"
+    region     = "eu-west-1"
+  }
+
+  assert {
+    condition     = length(data.aws_caller_identity.current) == 0
+    error_message = "aws_caller_identity must not be read when account_id is provided"
+  }
+
+  assert {
+    condition     = length(data.aws_region.current) == 0
+    error_message = "aws_region must not be read when region is provided"
+  }
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.aws.attributes, "210987654321")
+    error_message = "Attributes should contain the account ID given by variable"
+  }
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.aws.attributes, "eu-west-1")
+    error_message = "Attributes should contain the region given by variable"
+  }
+}
+
+run "explicit_account_still_resolves_region_from_data" {
+  command = plan
+
+  variables {
+    account_id = "210987654321"
+  }
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.aws.attributes, "210987654321")
+    error_message = "Attributes should contain the account ID given by variable"
+  }
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.aws.attributes, "us-east-1")
+    error_message = "Region should still come from the data source when only account_id is set"
+  }
+}
+
+run "rejects_malformed_account_id" {
+  command = plan
+
+  variables {
+    account_id = ""
+  }
+
+  expect_failures = [
+    var.account_id,
+  ]
+}
+
+run "rejects_malformed_region" {
+  command = plan
+
+  variables {
+    region = "us_east_1"
+  }
+
+  expect_failures = [
+    var.region,
+  ]
+}
+
+run "explicit_region_still_resolves_account_from_data" {
+  command = plan
+
+  variables {
+    region = "eu-west-1"
+  }
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.aws.attributes, "eu-west-1")
+    error_message = "Attributes should contain the region given by variable"
+  }
+
+  assert {
+    condition     = strcontains(nullplatform_provider_config.aws.attributes, "123456789012")
+    error_message = "Account ID should still come from the data source when only region is set"
+  }
+}
