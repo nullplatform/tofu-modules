@@ -26,7 +26,12 @@ variable "components" {
     global ("organization=*") — and the lookup meta may pin a revision by
     digest, by reference (git), or by tag (oci_image: the NEWEST revision
     registered with that tag wins; a moved tag drifts to the new digest by
-    design). Requires provider >= 0.0.102.
+    design). Requires provider >= 0.0.104.
+
+    The published BOM is exactly this list: a component you drop is gone from
+    the next revision. Provider releases before 0.0.104 let the platform merge
+    the previous default revision's components back in, so removals silently
+    stayed.
   EOT
   # `any`, not list(object({... resource = any ...})): inside a homogeneous list
   # Terraform unifies the `any` across every element, so a service_specification
