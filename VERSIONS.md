@@ -18,7 +18,7 @@ Verified 2026-09-16.
 
 | Component | Current | Variable | Module |
 | --- | --- | --- | --- |
-| `nullplatform-base` chart | `2.44.6` | `nullplatform_base_helm_version` | `nullplatform/base` |
+| `nullplatform-base` chart | `2.44.7` | `nullplatform_base_helm_version` | `nullplatform/base` |
 | `nullplatform-agent` chart | `3.1.0` | `nullplatform_agent_helm_version` | `nullplatform/agent` |
 | `cert-manager` chart | `v1.21.2` | `cert_manager_version` | `infrastructure/commons/cert_manager` |
 | `prometheus` chart | `29.30.0` | `prometheus_version` | `infrastructure/commons/prometheus` |
@@ -39,7 +39,7 @@ at deploy time, so what you run may not match the table: `cert_manager_version`,
 
 ```hcl
 module "base" {
-  nullplatform_base_helm_version = "2.44.6"
+  nullplatform_base_helm_version = "2.44.7"
   logging_controller_image_tag   = "1.6.1"
   gateway_api_crd_ref            = "v1.5.1"
 }
