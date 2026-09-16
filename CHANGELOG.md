@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.10.0](https://github.com/nullplatform/tofu-modules/compare/v7.9.1...v7.10.0) (2026-09-16)
+
+
+### Features
+
+* accept on-premise clusters in base, agent and external_dns ([#588](https://github.com/nullplatform/tofu-modules/issues/588)) ([43ed69b](https://github.com/nullplatform/tofu-modules/commit/43ed69b42858604d25aa84a84262525b26e81774))
+
 ## [7.9.1](https://github.com/nullplatform/tofu-modules/compare/v7.9.0...v7.9.1) (2026-09-14)
 
 
