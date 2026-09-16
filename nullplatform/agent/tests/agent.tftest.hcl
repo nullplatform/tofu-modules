@@ -96,3 +96,11 @@ run "oci_succeeds_with_default_gateway_names" {
     cloud_provider = "oci"
   }
 }
+
+run "onprem_succeeds_with_no_cloud_specific_config" {
+  command = plan
+
+  variables {
+    cloud_provider = "onprem"
+  }
+}
