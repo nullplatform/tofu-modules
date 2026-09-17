@@ -80,30 +80,6 @@ run "extra_envs_also_reaches_the_worker" {
 # Worker orchestration
 ################################################################################
 
-# DNS_TYPE/DOMAIN/USE_ACCOUNT_SLUG/SERVICE_TEMPLATE/INITIAL_INGRESS_PATH/
-# BLUE_GREEN_INGRESS_PATH are consumed by the worker when it renders a scope's
-# k8s deployment, not by the agent's own control loop — they live on the
-# worker's env only (worker_default_env), never in the agent's own
-# configuration.values (default_config).
-run "moved_deploy_vars_are_worker_only" {
-  command = plan
-
-  variables {
-    domain    = "playground.nullapps.io"
-    dns_type  = "external_dns"
-    namespace = "nullplatform"
-  }
-
-  assert {
-    condition = alltrue([
-      for key in ["DNS_TYPE", "DOMAIN", "USE_ACCOUNT_SLUG", "SERVICE_TEMPLATE",
-      "INITIAL_INGRESS_PATH", "BLUE_GREEN_INGRESS_PATH", "NAMESPACE"] :
-      !strcontains(helm_release.agent.values[0], "\n    ${key}:")
-    ])
-    error_message = "deploy/DNS vars and NAMESPACE must not leak into the agent pod's own configuration.values"
-  }
-}
-
 run "worker_block_always_present_with_expected_env" {
   command = plan
 
@@ -557,5 +533,156 @@ run "cluster_name_can_still_arrive_through_extra_envs" {
       if try(p.target.package, "") == "containers"
     ])
     error_message = "an existing installation passing CLUSTER_NAME through extra_envs must keep working"
+  }
+}
+
+################################################################################
+# Deploy/DNS variables on the agent container
+################################################################################
+
+# 34238fd2 (#554) moved DOMAIN/DNS_TYPE/USE_ACCOUNT_SLUG/IMAGE_PULL_SECRETS/
+# SERVICE_TEMPLATE/INITIAL_INGRESS_PATH/BLUE_GREEN_INGRESS_PATH/NAMESPACE/
+# CLUSTER_NAME out of the agent's own configuration.values and into the worker
+# patch. Installs whose scopes still run inside the agent (the legacy
+# command-executor exec flow) lost them. They must reach the agent again — in
+# both orchestration modes — while the worker keeps its own copy.
+#
+# The agent's env renders as `    KEY: "value"` under configuration.values;
+# the worker's renders through yamlencode as `"name": "KEY"`, so a match on
+# "\n    KEY:" is specific to the agent container.
+run "deploy_vars_reach_the_agent_env_with_orchestration_on" {
+  command = plan
+
+  variables {
+    domain                  = "playground.nullapps.io"
+    dns_type                = "external_dns"
+    use_account_slug        = "true"
+    image_pull_secrets      = "regcred"
+    workload_namespace      = "nullplatform"
+    service_template        = "/custom/service.yaml.tpl"
+    initial_ingress_path    = "/custom/initial-httproute.yaml.tpl"
+    blue_green_ingress_path = "/custom/blue-green-httproute.yaml.tpl"
+  }
+
+  assert {
+    condition = alltrue([
+      for key, want in {
+        DOMAIN                  = "playground.nullapps.io"
+        DNS_TYPE                = "external_dns"
+        USE_ACCOUNT_SLUG        = "true"
+        IMAGE_PULL_SECRETS      = "regcred"
+        SERVICE_TEMPLATE        = "/custom/service.yaml.tpl"
+        INITIAL_INGRESS_PATH    = "/custom/initial-httproute.yaml.tpl"
+        BLUE_GREEN_INGRESS_PATH = "/custom/blue-green-httproute.yaml.tpl"
+        CLUSTER_NAME            = "test-cluster"
+        # NAMESPACE is the agent's historical name for it, K8S_NAMESPACE the
+        # worker's; both are published so either convention resolves.
+        NAMESPACE     = "nullplatform"
+        K8S_NAMESPACE = "nullplatform"
+      } :
+      strcontains(helm_release.agent.values[0], "\n    ${key}: \"${want}\"")
+    ])
+    error_message = "the deploy/DNS vars must be back in the agent pod's own configuration.values"
+  }
+
+  # The worker patch is untouched by the restore: it still carries its own copy.
+  assert {
+    condition = alltrue([
+      for key, want in {
+        DOMAIN           = "playground.nullapps.io"
+        DNS_TYPE         = "external_dns"
+        K8S_NAMESPACE    = "nullplatform"
+        SERVICE_TEMPLATE = "/custom/service.yaml.tpl"
+      } :
+      anytrue([
+        for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+        anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == key && e.value == want])
+        if try(p.target.package, "") == "containers"
+      ])
+    ])
+    error_message = "restoring the agent's env must not take anything away from the worker's"
+  }
+
+  assert {
+    condition     = can(yamldecode(helm_release.agent.values[0]))
+    error_message = "the rendered values must be valid YAML with worker orchestration on"
+  }
+}
+
+################################################################################
+# Per-cloud variables on the agent container
+################################################################################
+
+# 34238fd2 left cloud_config empty for gcp/azure/oci, so on those clouds the
+# per-cloud values reached neither the agent nor (for gcp/oci) anything else.
+run "azure_cloud_vars_reach_the_agent_env" {
+  command = plan
+
+  variables {
+    cloud_provider         = "azure"
+    aws_iam_role_arn       = ""
+    cluster_name           = ""
+    azure_client_id        = "azure-client-id"
+    azure_client_secret    = "azure-client-secret"
+    azure_subscription_id  = "azure-subscription-id"
+    azure_resource_group   = "azure-rg"
+    azure_tenant_id        = "azure-tenant-id"
+    private_hosted_zone_rg = "azure-dns-rg"
+  }
+
+  assert {
+    condition = alltrue([
+      for key, want in {
+        PRIVATE_HOSTED_ZONE_RG = "azure-dns-rg"
+        PRIVATE_GATEWAY_NAME   = "gateway-private"
+        PUBLIC_GATEWAY_NAME    = "gateway-public"
+        RESOURCE_GROUP         = "azure-rg"
+        AZURE_SUBSCRIPTION_ID  = "azure-subscription-id"
+        AZURE_CLIENT_SECRET    = "azure-client-secret"
+        AZURE_CLIENT_ID        = "azure-client-id"
+        AZURE_TENANT_ID        = "azure-tenant-id"
+      } :
+      strcontains(helm_release.agent.values[0], "\n    ${key}: \"${want}\"")
+    ])
+    error_message = "the azure agent env must carry the values it had before 34238fd2"
+  }
+}
+
+run "gcp_cloud_vars_reach_the_agent_env" {
+  command = plan
+
+  variables {
+    cloud_provider       = "gcp"
+    aws_iam_role_arn     = ""
+    cluster_name         = ""
+    private_gateway_name = "gcp-gateway-private"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "\n    PRIVATE_GATEWAY_NAME: \"gcp-gateway-private\"")
+    error_message = "gcp must get PRIVATE_GATEWAY_NAME in the agent env again"
+  }
+
+  # gcp never had PUBLIC_GATEWAY_NAME in the agent env — only azure did. The
+  # worker's own env carries it for every cloud, hence the agent-specific match.
+  assert {
+    condition     = !strcontains(helm_release.agent.values[0], "\n    PUBLIC_GATEWAY_NAME:")
+    error_message = "gcp must not gain agent env vars it never had"
+  }
+}
+
+run "oci_cloud_vars_reach_the_agent_env" {
+  command = plan
+
+  variables {
+    cloud_provider       = "oci"
+    aws_iam_role_arn     = ""
+    cluster_name         = ""
+    private_gateway_name = "oci-gateway-private"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "\n    PRIVATE_GATEWAY_NAME: \"oci-gateway-private\"")
+    error_message = "oci must get PRIVATE_GATEWAY_NAME in the agent env again"
   }
 }

@@ -35,14 +35,67 @@ locals {
     AGENT_REPO = local.agent_repo
   }
 
+  # Deploy/DNS settings on the agent container itself.
+  #
+  # 34238fd2 (#554) moved these out of the agent's env and into the worker
+  # patch (worker_default_env). Installs whose scopes still run inside the
+  # agent — the legacy command-executor exec flow, var.agent_repo — lost them
+  # and broke. They belong in both places: the worker patch below is
+  # untouched, and the agent gets the same values back under the names its
+  # scope scripts have always read.
+  agent_deploy_config = merge(
+    {
+      DOMAIN             = var.domain
+      DNS_TYPE           = var.dns_type
+      USE_ACCOUNT_SLUG   = var.use_account_slug
+      IMAGE_PULL_SECRETS = var.image_pull_secrets
+      CLUSTER_NAME       = var.cluster_name
+
+      # The agent's scope scripts read NAMESPACE; the worker reads
+      # K8S_NAMESPACE for the same thing. Both names are published, to the
+      # same value, so a script written against either convention finds the
+      # namespace workloads deploy into. (Before 34238fd2 NAMESPACE carried
+      # var.namespace — the agent's own namespace — which #585 established
+      # was the wrong namespace to deploy workloads into.)
+      NAMESPACE     = var.workload_namespace
+      K8S_NAMESPACE = var.workload_namespace
+    },
+    # The same three paths the worker gets, so both execution paths render
+    # the same ingress stack. With worker_ingress = "alb" (the default) these
+    # are exactly the raw var values, as they were before 34238fd2.
+    local.ingress_paths,
+  )
+
+  # Cloud-specific slice of the agent container's own env.
+  #
+  # 34238fd2 (#554) emptied gcp/azure/oci here when it moved these values to
+  # worker_cloud_config, so on those clouds the agent lost them entirely.
+  # Restored under the pre-34238fd2 names. PRIVATE_DOMAIN is deliberately
+  # absent: var.private_domain was dropped in that same commit and is not
+  # coming back — pass it through extra_envs if a scope still reads it.
   cloud_config = {
     aws = {
       AWS_IAM_ROLE_ARN = var.aws_iam_role_arn
     }
 
-    gcp   = {}
-    azure = {}
-    oci   = {}
+    gcp = {
+      PRIVATE_GATEWAY_NAME = var.private_gateway_name
+    }
+
+    azure = {
+      PRIVATE_HOSTED_ZONE_RG = var.private_hosted_zone_rg
+      PRIVATE_GATEWAY_NAME   = var.private_gateway_name
+      PUBLIC_GATEWAY_NAME    = var.public_gateway_name
+      RESOURCE_GROUP         = var.azure_resource_group
+      AZURE_SUBSCRIPTION_ID  = var.azure_subscription_id
+      AZURE_CLIENT_SECRET    = var.azure_client_secret
+      AZURE_CLIENT_ID        = var.azure_client_id
+      AZURE_TENANT_ID        = var.azure_tenant_id
+    }
+
+    oci = {
+      PRIVATE_GATEWAY_NAME = var.private_gateway_name
+    }
   }
 
   # Drop nulls: a null reaching templatefile fails with an error that names no
@@ -50,6 +103,7 @@ locals {
   all_config = {
     for k, v in merge(
       local.default_config,
+      local.agent_deploy_config,
       lookup(local.cloud_config, var.cloud_provider, {}),
       var.extra_envs,
     ) : k => v if v != null
@@ -74,14 +128,22 @@ locals {
   }
   worker_templates = local.worker_ingress_templates[var.worker_ingress]
 
+  # Resolved once and shared by the agent env and the worker patch: an
+  # explicit path always wins over the one worker_ingress derives.
+  ingress_paths = {
+    SERVICE_TEMPLATE        = var.service_template != "" ? var.service_template : local.worker_templates.SERVICE_TEMPLATE
+    INITIAL_INGRESS_PATH    = var.initial_ingress_path != "" ? var.initial_ingress_path : local.worker_templates.INITIAL_INGRESS_PATH
+    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path != "" ? var.blue_green_ingress_path : local.worker_templates.BLUE_GREEN_INGRESS_PATH
+  }
+
   worker_default_env = {
     DNS_TYPE                = var.dns_type
     DOMAIN                  = var.domain
     USE_ACCOUNT_SLUG        = var.use_account_slug
     K8S_NAMESPACE           = var.workload_namespace
-    SERVICE_TEMPLATE        = var.service_template != "" ? var.service_template : local.worker_templates.SERVICE_TEMPLATE
-    INITIAL_INGRESS_PATH    = var.initial_ingress_path != "" ? var.initial_ingress_path : local.worker_templates.INITIAL_INGRESS_PATH
-    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path != "" ? var.blue_green_ingress_path : local.worker_templates.BLUE_GREEN_INGRESS_PATH
+    SERVICE_TEMPLATE        = local.ingress_paths.SERVICE_TEMPLATE
+    INITIAL_INGRESS_PATH    = local.ingress_paths.INITIAL_INGRESS_PATH
+    BLUE_GREEN_INGRESS_PATH = local.ingress_paths.BLUE_GREEN_INGRESS_PATH
     TRAFFIC_CONTAINER_IMAGE = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
     IMAGE_PULL_SECRETS      = var.image_pull_secrets
     PRIVATE_GATEWAY_NAME    = var.private_gateway_name
