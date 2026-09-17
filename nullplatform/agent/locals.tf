@@ -175,7 +175,10 @@ locals {
   # (not just "containers") gets the agent's own ServiceAccount (to assume its
   # role's trusted AWS roles) and enough memory to run its own tooling (e.g.
   # tofu init/apply), instead of the chart's own thin defaults.
-  worker_common_patches = [
+  #
+  # Built only while var.worker_orchestrator is true; with the toggle off the
+  # module writes no worker block at all, so there is nothing to patch.
+  worker_common_patches = var.worker_orchestrator ? [
     for pkg in var.worker_orchestrated_packages : {
       target = { package = pkg }
       merge = {
@@ -189,7 +192,7 @@ locals {
         )
       }
     }
-  ]
+  ] : []
 
   # Environment variables for the workers that run the k8s scope.
   #
@@ -214,7 +217,7 @@ locals {
   #
   # With ["containers", "scheduled-task"] you get two patches with the same
   # env, one per package. Packages not in the list get none of these vars.
-  worker_k8s_env_patches = [
+  worker_k8s_env_patches = var.worker_orchestrator ? [
     for pkg in var.worker_k8s_packages : {
       target = { package = pkg }
       merge = {
@@ -228,7 +231,7 @@ locals {
         }
       }
     }
-  ]
+  ] : []
 
   worker_defaults = {
     backend           = "kubernetes"
@@ -243,6 +246,10 @@ locals {
     idleTTL = "30m"
   }
 
+  # Consumed by the template only while var.worker_orchestrator is true. With
+  # the toggle off the template omits the top-level "worker" key entirely, so
+  # the chart keeps its own worker defaults and nothing is patched — the two
+  # patch lists above are empty in that mode as well.
   worker_final = merge(
     local.worker_defaults,
     try({ for k, v in var.worker : k => v if !contains(["patches", "allowedRegistries"], k) }, {}),
@@ -262,6 +269,7 @@ locals {
     aws_iam_role_arn     = var.cloud_provider == "aws" ? var.aws_iam_role_arn : ""
     init_scripts         = var.init_scripts
     service_account_name = var.service_account_name
+    worker_orchestrator  = var.worker_orchestrator
     worker               = local.worker_final
   })
 }

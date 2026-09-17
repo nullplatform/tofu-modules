@@ -80,7 +80,7 @@ run "extra_envs_also_reaches_the_worker" {
 # Worker orchestration
 ################################################################################
 
-run "worker_block_always_present_with_expected_env" {
+run "worker_block_present_by_default_with_expected_env" {
   command = plan
 
   variables {
@@ -606,6 +606,112 @@ run "deploy_vars_reach_the_agent_env_with_orchestration_on" {
   assert {
     condition     = can(yamldecode(helm_release.agent.values[0]))
     error_message = "the rendered values must be valid YAML with worker orchestration on"
+  }
+}
+
+run "deploy_vars_reach_the_agent_env_with_orchestration_off" {
+  command = plan
+
+  variables {
+    worker_orchestrator = false
+    domain              = "playground.nullapps.io"
+    dns_type            = "external_dns"
+    use_account_slug    = "true"
+    image_pull_secrets  = "regcred"
+    workload_namespace  = "nullplatform"
+  }
+
+  assert {
+    condition = alltrue([
+      for key, want in {
+        DOMAIN             = "playground.nullapps.io"
+        DNS_TYPE           = "external_dns"
+        USE_ACCOUNT_SLUG   = "true"
+        IMAGE_PULL_SECRETS = "regcred"
+        CLUSTER_NAME       = "test-cluster"
+        NAMESPACE          = "nullplatform"
+        K8S_NAMESPACE      = "nullplatform"
+      } :
+      strcontains(helm_release.agent.values[0], "\n    ${key}: \"${want}\"")
+    ])
+    error_message = "the agent's deploy/DNS env must not depend on worker orchestration being on"
+  }
+}
+
+################################################################################
+# worker_orchestrator toggle
+################################################################################
+
+# With the toggle off the module must write no worker configuration at all, so
+# the chart's own worker defaults apply and no pod is patched. var.worker and
+# the package lists are ignored while it is off.
+run "worker_orchestrator_false_emits_no_worker_key" {
+  command = plan
+
+  variables {
+    worker_orchestrator          = false
+    worker_orchestrated_packages = ["containers", "aws-s3-bucket"]
+    worker_k8s_packages          = ["containers", "scheduled-task"]
+    worker = {
+      idleTTL           = "1h"
+      allowedRegistries = ["123456789012.dkr.ecr.us-east-1.amazonaws.com/my-org/*"]
+      patches           = [{ target = { package = "my-pkg" }, merge = { spec = { serviceAccountName = "np-agent-sa" } } }]
+    }
+  }
+
+  assert {
+    condition     = can(yamldecode(helm_release.agent.values[0]))
+    error_message = "the rendered values must be valid YAML with worker orchestration off"
+  }
+
+  assert {
+    condition     = try(yamldecode(helm_release.agent.values[0]).worker, null) == null
+    error_message = "worker_orchestrator = false must emit no top-level worker key, so the chart's own defaults apply"
+  }
+
+  assert {
+    condition = (
+      !strcontains(helm_release.agent.values[0], "patches") &&
+      !strcontains(helm_release.agent.values[0], "idleTTL") &&
+      !strcontains(helm_release.agent.values[0], "allowedRegistries") &&
+      !strcontains(helm_release.agent.values[0], "my-pkg")
+    )
+    error_message = "worker_orchestrator = false must build no patches and pass nothing from var.worker through"
+  }
+
+  # The agent container itself is untouched by the toggle.
+  assert {
+    condition = (
+      strcontains(helm_release.agent.values[0], "\n    NP_API_KEY: \"test-api-key\"") &&
+      strcontains(helm_release.agent.values[0], "\n    IMAGE_TAG: \"0.9.2\"")
+    )
+    error_message = "the agent's own configuration.values must still render with worker orchestration off"
+  }
+}
+
+run "worker_orchestrator_defaults_to_true" {
+  command = plan
+
+  assert {
+    condition = (
+      try(yamldecode(helm_release.agent.values[0]).worker.backend, "") == "kubernetes" &&
+      length(try(yamldecode(helm_release.agent.values[0]).worker.patches, [])) > 0
+    )
+    error_message = "worker_orchestrator must default to true, keeping today's worker block and patches"
+  }
+}
+
+run "extra_envs_reaches_the_agent_with_orchestration_off" {
+  command = plan
+
+  variables {
+    worker_orchestrator = false
+    extra_envs          = { MY_VAR = "my-value" }
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "\n    MY_VAR: \"my-value\"")
+    error_message = "extra_envs must keep reaching the agent with worker orchestration off"
   }
 }
 

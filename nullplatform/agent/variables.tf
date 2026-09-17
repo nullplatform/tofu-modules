@@ -66,6 +66,30 @@ variable "service_account_name" {
   default     = "nullplatform-agent"
 }
 
+variable "worker_orchestrator" {
+  description = <<-EOT
+    Whether this module configures worker orchestration, i.e. whether it emits
+    the chart's top-level "worker" values block.
+
+    true (the default, and what every install gets today): the module renders
+    the whole computed worker block — backend, allowedRegistries, idleTTL and
+    the per-package patches built from worker_orchestrated_packages and
+    worker_k8s_packages — plus anything set in var.worker.
+
+    false: no "worker" key is written to the chart values at all and no
+    patches are built, so the chart's own worker defaults apply untouched.
+    Set it on installs that still run scopes inside the agent container
+    itself (the legacy command-executor exec flow — see var.agent_repo).
+    While it is false, var.worker, worker_orchestrated_packages,
+    worker_k8s_packages, worker_memory_limit and var.worker's patches are
+    ignored. The agent's own env is unaffected either way: the deploy/DNS
+    variables (DOMAIN, DNS_TYPE, NAMESPACE, ...) are published to the agent
+    container in both modes.
+  EOT
+  type        = bool
+  default     = true
+}
+
 variable "worker_orchestrated_packages" {
   description = <<-EOT
     Package slugs whose worker-orchestrator (package-exec) pods should run

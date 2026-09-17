@@ -35,6 +35,8 @@ initScripts:
   %{ endfor }
   %{ endif }
 
+%{ if worker_orchestrator ~}
 worker:
   ${indent(2, yamlencode(worker))}
+%{ endif ~}
 

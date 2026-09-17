@@ -104,3 +104,11 @@ run "onprem_succeeds_with_no_cloud_specific_config" {
     cloud_provider = "onprem"
   }
 }
+
+run "worker_orchestrator_false_still_plans" {
+  command = plan
+
+  variables {
+    worker_orchestrator = false
+  }
+}
