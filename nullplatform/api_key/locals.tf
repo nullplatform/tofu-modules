@@ -1,5 +1,8 @@
 locals {
-  nrn_without_namespace = var.nrn != null ? join(":", slice(split(":", var.nrn), 0, 2)) : null
+  # Keep at most organization:account, tolerating organization-only NRNs
+  # (a single-segment NRN would make an unconditional slice [0, 2) fail).
+  nrn_segments          = var.nrn != null ? split(":", var.nrn) : []
+  nrn_without_namespace = var.nrn != null ? join(":", slice(local.nrn_segments, 0, min(2, length(local.nrn_segments)))) : null
   nrn_parts             = var.nrn != null ? { for part in split(":", var.nrn) : split("=", part)[0] => split("=", part)[1] } : {}
   nrn_tags = {
     for key in ["organization", "account", "namespace"] : key => local.nrn_parts[key]
