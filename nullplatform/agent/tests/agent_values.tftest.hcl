@@ -374,9 +374,37 @@ run "long_worker_patch_strings_survive_rendering" {
 # The k8s scope only knows which ingress stack to deploy through the three
 # template paths; nothing reads an INGRESS_TYPE. ingress_stack defaults to
 # "istio", so the module derives the Gateway API template paths without any
-# variables set.
-run "ingress_stack_defaults_to_istio_and_derives_the_gateway_api_template_paths" {
+# variables set. The istio paths themselves differ by execution context: with
+# worker_orchestrator on (this file's default) the k8s scope runs inside its
+# own worker pod, image rooted at /app/pkg; off, it runs via the legacy
+# command-executor exec flow inside the agent container, where the scopes
+# repo lands under the agent user's home instead.
+run "ingress_stack_defaults_to_istio_and_derives_the_worker_gateway_api_template_paths" {
   command = plan
+
+  assert {
+    condition = alltrue([
+      for key, want in {
+        SERVICE_TEMPLATE        = "/app/pkg/k8s/deployment/templates/istio/service.yaml.tpl"
+        INITIAL_INGRESS_PATH    = "/app/pkg/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
+        BLUE_GREEN_INGRESS_PATH = "/app/pkg/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
+      } :
+      anytrue([
+        for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+        anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == key && e.value == want])
+        if try(p.target.package, "") == "containers"
+      ])
+    ])
+    error_message = "with worker_orchestrator on, the containers worker must default to the istio templates baked in the worker image"
+  }
+}
+
+run "ingress_stack_defaults_to_istio_and_derives_the_legacy_gateway_api_template_paths" {
+  command = plan
+
+  variables {
+    worker_orchestrator = false
+  }
 
   assert {
     condition = alltrue([
@@ -385,13 +413,9 @@ run "ingress_stack_defaults_to_istio_and_derives_the_gateway_api_template_paths"
         INITIAL_INGRESS_PATH    = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
         BLUE_GREEN_INGRESS_PATH = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
       } :
-      anytrue([
-        for p in yamldecode(helm_release.agent.values[0]).worker.patches :
-        anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == key && e.value == want])
-        if try(p.target.package, "") == "containers"
-      ])
+      strcontains(helm_release.agent.values[0], "\n    ${key}: \"${want}\"")
     ])
-    error_message = "with no ingress_stack set the containers worker must default to the istio templates baked in the image"
+    error_message = "with worker_orchestrator off, the agent's own env must default to the istio templates baked under the agent user's home"
   }
 }
 

@@ -98,21 +98,28 @@ locals {
   }
 
   # Template paths per ingress stack. "alb" sends empty values so the k8s scope
-  # falls back to its own defaults (AWS Load Balancer Controller Ingress);
-  # "istio" points at the Gateway API templates the scopes/containers image
-  # bakes under /home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio.
-  # An explicit service_template / initial_ingress_path / blue_green_ingress_path
+  # falls back to its own defaults (AWS Load Balancer Controller Ingress).
+  # "istio" points at the Gateway API templates the scopes image bakes in —
+  # the path differs by execution context: worker_orchestrator = true runs the
+  # k8s scope inside its own worker pod, image rooted at /app/pkg; false runs
+  # it via the legacy command-executor exec flow inside the agent container,
+  # where the scopes repo lands under the agent user's home instead. An
+  # explicit service_template / initial_ingress_path / blue_green_ingress_path
   # wins over either — that's the only override point; there's no separate
   # per-stack default variable, since a module call pins one ingress_stack for
   # the life of the install and the universal override already covers pointing
-  # at a different image path if scopes/containers ever moves these.
+  # at a different image path if the scopes image ever moves these.
   ingress_stack_templates = {
     alb = {
       SERVICE_TEMPLATE        = ""
       INITIAL_INGRESS_PATH    = ""
       BLUE_GREEN_INGRESS_PATH = ""
     }
-    istio = {
+    istio = var.worker_orchestrator ? {
+      SERVICE_TEMPLATE        = "/app/pkg/k8s/deployment/templates/istio/service.yaml.tpl"
+      INITIAL_INGRESS_PATH    = "/app/pkg/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
+      BLUE_GREEN_INGRESS_PATH = "/app/pkg/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
+      } : {
       SERVICE_TEMPLATE        = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/service.yaml.tpl"
       INITIAL_INGRESS_PATH    = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
       BLUE_GREEN_INGRESS_PATH = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
