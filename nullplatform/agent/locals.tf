@@ -35,75 +35,63 @@ locals {
     AGENT_REPO = local.agent_repo
   }
 
-  # Deploy/DNS settings on the agent container itself.
-  #
-  # 34238fd2 (#554) moved these out of the agent's env and into the worker
-  # patch (worker_default_env). Installs whose scopes still run inside the
-  # agent — the legacy command-executor exec flow, var.agent_repo — lost them
-  # and broke. They belong in both places: the worker patch below is
-  # untouched, and the agent gets the same values back under the names its
-  # scope scripts have always read.
-  agent_deploy_config = merge(
-    {
-      DOMAIN             = var.domain
-      DNS_TYPE           = var.dns_type
-      USE_ACCOUNT_SLUG   = var.use_account_slug
-      IMAGE_PULL_SECRETS = var.image_pull_secrets
-      CLUSTER_NAME       = var.cluster_name
+  # Deploy/DNS settings shared by both the agent container (legacy
+  # command-executor exec flow, var.agent_repo) and worker pods
+  # (worker_orchestrator) — same values regardless of destination, sent to
+  # both unconditionally. 34238fd2 (#554) sent them to only one side and
+  # broke installs still relying on the other; a root module can also mix
+  # both flows at once (some scopes legacy, some worker-orchestrated), so
+  # neither side can be skipped based on var.worker_orchestrator.
+  shared_deploy_config = {
+    DOMAIN                  = var.domain
+    DNS_TYPE                = var.dns_type
+    USE_ACCOUNT_SLUG        = var.use_account_slug
+    IMAGE_PULL_SECRETS      = var.image_pull_secrets
+    CLUSTER_NAME            = var.cluster_name
+    TRAFFIC_CONTAINER_IMAGE = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
+    PRIVATE_GATEWAY_NAME    = var.private_gateway_name
+    PUBLIC_GATEWAY_NAME     = var.public_gateway_name
+    # Both the agent's own scope scripts and the worker read K8S_NAMESPACE
+    # for the namespace workloads deploy into (verified against
+    # helm-charts/charts/agent and the scopes repo: neither reads a bare
+    # "NAMESPACE" key — the chart's only namespace-flavored hardcoded env var
+    # is NP_WORKER_NAMESPACE, and the k8s scope's build_context resolves
+    # NAMESPACE_OVERRIDE/K8S_NAMESPACE only). A plain "NAMESPACE" key used to
+    # be sent too (removed here) — it had no consumer.
+    K8S_NAMESPACE = var.workload_namespace
+  }
 
-      # The agent's scope scripts read NAMESPACE; the worker reads
-      # K8S_NAMESPACE for the same thing. Both names are published, to the
-      # same value, so a script written against either convention finds the
-      # namespace workloads deploy into. (Before 34238fd2 NAMESPACE carried
-      # var.namespace — the agent's own namespace — which #585 established
-      # was the wrong namespace to deploy workloads into.)
-      NAMESPACE     = var.workload_namespace
-      K8S_NAMESPACE = var.workload_namespace
-    },
-    # The same three paths the worker gets, so both execution paths render
-    # the same ingress stack. With worker_ingress = "alb" (the default) these
-    # are exactly the raw var values, as they were before 34238fd2.
-    local.ingress_paths,
-  )
-
-  # Cloud-specific slice of the agent container's own env.
-  #
-  # 34238fd2 (#554) emptied gcp/azure/oci here when it moved these values to
-  # worker_cloud_config, so on those clouds the agent lost them entirely.
-  # Restored under the pre-34238fd2 names. PRIVATE_DOMAIN is deliberately
-  # absent: var.private_domain was dropped in that same commit and is not
-  # coming back — pass it through extra_envs if a scope still reads it.
-  cloud_config = {
-    aws = {
-      AWS_IAM_ROLE_ARN = var.aws_iam_role_arn
-    }
-
-    gcp = {
-      PRIVATE_GATEWAY_NAME = var.private_gateway_name
-    }
-
+  # Cloud-specific slice of shared_deploy_config. PRIVATE_DOMAIN is
+  # deliberately absent: var.private_domain was dropped in 34238fd2 (#554)
+  # and is not coming back — pass it through extra_envs if a scope still
+  # reads it.
+  shared_cloud_config = {
     azure = {
       PRIVATE_HOSTED_ZONE_RG = var.private_hosted_zone_rg
-      PRIVATE_GATEWAY_NAME   = var.private_gateway_name
-      PUBLIC_GATEWAY_NAME    = var.public_gateway_name
       RESOURCE_GROUP         = var.azure_resource_group
       AZURE_SUBSCRIPTION_ID  = var.azure_subscription_id
       AZURE_CLIENT_SECRET    = var.azure_client_secret
       AZURE_CLIENT_ID        = var.azure_client_id
       AZURE_TENANT_ID        = var.azure_tenant_id
     }
-
-    oci = {
-      PRIVATE_GATEWAY_NAME = var.private_gateway_name
-    }
   }
+
+  # Cloud-specific slice of the agent container's own env: shared_cloud_config
+  # plus AWS_IAM_ROLE_ARN, which the agent assumes directly (the worker gets
+  # its AWS identity via serviceAccountName in a patch instead, see
+  # worker_common_patches).
+  cloud_config = merge(local.shared_cloud_config, {
+    aws = {
+      AWS_IAM_ROLE_ARN = var.aws_iam_role_arn
+    }
+  })
 
   # Drop nulls: a null reaching templatefile fails with an error that names no
   # variable, before any precondition gets to report the actual missing input.
   all_config = {
     for k, v in merge(
       local.default_config,
-      local.agent_deploy_config,
+      local.deploy_config,
       lookup(local.cloud_config, var.cloud_provider, {}),
       var.extra_envs,
     ) : k => v if v != null
@@ -112,8 +100,9 @@ locals {
   # Template paths per ingress stack. "alb" sends empty values so the k8s scope
   # falls back to its own defaults (AWS Load Balancer Controller Ingress);
   # "istio" points at the Gateway API templates the scopes/containers image
-  # bakes under /app/pkg/k8s/deployment/templates/istio. An explicit
-  # service_template / initial_ingress_path / blue_green_ingress_path wins.
+  # bakes under istio_service_template/istio_initial_ingress_path/
+  # istio_blue_green_ingress_path's defaults. An explicit service_template /
+  # initial_ingress_path / blue_green_ingress_path wins.
   worker_ingress_templates = {
     alb = {
       SERVICE_TEMPLATE        = ""
@@ -121,9 +110,9 @@ locals {
       BLUE_GREEN_INGRESS_PATH = ""
     }
     istio = {
-      SERVICE_TEMPLATE        = "/app/pkg/k8s/deployment/templates/istio/service.yaml.tpl"
-      INITIAL_INGRESS_PATH    = "/app/pkg/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
-      BLUE_GREEN_INGRESS_PATH = "/app/pkg/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
+      SERVICE_TEMPLATE        = var.istio_service_template
+      INITIAL_INGRESS_PATH    = var.istio_initial_ingress_path
+      BLUE_GREEN_INGRESS_PATH = var.istio_blue_green_ingress_path
     }
   }
   worker_templates = local.worker_ingress_templates[var.worker_ingress]
@@ -136,37 +125,20 @@ locals {
     BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path != "" ? var.blue_green_ingress_path : local.worker_templates.BLUE_GREEN_INGRESS_PATH
   }
 
-  worker_default_env = {
-    DNS_TYPE                = var.dns_type
-    DOMAIN                  = var.domain
-    USE_ACCOUNT_SLUG        = var.use_account_slug
-    K8S_NAMESPACE           = var.workload_namespace
-    SERVICE_TEMPLATE        = local.ingress_paths.SERVICE_TEMPLATE
-    INITIAL_INGRESS_PATH    = local.ingress_paths.INITIAL_INGRESS_PATH
-    BLUE_GREEN_INGRESS_PATH = local.ingress_paths.BLUE_GREEN_INGRESS_PATH
-    TRAFFIC_CONTAINER_IMAGE = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
-    IMAGE_PULL_SECRETS      = var.image_pull_secrets
-    PRIVATE_GATEWAY_NAME    = var.private_gateway_name
-    PUBLIC_GATEWAY_NAME     = var.public_gateway_name
-    # Name of the EKS cluster. The k8s scope needs it to look up the cluster's
-    # OIDC provider when it creates the IAM role for a scope.
-    CLUSTER_NAME = var.cluster_name
-  }
-
-  worker_cloud_config = {
-    azure = {
-      PRIVATE_HOSTED_ZONE_RG = var.private_hosted_zone_rg
-      RESOURCE_GROUP         = var.azure_resource_group
-      AZURE_SUBSCRIPTION_ID  = var.azure_subscription_id
-      AZURE_CLIENT_SECRET    = var.azure_client_secret
-      AZURE_CLIENT_ID        = var.azure_client_id
-      AZURE_TENANT_ID        = var.azure_tenant_id
-    }
-  }
+  # Deploy/DNS settings sent to both the agent container's own env
+  # (all_config below) and worker pods (worker_all_config): shared_deploy_config
+  # plus the ingress paths. The same three paths the worker gets, so both
+  # execution paths render the same ingress stack. With worker_ingress =
+  # "alb" (the default) these are exactly the raw var values, as they were
+  # before 34238fd2.
+  deploy_config = merge(
+    local.shared_deploy_config,
+    local.ingress_paths,
+  )
 
   worker_all_config = merge(
-    local.worker_default_env,
-    lookup(local.worker_cloud_config, var.cloud_provider, {}),
+    local.deploy_config,
+    lookup(local.shared_cloud_config, var.cloud_provider, {}),
     var.extra_envs,
   )
 

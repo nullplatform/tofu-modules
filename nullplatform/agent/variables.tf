@@ -79,8 +79,8 @@ variable "worker_orchestrator" {
     packages in their own worker pods; var.worker, the package lists and
     worker_memory_limit are ignored while it is off.
 
-    The agent's own env is the same either way: DOMAIN, DNS_TYPE, NAMESPACE and
-    the rest are always published to the agent container.
+    The agent's own env is the same either way: DOMAIN, DNS_TYPE, K8S_NAMESPACE
+    and the rest are always published to the agent container.
   EOT
   type        = bool
   default     = false
@@ -353,7 +353,7 @@ variable "image_pull_secrets" {
 
 
 # Which ingress stack the containers worker deploys scopes with. The k8s scope
-# ships two template sets under /app/pkg/k8s/deployment/templates: its default
+# ships two template sets under /home/agent/.np/nullplatform/scopes/k8s/deployment/templates: its default
 # (AWS Load Balancer Controller Ingress) and istio/ (Gateway API HTTPRoutes).
 # Nothing else selects between them: the scope does not read INGRESS_TYPE, it
 # just renders whatever SERVICE_TEMPLATE / INITIAL_INGRESS_PATH /
@@ -362,7 +362,7 @@ variable "image_pull_secrets" {
 variable "worker_ingress" {
   description = "Ingress stack the containers worker deploys scopes with: \"alb\" keeps the k8s scope's own templates (AWS Load Balancer Controller Ingress), \"istio\" points it at the Gateway API templates baked in the scopes/containers image. service_template, initial_ingress_path and blue_green_ingress_path override the derived paths when set."
   type        = string
-  default     = "alb"
+  default     = "istio"
 
   validation {
     condition     = contains(["alb", "istio"], var.worker_ingress)
@@ -386,6 +386,28 @@ variable "blue_green_ingress_path" {
   description = "Path, inside the worker image, of the ingress/route template used to shift traffic during a blue-green deployment. Empty (default) uses the template worker_ingress selects; set it only to point at a custom template."
   type        = string
   default     = ""
+}
+
+# Defaults for worker_ingress = "istio", pointing at the Gateway API templates
+# baked into the scopes/containers image. Override only if that image ships
+# the templates at different paths; to point at a custom template regardless
+# of worker_ingress, use service_template/initial_ingress_path/blue_green_ingress_path instead.
+variable "istio_service_template" {
+  description = "Path, inside the worker image, of the Service template used when worker_ingress is \"istio\"."
+  type        = string
+  default     = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/service.yaml.tpl"
+}
+
+variable "istio_initial_ingress_path" {
+  description = "Path, inside the worker image, of the HTTPRoute template for a scope's first deployment, used when worker_ingress is \"istio\"."
+  type        = string
+  default     = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
+}
+
+variable "istio_blue_green_ingress_path" {
+  description = "Path, inside the worker image, of the HTTPRoute template used to shift traffic during a blue-green deployment, used when worker_ingress is \"istio\"."
+  type        = string
+  default     = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
 }
 
 # Additional environment variables to pass to the agent

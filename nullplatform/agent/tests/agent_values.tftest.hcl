@@ -22,8 +22,9 @@ variables {
 
 # Pinning the traffic manager used to mean passing the whole image string through
 # extra_envs. The registry now lives in the module and only the tag is exposed.
-# TRAFFIC_CONTAINER_IMAGE is a worker-only var (worker_default_env), so it
-# renders as an env list entry, not a flat configuration.values key.
+# TRAFFIC_CONTAINER_IMAGE is part of deploy_config, sent to both the agent's
+# own configuration.values and the worker's env; this run only checks the
+# worker's env-list rendering.
 run "traffic_manager_image_is_assembled_from_the_tag" {
   command = plan
 
@@ -371,10 +372,35 @@ run "long_worker_patch_strings_survive_rendering" {
 ################################################################################
 
 # The k8s scope only knows which ingress stack to deploy through the three
-# template paths; nothing reads an INGRESS_TYPE. The default keeps the scope's
-# own (ALB Ingress) templates by sending empty values.
-run "worker_ingress_defaults_to_alb_and_leaves_the_scope_templates" {
+# template paths; nothing reads an INGRESS_TYPE. worker_ingress defaults to
+# "istio", so the module derives the Gateway API template paths without any
+# variables set.
+run "worker_ingress_defaults_to_istio_and_derives_the_gateway_api_template_paths" {
   command = plan
+
+  assert {
+    condition = alltrue([
+      for key, want in {
+        SERVICE_TEMPLATE        = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/service.yaml.tpl"
+        INITIAL_INGRESS_PATH    = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
+        BLUE_GREEN_INGRESS_PATH = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
+      } :
+      anytrue([
+        for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+        anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == key && e.value == want])
+        if try(p.target.package, "") == "containers"
+      ])
+    ])
+    error_message = "with no worker_ingress set the containers worker must default to the istio templates baked in the image"
+  }
+}
+
+run "worker_ingress_alb_leaves_the_scope_templates" {
+  command = plan
+
+  variables {
+    worker_ingress = "alb"
+  }
 
   assert {
     condition = alltrue([
@@ -386,30 +412,6 @@ run "worker_ingress_defaults_to_alb_and_leaves_the_scope_templates" {
       ])
     ])
     error_message = "with worker_ingress = alb the three template paths must render empty so the k8s scope uses its own templates"
-  }
-}
-
-run "worker_ingress_istio_derives_the_gateway_api_template_paths" {
-  command = plan
-
-  variables {
-    worker_ingress = "istio"
-  }
-
-  assert {
-    condition = alltrue([
-      for key, want in {
-        SERVICE_TEMPLATE        = "/app/pkg/k8s/deployment/templates/istio/service.yaml.tpl"
-        INITIAL_INGRESS_PATH    = "/app/pkg/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
-        BLUE_GREEN_INGRESS_PATH = "/app/pkg/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
-      } :
-      anytrue([
-        for p in yamldecode(helm_release.agent.values[0]).worker.patches :
-        anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == key && e.value == want])
-        if try(p.target.package, "") == "containers"
-      ])
-    ])
-    error_message = "worker_ingress = istio must point the containers worker at the istio templates baked in the image"
   }
 }
 
@@ -545,11 +547,14 @@ run "cluster_name_can_still_arrive_through_extra_envs" {
 ################################################################################
 
 # 34238fd2 (#554) moved DOMAIN/DNS_TYPE/USE_ACCOUNT_SLUG/IMAGE_PULL_SECRETS/
-# SERVICE_TEMPLATE/INITIAL_INGRESS_PATH/BLUE_GREEN_INGRESS_PATH/NAMESPACE/
+# SERVICE_TEMPLATE/INITIAL_INGRESS_PATH/BLUE_GREEN_INGRESS_PATH/K8S_NAMESPACE/
 # CLUSTER_NAME out of the agent's own configuration.values and into the worker
 # patch. Installs whose scopes still run inside the agent (the legacy
 # command-executor exec flow) lost them. They must reach the agent again — in
-# both orchestration modes — while the worker keeps its own copy.
+# both orchestration modes — while the worker keeps its own copy. (A plain
+# NAMESPACE key was restored alongside them by 03d854b7, then dropped again
+# once helm-charts/charts/agent and the scopes repo confirmed nothing reads
+# it — only K8S_NAMESPACE and NAMESPACE_OVERRIDE are ever consulted.)
 #
 # The agent's env renders as `    KEY: "value"` under configuration.values;
 # the worker's renders through yamlencode as `"name": "KEY"`, so a match on
@@ -579,10 +584,7 @@ run "deploy_vars_reach_the_agent_env_with_orchestration_on" {
         INITIAL_INGRESS_PATH    = "/custom/initial-httproute.yaml.tpl"
         BLUE_GREEN_INGRESS_PATH = "/custom/blue-green-httproute.yaml.tpl"
         CLUSTER_NAME            = "test-cluster"
-        # NAMESPACE is the agent's historical name for it, K8S_NAMESPACE the
-        # worker's; both are published so either convention resolves.
-        NAMESPACE     = "nullplatform"
-        K8S_NAMESPACE = "nullplatform"
+        K8S_NAMESPACE           = "nullplatform"
       } :
       strcontains(helm_release.agent.values[0], "\n    ${key}: \"${want}\"")
     ])
@@ -633,7 +635,6 @@ run "deploy_vars_reach_the_agent_env_with_orchestration_off" {
         USE_ACCOUNT_SLUG   = "true"
         IMAGE_PULL_SECRETS = "regcred"
         CLUSTER_NAME       = "test-cluster"
-        NAMESPACE          = "nullplatform"
         K8S_NAMESPACE      = "nullplatform"
       } :
       strcontains(helm_release.agent.values[0], "\n    ${key}: \"${want}\"")
@@ -766,6 +767,7 @@ run "gcp_cloud_vars_reach_the_agent_env" {
     aws_iam_role_arn     = ""
     cluster_name         = ""
     private_gateway_name = "gcp-gateway-private"
+    public_gateway_name  = "gcp-gateway-public"
   }
 
   assert {
@@ -773,11 +775,12 @@ run "gcp_cloud_vars_reach_the_agent_env" {
     error_message = "gcp must get PRIVATE_GATEWAY_NAME in the agent env again"
   }
 
-  # gcp never had PUBLIC_GATEWAY_NAME in the agent env — only azure did. The
-  # worker's own env carries it for every cloud, hence the agent-specific match.
+  # PRIVATE_GATEWAY_NAME/PUBLIC_GATEWAY_NAME moved into shared_deploy_config,
+  # sent to the agent's own env unconditionally regardless of cloud_provider —
+  # same as the worker's env always carried them.
   assert {
-    condition     = !strcontains(helm_release.agent.values[0], "\n    PUBLIC_GATEWAY_NAME:")
-    error_message = "gcp must not gain agent env vars it never had"
+    condition     = strcontains(helm_release.agent.values[0], "\n    PUBLIC_GATEWAY_NAME: \"gcp-gateway-public\"")
+    error_message = "gcp must also get PUBLIC_GATEWAY_NAME in the agent env, same as every other cloud"
   }
 }
 
