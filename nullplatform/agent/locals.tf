@@ -100,9 +100,12 @@ locals {
   # Template paths per ingress stack. "alb" sends empty values so the k8s scope
   # falls back to its own defaults (AWS Load Balancer Controller Ingress);
   # "istio" points at the Gateway API templates the scopes/containers image
-  # bakes under istio_service_template/istio_initial_ingress_path/
-  # istio_blue_green_ingress_path's defaults. An explicit service_template /
-  # initial_ingress_path / blue_green_ingress_path wins.
+  # bakes under /home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio.
+  # An explicit service_template / initial_ingress_path / blue_green_ingress_path
+  # wins over either — that's the only override point; there's no separate
+  # per-stack default variable, since a module call pins one worker_ingress for
+  # the life of the install and the universal override already covers pointing
+  # at a different image path if scopes/containers ever moves these.
   worker_ingress_templates = {
     alb = {
       SERVICE_TEMPLATE        = ""
@@ -110,9 +113,9 @@ locals {
       BLUE_GREEN_INGRESS_PATH = ""
     }
     istio = {
-      SERVICE_TEMPLATE        = var.istio_service_template
-      INITIAL_INGRESS_PATH    = var.istio_initial_ingress_path
-      BLUE_GREEN_INGRESS_PATH = var.istio_blue_green_ingress_path
+      SERVICE_TEMPLATE        = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/service.yaml.tpl"
+      INITIAL_INGRESS_PATH    = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
+      BLUE_GREEN_INGRESS_PATH = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
     }
   }
   worker_templates = local.worker_ingress_templates[var.worker_ingress]
