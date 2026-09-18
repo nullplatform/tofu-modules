@@ -559,3 +559,40 @@ run "cluster_name_can_still_arrive_through_extra_envs" {
     error_message = "an existing installation passing CLUSTER_NAME through extra_envs must keep working"
   }
 }
+
+################################################################################
+# Agent image pull secret
+################################################################################
+
+# The chart pulls the agent image anonymously unless it is told which secret to
+# use. That is fine while the image comes from the public repository, and breaks
+# the moment an install mirrors it into a registry of its own.
+run "agent_image_pull_secret_is_referenced_when_named" {
+  command = plan
+
+  variables {
+    image_pull_secret_name = "image-pull-secret-agent"
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).imagePullSecret.name == "image-pull-secret-agent"
+    error_message = "the agent's pull secret should reach the chart by name"
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).imagePullSecret.create == false
+    error_message = "the secret belongs to whoever owns the registry credentials: the chart must reference it, not create it"
+  }
+}
+
+# Left unset the block must not render at all: an imagePullSecret with an empty
+# name is not the same as no imagePullSecret, and every install pulling a public
+# image today passes through here.
+run "agent_image_pull_secret_is_absent_by_default" {
+  command = plan
+
+  assert {
+    condition     = !can(yamldecode(helm_release.agent.values[0]).imagePullSecret)
+    error_message = "without a name, nothing about imagePullSecret should be rendered"
+  }
+}

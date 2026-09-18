@@ -322,7 +322,24 @@ variable "domain" {
 
 # Image pull secrets configuration
 variable "image_pull_secrets" {
-  description = "Image pull secrets configuration"
+  description = "Name of the pull secret the scopes attach to the application pods they deploy, published to the workers as IMAGE_PULL_SECRETS. This is not the secret for the agent's own image — see image_pull_secret_name."
+  type        = string
+  default     = ""
+}
+
+variable "image_pull_secret_name" {
+  description = <<-EOT
+    Name of an existing pull secret, in the agent's own namespace, for pulling
+    the agent image itself.
+
+    Needed when that image comes from a private registry, which is the case for
+    an install that mirrors it instead of pulling from the public repository.
+    Empty leaves the chart's default and the pull stays anonymous, which is all
+    a public image needs.
+
+    The secret is not created here: it belongs to whoever owns the registry
+    credentials. Its name is what the agent's namespace must already hold.
+  EOT
   type        = string
   default     = ""
 }
