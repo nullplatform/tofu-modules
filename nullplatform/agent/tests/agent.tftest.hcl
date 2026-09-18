@@ -105,10 +105,21 @@ run "onprem_succeeds_with_no_cloud_specific_config" {
   }
 }
 
-run "worker_orchestrator_false_still_plans" {
+run "worker_orchestrator_defaults_to_off" {
+  command = plan
+
+  # No variable set: the module default must leave the chart's worker values
+  # alone, which is what installs running scopes inside the agent rely on.
+  assert {
+    condition     = try(yamldecode(helm_release.agent.values[0]).worker, null) == null
+    error_message = "worker orchestration must be off unless worker_orchestrator is set"
+  }
+}
+
+run "worker_orchestrator_true_still_plans" {
   command = plan
 
   variables {
-    worker_orchestrator = false
+    worker_orchestrator = true
   }
 }

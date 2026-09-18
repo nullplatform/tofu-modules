@@ -10,6 +10,10 @@ variables {
   image_tag                       = "0.9.2"
   nullplatform_agent_helm_version = "2.37.0"
   agent_traffic_manager_tag       = "1.8.0"
+
+  # The module ships worker orchestration OFF. Most runs here assert the worker
+  # block, so they opt in; the runs that assert the off path set it to false.
+  worker_orchestrator = true
 }
 
 ################################################################################
@@ -689,7 +693,7 @@ run "worker_orchestrator_false_emits_no_worker_key" {
   }
 }
 
-run "worker_orchestrator_defaults_to_true" {
+run "worker_orchestrator_true_renders_the_block_and_patches" {
   command = plan
 
   assert {
@@ -697,7 +701,7 @@ run "worker_orchestrator_defaults_to_true" {
       try(yamldecode(helm_release.agent.values[0]).worker.backend, "") == "kubernetes" &&
       length(try(yamldecode(helm_release.agent.values[0]).worker.patches, [])) > 0
     )
-    error_message = "worker_orchestrator must default to true, keeping today's worker block and patches"
+    error_message = "worker_orchestrator = true must render the worker block and its patches"
   }
 }
 

@@ -68,26 +68,22 @@ variable "service_account_name" {
 
 variable "worker_orchestrator" {
   description = <<-EOT
-    Whether this module configures worker orchestration, i.e. whether it emits
-    the chart's top-level "worker" values block.
+    Configure worker orchestration: emit the chart's top-level "worker" block
+    (backend, allowedRegistries, idleTTL and the per-package patches built from
+    worker_orchestrated_packages and worker_k8s_packages) plus anything set in
+    var.worker.
 
-    true (the default, and what every install gets today): the module renders
-    the whole computed worker block — backend, allowedRegistries, idleTTL and
-    the per-package patches built from worker_orchestrated_packages and
-    worker_k8s_packages — plus anything set in var.worker.
+    Off by default: the module writes no "worker" key and builds no patches, so
+    the chart's own defaults apply and scopes keep running inside the agent
+    container (the legacy exec flow, see var.agent_repo). Turn it on to run
+    packages in their own worker pods; var.worker, the package lists and
+    worker_memory_limit are ignored while it is off.
 
-    false: no "worker" key is written to the chart values at all and no
-    patches are built, so the chart's own worker defaults apply untouched.
-    Set it on installs that still run scopes inside the agent container
-    itself (the legacy command-executor exec flow — see var.agent_repo).
-    While it is false, var.worker, worker_orchestrated_packages,
-    worker_k8s_packages, worker_memory_limit and var.worker's patches are
-    ignored. The agent's own env is unaffected either way: the deploy/DNS
-    variables (DOMAIN, DNS_TYPE, NAMESPACE, ...) are published to the agent
-    container in both modes.
+    The agent's own env is the same either way: DOMAIN, DNS_TYPE, NAMESPACE and
+    the rest are always published to the agent container.
   EOT
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "worker_orchestrated_packages" {
