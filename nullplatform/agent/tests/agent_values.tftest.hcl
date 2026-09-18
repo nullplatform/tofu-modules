@@ -368,14 +368,14 @@ run "long_worker_patch_strings_survive_rendering" {
 }
 
 ################################################################################
-# worker_ingress
+# ingress_stack
 ################################################################################
 
 # The k8s scope only knows which ingress stack to deploy through the three
-# template paths; nothing reads an INGRESS_TYPE. worker_ingress defaults to
+# template paths; nothing reads an INGRESS_TYPE. ingress_stack defaults to
 # "istio", so the module derives the Gateway API template paths without any
 # variables set.
-run "worker_ingress_defaults_to_istio_and_derives_the_gateway_api_template_paths" {
+run "ingress_stack_defaults_to_istio_and_derives_the_gateway_api_template_paths" {
   command = plan
 
   assert {
@@ -391,15 +391,15 @@ run "worker_ingress_defaults_to_istio_and_derives_the_gateway_api_template_paths
         if try(p.target.package, "") == "containers"
       ])
     ])
-    error_message = "with no worker_ingress set the containers worker must default to the istio templates baked in the image"
+    error_message = "with no ingress_stack set the containers worker must default to the istio templates baked in the image"
   }
 }
 
-run "worker_ingress_alb_leaves_the_scope_templates" {
+run "ingress_stack_alb_leaves_the_scope_templates" {
   command = plan
 
   variables {
-    worker_ingress = "alb"
+    ingress_stack = "alb"
   }
 
   assert {
@@ -411,15 +411,15 @@ run "worker_ingress_alb_leaves_the_scope_templates" {
         if try(p.target.package, "") == "containers"
       ])
     ])
-    error_message = "with worker_ingress = alb the three template paths must render empty so the k8s scope uses its own templates"
+    error_message = "with ingress_stack = alb the three template paths must render empty so the k8s scope uses its own templates"
   }
 }
 
-run "explicit_template_paths_override_worker_ingress" {
+run "explicit_template_paths_override_ingress_stack" {
   command = plan
 
   variables {
-    worker_ingress   = "istio"
+    ingress_stack    = "istio"
     service_template = "/custom/service.yaml.tpl"
   }
 
@@ -429,18 +429,18 @@ run "explicit_template_paths_override_worker_ingress" {
       anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == "SERVICE_TEMPLATE" && e.value == "/custom/service.yaml.tpl"])
       if try(p.target.package, "") == "containers"
     ])
-    error_message = "an explicit service_template must win over the path worker_ingress derives"
+    error_message = "an explicit service_template must win over the path ingress_stack derives"
   }
 }
 
-run "worker_ingress_rejects_unknown_stacks" {
+run "ingress_stack_rejects_unknown_stacks" {
   command = plan
 
   variables {
-    worker_ingress = "nginx"
+    ingress_stack = "nginx"
   }
 
-  expect_failures = [var.worker_ingress]
+  expect_failures = [var.ingress_stack]
 }
 
 ################################################################################

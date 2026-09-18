@@ -25,7 +25,7 @@ run "ingress_type_not_istio_does_not_require_ingress_templates" {
 # The three precondition checks that used to require service_template /
 # initial_ingress_path / blue_green_ingress_path whenever
 # extra_envs.INGRESS_TYPE == "istio" were removed: that key was never read by
-# the k8s scope (see variable "worker_ingress" doc), and worker_ingress now
+# the k8s scope (see variable "ingress_stack" doc), and ingress_stack now
 # derives all three paths on its own — nothing to enforce here anymore.
 run "ingress_type_istio_with_all_ingress_templates_succeeds" {
   command = plan

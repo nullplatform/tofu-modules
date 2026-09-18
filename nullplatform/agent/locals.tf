@@ -103,10 +103,10 @@ locals {
   # bakes under /home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio.
   # An explicit service_template / initial_ingress_path / blue_green_ingress_path
   # wins over either — that's the only override point; there's no separate
-  # per-stack default variable, since a module call pins one worker_ingress for
+  # per-stack default variable, since a module call pins one ingress_stack for
   # the life of the install and the universal override already covers pointing
   # at a different image path if scopes/containers ever moves these.
-  worker_ingress_templates = {
+  ingress_stack_templates = {
     alb = {
       SERVICE_TEMPLATE        = ""
       INITIAL_INGRESS_PATH    = ""
@@ -118,22 +118,21 @@ locals {
       BLUE_GREEN_INGRESS_PATH = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
     }
   }
-  worker_templates = local.worker_ingress_templates[var.worker_ingress]
+  stack_templates = local.ingress_stack_templates[var.ingress_stack]
 
   # Resolved once and shared by the agent env and the worker patch: an
-  # explicit path always wins over the one worker_ingress derives.
+  # explicit path always wins over the one ingress_stack derives.
   ingress_paths = {
-    SERVICE_TEMPLATE        = var.service_template != "" ? var.service_template : local.worker_templates.SERVICE_TEMPLATE
-    INITIAL_INGRESS_PATH    = var.initial_ingress_path != "" ? var.initial_ingress_path : local.worker_templates.INITIAL_INGRESS_PATH
-    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path != "" ? var.blue_green_ingress_path : local.worker_templates.BLUE_GREEN_INGRESS_PATH
+    SERVICE_TEMPLATE        = var.service_template != "" ? var.service_template : local.stack_templates.SERVICE_TEMPLATE
+    INITIAL_INGRESS_PATH    = var.initial_ingress_path != "" ? var.initial_ingress_path : local.stack_templates.INITIAL_INGRESS_PATH
+    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path != "" ? var.blue_green_ingress_path : local.stack_templates.BLUE_GREEN_INGRESS_PATH
   }
 
   # Deploy/DNS settings sent to both the agent container's own env
   # (all_config below) and worker pods (worker_all_config): shared_deploy_config
   # plus the ingress paths. The same three paths the worker gets, so both
-  # execution paths render the same ingress stack. With worker_ingress =
-  # "alb" (the default) these are exactly the raw var values, as they were
-  # before 34238fd2.
+  # execution paths render the same ingress stack. With ingress_stack =
+  # "alb" these are exactly the raw var values, as they were before 34238fd2.
   deploy_config = merge(
     local.shared_deploy_config,
     local.ingress_paths,

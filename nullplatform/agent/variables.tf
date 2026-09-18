@@ -352,38 +352,40 @@ variable "image_pull_secrets" {
 ################################################################################
 
 
-# Which ingress stack the containers worker deploys scopes with. The k8s scope
-# ships two template sets under /home/agent/.np/nullplatform/scopes/k8s/deployment/templates: its default
+# Which ingress stack scopes deploy with — inside the worker pod
+# (worker_orchestrator on) or inside the agent container itself (the legacy
+# exec flow). The k8s scope ships two template sets under
+# /home/agent/.np/nullplatform/scopes/k8s/deployment/templates: its default
 # (AWS Load Balancer Controller Ingress) and istio/ (Gateway API HTTPRoutes).
 # Nothing else selects between them: the scope does not read INGRESS_TYPE, it
 # just renders whatever SERVICE_TEMPLATE / INITIAL_INGRESS_PATH /
 # BLUE_GREEN_INGRESS_PATH point at. This input derives the three paths so a
 # root module states the decision instead of copying image paths around.
-variable "worker_ingress" {
-  description = "Ingress stack the containers worker deploys scopes with: \"alb\" keeps the k8s scope's own templates (AWS Load Balancer Controller Ingress), \"istio\" points it at the Gateway API templates baked in the scopes/containers image. service_template, initial_ingress_path and blue_green_ingress_path override the derived paths when set."
+variable "ingress_stack" {
+  description = "Ingress stack scopes deploy with, in the worker pod or the agent container: \"alb\" keeps the k8s scope's own templates (AWS Load Balancer Controller Ingress), \"istio\" points it at the Gateway API templates baked in the scopes/containers image. service_template, initial_ingress_path and blue_green_ingress_path override the derived paths when set."
   type        = string
   default     = "istio"
 
   validation {
-    condition     = contains(["alb", "istio"], var.worker_ingress)
-    error_message = "worker_ingress must be \"alb\" or \"istio\"."
+    condition     = contains(["alb", "istio"], var.ingress_stack)
+    error_message = "ingress_stack must be \"alb\" or \"istio\"."
   }
 }
 
 variable "service_template" {
-  description = "Path, inside the worker image, of the Service template the k8s scope renders. Empty (default) uses the template worker_ingress selects; set it only to point at a custom template."
+  description = "Path, inside the worker image, of the Service template the k8s scope renders. Empty (default) uses the template ingress_stack selects; set it only to point at a custom template."
   type        = string
   default     = ""
 }
 
 variable "initial_ingress_path" {
-  description = "Path, inside the worker image, of the ingress/route template used on a scope's first deployment. Empty (default) uses the template worker_ingress selects; set it only to point at a custom template."
+  description = "Path, inside the worker image, of the ingress/route template used on a scope's first deployment. Empty (default) uses the template ingress_stack selects; set it only to point at a custom template."
   type        = string
   default     = ""
 }
 
 variable "blue_green_ingress_path" {
-  description = "Path, inside the worker image, of the ingress/route template used to shift traffic during a blue-green deployment. Empty (default) uses the template worker_ingress selects; set it only to point at a custom template."
+  description = "Path, inside the worker image, of the ingress/route template used to shift traffic during a blue-green deployment. Empty (default) uses the template ingress_stack selects; set it only to point at a custom template."
   type        = string
   default     = ""
 }
