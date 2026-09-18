@@ -35,63 +35,37 @@ locals {
     AGENT_REPO = local.agent_repo
   }
 
-  cloud_config = {
-    aws = {
-      AWS_IAM_ROLE_ARN = var.aws_iam_role_arn
-    }
-
-    gcp   = {}
-    azure = {}
-    oci   = {}
-  }
-
-  # Drop nulls: a null reaching templatefile fails with an error that names no
-  # variable, before any precondition gets to report the actual missing input.
-  all_config = {
-    for k, v in merge(
-      local.default_config,
-      lookup(local.cloud_config, var.cloud_provider, {}),
-      var.extra_envs,
-    ) : k => v if v != null
-  }
-
-  # Template paths per ingress stack. "alb" sends empty values so the k8s scope
-  # falls back to its own defaults (AWS Load Balancer Controller Ingress);
-  # "istio" points at the Gateway API templates the scopes/containers image
-  # bakes under /app/pkg/k8s/deployment/templates/istio. An explicit
-  # service_template / initial_ingress_path / blue_green_ingress_path wins.
-  worker_ingress_templates = {
-    alb = {
-      SERVICE_TEMPLATE        = ""
-      INITIAL_INGRESS_PATH    = ""
-      BLUE_GREEN_INGRESS_PATH = ""
-    }
-    istio = {
-      SERVICE_TEMPLATE        = "/app/pkg/k8s/deployment/templates/istio/service.yaml.tpl"
-      INITIAL_INGRESS_PATH    = "/app/pkg/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
-      BLUE_GREEN_INGRESS_PATH = "/app/pkg/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
-    }
-  }
-  worker_templates = local.worker_ingress_templates[var.worker_ingress]
-
-  worker_default_env = {
-    DNS_TYPE                = var.dns_type
+  # Deploy/DNS settings shared by both the agent container (legacy
+  # command-executor exec flow, var.agent_repo) and worker pods
+  # (worker_orchestrator) — same values regardless of destination, sent to
+  # both unconditionally. 34238fd2 (#554) sent them to only one side and
+  # broke installs still relying on the other; a root module can also mix
+  # both flows at once (some scopes legacy, some worker-orchestrated), so
+  # neither side can be skipped based on var.worker_orchestrator.
+  shared_deploy_config = {
     DOMAIN                  = var.domain
+    DNS_TYPE                = var.dns_type
     USE_ACCOUNT_SLUG        = var.use_account_slug
-    K8S_NAMESPACE           = var.workload_namespace
-    SERVICE_TEMPLATE        = var.service_template != "" ? var.service_template : local.worker_templates.SERVICE_TEMPLATE
-    INITIAL_INGRESS_PATH    = var.initial_ingress_path != "" ? var.initial_ingress_path : local.worker_templates.INITIAL_INGRESS_PATH
-    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path != "" ? var.blue_green_ingress_path : local.worker_templates.BLUE_GREEN_INGRESS_PATH
-    TRAFFIC_CONTAINER_IMAGE = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
     IMAGE_PULL_SECRETS      = var.image_pull_secrets
+    CLUSTER_NAME            = var.cluster_name
+    TRAFFIC_CONTAINER_IMAGE = "${var.agent_traffic_manager_repository}:${var.agent_traffic_manager_tag}"
     PRIVATE_GATEWAY_NAME    = var.private_gateway_name
     PUBLIC_GATEWAY_NAME     = var.public_gateway_name
-    # Name of the EKS cluster. The k8s scope needs it to look up the cluster's
-    # OIDC provider when it creates the IAM role for a scope.
-    CLUSTER_NAME = var.cluster_name
+    # Both the agent's own scope scripts and the worker read K8S_NAMESPACE
+    # for the namespace workloads deploy into (verified against
+    # helm-charts/charts/agent and the scopes repo: neither reads a bare
+    # "NAMESPACE" key — the chart's only namespace-flavored hardcoded env var
+    # is NP_WORKER_NAMESPACE, and the k8s scope's build_context resolves
+    # NAMESPACE_OVERRIDE/K8S_NAMESPACE only). A plain "NAMESPACE" key used to
+    # be sent too (removed here) — it had no consumer.
+    K8S_NAMESPACE = var.workload_namespace
   }
 
-  worker_cloud_config = {
+  # Cloud-specific slice of shared_deploy_config. PRIVATE_DOMAIN is
+  # deliberately absent: var.private_domain was dropped in 34238fd2 (#554)
+  # and is not coming back — pass it through extra_envs if a scope still
+  # reads it.
+  shared_cloud_config = {
     azure = {
       PRIVATE_HOSTED_ZONE_RG = var.private_hosted_zone_rg
       RESOURCE_GROUP         = var.azure_resource_group
@@ -102,9 +76,78 @@ locals {
     }
   }
 
+  # Cloud-specific slice of the agent container's own env: shared_cloud_config
+  # plus AWS_IAM_ROLE_ARN, which the agent assumes directly (the worker gets
+  # its AWS identity via serviceAccountName in a patch instead, see
+  # worker_common_patches).
+  cloud_config = merge(local.shared_cloud_config, {
+    aws = {
+      AWS_IAM_ROLE_ARN = var.aws_iam_role_arn
+    }
+  })
+
+  # Drop nulls: a null reaching templatefile fails with an error that names no
+  # variable, before any precondition gets to report the actual missing input.
+  all_config = {
+    for k, v in merge(
+      local.default_config,
+      local.deploy_config,
+      lookup(local.cloud_config, var.cloud_provider, {}),
+      var.extra_envs,
+    ) : k => v if v != null
+  }
+
+  # Template paths per ingress stack. "alb" sends empty values so the k8s scope
+  # falls back to its own defaults (AWS Load Balancer Controller Ingress).
+  # "istio" points at the Gateway API templates the scopes image bakes in —
+  # the path differs by execution context: worker_orchestrator = true runs the
+  # k8s scope inside its own worker pod, image rooted at /app/pkg; false runs
+  # it via the legacy command-executor exec flow inside the agent container,
+  # where the scopes repo lands under the agent user's home instead. An
+  # explicit service_template / initial_ingress_path / blue_green_ingress_path
+  # wins over either — that's the only override point; there's no separate
+  # per-stack default variable, since a module call pins one ingress_stack for
+  # the life of the install and the universal override already covers pointing
+  # at a different image path if the scopes image ever moves these.
+  ingress_stack_templates = {
+    alb = {
+      SERVICE_TEMPLATE        = ""
+      INITIAL_INGRESS_PATH    = ""
+      BLUE_GREEN_INGRESS_PATH = ""
+    }
+    istio = var.worker_orchestrator ? {
+      SERVICE_TEMPLATE        = "/app/pkg/k8s/deployment/templates/istio/service.yaml.tpl"
+      INITIAL_INGRESS_PATH    = "/app/pkg/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
+      BLUE_GREEN_INGRESS_PATH = "/app/pkg/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
+      } : {
+      SERVICE_TEMPLATE        = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/service.yaml.tpl"
+      INITIAL_INGRESS_PATH    = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
+      BLUE_GREEN_INGRESS_PATH = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
+    }
+  }
+  stack_templates = local.ingress_stack_templates[var.ingress_stack]
+
+  # Resolved once and shared by the agent env and the worker patch: an
+  # explicit path always wins over the one ingress_stack derives.
+  ingress_paths = {
+    SERVICE_TEMPLATE        = var.service_template != "" ? var.service_template : local.stack_templates.SERVICE_TEMPLATE
+    INITIAL_INGRESS_PATH    = var.initial_ingress_path != "" ? var.initial_ingress_path : local.stack_templates.INITIAL_INGRESS_PATH
+    BLUE_GREEN_INGRESS_PATH = var.blue_green_ingress_path != "" ? var.blue_green_ingress_path : local.stack_templates.BLUE_GREEN_INGRESS_PATH
+  }
+
+  # Deploy/DNS settings sent to both the agent container's own env
+  # (all_config below) and worker pods (worker_all_config): shared_deploy_config
+  # plus the ingress paths. The same three paths the worker gets, so both
+  # execution paths render the same ingress stack. With ingress_stack =
+  # "alb" these are exactly the raw var values, as they were before 34238fd2.
+  deploy_config = merge(
+    local.shared_deploy_config,
+    local.ingress_paths,
+  )
+
   worker_all_config = merge(
-    local.worker_default_env,
-    lookup(local.worker_cloud_config, var.cloud_provider, {}),
+    local.deploy_config,
+    lookup(local.shared_cloud_config, var.cloud_provider, {}),
     var.extra_envs,
   )
 
@@ -113,7 +156,10 @@ locals {
   # (not just "containers") gets the agent's own ServiceAccount (to assume its
   # role's trusted AWS roles) and enough memory to run its own tooling (e.g.
   # tofu init/apply), instead of the chart's own thin defaults.
-  worker_common_patches = [
+  #
+  # Built only while var.worker_orchestrator is true; with the toggle off the
+  # module writes no worker block at all, so there is nothing to patch.
+  worker_common_patches = var.worker_orchestrator ? [
     for pkg in var.worker_orchestrated_packages : {
       target = { package = pkg }
       merge = {
@@ -127,7 +173,7 @@ locals {
         )
       }
     }
-  ]
+  ] : []
 
   # Environment variables for the workers that run the k8s scope.
   #
@@ -152,7 +198,7 @@ locals {
   #
   # With ["containers", "scheduled-task"] you get two patches with the same
   # env, one per package. Packages not in the list get none of these vars.
-  worker_k8s_env_patches = [
+  worker_k8s_env_patches = var.worker_orchestrator ? [
     for pkg in var.worker_k8s_packages : {
       target = { package = pkg }
       merge = {
@@ -166,7 +212,7 @@ locals {
         }
       }
     }
-  ]
+  ] : []
 
   worker_defaults = {
     backend           = "kubernetes"
@@ -181,6 +227,10 @@ locals {
     idleTTL = "30m"
   }
 
+  # Consumed by the template only while var.worker_orchestrator is true. With
+  # the toggle off the template omits the top-level "worker" key entirely, so
+  # the chart keeps its own worker defaults and nothing is patched — the two
+  # patch lists above are empty in that mode as well.
   worker_final = merge(
     local.worker_defaults,
     try({ for k, v in var.worker : k => v if !contains(["patches", "allowedRegistries"], k) }, {}),
@@ -200,6 +250,7 @@ locals {
     aws_iam_role_arn     = var.cloud_provider == "aws" ? var.aws_iam_role_arn : ""
     init_scripts         = var.init_scripts
     service_account_name = var.service_account_name
+    worker_orchestrator  = var.worker_orchestrator
     worker               = local.worker_final
   })
 }

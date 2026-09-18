@@ -13,7 +13,7 @@ A single helm_release resource deploys the nullplatform-agent chart from the off
 - Deploys nullplatform-agent helm_release with atomic rollback, cleanup-on-fail, and capped max_history of 10 revisions
 - Configures cloud-provider-specific environment variables and IAM role annotations for AWS, Azure, GCP, OCI, and on-premises clusters
 - Generates per-package worker pod patches that inject k8s-scope env vars (DNS_TYPE, K8S_NAMESPACE, CLUSTER_NAME, template paths) into every listed worker_k8s_packages slug
-- Selects between AWS ALB Ingress and Istio Gateway API HTTPRoute template paths based on worker_ingress, with per-variable override escape hatches
+- Selects between AWS ALB Ingress and Istio Gateway API HTTPRoute template paths based on ingress_stack, with per-variable override escape hatches
 - Enforces pinned non-moving versions for both the Helm chart and traffic manager image tag via validation blocks
 - Merges allowedRegistries and patches additively so caller additions concatenate with module defaults rather than replacing them
 - Replaces the entire Helm release when the API key changes via a terraform_data replace trigger
@@ -156,39 +156,40 @@ resource "example_resource" "this" {
 | <a name="input_agent_traffic_manager_repository"></a> [agent\_traffic\_manager\_repository](#input\_agent\_traffic\_manager\_repository) | Container image repository for the traffic manager. Defaults to the official nullplatform image; override to pull from a mirror. Matches the pattern nullplatform/base uses for its own images. | `string` | `"public.ecr.aws/nullplatform/k8s-traffic-manager"` | no |
 | <a name="input_agent_traffic_manager_tag"></a> [agent\_traffic\_manager\_tag](#input\_agent\_traffic\_manager\_tag) | No default: every install pins this deliberately — see VERSIONS.md. Image tag for the traffic manager, published to the agent as TRAFFIC\_CONTAINER\_IMAGE. Pinning this used to mean passing the whole image string through extra\_envs; the registry lives here so only the tag is exposed. extra\_envs still takes precedence for anyone who needs a digest or a mirrored path. | `string` | n/a | yes |
 | <a name="input_api_key"></a> [api\_key](#input\_api\_key) | API key for authenticating with the nullplatform API | `string` | n/a | yes |
-| <a name="input_aws_iam_role_arn"></a> [aws\_iam\_role\_arn](#input\_aws\_iam\_role\_arn) | ARN of the AWS IAM role assigned to the agent | `string` | `""` | no |
-| <a name="input_azure_client_id"></a> [azure\_client\_id](#input\_azure\_client\_id) | Azure client ID for authentication | `string` | `null` | no |
-| <a name="input_azure_client_secret"></a> [azure\_client\_secret](#input\_azure\_client\_secret) | Azure client secret for authentication | `string` | `null` | no |
-| <a name="input_azure_resource_group"></a> [azure\_resource\_group](#input\_azure\_resource\_group) | Azure resource group name | `string` | `null` | no |
-| <a name="input_azure_subscription_id"></a> [azure\_subscription\_id](#input\_azure\_subscription\_id) | Azure subscription ID | `string` | `null` | no |
-| <a name="input_azure_tenant_id"></a> [azure\_tenant\_id](#input\_azure\_tenant\_id) | Azure tenant ID | `string` | `null` | no |
-| <a name="input_blue_green_ingress_path"></a> [blue\_green\_ingress\_path](#input\_blue\_green\_ingress\_path) | Path, inside the worker image, of the ingress/route template used to shift traffic during a blue-green deployment. Empty (default) uses the template worker\_ingress selects; set it only to point at a custom template. | `string` | `""` | no |
+| <a name="input_aws_iam_role_arn"></a> [aws\_iam\_role\_arn](#input\_aws\_iam\_role\_arn) | ARN of the AWS IAM role assigned to the agent. Required when cloud\_provider is 'aws'. | `string` | `""` | no |
+| <a name="input_azure_client_id"></a> [azure\_client\_id](#input\_azure\_client\_id) | Azure client ID for authentication. Required when cloud\_provider is 'azure'. | `string` | `null` | no |
+| <a name="input_azure_client_secret"></a> [azure\_client\_secret](#input\_azure\_client\_secret) | Azure client secret for authentication. Required when cloud\_provider is 'azure'. | `string` | `null` | no |
+| <a name="input_azure_resource_group"></a> [azure\_resource\_group](#input\_azure\_resource\_group) | Azure resource group name. Required when cloud\_provider is 'azure'. | `string` | `null` | no |
+| <a name="input_azure_subscription_id"></a> [azure\_subscription\_id](#input\_azure\_subscription\_id) | Azure subscription ID. Required when cloud\_provider is 'azure'. | `string` | `null` | no |
+| <a name="input_azure_tenant_id"></a> [azure\_tenant\_id](#input\_azure\_tenant\_id) | Azure tenant ID. Required when cloud\_provider is 'azure'. | `string` | `null` | no |
+| <a name="input_blue_green_ingress_path"></a> [blue\_green\_ingress\_path](#input\_blue\_green\_ingress\_path) | Path, inside the worker image, of the ingress/route template used to shift traffic during a blue-green deployment. Empty (default) uses the template ingress\_stack selects; set it only to point at a custom template. | `string` | `""` | no |
 | <a name="input_cloud_provider"></a> [cloud\_provider](#input\_cloud\_provider) | Cloud provider to use ('aws', 'gcp', 'azure', 'oci', or 'onprem' for self-managed/on-premise clusters) | `string` | n/a | yes |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the Kubernetes cluster the scopes run in. Sent to the k8s workers as CLUSTER\_NAME; the k8s scope uses it to find the EKS OIDC provider when creating IAM roles. Required when cloud\_provider is 'aws'. | `string` | `""` | no |
 | <a name="input_create_namespace"></a> [create\_namespace](#input\_create\_namespace) | Create the namespace if it does not exist. Leave true unless another module already owns it: nullplatform/base declares the same namespace with Helm ownership metadata, so with no ordering edge between the two whichever applies second fails. | `bool` | `true` | no |
-| <a name="input_dns_type"></a> [dns\_type](#input\_dns\_type) | Type of DNS Provider, ej: azure, route53, or external\_dns | `string` | `""` | no |
+| <a name="input_dns_type"></a> [dns\_type](#input\_dns\_type) | Type of DNS Provider, e.g. azure, route53, or external\_dns | `string` | `""` | no |
 | <a name="input_domain"></a> [domain](#input\_domain) | Base domain name used across resources | `string` | `""` | no |
 | <a name="input_extra_envs"></a> [extra\_envs](#input\_extra\_envs) | Additional environment variables to pass to the agent | `map(string)` | `{}` | no |
 | <a name="input_image_pull_secrets"></a> [image\_pull\_secrets](#input\_image\_pull\_secrets) | Image pull secrets configuration | `string` | `""` | no |
 | <a name="input_image_repository"></a> [image\_repository](#input\_image\_repository) | Container image repository for the agent. Defaults to the official nullplatform image. | `string` | `""` | no |
 | <a name="input_image_tag"></a> [image\_tag](#input\_image\_tag) | Image tag for the agent container image | `string` | n/a | yes |
+| <a name="input_ingress_stack"></a> [ingress\_stack](#input\_ingress\_stack) | Ingress stack scopes deploy with, in the worker pod or the agent container: "alb" keeps the k8s scope's own templates (AWS Load Balancer Controller Ingress), "istio" points it at the Gateway API templates baked in the scopes/containers image. service\_template, initial\_ingress\_path and blue\_green\_ingress\_path override the derived paths when set. | `string` | `"istio"` | no |
 | <a name="input_init_scripts"></a> [init\_scripts](#input\_init\_scripts) | List of initialization scripts to execute during agent startup | `list(string)` | `[]` | no |
-| <a name="input_initial_ingress_path"></a> [initial\_ingress\_path](#input\_initial\_ingress\_path) | Path, inside the worker image, of the ingress/route template used on a scope's first deployment. Empty (default) uses the template worker\_ingress selects; set it only to point at a custom template. | `string` | `""` | no |
+| <a name="input_initial_ingress_path"></a> [initial\_ingress\_path](#input\_initial\_ingress\_path) | Path, inside the worker image, of the ingress/route template used on a scope's first deployment. Empty (default) uses the template ingress\_stack selects; set it only to point at a custom template. | `string` | `""` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Kubernetes namespace where the nullplatform agent itself runs. This is NOT where scopes deploy their workloads — see var.workload\_namespace. | `string` | `"nullplatform-tools"` | no |
 | <a name="input_nullplatform_agent_helm_version"></a> [nullplatform\_agent\_helm\_version](#input\_nullplatform\_agent\_helm\_version) | No default: every install pins this deliberately — see VERSIONS.md. Version of the nullplatform agent Helm chart to deploy | `string` | n/a | yes |
 | <a name="input_private_gateway_name"></a> [private\_gateway\_name](#input\_private\_gateway\_name) | Name of the private/internal gateway used for routing | `string` | `"gateway-private"` | no |
-| <a name="input_private_hosted_zone_rg"></a> [private\_hosted\_zone\_rg](#input\_private\_hosted\_zone\_rg) | Resource group for private hosted zone | `string` | `null` | no |
+| <a name="input_private_hosted_zone_rg"></a> [private\_hosted\_zone\_rg](#input\_private\_hosted\_zone\_rg) | Resource group for private hosted zone. Required when cloud\_provider is 'azure'. | `string` | `null` | no |
 | <a name="input_public_gateway_name"></a> [public\_gateway\_name](#input\_public\_gateway\_name) | Name of the public gateway used for routing | `string` | `"gateway-public"` | no |
 | <a name="input_release_name"></a> [release\_name](#input\_release\_name) | Override for the Helm release name. Defaults to nullplatform-agent | `string` | `"nullplatform-agent"` | no |
 | <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | Override for the Kubernetes ServiceAccount name created by the Helm chart | `string` | `"nullplatform-agent"` | no |
-| <a name="input_service_template"></a> [service\_template](#input\_service\_template) | Path, inside the worker image, of the Service template the k8s scope renders. Empty (default) uses the template worker\_ingress selects; set it only to point at a custom template. | `string` | `""` | no |
+| <a name="input_service_template"></a> [service\_template](#input\_service\_template) | Path, inside the worker image, of the Service template the k8s scope renders. Empty (default) uses the template ingress\_stack selects; set it only to point at a custom template. | `string` | `""` | no |
 | <a name="input_tags_selectors"></a> [tags\_selectors](#input\_tags\_selectors) | Map of tags used to select and filter channels and agents | `map(string)` | n/a | yes |
 | <a name="input_use_account_slug"></a> [use\_account\_slug](#input\_use\_account\_slug) | Flag to determine whether to use the account slug in resource naming | `string` | `""` | no |
 | <a name="input_worker"></a> [worker](#input\_worker) | Extra worker-orchestration config, merged on top of the module's own computed<br/>worker block: backend ("kubernetes" by default), allowedRegistries<br/>(["public.ecr.aws/nullplatform/*"] by default, so the platform's own scope<br/>images keep working), idleTTL ("30m" by default, so worker Deployments<br/>left behind by an old/removed package revision get reaped instead of<br/>accumulating forever), and a patch for the worker container (2Gi memory<br/>limit, the deploy/DNS env vars below, and a serviceAccountName that always<br/>mirrors service\_account\_name). allowedRegistries and patches set here are<br/>concatenated with (not replacing) the module defaults — add your own<br/>registries or an extra patch rather than having to repeat the defaults;<br/>set backend or idleTTL here to override them outright (e.g. idleTTL = ""<br/>to disable the reaper, matching this module's pre-idleTTL-default<br/>behavior). Anything else — security, the legacy defaults/rules/pins —<br/>passes through as-is. See the nullplatform-agent chart values (>= 2.37.0)<br/>for the full shape. null = nothing extra beyond the defaults above.<br/><br/>Example:<br/>  worker = {<br/>    allowedRegistries = ["123456789012.dkr.ecr.us-east-1.amazonaws.com/your-org/*"]<br/>    patches           = [{ target = { package = "my-pkg" }, merge = { spec = { serviceAccountName = "np-agent-sa" } } }]<br/>    idleTTL           = "1h"<br/>  } | `any` | `null` | no |
-| <a name="input_worker_ingress"></a> [worker\_ingress](#input\_worker\_ingress) | Ingress stack the containers worker deploys scopes with: "alb" keeps the k8s scope's own templates (AWS Load Balancer Controller Ingress), "istio" points it at the Gateway API templates baked in the scopes/containers image. service\_template, initial\_ingress\_path and blue\_green\_ingress\_path override the derived paths when set. | `string` | `"alb"` | no |
 | <a name="input_worker_k8s_packages"></a> [worker\_k8s\_packages](#input\_worker\_k8s\_packages) | Package slugs whose worker runs the k8s scope and must receive its env vars (DNS\_TYPE, K8S\_NAMESPACE, template paths, CLUSTER\_NAME, extra\_envs). Add every package that runs the k8s scope code, e.g. ["containers", "scheduled-task"]. | `list(string)` | <pre>[<br/>  "containers"<br/>]</pre> | no |
 | <a name="input_worker_memory_limit"></a> [worker\_memory\_limit](#input\_worker\_memory\_limit) | Memory limit for a worker-orchestrated package's pod (packages in var.worker\_orchestrated\_packages). The chart's own default is small enough to OOM mid-tofu-apply for packages that run real IaC tooling. | `string` | `"2Gi"` | no |
 | <a name="input_worker_orchestrated_packages"></a> [worker\_orchestrated\_packages](#input\_worker\_orchestrated\_packages) | Package slugs whose worker-orchestrator (package-exec) pods should run<br/>under var.service\_account\_name (the same IRSA identity as the agent<br/>itself) and var.worker\_memory\_limit, via a per-package worker-container<br/>patch. Add a package's slug here whenever its worker needs to assume an<br/>AWS role, or needs more memory than the chart's own default (e.g. to run<br/>tofu/terraform); a worker for a package not listed here falls back to the<br/>namespace's default ServiceAccount and the chart's own memory default.<br/><br/>This is separate from the "containers" scope's own k8s-deployment env<br/>vars (DNS\_TYPE, DOMAIN, etc.), which remain specific to that package<br/>regardless of what's listed here. | `list(string)` | <pre>[<br/>  "containers"<br/>]</pre> | no |
+| <a name="input_worker_orchestrator"></a> [worker\_orchestrator](#input\_worker\_orchestrator) | Configure worker orchestration: emit the chart's top-level "worker" block<br/>(backend, allowedRegistries, idleTTL and the per-package patches built from<br/>worker\_orchestrated\_packages and worker\_k8s\_packages) plus anything set in<br/>var.worker.<br/><br/>Off by default: the module writes no "worker" key and builds no patches, so<br/>the chart's own defaults apply and scopes keep running inside the agent<br/>container (the legacy exec flow, see var.agent\_repo). Turn it on to run<br/>packages in their own worker pods; var.worker, the package lists and<br/>worker\_memory\_limit are ignored while it is off.<br/><br/>The agent's own env is the same either way: DOMAIN, DNS\_TYPE, K8S\_NAMESPACE<br/>and the rest are always published to the agent container. | `bool` | `false` | no |
 | <a name="input_workload_namespace"></a> [workload\_namespace](#input\_workload\_namespace) | Kubernetes namespace scopes deploy their application pods into, handed to the k8s-scope workers as K8S\_NAMESPACE. Defaults to the k8s scope's own default, which is what every pre-worker agent used. | `string` | `"nullplatform"` | no |
 <!-- END_TF_DOCS -->
 
@@ -201,7 +202,7 @@ resource "example_resource" "this" {
     "Deploys nullplatform-agent helm_release with atomic rollback, cleanup-on-fail, and capped max_history of 10 revisions",
     "Configures cloud-provider-specific environment variables and IAM role annotations for AWS, Azure, GCP, OCI, and on-premises clusters",
     "Generates per-package worker pod patches that inject k8s-scope env vars (DNS_TYPE, K8S_NAMESPACE, CLUSTER_NAME, template paths) into every listed worker_k8s_packages slug",
-    "Selects between AWS ALB Ingress and Istio Gateway API HTTPRoute template paths based on worker_ingress, with per-variable override escape hatches",
+    "Selects between AWS ALB Ingress and Istio Gateway API HTTPRoute template paths based on ingress_stack, with per-variable override escape hatches",
     "Enforces pinned non-moving versions for both the Helm chart and traffic manager image tag via validation blocks",
     "Merges allowedRegistries and patches additively so caller additions concatenate with module defaults rather than replacing them",
     "Replaces the entire Helm release when the API key changes via a terraform_data replace trigger"
@@ -238,8 +239,8 @@ resource "example_resource" "this" {
       "required": true
     },
     {
-      "name": "worker_ingress",
-      "description": "Ingress stack the containers worker deploys scopes with: \\",
+      "name": "ingress_stack",
+      "description": "Ingress stack scopes deploy with, in the worker pod or the agent container: \\",
       "required": false
     },
     {
@@ -379,17 +380,17 @@ resource "example_resource" "this" {
     },
     {
       "name": "service_template",
-      "description": "Path, inside the worker image, of the Service template the k8s scope renders. Empty (default) uses the template worker_ingress selects; set it only to point at a custom template.",
+      "description": "Path, inside the worker image, of the Service template the k8s scope renders. Empty (default) uses the template ingress_stack selects; set it only to point at a custom template.",
       "required": false
     },
     {
       "name": "initial_ingress_path",
-      "description": "Path, inside the worker image, of the ingress/route template used on a scope's first deployment. Empty (default) uses the template worker_ingress selects; set it only to point at a custom template.",
+      "description": "Path, inside the worker image, of the ingress/route template used on a scope's first deployment. Empty (default) uses the template ingress_stack selects; set it only to point at a custom template.",
       "required": false
     },
     {
       "name": "blue_green_ingress_path",
-      "description": "Path, inside the worker image, of the ingress/route template used to shift traffic during a blue-green deployment. Empty (default) uses the template worker_ingress selects; set it only to point at a custom template.",
+      "description": "Path, inside the worker image, of the ingress/route template used to shift traffic during a blue-green deployment. Empty (default) uses the template ingress_stack selects; set it only to point at a custom template.",
       "required": false
     },
     {
