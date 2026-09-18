@@ -796,3 +796,78 @@ run "oci_cloud_vars_reach_the_agent_env" {
     error_message = "oci must get PRIVATE_GATEWAY_NAME in the agent env again"
   }
 }
+
+################################################################################
+# agent_deploy_env switch
+################################################################################
+
+# With every scope running in a worker the agent needs none of the deploy
+# values, and the cloud secret must not sit in its Deployment. The worker patch
+# is untouched, so the packages that do the deploying still get them.
+run "agent_deploy_env_false_strips_them_from_the_agent_only" {
+  command = plan
+
+  variables {
+    agent_deploy_env       = false
+    cloud_provider         = "azure"
+    aws_iam_role_arn       = ""
+    cluster_name           = ""
+    domain                 = "acme.io"
+    dns_type               = "azure"
+    azure_client_id        = "azure-client-id"
+    azure_client_secret    = "azure-client-secret"
+    azure_subscription_id  = "azure-subscription-id"
+    azure_resource_group   = "azure-rg"
+    azure_tenant_id        = "azure-tenant-id"
+    private_hosted_zone_rg = "azure-dns-rg"
+  }
+
+  assert {
+    condition = (
+      !strcontains(helm_release.agent.values[0], "\n    DOMAIN:") &&
+      !strcontains(helm_release.agent.values[0], "\n    DNS_TYPE:") &&
+      !strcontains(helm_release.agent.values[0], "\n    NAMESPACE:") &&
+      !strcontains(helm_release.agent.values[0], "\n    AZURE_CLIENT_SECRET:")
+    )
+    error_message = "agent_deploy_env = false must publish no deploy or cloud deploy values to the agent container"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "\"name\": \"DOMAIN\"")
+    error_message = "the worker patch must still carry the deploy values when the agent drops them"
+  }
+
+  assert {
+    condition = (
+      strcontains(helm_release.agent.values[0], "\n    NP_API_KEY: \"test-api-key\"") &&
+      strcontains(helm_release.agent.values[0], "\n    TAGS: ")
+    )
+    error_message = "the agent's own configuration must survive agent_deploy_env = false"
+  }
+}
+
+run "agent_deploy_env_false_keeps_identity_and_extra_envs" {
+  command = plan
+
+  variables {
+    agent_deploy_env = false
+    extra_envs       = { MY_VAR = "my-value" }
+  }
+
+  assert {
+    condition = (
+      strcontains(helm_release.agent.values[0], "\n    MY_VAR: \"my-value\"") &&
+      strcontains(helm_release.agent.values[0], "\n    AWS_IAM_ROLE_ARN: ")
+    )
+    error_message = "extra_envs and the agent's own AWS identity must survive agent_deploy_env = false"
+  }
+}
+
+run "agent_deploy_env_defaults_to_on" {
+  command = plan
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "\n    DNS_TYPE: ")
+    error_message = "agent_deploy_env must default to on, keeping the deploy values on the agent"
+  }
+}

@@ -73,10 +73,21 @@ locals {
   # Restored under the pre-34238fd2 names. PRIVATE_DOMAIN is deliberately
   # absent: var.private_domain was dropped in that same commit and is not
   # coming back — pass it through extra_envs if a scope still reads it.
-  cloud_config = {
+  # Identity the agent process itself needs, independent of who runs scopes.
+  cloud_identity_config = {
     aws = {
       AWS_IAM_ROLE_ARN = var.aws_iam_role_arn
     }
+    gcp   = {}
+    azure = {}
+    oci   = {}
+  }
+
+  # Deploy-time cloud values the scopes read. Gated by var.agent_deploy_env:
+  # with every scope running in a worker these are dead weight on the agent,
+  # and AZURE_CLIENT_SECRET has no business sitting in the agent's Deployment.
+  cloud_deploy_config = {
+    aws = {}
 
     gcp = {
       PRIVATE_GATEWAY_NAME = var.private_gateway_name
@@ -98,16 +109,19 @@ locals {
     }
   }
 
+
   # Drop nulls: a null reaching templatefile fails with an error that names no
   # variable, before any precondition gets to report the actual missing input.
   all_config = {
     for k, v in merge(
       local.default_config,
-      local.agent_deploy_config,
-      lookup(local.cloud_config, var.cloud_provider, {}),
+      var.agent_deploy_env ? local.agent_deploy_config : {},
+      lookup(local.cloud_identity_config, var.cloud_provider, {}),
+      var.agent_deploy_env ? lookup(local.cloud_deploy_config, var.cloud_provider, {}) : {},
       var.extra_envs,
     ) : k => v if v != null
   }
+
 
   # Template paths per ingress stack. "alb" sends empty values so the k8s scope
   # falls back to its own defaults (AWS Load Balancer Controller Ingress);

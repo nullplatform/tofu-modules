@@ -66,6 +66,22 @@ variable "service_account_name" {
   default     = "nullplatform-agent"
 }
 
+variable "agent_deploy_env" {
+  description = <<-EOT
+    Publish the deploy/DNS variables (DOMAIN, DNS_TYPE, NAMESPACE, the ingress
+    paths, the per-cloud values including AZURE_CLIENT_SECRET) to the agent
+    container.
+
+    On by default, because a scope running inside the agent reads them there.
+    Turn it off once every scope runs in its own worker: workers get their own
+    copy through worker.patches, so the agent keeps only what it needs for
+    itself, and no cloud secret sits in its Deployment. extra_envs and the
+    agent's own identity (AWS_IAM_ROLE_ARN) are unaffected.
+  EOT
+  type        = bool
+  default     = true
+}
+
 variable "worker_orchestrator" {
   description = <<-EOT
     Configure worker orchestration: emit the chart's top-level "worker" block
