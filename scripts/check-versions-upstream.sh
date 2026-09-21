@@ -36,6 +36,8 @@ upstream_for() {
     '`istio-base` chart')               echo 'helm-index:https://istio-release.storage.googleapis.com/charts/index.yaml:base' ;;
     '`istiod` chart')                   echo 'helm-index:https://istio-release.storage.googleapis.com/charts/index.yaml:istiod' ;;
     '`gateway-api` CRDs')               echo 'frozen:kubernetes-sigs/gateway-api' ;;
+    '`external-dns` chart')             echo 'helm-index:https://kubernetes-sigs.github.io/external-dns/index.yaml:external-dns' ;;
+    '`aws-load-balancer-controller` chart') echo 'helm-index:https://aws.github.io/eks-charts/index.yaml:aws-load-balancer-controller' ;;
     '`k8s-logs-controller`')            echo 'ecr:nullplatform/k8s-logs-controller' ;;
     '`controlplane-agent`')             echo 'ecr:nullplatform/controlplane-agent' ;;
     '`k8s-traffic-manager`')            echo 'ecr:nullplatform/k8s-traffic-manager' ;;
@@ -54,6 +56,8 @@ hcl_vars_for() {
     '`istio-base` chart')               echo 'istio_base_version' ;;
     '`istiod` chart')                   echo 'istiod_version' ;;
     '`gateway-api` CRDs')               echo 'gateway_api_crd_ref' ;;
+    '`external-dns` chart')             echo 'external_dns_version' ;;
+    '`aws-load-balancer-controller` chart') echo 'aws_load_balancer_controller_version' ;;
     '`k8s-logs-controller`')            echo 'logging_controller_image_tag' ;;
     '`controlplane-agent`')             echo 'control_plane_agent_image_tag image_tag' ;;
     '`k8s-traffic-manager`')            echo 'agent_traffic_manager_tag' ;;
