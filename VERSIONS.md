@@ -24,6 +24,8 @@ Verified 2026-09-16.
 | `prometheus` chart | `29.30.0` | `prometheus_version` | `infrastructure/commons/prometheus` |
 | `istio-base` chart | `1.30.4` | `istio_base_version` | `infrastructure/commons/istio` |
 | `istiod` chart | `1.30.4` | `istiod_version` | `infrastructure/commons/istio` |
+| `external-dns` chart | `1.19.0` | `external_dns_version` | `infrastructure/commons/external_dns` |
+| `aws-load-balancer-controller` chart | `1.13.4` | `aws_load_balancer_controller_version` | `infrastructure/aws/aws_load_balancer_controller` |
 | `gateway-api` CRDs | `v1.5.1` | `gateway_api_crd_ref` | `nullplatform/base` |
 | `k8s-logs-controller` | `1.6.1` | `logging_controller_image_tag` | `nullplatform/base` |
 | `k8s-traffic-manager` | `1.8.1` | `agent_traffic_manager_tag` | `nullplatform/agent` |
@@ -63,6 +65,15 @@ module "container_orchestration" {
 
 module "cert_manager" {
   cert_manager_version = "v1.21.2"
+}
+
+module "external_dns" {
+  external_dns_version = "1.19.0"
+}
+
+# aws only
+module "aws_load_balancer_controller" {
+  aws_load_balancer_controller_version = "1.13.4"
 }
 
 module "prometheus" {
