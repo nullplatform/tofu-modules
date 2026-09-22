@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.12.0](https://github.com/nullplatform/tofu-modules/compare/v7.11.1...v7.12.0) (2026-09-22)
+
+
+### Features
+
+* **agent:** let the agent pull its own image from a private registry ([#601](https://github.com/nullplatform/tofu-modules/issues/601)) ([ac74f9b](https://github.com/nullplatform/tofu-modules/commit/ac74f9bb3308671774475a44b6e45dc087d6b051))
+
 ## [7.11.1](https://github.com/nullplatform/tofu-modules/compare/v7.11.0...v7.11.1) (2026-09-22)
 
 
