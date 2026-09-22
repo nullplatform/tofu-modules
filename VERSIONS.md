@@ -26,6 +26,7 @@ Verified 2026-09-22.
 | `istiod` chart | `1.30.5` | `istiod_version` | `infrastructure/commons/istio` |
 | `gateway-api` CRDs | `v1.5.1` | `gateway_api_crd_ref` | `nullplatform/base` |
 | `k8s-logs-controller` | `1.6.1` | `logging_controller_image_tag` | `nullplatform/base` |
+| `controlplane-agent` | `0.12.0` | `image_tag` | `nullplatform/agent` |
 | `k8s-traffic-manager` | `1.8.1` | `agent_traffic_manager_tag` | `nullplatform/agent` |
 | traffic manager (provider config) | `1.8.1` | `traffic_manager_version` | `container_orchestration/eks` |
 | `scopes` repository | `v1.15.1` | `agent_repo` (as `"https://github.com/nullplatform/scopes.git#v1.15.1"`) | `nullplatform/agent` |
@@ -48,7 +49,7 @@ module "base" {
 
 module "agent" {
   nullplatform_agent_helm_version = "3.1.0"
-  image_tag                       = "0.9.2"
+  image_tag                       = "0.12.0"
   agent_repos_scope_tag           = "v1.15.1"
   agent_traffic_manager_tag       = "1.8.1"
 
