@@ -115,6 +115,11 @@ run "static_files_distribution_defaults" {
   }
 
   assert {
+    condition     = !can(jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.geo_restriction.locations)
+    error_message = "geo_restriction.locations must be omitted when no country is listed: the spec gives it no default"
+  }
+
+  assert {
     condition     = length(jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.behaviors) == 0
     error_message = "behaviors should default to an empty list, as the spec declares"
   }

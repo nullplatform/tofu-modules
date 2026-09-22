@@ -65,10 +65,12 @@ locals {
           custom_error_responses          = var.aws_custom_error_responses
           price_class                     = var.aws_price_class
           default_root_object             = var.aws_default_root_object
-          geo_restriction = {
-            restriction_type = var.aws_geo_restriction.restriction_type
-            locations        = var.aws_geo_restriction.locations
-          }
+          # locations has no default in the spec: only sent when the caller
+          # declares some, so a config without a restriction never drifts.
+          geo_restriction = merge(
+            { restriction_type = var.aws_geo_restriction.restriction_type },
+            length(var.aws_geo_restriction.locations) > 0 ? { locations = var.aws_geo_restriction.locations } : {},
+          )
         },
       )
       network = merge(local.static_files_defaults.network, {
