@@ -27,17 +27,17 @@ resource "nullplatform_notification_channel" "from_template" {
           data = var.worker_orchestrator ? {
             package = var.package_slug
             cmdline = local.worker_entrypoint
-            environment = jsonencode({
+            environment = jsonencode(merge({
               NP_ACTION_CONTEXT = "'$${NOTIFICATION_CONTEXT}'"
               NP_PLUGIN         = var.package_slug
-            })
+            }, var.extra_environment))
             } : {
             for k, v in agent.value.command.data :
             k => (
               k == "environment"
-              ? jsonencode({
+              ? jsonencode(merge({
                 NP_ACTION_CONTEXT = "'$${NOTIFICATION_CONTEXT}'"
-              })
+              }, var.extra_environment))
               : (k == "cmdline" && var.enabled_override
                 ? "${tostring(v)} ${local.overrides_flag}"
                 : (can(tostring(v)) ? tostring(v) : jsonencode(v))
