@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.13.0](https://github.com/nullplatform/tofu-modules/compare/v7.12.0...v7.13.0) (2026-09-22)
+
+
+### Features
+
+* **scope_definition_agent_association:** allow extra environment variables via extra_environment ([#598](https://github.com/nullplatform/tofu-modules/issues/598)) ([324166e](https://github.com/nullplatform/tofu-modules/commit/324166ec87fa65616993cad4ea221943722dfb86))
+
 ## [7.12.0](https://github.com/nullplatform/tofu-modules/compare/v7.11.1...v7.12.0) (2026-09-22)
 
 
