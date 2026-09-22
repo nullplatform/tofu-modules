@@ -29,6 +29,11 @@ run "static_files_payload" {
     condition     = !can(jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.lambda_associations)
     error_message = "lambda_associations must be omitted when none are declared"
   }
+
+  assert {
+    condition     = !can(jsondecode(nullplatform_provider_config.scope_configuration.attributes).security.aws_web_acl_name)
+    error_message = "aws_web_acl_name must be omitted without a WebACL: the spec gives it no default"
+  }
 }
 
 run "static_files_rejects_unknown_event" {

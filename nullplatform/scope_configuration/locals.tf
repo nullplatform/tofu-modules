@@ -16,8 +16,7 @@ locals {
       azure_network = "azure_dns"
     }
     security = {
-      aws_security     = "none"
-      aws_web_acl_name = ""
+      aws_security = "none"
     }
   }
 
@@ -77,10 +76,14 @@ locals {
         aws_network               = var.aws_network
         aws_hosted_public_zone_id = var.aws_hosted_public_zone_id
       })
-      security = merge(local.static_files_defaults.security, {
-        aws_security     = var.aws_security
-        aws_web_acl_name = var.aws_web_acl_name
-      })
+      # aws_web_acl_name has no default in the spec, and is only read when
+      # aws_security = "waf": sending an empty string adds a key a config
+      # without a WebACL never had.
+      security = merge(
+        local.static_files_defaults.security,
+        { aws_security = var.aws_security },
+        var.aws_web_acl_name != "" ? { aws_web_acl_name = var.aws_web_acl_name } : {},
+      )
     }
   }
 
