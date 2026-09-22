@@ -41,6 +41,8 @@ upstream_for() {
     '`k8s-traffic-manager`')            echo 'ecr:nullplatform/k8s-traffic-manager' ;;
     'traffic manager (provider config)') echo 'ecr:nullplatform/k8s-traffic-manager' ;;
     '`scopes` repository')              echo 'frozen:nullplatform/scopes' ;;
+    '`external-dns` chart')             echo 'helm-index:https://kubernetes-sigs.github.io/external-dns/index.yaml:external-dns' ;;
+    '`aws-load-balancer-controller` chart') echo 'helm-index:https://aws.github.io/eks-charts/index.yaml:aws-load-balancer-controller' ;;
     *) echo '' ;;
   esac
 }
@@ -59,6 +61,8 @@ hcl_vars_for() {
     '`k8s-traffic-manager`')            echo 'agent_traffic_manager_tag' ;;
     'traffic manager (provider config)') echo 'traffic_manager_version' ;;
     '`scopes` repository')              echo 'agent_repos_scope_tag' ;;
+    '`external-dns` chart')             echo 'external_dns_version' ;;
+    '`aws-load-balancer-controller` chart') echo 'aws_load_balancer_controller_version' ;;
     *) echo '' ;;
   esac
 }

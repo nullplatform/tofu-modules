@@ -29,6 +29,8 @@ Verified 2026-09-16.
 | `k8s-traffic-manager` | `1.8.1` | `agent_traffic_manager_tag` | `nullplatform/agent` |
 | traffic manager (provider config) | `1.8.1` | `traffic_manager_version` | `container_orchestration/eks` |
 | `scopes` repository | `v1.15.1` | `agent_repo` (as `"https://github.com/nullplatform/scopes.git#v1.15.1"`) | `nullplatform/agent` |
+| `external-dns` chart | `1.19.0` | `external_dns_version` | `infrastructure/commons/external_dns` |
+| `aws-load-balancer-controller` chart | `1.13.4` | `aws_load_balancer_controller_version` | `infrastructure/aws/aws_load_balancer_controller` |
 
 **Read your cluster before copying these.** The rule is to pin what you are already running,
 so the change stays functionally inert. Four of these were previously unpinnable and resolved
@@ -63,6 +65,14 @@ module "container_orchestration" {
 
 module "cert_manager" {
   cert_manager_version = "v1.21.2"
+}
+
+module "external_dns" {
+  external_dns_version = "1.19.0"
+}
+
+module "aws_load_balancer_controller" {
+  aws_load_balancer_controller_version = "1.13.4"
 }
 
 module "prometheus" {
