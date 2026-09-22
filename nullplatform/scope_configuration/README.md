@@ -2,26 +2,27 @@
 
 ## Description
 
-Creates and manages a nullplatform provider scope configuration resource for either static-files (CloudFront/S3/Route53) or aws-lambda deployment types
+Configures a nullplatform provider scope configuration for either static-files (CloudFront-backed S3) or aws-lambda deployments by creating a nullplatform_provider_config resource with type-specific attributes
 
 ## Architecture
 
-The module creates a single nullplatform_provider_config resource, wiring the nrn, type, and dimensions inputs directly into it. The attributes payload is built by merging type-specific default maps with override maps computed in locals.tf — for static-files, cloud-provider-keyed overrides assemble distribution, network, security, and provider sub-objects; for aws-lambda, state and deployment objects are merged with an optional agent block when lambda_null_agent_layer_arn is provided. The final merged map is JSON-encoded and passed as the attributes argument, while the resource id is surfaced as the provider_config_id output.
+The module creates a single nullplatform_provider_config resource whose attributes are built by merging type-specific defaults with caller-supplied overrides in locals.tf. For static-files, cloud-provider-keyed maps produce a nested payload covering provider, distribution, network, and security blocks; for aws-lambda, state and deployment blocks are merged with an optional agent block when a layer ARN is supplied. All computed attributes are JSON-encoded via jsonencode() before being written to the nullplatform_provider_config resource, and the resource ID is exposed as the sole output.
 
 ## Features
 
-- Creates a nullplatform_provider_config resource encoding provider-specific attributes as a JSON payload
-- Configures static-files scope with CloudFront distribution, Route53 DNS, optional WAF WebACL attachment, and Lambda@Edge associations
-- Configures aws-lambda scope with OpenTofu state bucket, ECR placeholder image URI, and optional nullplatform agent Lambda layer
-- Merges provider-type defaults with caller-supplied overrides to prevent drift against unset optional fields
-- Conditionally includes lambda_associations and agent blocks only when their inputs are non-empty, avoiding drift on configs that never declared them
-- Validates each variable's applicability to the selected type and cloud provider to prevent misconfiguration
+- Creates a nullplatform_provider_config resource encoding type-specific scope configuration as a JSON attributes payload
+- Configures CloudFront distribution settings including cache behaviors, viewer protocol policies, Lambda@Edge and CloudFront Function invocations, and geo-restriction rules for static-files scopes
+- Configures AWS WAF WebACL attachment to CloudFront distributions via the aws_security and aws_web_acl_name variables
+- Configures ordered path-pattern cache behaviors with per-behavior cache mode, compression, origin request policy, response headers policy, and function invocations
+- Configures aws-lambda scope state bucket, placeholder ECR image URI, and optional nullplatform agent Lambda layer ARN
+- Translates legacy aws_lambda_associations input into the current distribution.default_invocations spec format for backward compatibility
+- Supports custom CloudFront error responses for SPA client-side routing by mapping origin error codes to custom response codes and page paths
 
 ## Basic Usage
 
 ```hcl
 module "scope_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v7.13.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v7.14.0"
 
   nrn  = "your-nrn"
   type = "your-type"
@@ -32,7 +33,7 @@ module "scope_configuration" {
 
 ```hcl
 module "scope_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v7.13.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v7.14.0"
 
   aws_hosted_public_zone_id = "your-aws-hosted-public-zone-id"  # Required when type = "static-files"
   aws_region                = "your-aws-region"  # Required when type = "static-files"
@@ -47,7 +48,7 @@ module "scope_configuration" {
 
 ```hcl
 module "scope_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v7.13.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v7.14.0"
 
   lambda_placeholder_image_uri = "your-lambda-placeholder-image-uri"  # Required when type = "aws-lambda"
   lambda_tofu_state_bucket     = "your-lambda-tofu-state-bucket"  # Required when type = "aws-lambda"
@@ -88,10 +89,22 @@ resource "example_resource" "this" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_aws_behaviors"></a> [aws\_behaviors](#input\_aws\_behaviors) | Ordered cache behaviors, each matching a path pattern. List order is the precedence CloudFront evaluates, and the first match wins, so put the most specific pattern first. Every field but path\_pattern mirrors its default\_* counterpart. | <pre>list(object({<br/>    path_pattern            = string<br/>    viewer_protocol_policy  = optional(string, "redirect-to-https")<br/>    compress                = optional(bool, true)<br/>    cache_mode              = optional(string, "legacy")<br/>    cache_policy            = optional(string, "CachingOptimized")<br/>    origin_request_policy   = optional(string, "AllViewerExceptHostHeader")<br/>    response_headers_policy = optional(string, "")<br/>    invocations = optional(list(object({<br/>      event_type   = string<br/>      function_arn = string<br/>    })), [])<br/>  }))</pre> | `[]` | no |
+| <a name="input_aws_custom_error_responses"></a> [aws\_custom\_error\_responses](#input\_aws\_custom\_error\_responses) | How CloudFront answers origin errors. A single-page app serves its entry document on 403 and 404 with response\_code 200, so the client router can take over. Empty creates none. | <pre>list(object({<br/>    error_code         = number<br/>    response_code      = optional(number)<br/>    response_page_path = optional(string)<br/>  }))</pre> | `[]` | no |
+| <a name="input_aws_default_cache_mode"></a> [aws\_default\_cache\_mode](#input\_aws\_default\_cache\_mode) | Cache key and origin requests on the default cache behavior. "legacy" forwards nothing and caches for an hour; "policy" hands both over to the cache and origin request policies. | `string` | `"legacy"` | no |
+| <a name="input_aws_default_cache_policy"></a> [aws\_default\_cache\_policy](#input\_aws\_default\_cache\_policy) | Managed cache policy for the default cache behavior. Only read when aws\_default\_cache\_mode = "policy". | `string` | `"CachingOptimized"` | no |
+| <a name="input_aws_default_compress"></a> [aws\_default\_compress](#input\_aws\_default\_compress) | Let CloudFront gzip or brotli text responses on the default cache behavior when the viewer accepts it. | `bool` | `true` | no |
+| <a name="input_aws_default_invocations"></a> [aws\_default\_invocations](#input\_aws\_default\_invocations) | Functions attached to the default cache behavior. A behavior runs CloudFront Functions or Lambda@Edge, never both, and Functions run on viewer events only. A Lambda ARN must include a published version. Supersedes aws\_lambda\_associations. | <pre>list(object({<br/>    event_type   = string<br/>    function_arn = string<br/>  }))</pre> | `[]` | no |
+| <a name="input_aws_default_origin_request_policy"></a> [aws\_default\_origin\_request\_policy](#input\_aws\_default\_origin\_request\_policy) | Managed origin request policy for the default cache behavior. Only read when aws\_default\_cache\_mode = "policy". | `string` | `"AllViewerExceptHostHeader"` | no |
+| <a name="input_aws_default_response_headers_policy"></a> [aws\_default\_response\_headers\_policy](#input\_aws\_default\_response\_headers\_policy) | Managed response headers policy for the default cache behavior. Empty attaches none. | `string` | `""` | no |
+| <a name="input_aws_default_root_object"></a> [aws\_default\_root\_object](#input\_aws\_default\_root\_object) | Object returned when the request is for the site root. | `string` | `"index.html"` | no |
+| <a name="input_aws_default_viewer_protocol_policy"></a> [aws\_default\_viewer\_protocol\_policy](#input\_aws\_default\_viewer\_protocol\_policy) | How CloudFront answers HTTP requests on the default cache behavior. | `string` | `"redirect-to-https"` | no |
 | <a name="input_aws_distribution"></a> [aws\_distribution](#input\_aws\_distribution) | CDN distribution for serving static files. | `string` | `"cloudfront"` | no |
+| <a name="input_aws_geo_restriction"></a> [aws\_geo\_restriction](#input\_aws\_geo\_restriction) | Countries allowed or denied, by ISO 3166-1 alpha-2 code. restriction\_type "none" serves everywhere and ignores locations. | <pre>object({<br/>    restriction_type = optional(string, "none")<br/>    locations        = optional(list(string), [])<br/>  })</pre> | `{}` | no |
 | <a name="input_aws_hosted_public_zone_id"></a> [aws\_hosted\_public\_zone\_id](#input\_aws\_hosted\_public\_zone\_id) | Public hosted zone ID for DNS records (e.g., Z1234567890ABC). | `string` | `null` | no |
 | <a name="input_aws_lambda_associations"></a> [aws\_lambda\_associations](#input\_aws\_lambda\_associations) | Lambda@Edge functions attached to the CloudFront default cache behavior, one entry per CloudFront event. function\_arn must include a published version. Empty (the default) leaves distribution.lambda\_associations out of the payload, matching a spec that never declared it. | <pre>list(object({<br/>    event_type   = string<br/>    function_arn = string<br/>  }))</pre> | `[]` | no |
 | <a name="input_aws_network"></a> [aws\_network](#input\_aws\_network) | DNS provider for managing records. | `string` | `"route53"` | no |
+| <a name="input_aws_price_class"></a> [aws\_price\_class](#input\_aws\_price\_class) | Edge locations the distribution is served from. | `string` | `"PriceClass_100"` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region where resources will be deployed. | `string` | `null` | no |
 | <a name="input_aws_security"></a> [aws\_security](#input\_aws\_security) | Optional WAF attachment for the CloudFront distribution. Choose 'none' to skip, or 'waf' to attach an existing AWS WAF WebACL. | `string` | `"none"` | no |
 | <a name="input_aws_state_bucket"></a> [aws\_state\_bucket](#input\_aws\_state\_bucket) | S3 bucket name for storing OpenTofu state (also used for S3-native state locking). | `string` | `null` | no |
@@ -114,15 +127,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "scope_configuration",
-  "description": "Creates and manages a nullplatform provider scope configuration resource for either static-files (CloudFront/S3/Route53) or aws-lambda deployment types",
-  "architecture": "The module creates a single nullplatform_provider_config resource, wiring the nrn, type, and dimensions inputs directly into it. The attributes payload is built by merging type-specific default maps with override maps computed in locals.tf — for static-files, cloud-provider-keyed overrides assemble distribution, network, security, and provider sub-objects; for aws-lambda, state and deployment objects are merged with an optional agent block when lambda_null_agent_layer_arn is provided. The final merged map is JSON-encoded and passed as the attributes argument, while the resource id is surfaced as the provider_config_id output.",
+  "description": "Configures a nullplatform provider scope configuration for either static-files (CloudFront-backed S3) or aws-lambda deployments by creating a nullplatform_provider_config resource with type-specific attributes",
+  "architecture": "The module creates a single nullplatform_provider_config resource whose attributes are built by merging type-specific defaults with caller-supplied overrides in locals.tf. For static-files, cloud-provider-keyed maps produce a nested payload covering provider, distribution, network, and security blocks; for aws-lambda, state and deployment blocks are merged with an optional agent block when a layer ARN is supplied. All computed attributes are JSON-encoded via jsonencode() before being written to the nullplatform_provider_config resource, and the resource ID is exposed as the sole output.",
   "features": [
-    "Creates a nullplatform_provider_config resource encoding provider-specific attributes as a JSON payload",
-    "Configures static-files scope with CloudFront distribution, Route53 DNS, optional WAF WebACL attachment, and Lambda@Edge associations",
-    "Configures aws-lambda scope with OpenTofu state bucket, ECR placeholder image URI, and optional nullplatform agent Lambda layer",
-    "Merges provider-type defaults with caller-supplied overrides to prevent drift against unset optional fields",
-    "Conditionally includes lambda_associations and agent blocks only when their inputs are non-empty, avoiding drift on configs that never declared them",
-    "Validates each variable's applicability to the selected type and cloud provider to prevent misconfiguration"
+    "Creates a nullplatform_provider_config resource encoding type-specific scope configuration as a JSON attributes payload",
+    "Configures CloudFront distribution settings including cache behaviors, viewer protocol policies, Lambda@Edge and CloudFront Function invocations, and geo-restriction rules for static-files scopes",
+    "Configures AWS WAF WebACL attachment to CloudFront distributions via the aws_security and aws_web_acl_name variables",
+    "Configures ordered path-pattern cache behaviors with per-behavior cache mode, compression, origin request policy, response headers policy, and function invocations",
+    "Configures aws-lambda scope state bucket, placeholder ECR image URI, and optional nullplatform agent Lambda layer ARN",
+    "Translates legacy aws_lambda_associations input into the current distribution.default_invocations spec format for backward compatibility",
+    "Supports custom CloudFront error responses for SPA client-side routing by mapping origin error codes to custom response codes and page paths"
   ],
   "inputs": [
     {
@@ -196,14 +210,74 @@ resource "example_resource" "this" {
       "required": false
     },
     {
+      "name": "aws_default_viewer_protocol_policy",
+      "description": "How CloudFront answers HTTP requests on the default cache behavior.",
+      "required": false
+    },
+    {
+      "name": "aws_default_invocations",
+      "description": "Functions attached to the default cache behavior. A behavior runs CloudFront Functions or Lambda@Edge, never both, and Functions run on viewer events only. A Lambda ARN must include a published version. Supersedes aws_lambda_associations.",
+      "required": false
+    },
+    {
+      "name": "aws_default_cache_mode",
+      "description": "Cache key and origin requests on the default cache behavior. \\",
+      "required": false
+    },
+    {
+      "name": "aws_default_cache_policy",
+      "description": "Managed cache policy for the default cache behavior. Only read when aws_default_cache_mode = \\",
+      "required": false
+    },
+    {
+      "name": "aws_default_origin_request_policy",
+      "description": "Managed origin request policy for the default cache behavior. Only read when aws_default_cache_mode = \\",
+      "required": false
+    },
+    {
+      "name": "aws_default_response_headers_policy",
+      "description": "Managed response headers policy for the default cache behavior. Empty attaches none.",
+      "required": false
+    },
+    {
+      "name": "aws_behaviors",
+      "description": "Ordered cache behaviors, each matching a path pattern. List order is the precedence CloudFront evaluates, and the first match wins, so put the most specific pattern first. Every field but path_pattern mirrors its default_* counterpart.",
+      "required": false
+    },
+    {
+      "name": "aws_custom_error_responses",
+      "description": "How CloudFront answers origin errors. A single-page app serves its entry document on 403 and 404 with response_code 200, so the client router can take over. Empty creates none.",
+      "required": false
+    },
+    {
+      "name": "aws_price_class",
+      "description": "Edge locations the distribution is served from.",
+      "required": false
+    },
+    {
+      "name": "aws_geo_restriction",
+      "description": "Countries allowed or denied, by ISO 3166-1 alpha-2 code. restriction_type \\",
+      "required": false
+    },
+    {
       "name": "dimensions",
       "description": "Dimension values for this configuration.",
+      "required": false
+    },
+    {
+      "name": "aws_default_compress",
+      "description": "Let CloudFront gzip or brotli text responses on the default cache behavior when the viewer accepts it.",
+      "required": false
+    },
+    {
+      "name": "aws_default_root_object",
+      "description": "Object returned when the request is for the site root.",
       "required": false
     }
   ],
   "outputs": [
     "provider_config_id"
   ],
-  "hash": "885bdbf292f2722184b800974f0fb101"
+  "hash": "ae861b0056fd2a2c60a49ca01acbf87a"
 }
 END_AI_METADATA -->
