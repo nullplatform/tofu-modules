@@ -129,21 +129,21 @@ resource "example_resource" "this" {
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 3.0 |
 | <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.86 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | 3.1.1 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [helm_release.agent](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [terraform_data.api_key_trigger](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.cross_variable_validation](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
@@ -151,7 +151,7 @@ resource "example_resource" "this" {
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_agent_repo"></a> [agent\_repo](#input\_agent\_repo) | Git repositories (each with a ref) the agent clones for its legacy<br/>command-executor exec flow. Joined into a comma-separated AGENT\_REPO<br/>value, no spaces. Empty when every scope uses worker\_orchestrator instead.<br/><br/>Example:<br/>  agent\_repo = [<br/>    "https://github.com/nullplatform/scopes.git#v1.15.1",<br/>    "https://github.com/nullplatform/services-s-3.git#v0.3.0",<br/>  ] | `list(string)` | `[]` | no |
 | <a name="input_agent_traffic_manager_repository"></a> [agent\_traffic\_manager\_repository](#input\_agent\_traffic\_manager\_repository) | Container image repository for the traffic manager. Defaults to the official nullplatform image; override to pull from a mirror. Matches the pattern nullplatform/base uses for its own images. | `string` | `"public.ecr.aws/nullplatform/k8s-traffic-manager"` | no |
 | <a name="input_agent_traffic_manager_tag"></a> [agent\_traffic\_manager\_tag](#input\_agent\_traffic\_manager\_tag) | No default: every install pins this deliberately — see VERSIONS.md. Image tag for the traffic manager, published to the agent as TRAFFIC\_CONTAINER\_IMAGE. Pinning this used to mean passing the whole image string through extra\_envs; the registry lives here so only the tag is exposed. extra\_envs still takes precedence for anyone who needs a digest or a mirrored path. | `string` | n/a | yes |
@@ -169,7 +169,8 @@ resource "example_resource" "this" {
 | <a name="input_dns_type"></a> [dns\_type](#input\_dns\_type) | Type of DNS Provider, ej: azure, route53, or external\_dns | `string` | `""` | no |
 | <a name="input_domain"></a> [domain](#input\_domain) | Base domain name used across resources | `string` | `""` | no |
 | <a name="input_extra_envs"></a> [extra\_envs](#input\_extra\_envs) | Additional environment variables to pass to the agent | `map(string)` | `{}` | no |
-| <a name="input_image_pull_secrets"></a> [image\_pull\_secrets](#input\_image\_pull\_secrets) | Image pull secrets configuration | `string` | `""` | no |
+| <a name="input_image_pull_secret_name"></a> [image\_pull\_secret\_name](#input\_image\_pull\_secret\_name) | Name of an existing pull secret, in the agent's own namespace, for pulling<br/>the agent image itself.<br/><br/>Needed when that image comes from a private registry, which is the case for<br/>an install that mirrors it instead of pulling from the public repository.<br/>Empty leaves the chart's default and the pull stays anonymous, which is all<br/>a public image needs.<br/><br/>The secret is not created here: it belongs to whoever owns the registry<br/>credentials. Its name is what the agent's namespace must already hold.<br/><br/>Not the pull secrets the scopes attach to the application pods they deploy<br/>— those are image\_pull\_secrets, and they take a JSON document, not a name. | `string` | `""` | no |
+| <a name="input_image_pull_secrets"></a> [image\_pull\_secrets](#input\_image\_pull\_secrets) | Pull secrets for the application pods the scopes deploy, published to the<br/>workers as IMAGE\_PULL\_SECRETS. Not the agent's own image — that one is<br/>image\_pull\_secret\_name.<br/><br/>A JSON document, not a secret name: {"ENABLED": bool, "SECRETS": [names]}.<br/>The workers hand the value straight to jq, and a bare name is not valid<br/>JSON, so it leaves them with no pull secrets at all instead of an error.<br/><br/>Left empty, the workers derive it from the scope-configurations provider<br/>rather than from here. | `string` | `""` | no |
 | <a name="input_image_repository"></a> [image\_repository](#input\_image\_repository) | Container image repository for the agent. Defaults to the official nullplatform image. | `string` | `""` | no |
 | <a name="input_image_tag"></a> [image\_tag](#input\_image\_tag) | Image tag for the agent container image | `string` | n/a | yes |
 | <a name="input_init_scripts"></a> [init\_scripts](#input\_init\_scripts) | List of initialization scripts to execute during agent startup | `list(string)` | `[]` | no |
@@ -373,8 +374,13 @@ resource "example_resource" "this" {
       "required": false
     },
     {
+      "name": "image_pull_secret_name",
+      "description": "Name of an existing secret in the agent's own namespace used to pull the agent image itself from a private registry; empty keeps the pull anonymous",
+      "required": false
+    },
+    {
       "name": "image_pull_secrets",
-      "description": "Image pull secrets configuration",
+      "description": "JSON document of shape {\"ENABLED\": bool, \"SECRETS\": [names]}, published to the workers as IMAGE_PULL_SECRETS for the application pods the scopes deploy; not a secret name",
       "required": false
     },
     {
