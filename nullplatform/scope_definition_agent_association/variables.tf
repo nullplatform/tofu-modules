@@ -116,6 +116,12 @@ variable "description" {
   default     = "Routes Containers deployments agent"
 }
 
+variable "extra_environment" {
+  description = "Additional environment variables to merge into the agent command's environment. Merged on top of the module's default environment (NP_ACTION_CONTEXT, and NP_PLUGIN when worker_orchestrator = true), so these values take precedence on key collision."
+  type        = map(string)
+  default     = {}
+}
+
 variable "extra_filters" {
   description = <<-EOT
     Additional filter expression to merge with the base template filters using $and.
