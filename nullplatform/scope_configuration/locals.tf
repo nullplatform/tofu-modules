@@ -9,7 +9,7 @@ locals {
     cloud_provider = "aws"
     distribution = {
       aws_distribution   = "cloudfront"
-      azure_distribution = "blob_cdn"
+      azure_distribution = "blob-cdn"
     }
     network = {
       aws_network   = "route53"
@@ -21,6 +21,26 @@ locals {
     }
   }
 
+  # The spec replaced distribution.lambda_associations with
+  # distribution.default_invocations, which names the runtime alongside the
+  # event ("Lambda@Edge - viewer response") so a behavior can also carry a
+  # CloudFront Function. aws_lambda_associations is kept as an input and
+  # translated here, so an install written against the old field keeps working
+  # without emitting a field the spec no longer accepts.
+  static_files_legacy_invocations = [
+    for a in var.aws_lambda_associations : {
+      event_type   = "Lambda@Edge - ${replace(a.event_type, "-", " ")}"
+      function_arn = a.function_arn
+    }
+  ]
+
+  # An explicit aws_default_invocations wins: it speaks the spec's own wording.
+  static_files_default_invocations = (
+    length(var.aws_default_invocations) > 0
+    ? var.aws_default_invocations
+    : local.static_files_legacy_invocations
+  )
+
   # Per-cloud override, merged on top of static_files_defaults. Adding a
   # cloud: new key here + its variables, new allowed value in variables.tf.
   static_files_cloud_overrides = {
@@ -30,12 +50,26 @@ locals {
         aws_region       = var.aws_region
         aws_state_bucket = var.aws_state_bucket
       }
-      # lambda_associations has no default in the spec: only sent when the
-      # caller declares some, so a config without them never drifts.
       distribution = merge(
         local.static_files_defaults.distribution,
-        { aws_distribution = var.aws_distribution },
-        length(var.aws_lambda_associations) > 0 ? { lambda_associations = var.aws_lambda_associations } : {},
+        {
+          aws_distribution                = var.aws_distribution
+          default_viewer_protocol_policy  = var.aws_default_viewer_protocol_policy
+          default_compress                = var.aws_default_compress
+          default_cache_mode              = var.aws_default_cache_mode
+          default_cache_policy            = var.aws_default_cache_policy
+          default_origin_request_policy   = var.aws_default_origin_request_policy
+          default_response_headers_policy = var.aws_default_response_headers_policy
+          default_invocations             = local.static_files_default_invocations
+          behaviors                       = var.aws_behaviors
+          custom_error_responses          = var.aws_custom_error_responses
+          price_class                     = var.aws_price_class
+          default_root_object             = var.aws_default_root_object
+          geo_restriction = {
+            restriction_type = var.aws_geo_restriction.restriction_type
+            locations        = var.aws_geo_restriction.locations
+          }
+        },
       )
       network = merge(local.static_files_defaults.network, {
         aws_network               = var.aws_network
