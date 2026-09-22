@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.14.0](https://github.com/nullplatform/tofu-modules/compare/v7.13.0...v7.14.0) (2026-09-22)
+
+
+### Features
+
+* **scope_configuration:** expose the static-files distribution settings ([#605](https://github.com/nullplatform/tofu-modules/issues/605)) ([26cab10](https://github.com/nullplatform/tofu-modules/commit/26cab104d3ea9402f51d30781fadac31d8a60279))
+
 ## [7.13.0](https://github.com/nullplatform/tofu-modules/compare/v7.12.0...v7.13.0) (2026-09-22)
 
 
