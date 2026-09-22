@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.11.1](https://github.com/nullplatform/tofu-modules/compare/v7.11.0...v7.11.1) (2026-09-22)
+
+
+### Bug Fixes
+
+* **docs:** track external-dns and aws-load-balancer-controller in VERSIONS.md ([#597](https://github.com/nullplatform/tofu-modules/issues/597)) ([42ad18d](https://github.com/nullplatform/tofu-modules/commit/42ad18dac641ade48c751b362d818e695245d758))
+
 ## [7.11.0](https://github.com/nullplatform/tofu-modules/compare/v7.10.1...v7.11.0) (2026-09-16)
 
 

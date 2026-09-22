@@ -14,21 +14,24 @@ a specific release, so an upgrade is something someone decides.
 
 ## What to pin
 
-Verified 2026-09-16.
+Verified 2026-09-22.
 
 | Component | Current | Variable | Module |
 | --- | --- | --- | --- |
 | `nullplatform-base` chart | `2.44.7` | `nullplatform_base_helm_version` | `nullplatform/base` |
 | `nullplatform-agent` chart | `3.1.0` | `nullplatform_agent_helm_version` | `nullplatform/agent` |
 | `cert-manager` chart | `v1.21.2` | `cert_manager_version` | `infrastructure/commons/cert_manager` |
-| `prometheus` chart | `29.30.0` | `prometheus_version` | `infrastructure/commons/prometheus` |
-| `istio-base` chart | `1.30.4` | `istio_base_version` | `infrastructure/commons/istio` |
-| `istiod` chart | `1.30.4` | `istiod_version` | `infrastructure/commons/istio` |
+| `prometheus` chart | `29.31.1` | `prometheus_version` | `infrastructure/commons/prometheus` |
+| `istio-base` chart | `1.30.5` | `istio_base_version` | `infrastructure/commons/istio` |
+| `istiod` chart | `1.30.5` | `istiod_version` | `infrastructure/commons/istio` |
 | `gateway-api` CRDs | `v1.5.1` | `gateway_api_crd_ref` | `nullplatform/base` |
 | `k8s-logs-controller` | `1.6.1` | `logging_controller_image_tag` | `nullplatform/base` |
+| `controlplane-agent` | `0.12.0` | `image_tag` | `nullplatform/agent` |
 | `k8s-traffic-manager` | `1.8.1` | `agent_traffic_manager_tag` | `nullplatform/agent` |
 | traffic manager (provider config) | `1.8.1` | `traffic_manager_version` | `container_orchestration/eks` |
 | `scopes` repository | `v1.15.1` | `agent_repo` (as `"https://github.com/nullplatform/scopes.git#v1.15.1"`) | `nullplatform/agent` |
+| `external-dns` chart | `1.22.0` | `external_dns_version` | `infrastructure/commons/external_dns` |
+| `aws-load-balancer-controller` chart | `3.5.0` | `aws_load_balancer_controller_version` | `infrastructure/aws/aws_load_balancer_controller` |
 
 **Read your cluster before copying these.** The rule is to pin what you are already running,
 so the change stays functionally inert. Four of these were previously unpinnable and resolved
@@ -46,7 +49,7 @@ module "base" {
 
 module "agent" {
   nullplatform_agent_helm_version = "3.1.0"
-  image_tag                       = "0.9.2"
+  image_tag                       = "0.12.0"
   agent_repos_scope_tag           = "v1.15.1"
   agent_traffic_manager_tag       = "1.8.1"
 
@@ -65,13 +68,21 @@ module "cert_manager" {
   cert_manager_version = "v1.21.2"
 }
 
+module "external_dns" {
+  external_dns_version = "1.22.0"
+}
+
+module "aws_load_balancer_controller" {
+  aws_load_balancer_controller_version = "3.5.0"
+}
+
 module "prometheus" {
-  prometheus_version = "29.30.0"
+  prometheus_version = "29.31.1"
 }
 
 module "istio" {
-  istio_base_version = "1.30.4"
-  istiod_version     = "1.30.4"
+  istio_base_version = "1.30.5"
+  istiod_version     = "1.30.5"
 }
 
 module "service_definition" {

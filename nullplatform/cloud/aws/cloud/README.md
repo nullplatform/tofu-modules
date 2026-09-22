@@ -22,7 +22,7 @@ The module conditionally fetches the AWS account ID via aws_caller_identity and 
 
 ```hcl
 module "cloud" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/cloud?ref=v7.11.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/cloud/aws/cloud?ref=v7.11.1"
 
   domain_name            = "your-domain-name"
   hosted_private_zone_id = "your-hosted-private-zone-id"
