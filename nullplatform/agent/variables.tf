@@ -322,7 +322,18 @@ variable "domain" {
 
 # Image pull secrets configuration
 variable "image_pull_secrets" {
-  description = "Name of the pull secret the scopes attach to the application pods they deploy, published to the workers as IMAGE_PULL_SECRETS. This is not the secret for the agent's own image — see image_pull_secret_name."
+  description = <<-EOT
+    Pull secrets for the application pods the scopes deploy, published to the
+    workers as IMAGE_PULL_SECRETS. Not the agent's own image — that one is
+    image_pull_secret_name.
+
+    A JSON document, not a secret name: {"ENABLED": bool, "SECRETS": [names]}.
+    The workers hand the value straight to jq, and a bare name is not valid
+    JSON, so it leaves them with no pull secrets at all instead of an error.
+
+    Left empty, the workers derive it from the scope-configurations provider
+    rather than from here.
+  EOT
   type        = string
   default     = ""
 }
@@ -339,6 +350,9 @@ variable "image_pull_secret_name" {
 
     The secret is not created here: it belongs to whoever owns the registry
     credentials. Its name is what the agent's namespace must already hold.
+
+    Not the pull secrets the scopes attach to the application pods they deploy
+    — those are image_pull_secrets, and they take a JSON document, not a name.
   EOT
   type        = string
   default     = ""
