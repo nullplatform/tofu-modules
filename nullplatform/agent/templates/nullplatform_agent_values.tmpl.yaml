@@ -19,7 +19,7 @@ serviceAccount:
 configuration:
   values:
   %{ for key, value in config_values }
-    ${key}: "${value}"
+    ${key}: ${jsonencode(value)}
   %{ endfor }
 
 image:
