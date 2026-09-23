@@ -1,5 +1,16 @@
 # Changelog
 
+## [8.0.0](https://github.com/nullplatform/tofu-modules/compare/v7.14.0...v8.0.0) (2026-09-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* **agent:** var.worker_ingress no longer exists. Any tfvars setting it must switch to ingress_stack — same values ("alb"/"istio"), same default ("istio"), same behavior otherwise.
+
+### Features
+
+* **agent:** worker orchestration opt-in, agent keeps its deploy env vars ([#594](https://github.com/nullplatform/tofu-modules/issues/594)) ([a55e414](https://github.com/nullplatform/tofu-modules/commit/a55e414170c6dec5d4e18c7166d10ec1eaa42834))
+
 ## [7.14.0](https://github.com/nullplatform/tofu-modules/compare/v7.13.0...v7.14.0) (2026-09-22)
 
 
