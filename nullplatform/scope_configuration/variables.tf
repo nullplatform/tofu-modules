@@ -224,3 +224,189 @@ variable "lambda_null_agent_layer_arn" {
     error_message = "lambda_null_agent_layer_arn only applies when type is 'aws-lambda'."
   }
 }
+
+variable "aws_default_viewer_protocol_policy" {
+  description = "How CloudFront answers HTTP requests on the default cache behavior."
+  type        = string
+  default     = "redirect-to-https"
+
+  validation {
+    condition     = contains(["redirect-to-https", "https-only", "allow-all"], var.aws_default_viewer_protocol_policy)
+    error_message = "aws_default_viewer_protocol_policy must be one of: redirect-to-https, https-only, allow-all."
+  }
+}
+
+variable "aws_default_compress" {
+  description = "Let CloudFront gzip or brotli text responses on the default cache behavior when the viewer accepts it."
+  type        = bool
+  default     = true
+}
+
+variable "aws_default_invocations" {
+  description = "Functions attached to the default cache behavior. A behavior runs CloudFront Functions or Lambda@Edge, never both, and Functions run on viewer events only. A Lambda ARN must include a published version. Supersedes aws_lambda_associations."
+  type = list(object({
+    event_type   = string
+    function_arn = string
+  }))
+  default = []
+
+  validation {
+    condition = alltrue([
+      for i in var.aws_default_invocations : contains([
+        "CloudFront Function - viewer request",
+        "CloudFront Function - viewer response",
+        "Lambda@Edge - viewer request",
+        "Lambda@Edge - viewer response",
+        "Lambda@Edge - origin request",
+        "Lambda@Edge - origin response",
+      ], i.event_type)
+    ])
+    error_message = "aws_default_invocations[*].event_type must be one of the spec's six values, e.g. \"Lambda@Edge - viewer response\"."
+  }
+
+  validation {
+    condition     = length(distinct([for i in var.aws_default_invocations : i.event_type])) == length(var.aws_default_invocations)
+    error_message = "aws_default_invocations must not repeat an event_type: CloudFront accepts one function per event on a behavior."
+  }
+}
+
+variable "aws_default_cache_mode" {
+  description = "Cache key and origin requests on the default cache behavior. \"legacy\" forwards nothing and caches for an hour; \"policy\" hands both over to the cache and origin request policies."
+  type        = string
+  default     = "legacy"
+
+  validation {
+    condition     = contains(["legacy", "policy"], var.aws_default_cache_mode)
+    error_message = "aws_default_cache_mode must be one of: legacy, policy."
+  }
+}
+
+variable "aws_default_cache_policy" {
+  description = "Managed cache policy for the default cache behavior. Only read when aws_default_cache_mode = \"policy\"."
+  type        = string
+  default     = "CachingOptimized"
+
+  validation {
+    condition     = contains(["CachingOptimized", "CachingDisabled", "CachingOptimizedForUncompressedObjects", "Amplify"], var.aws_default_cache_policy)
+    error_message = "aws_default_cache_policy must be one of: CachingOptimized, CachingDisabled, CachingOptimizedForUncompressedObjects, Amplify."
+  }
+}
+
+variable "aws_default_origin_request_policy" {
+  description = "Managed origin request policy for the default cache behavior. Only read when aws_default_cache_mode = \"policy\"."
+  type        = string
+  default     = "AllViewerExceptHostHeader"
+
+  validation {
+    condition     = contains(["AllViewerExceptHostHeader", "AllViewer", "CORS-S3Origin", "CORS-CustomOrigin", "UserAgentRefererHeaders"], var.aws_default_origin_request_policy)
+    error_message = "aws_default_origin_request_policy must be one of: AllViewerExceptHostHeader, AllViewer, CORS-S3Origin, CORS-CustomOrigin, UserAgentRefererHeaders."
+  }
+}
+
+variable "aws_default_response_headers_policy" {
+  description = "Managed response headers policy for the default cache behavior. Empty attaches none."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = contains(["", "SecurityHeadersPolicy", "CORS-and-SecurityHeadersPolicy", "SimpleCORS"], var.aws_default_response_headers_policy)
+    error_message = "aws_default_response_headers_policy must be empty or one of: SecurityHeadersPolicy, CORS-and-SecurityHeadersPolicy, SimpleCORS."
+  }
+}
+
+variable "aws_behaviors" {
+  description = "Ordered cache behaviors, each matching a path pattern. List order is the precedence CloudFront evaluates, and the first match wins, so put the most specific pattern first. Every field but path_pattern mirrors its default_* counterpart."
+  type = list(object({
+    path_pattern            = string
+    viewer_protocol_policy  = optional(string, "redirect-to-https")
+    compress                = optional(bool, true)
+    cache_mode              = optional(string, "legacy")
+    cache_policy            = optional(string, "CachingOptimized")
+    origin_request_policy   = optional(string, "AllViewerExceptHostHeader")
+    response_headers_policy = optional(string, "")
+    invocations = optional(list(object({
+      event_type   = string
+      function_arn = string
+    })), [])
+  }))
+  default = []
+
+  validation {
+    condition     = length(distinct([for b in var.aws_behaviors : b.path_pattern])) == length(var.aws_behaviors)
+    error_message = "aws_behaviors must not repeat a path_pattern: CloudFront rejects a distribution with duplicates."
+  }
+
+  validation {
+    condition = alltrue([
+      for b in var.aws_behaviors : contains(["legacy", "policy"], b.cache_mode)
+    ])
+    error_message = "aws_behaviors[*].cache_mode must be one of: legacy, policy."
+  }
+
+  validation {
+    condition = alltrue(flatten([
+      for b in var.aws_behaviors : [
+        for i in b.invocations : contains([
+          "CloudFront Function - viewer request",
+          "CloudFront Function - viewer response",
+          "Lambda@Edge - viewer request",
+          "Lambda@Edge - viewer response",
+          "Lambda@Edge - origin request",
+          "Lambda@Edge - origin response",
+        ], i.event_type)
+      ]
+    ]))
+    error_message = "aws_behaviors[*].invocations[*].event_type must be one of the spec's six values."
+  }
+}
+
+variable "aws_custom_error_responses" {
+  description = "How CloudFront answers origin errors. A single-page app serves its entry document on 403 and 404 with response_code 200, so the client router can take over. Empty creates none."
+  type = list(object({
+    error_code         = number
+    response_code      = optional(number)
+    response_page_path = optional(string)
+  }))
+  default = []
+
+  validation {
+    condition     = length(distinct([for e in var.aws_custom_error_responses : e.error_code])) == length(var.aws_custom_error_responses)
+    error_message = "aws_custom_error_responses must not repeat an error_code."
+  }
+}
+
+variable "aws_price_class" {
+  description = "Edge locations the distribution is served from."
+  type        = string
+  default     = "PriceClass_100"
+
+  validation {
+    condition     = contains(["PriceClass_100", "PriceClass_200", "PriceClass_All"], var.aws_price_class)
+    error_message = "aws_price_class must be one of: PriceClass_100, PriceClass_200, PriceClass_All."
+  }
+}
+
+variable "aws_default_root_object" {
+  description = "Object returned when the request is for the site root."
+  type        = string
+  default     = "index.html"
+}
+
+variable "aws_geo_restriction" {
+  description = "Countries allowed or denied, by ISO 3166-1 alpha-2 code. restriction_type \"none\" serves everywhere and ignores locations."
+  type = object({
+    restriction_type = optional(string, "none")
+    locations        = optional(list(string), [])
+  })
+  default = {}
+
+  validation {
+    condition     = contains(["none", "whitelist", "blacklist"], var.aws_geo_restriction.restriction_type)
+    error_message = "aws_geo_restriction.restriction_type must be one of: none, whitelist, blacklist."
+  }
+
+  validation {
+    condition     = var.aws_geo_restriction.restriction_type == "none" || length(var.aws_geo_restriction.locations) > 0
+    error_message = "aws_geo_restriction.locations is required when restriction_type is whitelist or blacklist."
+  }
+}

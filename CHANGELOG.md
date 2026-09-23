@@ -1,5 +1,33 @@
 # Changelog
 
+## [7.14.0](https://github.com/nullplatform/tofu-modules/compare/v7.13.0...v7.14.0) (2026-09-22)
+
+
+### Features
+
+* **scope_configuration:** expose the static-files distribution settings ([#605](https://github.com/nullplatform/tofu-modules/issues/605)) ([26cab10](https://github.com/nullplatform/tofu-modules/commit/26cab104d3ea9402f51d30781fadac31d8a60279))
+
+## [7.13.0](https://github.com/nullplatform/tofu-modules/compare/v7.12.0...v7.13.0) (2026-09-22)
+
+
+### Features
+
+* **scope_definition_agent_association:** allow extra environment variables via extra_environment ([#598](https://github.com/nullplatform/tofu-modules/issues/598)) ([324166e](https://github.com/nullplatform/tofu-modules/commit/324166ec87fa65616993cad4ea221943722dfb86))
+
+## [7.12.0](https://github.com/nullplatform/tofu-modules/compare/v7.11.1...v7.12.0) (2026-09-22)
+
+
+### Features
+
+* **agent:** let the agent pull its own image from a private registry ([#601](https://github.com/nullplatform/tofu-modules/issues/601)) ([ac74f9b](https://github.com/nullplatform/tofu-modules/commit/ac74f9bb3308671774475a44b6e45dc087d6b051))
+
+## [7.11.1](https://github.com/nullplatform/tofu-modules/compare/v7.11.0...v7.11.1) (2026-09-22)
+
+
+### Bug Fixes
+
+* **docs:** track external-dns and aws-load-balancer-controller in VERSIONS.md ([#597](https://github.com/nullplatform/tofu-modules/issues/597)) ([42ad18d](https://github.com/nullplatform/tofu-modules/commit/42ad18dac641ade48c751b362d818e695245d758))
+
 ## [7.11.0](https://github.com/nullplatform/tofu-modules/compare/v7.10.1...v7.11.0) (2026-09-16)
 
 

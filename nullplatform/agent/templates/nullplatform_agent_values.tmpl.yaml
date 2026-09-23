@@ -28,6 +28,12 @@ image:
   repository: "${image_repository}"
   %{ endif }
 
+%{ if image_pull_secret_name != "" ~}
+imagePullSecret:
+  create: false
+  name: "${image_pull_secret_name}"
+
+%{ endif ~}
   %{ if length(init_scripts) > 0 }
 initScripts:
   %{ for script in init_scripts }

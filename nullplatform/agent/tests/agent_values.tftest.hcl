@@ -823,3 +823,86 @@ run "oci_cloud_vars_reach_the_agent_env" {
     error_message = "oci must get PRIVATE_GATEWAY_NAME in the agent env again"
   }
 }
+
+################################################################################
+# Agent image pull secret
+################################################################################
+
+# The chart pulls the agent image anonymously unless it is told which secret to
+# use. That is fine while the image comes from the public repository, and breaks
+# the moment an install mirrors it into a registry of its own.
+run "agent_image_pull_secret_is_referenced_when_named" {
+  command = plan
+
+  variables {
+    image_pull_secret_name = "image-pull-secret-agent"
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).imagePullSecret.name == "image-pull-secret-agent"
+    error_message = "the agent's pull secret should reach the chart by name"
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).imagePullSecret.create == false
+    error_message = "the secret belongs to whoever owns the registry credentials: the chart must reference it, not create it"
+  }
+
+  # yamldecode is blind to blank lines, so the two asserts above still pass if the
+  # template's trim markers are dropped. This one pins the bytes around the block.
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "image:\n  tag: \"0.9.2\"\n  \n\nimagePullSecret:\n  create: false\n  name: \"image-pull-secret-agent\"\n\n  \n\nworker:\n")
+    error_message = "the imagePullSecret block must render with exactly the whitespace the trim markers produce"
+  }
+}
+
+# Left unset the block must not render at all: an imagePullSecret with an empty
+# name is not the same as no imagePullSecret, and every install pulling a public
+# image today passes through here.
+run "agent_image_pull_secret_is_absent_by_default" {
+  command = plan
+
+  assert {
+    condition     = !can(yamldecode(helm_release.agent.values[0]).imagePullSecret)
+    error_message = "without a name, nothing about imagePullSecret should be rendered"
+  }
+
+  # The guard has to be a clean no-op, not a blank line: every install that pulls
+  # a public image renders this path, and a stray newline is a free helm upgrade
+  # for all of them. yamldecode cannot see it, so pin the bytes.
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "image:\n  tag: \"0.9.2\"\n  \n\n  \n\nworker:\n")
+    error_message = "the imagePullSecret guard must leave the rendered document unchanged when no name is given"
+  }
+}
+
+# image_pull_secrets and image_pull_secret_name are one character apart and sit
+# next to each other, yet feed unrelated places: this one the workers' env, the
+# other the agent's own image. Nothing else in the suite keeps them apart.
+run "agent_and_workload_pull_secrets_do_not_cross_wire" {
+  command = plan
+
+  variables {
+    image_pull_secret_name = "image-pull-secret-agent"
+    image_pull_secrets     = "{\"ENABLED\":true,\"SECRETS\":[\"image-pull-secret-workload\"]}"
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).imagePullSecret.name == "image-pull-secret-agent"
+    error_message = "the agent's own pull secret must come from image_pull_secret_name"
+  }
+
+  assert {
+    condition = anytrue([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+      anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == "IMAGE_PULL_SECRETS" && e.value == "{\"ENABLED\":true,\"SECRETS\":[\"image-pull-secret-workload\"]}"])
+      if try(p.target.package, "") == "containers"
+    ])
+    error_message = "the workload pull secrets must reach the worker as IMAGE_PULL_SECRETS, unchanged"
+  }
+
+  assert {
+    condition     = !strcontains(jsonencode(yamldecode(helm_release.agent.values[0]).imagePullSecret), "image-pull-secret-workload")
+    error_message = "the workload pull secrets must never leak into the agent's own imagePullSecret block"
+  }
+}
