@@ -19,7 +19,7 @@ serviceAccount:
 configuration:
   values:
   %{ for key, value in config_values }
-    ${key}: "${value}"
+    ${key}: ${jsonencode(value)}
   %{ endfor }
 
 image:
@@ -41,6 +41,8 @@ initScripts:
   %{ endfor }
   %{ endif }
 
+%{ if worker_orchestrator ~}
 worker:
   ${indent(2, yamlencode(worker))}
+%{ endif ~}
 
