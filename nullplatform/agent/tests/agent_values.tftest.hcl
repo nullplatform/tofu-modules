@@ -906,3 +906,44 @@ run "agent_and_workload_pull_secrets_do_not_cross_wire" {
     error_message = "the workload pull secrets must never leak into the agent's own imagePullSecret block"
   }
 }
+
+################################################################################
+# Probe overrides
+################################################################################
+
+# Off by default: nothing is rendered, so the chart keeps its own probes and an
+# existing install sees no diff.
+run "probes_are_left_to_the_chart_by_default" {
+  command = plan
+
+  assert {
+    condition     = !strcontains(helm_release.agent.values[0], "livenessProbe") && !strcontains(helm_release.agent.values[0], "readinessProbe")
+    error_message = "with no overrides the module must not render any probe key"
+  }
+}
+
+# Only the given fields are rendered: helm merges them over the chart's probe,
+# so its httpGet /health on 8080 stays.
+run "probe_overrides_are_rendered" {
+  command = plan
+
+  variables {
+    liveness_probe  = { initialDelaySeconds = 120, failureThreshold = 6 }
+    readiness_probe = { initialDelaySeconds = 60 }
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "livenessProbe:\n  \"failureThreshold\": 6\n  \"initialDelaySeconds\": 120")
+    error_message = "liveness_probe must render under livenessProbe"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "readinessProbe:\n  \"initialDelaySeconds\": 60")
+    error_message = "readiness_probe must render under readinessProbe"
+  }
+
+  assert {
+    condition     = !strcontains(helm_release.agent.values[0], "httpGet")
+    error_message = "the module must not restate the chart's httpGet; only the given fields are rendered"
+  }
+}
