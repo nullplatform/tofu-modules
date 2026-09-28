@@ -1,5 +1,12 @@
 # Changelog
 
+## [8.1.0](https://github.com/nullplatform/tofu-modules/compare/v8.0.0...v8.1.0) (2026-09-28)
+
+
+### Features
+
+* **agent:** let installs tune the agent's liveness and readiness probes ([#609](https://github.com/nullplatform/tofu-modules/issues/609)) ([99fb7da](https://github.com/nullplatform/tofu-modules/commit/99fb7da184cd88b2844960d4dc73e15541e41672))
+
 ## [8.0.0](https://github.com/nullplatform/tofu-modules/compare/v7.14.0...v8.0.0) (2026-09-23)
 
 
