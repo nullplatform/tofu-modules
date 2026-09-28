@@ -218,6 +218,25 @@ variable "init_scripts" {
   default     = []
 }
 
+# The agent answers /health only after it has cloned every var.agent_repo, which
+# it does once at startup. Where that clone is slow (an emulated cluster, a thin
+# or proxied uplink) the chart's default probes kill the container mid-clone and
+# the pod crash-loops, re-cloning from scratch each time.
+#
+#   liveness_probe  = { initialDelaySeconds = 120, failureThreshold = 6 }
+#   readiness_probe = { initialDelaySeconds = 60 }
+variable "liveness_probe" {
+  description = "Fields merged over the chart's livenessProbe (httpGet /health on 8080), e.g. { initialDelaySeconds = 120 }. Null (the default) renders nothing and leaves the chart's probe untouched."
+  type        = any
+  default     = null
+}
+
+variable "readiness_probe" {
+  description = "Fields merged over the chart's readinessProbe (httpGet /health on 8080), e.g. { initialDelaySeconds = 60 }. Null (the default) renders nothing and leaves the chart's probe untouched."
+  type        = any
+  default     = null
+}
+
 variable "image_repository" {
   description = "Container image repository for the agent. Defaults to the official nullplatform image."
   type        = string

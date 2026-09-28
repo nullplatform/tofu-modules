@@ -253,5 +253,7 @@ locals {
     service_account_name   = var.service_account_name
     worker_orchestrator    = var.worker_orchestrator
     worker                 = local.worker_final
+    liveness_probe         = var.liveness_probe
+    readiness_probe        = var.readiness_probe
   })
 }

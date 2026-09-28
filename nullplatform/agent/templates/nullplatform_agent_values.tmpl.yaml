@@ -46,3 +46,11 @@ worker:
   ${indent(2, yamlencode(worker))}
 %{ endif ~}
 
+%{ if liveness_probe != null ~}
+livenessProbe:
+  ${indent(2, yamlencode(liveness_probe))}
+%{ endif ~}
+%{ if readiness_probe != null ~}
+readinessProbe:
+  ${indent(2, yamlencode(readiness_probe))}
+%{ endif ~}
