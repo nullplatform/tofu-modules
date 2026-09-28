@@ -2,27 +2,27 @@
 
 ## Description
 
-Deploys the nullplatform agent as a Helm release on Kubernetes, configuring cloud-provider-specific identity, ingress stack templates, and optional worker orchestration for running scopes in isolated worker pods
+Deploys the nullplatform agent as a Helm release on Kubernetes with cloud-provider-specific configuration, worker orchestration support, and configurable ingress stack templating
 
 ## Architecture
 
-A single helm_release resource deploys the nullplatform-agent chart from the official nullplatform Helm repository using a values document rendered via templatefile() from locals. A terraform_data resource tracks api_key changes and triggers helm_release replacement via replace_triggered_by. A second terraform_data resource enforces cross-variable preconditions (e.g. aws_iam_role_arn required for AWS, Azure credentials required for Azure) at plan time before any resource is created. The rendered values document merges default agent args, cloud-provider-specific env vars, ingress stack template paths, and optional worker orchestration patches (per-package serviceAccountName, memory limits, and k8s-scope env vars) into a single Helm values layer.
+The module renders a YAML values document via templatefile() from locals.tf and passes it to a single helm_release.agent resource targeting the nullplatform-agent chart. A terraform_data.api_key_trigger resource forces helm_release replacement when the API key changes, and a terraform_data.cross_variable_validation resource enforces cloud-provider-specific preconditions at plan time. Local values merge default_config, deploy_config, cloud_config, and extra_envs into all_config, which flows into the Helm values template alongside worker patch lists built from worker_orchestrated_packages and worker_k8s_packages.
 
 ## Features
 
-- Deploys nullplatform-agent via helm_release with atomic rollback, cleanup-on-fail, and capped history
-- Renders cloud-provider-specific environment variables for AWS (IAM role ARN), Azure (client credentials, subscription, resource group, tenant), GCP, OCI, and on-premises clusters
-- Configures ingress stack template paths for ALB (AWS Load Balancer Controller) or Istio (Gateway API HTTPRoutes) based on the ingress_stack variable
-- Generates per-package worker pod patches that inject k8s-scope env vars, a shared ServiceAccount, and memory limits when worker orchestration is enabled
-- Enforces pinned, non-moving versions for the Helm chart and traffic manager image tag via input validation
-- Supports custom init scripts, image pull secrets, extra environment variables, and overridable ingress template paths for advanced installations
-- Replaces the Helm release automatically when the API key changes via a terraform_data trigger
+- Deploys nullplatform-agent via helm_release with atomic upgrades, cleanup on failure, and capped release history
+- Generates per-cloud env blocks for AWS (IAM role ARN), Azure (client credentials, subscription, resource group, DNS zone RG), GCP, OCI, and on-premise clusters
+- Configures worker orchestration with per-package pod patches for ServiceAccount identity, memory limits, and k8s-scope environment variables
+- Selects ingress stack templates (ALB or Istio Gateway API HTTPRoutes) and resolves SERVICE_TEMPLATE, INITIAL_INGRESS_PATH, and BLUE_GREEN_INGRESS_PATH for both agent container and worker pods
+- Publishes traffic manager image reference as TRAFFIC_CONTAINER_IMAGE by combining agent_traffic_manager_repository and agent_traffic_manager_tag
+- Supports custom liveness and readiness probe overrides merged over the chart defaults to prevent crash-loops during slow agent_repo cloning
+- Enforces pinned version strings for nullplatform_agent_helm_version and agent_traffic_manager_tag, rejecting empty or moving references like latest, main, or master
 
 ## Basic Usage
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.1.0"
 
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
   api_key                         = "your-api-key"
@@ -33,11 +33,11 @@ module "agent" {
 }
 ```
 
-### Usage with AWS Cloud Provider
+### Usage with AWS
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.1.0"
 
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
   api_key                         = "your-api-key"
@@ -50,11 +50,11 @@ module "agent" {
 }
 ```
 
-### Usage with GCP Cloud Provider
+### Usage with GCP
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.1.0"
 
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
   api_key                         = "your-api-key"
@@ -65,11 +65,11 @@ module "agent" {
 }
 ```
 
-### Usage with Azure Cloud Provider
+### Usage with Azure
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.1.0"
 
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
   api_key                         = "your-api-key"
@@ -86,11 +86,11 @@ module "agent" {
 }
 ```
 
-### Usage with OCI Cloud Provider
+### Usage with OCI
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.1.0"
 
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
   api_key                         = "your-api-key"
@@ -101,11 +101,11 @@ module "agent" {
 }
 ```
 
-### Usage with On-Premises / Self-Managed
+### Usage with On-Premise
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.1.0"
 
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
   api_key                         = "your-api-key"
@@ -120,7 +120,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.1.0"
 
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
   api_key                         = "your-api-key"
@@ -135,7 +135,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.0.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.1.0"
 
   agent_traffic_manager_tag       = "agent_traffic_manager_tag"
   api_key                         = "your-api-key"
@@ -229,16 +229,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "agent",
-  "description": "Deploys the nullplatform agent as a Helm release on Kubernetes, configuring cloud-provider-specific identity, ingress stack templates, and optional worker orchestration for running scopes in isolated worker pods",
-  "architecture": "A single helm_release resource deploys the nullplatform-agent chart from the official nullplatform Helm repository using a values document rendered via templatefile() from locals. A terraform_data resource tracks api_key changes and triggers helm_release replacement via replace_triggered_by. A second terraform_data resource enforces cross-variable preconditions (e.g. aws_iam_role_arn required for AWS, Azure credentials required for Azure) at plan time before any resource is created. The rendered values document merges default agent args, cloud-provider-specific env vars, ingress stack template paths, and optional worker orchestration patches (per-package serviceAccountName, memory limits, and k8s-scope env vars) into a single Helm values layer.",
+  "description": "Deploys the nullplatform agent as a Helm release on Kubernetes with cloud-provider-specific configuration, worker orchestration support, and configurable ingress stack templating",
+  "architecture": "The module renders a YAML values document via templatefile() from locals.tf and passes it to a single helm_release.agent resource targeting the nullplatform-agent chart. A terraform_data.api_key_trigger resource forces helm_release replacement when the API key changes, and a terraform_data.cross_variable_validation resource enforces cloud-provider-specific preconditions at plan time. Local values merge default_config, deploy_config, cloud_config, and extra_envs into all_config, which flows into the Helm values template alongside worker patch lists built from worker_orchestrated_packages and worker_k8s_packages.",
   "features": [
-    "Deploys nullplatform-agent via helm_release with atomic rollback, cleanup-on-fail, and capped history",
-    "Renders cloud-provider-specific environment variables for AWS (IAM role ARN), Azure (client credentials, subscription, resource group, tenant), GCP, OCI, and on-premises clusters",
-    "Configures ingress stack template paths for ALB (AWS Load Balancer Controller) or Istio (Gateway API HTTPRoutes) based on the ingress_stack variable",
-    "Generates per-package worker pod patches that inject k8s-scope env vars, a shared ServiceAccount, and memory limits when worker orchestration is enabled",
-    "Enforces pinned, non-moving versions for the Helm chart and traffic manager image tag via input validation",
-    "Supports custom init scripts, image pull secrets, extra environment variables, and overridable ingress template paths for advanced installations",
-    "Replaces the Helm release automatically when the API key changes via a terraform_data trigger"
+    "Deploys nullplatform-agent via helm_release with atomic upgrades, cleanup on failure, and capped release history",
+    "Generates per-cloud env blocks for AWS (IAM role ARN), Azure (client credentials, subscription, resource group, DNS zone RG), GCP, OCI, and on-premise clusters",
+    "Configures worker orchestration with per-package pod patches for ServiceAccount identity, memory limits, and k8s-scope environment variables",
+    "Selects ingress stack templates (ALB or Istio Gateway API HTTPRoutes) and resolves SERVICE_TEMPLATE, INITIAL_INGRESS_PATH, and BLUE_GREEN_INGRESS_PATH for both agent container and worker pods",
+    "Publishes traffic manager image reference as TRAFFIC_CONTAINER_IMAGE by combining agent_traffic_manager_repository and agent_traffic_manager_tag",
+    "Supports custom liveness and readiness probe overrides merged over the chart defaults to prevent crash-loops during slow agent_repo cloning",
+    "Enforces pinned version strings for nullplatform_agent_helm_version and agent_traffic_manager_tag, rejecting empty or moving references like latest, main, or master"
   ],
   "inputs": [
     {
@@ -347,6 +347,16 @@ resource "example_resource" "this" {
       "required": false
     },
     {
+      "name": "liveness_probe",
+      "description": "Fields merged over the chart's livenessProbe (httpGet /health on 8080), e.g. { initialDelaySeconds = 120 }. Null (the default) renders nothing and leaves the chart's probe untouched.",
+      "required": false
+    },
+    {
+      "name": "readiness_probe",
+      "description": "Fields merged over the chart's readinessProbe (httpGet /health on 8080), e.g. { initialDelaySeconds = 60 }. Null (the default) renders nothing and leaves the chart's probe untouched.",
+      "required": false
+    },
+    {
       "name": "image_repository",
       "description": "Container image repository for the agent. Defaults to the official nullplatform image.",
       "required": false
@@ -443,6 +453,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "3d7e4641621ce09a5b57a38f4e451cf9"
+  "hash": "4e779284aeb84b0d800fd7922d189f83"
 }
 END_AI_METADATA -->
