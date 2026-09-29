@@ -86,13 +86,25 @@ locals {
     }
   })
 
+  # The agent's own identity, which it needs whoever runs the scopes, kept
+  # apart from shared_cloud_config so var.agent_deploy_env can drop the deploy
+  # half (including AZURE_CLIENT_SECRET) without taking this with it.
+  cloud_identity_config = {
+    aws = {
+      AWS_IAM_ROLE_ARN = var.aws_iam_role_arn
+    }
+  }
+
   # Drop nulls: a null reaching templatefile fails with an error that names no
   # variable, before any precondition gets to report the actual missing input.
   all_config = {
     for k, v in merge(
       local.default_config,
-      local.deploy_config,
-      lookup(local.cloud_config, var.cloud_provider, {}),
+      # Dropped by var.agent_deploy_env = false: an install whose scopes all
+      # run in workers reads none of these in the agent container, and the
+      # worker patch carries its own copy either way.
+      var.agent_deploy_env ? local.deploy_config : {},
+      var.agent_deploy_env ? lookup(local.cloud_config, var.cloud_provider, {}) : lookup(local.cloud_identity_config, var.cloud_provider, {}),
       var.extra_envs,
     ) : k => v if v != null
   }
