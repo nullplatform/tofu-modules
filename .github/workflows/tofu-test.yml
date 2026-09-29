@@ -35,7 +35,7 @@ jobs:
   test-container-orchestration-modules:
     uses: nullplatform/actions-nullplatform/.github/workflows/tofu-test.yml@main
     with:
-      modules: '["nullplatform/container_orchestration/aks", "nullplatform/container_orchestration/eks", "nullplatform/container_orchestration/gke"]'
+      modules: '["nullplatform/container_orchestration/aks", "nullplatform/container_orchestration/eks", "nullplatform/container_orchestration/gke", "nullplatform/container_orchestration/oke"]'
 
   test-gate:
     name: All module tests passed

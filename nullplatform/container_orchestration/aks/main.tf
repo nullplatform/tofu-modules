@@ -28,6 +28,12 @@ locals {
     var.service_account_name != "" ? { service_account_name = var.service_account_name } : {},
   )
 
+  naming = { for k, v in {
+    strategy           = var.naming_strategy
+    deployment_pattern = var.naming_deployment_pattern
+    scope_pattern      = var.naming_scope_pattern
+  } : k => v if v != "" }
+
   attributes = merge(
     {
       cluster = local.cluster
@@ -37,6 +43,7 @@ locals {
     length(local.security) > 0 ? { security = local.security } : {},
     { traffic_manager = { version = var.traffic_manager_version } },
     length(var.object_modifiers) > 0 ? { object_modifiers = { modifiers = var.object_modifiers } } : {},
+    length(local.naming) > 0 ? { naming = local.naming } : {},
   )
 }
 
