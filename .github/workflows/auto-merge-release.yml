@@ -56,7 +56,7 @@ jobs:
           AUTHOR=$(echo "$PR_JSON" | jq -r '.user.login')
           HAS_LABEL=$(echo "$PR_JSON" | jq '[.labels[].name] | contains(["autorelease: pending"])')
 
-          if [ "$AUTHOR" != "github-actions[bot]" ] || [ "$HAS_LABEL" != "true" ]; then
+          if { [ "$AUTHOR" != "github-actions[bot]" ] && [ "$AUTHOR" != "release-application[bot]" ]; } || [ "$HAS_LABEL" != "true" ]; then
             echo "Open PR doesn't match expected author/label. Skipping."
             echo "pr_number=" >> "$GITHUB_OUTPUT"
             exit 0
