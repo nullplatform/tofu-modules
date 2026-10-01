@@ -1,5 +1,12 @@
 # Changelog
 
+## [8.2.0](https://github.com/nullplatform/tofu-modules/compare/v8.1.0...v8.2.0) (2026-10-01)
+
+
+### Features
+
+* **container_orchestration:** configure Kubernetes object naming per cluster ([#611](https://github.com/nullplatform/tofu-modules/issues/611)) ([7be76ee](https://github.com/nullplatform/tofu-modules/commit/7be76ee53a2f660762beaa44a5723ad5a1e98dbf))
+
 ## [8.1.0](https://github.com/nullplatform/tofu-modules/compare/v8.0.0...v8.1.0) (2026-09-28)
 
 
