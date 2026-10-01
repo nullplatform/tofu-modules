@@ -2,24 +2,26 @@
 
 ## Description
 
-Configures an Oracle Container Engine for Kubernetes (OKE) provider in Nullplatform
+Configures a Nullplatform OKE (Oracle Kubernetes Engine) provider by registering cluster, gateway, and naming settings via a nullplatform_provider_config resource
 
 ## Architecture
 
-Creates a single nullplatform_provider_config resource of type 'oke' that stores cluster metadata including cluster name, region, and gateway configuration. The module accepts required inputs for NRN, cluster name, and region, while providing defaults for Kubernetes namespaces and gateway names. All configuration is encoded as JSON attributes within the provider config resource.
+The module creates a single nullplatform_provider_config resource of type 'oke' that receives the NRN identifier and optional dimensions map. Cluster connectivity details (name, namespace, region), gateway configuration (namespace, public and private gateway names), and an optional naming block are merged into a JSON-encoded attributes payload. The naming block is conditionally included only when at least one naming variable is non-empty, using a local map filtered by non-empty values.
 
 ## Features
 
-- Registers OKE cluster with Nullplatform using provider configuration
-- Stores cluster location and namespace mappings in centralized configuration
-- Configures public and private gateway references for traffic routing
-- Supports custom dimensions for provider-level tagging and organization
+- Registers an OKE cluster with Nullplatform using cluster name, namespace, and OCI region
+- Configures public and private gateway references within a dedicated gateway namespace
+- Supports flexible Kubernetes object naming strategies including ids, qualified slugs, and custom patterns
+- Applies custom deployment-level naming patterns for Deployment, Service, HPA, Secret, and PodDisruptionBudget objects
+- Applies custom scope-level naming patterns for long-lived objects such as Ingress, HTTPRoute, and serving certificates
+- Conditionally omits the naming block from provider attributes when no naming variables are set
 
 ## Basic Usage
 
 ```hcl
 module "oke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/oke?ref=v8.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/oke?ref=v8.2.0"
 
   cluster_name = "your-cluster-name"
   nrn          = "your-nrn"
@@ -63,6 +65,9 @@ resource "example_resource" "this" {
 | <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Dimensions for the provider configuration | `map(any)` | `{}` | no |
 | <a name="input_gateway_namespace"></a> [gateway\_namespace](#input\_gateway\_namespace) | Kubernetes namespace where the gateway is deployed | `string` | `"gateways"` | no |
 | <a name="input_namespace_application_default"></a> [namespace\_application\_default](#input\_namespace\_application\_default) | Default Kubernetes namespace for applications | `string` | `"nullplatform"` | no |
+| <a name="input_naming_deployment_pattern"></a> [naming\_deployment\_pattern](#input\_naming\_deployment\_pattern) | Name pattern for the objects a deployment creates (Deployment, Service, HPA, Secret, PodDisruptionBudget), e.g. {.application.slug}-{.scope.slug}-{.deployment.id}. Read only when naming\_strategy is 'custom' | `string` | `""` | no |
+| <a name="input_naming_scope_pattern"></a> [naming\_scope\_pattern](#input\_naming\_scope\_pattern) | Name pattern for the objects that outlive a deployment (Ingress, HTTPRoute, serving certificate), e.g. {.application.slug}-{.scope.slug}-{.scope.id}. Read only when naming\_strategy is 'custom'. Only applies to scopes created after the change | `string` | `""` | no |
+| <a name="input_naming_strategy"></a> [naming\_strategy](#input\_naming\_strategy) | How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'ids' when unset | `string` | `""` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform NRN (e.g., organization=X:account=Y:namespace=Z) | `string` | n/a | yes |
 | <a name="input_private_gateway_name"></a> [private\_gateway\_name](#input\_private\_gateway\_name) | Name of the private gateway | `string` | `"private-gateway"` | no |
 | <a name="input_public_gateway_name"></a> [public\_gateway\_name](#input\_public\_gateway\_name) | Name of the public gateway | `string` | `"public-gateway"` | no |
@@ -72,13 +77,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "oke",
-  "description": "Configures an Oracle Container Engine for Kubernetes (OKE) provider in Nullplatform",
-  "architecture": "Creates a single nullplatform_provider_config resource of type 'oke' that stores cluster metadata including cluster name, region, and gateway configuration. The module accepts required inputs for NRN, cluster name, and region, while providing defaults for Kubernetes namespaces and gateway names. All configuration is encoded as JSON attributes within the provider config resource.",
+  "description": "Configures a Nullplatform OKE (Oracle Kubernetes Engine) provider by registering cluster, gateway, and naming settings via a nullplatform_provider_config resource",
+  "architecture": "The module creates a single nullplatform_provider_config resource of type 'oke' that receives the NRN identifier and optional dimensions map. Cluster connectivity details (name, namespace, region), gateway configuration (namespace, public and private gateway names), and an optional naming block are merged into a JSON-encoded attributes payload. The naming block is conditionally included only when at least one naming variable is non-empty, using a local map filtered by non-empty values.",
   "features": [
-    "Registers OKE cluster with Nullplatform using provider configuration",
-    "Stores cluster location and namespace mappings in centralized configuration",
-    "Configures public and private gateway references for traffic routing",
-    "Supports custom dimensions for provider-level tagging and organization"
+    "Registers an OKE cluster with Nullplatform using cluster name, namespace, and OCI region",
+    "Configures public and private gateway references within a dedicated gateway namespace",
+    "Supports flexible Kubernetes object naming strategies including ids, qualified slugs, and custom patterns",
+    "Applies custom deployment-level naming patterns for Deployment, Service, HPA, Secret, and PodDisruptionBudget objects",
+    "Applies custom scope-level naming patterns for long-lived objects such as Ingress, HTTPRoute, and serving certificates",
+    "Conditionally omits the naming block from provider attributes when no naming variables are set"
   ],
   "inputs": [
     {
@@ -95,6 +102,21 @@ resource "example_resource" "this" {
       "name": "region",
       "description": "OCI region where the OKE cluster is deployed",
       "required": true
+    },
+    {
+      "name": "naming_strategy",
+      "description": "How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'ids' when unset",
+      "required": false
+    },
+    {
+      "name": "naming_deployment_pattern",
+      "description": "Name pattern for the objects a deployment creates (Deployment, Service, HPA, Secret, PodDisruptionBudget), e.g. {.application.slug}-{.scope.slug}-{.deployment.id}. Read only when naming_strategy is 'custom'",
+      "required": false
+    },
+    {
+      "name": "naming_scope_pattern",
+      "description": "Name pattern for the objects that outlive a deployment (Ingress, HTTPRoute, serving certificate), e.g. {.application.slug}-{.scope.slug}-{.scope.id}. Read only when naming_strategy is 'custom'. Only applies to scopes created after the change",
+      "required": false
     },
     {
       "name": "dimensions",
@@ -123,6 +145,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "060984ac5758589ac80ed5c25e610c35"
+  "hash": "50ec276d47d186460627d6814f448896"
 }
 END_AI_METADATA -->

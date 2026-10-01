@@ -14,7 +14,7 @@ a specific release, so an upgrade is something someone decides.
 
 ## What to pin
 
-Verified 2026-09-28.
+Verified 2026-10-01.
 
 | Component | Current | Variable | Module |
 | --- | --- | --- | --- |
@@ -26,11 +26,11 @@ Verified 2026-09-28.
 | `istiod` chart | `1.30.5` | `istiod_version` | `infrastructure/commons/istio` |
 | `gateway-api` CRDs | `v1.5.1` | `gateway_api_crd_ref` | `nullplatform/base` |
 | `k8s-logs-controller` | `1.6.2` | `logging_controller_image_tag` | `nullplatform/base` |
-| `controlplane-agent` | `0.12.0` | `image_tag` | `nullplatform/agent` |
+| `controlplane-agent` | `0.13.0` | `image_tag` | `nullplatform/agent` |
 | `k8s-traffic-manager` | `1.8.1` | `agent_traffic_manager_tag` | `nullplatform/agent` |
 | traffic manager (provider config) | `1.8.1` | `traffic_manager_version` | `container_orchestration/eks` |
 | `scopes` repository | `v1.15.1` | `agent_repo` (as `"https://github.com/nullplatform/scopes.git#v1.15.1"`) | `nullplatform/agent` |
-| `external-dns` chart | `1.22.0` | `external_dns_version` | `infrastructure/commons/external_dns` |
+| `external-dns` chart | `1.23.0` | `external_dns_version` | `infrastructure/commons/external_dns` |
 | `aws-load-balancer-controller` chart | `3.5.0` | `aws_load_balancer_controller_version` | `infrastructure/aws/aws_load_balancer_controller` |
 
 **Read your cluster before copying these.** The rule is to pin what you are already running,
@@ -49,7 +49,7 @@ module "base" {
 
 module "agent" {
   nullplatform_agent_helm_version = "3.1.0"
-  image_tag                       = "0.12.0"
+  image_tag                       = "0.13.0"
   agent_repos_scope_tag           = "v1.15.1"
   agent_traffic_manager_tag       = "1.8.1"
 
@@ -69,7 +69,7 @@ module "cert_manager" {
 }
 
 module "external_dns" {
-  external_dns_version = "1.22.0"
+  external_dns_version = "1.23.0"
 }
 
 module "aws_load_balancer_controller" {

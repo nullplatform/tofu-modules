@@ -2,27 +2,27 @@
 
 ## Description
 
-Configures a Nullplatform AKS provider configuration resource with cluster, gateway, resource management, security, and traffic manager settings
+Configures a Nullplatform AKS provider configuration resource that registers an Azure Kubernetes Service cluster with gateway, resource management, security, naming, and traffic manager settings
 
 ## Architecture
 
-The module constructs a set of structured locals that merge optional and required inputs into a nested attribute map, then encodes it as JSON into a single nullplatform_provider_config resource of type aks-configuration. The cluster local combines cluster_name, resource_group, namespace, and optional authentication_mode, while the gateway local merges public and optional private gateway names. Resource management, security, and object modifier locals are conditionally included only when their respective input variables are non-empty, and the final attributes map is passed to the nullplatform_provider_config resource alongside the NRN and dimensions inputs.
+The module constructs several local maps (cluster, gateway, resource_management, security, naming) by merging optional variables into structured objects, then encodes the combined attributes map as JSON. A single nullplatform_provider_config resource of type 'aks-configuration' is created, binding the NRN and optional dimensions to the JSON-encoded attributes blob. Optional fields are conditionally included using Terraform's merge and for expressions, so absent inputs produce no keys in the final payload.
 
 ## Features
 
-- Creates a nullplatform_provider_config resource of type aks-configuration scoped to a Nullplatform NRN
-- Configures AKS cluster identity with optional authentication mode selection (localAccounts, azureActiveDirectory, localandAAD)
-- Configures public and optionally private Istio ingress gateway references within the provider config
-- Enforces a pinned, non-moving traffic manager sidecar container version via validation
-- Supports optional resource management tuning including memory/CPU ratios and millicore limits
-- Supports optional Kubernetes security settings including image pull secrets and service account name
-- Supports dynamic Kubernetes object modifiers for runtime patch customization
+- Creates a nullplatform_provider_config resource that registers an AKS cluster with the Nullplatform control plane
+- Configures gateway settings supporting both public and optional private Application Gateway names in a specified Kubernetes namespace
+- Enforces a pinned traffic manager sidecar container version, rejecting floating references like 'latest', 'main', or 'master'
+- Supports flexible Kubernetes object naming strategies including id-based, qualified slug-based, and fully custom pattern-based naming
+- Configures resource management tuning including memory-to-CPU ratio, request-to-limit ratios, and maximum milicores per pod
+- Applies security settings including image pull secrets and a custom Kubernetes service account for deployments
+- Accepts dynamic Kubernetes object modifiers to patch arbitrary k8s objects at deploy time
 
 ## Basic Usage
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v8.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v8.2.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -32,11 +32,11 @@ module "aks" {
 }
 ```
 
-### Usage with Latest Traffic Manager Version
+### Usage with Latest/Floating Version (Rejected)
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v8.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v8.2.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -46,11 +46,11 @@ module "aks" {
 }
 ```
 
-### Usage with Main Traffic Manager Version
+### Usage with Main Branch Version (Rejected)
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v8.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v8.2.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -60,11 +60,11 @@ module "aks" {
 }
 ```
 
-### Usage with Master Traffic Manager Version
+### Usage with Master Branch Version (Rejected)
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v8.1.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v8.2.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -116,6 +116,9 @@ resource "example_resource" "this" {
 | <a name="input_memory_cpu_ratio"></a> [memory\_cpu\_ratio](#input\_memory\_cpu\_ratio) | Amount of MiB of ram per CPU. Default value is 2048, it means 1 core for every 2 GiB of RAM | `string` | `""` | no |
 | <a name="input_memory_request_to_limit_ratio"></a> [memory\_request\_to\_limit\_ratio](#input\_memory\_request\_to\_limit\_ratio) | Sets the ratio between requested and limit memory. Default value is 1, must be a number greater than or equal to 1 | `string` | `""` | no |
 | <a name="input_namespace_application_default"></a> [namespace\_application\_default](#input\_namespace\_application\_default) | Default Kubernetes namespace for applications | `string` | `"nullplatform"` | no |
+| <a name="input_naming_deployment_pattern"></a> [naming\_deployment\_pattern](#input\_naming\_deployment\_pattern) | Name pattern for the objects a deployment creates (Deployment, Service, HPA, Secret, PodDisruptionBudget), e.g. {.application.slug}-{.scope.slug}-{.deployment.id}. Read only when naming\_strategy is 'custom' | `string` | `""` | no |
+| <a name="input_naming_scope_pattern"></a> [naming\_scope\_pattern](#input\_naming\_scope\_pattern) | Name pattern for the objects that outlive a deployment (Ingress, HTTPRoute, serving certificate), e.g. {.application.slug}-{.scope.slug}-{.scope.id}. Read only when naming\_strategy is 'custom'. Only applies to scopes created after the change | `string` | `""` | no |
+| <a name="input_naming_strategy"></a> [naming\_strategy](#input\_naming\_strategy) | How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'ids' when unset | `string` | `""` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform NRN (e.g., organization=X:account=Y:namespace=Z) | `string` | n/a | yes |
 | <a name="input_object_modifiers"></a> [object\_modifiers](#input\_object\_modifiers) | List of modifications to dynamically modify k8s objects | <pre>list(object({<br/>    selector = string<br/>    action   = string<br/>    type     = string<br/>    value    = optional(string, "")<br/>  }))</pre> | `[]` | no |
 | <a name="input_private_gateway_name"></a> [private\_gateway\_name](#input\_private\_gateway\_name) | Name of the private Application Gateway in AKS | `string` | `""` | no |
@@ -128,16 +131,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "aks",
-  "description": "Configures a Nullplatform AKS provider configuration resource with cluster, gateway, resource management, security, and traffic manager settings",
-  "architecture": "The module constructs a set of structured locals that merge optional and required inputs into a nested attribute map, then encodes it as JSON into a single nullplatform_provider_config resource of type aks-configuration. The cluster local combines cluster_name, resource_group, namespace, and optional authentication_mode, while the gateway local merges public and optional private gateway names. Resource management, security, and object modifier locals are conditionally included only when their respective input variables are non-empty, and the final attributes map is passed to the nullplatform_provider_config resource alongside the NRN and dimensions inputs.",
+  "description": "Configures a Nullplatform AKS provider configuration resource that registers an Azure Kubernetes Service cluster with gateway, resource management, security, naming, and traffic manager settings",
+  "architecture": "The module constructs several local maps (cluster, gateway, resource_management, security, naming) by merging optional variables into structured objects, then encodes the combined attributes map as JSON. A single nullplatform_provider_config resource of type 'aks-configuration' is created, binding the NRN and optional dimensions to the JSON-encoded attributes blob. Optional fields are conditionally included using Terraform's merge and for expressions, so absent inputs produce no keys in the final payload.",
   "features": [
-    "Creates a nullplatform_provider_config resource of type aks-configuration scoped to a Nullplatform NRN",
-    "Configures AKS cluster identity with optional authentication mode selection (localAccounts, azureActiveDirectory, localandAAD)",
-    "Configures public and optionally private Istio ingress gateway references within the provider config",
-    "Enforces a pinned, non-moving traffic manager sidecar container version via validation",
-    "Supports optional resource management tuning including memory/CPU ratios and millicore limits",
-    "Supports optional Kubernetes security settings including image pull secrets and service account name",
-    "Supports dynamic Kubernetes object modifiers for runtime patch customization"
+    "Creates a nullplatform_provider_config resource that registers an AKS cluster with the Nullplatform control plane",
+    "Configures gateway settings supporting both public and optional private Application Gateway names in a specified Kubernetes namespace",
+    "Enforces a pinned traffic manager sidecar container version, rejecting floating references like 'latest', 'main', or 'master'",
+    "Supports flexible Kubernetes object naming strategies including id-based, qualified slug-based, and fully custom pattern-based naming",
+    "Configures resource management tuning including memory-to-CPU ratio, request-to-limit ratios, and maximum milicores per pod",
+    "Applies security settings including image pull secrets and a custom Kubernetes service account for deployments",
+    "Accepts dynamic Kubernetes object modifiers to patch arbitrary k8s objects at deploy time"
   ],
   "inputs": [
     {
@@ -164,6 +167,21 @@ resource "example_resource" "this" {
       "name": "traffic_manager_version",
       "description": "No default: every install pins this deliberately — see VERSIONS.md. Tag for the traffic manager sidecar container",
       "required": true
+    },
+    {
+      "name": "naming_strategy",
+      "description": "How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'ids' when unset",
+      "required": false
+    },
+    {
+      "name": "naming_deployment_pattern",
+      "description": "Name pattern for the objects a deployment creates (Deployment, Service, HPA, Secret, PodDisruptionBudget), e.g. {.application.slug}-{.scope.slug}-{.deployment.id}. Read only when naming_strategy is 'custom'",
+      "required": false
+    },
+    {
+      "name": "naming_scope_pattern",
+      "description": "Name pattern for the objects that outlive a deployment (Ingress, HTTPRoute, serving certificate), e.g. {.application.slug}-{.scope.slug}-{.scope.id}. Read only when naming_strategy is 'custom'. Only applies to scopes created after the change",
+      "required": false
     },
     {
       "name": "dimensions",
@@ -227,6 +245,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "65a7d6c6c893cb43c077bae43b2e11c3"
+  "hash": "a78aa9185b230f1535aa778d3900c468"
 }
 END_AI_METADATA -->
