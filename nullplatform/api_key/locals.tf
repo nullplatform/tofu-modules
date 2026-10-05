@@ -32,20 +32,16 @@ locals {
         "secops",
       ]
     }
+    # Notification channel keys are only exchanged for a token to dispatch
+    # commands to agents (POST /agent_command), so they carry the single-action
+    # controlplane:agent-dispatcher role.
     scope_notification = {
-      name = "SCOPE-NOTIFICATION-CHANNEL-${local.slug}"
-      role_slugs = [
-        "controlplane:agent",
-        "ops",
-      ]
+      name       = "SCOPE-NOTIFICATION-CHANNEL-${local.slug}"
+      role_slugs = ["controlplane:agent-dispatcher"]
     }
     service_notification = {
-      name = "SERVICE-NOTIFICATION-CHANNEL-${local.slug}"
-      role_slugs = [
-        "controlplane:agent",
-        "admin",
-        "ops",
-      ]
+      name       = "SERVICE-NOTIFICATION-CHANNEL-${local.slug}"
+      role_slugs = ["controlplane:agent-dispatcher"]
     }
     custom = {
       name       = var.custom_name != null ? var.custom_name : ""

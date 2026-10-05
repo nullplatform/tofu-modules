@@ -239,3 +239,35 @@ run "internal_off_is_explicit" {
     error_message = "internal = false should reach the nullplatform_api_key resource"
   }
 }
+
+################################################################################
+# Notification channel keys — only dispatch commands to agents
+################################################################################
+
+run "scope_notification_grants_only_agent_dispatcher" {
+  command = plan
+
+  variables {
+    type               = "scope_notification"
+    specification_slug = "k8s"
+  }
+
+  assert {
+    condition     = toset([for g in nullplatform_api_key.this.grants : g.role_slug]) == toset(["controlplane:agent-dispatcher"])
+    error_message = "Scope notification API key should only grant controlplane:agent-dispatcher"
+  }
+}
+
+run "service_notification_grants_only_agent_dispatcher" {
+  command = plan
+
+  variables {
+    type               = "service_notification"
+    specification_slug = "postgresql"
+  }
+
+  assert {
+    condition     = toset([for g in nullplatform_api_key.this.grants : g.role_slug]) == toset(["controlplane:agent-dispatcher"])
+    error_message = "Service notification API key should only grant controlplane:agent-dispatcher"
+  }
+}

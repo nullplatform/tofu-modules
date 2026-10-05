@@ -3,7 +3,7 @@
 ################################################################################
 
 variable "type" {
-  description = "Type of API key to create. Determines the pre-configured grants and tags. 'base' carries the agent roles minus secrets-reader, for the nullplatform base module. Use 'custom' to define your own roles and tags."
+  description = "Type of API key to create. Determines the pre-configured grants and tags. 'base' carries the agent roles minus secrets-reader, for the nullplatform base module. 'scope_notification' and 'service_notification' only carry controlplane:agent-dispatcher, the role that lets a notification channel dispatch commands to agents. Use 'custom' to define your own roles and tags."
   type        = string
 
   validation {
