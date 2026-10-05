@@ -58,9 +58,16 @@ variable "type" {
 }
 
 variable "label_filter" {
-  description = "Kubernetes label selector to filter resources processed by ExternalDNS. Defaults to 'dns/zone-type=<zone_type>' when zone_type is set. Pass an explicit value to override, or an empty string to disable filtering."
+  description = "Kubernetes label selector to filter resources processed by ExternalDNS. Applied by the 'aws', 'azure' and 'azure-private-dns' providers. On 'aws' it defaults to 'dns/zone-type=<zone_type>' when zone_type is set; on Azure only an explicit value applies (e.g. 'dns/zone-type!=private' for a public instance next to an 'azure-private-dns' one). Pass an empty string to disable filtering."
   type        = string
   default     = null
+}
+
+variable "gateway_name" {
+  description = "Limit Gateway API route sources (e.g. gateway-httproute) to routes attached to this Gateway name, via --gateway-name. Empty means routes of every Gateway."
+  type        = string
+  default     = ""
+  nullable    = false
 }
 
 ###############################################################################

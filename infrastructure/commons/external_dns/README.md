@@ -16,7 +16,8 @@ The module creates an optional kubernetes_namespace_v1 resource when create_name
 - Creates provider-specific Kubernetes secrets for API tokens and configuration files (Cloudflare, OCI, Azure, PowerDNS, RFC2136)
 - Configures Azure Workload Identity pod labels and serviceAccount annotations or falls back to Service Principal auth when azure_workload_identity_enabled is false
 - Mounts OCI and Azure provider configuration files as secret volumes into the ExternalDNS pod
-- Supports optional label filtering on Kubernetes resources via an explicit label_filter or auto-derived dns/zone-type label
+- Supports optional label filtering on Kubernetes resources via an explicit label_filter (AWS and Azure) or an auto-derived dns/zone-type label (AWS)
+- Limits Gateway API route sources to a single Gateway via gateway_name, so public and private ExternalDNS instances can split one cluster's routes
 
 ## Basic Usage
 
@@ -104,6 +105,45 @@ module "external_dns" {
   azure_workload_identity_enabled = "your-azure-workload-identity-enabled"  # Required when dns_provider_name = "azure-private-dns"
   dns_provider_name               = "azure-private-dns"
   domain_filters                  = "your-domain-filters"
+}
+```
+
+### Usage with Azure public and private zones (split-horizon)
+
+One instance per zone. The k8s scope labels each DNSEndpoint with `dns/zone-type: public|private` by scope visibility, so the public instance skips internal scopes and the routes of the private gateway, while the private instance publishes every host for resolution inside the VNet. The private instance needs its own namespace because the Azure config secret has a fixed name.
+
+```hcl
+module "external_dns" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v8.2.0"
+
+  dns_provider_name = "azure"
+  domain_filters    = "your-domain-filters"
+  sources           = ["gateway-httproute", "crd"]
+  label_filter      = "dns/zone-type!=private"
+  gateway_name      = "gateway-public"
+
+  azure_client_id               = "your-azure-client-id"
+  azure_federated_credential_id = "your-azure-federated-credential-id"
+  azure_resource_group          = "your-public-zone-resource-group"
+  azure_subscription_id         = "your-azure-subscription-id"
+  azure_tenant_id               = "your-azure-tenant-id"
+}
+
+module "external_dns_private" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v8.2.0"
+
+  type                   = "private"
+  dns_provider_name      = "azure-private-dns"
+  domain_filters         = "your-domain-filters"
+  external_dns_namespace = "external-dns-private"
+  txt_owner_id           = "external-dns-private"
+  sources                = ["gateway-httproute", "crd"]
+
+  azure_client_id               = "your-private-dns-identity-client-id"
+  azure_federated_credential_id = "your-private-dns-federated-credential-id"
+  azure_resource_group          = "your-private-zone-resource-group"
+  azure_subscription_id         = "your-azure-subscription-id"
+  azure_tenant_id               = "your-azure-tenant-id"
 }
 ```
 
@@ -212,10 +252,11 @@ resource "example_resource" "this" {
 | <a name="input_domain_filters"></a> [domain\_filters](#input\_domain\_filters) | The domain filter to limit ExternalDNS to manage DNS records only for specific domains | `string` | n/a | yes |
 | <a name="input_external_dns_namespace"></a> [external\_dns\_namespace](#input\_external\_dns\_namespace) | The Kubernetes namespace where ExternalDNS will be deployed | `string` | `"external-dns"` | no |
 | <a name="input_external_dns_version"></a> [external\_dns\_version](#input\_external\_dns\_version) | The version of ExternalDNS Helm chart to deploy | `string` | `"1.19.0"` | no |
+| <a name="input_gateway_name"></a> [gateway\_name](#input\_gateway\_name) | Limit Gateway API route sources (e.g. gateway-httproute) to routes attached to this Gateway name, via --gateway-name. Empty means routes of every Gateway. | `string` | `""` | no |
 | <a name="input_gcp_project_id"></a> [gcp\_project\_id](#input\_gcp\_project\_id) | The GCP project ID where the Cloud DNS zones are located (required when dns\_provider\_name is 'google') | `string` | `""` | no |
 | <a name="input_gcp_service_account_email"></a> [gcp\_service\_account\_email](#input\_gcp\_service\_account\_email) | Email of the GCP service account bound via Workload Identity for Cloud DNS access (required when dns\_provider\_name is 'google'). Create the service account and the Workload Identity binding outside this module (e.g. with infrastructure/gcp/iam) and pass its email here. | `string` | `""` | no |
 | <a name="input_gcp_service_account_name"></a> [gcp\_service\_account\_name](#input\_gcp\_service\_account\_name) | The Kubernetes service account name for GCP Workload Identity | `string` | `"external-dns"` | no |
-| <a name="input_label_filter"></a> [label\_filter](#input\_label\_filter) | Kubernetes label selector to filter resources processed by ExternalDNS. Defaults to 'dns/zone-type=<zone\_type>' when zone\_type is set. Pass an explicit value to override, or an empty string to disable filtering. | `string` | `null` | no |
+| <a name="input_label_filter"></a> [label\_filter](#input\_label\_filter) | Kubernetes label selector to filter resources processed by ExternalDNS. Applied by the 'aws', 'azure' and 'azure-private-dns' providers. On 'aws' it defaults to 'dns/zone-type=<zone\_type>' when zone\_type is set; on Azure only an explicit value applies (e.g. 'dns/zone-type!=private' for a public instance next to an 'azure-private-dns' one). Pass an empty string to disable filtering. | `string` | `null` | no |
 | <a name="input_oci_compartment_ocid"></a> [oci\_compartment\_ocid](#input\_oci\_compartment\_ocid) | The OCI compartment OCID where the DNS zones are located (required when dns\_provider\_name is 'oci') | `string` | `""` | no |
 | <a name="input_oci_region"></a> [oci\_region](#input\_oci\_region) | The OCI region for workload identity configuration (required when dns\_provider\_name is 'oci') | `string` | `""` | no |
 | <a name="input_oci_service_account_name"></a> [oci\_service\_account\_name](#input\_oci\_service\_account\_name) | The Kubernetes service account name for OCI Workload Identity | `string` | `"external-dns"` | no |
@@ -252,7 +293,8 @@ resource "example_resource" "this" {
     "Creates provider-specific Kubernetes secrets for API tokens and configuration files (Cloudflare, OCI, Azure, PowerDNS, RFC2136)",
     "Configures Azure Workload Identity pod labels and serviceAccount annotations or falls back to Service Principal auth when azure_workload_identity_enabled is false",
     "Mounts OCI and Azure provider configuration files as secret volumes into the ExternalDNS pod",
-    "Supports optional label filtering on Kubernetes resources via an explicit label_filter or auto-derived dns/zone-type label"
+    "Supports optional label filtering on Kubernetes resources via an explicit label_filter (AWS and Azure) or an auto-derived dns/zone-type label (AWS)",
+    "Limits Gateway API route sources to a single Gateway via gateway_name, so public and private ExternalDNS instances can split one cluster's routes"
   ],
   "inputs": [
     {
@@ -312,7 +354,12 @@ resource "example_resource" "this" {
     },
     {
       "name": "label_filter",
-      "description": "Kubernetes label selector to filter resources processed by ExternalDNS. Defaults to 'dns/zone-type=<zone_type>' when zone_type is set. Pass an explicit value to override, or an empty string to disable filtering.",
+      "description": "Kubernetes label selector to filter resources processed by ExternalDNS. Applied by the 'aws', 'azure' and 'azure-private-dns' providers. On 'aws' it defaults to 'dns/zone-type=<zone_type>' when zone_type is set; on Azure only an explicit value applies (e.g. 'dns/zone-type!=private' for a public instance next to an 'azure-private-dns' one). Pass an empty string to disable filtering.",
+      "required": false
+    },
+    {
+      "name": "gateway_name",
+      "description": "Limit Gateway API route sources (e.g. gateway-httproute) to routes attached to this Gateway name, via --gateway-name. Empty means routes of every Gateway.",
       "required": false
     },
     {

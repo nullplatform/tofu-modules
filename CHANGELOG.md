@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+
+### Bug Fixes
+
+* **external_dns:** support public and private DNS on Azure with ExternalDNS: `label_filter` now applies to the `azure` and `azure-private-dns` providers, and the new `gateway_name` limits route sources to one Gateway, so a public instance keeps internal scopes out of the public zone while an `azure-private-dns` instance publishes them in the Private DNS zone (split-horizon)
+
 ## [8.2.0](https://github.com/nullplatform/tofu-modules/compare/v8.1.0...v8.2.0) (2026-10-01)
 
 
