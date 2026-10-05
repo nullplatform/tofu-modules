@@ -53,13 +53,14 @@ data "http" "scope_configuration_template" {
 }
 
 # Process service specification template using gomplate with NRN variable
+# (plus var.template_env_vars, as for every gomplate render below)
 data "external" "service_spec" {
   depends_on = [data.http.service_spec_template]
 
   program = ["sh", "-c", <<-EOT
     template_b64="${base64encode(data.http.service_spec_template.response_body)}"
     processed_json=$(echo "$template_b64" | base64 -d | \
-    NRN='${var.nrn}' \
+    NRN='${var.nrn}' ${local.template_env_assignments}\
     gomplate)
     printf '%s\n' "$processed_json" | jq -c '{json: tojson}'
   EOT
@@ -82,7 +83,7 @@ data "external" "scope_type" {
   program = ["sh", "-c", <<-EOT
     template_b64="${base64encode(data.http.scope_type_template.response_body)}"
     processed_json=$(echo "$template_b64" | base64 -d | \
-    NRN='${local.dependent_env_vars.NRN}' \
+    NRN='${local.dependent_env_vars.NRN}' ${local.template_env_assignments}\
     SERVICE_SPECIFICATION_ID='${local.dependent_env_vars.SERVICE_SPECIFICATION_ID}' \
     gomplate)
     printf '%s\n' "$processed_json" | jq -c '{json: tojson}'
@@ -104,7 +105,7 @@ data "external" "action_specs" {
   program = ["sh", "-c", <<-EOT
     template_b64="${base64encode(try(data.http.action_templates[each.key].response_body, "{}"))}"
     processed_json=$(echo "$template_b64" | base64 -d | \
-    NRN='${local.dependent_env_vars.NRN}' \
+    NRN='${local.dependent_env_vars.NRN}' ${local.template_env_assignments}\
     SERVICE_SPECIFICATION_ID='${local.dependent_env_vars.SERVICE_SPECIFICATION_ID}' \
     SERVICE_SLUG='${local.dependent_env_vars.SERVICE_SLUG}' \
     SERVICE_PATH='${local.dependent_env_vars.SERVICE_PATH}' \

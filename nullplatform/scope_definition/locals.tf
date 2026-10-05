@@ -13,12 +13,19 @@ locals {
     REPO_PATH                = var.repo_path
   }
 
+  # Extra `KEY='value' ` shell assignments for every gomplate render. Keys and
+  # values are validated on var.template_env_vars (shell-safe). Empty by default.
+  template_env_assignments = join("", [for k in sort(keys(var.template_env_vars)) : "${k}='${var.template_env_vars[k]}' "])
+
   scope_type_def = jsondecode(data.external.scope_type.result.json)
 
   static_action_specs = toset(
     var.action_spec_names != null ? var.action_spec_names : try(local.service_spec_parsed.available_actions, [])
   )
 
+  # scope-configuration.json.tpl is not rendered by gomplate: this regex swaps
+  # every `{{ env.Getenv "..." }}` for the NRN, so template_env_vars do not
+  # apply to it.
   scope_configuration_rendered = var.create_scope_configuration ? replace(
     data.http.scope_configuration_template[0].response_body,
     "/\"{{\\s+env.Getenv\\s+\".*\"\\s+}}\"/",
