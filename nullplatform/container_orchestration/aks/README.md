@@ -22,7 +22,7 @@ The module constructs several local maps (cluster, gateway, resource_management,
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v8.3.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v8.3.1"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -36,7 +36,7 @@ module "aks" {
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v8.3.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v8.3.1"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -50,7 +50,7 @@ module "aks" {
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v8.3.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v8.3.1"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -64,7 +64,7 @@ module "aks" {
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v8.3.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v8.3.1"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
