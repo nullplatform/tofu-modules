@@ -29,6 +29,19 @@ module "scope_definition" {
 }
 ```
 
+## Template environment variables
+
+Templates can read installation-specific settings through `template_env_vars`:
+
+```hcl
+module "scope_definition" {
+  # ...
+  template_env_vars = { LAMBDA_DEPLOYMENT_TYPES = "zip" }
+}
+```
+
+Each entry is exported to every gomplate render (service spec, scope type, action specs) and read in the template with `{{ env.Getenv "LAMBDA_DEPLOYMENT_TYPES" }}`. `scope-configuration.json.tpl` is not rendered by gomplate (every `env.Getenv` in it is replaced with the NRN), so it does not see these variables.
+
 ## Using Outputs
 
 ```hcl
