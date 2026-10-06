@@ -22,7 +22,7 @@ The module assembles a set of deeply nested local maps from input variables — 
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v8.2.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v8.3.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -34,7 +34,7 @@ module "eks" {
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v8.2.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v8.3.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -46,7 +46,7 @@ module "eks" {
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v8.2.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v8.3.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -58,7 +58,7 @@ module "eks" {
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v8.2.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v8.3.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
