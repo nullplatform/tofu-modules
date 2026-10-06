@@ -7,6 +7,13 @@
 
 * **external_dns:** support public and private DNS on Azure with ExternalDNS: `label_filter` now applies to the `azure` and `azure-private-dns` providers, and the new `gateway_name` limits route sources to one Gateway, so a public instance keeps internal scopes out of the public zone while an `azure-private-dns` instance publishes them in the Private DNS zone (split-horizon)
 
+## [8.3.0](https://github.com/nullplatform/tofu-modules/compare/v8.2.1...v8.3.0) (2026-10-06)
+
+
+### Features
+
+* **service_definition_agent_association:** route service telemetry notifications ([#613](https://github.com/nullplatform/tofu-modules/issues/613)) ([831cb5c](https://github.com/nullplatform/tofu-modules/commit/831cb5ca9212c2bbcaaba4a90ea00fd8a54a3784))
+
 ## [8.2.1](https://github.com/nullplatform/tofu-modules/compare/v8.2.0...v8.2.1) (2026-10-05)
 
 
