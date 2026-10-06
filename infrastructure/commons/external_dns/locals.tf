@@ -196,5 +196,26 @@ locals {
     rfc2136             = local.rfc2136_config
   }
 
-  external_dns_values = merge(local.base_config, local.provider_configs[var.dns_provider_name])
+  provider_config = local.provider_configs[var.dns_provider_name]
+
+  azure_label_filter = var.label_filter == null ? "" : var.label_filter
+
+  # Flags appended to the provider's own extraArgs. route53_config already
+  # carries its label filter; Azure only takes an explicit label_filter, since
+  # zone_type never filtered anything there.
+  common_extra_args = compact([
+    local.azure_family_active && local.azure_label_filter != "" ? "--label-filter=${local.azure_label_filter}" : "",
+    var.gateway_name != "" ? "--gateway-name=${var.gateway_name}" : "",
+  ])
+
+  # extraArgs is only set when there is something to add, so releases that use
+  # neither option render the same values as before.
+  external_dns_values = merge(
+    local.base_config,
+    local.provider_config,
+    {
+      for k, v in { extraArgs = tolist(concat(try(local.provider_config.extraArgs, []), local.common_extra_args)) } :
+      k => v if length(local.common_extra_args) > 0
+    },
+  )
 }

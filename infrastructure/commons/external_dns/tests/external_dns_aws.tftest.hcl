@@ -135,3 +135,33 @@ run "aws_pod_identity_omits_role_annotation" {
     error_message = "Pod Identity mode must omit the IRSA role-arn annotation"
   }
 }
+
+run "aws_without_gateway_name_keeps_route53_args" {
+  command = plan
+
+  assert {
+    condition     = local.external_dns_values.extraArgs == local.route53_config.extraArgs
+    error_message = "Without gateway_name, AWS extraArgs must be exactly the route53 ones"
+  }
+}
+
+run "aws_gateway_name_appends_to_route53_args" {
+  command = plan
+
+  variables {
+    gateway_name = "gateway-public"
+  }
+
+  assert {
+    condition = local.external_dns_values.extraArgs == concat(
+      local.route53_config.extraArgs,
+      tolist(["--gateway-name=gateway-public"]),
+    )
+    error_message = "gateway_name should be appended after the route53 extraArgs"
+  }
+
+  assert {
+    condition     = length([for a in local.external_dns_values.extraArgs : a if startswith(a, "--label-filter=")]) == 1
+    error_message = "AWS must keep a single --label-filter (from route53_config)"
+  }
+}
