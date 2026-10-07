@@ -9,7 +9,7 @@ locals {
     cloud_provider = "aws"
     distribution = {
       aws_distribution   = "cloudfront"
-      azure_distribution = "blob-cdn"
+      azure_distribution = "front-door"
     }
     network = {
       aws_network   = "route53"

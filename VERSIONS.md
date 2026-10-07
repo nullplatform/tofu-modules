@@ -14,7 +14,7 @@ a specific release, so an upgrade is something someone decides.
 
 ## What to pin
 
-Verified 2026-10-01.
+Verified 2026-10-06.
 
 | Component | Current | Variable | Module |
 | --- | --- | --- | --- |
@@ -31,7 +31,7 @@ Verified 2026-10-01.
 | traffic manager (provider config) | `1.8.1` | `traffic_manager_version` | `container_orchestration/eks` |
 | `scopes` repository | `v1.15.1` | `agent_repo` (as `"https://github.com/nullplatform/scopes.git#v1.15.1"`) | `nullplatform/agent` |
 | `external-dns` chart | `1.23.0` | `external_dns_version` | `infrastructure/commons/external_dns` |
-| `aws-load-balancer-controller` chart | `3.5.0` | `aws_load_balancer_controller_version` | `infrastructure/aws/aws_load_balancer_controller` |
+| `aws-load-balancer-controller` chart | `3.6.0` | `aws_load_balancer_controller_version` | `infrastructure/aws/aws_load_balancer_controller` |
 
 **Read your cluster before copying these.** The rule is to pin what you are already running,
 so the change stays functionally inert. Four of these were previously unpinnable and resolved
@@ -73,7 +73,7 @@ module "external_dns" {
 }
 
 module "aws_load_balancer_controller" {
-  aws_load_balancer_controller_version = "3.5.0"
+  aws_load_balancer_controller_version = "3.6.0"
 }
 
 module "prometheus" {
