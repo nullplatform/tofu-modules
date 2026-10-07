@@ -145,11 +145,29 @@ locals {
     local.ingress_paths,
   )
 
-  worker_all_config = merge(
-    local.deploy_config,
-    lookup(local.shared_cloud_config, var.cloud_provider, {}),
-    var.extra_envs,
-  )
+  # Nulls dropped like all_config does for the agent: an unset optional value
+  # (e.g. azure_client_secret under workload identity) must not reach the
+  # worker's env as an empty variable.
+  worker_all_config = {
+    for k, v in merge(
+      local.deploy_config,
+      lookup(local.shared_cloud_config, var.cloud_provider, {}),
+      var.extra_envs,
+    ) : k => v if v != null
+  }
+
+  # AKS Workload Identity: the webhook only projects the ServiceAccount token
+  # into pods carrying this label. Applied to the agent pod (podLabels) and to
+  # every worker-orchestrated package's pod (worker_common_patches).
+  pod_labels = var.cloud_provider == "azure" && var.azure_workload_identity ? {
+    "azure.workload.identity/use" = "true"
+  } : {}
+
+  # The workload identity webhook injects AZURE_CLIENT_ID into labelled pods
+  # from this ServiceAccount annotation (empty when absent) and its env wins
+  # over the agent's envFrom config. While the Service Principal is still set,
+  # annotate it so the agent keeps its client ID.
+  azure_sa_client_id = var.cloud_provider == "azure" && var.azure_workload_identity && var.azure_client_id != null ? var.azure_client_id : ""
 
   # Generic identity + resources — one patch per package in
   # var.worker_orchestrated_packages, so any worker-orchestrated package's pod
@@ -162,16 +180,19 @@ locals {
   worker_common_patches = var.worker_orchestrator ? [
     for pkg in var.worker_orchestrated_packages : {
       target = { package = pkg }
-      merge = {
-        spec = merge(
-          var.service_account_name != "" ? { serviceAccountName = var.service_account_name } : {},
-          {
-            containers = [
-              { name = "worker", resources = { limits = { memory = var.worker_memory_limit } } }
-            ]
-          }
-        )
-      }
+      merge = merge(
+        {
+          spec = merge(
+            var.service_account_name != "" ? { serviceAccountName = var.service_account_name } : {},
+            {
+              containers = [
+                { name = "worker", resources = { limits = { memory = var.worker_memory_limit } } }
+              ]
+            }
+          )
+        },
+        length(local.pod_labels) > 0 ? { metadata = { labels = local.pod_labels } } : {}
+      )
     }
   ] : []
 
@@ -251,6 +272,8 @@ locals {
     aws_iam_role_arn       = var.cloud_provider == "aws" ? var.aws_iam_role_arn : ""
     init_scripts           = var.init_scripts
     service_account_name   = var.service_account_name
+    pod_labels             = local.pod_labels
+    azure_sa_client_id     = local.azure_sa_client_id
     worker_orchestrator    = var.worker_orchestrator
     worker                 = local.worker_final
     liveness_probe         = var.liveness_probe
