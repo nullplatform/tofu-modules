@@ -21,12 +21,8 @@ resource "azurerm_federated_identity_credential" "this" {
   subject             = "system:serviceaccount:${var.namespace}:${var.service_account_name}"
 }
 
-# Single role assignment from role_definition_name + scope (the original
-# interface). Kept at its own address, behind count, so existing callers keep
-# their assignment instead of destroying and recreating it.
 resource "azurerm_role_assignment" "this" {
-  # Only role_definition_name drives count: it is a literal in practice, while
-  # scope is often a resource created in the same apply (unknown at plan).
+  # count depends only on role_definition_name: scope may be unknown at plan.
   count = var.role_definition_name != null ? 1 : 0
 
   scope                = var.scope
@@ -46,9 +42,6 @@ moved {
   to   = azurerm_role_assignment.this[0]
 }
 
-# Additional role assignments, keyed by a caller-chosen static name: the key set
-# must be known at plan time, while a scope may only be known after apply (e.g. a
-# DNS zone created in the same run).
 resource "azurerm_role_assignment" "additional" {
   for_each = var.role_assignments
 

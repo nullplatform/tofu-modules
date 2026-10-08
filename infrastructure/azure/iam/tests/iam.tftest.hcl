@@ -1,6 +1,4 @@
 mock_provider "azurerm" {
-  # Role assignments and the federated credential parse these IDs, so the
-  # mocks need well-formed ones.
   mock_resource "azurerm_user_assigned_identity" {
     defaults = {
       id           = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mi-test"
@@ -19,7 +17,6 @@ variables {
   service_account_name = "nullplatform-agent"
 }
 
-# The original single-role interface keeps producing exactly one assignment
 run "single_role_assignment_still_works" {
   command = plan
 
@@ -39,7 +36,6 @@ run "single_role_assignment_still_works" {
   }
 }
 
-# One assignment per role_assignments entry, keyed by the caller's name
 run "role_assignments_creates_one_per_entry" {
   command = plan
 
@@ -67,7 +63,6 @@ run "role_assignments_creates_one_per_entry" {
   }
 }
 
-# Both interfaces can be combined
 run "single_role_and_role_assignments_combine" {
   command = plan
 
@@ -88,7 +83,6 @@ run "single_role_and_role_assignments_combine" {
   }
 }
 
-# An identity with no roles is valid (roles can be granted elsewhere)
 run "identity_without_role_assignments" {
   command = plan
 
@@ -98,7 +92,6 @@ run "identity_without_role_assignments" {
   }
 }
 
-# role_definition_name without scope (or the reverse) is rejected
 run "rejects_role_without_scope" {
   command = plan
 
@@ -109,7 +102,6 @@ run "rejects_role_without_scope" {
   expect_failures = [azurerm_role_assignment.this]
 }
 
-# scope without role_definition_name is rejected too
 run "rejects_scope_without_role" {
   command = plan
 
@@ -120,7 +112,6 @@ run "rejects_scope_without_role" {
   expect_failures = [azurerm_user_assigned_identity.this]
 }
 
-# The federated credential trusts exactly the configured ServiceAccount
 run "federated_credential_trusts_the_service_account" {
   command = plan
 
@@ -140,8 +131,6 @@ run "federated_credential_trusts_the_service_account" {
   }
 }
 
-# A scope created in the same apply (unknown at plan) must still plan: count may
-# only depend on role_definition_name.
 run "single_role_with_scope_unknown_at_plan" {
   command = plan
 

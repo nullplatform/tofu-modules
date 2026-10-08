@@ -145,9 +145,6 @@ locals {
     local.ingress_paths,
   )
 
-  # Nulls dropped like all_config does for the agent: an unset optional value
-  # (e.g. azure_client_secret under workload identity) must not reach the
-  # worker's env as an empty variable.
   worker_all_config = {
     for k, v in merge(
       local.deploy_config,
@@ -156,17 +153,11 @@ locals {
     ) : k => v if v != null
   }
 
-  # AKS Workload Identity: the webhook only projects the ServiceAccount token
-  # into pods carrying this label. Applied to the agent pod (podLabels) and to
-  # every worker-orchestrated package's pod (worker_common_patches).
   pod_labels = var.cloud_provider == "azure" && var.azure_workload_identity ? {
     "azure.workload.identity/use" = "true"
   } : {}
 
-  # The workload identity webhook injects AZURE_CLIENT_ID into labelled pods
-  # from this ServiceAccount annotation (empty when absent) and its env wins
-  # over the agent's envFrom config. While the Service Principal is still set,
-  # annotate it so the agent keeps its client ID.
+  # The WI webhook sets AZURE_CLIENT_ID from this annotation, overriding envFrom.
   azure_sa_client_id = var.cloud_provider == "azure" && var.azure_workload_identity && var.azure_client_id != null ? var.azure_client_id : ""
 
   # Generic identity + resources — one patch per package in

@@ -948,12 +948,6 @@ run "probe_overrides_are_rendered" {
   }
 }
 
-################################################################################
-# AKS Workload Identity
-################################################################################
-
-# The webhook only projects the ServiceAccount token into labelled pods: the
-# agent itself (podLabels) and every worker-orchestrated package's pod.
 run "azure_workload_identity_labels_the_agent_and_its_workers" {
   command = plan
 
@@ -990,7 +984,6 @@ run "azure_workload_identity_labels_the_agent_and_its_workers" {
   }
 }
 
-# During migration the Service Principal secret is still set: both must render.
 run "azure_workload_identity_coexists_with_the_client_secret" {
   command = plan
 
@@ -1012,15 +1005,12 @@ run "azure_workload_identity_coexists_with_the_client_secret" {
     error_message = "the label and the legacy secret must both render while migrating"
   }
 
-  # The webhook injects AZURE_CLIENT_ID from this annotation (empty when absent)
-  # and its env wins over the chart's envFrom, so the agent would lose its ID.
   assert {
     condition     = strcontains(helm_release.agent.values[0], "azure.workload.identity/client-id: \"azure-client-id\"")
     error_message = "the ServiceAccount must be annotated with the client ID while the Service Principal is still set"
   }
 }
 
-# Without workload identity the module renders exactly what it did before.
 run "azure_without_workload_identity_renders_no_label" {
   command = plan
 
@@ -1042,7 +1032,6 @@ run "azure_without_workload_identity_renders_no_label" {
   }
 }
 
-# The flag only means something on Azure.
 run "azure_workload_identity_is_ignored_off_azure" {
   command = plan
 
@@ -1056,7 +1045,6 @@ run "azure_workload_identity_is_ignored_off_azure" {
   }
 }
 
-# On Azure, either workload identity or the full Service Principal is required.
 run "azure_requires_workload_identity_or_a_client_secret" {
   command = plan
 
@@ -1074,8 +1062,6 @@ run "azure_requires_workload_identity_or_a_client_secret" {
   expect_failures = [terraform_data.cross_variable_validation]
 }
 
-# A secret without its client ID is a half-configured Service Principal, even
-# with the flag on.
 run "azure_client_secret_without_client_id_is_rejected" {
   command = plan
 
@@ -1094,7 +1080,6 @@ run "azure_client_secret_without_client_id_is_rejected" {
   expect_failures = [terraform_data.cross_variable_validation]
 }
 
-# Worker pods must run as the federated ServiceAccount.
 run "azure_workload_identity_requires_a_service_account_name" {
   command = plan
 
@@ -1113,8 +1098,6 @@ run "azure_workload_identity_requires_a_service_account_name" {
   expect_failures = [terraform_data.cross_variable_validation]
 }
 
-# With orchestration off there are no worker patches: only the agent's own
-# podLabels carries the label, once.
 run "azure_workload_identity_without_worker_orchestrator_labels_only_the_agent" {
   command = plan
 

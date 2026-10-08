@@ -1,5 +1,3 @@
-# Calls the module the way a root module does when the role's scope is a
-# resource created in the same apply (e.g. a DNS zone): scope is unknown at plan.
 resource "terraform_data" "zone" {
   input = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-test/providers/Microsoft.Network/dnsZones/example.com"
 }
