@@ -44,6 +44,17 @@ variable "retention_policy_in_days" {
   default     = null
 }
 
+# Defaults to true so existing installs that pull through admin-credential
+# pull secrets keep working. Set it to false once AKS pulls through its kubelet
+# identity (infrastructure/azure/aks attach_acr) and CI pushes with a scoped
+# token (infrastructure/azure/acr_push_token): the admin user can push, pull
+# and delete every repository, and nothing else needs it after that.
+variable "admin_enabled" {
+  type        = bool
+  description = "Whether to enable the registry admin user (static username/password with full access). Set to false once AKS pulls via attach_acr and CI pushes via acr_push_token."
+  default     = true
+}
+
 ###############################################################################
 # OPTIONAL VARIABLES - TAGS AND METADATA
 ###############################################################################
