@@ -34,12 +34,14 @@ variable "service_account_name" {
 
 variable "role_definition_name" {
   type        = string
-  description = "The Azure role definition to assign to the managed identity (e.g., 'DNS Zone Contributor')"
+  description = "The Azure role definition to assign to the managed identity (e.g., 'DNS Zone Contributor'). Optional: leave null and use role_assignments instead. Must be set together with scope"
+  default     = null
 }
 
 variable "scope" {
   type        = string
-  description = "The scope at which the role assignment is applied (e.g., DNS zone resource ID)"
+  description = "The scope at which the role assignment is applied (e.g., DNS zone resource ID). Optional: leave null and use role_assignments instead. Must be set together with role_definition_name"
+  default     = null
 }
 
 ###############################################################################
@@ -50,4 +52,14 @@ variable "tags" {
   type        = map(string)
   description = "A mapping of tags to assign to the managed identity"
   default     = {}
+}
+
+variable "role_assignments" {
+  type = map(object({
+    role_definition_name = string
+    scope                = string
+  }))
+  description = "Additional role assignments for the identity, keyed by a static name of your choice (e.g. \"dns_public\"). Keys must be known at plan time; scopes may be known only after apply"
+  default     = {}
+  nullable    = false
 }
