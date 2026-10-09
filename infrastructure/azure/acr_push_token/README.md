@@ -20,7 +20,7 @@ The module looks up the built-in `_repositories_push` scope map from an existing
 
 ```hcl
 module "acr_push_token" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/acr_push_token?ref=v8.4.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/acr_push_token?ref=v8.5.0"
 
   containerregistry_name = "your-containerregistry-name"
   resource_group_name    = "your-resource-group-name"
