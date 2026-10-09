@@ -2,34 +2,32 @@
 
 ## Description
 
-Creates an Azure user-assigned managed identity with federated credentials for Kubernetes workload identity and assigns an Azure RBAC role
+Creates an Azure user-assigned managed identity with federated identity credentials for AKS workload identity, optionally assigning Azure RBAC roles
 
 ## Architecture
 
-The module creates an azurerm_user_assigned_identity resource in the specified resource group and location. It then establishes an azurerm_federated_identity_credential linking the managed identity to a Kubernetes service account via OIDC issuer URL, enabling workload identity federation. Finally, it creates an azurerm_role_assignment granting the managed identity's principal the specified Azure RBAC role at the given scope.
+The module creates an azurerm_user_assigned_identity resource as its core, then wires an azurerm_federated_identity_credential to it using the identity's resource ID as parent_id, binding the AKS OIDC issuer URL to a Kubernetes service account subject string composed from the namespace and service_account_name inputs. An optional azurerm_role_assignment.this is conditionally created (count-based) when both role_definition_name and scope are provided, and an additional azurerm_role_assignment.additional for_each map supports multiple supplementary role assignments, all referencing the identity's principal_id. Outputs expose the identity's client_id, principal_id, and resource ID for downstream consumption.
 
 ## Features
 
-- Creates Azure user-assigned managed identity in specified resource group and location
-- Configures federated identity credential with OIDC issuer for Kubernetes service account authentication
-- Establishes workload identity federation using api://AzureADTokenExchange audience
-- Assigns Azure RBAC role to the managed identity at specified scope
-- Outputs client ID, principal ID, and resource ID for integration with Kubernetes resources
-- Supports custom tagging for resource organization and cost tracking
+- Creates an Azure user-assigned managed identity with configurable name, resource group, location, and tags
+- Configures a federated identity credential linking the managed identity to a specific Kubernetes service account via AKS OIDC issuer URL
+- Assigns a single Azure RBAC role at a specified scope when both role_definition_name and scope are provided
+- Supports multiple additional role assignments via a map input with plan-time-stable keys
+- Enforces mutual dependency between scope and role_definition_name using lifecycle preconditions
+- Outputs client_id, principal_id, and resource ID for use by downstream Kubernetes workload identity configurations
 
 ## Basic Usage
 
 ```hcl
 module "iam" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/iam?ref=v8.4.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/iam?ref=v8.5.0"
 
   location             = "your-location"
   name                 = "your-name"
   namespace            = "your-namespace"
   oidc_issuer_url      = "your-oidc-issuer-url"
   resource_group_name  = "your-resource-group-name"
-  role_definition_name = "your-role-definition-name"
-  scope                = "your-scope"
   service_account_name = "your-service-account-name"
 }
 ```
@@ -54,13 +52,14 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | ~> 4.0 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.81.0 |
 
 ## Resources
 
 | Name | Type |
 |------|------|
 | [azurerm_federated_identity_credential.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/federated_identity_credential) | resource |
+| [azurerm_role_assignment.additional](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) | resource |
 | [azurerm_role_assignment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) | resource |
 | [azurerm_user_assigned_identity.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/user_assigned_identity) | resource |
 
@@ -73,8 +72,9 @@ resource "example_resource" "this" {
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | The Kubernetes namespace of the service account to federate | `string` | n/a | yes |
 | <a name="input_oidc_issuer_url"></a> [oidc\_issuer\_url](#input\_oidc\_issuer\_url) | The OIDC issuer URL of the AKS cluster for federated identity | `string` | n/a | yes |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | The name of the resource group where the managed identity will be created | `string` | n/a | yes |
-| <a name="input_role_definition_name"></a> [role\_definition\_name](#input\_role\_definition\_name) | The Azure role definition to assign to the managed identity (e.g., 'DNS Zone Contributor') | `string` | n/a | yes |
-| <a name="input_scope"></a> [scope](#input\_scope) | The scope at which the role assignment is applied (e.g., DNS zone resource ID) | `string` | n/a | yes |
+| <a name="input_role_assignments"></a> [role\_assignments](#input\_role\_assignments) | Additional role assignments for the identity, keyed by a static name of your choice (e.g. "dns\_public"). Keys must be known at plan time; scopes may be known only after apply | <pre>map(object({<br/>    role_definition_name = string<br/>    scope                = string<br/>  }))</pre> | `{}` | no |
+| <a name="input_role_definition_name"></a> [role\_definition\_name](#input\_role\_definition\_name) | The Azure role definition to assign to the managed identity (e.g., 'DNS Zone Contributor'). Optional: leave null and use role\_assignments instead. Must be set together with scope | `string` | `null` | no |
+| <a name="input_scope"></a> [scope](#input\_scope) | The scope at which the role assignment is applied (e.g., DNS zone resource ID). Optional: leave null and use role\_assignments instead. Must be set together with role\_definition\_name | `string` | `null` | no |
 | <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | The Kubernetes service account name to federate with the managed identity | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to the managed identity | `map(string)` | `{}` | no |
 
@@ -90,15 +90,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "iam",
-  "description": "Creates an Azure user-assigned managed identity with federated credentials for Kubernetes workload identity and assigns an Azure RBAC role",
-  "architecture": "The module creates an azurerm_user_assigned_identity resource in the specified resource group and location. It then establishes an azurerm_federated_identity_credential linking the managed identity to a Kubernetes service account via OIDC issuer URL, enabling workload identity federation. Finally, it creates an azurerm_role_assignment granting the managed identity's principal the specified Azure RBAC role at the given scope.",
+  "description": "Creates an Azure user-assigned managed identity with federated identity credentials for AKS workload identity, optionally assigning Azure RBAC roles",
+  "architecture": "The module creates an azurerm_user_assigned_identity resource as its core, then wires an azurerm_federated_identity_credential to it using the identity's resource ID as parent_id, binding the AKS OIDC issuer URL to a Kubernetes service account subject string composed from the namespace and service_account_name inputs. An optional azurerm_role_assignment.this is conditionally created (count-based) when both role_definition_name and scope are provided, and an additional azurerm_role_assignment.additional for_each map supports multiple supplementary role assignments, all referencing the identity's principal_id. Outputs expose the identity's client_id, principal_id, and resource ID for downstream consumption.",
   "features": [
-    "Creates Azure user-assigned managed identity in specified resource group and location",
-    "Configures federated identity credential with OIDC issuer for Kubernetes service account authentication",
-    "Establishes workload identity federation using api://AzureADTokenExchange audience",
-    "Assigns Azure RBAC role to the managed identity at specified scope",
-    "Outputs client ID, principal ID, and resource ID for integration with Kubernetes resources",
-    "Supports custom tagging for resource organization and cost tracking"
+    "Creates an Azure user-assigned managed identity with configurable name, resource group, location, and tags",
+    "Configures a federated identity credential linking the managed identity to a specific Kubernetes service account via AKS OIDC issuer URL",
+    "Assigns a single Azure RBAC role at a specified scope when both role_definition_name and scope are provided",
+    "Supports multiple additional role assignments via a map input with plan-time-stable keys",
+    "Enforces mutual dependency between scope and role_definition_name using lifecycle preconditions",
+    "Outputs client_id, principal_id, and resource ID for use by downstream Kubernetes workload identity configurations"
   ],
   "inputs": [
     {
@@ -133,17 +133,22 @@ resource "example_resource" "this" {
     },
     {
       "name": "role_definition_name",
-      "description": "The Azure role definition to assign to the managed identity (e.g., 'DNS Zone Contributor')",
-      "required": true
+      "description": "The Azure role definition to assign to the managed identity (e.g., 'DNS Zone Contributor'). Optional: leave null and use role_assignments instead. Must be set together with scope",
+      "required": false
     },
     {
       "name": "scope",
-      "description": "The scope at which the role assignment is applied (e.g., DNS zone resource ID)",
-      "required": true
+      "description": "The scope at which the role assignment is applied (e.g., DNS zone resource ID). Optional: leave null and use role_assignments instead. Must be set together with role_definition_name",
+      "required": false
     },
     {
       "name": "tags",
       "description": "A mapping of tags to assign to the managed identity",
+      "required": false
+    },
+    {
+      "name": "role_assignments",
+      "description": "Additional role assignments for the identity, keyed by a static name of your choice (e.g. \\",
       "required": false
     }
   ],
@@ -152,6 +157,6 @@ resource "example_resource" "this" {
     "principal_id",
     "id"
   ],
-  "hash": "532c5b7a2b8a814bba1376ca1189f0a4"
+  "hash": "89986085d51417f834e49e387111f737"
 }
 END_AI_METADATA -->
