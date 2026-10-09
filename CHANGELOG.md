@@ -7,6 +7,15 @@
 
 * **external_dns:** support public and private DNS on Azure with ExternalDNS: `label_filter` now applies to the `azure` and `azure-private-dns` providers, and the new `gateway_name` limits route sources to one Gateway, so a public instance keeps internal scopes out of the public zone while an `azure-private-dns` instance publishes them in the Private DNS zone (split-horizon)
 
+## [8.4.0](https://github.com/nullplatform/tofu-modules/compare/v8.3.1...v8.4.0) (2026-10-08)
+
+
+### Features
+
+* **azure/acr_push_token:** add a push-only ACR token for CI ([fd0d75c](https://github.com/nullplatform/tofu-modules/commit/fd0d75c6927659e6c6a9d5f8715ed3844f00dcaa))
+* **azure/acr:** allow disabling the admin user ([93601ab](https://github.com/nullplatform/tofu-modules/commit/93601abac11382505c89f147d091f702cf4f3024))
+* **azure:** pull from ACR without secrets and push with a scoped token ([#622](https://github.com/nullplatform/tofu-modules/issues/622)) ([acd3098](https://github.com/nullplatform/tofu-modules/commit/acd3098ac1d785b5ef38151347b5eb5dee34bc21))
+
 ## [8.3.1](https://github.com/nullplatform/tofu-modules/compare/v8.3.0...v8.3.1) (2026-10-06)
 
 

@@ -2,28 +2,31 @@
 
 ## Description
 
-This module creates an Azure Container Registry with a specified name and configuration
+Provisions an Azure Container Registry using the AVM module with configurable SKU, admin access, zone redundancy, and retention policies
 
 ## Architecture
 
-The module uses the azurerm_container_registry resource to create the container registry, and the data.azurerm_container_registry data source to retrieve the registry's details. The module also uses the module.containerregistry module to create the registry. The inputs flow into the resources through variables, and the outputs are exposed through the output.tf file. The registry is created in the specified location and resource group, with the specified SKU and configuration.
+The module wraps the azure/avm-res-containerregistry-registry/azurerm AVM module, passing through inputs such as name, location, resource_group_name, sku, admin_enabled, zone_redundancy_enabled, and retention_policy_in_days directly into the underlying azurerm_container_registry resource. Outputs are sourced from the module's resource object rather than a data source, avoiding deferred evaluation during apply. Admin credentials are conditionally exposed as sensitive outputs only when admin_enabled is true.
 
 ## Features
 
-- Creates an Azure Container Registry with a specified name and configuration
-- Configures the registry with a specified SKU and zone redundancy
-- Supports retention policies for untagged manifests
+- Creates an Azure Container Registry with support for Basic, Standard, and Premium SKUs
+- Configures optional zone redundancy for high availability across availability zones (requires Premium SKU)
+- Enables configurable untagged manifest retention policy in days (requires Premium SKU)
+- Exposes registry login server FQDN as an output for downstream consumer configuration
+- Conditionally outputs sensitive admin username and password only when admin user is enabled
+- Supports resource tagging via a flexible map of key-value tag pairs
+- Validates registry name format to enforce Azure naming constraints (5-50 lowercase alphanumeric characters)
 
 ## Basic Usage
 
 ```hcl
 module "acr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/acr?ref=v8.3.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/acr?ref=v8.4.0"
 
   containerregistry_name = "your-containerregistry-name"
   location               = "your-location"
   resource_group_name    = "your-resource-group-name"
-  subscription_id        = "your-subscription-id"
 }
 ```
 
@@ -44,27 +47,17 @@ resource "example_resource" "this" {
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.6 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 4.0 |
 
-## Providers
-
-| Name | Version |
-|------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.68.0 |
-
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_containerregistry"></a> [containerregistry](#module\_containerregistry) | azure/avm-res-containerregistry-registry/azurerm | v0.4.0 |
 
-## Resources
-
-| Name | Type |
-|------|------|
-
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_admin_enabled"></a> [admin\_enabled](#input\_admin\_enabled) | Whether to enable the registry admin user (static username/password with full access). Set to false once AKS pulls via attach\_acr and CI pushes via acr\_push\_token. | `bool` | `true` | no |
 | <a name="input_containerregistry_name"></a> [containerregistry\_name](#input\_containerregistry\_name) | The name of the container registry (must be globally unique, lowercase alphanumeric only, 5-50 characters) | `string` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | The Azure region where the container registry will be created (e.g., eastus, westus2) | `string` | n/a | yes |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | The name of the resource group where the container registry will be created | `string` | n/a | yes |
@@ -77,8 +70,8 @@ resource "example_resource" "this" {
 
 | Name | Description |
 |------|-------------|
-| <a name="output_acr_admin_password"></a> [acr\_admin\_password](#output\_acr\_admin\_password) | The admin password of the ACR |
-| <a name="output_acr_admin_username"></a> [acr\_admin\_username](#output\_acr\_admin\_username) | The admin username of the ACR |
+| <a name="output_acr_admin_password"></a> [acr\_admin\_password](#output\_acr\_admin\_password) | The admin password of the ACR. Null when admin\_enabled is false. |
+| <a name="output_acr_admin_username"></a> [acr\_admin\_username](#output\_acr\_admin\_username) | The admin username of the ACR. Null when admin\_enabled is false. |
 | <a name="output_acr_id"></a> [acr\_id](#output\_acr\_id) | The ID of the Azure Container Registry |
 | <a name="output_acr_login_server"></a> [acr\_login\_server](#output\_acr\_login\_server) | The FQDN of the ACR login server |
 <!-- END_TF_DOCS -->
@@ -86,12 +79,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "acr",
-  "description": "This module creates an Azure Container Registry with a specified name and configuration",
-  "architecture": "The module uses the azurerm_container_registry resource to create the container registry, and the data.azurerm_container_registry data source to retrieve the registry's details. The module also uses the module.containerregistry module to create the registry. The inputs flow into the resources through variables, and the outputs are exposed through the output.tf file. The registry is created in the specified location and resource group, with the specified SKU and configuration.",
+  "description": "Provisions an Azure Container Registry using the AVM module with configurable SKU, admin access, zone redundancy, and retention policies",
+  "architecture": "The module wraps the azure/avm-res-containerregistry-registry/azurerm AVM module, passing through inputs such as name, location, resource_group_name, sku, admin_enabled, zone_redundancy_enabled, and retention_policy_in_days directly into the underlying azurerm_container_registry resource. Outputs are sourced from the module's resource object rather than a data source, avoiding deferred evaluation during apply. Admin credentials are conditionally exposed as sensitive outputs only when admin_enabled is true.",
   "features": [
-    "Creates an Azure Container Registry with a specified name and configuration",
-    "Configures the registry with a specified SKU and zone redundancy",
-    "Supports retention policies for untagged manifests"
+    "Creates an Azure Container Registry with support for Basic, Standard, and Premium SKUs",
+    "Configures optional zone redundancy for high availability across availability zones (requires Premium SKU)",
+    "Enables configurable untagged manifest retention policy in days (requires Premium SKU)",
+    "Exposes registry login server FQDN as an output for downstream consumer configuration",
+    "Conditionally outputs sensitive admin username and password only when admin user is enabled",
+    "Supports resource tagging via a flexible map of key-value tag pairs",
+    "Validates registry name format to enforce Azure naming constraints (5-50 lowercase alphanumeric characters)"
   ],
   "inputs": [
     {
@@ -102,11 +99,6 @@ resource "example_resource" "this" {
     {
       "name": "resource_group_name",
       "description": "The name of the resource group where the container registry will be created",
-      "required": true
-    },
-    {
-      "name": "subscription_id",
-      "description": "The ID of the Azure subscription",
       "required": true
     },
     {
@@ -130,6 +122,11 @@ resource "example_resource" "this" {
       "required": false
     },
     {
+      "name": "admin_enabled",
+      "description": "Whether to enable the registry admin user (static username/password with full access). Set to false once AKS pulls via attach_acr and CI pushes via acr_push_token.",
+      "required": false
+    },
+    {
       "name": "tags",
       "description": "A mapping of tags to assign to the container registry",
       "required": false
@@ -141,6 +138,6 @@ resource "example_resource" "this" {
     "acr_admin_username",
     "acr_admin_password"
   ],
-  "hash": "54e9b4f479061680b81b29246e7f6bc5"
+  "hash": "586e409898131756adebfb6e2c36e2e5"
 }
 END_AI_METADATA -->
