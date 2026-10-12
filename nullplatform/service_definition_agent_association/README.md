@@ -2,29 +2,28 @@
 
 ## Description
 
-Creates a nullplatform notification channel that routes actions to agents via either a legacy git-clone exec or a worker-orchestrator package-exec command mode
+Creates a NullPlatform notification channel that routes service events to agents using either a worker-orchestrator (package-exec) or legacy git-clone exec command mode
 
 ## Architecture
 
-The module creates a terraform_data resource that acts as an API key change trigger and a nullplatform_notification_channel resource that embeds agent configuration. The notification channel's configuration block wires the api_key, tags_selectors, and command type together, switching between package-exec and exec command structures based on the worker_orchestrator boolean. A jsonencode filter is applied to the channel to scope it to a specific service specification slug via $or query logic. The terraform_data trigger ensures the channel is replaced whenever the API key changes.
+The module creates a single nullplatform_notification_channel resource configured with an agent block that contains API credentials, a command block, and tag-based agent selectors. The command type is conditionally set to either 'package-exec' (worker_orchestrator=true) or 'exec' (worker_orchestrator=false), with the data payload built accordingly from package_slug/entrypoint or repository path variables. Lifecycle preconditions enforce that package_slug is provided for worker-orchestrator mode and repository_service_spec_repo is provided for legacy exec mode. The channel filters notifications using a JSON-encoded OR condition matching service specification slugs against incoming notification context.
 
 ## Features
 
-- Creates a nullplatform_notification_channel with configurable agent command routing (package-exec or legacy exec)
-- Supports worker-orchestrator mode that routes package-exec commands to agents running published worker images
-- Supports legacy git-clone exec mode using a repository-based entrypoint path with configurable arguments
-- Configures agent selector tags to target specific agents via a map of tag key-value pairs
-- Applies service specification slug filters using $or query logic to scope channel notifications
-- Triggers channel replacement automatically when the API key changes via a terraform_data lifecycle dependency
-- Validates mutually exclusive requirements: package_slug for worker mode and repository_service_spec_repo for legacy mode
+- Creates a nullplatform_notification_channel with tag-based agent selector filtering
+- Supports worker-orchestrator mode that spawns package worker images via package-exec commands
+- Supports legacy git-clone exec mode that runs entrypoints from cloned repositories inside agent pods
+- Configures dynamic JSON-encoded environment variables injecting NP_ACTION_CONTEXT and NP_PLUGIN into agent commands
+- Enforces lifecycle preconditions to validate required variables per orchestration mode
+- Filters notification routing by service specification slug using OR-based JSON filter expressions
+- Allows optional API key override with platform-managed credential as the default
 
 ## Basic Usage
 
 ```hcl
 module "service_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v8.5.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v8.6.0"
 
-  api_key        = "your-api-key"
   tags_selectors = "your-tags-selectors"
 }
 ```
@@ -43,28 +42,26 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | ~> 0.0.86 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.107 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.95 |
-| <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.107 |
 
 ## Resources
 
 | Name | Type |
 |------|------|
 | [nullplatform_notification_channel.channel_from_template](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/notification_channel) | resource |
-| [terraform_data.api_key_trigger](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_agent_arguments"></a> [agent\_arguments](#input\_agent\_arguments) | Arguments to pass to the agent entrypoint command. Unused when worker\_orchestrator = true. | `list(string)` | `[]` | no |
-| <a name="input_api_key"></a> [api\_key](#input\_api\_key) | API key for authenticating with the nullplatform API | `string` | n/a | yes |
+| <a name="input_api_key"></a> [api\_key](#input\_api\_key) | Deprecated: omit it. When null (default) the platform creates and manages the channel credential (an API key holding only controlplane:agent-dispatcher on the channel NRN); the identity running the apply must be able to assign that role. Passing a key keeps using it; removing it later converts the channel in place (same id). Requires nullplatform provider >= 0.0.107. | `string` | `null` | no |
 | <a name="input_base_clone_path"></a> [base\_clone\_path](#input\_base\_clone\_path) | Base path where the service repository is cloned inside the agent pod. Unused when worker\_orchestrator = true. | `string` | `"/home/agent/.np"` | no |
 | <a name="input_channel_sources"></a> [channel\_sources](#input\_channel\_sources) | List of sources for the notification channel (e.g., ['service', 'telemetry']). Add 'telemetry' to receive metric:list and metric:data notifications for the service | `list(string)` | <pre>[<br/>  "service"<br/>]</pre> | no |
 | <a name="input_channel_type"></a> [channel\_type](#input\_channel\_type) | Type of the notification channel (e.g., 'agent') | `string` | `"agent"` | no |
@@ -88,23 +85,18 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "service_definition_agent_association",
-  "description": "Creates a nullplatform notification channel that routes actions to agents via either a legacy git-clone exec or a worker-orchestrator package-exec command mode",
-  "architecture": "The module creates a terraform_data resource that acts as an API key change trigger and a nullplatform_notification_channel resource that embeds agent configuration. The notification channel's configuration block wires the api_key, tags_selectors, and command type together, switching between package-exec and exec command structures based on the worker_orchestrator boolean. A jsonencode filter is applied to the channel to scope it to a specific service specification slug via $or query logic. The terraform_data trigger ensures the channel is replaced whenever the API key changes.",
+  "description": "Creates a NullPlatform notification channel that routes service events to agents using either a worker-orchestrator (package-exec) or legacy git-clone exec command mode",
+  "architecture": "The module creates a single nullplatform_notification_channel resource configured with an agent block that contains API credentials, a command block, and tag-based agent selectors. The command type is conditionally set to either 'package-exec' (worker_orchestrator=true) or 'exec' (worker_orchestrator=false), with the data payload built accordingly from package_slug/entrypoint or repository path variables. Lifecycle preconditions enforce that package_slug is provided for worker-orchestrator mode and repository_service_spec_repo is provided for legacy exec mode. The channel filters notifications using a JSON-encoded OR condition matching service specification slugs against incoming notification context.",
   "features": [
-    "Creates a nullplatform_notification_channel with configurable agent command routing (package-exec or legacy exec)",
-    "Supports worker-orchestrator mode that routes package-exec commands to agents running published worker images",
-    "Supports legacy git-clone exec mode using a repository-based entrypoint path with configurable arguments",
-    "Configures agent selector tags to target specific agents via a map of tag key-value pairs",
-    "Applies service specification slug filters using $or query logic to scope channel notifications",
-    "Triggers channel replacement automatically when the API key changes via a terraform_data lifecycle dependency",
-    "Validates mutually exclusive requirements: package_slug for worker mode and repository_service_spec_repo for legacy mode"
+    "Creates a nullplatform_notification_channel with tag-based agent selector filtering",
+    "Supports worker-orchestrator mode that spawns package worker images via package-exec commands",
+    "Supports legacy git-clone exec mode that runs entrypoints from cloned repositories inside agent pods",
+    "Configures dynamic JSON-encoded environment variables injecting NP_ACTION_CONTEXT and NP_PLUGIN into agent commands",
+    "Enforces lifecycle preconditions to validate required variables per orchestration mode",
+    "Filters notification routing by service specification slug using OR-based JSON filter expressions",
+    "Allows optional API key override with platform-managed credential as the default"
   ],
   "inputs": [
-    {
-      "name": "api_key",
-      "description": "API key for authenticating with the nullplatform API",
-      "required": true
-    },
     {
       "name": "tags_selectors",
       "description": "Map of tags used to select and filter agents",
@@ -113,6 +105,11 @@ resource "example_resource" "this" {
     {
       "name": "nrn",
       "description": "Nullplatform Resource Name (organization:account format)",
+      "required": false
+    },
+    {
+      "name": "api_key",
+      "description": "Deprecated: omit it. When null (default) the platform creates and manages the channel credential (an API key holding only controlplane:agent-dispatcher on the channel NRN); the identity running the apply must be able to assign that role. Passing a key keeps using it; removing it later converts the channel in place (same id). Requires nullplatform provider >= 0.0.107.",
       "required": false
     },
     {
@@ -174,6 +171,6 @@ resource "example_resource" "this" {
   "outputs": [
     "id"
   ],
-  "hash": "adb7f98db1de2ac32fab89947b3b33c2"
+  "hash": "b2f701872e8cb3f574bf3ac3cd623559"
 }
 END_AI_METADATA -->
