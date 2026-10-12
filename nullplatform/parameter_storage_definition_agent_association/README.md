@@ -6,25 +6,24 @@ Creates a NullPlatform agent notification channel configured to handle parameter
 
 ## Architecture
 
-The module creates a terraform_data resource to track API key changes and a nullplatform_notification_channel resource of type 'agent' sourced from parameters. The terraform_data.api_key_trigger resource is wired to the notification channel via replace_triggered_by, ensuring the channel is recreated whenever the API key rotates. The notification channel embeds an agent configuration block with an exec command pointing to the script_path, environment variables injected with NOTIFICATION_CONTEXT, and tag-based selector filtering. The channel ID is surfaced as an output.
+The module provisions a single nullplatform_notification_channel resource of type 'agent' with source set to 'parameters'. The resource is anchored to a given NRN and internally wires the api_key, tag selectors, and script_path into the agent configuration block's command data. The exec command injects a NOTIFICATION_CONTEXT environment variable via jsonencode, and the resulting channel ID is surfaced as an output.
 
 ## Features
 
-- Creates a nullplatform_notification_channel of type 'agent' anchored to a specified NRN
-- Configures an exec command within the agent block to invoke a custom script path for parameter handling
-- Injects NOTIFICATION_CONTEXT environment variable into the agent exec command at runtime
-- Enables tag-based selector filtering via a configurable map of key-value tag selectors
-- Triggers automatic recreation of the notification channel when the API key is rotated using terraform_data lifecycle replacement
-- Marks the agent API key as sensitive to prevent exposure in Terraform plan and state output
+- Creates a NullPlatform agent notification channel anchored to a specified NRN
+- Configures an exec-type command with a customizable script path for parameter storage and retrieval
+- Injects NOTIFICATION_CONTEXT environment variable into the agent exec command automatically
+- Supports tag-based selector filtering so agents can scope channels to specific environments
+- Accepts an optional sensitive API key with platform-managed credential fallback when omitted
+- Exposes the created notification channel ID as an output for downstream reference
 
 ## Basic Usage
 
 ```hcl
 module "parameter_storage_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_definition_agent_association?ref=v8.5.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_definition_agent_association?ref=v8.6.0"
 
-  api_key = "your-api-key"
-  nrn     = "your-nrn"
+  nrn = "your-nrn"
 }
 ```
 
@@ -43,27 +42,25 @@ resource "example_resource" "this" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.0 |
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.95 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.107 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.96 |
-| <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.107 |
 
 ## Resources
 
 | Name | Type |
 |------|------|
 | [nullplatform_notification_channel.from_template](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/notification_channel) | resource |
-| [terraform_data.api_key_trigger](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_api_key"></a> [api\_key](#input\_api\_key) | Agent API key for the notification channel. Rotating it recreates the channel (via terraform\_data.api\_key\_trigger). | `string` | n/a | yes |
+| <a name="input_api_key"></a> [api\_key](#input\_api\_key) | Deprecated: omit it. When null (default) the platform creates and manages the channel credential (an API key holding only controlplane:agent-dispatcher on the channel NRN); the identity running the apply must be able to assign that role. Passing a key keeps using it; removing it later converts the channel in place (same id). Requires nullplatform provider >= 0.0.107. | `string` | `null` | no |
 | <a name="input_description"></a> [description](#input\_description) | Description shown for the notification channel. | `string` | `""` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | NRN where the agent notification channel is anchored. | `string` | n/a | yes |
 | <a name="input_script_path"></a> [script\_path](#input\_script\_path) | Command line path the agent executes to handle parameter storage and retrieval. | `string` | `"nullplatform/parameters-provider/parameters/entrypoint"` | no |
@@ -80,14 +77,14 @@ resource "example_resource" "this" {
 {
   "name": "parameter_storage_definition_agent_association",
   "description": "Creates a NullPlatform agent notification channel configured to handle parameter storage and retrieval via an exec command",
-  "architecture": "The module creates a terraform_data resource to track API key changes and a nullplatform_notification_channel resource of type 'agent' sourced from parameters. The terraform_data.api_key_trigger resource is wired to the notification channel via replace_triggered_by, ensuring the channel is recreated whenever the API key rotates. The notification channel embeds an agent configuration block with an exec command pointing to the script_path, environment variables injected with NOTIFICATION_CONTEXT, and tag-based selector filtering. The channel ID is surfaced as an output.",
+  "architecture": "The module provisions a single nullplatform_notification_channel resource of type 'agent' with source set to 'parameters'. The resource is anchored to a given NRN and internally wires the api_key, tag selectors, and script_path into the agent configuration block's command data. The exec command injects a NOTIFICATION_CONTEXT environment variable via jsonencode, and the resulting channel ID is surfaced as an output.",
   "features": [
-    "Creates a nullplatform_notification_channel of type 'agent' anchored to a specified NRN",
-    "Configures an exec command within the agent block to invoke a custom script path for parameter handling",
-    "Injects NOTIFICATION_CONTEXT environment variable into the agent exec command at runtime",
-    "Enables tag-based selector filtering via a configurable map of key-value tag selectors",
-    "Triggers automatic recreation of the notification channel when the API key is rotated using terraform_data lifecycle replacement",
-    "Marks the agent API key as sensitive to prevent exposure in Terraform plan and state output"
+    "Creates a NullPlatform agent notification channel anchored to a specified NRN",
+    "Configures an exec-type command with a customizable script path for parameter storage and retrieval",
+    "Injects NOTIFICATION_CONTEXT environment variable into the agent exec command automatically",
+    "Supports tag-based selector filtering so agents can scope channels to specific environments",
+    "Accepts an optional sensitive API key with platform-managed credential fallback when omitted",
+    "Exposes the created notification channel ID as an output for downstream reference"
   ],
   "inputs": [
     {
@@ -97,8 +94,8 @@ resource "example_resource" "this" {
     },
     {
       "name": "api_key",
-      "description": "Agent API key for the notification channel. Rotating it recreates the channel (via terraform_data.api_key_trigger).",
-      "required": true
+      "description": "Deprecated: omit it. When null (default) the platform creates and manages the channel credential (an API key holding only controlplane:agent-dispatcher on the channel NRN); the identity running the apply must be able to assign that role. Passing a key keeps using it; removing it later converts the channel in place (same id). Requires nullplatform provider >= 0.0.107.",
+      "required": false
     },
     {
       "name": "tags_selectors",
@@ -119,6 +116,6 @@ resource "example_resource" "this" {
   "outputs": [
     "notification_channel_id"
   ],
-  "hash": "25969b6b83582b8b4e1796481d0f5337"
+  "hash": "249bce6a359aa0aafd7481fe094c04d1"
 }
 END_AI_METADATA -->
