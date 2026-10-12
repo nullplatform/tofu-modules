@@ -947,3 +947,179 @@ run "probe_overrides_are_rendered" {
     error_message = "the module must not restate the chart's httpGet; only the given fields are rendered"
   }
 }
+
+run "azure_workload_identity_labels_the_agent_and_its_workers" {
+  command = plan
+
+  variables {
+    cloud_provider               = "azure"
+    aws_iam_role_arn             = ""
+    cluster_name                 = ""
+    azure_workload_identity      = true
+    azure_subscription_id        = "azure-subscription-id"
+    azure_resource_group         = "azure-rg"
+    azure_tenant_id              = "azure-tenant-id"
+    private_hosted_zone_rg       = "azure-dns-rg"
+    worker_orchestrated_packages = ["containers", "aks"]
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "podLabels:\n  \"azure.workload.identity/use\": \"true\"")
+    error_message = "the agent pod must carry the azure.workload.identity/use label"
+  }
+
+  assert {
+    condition     = length(regexall("\"azure.workload.identity/use\": \"true\"", helm_release.agent.values[0])) == 3
+    error_message = "the label must appear once for the agent and once per worker-orchestrated package (here 1 + 2)"
+  }
+
+  assert {
+    condition     = !strcontains(helm_release.agent.values[0], "AZURE_CLIENT_SECRET")
+    error_message = "with workload identity and no secret, AZURE_CLIENT_SECRET must not be rendered"
+  }
+
+  assert {
+    condition     = !strcontains(helm_release.agent.values[0], "azure.workload.identity/client-id")
+    error_message = "without azure_client_id the ServiceAccount must not get a client-id annotation"
+  }
+}
+
+run "azure_workload_identity_coexists_with_the_client_secret" {
+  command = plan
+
+  variables {
+    cloud_provider          = "azure"
+    aws_iam_role_arn        = ""
+    cluster_name            = ""
+    azure_workload_identity = true
+    azure_client_id         = "azure-client-id"
+    azure_client_secret     = "azure-client-secret"
+    azure_subscription_id   = "azure-subscription-id"
+    azure_resource_group    = "azure-rg"
+    azure_tenant_id         = "azure-tenant-id"
+    private_hosted_zone_rg  = "azure-dns-rg"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "\"azure.workload.identity/use\": \"true\"") && strcontains(helm_release.agent.values[0], "\n    AZURE_CLIENT_SECRET: \"azure-client-secret\"")
+    error_message = "the label and the legacy secret must both render while migrating"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "azure.workload.identity/client-id: \"azure-client-id\"")
+    error_message = "the ServiceAccount must be annotated with the client ID while the Service Principal is still set"
+  }
+}
+
+run "azure_without_workload_identity_renders_no_label" {
+  command = plan
+
+  variables {
+    cloud_provider         = "azure"
+    aws_iam_role_arn       = ""
+    cluster_name           = ""
+    azure_client_id        = "azure-client-id"
+    azure_client_secret    = "azure-client-secret"
+    azure_subscription_id  = "azure-subscription-id"
+    azure_resource_group   = "azure-rg"
+    azure_tenant_id        = "azure-tenant-id"
+    private_hosted_zone_rg = "azure-dns-rg"
+  }
+
+  assert {
+    condition     = !strcontains(helm_release.agent.values[0], "azure.workload.identity") && !strcontains(helm_release.agent.values[0], "podLabels")
+    error_message = "azure_workload_identity = false must not add any label"
+  }
+}
+
+run "azure_workload_identity_is_ignored_off_azure" {
+  command = plan
+
+  variables {
+    azure_workload_identity = true
+  }
+
+  assert {
+    condition     = !strcontains(helm_release.agent.values[0], "azure.workload.identity")
+    error_message = "the label must only be added when cloud_provider is azure"
+  }
+}
+
+run "azure_requires_workload_identity_or_a_client_secret" {
+  command = plan
+
+  variables {
+    cloud_provider         = "azure"
+    aws_iam_role_arn       = ""
+    cluster_name           = ""
+    azure_client_id        = "azure-client-id"
+    azure_subscription_id  = "azure-subscription-id"
+    azure_resource_group   = "azure-rg"
+    azure_tenant_id        = "azure-tenant-id"
+    private_hosted_zone_rg = "azure-dns-rg"
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "azure_client_secret_without_client_id_is_rejected" {
+  command = plan
+
+  variables {
+    cloud_provider          = "azure"
+    aws_iam_role_arn        = ""
+    cluster_name            = ""
+    azure_workload_identity = true
+    azure_client_secret     = "azure-client-secret"
+    azure_subscription_id   = "azure-subscription-id"
+    azure_resource_group    = "azure-rg"
+    azure_tenant_id         = "azure-tenant-id"
+    private_hosted_zone_rg  = "azure-dns-rg"
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "azure_workload_identity_requires_a_service_account_name" {
+  command = plan
+
+  variables {
+    cloud_provider          = "azure"
+    aws_iam_role_arn        = ""
+    cluster_name            = ""
+    azure_workload_identity = true
+    service_account_name    = ""
+    azure_subscription_id   = "azure-subscription-id"
+    azure_resource_group    = "azure-rg"
+    azure_tenant_id         = "azure-tenant-id"
+    private_hosted_zone_rg  = "azure-dns-rg"
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "azure_workload_identity_without_worker_orchestrator_labels_only_the_agent" {
+  command = plan
+
+  variables {
+    cloud_provider          = "azure"
+    aws_iam_role_arn        = ""
+    cluster_name            = ""
+    azure_workload_identity = true
+    worker_orchestrator     = false
+    azure_subscription_id   = "azure-subscription-id"
+    azure_resource_group    = "azure-rg"
+    azure_tenant_id         = "azure-tenant-id"
+    private_hosted_zone_rg  = "azure-dns-rg"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "podLabels:")
+    error_message = "the agent pod must still carry podLabels with the orchestrator off"
+  }
+
+  assert {
+    condition     = length(regexall("\"azure.workload.identity/use\": \"true\"", helm_release.agent.values[0])) == 1
+    error_message = "the label must render exactly once (agent only) with worker_orchestrator = false"
+  }
+}

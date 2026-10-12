@@ -14,8 +14,16 @@ serviceAccount:
   annotations:
     eks.amazonaws.com/role-arn: "${aws_iam_role_arn}"
   %{ endif }
+%{ if azure_sa_client_id != "" ~}
+  annotations:
+    azure.workload.identity/client-id: "${azure_sa_client_id}"
+%{ endif ~}
   %{ endif }
 
+%{ if length(pod_labels) > 0 ~}
+podLabels:
+  ${indent(2, yamlencode(pod_labels))}
+%{ endif ~}
 configuration:
   values:
   %{ for key, value in config_values }

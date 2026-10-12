@@ -22,7 +22,7 @@ The module creates a terraform_data resource that acts as an API key change trig
 
 ```hcl
 module "service_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v8.4.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v8.5.0"
 
   api_key        = "your-api-key"
   tags_selectors = "your-tags-selectors"

@@ -86,8 +86,9 @@ variable "worker_orchestrated_packages" {
     under var.service_account_name (the same IRSA identity as the agent
     itself) and var.worker_memory_limit, via a per-package worker-container
     patch. Add a package's slug here whenever its worker needs to assume an
-    AWS role, or needs more memory than the chart's own default (e.g. to run
-    tofu/terraform); a worker for a package not listed here falls back to the
+    AWS role or needs Azure workload identity (the azure.workload.identity/use
+    label is added through the same per-package patch), or needs more memory
+    than the chart's own default (e.g. to run tofu/terraform); a worker for a package not listed here falls back to the
     namespace's default ServiceAccount and the chart's own memory default.
 
     This is separate from the "containers" scope's own k8s-deployment env
@@ -264,13 +265,13 @@ variable "aws_iam_role_arn" {
 ################################################################################
 
 variable "azure_client_id" {
-  description = "Azure client ID for authentication. Required when cloud_provider is 'azure'."
+  description = "Azure client ID of the Service Principal the agent authenticates with. Required when cloud_provider is 'azure', unless azure_workload_identity is true. With azure_workload_identity it can be set without a secret: it then annotates the ServiceAccount (the agent-wide default identity for SDK tools)."
   type        = string
   default     = null
 }
 
 variable "azure_client_secret" {
-  description = "Azure client secret for authentication. Required when cloud_provider is 'azure'."
+  description = "Azure client secret of the Service Principal the agent authenticates with. Required when cloud_provider is 'azure', unless azure_workload_identity is true."
   type        = string
   default     = null
   sensitive   = true
@@ -292,6 +293,25 @@ variable "private_hosted_zone_rg" {
   description = "Resource group for private hosted zone. Required when cloud_provider is 'azure'."
   type        = string
   default     = null
+}
+
+variable "azure_workload_identity" {
+  description = <<-EOT
+    Run the agent and its worker-orchestrated pods with AKS Workload Identity:
+    they get the label azure.workload.identity/use = "true", so the workload
+    identity webhook projects the ServiceAccount token (AZURE_FEDERATED_TOKEN_FILE).
+    The k8s scope then authenticates to Azure as the managed identity it resolves
+    per scope dimension from the Identity & Access provider, and
+    azure_client_id / azure_client_secret become optional. Only applies when
+    cloud_provider is 'azure'.
+
+    The managed identities the scope uses need a federated credential for
+    subject system:serviceaccount:<namespace>:<service_account_name> (defaults:
+    nullplatform-tools:nullplatform-agent) against the cluster's OIDC issuer.
+  EOT
+  type        = bool
+  default     = false
+  nullable    = false
 }
 
 variable "azure_tenant_id" {

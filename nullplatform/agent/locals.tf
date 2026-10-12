@@ -145,11 +145,20 @@ locals {
     local.ingress_paths,
   )
 
-  worker_all_config = merge(
-    local.deploy_config,
-    lookup(local.shared_cloud_config, var.cloud_provider, {}),
-    var.extra_envs,
-  )
+  worker_all_config = {
+    for k, v in merge(
+      local.deploy_config,
+      lookup(local.shared_cloud_config, var.cloud_provider, {}),
+      var.extra_envs,
+    ) : k => v if v != null
+  }
+
+  pod_labels = var.cloud_provider == "azure" && var.azure_workload_identity ? {
+    "azure.workload.identity/use" = "true"
+  } : {}
+
+  # The WI webhook sets AZURE_CLIENT_ID from this annotation, overriding envFrom.
+  azure_sa_client_id = var.cloud_provider == "azure" && var.azure_workload_identity && var.azure_client_id != null ? var.azure_client_id : ""
 
   # Generic identity + resources — one patch per package in
   # var.worker_orchestrated_packages, so any worker-orchestrated package's pod
@@ -162,16 +171,19 @@ locals {
   worker_common_patches = var.worker_orchestrator ? [
     for pkg in var.worker_orchestrated_packages : {
       target = { package = pkg }
-      merge = {
-        spec = merge(
-          var.service_account_name != "" ? { serviceAccountName = var.service_account_name } : {},
-          {
-            containers = [
-              { name = "worker", resources = { limits = { memory = var.worker_memory_limit } } }
-            ]
-          }
-        )
-      }
+      merge = merge(
+        {
+          spec = merge(
+            var.service_account_name != "" ? { serviceAccountName = var.service_account_name } : {},
+            {
+              containers = [
+                { name = "worker", resources = { limits = { memory = var.worker_memory_limit } } }
+              ]
+            }
+          )
+        },
+        length(local.pod_labels) > 0 ? { metadata = { labels = local.pod_labels } } : {}
+      )
     }
   ] : []
 
@@ -251,6 +263,8 @@ locals {
     aws_iam_role_arn       = var.cloud_provider == "aws" ? var.aws_iam_role_arn : ""
     init_scripts           = var.init_scripts
     service_account_name   = var.service_account_name
+    pod_labels             = local.pod_labels
+    azure_sa_client_id     = local.azure_sa_client_id
     worker_orchestrator    = var.worker_orchestrator
     worker                 = local.worker_final
     liveness_probe         = var.liveness_probe
