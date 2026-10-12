@@ -29,6 +29,30 @@ resource "terraform_data" "provider_validation" {
       error_message = "oci_region is required when dns_provider_name is 'oci'."
     }
     precondition {
+      condition     = var.dns_provider_name != "pdns" || var.pdns_server != ""
+      error_message = "pdns_server is required when dns_provider_name is 'pdns'."
+    }
+    precondition {
+      condition     = var.dns_provider_name != "pdns" || length(var.pdns_api_key) > 0
+      error_message = "pdns_api_key is required when dns_provider_name is 'pdns'."
+    }
+    precondition {
+      condition     = var.dns_provider_name != "rfc2136" || var.rfc2136_host != ""
+      error_message = "rfc2136_host is required when dns_provider_name is 'rfc2136'."
+    }
+    precondition {
+      condition     = var.dns_provider_name != "rfc2136" || var.rfc2136_zone != ""
+      error_message = "rfc2136_zone is required when dns_provider_name is 'rfc2136'."
+    }
+    precondition {
+      condition     = var.dns_provider_name != "rfc2136" || var.rfc2136_insecure || var.rfc2136_tsig_keyname != ""
+      error_message = "rfc2136_tsig_keyname is required when dns_provider_name is 'rfc2136' and rfc2136_insecure is false."
+    }
+    precondition {
+      condition     = var.dns_provider_name != "rfc2136" || var.rfc2136_insecure || length(var.rfc2136_tsig_secret) > 0
+      error_message = "rfc2136_tsig_secret is required when dns_provider_name is 'rfc2136' and rfc2136_insecure is false."
+    }
+    precondition {
       condition     = var.dns_provider_name != "google" || length(var.gcp_project_id) > 0
       error_message = "gcp_project_id is required when dns_provider_name is 'google'."
     }

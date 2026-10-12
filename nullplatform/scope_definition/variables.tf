@@ -197,8 +197,14 @@ variable "package" {
         otherwise the latest revision is used. Lookup resolves artifacts
         VISIBLE at var.nrn — owned there, shared by ancestors, or published
         globally with "organization=*" (nullplatform's own scope images) —
-        requiring provider >= 0.0.102;
+        requiring provider >= 0.0.104;
       • pin explicit ids — set `resource_id` + `resource_revision_id`.
+
+    The BOM published is exactly what this input describes: remove an artifact
+    here and it is gone from the next revision. Provider releases before 0.0.104
+    let the platform merge the previous default revision's components back in,
+    so a removed artifact (a git source left over from an older layout, say)
+    silently stayed in every revision published afterwards.
 
     For an "oci_image" artifact (the default type), `name` defaults to
     "worker-image" and meta.registry/meta.repository default to

@@ -33,6 +33,8 @@ resource "helm_release" "external_dns" {
     kubernetes_secret_v1.external_dns_cloudflare,
     kubernetes_secret_v1.external_dns_oci_config,
     kubernetes_secret_v1.external_dns_azure_config,
+    kubernetes_secret_v1.external_dns_pdns,
+    kubernetes_secret_v1.external_dns_rfc2136,
   ]
 }
 

@@ -36,6 +36,30 @@ resource "kubernetes_secret_v1" "external_dns_azure_config" {
   depends_on = [kubernetes_namespace_v1.external_dns]
 }
 
+resource "kubernetes_secret_v1" "external_dns_pdns" {
+  count = var.dns_provider_name == "pdns" ? 1 : 0
+  metadata {
+    name      = "external-dns-pdns"
+    namespace = var.external_dns_namespace
+  }
+  type = "Opaque"
+  data = {
+    "api-key" = var.pdns_api_key
+  }
+}
+
+resource "kubernetes_secret_v1" "external_dns_rfc2136" {
+  count = var.dns_provider_name == "rfc2136" && !var.rfc2136_insecure ? 1 : 0
+  metadata {
+    name      = "external-dns-rfc2136"
+    namespace = var.external_dns_namespace
+  }
+  type = "Opaque"
+  data = {
+    "tsig-secret" = var.rfc2136_tsig_secret
+  }
+}
+
 resource "kubernetes_secret_v1" "external_dns_oci_config" {
   count = var.dns_provider_name == "oci" ? 1 : 0
 

@@ -10,6 +10,10 @@ variables {
   image_tag                       = "0.9.2"
   nullplatform_agent_helm_version = "2.37.0"
   agent_traffic_manager_tag       = "1.8.0"
+
+  # The module ships worker orchestration OFF. Most runs here assert the worker
+  # block, so they opt in; the runs that assert the off path set it to false.
+  worker_orchestrator = true
 }
 
 ################################################################################
@@ -18,8 +22,9 @@ variables {
 
 # Pinning the traffic manager used to mean passing the whole image string through
 # extra_envs. The registry now lives in the module and only the tag is exposed.
-# TRAFFIC_CONTAINER_IMAGE is a worker-only var (worker_default_env), so it
-# renders as an env list entry, not a flat configuration.values key.
+# TRAFFIC_CONTAINER_IMAGE is part of deploy_config, sent to both the agent's
+# own configuration.values and the worker's env; this run only checks the
+# worker's env-list rendering.
 run "traffic_manager_image_is_assembled_from_the_tag" {
   command = plan
 
@@ -80,31 +85,7 @@ run "extra_envs_also_reaches_the_worker" {
 # Worker orchestration
 ################################################################################
 
-# DNS_TYPE/DOMAIN/USE_ACCOUNT_SLUG/SERVICE_TEMPLATE/INITIAL_INGRESS_PATH/
-# BLUE_GREEN_INGRESS_PATH are consumed by the worker when it renders a scope's
-# k8s deployment, not by the agent's own control loop — they live on the
-# worker's env only (worker_default_env), never in the agent's own
-# configuration.values (default_config).
-run "moved_deploy_vars_are_worker_only" {
-  command = plan
-
-  variables {
-    domain    = "playground.nullapps.io"
-    dns_type  = "external_dns"
-    namespace = "nullplatform"
-  }
-
-  assert {
-    condition = alltrue([
-      for key in ["DNS_TYPE", "DOMAIN", "USE_ACCOUNT_SLUG", "SERVICE_TEMPLATE",
-      "INITIAL_INGRESS_PATH", "BLUE_GREEN_INGRESS_PATH", "NAMESPACE"] :
-      !strcontains(helm_release.agent.values[0], "\n    ${key}:")
-    ])
-    error_message = "deploy/DNS vars and NAMESPACE must not leak into the agent pod's own configuration.values"
-  }
-}
-
-run "worker_block_always_present_with_expected_env" {
+run "worker_block_present_by_default_with_expected_env" {
   command = plan
 
   variables {
@@ -387,34 +368,19 @@ run "long_worker_patch_strings_survive_rendering" {
 }
 
 ################################################################################
-# worker_ingress
+# ingress_stack
 ################################################################################
 
 # The k8s scope only knows which ingress stack to deploy through the three
-# template paths; nothing reads an INGRESS_TYPE. The default keeps the scope's
-# own (ALB Ingress) templates by sending empty values.
-run "worker_ingress_defaults_to_alb_and_leaves_the_scope_templates" {
+# template paths; nothing reads an INGRESS_TYPE. ingress_stack defaults to
+# "istio", so the module derives the Gateway API template paths without any
+# variables set. The istio paths themselves differ by execution context: with
+# worker_orchestrator on (this file's default) the k8s scope runs inside its
+# own worker pod, image rooted at /app/pkg; off, it runs via the legacy
+# command-executor exec flow inside the agent container, where the scopes
+# repo lands under the agent user's home instead.
+run "ingress_stack_defaults_to_istio_and_derives_the_worker_gateway_api_template_paths" {
   command = plan
-
-  assert {
-    condition = alltrue([
-      for key in ["SERVICE_TEMPLATE", "INITIAL_INGRESS_PATH", "BLUE_GREEN_INGRESS_PATH"] :
-      anytrue([
-        for p in yamldecode(helm_release.agent.values[0]).worker.patches :
-        anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == key && e.value == ""])
-        if try(p.target.package, "") == "containers"
-      ])
-    ])
-    error_message = "with worker_ingress = alb the three template paths must render empty so the k8s scope uses its own templates"
-  }
-}
-
-run "worker_ingress_istio_derives_the_gateway_api_template_paths" {
-  command = plan
-
-  variables {
-    worker_ingress = "istio"
-  }
 
   assert {
     condition = alltrue([
@@ -429,15 +395,55 @@ run "worker_ingress_istio_derives_the_gateway_api_template_paths" {
         if try(p.target.package, "") == "containers"
       ])
     ])
-    error_message = "worker_ingress = istio must point the containers worker at the istio templates baked in the image"
+    error_message = "with worker_orchestrator on, the containers worker must default to the istio templates baked in the worker image"
   }
 }
 
-run "explicit_template_paths_override_worker_ingress" {
+run "ingress_stack_defaults_to_istio_and_derives_the_legacy_gateway_api_template_paths" {
   command = plan
 
   variables {
-    worker_ingress   = "istio"
+    worker_orchestrator = false
+  }
+
+  assert {
+    condition = alltrue([
+      for key, want in {
+        SERVICE_TEMPLATE        = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/service.yaml.tpl"
+        INITIAL_INGRESS_PATH    = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
+        BLUE_GREEN_INGRESS_PATH = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
+      } :
+      strcontains(helm_release.agent.values[0], "\n    ${key}: \"${want}\"")
+    ])
+    error_message = "with worker_orchestrator off, the agent's own env must default to the istio templates baked under the agent user's home"
+  }
+}
+
+run "ingress_stack_alb_leaves_the_scope_templates" {
+  command = plan
+
+  variables {
+    ingress_stack = "alb"
+  }
+
+  assert {
+    condition = alltrue([
+      for key in ["SERVICE_TEMPLATE", "INITIAL_INGRESS_PATH", "BLUE_GREEN_INGRESS_PATH"] :
+      anytrue([
+        for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+        anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == key && e.value == ""])
+        if try(p.target.package, "") == "containers"
+      ])
+    ])
+    error_message = "with ingress_stack = alb the three template paths must render empty so the k8s scope uses its own templates"
+  }
+}
+
+run "explicit_template_paths_override_ingress_stack" {
+  command = plan
+
+  variables {
+    ingress_stack    = "istio"
     service_template = "/custom/service.yaml.tpl"
   }
 
@@ -447,18 +453,18 @@ run "explicit_template_paths_override_worker_ingress" {
       anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == "SERVICE_TEMPLATE" && e.value == "/custom/service.yaml.tpl"])
       if try(p.target.package, "") == "containers"
     ])
-    error_message = "an explicit service_template must win over the path worker_ingress derives"
+    error_message = "an explicit service_template must win over the path ingress_stack derives"
   }
 }
 
-run "worker_ingress_rejects_unknown_stacks" {
+run "ingress_stack_rejects_unknown_stacks" {
   command = plan
 
   variables {
-    worker_ingress = "nginx"
+    ingress_stack = "nginx"
   }
 
-  expect_failures = [var.worker_ingress]
+  expect_failures = [var.ingress_stack]
 }
 
 ################################################################################
@@ -557,5 +563,563 @@ run "cluster_name_can_still_arrive_through_extra_envs" {
       if try(p.target.package, "") == "containers"
     ])
     error_message = "an existing installation passing CLUSTER_NAME through extra_envs must keep working"
+  }
+}
+
+################################################################################
+# Deploy/DNS variables on the agent container
+################################################################################
+
+# 34238fd2 (#554) moved DOMAIN/DNS_TYPE/USE_ACCOUNT_SLUG/IMAGE_PULL_SECRETS/
+# SERVICE_TEMPLATE/INITIAL_INGRESS_PATH/BLUE_GREEN_INGRESS_PATH/K8S_NAMESPACE/
+# CLUSTER_NAME out of the agent's own configuration.values and into the worker
+# patch. Installs whose scopes still run inside the agent (the legacy
+# command-executor exec flow) lost them. They must reach the agent again — in
+# both orchestration modes — while the worker keeps its own copy. (A plain
+# NAMESPACE key was restored alongside them by 03d854b7, then dropped again
+# once helm-charts/charts/agent and the scopes repo confirmed nothing reads
+# it — only K8S_NAMESPACE and NAMESPACE_OVERRIDE are ever consulted.)
+#
+# The agent's env renders as `    KEY: "value"` under configuration.values;
+# the worker's renders through yamlencode as `"name": "KEY"`, so a match on
+# "\n    KEY:" is specific to the agent container.
+run "deploy_vars_reach_the_agent_env_with_orchestration_on" {
+  command = plan
+
+  variables {
+    domain                  = "playground.nullapps.io"
+    dns_type                = "external_dns"
+    use_account_slug        = "true"
+    image_pull_secrets      = "regcred"
+    workload_namespace      = "nullplatform"
+    service_template        = "/custom/service.yaml.tpl"
+    initial_ingress_path    = "/custom/initial-httproute.yaml.tpl"
+    blue_green_ingress_path = "/custom/blue-green-httproute.yaml.tpl"
+  }
+
+  assert {
+    condition = alltrue([
+      for key, want in {
+        DOMAIN                  = "playground.nullapps.io"
+        DNS_TYPE                = "external_dns"
+        USE_ACCOUNT_SLUG        = "true"
+        IMAGE_PULL_SECRETS      = "regcred"
+        SERVICE_TEMPLATE        = "/custom/service.yaml.tpl"
+        INITIAL_INGRESS_PATH    = "/custom/initial-httproute.yaml.tpl"
+        BLUE_GREEN_INGRESS_PATH = "/custom/blue-green-httproute.yaml.tpl"
+        CLUSTER_NAME            = "test-cluster"
+        K8S_NAMESPACE           = "nullplatform"
+      } :
+      strcontains(helm_release.agent.values[0], "\n    ${key}: \"${want}\"")
+    ])
+    error_message = "the deploy/DNS vars must be back in the agent pod's own configuration.values"
+  }
+
+  # The worker patch is untouched by the restore: it still carries its own copy.
+  assert {
+    condition = alltrue([
+      for key, want in {
+        DOMAIN           = "playground.nullapps.io"
+        DNS_TYPE         = "external_dns"
+        K8S_NAMESPACE    = "nullplatform"
+        SERVICE_TEMPLATE = "/custom/service.yaml.tpl"
+      } :
+      anytrue([
+        for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+        anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == key && e.value == want])
+        if try(p.target.package, "") == "containers"
+      ])
+    ])
+    error_message = "restoring the agent's env must not take anything away from the worker's"
+  }
+
+  assert {
+    condition     = can(yamldecode(helm_release.agent.values[0]))
+    error_message = "the rendered values must be valid YAML with worker orchestration on"
+  }
+}
+
+run "deploy_vars_reach_the_agent_env_with_orchestration_off" {
+  command = plan
+
+  variables {
+    worker_orchestrator = false
+    domain              = "playground.nullapps.io"
+    dns_type            = "external_dns"
+    use_account_slug    = "true"
+    image_pull_secrets  = "regcred"
+    workload_namespace  = "nullplatform"
+  }
+
+  assert {
+    condition = alltrue([
+      for key, want in {
+        DOMAIN             = "playground.nullapps.io"
+        DNS_TYPE           = "external_dns"
+        USE_ACCOUNT_SLUG   = "true"
+        IMAGE_PULL_SECRETS = "regcred"
+        CLUSTER_NAME       = "test-cluster"
+        K8S_NAMESPACE      = "nullplatform"
+      } :
+      strcontains(helm_release.agent.values[0], "\n    ${key}: \"${want}\"")
+    ])
+    error_message = "the agent's deploy/DNS env must not depend on worker orchestration being on"
+  }
+}
+
+################################################################################
+# worker_orchestrator toggle
+################################################################################
+
+# With the toggle off the module must write no worker configuration at all, so
+# the chart's own worker defaults apply and no pod is patched. var.worker and
+# the package lists are ignored while it is off.
+run "worker_orchestrator_false_emits_no_worker_key" {
+  command = plan
+
+  variables {
+    worker_orchestrator          = false
+    worker_orchestrated_packages = ["containers", "aws-s3-bucket"]
+    worker_k8s_packages          = ["containers", "scheduled-task"]
+    worker = {
+      idleTTL           = "1h"
+      allowedRegistries = ["123456789012.dkr.ecr.us-east-1.amazonaws.com/my-org/*"]
+      patches           = [{ target = { package = "my-pkg" }, merge = { spec = { serviceAccountName = "np-agent-sa" } } }]
+    }
+  }
+
+  assert {
+    condition     = can(yamldecode(helm_release.agent.values[0]))
+    error_message = "the rendered values must be valid YAML with worker orchestration off"
+  }
+
+  assert {
+    condition     = try(yamldecode(helm_release.agent.values[0]).worker, null) == null
+    error_message = "worker_orchestrator = false must emit no top-level worker key, so the chart's own defaults apply"
+  }
+
+  assert {
+    condition = (
+      !strcontains(helm_release.agent.values[0], "patches") &&
+      !strcontains(helm_release.agent.values[0], "idleTTL") &&
+      !strcontains(helm_release.agent.values[0], "allowedRegistries") &&
+      !strcontains(helm_release.agent.values[0], "my-pkg")
+    )
+    error_message = "worker_orchestrator = false must build no patches and pass nothing from var.worker through"
+  }
+
+  # The agent container itself is untouched by the toggle.
+  assert {
+    condition = (
+      strcontains(helm_release.agent.values[0], "\n    NP_API_KEY: \"test-api-key\"") &&
+      strcontains(helm_release.agent.values[0], "\n    IMAGE_TAG: \"0.9.2\"")
+    )
+    error_message = "the agent's own configuration.values must still render with worker orchestration off"
+  }
+}
+
+run "worker_orchestrator_true_renders_the_block_and_patches" {
+  command = plan
+
+  assert {
+    condition = (
+      try(yamldecode(helm_release.agent.values[0]).worker.backend, "") == "kubernetes" &&
+      length(try(yamldecode(helm_release.agent.values[0]).worker.patches, [])) > 0
+    )
+    error_message = "worker_orchestrator = true must render the worker block and its patches"
+  }
+}
+
+run "extra_envs_reaches_the_agent_with_orchestration_off" {
+  command = plan
+
+  variables {
+    worker_orchestrator = false
+    extra_envs          = { MY_VAR = "my-value" }
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "\n    MY_VAR: \"my-value\"")
+    error_message = "extra_envs must keep reaching the agent with worker orchestration off"
+  }
+}
+
+################################################################################
+# Per-cloud variables on the agent container
+################################################################################
+
+# 34238fd2 left cloud_config empty for gcp/azure/oci, so on those clouds the
+# per-cloud values reached neither the agent nor (for gcp/oci) anything else.
+run "azure_cloud_vars_reach_the_agent_env" {
+  command = plan
+
+  variables {
+    cloud_provider         = "azure"
+    aws_iam_role_arn       = ""
+    cluster_name           = ""
+    azure_client_id        = "azure-client-id"
+    azure_client_secret    = "azure-client-secret"
+    azure_subscription_id  = "azure-subscription-id"
+    azure_resource_group   = "azure-rg"
+    azure_tenant_id        = "azure-tenant-id"
+    private_hosted_zone_rg = "azure-dns-rg"
+  }
+
+  assert {
+    condition = alltrue([
+      for key, want in {
+        PRIVATE_HOSTED_ZONE_RG = "azure-dns-rg"
+        PRIVATE_GATEWAY_NAME   = "gateway-private"
+        PUBLIC_GATEWAY_NAME    = "gateway-public"
+        RESOURCE_GROUP         = "azure-rg"
+        AZURE_SUBSCRIPTION_ID  = "azure-subscription-id"
+        AZURE_CLIENT_SECRET    = "azure-client-secret"
+        AZURE_CLIENT_ID        = "azure-client-id"
+        AZURE_TENANT_ID        = "azure-tenant-id"
+      } :
+      strcontains(helm_release.agent.values[0], "\n    ${key}: \"${want}\"")
+    ])
+    error_message = "the azure agent env must carry the values it had before 34238fd2"
+  }
+}
+
+run "gcp_cloud_vars_reach_the_agent_env" {
+  command = plan
+
+  variables {
+    cloud_provider       = "gcp"
+    aws_iam_role_arn     = ""
+    cluster_name         = ""
+    private_gateway_name = "gcp-gateway-private"
+    public_gateway_name  = "gcp-gateway-public"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "\n    PRIVATE_GATEWAY_NAME: \"gcp-gateway-private\"")
+    error_message = "gcp must get PRIVATE_GATEWAY_NAME in the agent env again"
+  }
+
+  # PRIVATE_GATEWAY_NAME/PUBLIC_GATEWAY_NAME moved into shared_deploy_config,
+  # sent to the agent's own env unconditionally regardless of cloud_provider —
+  # same as the worker's env always carried them.
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "\n    PUBLIC_GATEWAY_NAME: \"gcp-gateway-public\"")
+    error_message = "gcp must also get PUBLIC_GATEWAY_NAME in the agent env, same as every other cloud"
+  }
+}
+
+run "oci_cloud_vars_reach_the_agent_env" {
+  command = plan
+
+  variables {
+    cloud_provider       = "oci"
+    aws_iam_role_arn     = ""
+    cluster_name         = ""
+    private_gateway_name = "oci-gateway-private"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "\n    PRIVATE_GATEWAY_NAME: \"oci-gateway-private\"")
+    error_message = "oci must get PRIVATE_GATEWAY_NAME in the agent env again"
+  }
+}
+
+################################################################################
+# Agent image pull secret
+################################################################################
+
+# The chart pulls the agent image anonymously unless it is told which secret to
+# use. That is fine while the image comes from the public repository, and breaks
+# the moment an install mirrors it into a registry of its own.
+run "agent_image_pull_secret_is_referenced_when_named" {
+  command = plan
+
+  variables {
+    image_pull_secret_name = "image-pull-secret-agent"
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).imagePullSecret.name == "image-pull-secret-agent"
+    error_message = "the agent's pull secret should reach the chart by name"
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).imagePullSecret.create == false
+    error_message = "the secret belongs to whoever owns the registry credentials: the chart must reference it, not create it"
+  }
+
+  # yamldecode is blind to blank lines, so the two asserts above still pass if the
+  # template's trim markers are dropped. This one pins the bytes around the block.
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "image:\n  tag: \"0.9.2\"\n  \n\nimagePullSecret:\n  create: false\n  name: \"image-pull-secret-agent\"\n\n  \n\nworker:\n")
+    error_message = "the imagePullSecret block must render with exactly the whitespace the trim markers produce"
+  }
+}
+
+# Left unset the block must not render at all: an imagePullSecret with an empty
+# name is not the same as no imagePullSecret, and every install pulling a public
+# image today passes through here.
+run "agent_image_pull_secret_is_absent_by_default" {
+  command = plan
+
+  assert {
+    condition     = !can(yamldecode(helm_release.agent.values[0]).imagePullSecret)
+    error_message = "without a name, nothing about imagePullSecret should be rendered"
+  }
+
+  # The guard has to be a clean no-op, not a blank line: every install that pulls
+  # a public image renders this path, and a stray newline is a free helm upgrade
+  # for all of them. yamldecode cannot see it, so pin the bytes.
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "image:\n  tag: \"0.9.2\"\n  \n\n  \n\nworker:\n")
+    error_message = "the imagePullSecret guard must leave the rendered document unchanged when no name is given"
+  }
+}
+
+# image_pull_secrets and image_pull_secret_name are one character apart and sit
+# next to each other, yet feed unrelated places: this one the workers' env, the
+# other the agent's own image. Nothing else in the suite keeps them apart.
+run "agent_and_workload_pull_secrets_do_not_cross_wire" {
+  command = plan
+
+  variables {
+    image_pull_secret_name = "image-pull-secret-agent"
+    image_pull_secrets     = "{\"ENABLED\":true,\"SECRETS\":[\"image-pull-secret-workload\"]}"
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).imagePullSecret.name == "image-pull-secret-agent"
+    error_message = "the agent's own pull secret must come from image_pull_secret_name"
+  }
+
+  assert {
+    condition = anytrue([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+      anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == "IMAGE_PULL_SECRETS" && e.value == "{\"ENABLED\":true,\"SECRETS\":[\"image-pull-secret-workload\"]}"])
+      if try(p.target.package, "") == "containers"
+    ])
+    error_message = "the workload pull secrets must reach the worker as IMAGE_PULL_SECRETS, unchanged"
+  }
+
+  assert {
+    condition     = !strcontains(jsonencode(yamldecode(helm_release.agent.values[0]).imagePullSecret), "image-pull-secret-workload")
+    error_message = "the workload pull secrets must never leak into the agent's own imagePullSecret block"
+  }
+}
+
+################################################################################
+# Probe overrides
+################################################################################
+
+# Off by default: nothing is rendered, so the chart keeps its own probes and an
+# existing install sees no diff.
+run "probes_are_left_to_the_chart_by_default" {
+  command = plan
+
+  assert {
+    condition     = !strcontains(helm_release.agent.values[0], "livenessProbe") && !strcontains(helm_release.agent.values[0], "readinessProbe")
+    error_message = "with no overrides the module must not render any probe key"
+  }
+}
+
+# Only the given fields are rendered: helm merges them over the chart's probe,
+# so its httpGet /health on 8080 stays.
+run "probe_overrides_are_rendered" {
+  command = plan
+
+  variables {
+    liveness_probe  = { initialDelaySeconds = 120, failureThreshold = 6 }
+    readiness_probe = { initialDelaySeconds = 60 }
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "livenessProbe:\n  \"failureThreshold\": 6\n  \"initialDelaySeconds\": 120")
+    error_message = "liveness_probe must render under livenessProbe"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "readinessProbe:\n  \"initialDelaySeconds\": 60")
+    error_message = "readiness_probe must render under readinessProbe"
+  }
+
+  assert {
+    condition     = !strcontains(helm_release.agent.values[0], "httpGet")
+    error_message = "the module must not restate the chart's httpGet; only the given fields are rendered"
+  }
+}
+
+run "azure_workload_identity_labels_the_agent_and_its_workers" {
+  command = plan
+
+  variables {
+    cloud_provider               = "azure"
+    aws_iam_role_arn             = ""
+    cluster_name                 = ""
+    azure_workload_identity      = true
+    azure_subscription_id        = "azure-subscription-id"
+    azure_resource_group         = "azure-rg"
+    azure_tenant_id              = "azure-tenant-id"
+    private_hosted_zone_rg       = "azure-dns-rg"
+    worker_orchestrated_packages = ["containers", "aks"]
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "podLabels:\n  \"azure.workload.identity/use\": \"true\"")
+    error_message = "the agent pod must carry the azure.workload.identity/use label"
+  }
+
+  assert {
+    condition     = length(regexall("\"azure.workload.identity/use\": \"true\"", helm_release.agent.values[0])) == 3
+    error_message = "the label must appear once for the agent and once per worker-orchestrated package (here 1 + 2)"
+  }
+
+  assert {
+    condition     = !strcontains(helm_release.agent.values[0], "AZURE_CLIENT_SECRET")
+    error_message = "with workload identity and no secret, AZURE_CLIENT_SECRET must not be rendered"
+  }
+
+  assert {
+    condition     = !strcontains(helm_release.agent.values[0], "azure.workload.identity/client-id")
+    error_message = "without azure_client_id the ServiceAccount must not get a client-id annotation"
+  }
+}
+
+run "azure_workload_identity_coexists_with_the_client_secret" {
+  command = plan
+
+  variables {
+    cloud_provider          = "azure"
+    aws_iam_role_arn        = ""
+    cluster_name            = ""
+    azure_workload_identity = true
+    azure_client_id         = "azure-client-id"
+    azure_client_secret     = "azure-client-secret"
+    azure_subscription_id   = "azure-subscription-id"
+    azure_resource_group    = "azure-rg"
+    azure_tenant_id         = "azure-tenant-id"
+    private_hosted_zone_rg  = "azure-dns-rg"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "\"azure.workload.identity/use\": \"true\"") && strcontains(helm_release.agent.values[0], "\n    AZURE_CLIENT_SECRET: \"azure-client-secret\"")
+    error_message = "the label and the legacy secret must both render while migrating"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "azure.workload.identity/client-id: \"azure-client-id\"")
+    error_message = "the ServiceAccount must be annotated with the client ID while the Service Principal is still set"
+  }
+}
+
+run "azure_without_workload_identity_renders_no_label" {
+  command = plan
+
+  variables {
+    cloud_provider         = "azure"
+    aws_iam_role_arn       = ""
+    cluster_name           = ""
+    azure_client_id        = "azure-client-id"
+    azure_client_secret    = "azure-client-secret"
+    azure_subscription_id  = "azure-subscription-id"
+    azure_resource_group   = "azure-rg"
+    azure_tenant_id        = "azure-tenant-id"
+    private_hosted_zone_rg = "azure-dns-rg"
+  }
+
+  assert {
+    condition     = !strcontains(helm_release.agent.values[0], "azure.workload.identity") && !strcontains(helm_release.agent.values[0], "podLabels")
+    error_message = "azure_workload_identity = false must not add any label"
+  }
+}
+
+run "azure_workload_identity_is_ignored_off_azure" {
+  command = plan
+
+  variables {
+    azure_workload_identity = true
+  }
+
+  assert {
+    condition     = !strcontains(helm_release.agent.values[0], "azure.workload.identity")
+    error_message = "the label must only be added when cloud_provider is azure"
+  }
+}
+
+run "azure_requires_workload_identity_or_a_client_secret" {
+  command = plan
+
+  variables {
+    cloud_provider         = "azure"
+    aws_iam_role_arn       = ""
+    cluster_name           = ""
+    azure_client_id        = "azure-client-id"
+    azure_subscription_id  = "azure-subscription-id"
+    azure_resource_group   = "azure-rg"
+    azure_tenant_id        = "azure-tenant-id"
+    private_hosted_zone_rg = "azure-dns-rg"
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "azure_client_secret_without_client_id_is_rejected" {
+  command = plan
+
+  variables {
+    cloud_provider          = "azure"
+    aws_iam_role_arn        = ""
+    cluster_name            = ""
+    azure_workload_identity = true
+    azure_client_secret     = "azure-client-secret"
+    azure_subscription_id   = "azure-subscription-id"
+    azure_resource_group    = "azure-rg"
+    azure_tenant_id         = "azure-tenant-id"
+    private_hosted_zone_rg  = "azure-dns-rg"
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "azure_workload_identity_requires_a_service_account_name" {
+  command = plan
+
+  variables {
+    cloud_provider          = "azure"
+    aws_iam_role_arn        = ""
+    cluster_name            = ""
+    azure_workload_identity = true
+    service_account_name    = ""
+    azure_subscription_id   = "azure-subscription-id"
+    azure_resource_group    = "azure-rg"
+    azure_tenant_id         = "azure-tenant-id"
+    private_hosted_zone_rg  = "azure-dns-rg"
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "azure_workload_identity_without_worker_orchestrator_labels_only_the_agent" {
+  command = plan
+
+  variables {
+    cloud_provider          = "azure"
+    aws_iam_role_arn        = ""
+    cluster_name            = ""
+    azure_workload_identity = true
+    worker_orchestrator     = false
+    azure_subscription_id   = "azure-subscription-id"
+    azure_resource_group    = "azure-rg"
+    azure_tenant_id         = "azure-tenant-id"
+    private_hosted_zone_rg  = "azure-dns-rg"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "podLabels:")
+    error_message = "the agent pod must still carry podLabels with the orchestrator off"
+  }
+
+  assert {
+    condition     = length(regexall("\"azure.workload.identity/use\": \"true\"", helm_release.agent.values[0])) == 1
+    error_message = "the label must render exactly once (agent only) with worker_orchestrator = false"
   }
 }

@@ -138,6 +138,53 @@ locals {
     ]
   }
 
+  # PowerDNS: API key travels as an env var, not extraArgs, so it never lands
+  # in the pod's command line (kingpin auto-derives EXTERNAL_DNS_PDNS_API_KEY
+  # from the --pdns-api-key flag).
+  pdns_config = {
+    provider = { name = "pdns" }
+    extraArgs = compact([
+      "--pdns-server=${var.pdns_server}",
+      "--pdns-server-id=${var.pdns_server_id}",
+      var.pdns_skip_tls_verify ? "--pdns-skip-tls-verify" : "",
+    ])
+    env = [{
+      name = "EXTERNAL_DNS_PDNS_API_KEY"
+      valueFrom = {
+        secretKeyRef = {
+          name = "external-dns-pdns"
+          key  = "api-key"
+        }
+      }
+    }]
+  }
+
+  # RFC2136 (BIND, Knot, etc. via dynamic updates). TSIG auth is the default;
+  # rfc2136_insecure=true skips it for lab/dev servers with no TSIG configured.
+  rfc2136_config = {
+    provider = { name = "rfc2136" }
+    extraArgs = concat(
+      [
+        "--rfc2136-host=${var.rfc2136_host}",
+        "--rfc2136-port=${var.rfc2136_port}",
+        "--rfc2136-zone=${var.rfc2136_zone}",
+      ],
+      var.rfc2136_insecure ? ["--rfc2136-insecure"] : [
+        "--rfc2136-tsig-keyname=${var.rfc2136_tsig_keyname}",
+        "--rfc2136-tsig-secret-alg=${var.rfc2136_tsig_secret_alg}",
+      ]
+    )
+    env = var.rfc2136_insecure ? [] : [{
+      name = "EXTERNAL_DNS_RFC2136_TSIG_SECRET"
+      valueFrom = {
+        secretKeyRef = {
+          name = "external-dns-rfc2136"
+          key  = "tsig-secret"
+        }
+      }
+    }]
+  }
+
   provider_configs = {
     cloudflare          = local.cloudflare_config
     aws                 = local.route53_config
@@ -145,7 +192,30 @@ locals {
     azure               = local.azure_config
     "azure-private-dns" = local.azure_config
     google              = local.google_config
+    pdns                = local.pdns_config
+    rfc2136             = local.rfc2136_config
   }
 
-  external_dns_values = merge(local.base_config, local.provider_configs[var.dns_provider_name])
+  provider_config = local.provider_configs[var.dns_provider_name]
+
+  azure_label_filter = var.label_filter == null ? "" : var.label_filter
+
+  # Flags appended to the provider's own extraArgs. route53_config already
+  # carries its label filter; Azure only takes an explicit label_filter, since
+  # zone_type never filtered anything there.
+  common_extra_args = compact([
+    local.azure_family_active && local.azure_label_filter != "" ? "--label-filter=${local.azure_label_filter}" : "",
+    var.gateway_name != "" ? "--gateway-name=${var.gateway_name}" : "",
+  ])
+
+  # extraArgs is only set when there is something to add, so releases that use
+  # neither option render the same values as before.
+  external_dns_values = merge(
+    local.base_config,
+    local.provider_config,
+    {
+      for k, v in { extraArgs = tolist(concat(try(local.provider_config.extraArgs, []), local.common_extra_args)) } :
+      k => v if length(local.common_extra_args) > 0
+    },
+  )
 }

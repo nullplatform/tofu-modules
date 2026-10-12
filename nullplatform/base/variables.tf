@@ -28,10 +28,10 @@ variable "np_api_key" {
 
 variable "k8s_provider" {
   type        = string
-  description = "Cloud provider (eks, gke, aks, oke and aro)."
+  description = "Cloud provider (eks, gke, aks, oke, aro, or generic for non-managed/on-premise clusters)."
   validation {
-    condition     = contains(["eks", "gke", "aks", "oke", "aro"], var.k8s_provider)
-    error_message = "k8s_provider must be one of: eks, gke, aks, oke and aro"
+    condition     = contains(["eks", "gke", "aks", "oke", "aro", "generic"], var.k8s_provider)
+    error_message = "k8s_provider must be one of: eks, gke, aks, oke, aro and generic"
   }
 }
 

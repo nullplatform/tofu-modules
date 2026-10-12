@@ -14,12 +14,20 @@ serviceAccount:
   annotations:
     eks.amazonaws.com/role-arn: "${aws_iam_role_arn}"
   %{ endif }
+%{ if azure_sa_client_id != "" ~}
+  annotations:
+    azure.workload.identity/client-id: "${azure_sa_client_id}"
+%{ endif ~}
   %{ endif }
 
+%{ if length(pod_labels) > 0 ~}
+podLabels:
+  ${indent(2, yamlencode(pod_labels))}
+%{ endif ~}
 configuration:
   values:
   %{ for key, value in config_values }
-    ${key}: "${value}"
+    ${key}: ${jsonencode(value)}
   %{ endfor }
 
 image:
@@ -28,6 +36,12 @@ image:
   repository: "${image_repository}"
   %{ endif }
 
+%{ if image_pull_secret_name != "" ~}
+imagePullSecret:
+  create: false
+  name: "${image_pull_secret_name}"
+
+%{ endif ~}
   %{ if length(init_scripts) > 0 }
 initScripts:
   %{ for script in init_scripts }
@@ -35,6 +49,16 @@ initScripts:
   %{ endfor }
   %{ endif }
 
+%{ if worker_orchestrator ~}
 worker:
   ${indent(2, yamlencode(worker))}
+%{ endif ~}
 
+%{ if liveness_probe != null ~}
+livenessProbe:
+  ${indent(2, yamlencode(liveness_probe))}
+%{ endif ~}
+%{ if readiness_probe != null ~}
+readinessProbe:
+  ${indent(2, yamlencode(readiness_probe))}
+%{ endif ~}

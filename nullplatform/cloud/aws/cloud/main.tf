@@ -4,10 +4,7 @@ resource "nullplatform_provider_config" "aws" {
   type       = "aws-configuration"
   dimensions = var.dimensions
   attributes = jsonencode({
-    account = {
-      id     = data.aws_caller_identity.current.id
-      region = data.aws_region.current.region
-    }
+    account    = local.account
     networking = local.networking
   })
 }

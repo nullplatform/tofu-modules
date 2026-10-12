@@ -17,12 +17,16 @@ resource "terraform_data" "cross_variable_validation" {
       error_message = "cluster_name is required when cloud_provider is 'aws': the k8s scope needs it to find the EKS OIDC provider when it creates IAM roles. Set cluster_name (extra_envs.CLUSTER_NAME is still accepted for existing installations)."
     }
     precondition {
-      condition     = var.cloud_provider != "azure" || var.azure_client_id != null
-      error_message = "azure_client_id is required when cloud_provider is 'azure'."
+      condition     = var.cloud_provider != "azure" || var.azure_workload_identity || (var.azure_client_id != null && var.azure_client_secret != null)
+      error_message = "On 'azure', set azure_workload_identity = true or provide both azure_client_id and azure_client_secret."
     }
     precondition {
-      condition     = var.cloud_provider != "azure" || var.azure_client_secret != null
-      error_message = "azure_client_secret is required when cloud_provider is 'azure'."
+      condition     = var.cloud_provider != "azure" || var.azure_client_secret == null || var.azure_client_id != null
+      error_message = "azure_client_secret is set without azure_client_id."
+    }
+    precondition {
+      condition     = !(var.cloud_provider == "azure" && var.azure_workload_identity) || var.service_account_name != ""
+      error_message = "azure_workload_identity needs service_account_name: worker pods must run as the federated ServiceAccount."
     }
     precondition {
       condition     = var.cloud_provider != "azure" || var.azure_subscription_id != null
@@ -40,22 +44,9 @@ resource "terraform_data" "cross_variable_validation" {
       condition     = var.cloud_provider != "azure" || var.azure_tenant_id != null
       error_message = "azure_tenant_id is required when cloud_provider is 'azure'."
     }
-    precondition {
-      condition     = lookup(var.extra_envs, "INGRESS_TYPE", "") != "istio" || var.service_template != ""
-      error_message = "service_template is required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio."
-    }
-    precondition {
-      condition     = lookup(var.extra_envs, "INGRESS_TYPE", "") != "istio" || var.initial_ingress_path != ""
-      error_message = "initial_ingress_path is required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio."
-    }
-    precondition {
-      condition     = lookup(var.extra_envs, "INGRESS_TYPE", "") != "istio" || var.blue_green_ingress_path != ""
-      error_message = "blue_green_ingress_path is required when extra_envs.INGRESS_TYPE is 'istio' — the k8s scope's default template is AWS ALB Ingress and won't route traffic correctly through Istio."
-    }
   }
 }
 
-# Deploy nullplatform agent to Kubernetes cluster via Helm chart
 resource "helm_release" "agent" {
   name       = var.release_name
   chart      = "nullplatform-agent"

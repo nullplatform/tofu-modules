@@ -3,10 +3,6 @@ locals {
   worker_entrypoint = var.entrypoint != "" ? var.entrypoint : "/app/packages/${var.package_slug}/entrypoint"
 }
 
-resource "terraform_data" "api_key_trigger" {
-  input = var.api_key
-}
-
 resource "nullplatform_notification_channel" "channel_from_template" {
   nrn         = var.nrn
   type        = var.channel_type
@@ -42,12 +38,12 @@ resource "nullplatform_notification_channel" "channel_from_template" {
 
   filters = jsonencode({
     "$or" = [
-      { "service.specification.slug" = { "$eq" : var.service_specification_slug } }
+      { "service.specification.slug" = { "$eq" : var.service_specification_slug } },
+      { "arguments.service_specification.slug" = { "$eq" : var.service_specification_slug } }
     ]
   })
 
   lifecycle {
-    replace_triggered_by = [terraform_data.api_key_trigger]
     precondition {
       condition     = !var.worker_orchestrator || var.package_slug != ""
       error_message = "package_slug is required when worker_orchestrator = true."

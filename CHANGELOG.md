@@ -1,5 +1,133 @@
 # Changelog
 
+## Unreleased
+
+
+### Bug Fixes
+
+* **external_dns:** support public and private DNS on Azure with ExternalDNS: `label_filter` now applies to the `azure` and `azure-private-dns` providers, and the new `gateway_name` limits route sources to one Gateway, so a public instance keeps internal scopes out of the public zone while an `azure-private-dns` instance publishes them in the Private DNS zone (split-horizon)
+
+## [8.6.0](https://github.com/nullplatform/tofu-modules/compare/v8.5.0...v8.6.0) (2026-10-12)
+
+
+### Features
+
+* **agent_association:** make api_key optional for a platform-managed credential ([9446fd3](https://github.com/nullplatform/tofu-modules/commit/9446fd3b3a3c312daadb15959bd51532ffc9e4e3))
+* **agent_association:** make api_key optional for a platform-managed credential ([#624](https://github.com/nullplatform/tofu-modules/issues/624)) ([7baf78f](https://github.com/nullplatform/tofu-modules/commit/7baf78fc18fcec9a11e948a84791d6b3e8eb84cd))
+
+## [8.5.0](https://github.com/nullplatform/tofu-modules/compare/v8.4.0...v8.5.0) (2026-10-09)
+
+
+### Features
+
+* **azure:** support AKS Workload Identity for the agent and grant several roles per identity ([#621](https://github.com/nullplatform/tofu-modules/issues/621)) ([7fae4d0](https://github.com/nullplatform/tofu-modules/commit/7fae4d046a39ebb028ffb9f8490eb14ab07a6918))
+
+## [8.4.0](https://github.com/nullplatform/tofu-modules/compare/v8.3.1...v8.4.0) (2026-10-08)
+
+
+### Features
+
+* **azure/acr_push_token:** add a push-only ACR token for CI ([fd0d75c](https://github.com/nullplatform/tofu-modules/commit/fd0d75c6927659e6c6a9d5f8715ed3844f00dcaa))
+* **azure/acr:** allow disabling the admin user ([93601ab](https://github.com/nullplatform/tofu-modules/commit/93601abac11382505c89f147d091f702cf4f3024))
+* **azure:** pull from ACR without secrets and push with a scoped token ([#622](https://github.com/nullplatform/tofu-modules/issues/622)) ([acd3098](https://github.com/nullplatform/tofu-modules/commit/acd3098ac1d785b5ef38151347b5eb5dee34bc21))
+
+## [8.3.1](https://github.com/nullplatform/tofu-modules/compare/v8.3.0...v8.3.1) (2026-10-06)
+
+
+### Bug Fixes
+
+* **scope_configuration:** azure_distribution's only valid value is "front-door", not "blob-cdn" ([#618](https://github.com/nullplatform/tofu-modules/issues/618)) ([80a04d9](https://github.com/nullplatform/tofu-modules/commit/80a04d95f7ba62746f8adb704ee93a37f14e6eda))
+
+## [8.3.0](https://github.com/nullplatform/tofu-modules/compare/v8.2.1...v8.3.0) (2026-10-06)
+
+
+### Features
+
+* **service_definition_agent_association:** route service telemetry notifications ([#613](https://github.com/nullplatform/tofu-modules/issues/613)) ([831cb5c](https://github.com/nullplatform/tofu-modules/commit/831cb5ca9212c2bbcaaba4a90ea00fd8a54a3784))
+
+## [8.2.1](https://github.com/nullplatform/tofu-modules/compare/v8.2.0...v8.2.1) (2026-10-05)
+
+
+### Bug Fixes
+
+* apply label_filter on Azure and add gateway_name to external_dns ([049cf7d](https://github.com/nullplatform/tofu-modules/commit/049cf7d6ee1a1b5fcedb3366ecf7e815a4ea3c7e))
+* apply label_filter on Azure and add gateway_name to external_dns ([#614](https://github.com/nullplatform/tofu-modules/issues/614)) ([e1babb1](https://github.com/nullplatform/tofu-modules/commit/e1babb1db0c6817ea7f90a1069f095586f594851))
+
+## [8.2.0](https://github.com/nullplatform/tofu-modules/compare/v8.1.0...v8.2.0) (2026-10-01)
+
+
+### Features
+
+* **container_orchestration:** configure Kubernetes object naming per cluster ([#611](https://github.com/nullplatform/tofu-modules/issues/611)) ([7be76ee](https://github.com/nullplatform/tofu-modules/commit/7be76ee53a2f660762beaa44a5723ad5a1e98dbf))
+
+## [8.1.0](https://github.com/nullplatform/tofu-modules/compare/v8.0.0...v8.1.0) (2026-09-28)
+
+
+### Features
+
+* **agent:** let installs tune the agent's liveness and readiness probes ([#609](https://github.com/nullplatform/tofu-modules/issues/609)) ([99fb7da](https://github.com/nullplatform/tofu-modules/commit/99fb7da184cd88b2844960d4dc73e15541e41672))
+
+## [8.0.0](https://github.com/nullplatform/tofu-modules/compare/v7.14.0...v8.0.0) (2026-09-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* **agent:** var.worker_ingress no longer exists. Any tfvars setting it must switch to ingress_stack — same values ("alb"/"istio"), same default ("istio"), same behavior otherwise.
+
+### Features
+
+* **agent:** worker orchestration opt-in, agent keeps its deploy env vars ([#594](https://github.com/nullplatform/tofu-modules/issues/594)) ([a55e414](https://github.com/nullplatform/tofu-modules/commit/a55e414170c6dec5d4e18c7166d10ec1eaa42834))
+
+## [7.14.0](https://github.com/nullplatform/tofu-modules/compare/v7.13.0...v7.14.0) (2026-09-22)
+
+
+### Features
+
+* **scope_configuration:** expose the static-files distribution settings ([#605](https://github.com/nullplatform/tofu-modules/issues/605)) ([26cab10](https://github.com/nullplatform/tofu-modules/commit/26cab104d3ea9402f51d30781fadac31d8a60279))
+
+## [7.13.0](https://github.com/nullplatform/tofu-modules/compare/v7.12.0...v7.13.0) (2026-09-22)
+
+
+### Features
+
+* **scope_definition_agent_association:** allow extra environment variables via extra_environment ([#598](https://github.com/nullplatform/tofu-modules/issues/598)) ([324166e](https://github.com/nullplatform/tofu-modules/commit/324166ec87fa65616993cad4ea221943722dfb86))
+
+## [7.12.0](https://github.com/nullplatform/tofu-modules/compare/v7.11.1...v7.12.0) (2026-09-22)
+
+
+### Features
+
+* **agent:** let the agent pull its own image from a private registry ([#601](https://github.com/nullplatform/tofu-modules/issues/601)) ([ac74f9b](https://github.com/nullplatform/tofu-modules/commit/ac74f9bb3308671774475a44b6e45dc087d6b051))
+
+## [7.11.1](https://github.com/nullplatform/tofu-modules/compare/v7.11.0...v7.11.1) (2026-09-22)
+
+
+### Bug Fixes
+
+* **docs:** track external-dns and aws-load-balancer-controller in VERSIONS.md ([#597](https://github.com/nullplatform/tofu-modules/issues/597)) ([42ad18d](https://github.com/nullplatform/tofu-modules/commit/42ad18dac641ade48c751b362d818e695245d758))
+
+## [7.11.0](https://github.com/nullplatform/tofu-modules/compare/v7.10.1...v7.11.0) (2026-09-16)
+
+
+### Features
+
+* **cloud:** allow pinning aws account_id and region by variable ([#592](https://github.com/nullplatform/tofu-modules/issues/592)) ([c4f2c09](https://github.com/nullplatform/tofu-modules/commit/c4f2c0904e5887685bba5213cc897eb99d82f238))
+
+## [7.10.1](https://github.com/nullplatform/tofu-modules/compare/v7.10.0...v7.10.1) (2026-09-16)
+
+
+### Bug Fixes
+
+* **packages:** require provider 0.0.104 where packages are published ([44dcbef](https://github.com/nullplatform/tofu-modules/commit/44dcbef569de5067e7e62b470b86421527c9cc5b))
+* **packages:** require provider 0.0.104 where packages are published ([#590](https://github.com/nullplatform/tofu-modules/issues/590)) ([6da8e43](https://github.com/nullplatform/tofu-modules/commit/6da8e43c39b8f9989258a1c8d63f24a3211825d6))
+
+## [7.10.0](https://github.com/nullplatform/tofu-modules/compare/v7.9.1...v7.10.0) (2026-09-16)
+
+
+### Features
+
+* accept on-premise clusters in base, agent and external_dns ([#588](https://github.com/nullplatform/tofu-modules/issues/588)) ([43ed69b](https://github.com/nullplatform/tofu-modules/commit/43ed69b42858604d25aa84a84262525b26e81774))
+
 ## [7.9.1](https://github.com/nullplatform/tofu-modules/compare/v7.9.0...v7.9.1) (2026-09-14)
 
 

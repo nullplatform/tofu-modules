@@ -38,6 +38,12 @@ locals {
     var.traffic_manager_port != null ? { port = var.traffic_manager_port } : {},
   )
 
+  naming = { for k, v in {
+    strategy           = var.naming_strategy
+    deployment_pattern = var.naming_deployment_pattern
+    scope_pattern      = var.naming_scope_pattern
+  } : k => v if v != "" }
+
   attributes = merge(
     {
       cluster = local.cluster
@@ -48,6 +54,7 @@ locals {
     length(local.security) > 0 ? { security = local.security } : {},
     length(local.traffic_manager) > 0 ? { traffic_manager = local.traffic_manager } : {},
     length(var.object_modifiers) > 0 ? { object_modifiers = { modifiers = var.object_modifiers } } : {},
+    length(local.naming) > 0 ? { naming = local.naming } : {},
   )
 }
 

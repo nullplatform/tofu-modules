@@ -99,3 +99,33 @@ variable "object_modifiers" {
   }))
   default = []
 }
+
+variable "naming_strategy" {
+  description = "How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'ids' when unset"
+  type        = string
+  default     = ""
+  validation {
+    condition     = contains(["", "ids", "qualified", "custom"], var.naming_strategy)
+    error_message = "naming_strategy must be one of: ids, qualified, custom."
+  }
+}
+
+variable "naming_deployment_pattern" {
+  description = "Name pattern for the objects a deployment creates (Deployment, Service, HPA, Secret, PodDisruptionBudget), e.g. {.application.slug}-{.scope.slug}-{.deployment.id}. Read only when naming_strategy is 'custom'"
+  type        = string
+  default     = ""
+  validation {
+    condition     = var.naming_deployment_pattern == "" || (length(var.naming_deployment_pattern) <= 200 && can(regex("^[A-Za-z0-9.{}\\[\\]\"_-]+$", var.naming_deployment_pattern)))
+    error_message = "naming_deployment_pattern must be at most 200 characters of letters, digits, and . { } [ ] \" _ -"
+  }
+}
+
+variable "naming_scope_pattern" {
+  description = "Name pattern for the objects that outlive a deployment (Ingress, HTTPRoute, serving certificate), e.g. {.application.slug}-{.scope.slug}-{.scope.id}. Read only when naming_strategy is 'custom'. Only applies to scopes created after the change"
+  type        = string
+  default     = ""
+  validation {
+    condition     = var.naming_scope_pattern == "" || (length(var.naming_scope_pattern) <= 200 && can(regex("^[A-Za-z0-9.{}\\[\\]\"_-]+$", var.naming_scope_pattern)))
+    error_message = "naming_scope_pattern must be at most 200 characters of letters, digits, and . { } [ ] \" _ -"
+  }
+}

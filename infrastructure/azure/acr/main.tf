@@ -4,7 +4,7 @@ module "containerregistry" {
   name                     = var.containerregistry_name
   resource_group_name      = var.resource_group_name
   location                 = var.location
-  admin_enabled            = true
+  admin_enabled            = var.admin_enabled
   sku                      = var.sku
   zone_redundancy_enabled  = var.zone_redundancy_enabled
   tags                     = var.tags

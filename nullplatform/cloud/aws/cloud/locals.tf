@@ -1,4 +1,9 @@
 locals {
+  account = {
+    id     = coalesce(var.account_id, one(data.aws_caller_identity.current[*].id))
+    region = coalesce(var.region, one(data.aws_region.current[*].region))
+  }
+
   # La API rechaza un hosted_public_zone_id vacío, así que solo se incluye
   # cuando tiene valor — esto habilita instalaciones private-only.
   networking = merge(

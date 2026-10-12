@@ -35,3 +35,25 @@ variable "application_domain" {
   description = "Add account name in domain"
   default     = false
 }
+
+variable "account_id" {
+  description = "AWS account ID to register. Asserted by the caller and only format-checked, not verified against any AWS credentials. Leave unset to read it from the AWS provider credentials (aws_caller_identity)."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.account_id == null || can(regex("^[0-9]{12}$", var.account_id))
+    error_message = "account_id must be a 12-digit AWS account ID, or unset to resolve it from the AWS provider credentials."
+  }
+}
+
+variable "region" {
+  description = "AWS region to register. Asserted by the caller and only format-checked, not verified against the AWS provider. Leave unset to read it from the AWS provider configuration (aws_region)."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.region == null || can(regex("^[a-z]{2}(-[a-z]+)+-[0-9]+$", var.region))
+    error_message = "region must be a valid AWS region name (e.g. us-east-1, us-gov-west-1), or unset to resolve it from the AWS provider configuration."
+  }
+}

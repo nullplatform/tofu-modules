@@ -174,3 +174,6 @@ terraform.tfstate.backup
 nullplatform/scope_definition/examples/
 # Local API skill token (credential — never commit)
 np-api-skill.token
+
+# macOS Finder metadata
+.DS_Store
