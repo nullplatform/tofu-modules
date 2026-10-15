@@ -17,6 +17,9 @@ jobs:
       pull-requests: write
     with:
       update_readme_versions: false
+    secrets:
+      app-id: ${{ secrets.APP_RELEASE_ID }}
+      app-private-key: ${{ secrets.APP_RELEASE_PRIVATE_KEY }}
 
   generate-readmes:
     name: Generate READMEs for Release PR
@@ -47,12 +50,22 @@ jobs:
             echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
           fi
 
+      # Pushing with github.token would put the new head's PR checks on hold for approval again.
+      - name: Generate GitHub App token
+        if: steps.check_pr.outputs.pr_exists == 'true'
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.APP_RELEASE_ID }}
+          private-key: ${{ secrets.APP_RELEASE_PRIVATE_KEY }}
+
       - name: Checkout Release PR branch
         if: steps.check_pr.outputs.pr_exists == 'true'
         uses: actions/checkout@v6
         with:
           ref: release-please--branches--main
           fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Detect changed modules
         if: steps.check_pr.outputs.pr_exists == 'true'
