@@ -14,16 +14,16 @@ a specific release, so an upgrade is something someone decides.
 
 ## What to pin
 
-Verified 2026-10-09.
+Verified 2026-10-16.
 
 | Component | Current | Variable | Module |
 | --- | --- | --- | --- |
 | `nullplatform-base` chart | `2.44.7` | `nullplatform_base_helm_version` | `nullplatform/base` |
 | `nullplatform-agent` chart | `3.1.0` | `nullplatform_agent_helm_version` | `nullplatform/agent` |
 | `cert-manager` chart | `v1.21.2` | `cert_manager_version` | `infrastructure/commons/cert_manager` |
-| `prometheus` chart | `29.36.1` | `prometheus_version` | `infrastructure/commons/prometheus` |
-| `istio-base` chart | `1.30.5` | `istio_base_version` | `infrastructure/commons/istio` |
-| `istiod` chart | `1.30.5` | `istiod_version` | `infrastructure/commons/istio` |
+| `prometheus` chart | `29.37.0` | `prometheus_version` | `infrastructure/commons/prometheus` |
+| `istio-base` chart | `1.30.6` | `istio_base_version` | `infrastructure/commons/istio` |
+| `istiod` chart | `1.30.6` | `istiod_version` | `infrastructure/commons/istio` |
 | `gateway-api` CRDs | `v1.5.1` | `gateway_api_crd_ref` | `nullplatform/base` |
 | `k8s-logs-controller` | `v1.6.3` | `logging_controller_image_tag` | `nullplatform/base` |
 | `controlplane-agent` | `0.13.0` | `image_tag` | `nullplatform/agent` |
@@ -103,12 +103,12 @@ module "aws_load_balancer_controller" {
 }
 
 module "prometheus" {
-  prometheus_version = "29.36.1"
+  prometheus_version = "29.37.0"
 }
 
 module "istio" {
-  istio_base_version = "1.30.5"
-  istiod_version     = "1.30.5"
+  istio_base_version = "1.30.6"
+  istiod_version     = "1.30.6"
 }
 
 module "service_definition" {

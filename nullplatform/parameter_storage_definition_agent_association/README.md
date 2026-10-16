@@ -21,7 +21,7 @@ The module provisions a single nullplatform_notification_channel resource of typ
 
 ```hcl
 module "parameter_storage_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_definition_agent_association?ref=v8.7.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/parameter_storage_definition_agent_association?ref=v8.7.1"
 
   nrn = "your-nrn"
 }
