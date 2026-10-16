@@ -156,9 +156,15 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set +e
-          ./scripts/check-versions-upstream.sh --write
+          ./scripts/check-versions-upstream.sh --write > "$RUNNER_TEMP/versions-report.txt"
           rc=$?
           set -e
+          cat "$RUNNER_TEMP/versions-report.txt"
+          # A Kubernetes minor bump leaves the addon pins on builds for the old
+          # minor, and only the EKS API lists the new ones. Say so on the run.
+          if grep -q 'Kubernetes moves to' "$RUNNER_TEMP/versions-report.txt"; then
+            echo "::warning::VERSIONS.md moves the EKS Kubernetes minor; update every addon build for it before merging this release"
+          fi
           if [ "$rc" -eq 3 ]; then
             echo "::warning::VERSIONS.md's Ready-to-paste block sets a variable its module does not declare; table left unchanged"
           elif [ "$rc" -gt 1 ]; then

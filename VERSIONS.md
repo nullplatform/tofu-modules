@@ -29,7 +29,9 @@ Verified 2026-10-16.
 | `controlplane-agent` | `0.13.0` | `image_tag` | `nullplatform/agent` |
 | `k8s-traffic-manager` | `1.8.1` | `agent_traffic_manager_tag` | `nullplatform/agent` |
 | traffic manager (provider config) | `1.8.1` | `traffic_manager_version` | `container_orchestration/eks` |
-| `scopes` repository | `v1.15.1` | `agent_repo` (as `"https://github.com/nullplatform/scopes.git#v1.15.1"`; only without packages) | `nullplatform/agent` |
+| `scopes` repository | `v1.18.0` | `agent_repo` (as `"https://github.com/nullplatform/scopes.git#v1.18.0"`; only without packages) | `nullplatform/agent` |
+| `scopes-lambda` repository | `v0.9.2` | `agent_repo` (as `"https://github.com/nullplatform/scopes-lambda.git#v0.9.2"`; only without packages) | `nullplatform/agent` |
+| `scopes-static-files` repository | `v4.1.1` | `agent_repo` (as `"https://github.com/nullplatform/scopes-static-files.git#v4.1.1"`; only without packages) | `nullplatform/agent` |
 | `external-dns` chart | `1.23.0` | `external_dns_version` | `infrastructure/commons/external_dns` |
 | `aws-load-balancer-controller` chart | `3.6.0` | `aws_load_balancer_controller_version` | `infrastructure/aws/aws_load_balancer_controller` |
 | `nullplatform-cert-manager-config` chart | `2.35.0` | `cert_manager_config_version` | `infrastructure/commons/cert_manager` |
@@ -64,9 +66,9 @@ module "agent" {
   # exec flow): the agent clones these repositories at startup. With packages the
   # scopes and services come from each package, so leave agent_repo unset.
   # agent_repo = [
-  #   "https://github.com/nullplatform/scopes.git#v1.15.1",
-  #   "https://github.com/nullplatform/scopes-lambda.git#v0.3.1",
-  #   "https://github.com/nullplatform/scopes-static-files.git#v0.4.0",
+  #   "https://github.com/nullplatform/scopes.git#v1.18.0",
+  #   "https://github.com/nullplatform/scopes-lambda.git#v0.9.2",
+  #   "https://github.com/nullplatform/scopes-static-files.git#v4.1.1",
   # ]
 }
 
@@ -138,16 +140,17 @@ or a mirrored registry path can be passed the way it was before the tag was expo
 
 ## Caveats
 
-**The scopes ref steps back.** `agent_repos_scope` used to point at `scopes.git#main`, and
-`main` has moved past `v1.15.1`. Pinning the tag is deliberate — it is the ref named in the
-migration request — but it is not the same tree the branch tip pointed at.
+**The scopes repositories follow their latest release.** `scopes`, `scopes-lambda` and
+`scopes-static-files` are each bumped to their newest tag in the release pull request, whether an
+install runs packages or the legacy flow, so the table names one current set for both. The
+rewrite replaces the `url#ref` in the table and in the commented `agent_repo` list. Their tags
+cross major versions freely (`scopes-static-files` went from `v0.4.0` to `v4.1.1`), so read the
+release notes of a major bump before merging the release that carries it.
 
 **The agent repositories only matter without packages.** `agent_repos_scope_tag` and
 `agent_repos_extra` are gone; `agent_repo` replaced both, as one list of `url#ref`. The agent
 clones it only in the legacy exec flow (`worker_orchestrator = false`). An install that runs
-packages gets its scopes and services from each package and leaves `agent_repo` empty, so the
-`scopes` row and the commented list above do not apply to it. The `scopes-lambda` and
-`scopes-static-files` refs in that list have no table row and are not checked against upstream.
+packages gets its scopes and services from each package and leaves `agent_repo` empty.
 
 **cert-manager and prometheus were not pinnable at all.** `cert_manager_version` existed but
 was never wired to its `helm_release`, and `prometheus` had no version argument, so both
@@ -160,11 +163,11 @@ branch. Pinning the scopes ref in `agent_repo` does not cover them: the agent cl
 definition modules read the branch. They are listed in
 `scripts/version-pinning-baseline.txt` with the reason.
 
-**The gateway-api CRD ref follows Istio, not its own latest.** `gateway_api_crd_ref` is pinned to
-the version Istio's own version-pinned docs document installing, so it is reported as frozen
-rather than bumped: Istio 1.30's release notes warn that upgrading these CRDs without upgrading
-Istio leaves `TLSRoute` and `ReferenceGrant` invisible to istiod. Bump it together with
-`istio_base_version` and `istiod_version`, after re-reading istio.io for that release.
+**The gateway-api CRD ref follows Istio, not its own latest.** `gateway_api_crd_ref` tracks the
+`sigs.k8s.io/gateway-api` version in `istio/istio`'s `go.mod` at the pinned `istiod_version`:
+Istio 1.30's release notes warn that upgrading these CRDs past what Istio builds against leaves
+`TLSRoute` and `ReferenceGrant` invisible to istiod. The check reads it for the istiod version
+the release is moving to, so an Istio bump carries its matching CRD ref in the same pull request.
 
 It is also applied on every install *and upgrade*, not only on first install: the base chart runs
 `kubectl kustomize "github.com/kubernetes-sigs/gateway-api/config/crd?ref=<ref>" | kubectl apply
@@ -178,13 +181,19 @@ chart's own default is still `v1.3.0`, which is what Istio 1.27 documented — s
 `1.30.4` these modules deploy, which is the mismatch the paragraph above warns about. The table
 tracks the module value; the chart default is a separate fix in `nullplatform/helm-charts`.
 
+**Kubernetes runs one minor behind the newest.** `kubernetes_version` tracks the EKS minor
+before the newest one (per endoflife.date): `1.36` while `1.37` is the newest, moving to `1.37`
+when `1.38` is released. The newest minor ships before addons and tooling settle; one behind
+still has the full standard-support window ahead of it.
+
 **The EKS rows move together.** The node AMI and every addon build are published per
-Kubernetes minor, so `kubernetes_version` is reported as frozen: bumping it means choosing a new
-AMI and new addon builds in the same change. The AMI row is compared only within the pinned
-minor, against the `awslabs/amazon-eks-ami` release notes, so it is bumped like any other row.
-The addon rows have no public source — the builds are listed by the EKS API, which needs AWS
-credentials — so they are reported as manual and never rewritten. To pick them for a minor,
-take the default build AWS marks for it:
+Kubernetes minor. The AMI row is read for the minor the table is moving to, against the
+`awslabs/amazon-eks-ami` release notes, so a minor bump carries a matching AMI and a patch bump
+within the minor is an ordinary row update. The addon rows have no public source — the builds
+are listed by the EKS API, which needs AWS credentials — so they are reported as manual and
+never rewritten. When the minor moves, the release pull request reports every addon as
+needing a build for the new minor and warns; merge it only after updating them. To pick them,
+take the default build AWS marks for the minor:
 
 ```bash
 aws eks describe-addon-versions --kubernetes-version 1.36 --addon-name vpc-cni \
