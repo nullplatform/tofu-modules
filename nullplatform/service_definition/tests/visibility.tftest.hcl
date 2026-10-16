@@ -37,7 +37,6 @@ run "visible_to_replaces_default" {
   command = plan
 
   variables {
-    nrn                    = "organization=1"
     visible_to             = ["organization=1:account=9"]
     extra_visibile_to_nrns = ["organization=1:account=3"]
   }
@@ -56,4 +55,31 @@ run "visible_to_rejects_empty_list" {
   }
 
   expect_failures = [var.visible_to]
+}
+
+# visible_to only narrows the specification: the package keeps var.nrn
+# (owner and default visibility), so it is never replaced.
+run "visible_to_does_not_touch_package" {
+  command = plan
+
+  variables {
+    nrn        = "organization=1"
+    visible_to = ["organization=1:account=9"]
+    package    = { version = "1.0.0" }
+  }
+
+  assert {
+    condition     = nullplatform_service_specification.from_template.visible_to == tolist(["organization=1:account=9"])
+    error_message = "The specification should use visible_to."
+  }
+
+  assert {
+    condition     = nullplatform_package.this[0].nrn == "organization=1"
+    error_message = "The package should keep var.nrn as its owner."
+  }
+
+  assert {
+    condition     = nullplatform_package.this[0].visible_to == tolist(["organization=1"])
+    error_message = "The package visibility should not follow visible_to."
+  }
 }
