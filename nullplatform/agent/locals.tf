@@ -269,5 +269,11 @@ locals {
     worker                 = local.worker_final
     liveness_probe         = var.liveness_probe
     readiness_probe        = var.readiness_probe
+    startup_probe          = var.startup_probe
+    pod_annotations        = var.pod_annotations
+    termination_grace      = var.termination_grace_period_seconds
+    pod_disruption_budget  = var.pod_disruption_budget
+    node_selector          = var.node_selector
+    tolerations            = var.tolerations
   })
 }

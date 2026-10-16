@@ -948,6 +948,106 @@ run "probe_overrides_are_rendered" {
   }
 }
 
+################################################################################
+# Disruption protection (chart >= 3.2.0)
+################################################################################
+
+# The chart carries the defaults (autoscaler annotations, startupProbe, grace
+# period); the module renders nothing unless asked, so an existing install sees
+# no diff and the chart stays the single source of those defaults.
+run "disruption_settings_are_left_to_the_chart_by_default" {
+  command = plan
+
+  assert {
+    condition = alltrue([
+      for key in ["startupProbe", "podAnnotations", "terminationGracePeriodSeconds", "podDisruptionBudget", "nodeSelector", "tolerations"] :
+      !contains(keys(yamldecode(helm_release.agent.values[0])), key)
+    ])
+    error_message = "with no overrides the module must not render any disruption-related key"
+  }
+}
+
+run "disruption_overrides_are_rendered" {
+  command = plan
+
+  variables {
+    startup_probe                    = { failureThreshold = 60 }
+    pod_annotations                  = { team = "platform" }
+    termination_grace_period_seconds = 120
+    pod_disruption_budget            = { enabled = true, maxUnavailable = 1 }
+    node_selector                    = { "karpenter.sh/nodepool" = "platform" }
+    tolerations = [
+      { key = "dedicated", operator = "Equal", value = "platform", effect = "NoSchedule" },
+      { key = "node.kubernetes.io/unreachable", operator = "Exists", effect = "NoExecute", tolerationSeconds = 300 },
+    ]
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).startupProbe == { failureThreshold = 60 }
+    error_message = "startup_probe must render only its own fields under startupProbe, so helm merges them over the chart's httpGet"
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).podAnnotations == { team = "platform" }
+    error_message = "pod_annotations must render under podAnnotations"
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).terminationGracePeriodSeconds == 120
+    error_message = "termination_grace_period_seconds must render as a number"
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).podDisruptionBudget == { enabled = true, maxUnavailable = 1 }
+    error_message = "pod_disruption_budget must render under podDisruptionBudget"
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).nodeSelector == { "karpenter.sh/nodepool" = "platform" }
+    error_message = "node_selector must render under nodeSelector"
+  }
+
+  assert {
+    condition     = length(yamldecode(helm_release.agent.values[0]).tolerations) == 2 && yamldecode(helm_release.agent.values[0]).tolerations[1].tolerationSeconds == 300
+    error_message = "tolerations with different keys must render as-is under tolerations"
+  }
+}
+
+# Helm deletes a chart default when the override is null: this is how an
+# install drops one of the chart's autoscaler annotations.
+run "pod_annotation_set_to_null_drops_the_chart_default" {
+  command = plan
+
+  variables {
+    pod_annotations = { "karpenter.sh/do-not-disrupt" = null }
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "\"karpenter.sh/do-not-disrupt\": null")
+    error_message = "a null annotation must render as null so helm removes the chart's default"
+  }
+}
+
+run "termination_grace_period_must_outlast_the_prestop_sleep" {
+  command = plan
+
+  variables {
+    termination_grace_period_seconds = 30
+  }
+
+  expect_failures = [var.termination_grace_period_seconds]
+}
+
+run "tolerations_must_be_a_list" {
+  command = plan
+
+  variables {
+    tolerations = { key = "dedicated", operator = "Exists" }
+  }
+
+  expect_failures = [var.tolerations]
+}
+
 run "azure_workload_identity_labels_the_agent_and_its_workers" {
   command = plan
 

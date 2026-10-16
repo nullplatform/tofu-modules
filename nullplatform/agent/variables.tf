@@ -238,6 +238,71 @@ variable "readiness_probe" {
   default     = null
 }
 
+# An evicted agent takes every action it is running down with it: a node
+# autoscaler consolidating the agent's node fails the deploy in flight even
+# though its pods come up fine, and leaves its resources behind. From chart
+# 3.2.0 the chart itself protects the agent by default (do-not-disrupt /
+# safe-to-evict annotations, startupProbe, terminationGracePeriodSeconds), so
+# these variables only add to or override the chart: null/empty renders
+# nothing and an existing install sees no diff.
+variable "startup_probe" {
+  description = "Fields merged over the chart's startupProbe (chart >= 3.2.0: httpGet /health on 8080, every 10s, up to 30 failures), e.g. { failureThreshold = 60 } for a slow repo clone. Null (the default) renders nothing and leaves the chart's probe untouched."
+  type        = any
+  default     = null
+}
+
+variable "pod_annotations" {
+  description = "Annotations merged over the chart's podAnnotations. From chart 3.2.0 the chart sets karpenter.sh/do-not-disrupt = \"true\" and cluster-autoscaler.kubernetes.io/safe-to-evict = \"false\" so node autoscalers don't evict the agent mid-action; set a key to null to drop one of them (e.g. an admission policy that rejects it). Empty (the default) renders nothing."
+  type        = map(string)
+  default     = {}
+}
+
+variable "termination_grace_period_seconds" {
+  description = "Seconds the agent gets to stop after SIGTERM (chart >= 3.2.0, which defaults to 60). Keep it above the chart's preStop sleep (30s). Null (the default) renders nothing."
+  type        = number
+  default     = null
+
+  validation {
+    condition     = var.termination_grace_period_seconds == null || try(var.termination_grace_period_seconds > 30, false)
+    error_message = "termination_grace_period_seconds must be above 30: the chart's preStop hook sleeps 30s, and the agent is killed when the grace period runs out."
+  }
+}
+
+variable "pod_disruption_budget" {
+  description = <<-EOT
+    PodDisruptionBudget for the agent (chart >= 3.2.0), rendered as the chart's
+    podDisruptionBudget values. Null (the default) renders nothing and the chart
+    keeps it disabled. With a single replica only a budget that still allows an
+    eviction is accepted: the chart refuses maxUnavailable = 0 and a minAvailable
+    that is not below the replica count, since they would hang node drains and
+    cluster upgrades.
+
+    Example:
+      pod_disruption_budget = { enabled = true, maxUnavailable = 1 }
+  EOT
+  type        = any
+  default     = null
+}
+
+variable "node_selector" {
+  description = "nodeSelector for the agent pod, e.g. to pin it to a node pool that is not consolidated. Empty (the default) renders nothing."
+  type        = map(string)
+  default     = {}
+}
+
+variable "tolerations" {
+  description = "Tolerations for the agent pod. Helm replaces lists instead of merging them, so this replaces the chart's defaults (node.kubernetes.io/not-ready and node.kubernetes.io/unreachable, NoExecute for 300s): include them if you still want them. Null (the default) renders nothing and keeps the chart's tolerations."
+  # any, not list(any): tolerations with different keys (one with
+  # tolerationSeconds, one without) don't unify into a single element type.
+  type    = any
+  default = null
+
+  validation {
+    condition     = var.tolerations == null || (!can(keys(var.tolerations)) && can([for t in var.tolerations : keys(t)]))
+    error_message = "tolerations must be a list of toleration objects (key, operator, value, effect, tolerationSeconds)."
+  }
+}
+
 variable "image_repository" {
   description = "Container image repository for the agent. Defaults to the official nullplatform image."
   type        = string
