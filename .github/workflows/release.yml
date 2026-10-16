@@ -159,7 +159,9 @@ jobs:
           ./scripts/check-versions-upstream.sh --write
           rc=$?
           set -e
-          if [ "$rc" -gt 1 ]; then
+          if [ "$rc" -eq 3 ]; then
+            echo "::warning::VERSIONS.md's Ready-to-paste block sets a variable its module does not declare; table left unchanged"
+          elif [ "$rc" -gt 1 ]; then
             echo "::warning::check-versions-upstream.sh did not run (exit $rc); VERSIONS.md left unchanged"
           fi
 
