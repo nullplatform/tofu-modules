@@ -173,6 +173,52 @@ variable "extra_visible_to_nrns" {
 }
 
 ################################################################################
+# Template rendering
+################################################################################
+
+variable "template_env_vars" {
+  description = <<-EOT
+    Extra environment variables passed to every gomplate render of the module
+    (service spec, scope type and action specs), next to the module's built-in
+    ones. Lets a template read installation-specific settings with
+    `{{ env.Getenv "KEY" }}`, e.g. `{ LAMBDA_DEPLOYMENT_TYPES = "zip" }`.
+
+    Keys must match `^[A-Z_][A-Z0-9_]*$` and cannot be a built-in name (`NRN`,
+    `SERVICE_SPECIFICATION_ID`, `SERVICE_SLUG`, `SERVICE_PATH`, `REPO_PATH`) or
+    a process variable (`PATH`, `HOME`, `LD_*`, `DYLD_*`, `GOMPLATE_*`). Values
+    cannot contain a single quote (they are interpolated inside single quotes
+    in a shell command). Values are stored in plain text in state: do not pass
+    secrets. An empty value is seen as unset by `env.Getenv`. Not applied to
+    `scope-configuration.json.tpl`, which is not rendered by gomplate.
+  EOT
+  type        = map(string)
+  default     = {}
+
+  validation {
+    condition     = alltrue([for k in keys(var.template_env_vars) : can(regex("^[A-Z_][A-Z0-9_]*$", k))])
+    error_message = "template_env_vars keys must match ^[A-Z_][A-Z0-9_]*$ (upper-case environment variable names)."
+  }
+
+  validation {
+    condition = length(setintersection(
+      keys(var.template_env_vars),
+      ["NRN", "SERVICE_SPECIFICATION_ID", "SERVICE_SLUG", "SERVICE_PATH", "REPO_PATH"]
+    )) == 0
+    error_message = "template_env_vars cannot set NRN, SERVICE_SPECIFICATION_ID, SERVICE_SLUG, SERVICE_PATH or REPO_PATH: the module sets them."
+  }
+
+  validation {
+    condition     = alltrue([for k in keys(var.template_env_vars) : !can(regex("^(PATH|HOME|LD_.*|DYLD_.*|GOMPLATE_.*)$", k))])
+    error_message = "template_env_vars cannot set PATH, HOME, LD_*, DYLD_* or GOMPLATE_*: they change how gomplate runs."
+  }
+
+  validation {
+    condition     = alltrue([for v in values(var.template_env_vars) : !strcontains(v, "'")])
+    error_message = "template_env_vars values cannot contain a single quote ('): they are interpolated inside single quotes in a shell command."
+  }
+}
+
+################################################################################
 # Package (optional)
 ################################################################################
 

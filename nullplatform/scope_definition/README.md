@@ -29,6 +29,19 @@ module "scope_definition" {
 }
 ```
 
+## Template environment variables
+
+Templates can read installation-specific settings through `template_env_vars`:
+
+```hcl
+module "scope_definition" {
+  # ...
+  template_env_vars = { LAMBDA_DEPLOYMENT_TYPES = "zip" }
+}
+```
+
+Each entry is exported to every gomplate render (service spec, scope type, action specs) and read in the template with `{{ env.Getenv "LAMBDA_DEPLOYMENT_TYPES" }}`. A missing or empty variable renders as the `env.Getenv` default without error, so templates that require a setting should check it with `fail`. Values end up in state: do not pass secrets. `scope-configuration.json.tpl` is not rendered by gomplate (each quoted `"{{ env.Getenv ... }}"` string in it is replaced with the NRN), so it does not see these variables.
+
 ## Using Outputs
 
 ```hcl
