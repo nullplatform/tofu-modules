@@ -62,3 +62,26 @@ livenessProbe:
 readinessProbe:
   ${indent(2, yamlencode(readiness_probe))}
 %{ endif ~}
+%{ if startup_probe != null ~}
+startupProbe:
+  ${indent(2, yamlencode(startup_probe))}
+%{ endif ~}
+%{ if length(pod_annotations) > 0 ~}
+podAnnotations:
+  ${indent(2, yamlencode(pod_annotations))}
+%{ endif ~}
+%{ if termination_grace != null ~}
+terminationGracePeriodSeconds: ${termination_grace}
+%{ endif ~}
+%{ if pod_disruption_budget != null ~}
+podDisruptionBudget:
+  ${indent(2, yamlencode(pod_disruption_budget))}
+%{ endif ~}
+%{ if length(node_selector) > 0 ~}
+nodeSelector:
+  ${indent(2, yamlencode(node_selector))}
+%{ endif ~}
+%{ if tolerations != null ~}
+tolerations:
+  ${indent(2, yamlencode(tolerations))}
+%{ endif ~}
