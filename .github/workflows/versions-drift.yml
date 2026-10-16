@@ -39,6 +39,13 @@ jobs:
           ./scripts/check-versions-upstream.sh --markdown > report.md
           rc=$?
           set -e
+          # The summary is not part of the log, nor of the check run's API output.
+          cat report.md
+          # An unreadable upstream is not drift: say so on the run, without
+          # failing the pull request over a flaky registry.
+          if grep -q 'could not read upstream' report.md; then
+            echo "::warning::check-versions-upstream.sh could not read some upstreams; the report is incomplete"
+          fi
           case "$rc" in
             0) echo "drift=0" >> "$GITHUB_OUTPUT" ;;
             1) echo "drift=1" >> "$GITHUB_OUTPUT" ;;
