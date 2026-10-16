@@ -99,6 +99,17 @@ variable "extra_visibile_to_nrns" {
   description = "Additional NRNs that should have visibility to the created service specification"
 }
 
+variable "visible_to" {
+  type        = list(string)
+  default     = null
+  description = "Replaces the service specification visibility. When null, it is var.nrn plus extra_visibile_to_nrns. Set it to scope the specification below var.nrn (e.g. a single account) without changing var.nrn, which also owns the package and would replace it."
+
+  validation {
+    condition     = var.visible_to == null ? true : length(var.visible_to) > 0
+    error_message = "visible_to must list at least one NRN when set."
+  }
+}
+
 variable "dimensions" {
   type        = any
   default     = {}

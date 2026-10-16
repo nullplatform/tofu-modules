@@ -54,7 +54,7 @@ locals {
 
   available_actions = var.available_actions
   available_links   = var.available_links
-  visible_to_nrns   = concat([var.nrn], var.extra_visibile_to_nrns)
+  visible_to_nrns   = var.visible_to != null ? var.visible_to : concat([var.nrn], var.extra_visibile_to_nrns)
 }
 
 locals {
