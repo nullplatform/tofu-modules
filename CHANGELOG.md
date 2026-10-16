@@ -7,6 +7,20 @@
 
 * **external_dns:** support public and private DNS on Azure with ExternalDNS: `label_filter` now applies to the `azure` and `azure-private-dns` providers, and the new `gateway_name` limits route sources to one Gateway, so a public instance keeps internal scopes out of the public zone while an `azure-private-dns` instance publishes them in the Private DNS zone (split-horizon)
 
+## [8.8.0](https://github.com/nullplatform/tofu-modules/compare/v8.7.1...v8.8.0) (2026-10-16)
+
+
+### Features
+
+* **ci:** track scopes, gateway-api and EKS Kubernetes versions in VERSIONS.md ([#631](https://github.com/nullplatform/tofu-modules/issues/631)) ([5931645](https://github.com/nullplatform/tofu-modules/commit/59316456eff37df3be656c0b624cbaae9ad44aab))
+
+## [8.7.1](https://github.com/nullplatform/tofu-modules/compare/v8.7.0...v8.7.1) (2026-10-16)
+
+
+### Bug Fixes
+
+* **docs:** correct VERSIONS.md pins and validate its Ready-to-paste block ([#628](https://github.com/nullplatform/tofu-modules/issues/628)) ([1049144](https://github.com/nullplatform/tofu-modules/commit/1049144fd499f2a5108338a82aa7524b5cbdd394))
+
 ## [8.7.0](https://github.com/nullplatform/tofu-modules/compare/v8.6.0...v8.7.0) (2026-10-12)
 
 
