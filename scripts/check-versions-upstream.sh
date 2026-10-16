@@ -38,16 +38,18 @@ upstream_for() {
     '`prometheus` chart')               echo 'helm-index:https://prometheus-community.github.io/helm-charts/index.yaml:prometheus' ;;
     '`istio-base` chart')               echo 'helm-index:https://istio-release.storage.googleapis.com/charts/index.yaml:base' ;;
     '`istiod` chart')                   echo 'helm-index:https://istio-release.storage.googleapis.com/charts/index.yaml:istiod' ;;
-    '`gateway-api` CRDs')               echo 'gh-semver:kubernetes-sigs/gateway-api' ;;
+    '`gateway-api` CRDs')               echo 'istio-gomod' ;;
     '`k8s-logs-controller`')            echo 'ecr:nullplatform/k8s-logs-controller' ;;
     '`controlplane-agent`')             echo 'ecr:nullplatform/controlplane-agent' ;;
     '`k8s-traffic-manager`')            echo 'ecr:nullplatform/k8s-traffic-manager' ;;
     'traffic manager (provider config)') echo 'ecr:nullplatform/k8s-traffic-manager' ;;
     '`scopes` repository')              echo 'gh-semver:nullplatform/scopes' ;;
+    '`scopes-lambda` repository')       echo 'gh-semver:nullplatform/scopes-lambda' ;;
+    '`scopes-static-files` repository') echo 'gh-semver:nullplatform/scopes-static-files' ;;
     '`external-dns` chart')             echo 'helm-index:https://kubernetes-sigs.github.io/external-dns/index.yaml:external-dns' ;;
     '`aws-load-balancer-controller` chart') echo 'helm-index:https://aws.github.io/eks-charts/index.yaml:aws-load-balancer-controller' ;;
     '`nullplatform-cert-manager-config` chart') echo 'helm-index:https://nullplatform.github.io/helm-charts/index.yaml:nullplatform-cert-manager-config' ;;
-    'EKS Kubernetes version')           echo 'eol:amazon-eks' ;;
+    'EKS Kubernetes version')           echo 'eks-n1' ;;
     'EKS node AMI')                     echo 'eks-ami' ;;
     # Addon builds are listed only by the EKS API, which needs AWS credentials
     # this check does not have. Reported, never compared.
@@ -118,9 +120,9 @@ module_dirs_for() {
 # The reason is printed in the report so it travels with the drift.
 frozen_reason() {
   case "$1" in
-    '`scopes` repository') echo 'pinned deliberately to the ref named in the migration request; see Caveats' ;;
-    '`gateway-api` CRDs') echo 'follows the version Istio documents installing, not its own latest; bump it with Istio' ;;
-    'EKS Kubernetes version') echo 'a cluster upgrade moves the node AMI and every addon with it; see Caveats' ;;
+    # No row is held back today: gateway-api follows the pinned Istio and the
+    # Kubernetes version follows the minor before the newest. Add one here to
+    # report a row without rewriting it.
     *) echo '' ;;
   esac
 }
@@ -216,20 +218,42 @@ gh_release_latest() {
   gh_json "https://api.github.com/repos/$1/releases/latest" | jq -r '.tag_name // empty'
 }
 
-# Newest release cycle of a product on endoflife.date, e.g. "1.37" for amazon-eks.
-eol_latest() {
-  curl -fsS "https://endoflife.date/api/$1.json" | jq -r '.[0].cycle // empty'
+# The EKS minor before the newest, e.g. "1.36" while 1.37 is the newest. The
+# newest minor ships before its addons and tooling settle, so installs run one
+# behind it and move on their own when the next one is released.
+eks_n1_latest() {
+  curl -fsS "https://endoflife.date/api/amazon-eks.json" | jq -r '.[1].cycle // empty'
 }
 
-# Newest EKS-optimized AMI release for the Kubernetes minor already pinned, e.g.
-# "1.36.4-20261012". The minor comes from the pin so this never proposes a
-# cluster upgrade; that is the Kubernetes version row's call.
+# Newest EKS-optimized AMI release for the Kubernetes minor the table is moving
+# to, e.g. "1.36.4-20261012". That is the Kubernetes row's resolved value when
+# it was read, so a minor bump carries a matching AMI; otherwise the pin's own.
 eks_ami_latest() {
   local minor
-  minor="$(echo "$1" | cut -d. -f1,2)"
+  minor="${K8S_TARGET:-$(echo "$1" | cut -d. -f1,2)}"
   gh_json "https://api.github.com/repos/awslabs/amazon-eks-ami/releases/latest" |
     jq -r '.body // empty' |
     grep -oE "${minor//./\\.}\.[0-9]+-[0-9]{8}" | sort -rV | head -1
+}
+
+# The Gateway API version Istio itself builds against, read from istio/istio's
+# go.mod at the istiod version the table is moving to. Upgrading the CRDs past
+# it leaves TLSRoute and ReferenceGrant invisible to istiod (Istio 1.30 notes).
+istio_gomod_gateway_api() {
+  [ -n "${ISTIO_TARGET:-}" ] || return 0
+  curl -fsS "https://raw.githubusercontent.com/istio/istio/$ISTIO_TARGET/go.mod" |
+    awk '$1 == "sigs.k8s.io/gateway-api" { print $2; exit }'
+}
+
+# Repository URL a row's ref is appended to as url#ref, in the table and in the
+# Ready-to-paste agent_repo list. The rewrite replaces url#old with url#new.
+repo_url_for() {
+  case "$1" in
+    '`scopes` repository')              echo 'https://github.com/nullplatform/scopes.git' ;;
+    '`scopes-lambda` repository')       echo 'https://github.com/nullplatform/scopes-lambda.git' ;;
+    '`scopes-static-files` repository') echo 'https://github.com/nullplatform/scopes-static-files.git' ;;
+    *) echo '' ;;
+  esac
 }
 
 resolve_latest() {
@@ -242,8 +266,9 @@ resolve_latest() {
     helm-index) helm_index_latest "${rest%:*}" "${rest##*:}" ;;
     gh-semver)  gh_json "https://api.github.com/repos/$rest/tags?per_page=100" |
                   jq -r '.[].name' | grep -E '^v?[0-9]+\.[0-9]+\.[0-9]+$' | sort -rV | head -1 ;;
-    eol)        eol_latest "$rest" ;;
+    eks-n1)     eks_n1_latest ;;
     eks-ami)    eks_ami_latest "$pinned" ;;
+    istio-gomod) istio_gomod_gateway_api ;;
   esac
 }
 
@@ -256,6 +281,18 @@ ECR_TOKEN="$(curl -fsS https://public.ecr.aws/token/ | jq -r '.token' || true)"
 ROWS=()
 DRIFT=0
 BROKEN=0
+# Values some rows derive from others: the AMI from the Kubernetes minor, the
+# gateway-api ref from istiod. Set as those rows are read, so the table must
+# list the Kubernetes row before the AMI and addons, and istiod before gateway-api.
+K8S_TARGET=''
+ISTIO_TARGET=''
+# The minor the addon pins were picked for. kube-proxy is built per Kubernetes
+# minor (v1.36.0-eksbuild.N), so its pin names it; unlike comparing against the
+# old Kubernetes pin, this keeps flagging stale addons on every run after the
+# bump, until someone updates them.
+ADDONS_MINOR="$(awk -F'|' 'index($0, "| `kube-proxy` addon |") == 1 {
+  v = $3; gsub(/[ `]/, "", v); sub(/^v/, "", v); split(v, a, "."); print a[1] "." a[2]
+}' "$DOC")"
 
 while IFS='|' read -r _ component pinned _; do
   component="$(echo "$component" | sed 's/^ *//; s/ *$//')"
@@ -275,6 +312,16 @@ while IFS='|' read -r _ component pinned _; do
   # Nothing to compare against: listed so the pin is visible, and it neither
   # counts as drift nor blocks the rewrite of the other rows.
   if [ "${spec%%:*}" = 'manual' ]; then
+    case "$component" in
+      *' addon')
+        # Addon builds are published per Kubernetes minor. When the table moves
+        # the cluster, these pins belong to the old minor and nothing here can
+        # list the new builds, so the report has to say so out loud.
+        if [ -n "$K8S_TARGET" ] && [ -n "$ADDONS_MINOR" ] && [ "$K8S_TARGET" != "$ADDONS_MINOR" ]; then
+          ROWS+=("$component|$pinned|-|manual: Kubernetes moves to $K8S_TARGET but addons are for $ADDONS_MINOR; pick its default build before merging")
+          continue
+        fi ;;
+    esac
     ROWS+=("$component|$pinned|-|manual: ${spec#manual:}")
     continue
   fi
@@ -285,6 +332,11 @@ while IFS='|' read -r _ component pinned _; do
     BROKEN=1
     continue
   fi
+
+  case "$component" in
+    'EKS Kubernetes version') K8S_TARGET="$latest" ;;
+    '`istiod` chart')         ISTIO_TARGET="$latest" ;;
+  esac
 
   reason="$(frozen_reason "$component")"
   if [ "$pinned" = "$latest" ]; then
@@ -399,6 +451,16 @@ if [ "$WRITE" = 1 ] && [ "$DRIFT" = 1 ] && [ "$BROKEN" = 0 ]; then
         { print }
       ' "$DOC" > "$DOC.tmp" && mv "$DOC.tmp" "$DOC"
     done
+    # A ref carried inside a repository URL (url#ref), wherever it appears: the
+    # table's variable cell and the agent_repo list, commented or not. Literal
+    # match, since the URL is full of regex metacharacters.
+    url="$(repo_url_for "$c")"
+    if [ -n "$url" ]; then
+      awk -v from="$url#$p\"" -v to="$url#$l\"" '
+        { while ((i = index($0, from)) > 0) $0 = substr($0, 1, i - 1) to substr($0, i + length(from)) }
+        { print }
+      ' "$DOC" > "$DOC.tmp" && mv "$DOC.tmp" "$DOC"
+    fi
   done
   awk -v d="$(date -u +%Y-%m-%d)" '/^Verified /{print "Verified " d "."; next} {print}' \
     "$DOC" > "$DOC.tmp" && mv "$DOC.tmp" "$DOC"
