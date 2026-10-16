@@ -40,7 +40,7 @@ module "scope_definition" {
 }
 ```
 
-Each entry is exported to every gomplate render (service spec, scope type, action specs) and read in the template with `{{ env.Getenv "LAMBDA_DEPLOYMENT_TYPES" }}`. `scope-configuration.json.tpl` is not rendered by gomplate (every `env.Getenv` in it is replaced with the NRN), so it does not see these variables.
+Each entry is exported to every gomplate render (service spec, scope type, action specs) and read in the template with `{{ env.Getenv "LAMBDA_DEPLOYMENT_TYPES" }}`. A missing or empty variable renders as the `env.Getenv` default without error, so templates that require a setting should check it with `fail`. Values end up in state: do not pass secrets. `scope-configuration.json.tpl` is not rendered by gomplate (each quoted `"{{ env.Getenv ... }}"` string in it is replaced with the NRN), so it does not see these variables.
 
 ## Using Outputs
 

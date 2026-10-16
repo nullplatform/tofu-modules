@@ -5,7 +5,7 @@ mock_provider "nullplatform" {}
 override_data {
   target = data.http.service_spec_template
   values = {
-    status_code = 200
+    status_code   = 200
     response_body = <<-EOT
       {
         "visible_to": [],
@@ -13,7 +13,8 @@ override_data {
         "type": "scope",
         "attributes": {
           "nrn": "{{ env.Getenv "NRN" }}",
-          "custom": "{{ env.Getenv "CUSTOM_FLAG" "unset" }}"
+          "custom": "{{ env.Getenv "CUSTOM_FLAG" "unset" }}",
+          "other": "{{ env.Getenv "OTHER_FLAG" "unset" }}"
         },
         "use_default_actions": false,
         "selectors": {"category": "Scope", "imported": false, "provider": "Agent", "sub_category": "Custom"},
@@ -26,7 +27,7 @@ override_data {
 override_data {
   target = data.http.scope_type_template
   values = {
-    status_code = 200
+    status_code   = 200
     response_body = <<-EOT
       {"provider_type": "service", "flag": "{{ env.Getenv "CUSTOM_FLAG" "unset" }}"}
     EOT
@@ -36,7 +37,7 @@ override_data {
 override_data {
   target = data.http.action_templates
   values = {
-    status_code = 200
+    status_code   = 200
     response_body = <<-EOT
       {"name": "{{ env.Getenv "CUSTOM_FLAG" "unset" }}", "type": "custom", "parameters": {}, "results": {}}
     EOT
@@ -48,6 +49,8 @@ variables {
   np_api_key = "test"
 }
 
+# Semantic check only: with {} the assignments string is empty, so the shell
+# command is the same as without the variable.
 run "default_render_is_unchanged" {
   command = plan
 
@@ -98,6 +101,27 @@ run "extra_var_reaches_scope_type_and_actions" {
   }
 }
 
+run "multiple_keys_with_shell_characters_render_verbatim" {
+  command = plan
+
+  variables {
+    template_env_vars = {
+      CUSTOM_FLAG = "a b $HOME `id` $(id) ; |"
+      OTHER_FLAG  = "second"
+    }
+  }
+
+  assert {
+    condition     = local.service_spec_parsed.attributes.custom == "a b $HOME `id` $(id) ; |"
+    error_message = "Values must reach the template verbatim, without shell expansion"
+  }
+
+  assert {
+    condition     = local.service_spec_parsed.attributes.other == "second"
+    error_message = "Every key of template_env_vars must reach the template"
+  }
+}
+
 run "rejects_invalid_key" {
   command = plan
 
@@ -133,6 +157,26 @@ run "rejects_value_with_single_quote" {
 
   variables {
     template_env_vars = { CUSTOM_FLAG = "it's" }
+  }
+
+  expect_failures = [var.template_env_vars]
+}
+
+run "rejects_module_builtin_key" {
+  command = plan
+
+  variables {
+    template_env_vars = { SERVICE_SLUG = "x" }
+  }
+
+  expect_failures = [var.template_env_vars]
+}
+
+run "rejects_process_env_key" {
+  command = plan
+
+  variables {
+    template_env_vars = { GOMPLATE_LEFT_DELIM = "<<" }
   }
 
   expect_failures = [var.template_env_vars]

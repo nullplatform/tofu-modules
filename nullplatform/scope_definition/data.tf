@@ -53,7 +53,6 @@ data "http" "scope_configuration_template" {
 }
 
 # Process service specification template using gomplate with NRN variable
-# (plus var.template_env_vars, as for every gomplate render below)
 data "external" "service_spec" {
   depends_on = [data.http.service_spec_template]
 

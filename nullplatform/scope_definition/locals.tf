@@ -23,9 +23,8 @@ locals {
     var.action_spec_names != null ? var.action_spec_names : try(local.service_spec_parsed.available_actions, [])
   )
 
-  # scope-configuration.json.tpl is not rendered by gomplate: this regex swaps
-  # every `{{ env.Getenv "..." }}` for the NRN, so template_env_vars do not
-  # apply to it.
+  # Not gomplate: each quoted `"{{ env.Getenv ... }}"` string becomes the NRN
+  # (greedy `.*`: one placeholder per line), so template_env_vars do not apply.
   scope_configuration_rendered = var.create_scope_configuration ? replace(
     data.http.scope_configuration_template[0].response_body,
     "/\"{{\\s+env.Getenv\\s+\".*\"\\s+}}\"/",
