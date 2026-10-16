@@ -31,32 +31,16 @@ run "base_api_key" {
   }
 }
 
-run "scope_notification_api_key" {
+# Notification channel keys moved to the platform: the agent association
+# modules let nullplatform create and manage the channel credential.
+run "notification_types_are_rejected" {
   command = plan
 
   variables {
-    type               = "scope_notification"
-    specification_slug = "k8s"
+    type = "scope_notification"
   }
 
-  assert {
-    condition     = nullplatform_api_key.this.name == "SCOPE-NOTIFICATION-CHANNEL-K8S"
-    error_message = "Scope notification API key name should be 'SCOPE-NOTIFICATION-CHANNEL-K8S'"
-  }
-}
-
-run "service_notification_api_key" {
-  command = plan
-
-  variables {
-    type               = "service_notification"
-    specification_slug = "PostgreSQL"
-  }
-
-  assert {
-    condition     = nullplatform_api_key.this.name == "SERVICE-NOTIFICATION-CHANNEL-POSTGRESQL"
-    error_message = "Service notification API key name should be 'SERVICE-NOTIFICATION-CHANNEL-POSTGRESQL'"
-  }
+  expect_failures = [var.type]
 }
 
 run "custom_api_key" {
