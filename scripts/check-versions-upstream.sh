@@ -127,11 +127,18 @@ frozen_reason() {
   esac
 }
 
+# Every public ECR request goes through here. Shared GitHub runner IPs hit its
+# anonymous rate limit, so each request retries. No --retry-delay: a fixed delay
+# turns off curl's exponential backoff and its handling of Retry-After on a 429.
+ecr_curl() {
+  curl -fsS --retry 5 --retry-all-errors --retry-max-time 60 "$@"
+}
+
 # One anonymous token for the whole run: the endpoint rate-limits per request,
 # and a token fetched inside "$(...)" would be discarded with the subshell.
 ECR_TOKEN=''
 ecr_token() {
-  [ -n "$ECR_TOKEN" ] || ECR_TOKEN="$(curl -fsS https://public.ecr.aws/token/ | jq -r '.token')"
+  [ -n "$ECR_TOKEN" ] || ECR_TOKEN="$(ecr_curl https://public.ecr.aws/token/ | jq -r '.token // empty')"
   echo "$ECR_TOKEN"
 }
 
@@ -142,8 +149,7 @@ ecr_build_date() {
   local repo="$1" tag="$2" tok base manifest cfg created
   tok="$(ecr_token)"
   base="https://public.ecr.aws/v2/$repo"
-  manifest="$(curl -fsS --retry 3 --retry-delay 2 --retry-all-errors \
-    -H "Authorization: Bearer $tok" -H "Accept: $ACCEPT" \
+  manifest="$(ecr_curl -H "Authorization: Bearer $tok" -H "Accept: $ACCEPT" \
     "$base/manifests/$tag" 2>/dev/null)" || return 0
   # A manifest list carries no config. Follow the first real platform manifest:
   # index entries also include attestations, which have platform unknown/unknown
@@ -152,14 +158,12 @@ ecr_build_date() {
     local child
     child="$(jq -r '[.manifests[] | select((.platform.os // "unknown") != "unknown")][0].digest // empty' <<<"$manifest")"
     [ -n "$child" ] || return 0
-    manifest="$(curl -fsS --retry 3 --retry-delay 2 --retry-all-errors \
-      -H "Authorization: Bearer $tok" -H "Accept: $ACCEPT" \
+    manifest="$(ecr_curl -H "Authorization: Bearer $tok" -H "Accept: $ACCEPT" \
       "$base/manifests/$child" 2>/dev/null)" || return 0
   fi
   cfg="$(jq -r '.config.digest // empty' <<<"$manifest")"
   [ -n "$cfg" ] || return 0
-  created="$(curl -fsSL --retry 3 --retry-delay 2 --retry-all-errors \
-    -H "Authorization: Bearer $tok" -H 'Accept: */*' \
+  created="$(ecr_curl -L -H "Authorization: Bearer $tok" -H 'Accept: */*' \
     "$base/blobs/$cfg" 2>/dev/null | jq -r '.created // empty')" || return 0
   [ -n "$created" ] || return 0
   date -u -d "$created" +%s 2>/dev/null || date -u -jf '%Y-%m-%dT%H:%M:%S' "${created:0:19}" +%s 2>/dev/null || true
@@ -171,7 +175,7 @@ ecr_build_date() {
 ecr_latest() {
   local repo="$1" tok tags best_tag='' best_date=0 tag d
   tok="$(ecr_token)"
-  tags="$(curl -fsS -H "Authorization: Bearer $tok" \
+  tags="$(ecr_curl -H "Authorization: Bearer $tok" \
     "https://public.ecr.aws/v2/$repo/tags/list" | jq -r '.tags[]?' |
     grep -E '^v?[0-9]+\.[0-9]+\.[0-9]+$' |
     awk '{ t = $0; sub(/^v/, "", t); print t, $0 }' | sort -rV | head -3 | cut -d' ' -f2)" || return 0
@@ -276,9 +280,10 @@ resolve_latest() {
 # Whether the pin is spelled as published is checked separately.
 bare() { echo "${1#v}"; }
 
-ECR_TOKEN="$(curl -fsS https://public.ecr.aws/token/ | jq -r '.token' || true)"
+ECR_TOKEN="$(ecr_token || true)"
 
 ROWS=()
+RESOLVED=''
 DRIFT=0
 BROKEN=0
 # Values some rows derive from others: the AMI from the Kubernetes minor, the
@@ -326,7 +331,16 @@ while IFS='|' read -r _ component pinned _; do
     continue
   fi
 
-  latest="$(resolve_latest "$spec" "$pinned" || true)"
+  # Rows sharing an ECR repository read it once: each read costs several
+  # requests against the rate limit. Only ecr specs, whose answer does not
+  # depend on the row, and only answers, so a failed read is retried.
+  latest=''
+  [ "${spec%%:*}" = 'ecr' ] &&
+    latest="$(printf '%s\n' "$RESOLVED" | awk -v k="$spec" '$1 == k { print $2; exit }')"
+  if [ -z "$latest" ]; then
+    latest="$(resolve_latest "$spec" "$pinned" || true)"
+    [ -z "$latest" ] || [ "${spec%%:*}" != 'ecr' ] || RESOLVED="$RESOLVED$spec $latest"$'\n'
+  fi
   if [ -z "$latest" ]; then
     ROWS+=("$component|$pinned|-|could not read upstream")
     BROKEN=1
