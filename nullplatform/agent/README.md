@@ -22,7 +22,7 @@ The module renders a YAML values document via templatefile() from locals.tf and 
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.9.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v9.0.0"
 
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
   api_key                         = "your-api-key"
@@ -37,7 +37,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.9.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v9.0.0"
 
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
   api_key                         = "your-api-key"
@@ -54,7 +54,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.9.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v9.0.0"
 
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
   api_key                         = "your-api-key"
@@ -69,7 +69,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.9.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v9.0.0"
 
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
   api_key                         = "your-api-key"
@@ -88,7 +88,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.9.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v9.0.0"
 
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
   api_key                         = "your-api-key"
@@ -103,7 +103,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.9.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v9.0.0"
 
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
   api_key                         = "your-api-key"

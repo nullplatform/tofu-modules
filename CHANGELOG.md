@@ -7,6 +7,17 @@
 
 * **external_dns:** support public and private DNS on Azure with ExternalDNS: `label_filter` now applies to the `azure` and `azure-private-dns` providers, and the new `gateway_name` limits route sources to one Gateway, so a public instance keeps internal scopes out of the public zone while an `azure-private-dns` instance publishes them in the Private DNS zone (split-horizon)
 
+## [9.0.0](https://github.com/nullplatform/tofu-modules/compare/v8.9.1...v9.0.0) (2026-10-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* **api_key:** type no longer accepts "scope_notification" or "service_notification", and the specification_slug input is removed. Remove those module calls and omit api_key in scope_definition_agent_association, service_definition_agent_association and parameter_storage_definition_agent_association so the platform manages the channel credential.
+
+### Features
+
+* **api_key:** remove scope_notification and service_notification types ([#629](https://github.com/nullplatform/tofu-modules/issues/629)) ([8e75fe2](https://github.com/nullplatform/tofu-modules/commit/8e75fe2af6c2cd4b9e066c4620b32544ab568a95))
+
 ## [8.9.1](https://github.com/nullplatform/tofu-modules/compare/v8.9.0...v8.9.1) (2026-10-16)
 
 

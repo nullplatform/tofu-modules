@@ -6,8 +6,6 @@ locals {
     if contains(keys(local.nrn_parts), key)
   }
 
-  slug = var.specification_slug != null ? upper(var.specification_slug) : ""
-
   configs = {
     agent = {
       name = "AGENT"
@@ -30,21 +28,6 @@ locals {
         "developer",
         "ops",
         "secops",
-      ]
-    }
-    scope_notification = {
-      name = "SCOPE-NOTIFICATION-CHANNEL-${local.slug}"
-      role_slugs = [
-        "controlplane:agent",
-        "ops",
-      ]
-    }
-    service_notification = {
-      name = "SERVICE-NOTIFICATION-CHANNEL-${local.slug}"
-      role_slugs = [
-        "controlplane:agent",
-        "admin",
-        "ops",
       ]
     }
     custom = {
