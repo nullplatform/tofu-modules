@@ -37,7 +37,7 @@ resource "nullplatform_api_key" "this" {
 
     precondition {
       condition     = var.type == "custom" || var.nrn != null
-      error_message = "nrn is required for predefined types (agent, base, scope_notification, service_notification)"
+      error_message = "nrn is required for predefined types (agent, base)"
     }
 
     precondition {
@@ -48,11 +48,6 @@ resource "nullplatform_api_key" "this" {
     precondition {
       condition     = var.type != "custom" || length(var.custom_grants) == 0 || length(var.custom_role_slugs) == 0
       error_message = "use either custom_role_slugs or custom_grants, not both"
-    }
-
-    precondition {
-      condition     = !contains(["scope_notification", "service_notification"], var.type) || (var.specification_slug != null && var.specification_slug != "")
-      error_message = "specification_slug is required for scope_notification and service_notification types"
     }
   }
 }
