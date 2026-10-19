@@ -26,6 +26,7 @@ resource "nullplatform_action_specification" "from_templates" {
   retryable                = try(local.action_specs_parsed[each.key].retryable, false)
   annotations              = try(jsonencode(local.action_specs_parsed[each.key].annotations), null)
   icon                     = try(local.action_specs_parsed[each.key].icon, null)
+  external                 = try(jsonencode(local.action_specs_parsed[each.key].external), null)
 }
 
 resource "nullplatform_link_specification" "from_templates" {
