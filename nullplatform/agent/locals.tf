@@ -226,10 +226,20 @@ locals {
     }
   ] : []
 
+  # Disruption protection for every worker: an empty target matches all of
+  # them, whatever package they run. First in the list so a per-package patch
+  # (or var.worker.patches) can still override an annotation.
+  worker_annotation_patches = var.worker_orchestrator && length(var.worker_pod_annotations) > 0 ? [
+    {
+      target = {}
+      merge  = { metadata = { annotations = var.worker_pod_annotations } }
+    }
+  ] : []
+
   worker_defaults = {
     backend           = "kubernetes"
     allowedRegistries = ["public.ecr.aws/nullplatform/*"]
-    patches           = concat(local.worker_common_patches, local.worker_k8s_env_patches)
+    patches           = concat(local.worker_annotation_patches, local.worker_common_patches, local.worker_k8s_env_patches)
     # Reap worker-orchestrated pods (and their Deployments) after 30m with no
     # activity. Previously unset (NP_WORKER_IDLE_TTL empty), which disables
     # the reaper entirely — stale workers from old package revisions or

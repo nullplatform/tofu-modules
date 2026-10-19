@@ -284,6 +284,20 @@ variable "pod_disruption_budget" {
   default     = null
 }
 
+# Worker pods run the actions themselves (a deploy runs in its package's
+# worker), so evicting a worker mid-action fails it just like evicting the
+# agent does. The agent spawns them, so the chart's podAnnotations don't reach
+# them: the module adds these through a worker patch with an empty target,
+# which the chart applies to every worker.
+variable "worker_pod_annotations" {
+  description = "Annotations added to every worker pod (worker_orchestrator only) through a patch with an empty target. The defaults keep node autoscalers from evicting a worker mid-action: karpenter.sh/do-not-disrupt for Karpenter (EKS Auto Mode, AKS node auto-provisioning) and cluster-autoscaler.kubernetes.io/safe-to-evict for Cluster Autoscaler; a cluster without them ignores both. An idle worker then holds its node until the idle reaper (idleTTL, 30m by default) removes it. Empty renders no patch."
+  type        = map(string)
+  default = {
+    "karpenter.sh/do-not-disrupt"                    = "true"
+    "cluster-autoscaler.kubernetes.io/safe-to-evict" = "false"
+  }
+}
+
 variable "node_selector" {
   description = "nodeSelector for the agent pod, e.g. to pin it to a node pool that is not consolidated. Empty (the default) renders nothing."
   type        = map(string)
