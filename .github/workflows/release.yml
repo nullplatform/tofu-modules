@@ -186,18 +186,30 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
 
-          git add -A '*.md' || true
+          # VERSIONS.md gets its own commit, so each message says what changed:
+          # the upstream pins move independently of the module READMEs.
+          pushed=false
+          git add -A VERSIONS.md || true
+          if ! git diff --staged --quiet; then
+            git commit -m "docs: update version references in VERSIONS.md"
+            pushed=true
+          fi
 
-          if git diff --staged --quiet; then
-            echo "No README changes to commit"
-          else
+          git add -A '*.md' || true
+          if ! git diff --staged --quiet; then
             if [ "${{ steps.changed.outputs.has_changes }}" = "true" ]; then
               git commit -m "docs: regenerate READMEs for changed modules and update versions"
             else
               git commit -m "docs: update version references in READMEs"
             fi
+            pushed=true
+          fi
+
+          if [ "$pushed" = true ]; then
             git push origin release-please--branches--main
-            echo "READMEs updated in Release PR #${{ steps.check_pr.outputs.pr_number }}"
+            echo "Docs updated in Release PR #${{ steps.check_pr.outputs.pr_number }}"
+          else
+            echo "No docs changes to commit"
           fi
         env:
           HUSKY: 0
