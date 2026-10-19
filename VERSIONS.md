@@ -14,7 +14,7 @@ a specific release, so an upgrade is something someone decides.
 
 ## What to pin
 
-Verified 2026-10-16.
+Verified 2026-10-19.
 
 | Component | Current | Variable | Module |
 | --- | --- | --- | --- |
@@ -30,7 +30,7 @@ Verified 2026-10-16.
 | `k8s-traffic-manager` | `1.8.1` | `agent_traffic_manager_tag` | `nullplatform/agent` |
 | traffic manager (provider config) | `1.8.1` | `traffic_manager_version` | `container_orchestration/eks` |
 | `scopes` repository | `v1.18.0` | `agent_repo` (as `"https://github.com/nullplatform/scopes.git#v1.18.0"`; only without packages) | `nullplatform/agent` |
-| `scopes-lambda` repository | `v0.9.2` | `agent_repo` (as `"https://github.com/nullplatform/scopes-lambda.git#v0.9.2"`; only without packages) | `nullplatform/agent` |
+| `scopes-lambda` repository | `v0.10.0` | `agent_repo` (as `"https://github.com/nullplatform/scopes-lambda.git#v0.10.0"`; only without packages) | `nullplatform/agent` |
 | `scopes-static-files` repository | `v4.1.1` | `agent_repo` (as `"https://github.com/nullplatform/scopes-static-files.git#v4.1.1"`; only without packages) | `nullplatform/agent` |
 | `external-dns` chart | `1.23.0` | `external_dns_version` | `infrastructure/commons/external_dns` |
 | `aws-load-balancer-controller` chart | `3.6.0` | `aws_load_balancer_controller_version` | `infrastructure/aws/aws_load_balancer_controller` |
@@ -67,7 +67,7 @@ module "agent" {
   # scopes and services come from each package, so leave agent_repo unset.
   # agent_repo = [
   #   "https://github.com/nullplatform/scopes.git#v1.18.0",
-  #   "https://github.com/nullplatform/scopes-lambda.git#v0.9.2",
+  #   "https://github.com/nullplatform/scopes-lambda.git#v0.10.0",
   #   "https://github.com/nullplatform/scopes-static-files.git#v4.1.1",
   # ]
 }
