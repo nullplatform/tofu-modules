@@ -730,6 +730,64 @@ run "worker_orchestrator_true_renders_the_block_and_patches" {
   }
 }
 
+################################################################################
+# Worker disruption protection
+################################################################################
+
+# Workers run the actions, so evicting one fails the action in flight. An empty
+# target makes the chart apply the patch to every worker, whatever its package.
+run "workers_are_protected_from_autoscaler_evictions_by_default" {
+  command = plan
+
+  assert {
+    condition = yamldecode(helm_release.agent.values[0]).worker.patches[0] == {
+      target = {}
+      merge = { metadata = { annotations = {
+        "karpenter.sh/do-not-disrupt"                    = "true"
+        "cluster-autoscaler.kubernetes.io/safe-to-evict" = "false"
+      } } }
+    }
+    error_message = "the first worker patch must target every worker and carry the autoscaler annotations"
+  }
+
+  assert {
+    condition = length([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches : p
+      if try(p.merge.metadata.annotations, null) != null
+    ]) == 1
+    error_message = "the annotations must come from a single patch, not be repeated per package"
+  }
+}
+
+run "worker_annotation_set_to_null_is_rendered_as_null" {
+  command = plan
+
+  variables {
+    worker_pod_annotations = { "karpenter.sh/do-not-disrupt" = null, team = "platform" }
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).worker.patches[0].merge.metadata.annotations == { "karpenter.sh/do-not-disrupt" = null, team = "platform" }
+    error_message = "worker_pod_annotations must be rendered as given, null included"
+  }
+}
+
+run "empty_worker_annotations_render_no_patch" {
+  command = plan
+
+  variables {
+    worker_pod_annotations = {}
+  }
+
+  assert {
+    condition = length([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches : p
+      if try(p.merge.metadata.annotations, null) != null
+    ]) == 0
+    error_message = "an empty worker_pod_annotations must not render the annotation patch"
+  }
+}
+
 run "extra_envs_reaches_the_agent_with_orchestration_off" {
   command = plan
 

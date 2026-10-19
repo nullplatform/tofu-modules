@@ -198,6 +198,7 @@ resource "example_resource" "this" {
 | <a name="input_worker_memory_limit"></a> [worker\_memory\_limit](#input\_worker\_memory\_limit) | Memory limit for a worker-orchestrated package's pod (packages in var.worker\_orchestrated\_packages). The chart's own default is small enough to OOM mid-tofu-apply for packages that run real IaC tooling. | `string` | `"2Gi"` | no |
 | <a name="input_worker_orchestrated_packages"></a> [worker\_orchestrated\_packages](#input\_worker\_orchestrated\_packages) | Package slugs whose worker-orchestrator (package-exec) pods should run<br/>under var.service\_account\_name (the same IRSA identity as the agent<br/>itself) and var.worker\_memory\_limit, via a per-package worker-container<br/>patch. Add a package's slug here whenever its worker needs to assume an<br/>AWS role or needs Azure workload identity (the azure.workload.identity/use<br/>label is added through the same per-package patch), or needs more memory<br/>than the chart's own default (e.g. to run tofu/terraform); a worker for a package not listed here falls back to the<br/>namespace's default ServiceAccount and the chart's own memory default.<br/><br/>This is separate from the "containers" scope's own k8s-deployment env<br/>vars (DNS\_TYPE, DOMAIN, etc.), which remain specific to that package<br/>regardless of what's listed here. | `list(string)` | <pre>[<br/>  "containers"<br/>]</pre> | no |
 | <a name="input_worker_orchestrator"></a> [worker\_orchestrator](#input\_worker\_orchestrator) | Configure worker orchestration: emit the chart's top-level "worker" block<br/>(backend, allowedRegistries, idleTTL and the per-package patches built from<br/>worker\_orchestrated\_packages and worker\_k8s\_packages) plus anything set in<br/>var.worker.<br/><br/>Off by default: the module writes no "worker" key and builds no patches, so<br/>the chart's own defaults apply and scopes keep running inside the agent<br/>container (the legacy exec flow, see var.agent\_repo). Turn it on to run<br/>packages in their own worker pods; var.worker, the package lists and<br/>worker\_memory\_limit are ignored while it is off.<br/><br/>The agent's own env is the same either way: DOMAIN, DNS\_TYPE, K8S\_NAMESPACE<br/>and the rest are always published to the agent container. | `bool` | `false` | no |
+| <a name="input_worker_pod_annotations"></a> [worker\_pod\_annotations](#input\_worker\_pod\_annotations) | Annotations added to every worker pod (worker\_orchestrator only) through a patch with an empty target. The defaults keep node autoscalers from evicting a worker mid-action: karpenter.sh/do-not-disrupt for Karpenter (EKS Auto Mode, AKS node auto-provisioning) and cluster-autoscaler.kubernetes.io/safe-to-evict for Cluster Autoscaler; a cluster without them ignores both. An idle worker then holds its node until the idle reaper (idleTTL, 30m by default) removes it. Empty renders no patch. | `map(string)` | <pre>{<br/>  "cluster-autoscaler.kubernetes.io/safe-to-evict": "false",<br/>  "karpenter.sh/do-not-disrupt": "true"<br/>}</pre> | no |
 | <a name="input_workload_namespace"></a> [workload\_namespace](#input\_workload\_namespace) | Kubernetes namespace scopes deploy their application pods into, handed to the k8s-scope workers as K8S\_NAMESPACE. Defaults to the k8s scope's own default, which is what every pre-worker agent used. | `string` | `"nullplatform"` | no |
 <!-- END_TF_DOCS -->
 
@@ -354,6 +355,11 @@ resource "example_resource" "this" {
     {
       "name": "pod_disruption_budget",
       "description": "",
+      "required": false
+    },
+    {
+      "name": "worker_pod_annotations",
+      "description": "Annotations added to every worker pod through a patch with an empty target (worker_orchestrator only). Defaults to karpenter.sh/do-not-disrupt and cluster-autoscaler safe-to-evict so node autoscalers don't evict a worker mid-action. Empty renders no patch.",
       "required": false
     },
     {
