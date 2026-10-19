@@ -2,27 +2,27 @@
 
 ## Description
 
-Deploys the nullplatform agent as a Helm release on a Kubernetes cluster with cloud-provider-specific configuration, worker orchestration, and ingress stack selection
+Deploys the nullplatform agent as a Helm release on Kubernetes with cloud-provider-specific configuration, worker orchestration support, and ingress stack selection
 
 ## Architecture
 
-A single helm_release resource named 'agent' deploys the nullplatform-agent chart from the official Helm repository, with values rendered by a templatefile() call that merges locals built from cloud-provider-specific maps, ingress stack templates, worker patch lists, and the all_config/worker_all_config maps. A terraform_data.api_key_trigger resource forces helm_release replacement whenever the API key changes, and a terraform_data.cross_variable_validation resource enforces cloud-provider-specific preconditions (IAM role for AWS, client credentials or workload identity for Azure) at plan time. Worker orchestration is controlled by var.worker_orchestrator, which gates generation of per-package pod patches for identity, memory limits, and k8s scope environment variables that are merged into the chart's worker block.
+The module renders a YAML values document via templatefile() from locals.tf and passes it to a single helm_release resource targeting the nullplatform-agent chart. A terraform_data.api_key_trigger resource forces helm_release replacement when the API key rotates, while terraform_data.cross_variable_validation enforces cloud-provider-specific preconditions at plan time. Locals merge default_config, deploy_config, cloud_config, and extra_envs into all_config, which flows into the chart values as agent environment variables; worker orchestration patches are conditionally built into per-package merge blocks that configure serviceAccountName, memory limits, and k8s-scope env vars on worker pods.
 
 ## Features
 
-- Deploys nullplatform-agent via helm_release with atomic upgrades, cleanup on failure, and capped revision history
-- Renders cloud-provider-specific environment variables for AWS (IAM role ARN), Azure (client credentials, workload identity, subscription, tenant, resource group), GCP, OCI, and on-premises clusters
-- Configures worker orchestration with per-package pod patches for service account identity, memory limits, and k8s scope environment variables when worker_orchestrator is enabled
-- Selects ingress templates automatically based on ingress_stack (ALB or Istio Gateway API HTTPRoutes) with per-execution-context path resolution for worker vs legacy agent flows
-- Enforces pinned non-moving versions for both the Helm chart and traffic manager image tag via input validation
-- Supports Azure Workload Identity by injecting the azure.workload.identity/use pod label and federated ServiceAccount annotation across agent and worker pods
-- Merges extra_envs last so operators can override any computed environment variable including TRAFFIC_CONTAINER_IMAGE without modifying module internals
+- Deploys nullplatform-agent via helm_release with atomic rollback, cleanup-on-fail, and capped revision history
+- Builds per-package worker orchestration patches injecting ServiceAccount identity, memory limits, and k8s-scope env vars into worker pods
+- Configures ingress stack templates (ALB or Istio Gateway API HTTPRoutes) by deriving SERVICE_TEMPLATE, INITIAL_INGRESS_PATH, and BLUE_GREEN_INGRESS_PATH from ingress_stack selection
+- Injects cloud-provider-specific environment variables including AWS_IAM_ROLE_ARN for AWS and Azure Service Principal or Workload Identity credentials for Azure
+- Enforces cloud-provider preconditions at plan time via terraform_data lifecycle preconditions covering IAM roles, Azure credentials, and cluster naming
+- Pins nullplatform agent Helm chart version and traffic manager image tag with validation rejecting empty or moving references
+- Supports AKS Workload Identity by conditionally labeling agent and worker pods with azure.workload.identity/use and annotating the ServiceAccount
 
 ## Basic Usage
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.9.1"
 
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
   api_key                         = "your-api-key"
@@ -37,7 +37,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.9.1"
 
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
   api_key                         = "your-api-key"
@@ -54,7 +54,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.9.1"
 
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
   api_key                         = "your-api-key"
@@ -69,12 +69,10 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.9.1"
 
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
   api_key                         = "your-api-key"
-  azure_client_id                 = "your-azure-client-id"  # Required when cloud_provider = "azure"
-  azure_client_secret             = "your-azure-client-secret"  # Required when cloud_provider = "azure"
   azure_resource_group            = "your-azure-resource-group"  # Required when cloud_provider = "azure"
   azure_subscription_id           = "your-azure-subscription-id"  # Required when cloud_provider = "azure"
   azure_tenant_id                 = "your-azure-tenant-id"  # Required when cloud_provider = "azure"
@@ -90,7 +88,7 @@ module "agent" {
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.9.1"
 
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
   api_key                         = "your-api-key"
@@ -101,45 +99,15 @@ module "agent" {
 }
 ```
 
-### Usage with On-Premises / Self-Managed
+### Usage with On-Premise / Self-Managed
 
 ```hcl
 module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.9.1"
 
   agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
   api_key                         = "your-api-key"
   cloud_provider                  = "onprem"
-  image_tag                       = "your-image-tag"
-  nullplatform_agent_helm_version = "your-nullplatform-agent-helm-version"
-  tags_selectors                  = "your-tags-selectors"
-}
-```
-
-### Usage with Pinned Helm Chart Version
-
-```hcl
-module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.8.0"
-
-  agent_traffic_manager_tag       = "your-agent-traffic-manager-tag"
-  api_key                         = "your-api-key"
-  cloud_provider                  = "your-cloud-provider"
-  image_tag                       = "your-image-tag"
-  nullplatform_agent_helm_version = "nullplatform_agent_helm_version"
-  tags_selectors                  = "your-tags-selectors"
-}
-```
-
-### Usage with Pinned Traffic Manager Tag
-
-```hcl
-module "agent" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/agent?ref=v8.8.0"
-
-  agent_traffic_manager_tag       = "agent_traffic_manager_tag"
-  api_key                         = "your-api-key"
-  cloud_provider                  = "your-cloud-provider"
   image_tag                       = "your-image-tag"
   nullplatform_agent_helm_version = "your-nullplatform-agent-helm-version"
   tags_selectors                  = "your-tags-selectors"
@@ -209,7 +177,10 @@ resource "example_resource" "this" {
 | <a name="input_initial_ingress_path"></a> [initial\_ingress\_path](#input\_initial\_ingress\_path) | Path, inside the worker image, of the ingress/route template used on a scope's first deployment. Empty (default) uses the template ingress\_stack selects; set it only to point at a custom template. | `string` | `""` | no |
 | <a name="input_liveness_probe"></a> [liveness\_probe](#input\_liveness\_probe) | Fields merged over the chart's livenessProbe (httpGet /health on 8080), e.g. { initialDelaySeconds = 120 }. Null (the default) renders nothing and leaves the chart's probe untouched. | `any` | `null` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Kubernetes namespace where the nullplatform agent itself runs. This is NOT where scopes deploy their workloads — see var.workload\_namespace. | `string` | `"nullplatform-tools"` | no |
+| <a name="input_node_selector"></a> [node\_selector](#input\_node\_selector) | nodeSelector for the agent pod, e.g. to pin it to a node pool that is not consolidated. Empty (the default) renders nothing. | `map(string)` | `{}` | no |
 | <a name="input_nullplatform_agent_helm_version"></a> [nullplatform\_agent\_helm\_version](#input\_nullplatform\_agent\_helm\_version) | No default: every install pins this deliberately — see VERSIONS.md. Version of the nullplatform agent Helm chart to deploy | `string` | n/a | yes |
+| <a name="input_pod_annotations"></a> [pod\_annotations](#input\_pod\_annotations) | Annotations merged over the chart's podAnnotations. From chart 3.2.0 the chart sets karpenter.sh/do-not-disrupt = "true" and cluster-autoscaler.kubernetes.io/safe-to-evict = "false" so node autoscalers don't evict the agent mid-action; set a key to null to drop one of them (e.g. an admission policy that rejects it). Empty (the default) renders nothing. | `map(string)` | `{}` | no |
+| <a name="input_pod_disruption_budget"></a> [pod\_disruption\_budget](#input\_pod\_disruption\_budget) | PodDisruptionBudget for the agent (chart >= 3.2.0), rendered as the chart's<br/>podDisruptionBudget values. Null (the default) renders nothing and the chart<br/>keeps it disabled. With a single replica only a budget that still allows an<br/>eviction is accepted: the chart refuses maxUnavailable = 0 and a minAvailable<br/>that is not below the replica count, since they would hang node drains and<br/>cluster upgrades.<br/><br/>Example:<br/>  pod\_disruption\_budget = { enabled = true, maxUnavailable = 1 } | `any` | `null` | no |
 | <a name="input_private_gateway_name"></a> [private\_gateway\_name](#input\_private\_gateway\_name) | Name of the private/internal gateway used for routing | `string` | `"gateway-private"` | no |
 | <a name="input_private_hosted_zone_rg"></a> [private\_hosted\_zone\_rg](#input\_private\_hosted\_zone\_rg) | Resource group for private hosted zone. Required when cloud\_provider is 'azure'. | `string` | `null` | no |
 | <a name="input_public_gateway_name"></a> [public\_gateway\_name](#input\_public\_gateway\_name) | Name of the public gateway used for routing | `string` | `"gateway-public"` | no |
@@ -217,7 +188,10 @@ resource "example_resource" "this" {
 | <a name="input_release_name"></a> [release\_name](#input\_release\_name) | Override for the Helm release name. Defaults to nullplatform-agent | `string` | `"nullplatform-agent"` | no |
 | <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | Override for the Kubernetes ServiceAccount name created by the Helm chart | `string` | `"nullplatform-agent"` | no |
 | <a name="input_service_template"></a> [service\_template](#input\_service\_template) | Path, inside the worker image, of the Service template the k8s scope renders. Empty (default) uses the template ingress\_stack selects; set it only to point at a custom template. | `string` | `""` | no |
+| <a name="input_startup_probe"></a> [startup\_probe](#input\_startup\_probe) | Fields merged over the chart's startupProbe (chart >= 3.2.0: httpGet /health on 8080, every 10s, up to 30 failures), e.g. { failureThreshold = 60 } for a slow repo clone. Null (the default) renders nothing and leaves the chart's probe untouched. | `any` | `null` | no |
 | <a name="input_tags_selectors"></a> [tags\_selectors](#input\_tags\_selectors) | Map of tags used to select and filter channels and agents | `map(string)` | n/a | yes |
+| <a name="input_termination_grace_period_seconds"></a> [termination\_grace\_period\_seconds](#input\_termination\_grace\_period\_seconds) | Seconds the agent gets to stop after SIGTERM (chart >= 3.2.0, which defaults to 60). Keep it above the chart's preStop sleep (30s). Null (the default) renders nothing. | `number` | `null` | no |
+| <a name="input_tolerations"></a> [tolerations](#input\_tolerations) | Tolerations for the agent pod. Helm replaces lists instead of merging them, so this replaces the chart's defaults (node.kubernetes.io/not-ready and node.kubernetes.io/unreachable, NoExecute for 300s): include them if you still want them. Null (the default) renders nothing and keeps the chart's tolerations. | `any` | `null` | no |
 | <a name="input_use_account_slug"></a> [use\_account\_slug](#input\_use\_account\_slug) | Flag to determine whether to use the account slug in resource naming | `string` | `""` | no |
 | <a name="input_worker"></a> [worker](#input\_worker) | Extra worker-orchestration config, merged on top of the module's own computed<br/>worker block: backend ("kubernetes" by default), allowedRegistries<br/>(["public.ecr.aws/nullplatform/*"] by default, so the platform's own scope<br/>images keep working), idleTTL ("30m" by default, so worker Deployments<br/>left behind by an old/removed package revision get reaped instead of<br/>accumulating forever), and a patch for the worker container (2Gi memory<br/>limit, the deploy/DNS env vars below, and a serviceAccountName that always<br/>mirrors service\_account\_name). allowedRegistries and patches set here are<br/>concatenated with (not replacing) the module defaults — add your own<br/>registries or an extra patch rather than having to repeat the defaults;<br/>set backend or idleTTL here to override them outright (e.g. idleTTL = ""<br/>to disable the reaper, matching this module's pre-idleTTL-default<br/>behavior). Anything else — security, the legacy defaults/rules/pins —<br/>passes through as-is. See the nullplatform-agent chart values (>= 2.37.0)<br/>for the full shape. null = nothing extra beyond the defaults above.<br/><br/>Example:<br/>  worker = {<br/>    allowedRegistries = ["123456789012.dkr.ecr.us-east-1.amazonaws.com/your-org/*"]<br/>    patches           = [{ target = { package = "my-pkg" }, merge = { spec = { serviceAccountName = "np-agent-sa" } } }]<br/>    idleTTL           = "1h"<br/>  } | `any` | `null` | no |
 | <a name="input_worker_k8s_packages"></a> [worker\_k8s\_packages](#input\_worker\_k8s\_packages) | Package slugs whose worker runs the k8s scope and must receive its env vars (DNS\_TYPE, K8S\_NAMESPACE, template paths, CLUSTER\_NAME, extra\_envs). Add every package that runs the k8s scope code, e.g. ["containers", "scheduled-task"]. | `list(string)` | <pre>[<br/>  "containers"<br/>]</pre> | no |
@@ -230,16 +204,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "agent",
-  "description": "Deploys the nullplatform agent as a Helm release on a Kubernetes cluster with cloud-provider-specific configuration, worker orchestration, and ingress stack selection",
-  "architecture": "A single helm_release resource named 'agent' deploys the nullplatform-agent chart from the official Helm repository, with values rendered by a templatefile() call that merges locals built from cloud-provider-specific maps, ingress stack templates, worker patch lists, and the all_config/worker_all_config maps. A terraform_data.api_key_trigger resource forces helm_release replacement whenever the API key changes, and a terraform_data.cross_variable_validation resource enforces cloud-provider-specific preconditions (IAM role for AWS, client credentials or workload identity for Azure) at plan time. Worker orchestration is controlled by var.worker_orchestrator, which gates generation of per-package pod patches for identity, memory limits, and k8s scope environment variables that are merged into the chart's worker block.",
+  "description": "Deploys the nullplatform agent as a Helm release on Kubernetes with cloud-provider-specific configuration, worker orchestration support, and ingress stack selection",
+  "architecture": "The module renders a YAML values document via templatefile() from locals.tf and passes it to a single helm_release resource targeting the nullplatform-agent chart. A terraform_data.api_key_trigger resource forces helm_release replacement when the API key rotates, while terraform_data.cross_variable_validation enforces cloud-provider-specific preconditions at plan time. Locals merge default_config, deploy_config, cloud_config, and extra_envs into all_config, which flows into the chart values as agent environment variables; worker orchestration patches are conditionally built into per-package merge blocks that configure serviceAccountName, memory limits, and k8s-scope env vars on worker pods.",
   "features": [
-    "Deploys nullplatform-agent via helm_release with atomic upgrades, cleanup on failure, and capped revision history",
-    "Renders cloud-provider-specific environment variables for AWS (IAM role ARN), Azure (client credentials, workload identity, subscription, tenant, resource group), GCP, OCI, and on-premises clusters",
-    "Configures worker orchestration with per-package pod patches for service account identity, memory limits, and k8s scope environment variables when worker_orchestrator is enabled",
-    "Selects ingress templates automatically based on ingress_stack (ALB or Istio Gateway API HTTPRoutes) with per-execution-context path resolution for worker vs legacy agent flows",
-    "Enforces pinned non-moving versions for both the Helm chart and traffic manager image tag via input validation",
-    "Supports Azure Workload Identity by injecting the azure.workload.identity/use pod label and federated ServiceAccount annotation across agent and worker pods",
-    "Merges extra_envs last so operators can override any computed environment variable including TRAFFIC_CONTAINER_IMAGE without modifying module internals"
+    "Deploys nullplatform-agent via helm_release with atomic rollback, cleanup-on-fail, and capped revision history",
+    "Builds per-package worker orchestration patches injecting ServiceAccount identity, memory limits, and k8s-scope env vars into worker pods",
+    "Configures ingress stack templates (ALB or Istio Gateway API HTTPRoutes) by deriving SERVICE_TEMPLATE, INITIAL_INGRESS_PATH, and BLUE_GREEN_INGRESS_PATH from ingress_stack selection",
+    "Injects cloud-provider-specific environment variables including AWS_IAM_ROLE_ARN for AWS and Azure Service Principal or Workload Identity credentials for Azure",
+    "Enforces cloud-provider preconditions at plan time via terraform_data lifecycle preconditions covering IAM roles, Azure credentials, and cluster naming",
+    "Pins nullplatform agent Helm chart version and traffic manager image tag with validation rejecting empty or moving references",
+    "Supports AKS Workload Identity by conditionally labeling agent and worker pods with azure.workload.identity/use and annotating the ServiceAccount"
   ],
   "inputs": [
     {
@@ -271,6 +245,16 @@ resource "example_resource" "this" {
       "name": "agent_traffic_manager_tag",
       "description": "No default: every install pins this deliberately — see VERSIONS.md. Image tag for the traffic manager, published to the agent as TRAFFIC_CONTAINER_IMAGE. Pinning this used to mean passing the whole image string through extra_envs; the registry lives here so only the tag is exposed. extra_envs still takes precedence for anyone who needs a digest or a mirrored path.",
       "required": true
+    },
+    {
+      "name": "termination_grace_period_seconds",
+      "description": "Seconds the agent gets to stop after SIGTERM (chart >= 3.2.0, which defaults to 60). Keep it above the chart's preStop sleep (30s). Null (the default) renders nothing.",
+      "required": false
+    },
+    {
+      "name": "tolerations",
+      "description": "Tolerations for the agent pod. Helm replaces lists instead of merging them, so this replaces the chart's defaults (node.kubernetes.io/not-ready and node.kubernetes.io/unreachable, NoExecute for 300s): include them if you still want them. Null (the default) renders nothing and keeps the chart's tolerations.",
+      "required": false
     },
     {
       "name": "ingress_stack",
@@ -355,6 +339,26 @@ resource "example_resource" "this" {
     {
       "name": "readiness_probe",
       "description": "Fields merged over the chart's readinessProbe (httpGet /health on 8080), e.g. { initialDelaySeconds = 60 }. Null (the default) renders nothing and leaves the chart's probe untouched.",
+      "required": false
+    },
+    {
+      "name": "startup_probe",
+      "description": "Fields merged over the chart's startupProbe (chart >= 3.2.0: httpGet /health on 8080, every 10s, up to 30 failures), e.g. { failureThreshold = 60 } for a slow repo clone. Null (the default) renders nothing and leaves the chart's probe untouched.",
+      "required": false
+    },
+    {
+      "name": "pod_annotations",
+      "description": "Annotations merged over the chart's podAnnotations. From chart 3.2.0 the chart sets karpenter.sh/do-not-disrupt = \\",
+      "required": false
+    },
+    {
+      "name": "pod_disruption_budget",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "node_selector",
+      "description": "nodeSelector for the agent pod, e.g. to pin it to a node pool that is not consolidated. Empty (the default) renders nothing.",
       "required": false
     },
     {
@@ -459,6 +463,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "97c26c1f43fcc86ba985113d1929c6e1"
+  "hash": "608bc2ccd34c1f72e4af57d54945e331"
 }
 END_AI_METADATA -->

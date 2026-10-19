@@ -165,6 +165,11 @@ jobs:
           if grep -q 'Kubernetes moves to' "$RUNNER_TEMP/versions-report.txt"; then
             echo "::warning::VERSIONS.md moves the EKS Kubernetes minor; update every addon build for it before merging this release"
           fi
+          # Exit 1 means drift or an unreadable row, and only drift is fine: one
+          # unreadable row keeps --write from touching the table at all.
+          if grep -q 'could not read upstream' "$RUNNER_TEMP/versions-report.txt"; then
+            echo "::warning::check-versions-upstream.sh could not read some upstreams; VERSIONS.md left unchanged. Re-run this job to refresh it"
+          fi
           if [ "$rc" -eq 3 ]; then
             echo "::warning::VERSIONS.md's Ready-to-paste block sets a variable its module does not declare; table left unchanged"
           elif [ "$rc" -gt 1 ]; then

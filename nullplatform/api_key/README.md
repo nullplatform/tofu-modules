@@ -21,7 +21,7 @@ The module defines a single nullplatform_api_key resource whose name, grants, an
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v8.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v8.9.1"
 
   type = "your-type"
 }
@@ -31,7 +31,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v8.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v8.9.1"
 
   nrn  = "your-nrn"  # Required when type = "agent"
   type = "agent"
@@ -42,7 +42,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v8.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v8.9.1"
 
   nrn  = "your-nrn"  # Required when type = "base"
   type = "base"
@@ -53,7 +53,7 @@ module "api_key" {
 
 ```hcl
 module "api_key" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v8.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/api_key?ref=v8.9.1"
 
   custom_name       = "your-custom-name"  # Required when type = "custom"
   custom_role_slugs = "your-custom-role-slugs"  # Required when type = "custom"
