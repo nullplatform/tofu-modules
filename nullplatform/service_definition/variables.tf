@@ -96,7 +96,18 @@ variable "bitbucket_email" {
 variable "extra_visibile_to_nrns" {
   type        = list(string)
   default     = []
-  description = "Additional NRNs that should have visibility to the created service specification"
+  description = "Additional NRNs that should have visibility to the created service specification. Ignored when visible_to is set."
+}
+
+variable "visible_to" {
+  type        = list(string)
+  default     = null
+  description = "Replaces the service specification visibility (default: var.nrn plus extra_visibile_to_nrns, which is ignored when this is set; var.nrn is not added automatically). Does not affect the package, which stays owned by var.nrn and uses package.visible_to. Must not be empty."
+
+  validation {
+    condition     = var.visible_to == null ? true : length(var.visible_to) > 0
+    error_message = "visible_to must list at least one NRN when set."
+  }
 }
 
 variable "dimensions" {
