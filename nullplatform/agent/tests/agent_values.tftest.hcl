@@ -1018,7 +1018,7 @@ run "disruption_settings_are_left_to_the_chart_by_default" {
 
   assert {
     condition = alltrue([
-      for key in ["startupProbe", "podAnnotations", "terminationGracePeriodSeconds", "podDisruptionBudget", "nodeSelector", "tolerations"] :
+      for key in ["startupProbe", "podAnnotations", "terminationGracePeriodSeconds", "shutdownDrainTimeoutSeconds", "podDisruptionBudget", "nodeSelector", "tolerations"] :
       !contains(keys(yamldecode(helm_release.agent.values[0])), key)
     ])
     error_message = "with no overrides the module must not render any disruption-related key"
@@ -1032,6 +1032,7 @@ run "disruption_overrides_are_rendered" {
     startup_probe                    = { failureThreshold = 60 }
     pod_annotations                  = { team = "platform" }
     termination_grace_period_seconds = 120
+    shutdown_drain_timeout_seconds   = 90
     pod_disruption_budget            = { enabled = true, maxUnavailable = 1 }
     node_selector                    = { "karpenter.sh/nodepool" = "platform" }
     tolerations = [
@@ -1053,6 +1054,11 @@ run "disruption_overrides_are_rendered" {
   assert {
     condition     = yamldecode(helm_release.agent.values[0]).terminationGracePeriodSeconds == 120
     error_message = "termination_grace_period_seconds must render as a number"
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).shutdownDrainTimeoutSeconds == 90
+    error_message = "shutdown_drain_timeout_seconds must render as a number under shutdownDrainTimeoutSeconds"
   }
 
   assert {
@@ -1094,6 +1100,27 @@ run "termination_grace_period_must_outlast_the_prestop_sleep" {
   }
 
   expect_failures = [var.termination_grace_period_seconds]
+}
+
+run "shutdown_drain_must_fit_in_the_grace_period" {
+  command = plan
+
+  variables {
+    termination_grace_period_seconds = 60
+    shutdown_drain_timeout_seconds   = 55
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "shutdown_drain_must_be_whole_seconds" {
+  command = plan
+
+  variables {
+    shutdown_drain_timeout_seconds = 1.5
+  }
+
+  expect_failures = [var.shutdown_drain_timeout_seconds]
 }
 
 run "tolerations_must_be_a_list" {

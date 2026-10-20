@@ -17,6 +17,10 @@ resource "terraform_data" "cross_variable_validation" {
       error_message = "cluster_name is required when cloud_provider is 'aws': the k8s scope needs it to find the EKS OIDC provider when it creates IAM roles. Set cluster_name (extra_envs.CLUSTER_NAME is still accepted for existing installations)."
     }
     precondition {
+      condition     = var.shutdown_drain_timeout_seconds == null || var.termination_grace_period_seconds == null || try(var.shutdown_drain_timeout_seconds + 10 <= var.termination_grace_period_seconds, false)
+      error_message = "shutdown_drain_timeout_seconds must be at least 10s below termination_grace_period_seconds: the agent is killed when the grace period runs out, cutting the drain and the disconnect after it."
+    }
+    precondition {
       condition     = var.cloud_provider != "azure" || var.azure_workload_identity || (var.azure_client_id != null && var.azure_client_secret != null)
       error_message = "On 'azure', set azure_workload_identity = true or provide both azure_client_id and azure_client_secret."
     }

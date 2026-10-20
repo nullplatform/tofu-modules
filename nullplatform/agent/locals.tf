@@ -282,6 +282,7 @@ locals {
     startup_probe          = var.startup_probe
     pod_annotations        = var.pod_annotations
     termination_grace      = var.termination_grace_period_seconds
+    shutdown_drain_timeout = var.shutdown_drain_timeout_seconds
     pod_disruption_budget  = var.pod_disruption_budget
     node_selector          = var.node_selector
     tolerations            = var.tolerations
