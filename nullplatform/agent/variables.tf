@@ -258,13 +258,24 @@ variable "pod_annotations" {
 }
 
 variable "termination_grace_period_seconds" {
-  description = "Seconds the agent gets to stop after SIGTERM (chart >= 3.2.0, which defaults to 60). Keep it above the chart's preStop sleep (30s). Null (the default) renders nothing."
+  description = "Seconds the agent gets to stop after SIGTERM (chart >= 3.2.0, which defaults to 60, and 120 from 3.3.0). It has to fit shutdown_drain_timeout_seconds plus 10s for the disconnect. Null (the default) renders nothing."
   type        = number
   default     = null
 
   validation {
     condition     = var.termination_grace_period_seconds == null || try(var.termination_grace_period_seconds > 30, false)
     error_message = "termination_grace_period_seconds must be above 30: the chart's preStop hook sleeps 30s, and the agent is killed when the grace period runs out."
+  }
+}
+
+variable "shutdown_drain_timeout_seconds" {
+  description = "Seconds the agent waits on SIGTERM for running commands to finish before it disconnects (chart >= 3.3.0, which defaults to 90, rendered as NP_SHUTDOWN_DRAIN_TIMEOUT). Commands still running after that are re-delivered to the next agent, so size it to the longest action (a start-blue-green takes ~70s). 0 disables the wait. Must stay at least 10s below termination_grace_period_seconds. Null (the default) renders nothing; extra_envs.NP_SHUTDOWN_DRAIN_TIMEOUT still takes precedence."
+  type        = number
+  default     = null
+
+  validation {
+    condition     = var.shutdown_drain_timeout_seconds == null || try(var.shutdown_drain_timeout_seconds >= 0 && floor(var.shutdown_drain_timeout_seconds) == var.shutdown_drain_timeout_seconds, false)
+    error_message = "shutdown_drain_timeout_seconds must be a whole number of seconds, 0 or above."
   }
 }
 

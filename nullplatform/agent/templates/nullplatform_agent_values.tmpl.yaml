@@ -73,6 +73,9 @@ podAnnotations:
 %{ if termination_grace != null ~}
 terminationGracePeriodSeconds: ${termination_grace}
 %{ endif ~}
+%{ if shutdown_drain_timeout != null ~}
+shutdownDrainTimeoutSeconds: ${shutdown_drain_timeout}
+%{ endif ~}
 %{ if pod_disruption_budget != null ~}
 podDisruptionBudget:
   ${indent(2, yamlencode(pod_disruption_budget))}
