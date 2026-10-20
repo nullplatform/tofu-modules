@@ -19,7 +19,7 @@ Verified 2026-10-20.
 | Component | Current | Variable | Module |
 | --- | --- | --- | --- |
 | `nullplatform-base` chart | `2.44.7` | `nullplatform_base_helm_version` | `nullplatform/base` |
-| `nullplatform-agent` chart | `3.2.0` | `nullplatform_agent_helm_version` | `nullplatform/agent` |
+| `nullplatform-agent` chart | `3.3.0` | `nullplatform_agent_helm_version` | `nullplatform/agent` |
 | `cert-manager` chart | `v1.21.2` | `cert_manager_version` | `infrastructure/commons/cert_manager` |
 | `prometheus` chart | `29.37.0` | `prometheus_version` | `infrastructure/commons/prometheus` |
 | `istio-base` chart | `1.30.6` | `istio_base_version` | `infrastructure/commons/istio` |
@@ -58,7 +58,7 @@ module "base" {
 }
 
 module "agent" {
-  nullplatform_agent_helm_version = "3.2.0"
+  nullplatform_agent_helm_version = "3.3.0"
   image_tag                       = "0.14.0"
   agent_traffic_manager_tag       = "1.8.1"
 
