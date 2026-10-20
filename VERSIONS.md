@@ -25,7 +25,7 @@ Verified 2026-10-20.
 | `istio-base` chart | `1.30.6` | `istio_base_version` | `infrastructure/commons/istio` |
 | `istiod` chart | `1.30.6` | `istiod_version` | `infrastructure/commons/istio` |
 | `gateway-api` CRDs | `v1.5.1` | `gateway_api_crd_ref` | `nullplatform/base` |
-| `k8s-logs-controller` | `v1.6.3` | `logging_controller_image_tag` | `nullplatform/base` |
+| `k8s-logs-controller` | `v1.6.4` | `logging_controller_image_tag` | `nullplatform/base` |
 | `controlplane-agent` | `0.14.0` | `image_tag` | `nullplatform/agent` |
 | `k8s-traffic-manager` | `1.8.1` | `agent_traffic_manager_tag` | `nullplatform/agent` |
 | traffic manager (provider config) | `1.8.1` | `traffic_manager_version` | `container_orchestration/eks` |
@@ -53,7 +53,7 @@ at deploy time, so what you run may not match the table: `cert_manager_version`,
 ```hcl
 module "base" {
   nullplatform_base_helm_version = "2.44.7"
-  logging_controller_image_tag   = "v1.6.3"
+  logging_controller_image_tag   = "v1.6.4"
   gateway_api_crd_ref            = "v1.5.1"
 }
 
