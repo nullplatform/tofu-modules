@@ -85,8 +85,8 @@ run "static_files_distribution_defaults" {
   }
 
   assert {
-    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.azure_distribution == "blob-cdn"
-    error_message = "azure_distribution must match the spec's own value, blob-cdn"
+    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.azure_distribution == "front-door"
+    error_message = "azure_distribution must match the spec's own value, front-door"
   }
 
   assert {

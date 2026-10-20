@@ -156,10 +156,23 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set +e
-          ./scripts/check-versions-upstream.sh --write
+          ./scripts/check-versions-upstream.sh --write > "$RUNNER_TEMP/versions-report.txt"
           rc=$?
           set -e
-          if [ "$rc" -gt 1 ]; then
+          cat "$RUNNER_TEMP/versions-report.txt"
+          # A Kubernetes minor bump leaves the addon pins on builds for the old
+          # minor, and only the EKS API lists the new ones. Say so on the run.
+          if grep -q 'Kubernetes moves to' "$RUNNER_TEMP/versions-report.txt"; then
+            echo "::warning::VERSIONS.md moves the EKS Kubernetes minor; update every addon build for it before merging this release"
+          fi
+          # Exit 1 means drift or an unreadable row, and only drift is fine: one
+          # unreadable row keeps --write from touching the table at all.
+          if grep -q 'could not read upstream' "$RUNNER_TEMP/versions-report.txt"; then
+            echo "::warning::check-versions-upstream.sh could not read some upstreams; VERSIONS.md left unchanged. Re-run this job to refresh it"
+          fi
+          if [ "$rc" -eq 3 ]; then
+            echo "::warning::VERSIONS.md's Ready-to-paste block sets a variable its module does not declare; table left unchanged"
+          elif [ "$rc" -gt 1 ]; then
             echo "::warning::check-versions-upstream.sh did not run (exit $rc); VERSIONS.md left unchanged"
           fi
 
@@ -173,18 +186,30 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
 
-          git add -A '*.md' || true
+          # VERSIONS.md gets its own commit, so each message says what changed:
+          # the upstream pins move independently of the module READMEs.
+          pushed=false
+          git add -A VERSIONS.md || true
+          if ! git diff --staged --quiet; then
+            git commit -m "docs: update version references in VERSIONS.md"
+            pushed=true
+          fi
 
-          if git diff --staged --quiet; then
-            echo "No README changes to commit"
-          else
+          git add -A '*.md' || true
+          if ! git diff --staged --quiet; then
             if [ "${{ steps.changed.outputs.has_changes }}" = "true" ]; then
               git commit -m "docs: regenerate READMEs for changed modules and update versions"
             else
               git commit -m "docs: update version references in READMEs"
             fi
+            pushed=true
+          fi
+
+          if [ "$pushed" = true ]; then
             git push origin release-please--branches--main
-            echo "READMEs updated in Release PR #${{ steps.check_pr.outputs.pr_number }}"
+            echo "Docs updated in Release PR #${{ steps.check_pr.outputs.pr_number }}"
+          else
+            echo "No docs changes to commit"
           fi
         env:
           HUSKY: 0

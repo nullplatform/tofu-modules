@@ -4,8 +4,9 @@ variable "nrn" {
 }
 
 variable "api_key" {
-  description = "Agent API key for the notification channel. Rotating it recreates the channel (via terraform_data.api_key_trigger)."
+  description = "Deprecated: omit it. When null (default) the platform creates and manages the channel credential (an API key holding only controlplane:agent-dispatcher on the channel NRN); the identity running the apply must be able to assign that role. Passing a key keeps using it; removing it later converts the channel in place (same id). Requires nullplatform provider >= 0.0.107."
   type        = string
+  default     = null
   sensitive   = true
 }
 

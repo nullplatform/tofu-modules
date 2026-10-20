@@ -7,6 +7,111 @@
 
 * **external_dns:** support public and private DNS on Azure with ExternalDNS: `label_filter` now applies to the `azure` and `azure-private-dns` providers, and the new `gateway_name` limits route sources to one Gateway, so a public instance keeps internal scopes out of the public zone while an `azure-private-dns` instance publishes them in the Private DNS zone (split-horizon)
 
+## [9.2.0](https://github.com/nullplatform/tofu-modules/compare/v9.1.0...v9.2.0) (2026-10-20)
+
+
+### Features
+
+* **agent:** expose shutdown_drain_timeout_seconds ([#643](https://github.com/nullplatform/tofu-modules/issues/643)) ([1b08ec5](https://github.com/nullplatform/tofu-modules/commit/1b08ec5c06087d3e9dcc5d1eb1b936b482a56fb6))
+
+## [9.1.0](https://github.com/nullplatform/tofu-modules/compare/v9.0.1...v9.1.0) (2026-10-19)
+
+
+### Features
+
+* **agent:** protect worker pods from autoscaler evictions ([#639](https://github.com/nullplatform/tofu-modules/issues/639)) ([da901e0](https://github.com/nullplatform/tofu-modules/commit/da901e035f8259605aa53cbbc38db4f283a4bf41))
+
+## [9.0.1](https://github.com/nullplatform/tofu-modules/compare/v9.0.0...v9.0.1) (2026-10-19)
+
+
+### Bug Fixes
+
+* **ci:** commit VERSIONS.md separately and log the drift report ([#637](https://github.com/nullplatform/tofu-modules/issues/637)) ([2088d37](https://github.com/nullplatform/tofu-modules/commit/2088d37119d257b3bfdd866a0576642c91bbd1b1))
+
+## [9.0.0](https://github.com/nullplatform/tofu-modules/compare/v8.9.1...v9.0.0) (2026-10-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* **api_key:** type no longer accepts "scope_notification" or "service_notification", and the specification_slug input is removed. Remove those module calls and omit api_key in scope_definition_agent_association, service_definition_agent_association and parameter_storage_definition_agent_association so the platform manages the channel credential.
+
+### Features
+
+* **api_key:** remove scope_notification and service_notification types ([#629](https://github.com/nullplatform/tofu-modules/issues/629)) ([8e75fe2](https://github.com/nullplatform/tofu-modules/commit/8e75fe2af6c2cd4b9e066c4620b32544ab568a95))
+
+## [8.9.1](https://github.com/nullplatform/tofu-modules/compare/v8.9.0...v8.9.1) (2026-10-16)
+
+
+### Bug Fixes
+
+* **ci:** retry public ECR reads in check-versions-upstream ([#635](https://github.com/nullplatform/tofu-modules/issues/635)) ([70e82d5](https://github.com/nullplatform/tofu-modules/commit/70e82d52c6986334033a91a8a3d9df0a3fb2f254))
+
+## [8.9.0](https://github.com/nullplatform/tofu-modules/compare/v8.8.0...v8.9.0) (2026-10-16)
+
+
+### Features
+
+* **agent:** expose pod disruption settings of the agent chart ([#633](https://github.com/nullplatform/tofu-modules/issues/633)) ([9d4879b](https://github.com/nullplatform/tofu-modules/commit/9d4879bcc9b509f82663d66fe1d16d29e2453de2))
+
+## [8.8.0](https://github.com/nullplatform/tofu-modules/compare/v8.7.1...v8.8.0) (2026-10-16)
+
+
+### Features
+
+* **ci:** track scopes, gateway-api and EKS Kubernetes versions in VERSIONS.md ([#631](https://github.com/nullplatform/tofu-modules/issues/631)) ([5931645](https://github.com/nullplatform/tofu-modules/commit/59316456eff37df3be656c0b624cbaae9ad44aab))
+
+## [8.7.1](https://github.com/nullplatform/tofu-modules/compare/v8.7.0...v8.7.1) (2026-10-16)
+
+
+### Bug Fixes
+
+* **docs:** correct VERSIONS.md pins and validate its Ready-to-paste block ([#628](https://github.com/nullplatform/tofu-modules/issues/628)) ([1049144](https://github.com/nullplatform/tofu-modules/commit/1049144fd499f2a5108338a82aa7524b5cbdd394))
+
+## [8.7.0](https://github.com/nullplatform/tofu-modules/compare/v8.6.0...v8.7.0) (2026-10-12)
+
+
+### Features
+
+* **ecr:** configure the build workflow IAM role instead of, or alongside, static keys ([#587](https://github.com/nullplatform/tofu-modules/issues/587)) ([d739b4f](https://github.com/nullplatform/tofu-modules/commit/d739b4f9cd82299457033e27483a89ce950395c3))
+
+## [8.6.0](https://github.com/nullplatform/tofu-modules/compare/v8.5.0...v8.6.0) (2026-10-12)
+
+
+### Features
+
+* **agent_association:** make api_key optional for a platform-managed credential ([9446fd3](https://github.com/nullplatform/tofu-modules/commit/9446fd3b3a3c312daadb15959bd51532ffc9e4e3))
+* **agent_association:** make api_key optional for a platform-managed credential ([#624](https://github.com/nullplatform/tofu-modules/issues/624)) ([7baf78f](https://github.com/nullplatform/tofu-modules/commit/7baf78fc18fcec9a11e948a84791d6b3e8eb84cd))
+
+## [8.5.0](https://github.com/nullplatform/tofu-modules/compare/v8.4.0...v8.5.0) (2026-10-09)
+
+
+### Features
+
+* **azure:** support AKS Workload Identity for the agent and grant several roles per identity ([#621](https://github.com/nullplatform/tofu-modules/issues/621)) ([7fae4d0](https://github.com/nullplatform/tofu-modules/commit/7fae4d046a39ebb028ffb9f8490eb14ab07a6918))
+
+## [8.4.0](https://github.com/nullplatform/tofu-modules/compare/v8.3.1...v8.4.0) (2026-10-08)
+
+
+### Features
+
+* **azure/acr_push_token:** add a push-only ACR token for CI ([fd0d75c](https://github.com/nullplatform/tofu-modules/commit/fd0d75c6927659e6c6a9d5f8715ed3844f00dcaa))
+* **azure/acr:** allow disabling the admin user ([93601ab](https://github.com/nullplatform/tofu-modules/commit/93601abac11382505c89f147d091f702cf4f3024))
+* **azure:** pull from ACR without secrets and push with a scoped token ([#622](https://github.com/nullplatform/tofu-modules/issues/622)) ([acd3098](https://github.com/nullplatform/tofu-modules/commit/acd3098ac1d785b5ef38151347b5eb5dee34bc21))
+
+## [8.3.1](https://github.com/nullplatform/tofu-modules/compare/v8.3.0...v8.3.1) (2026-10-06)
+
+
+### Bug Fixes
+
+* **scope_configuration:** azure_distribution's only valid value is "front-door", not "blob-cdn" ([#618](https://github.com/nullplatform/tofu-modules/issues/618)) ([80a04d9](https://github.com/nullplatform/tofu-modules/commit/80a04d95f7ba62746f8adb704ee93a37f14e6eda))
+
+## [8.3.0](https://github.com/nullplatform/tofu-modules/compare/v8.2.1...v8.3.0) (2026-10-06)
+
+
+### Features
+
+* **service_definition_agent_association:** route service telemetry notifications ([#613](https://github.com/nullplatform/tofu-modules/issues/613)) ([831cb5c](https://github.com/nullplatform/tofu-modules/commit/831cb5ca9212c2bbcaaba4a90ea00fd8a54a3784))
+
 ## [8.2.1](https://github.com/nullplatform/tofu-modules/compare/v8.2.0...v8.2.1) (2026-10-05)
 
 

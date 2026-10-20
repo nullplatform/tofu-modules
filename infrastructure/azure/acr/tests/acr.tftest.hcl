@@ -63,3 +63,34 @@ run "retention_policy" {
     retention_policy_in_days = 30
   }
 }
+
+# admin_enabled defaults to true so existing installs keep their admin credentials
+# (apply against the mock provider: admin_username/admin_password are computed
+# by the registry, so they are unknown at plan time)
+run "admin_enabled_by_default" {
+  command = apply
+
+  assert {
+    condition     = var.admin_enabled == true
+    error_message = "admin_enabled must default to true to stay backward compatible"
+  }
+
+  assert {
+    condition     = output.acr_admin_username != null && output.acr_admin_password != null
+    error_message = "admin credentials must be exposed while admin_enabled is true"
+  }
+}
+
+# With the admin user disabled the module must not expose admin credentials
+run "admin_disabled_hides_credentials" {
+  command = apply
+
+  variables {
+    admin_enabled = false
+  }
+
+  assert {
+    condition     = output.acr_admin_username == null && output.acr_admin_password == null
+    error_message = "admin credentials must be null when admin_enabled is false"
+  }
+}

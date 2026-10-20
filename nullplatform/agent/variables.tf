@@ -86,8 +86,9 @@ variable "worker_orchestrated_packages" {
     under var.service_account_name (the same IRSA identity as the agent
     itself) and var.worker_memory_limit, via a per-package worker-container
     patch. Add a package's slug here whenever its worker needs to assume an
-    AWS role, or needs more memory than the chart's own default (e.g. to run
-    tofu/terraform); a worker for a package not listed here falls back to the
+    AWS role or needs Azure workload identity (the azure.workload.identity/use
+    label is added through the same per-package patch), or needs more memory
+    than the chart's own default (e.g. to run tofu/terraform); a worker for a package not listed here falls back to the
     namespace's default ServiceAccount and the chart's own memory default.
 
     This is separate from the "containers" scope's own k8s-deployment env
@@ -237,6 +238,96 @@ variable "readiness_probe" {
   default     = null
 }
 
+# An evicted agent takes every action it is running down with it: a node
+# autoscaler consolidating the agent's node fails the deploy in flight even
+# though its pods come up fine, and leaves its resources behind. From chart
+# 3.2.0 the chart itself protects the agent by default (do-not-disrupt /
+# safe-to-evict annotations, startupProbe, terminationGracePeriodSeconds), so
+# these variables only add to or override the chart: null/empty renders
+# nothing and an existing install sees no diff.
+variable "startup_probe" {
+  description = "Fields merged over the chart's startupProbe (chart >= 3.2.0: httpGet /health on 8080, every 10s, up to 30 failures), e.g. { failureThreshold = 60 } for a slow repo clone. Null (the default) renders nothing and leaves the chart's probe untouched."
+  type        = any
+  default     = null
+}
+
+variable "pod_annotations" {
+  description = "Annotations merged over the chart's podAnnotations. From chart 3.2.0 the chart sets karpenter.sh/do-not-disrupt = \"true\" and cluster-autoscaler.kubernetes.io/safe-to-evict = \"false\" so node autoscalers don't evict the agent mid-action; set a key to null to drop one of them (e.g. an admission policy that rejects it). Empty (the default) renders nothing."
+  type        = map(string)
+  default     = {}
+}
+
+variable "termination_grace_period_seconds" {
+  description = "Seconds the agent gets to stop after SIGTERM (chart >= 3.2.0, which defaults to 60, and 120 from 3.3.0). It has to fit shutdown_drain_timeout_seconds plus 10s for the disconnect. Null (the default) renders nothing."
+  type        = number
+  default     = null
+
+  validation {
+    condition     = var.termination_grace_period_seconds == null || try(var.termination_grace_period_seconds > 30, false)
+    error_message = "termination_grace_period_seconds must be above 30: the chart's preStop hook sleeps 30s, and the agent is killed when the grace period runs out."
+  }
+}
+
+variable "shutdown_drain_timeout_seconds" {
+  description = "Seconds the agent waits on SIGTERM for running commands to finish before it disconnects (chart >= 3.3.0, which defaults to 90, rendered as NP_SHUTDOWN_DRAIN_TIMEOUT). Commands still running after that are re-delivered to the next agent, so size it to the longest action (a start-blue-green takes ~70s). 0 disables the wait. Must stay at least 10s below termination_grace_period_seconds. Null (the default) renders nothing; extra_envs.NP_SHUTDOWN_DRAIN_TIMEOUT still takes precedence."
+  type        = number
+  default     = null
+
+  validation {
+    condition     = var.shutdown_drain_timeout_seconds == null || try(var.shutdown_drain_timeout_seconds >= 0 && floor(var.shutdown_drain_timeout_seconds) == var.shutdown_drain_timeout_seconds, false)
+    error_message = "shutdown_drain_timeout_seconds must be a whole number of seconds, 0 or above."
+  }
+}
+
+variable "pod_disruption_budget" {
+  description = <<-EOT
+    PodDisruptionBudget for the agent (chart >= 3.2.0), rendered as the chart's
+    podDisruptionBudget values. Null (the default) renders nothing and the chart
+    keeps it disabled. With a single replica only a budget that still allows an
+    eviction is accepted: the chart refuses maxUnavailable = 0 and a minAvailable
+    that is not below the replica count, since they would hang node drains and
+    cluster upgrades.
+
+    Example:
+      pod_disruption_budget = { enabled = true, maxUnavailable = 1 }
+  EOT
+  type        = any
+  default     = null
+}
+
+# Worker pods run the actions themselves (a deploy runs in its package's
+# worker), so evicting a worker mid-action fails it just like evicting the
+# agent does. The agent spawns them, so the chart's podAnnotations don't reach
+# them: the module adds these through a worker patch with an empty target,
+# which the chart applies to every worker.
+variable "worker_pod_annotations" {
+  description = "Annotations added to every worker pod (worker_orchestrator only) through a patch with an empty target. The defaults keep node autoscalers from evicting a worker mid-action: karpenter.sh/do-not-disrupt for Karpenter (EKS Auto Mode, AKS node auto-provisioning) and cluster-autoscaler.kubernetes.io/safe-to-evict for Cluster Autoscaler; a cluster without them ignores both. An idle worker then holds its node until the idle reaper (idleTTL, 30m by default) removes it. Empty renders no patch."
+  type        = map(string)
+  default = {
+    "karpenter.sh/do-not-disrupt"                    = "true"
+    "cluster-autoscaler.kubernetes.io/safe-to-evict" = "false"
+  }
+}
+
+variable "node_selector" {
+  description = "nodeSelector for the agent pod, e.g. to pin it to a node pool that is not consolidated. Empty (the default) renders nothing."
+  type        = map(string)
+  default     = {}
+}
+
+variable "tolerations" {
+  description = "Tolerations for the agent pod. Helm replaces lists instead of merging them, so this replaces the chart's defaults (node.kubernetes.io/not-ready and node.kubernetes.io/unreachable, NoExecute for 300s): include them if you still want them. Null (the default) renders nothing and keeps the chart's tolerations."
+  # any, not list(any): tolerations with different keys (one with
+  # tolerationSeconds, one without) don't unify into a single element type.
+  type    = any
+  default = null
+
+  validation {
+    condition     = var.tolerations == null || (!can(keys(var.tolerations)) && can([for t in var.tolerations : keys(t)]))
+    error_message = "tolerations must be a list of toleration objects (key, operator, value, effect, tolerationSeconds)."
+  }
+}
+
 variable "image_repository" {
   description = "Container image repository for the agent. Defaults to the official nullplatform image."
   type        = string
@@ -264,13 +355,13 @@ variable "aws_iam_role_arn" {
 ################################################################################
 
 variable "azure_client_id" {
-  description = "Azure client ID for authentication. Required when cloud_provider is 'azure'."
+  description = "Azure client ID of the Service Principal the agent authenticates with. Required when cloud_provider is 'azure', unless azure_workload_identity is true. With azure_workload_identity it can be set without a secret: it then annotates the ServiceAccount (the agent-wide default identity for SDK tools)."
   type        = string
   default     = null
 }
 
 variable "azure_client_secret" {
-  description = "Azure client secret for authentication. Required when cloud_provider is 'azure'."
+  description = "Azure client secret of the Service Principal the agent authenticates with. Required when cloud_provider is 'azure', unless azure_workload_identity is true."
   type        = string
   default     = null
   sensitive   = true
@@ -292,6 +383,25 @@ variable "private_hosted_zone_rg" {
   description = "Resource group for private hosted zone. Required when cloud_provider is 'azure'."
   type        = string
   default     = null
+}
+
+variable "azure_workload_identity" {
+  description = <<-EOT
+    Run the agent and its worker-orchestrated pods with AKS Workload Identity:
+    they get the label azure.workload.identity/use = "true", so the workload
+    identity webhook projects the ServiceAccount token (AZURE_FEDERATED_TOKEN_FILE).
+    The k8s scope then authenticates to Azure as the managed identity it resolves
+    per scope dimension from the Identity & Access provider, and
+    azure_client_id / azure_client_secret become optional. Only applies when
+    cloud_provider is 'azure'.
+
+    The managed identities the scope uses need a federated credential for
+    subject system:serviceaccount:<namespace>:<service_account_name> (defaults:
+    nullplatform-tools:nullplatform-agent) against the cluster's OIDC issuer.
+  EOT
+  type        = bool
+  default     = false
+  nullable    = false
 }
 
 variable "azure_tenant_id" {

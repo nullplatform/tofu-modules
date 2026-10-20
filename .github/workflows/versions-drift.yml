@@ -31,15 +31,25 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          # Exit 1 means drift or an unreadable row, which is a result. Anything
+          # Exit 1 means drift or an unreadable row, which is a result. Exit 3
+          # means the Ready-to-paste block sets a variable its module does not
+          # declare, which fails the job after the report is published. Anything
           # else means the check itself did not run, and must not pass silently.
           set +e
           ./scripts/check-versions-upstream.sh --markdown > report.md
           rc=$?
           set -e
+          # The summary is not part of the log, nor of the check run's API output.
+          cat report.md
+          # An unreadable upstream is not drift: say so on the run, without
+          # failing the pull request over a flaky registry.
+          if grep -q 'could not read upstream' report.md; then
+            echo "::warning::check-versions-upstream.sh could not read some upstreams; the report is incomplete"
+          fi
           case "$rc" in
             0) echo "drift=0" >> "$GITHUB_OUTPUT" ;;
             1) echo "drift=1" >> "$GITHUB_OUTPUT" ;;
+            3) echo "drift=1" >> "$GITHUB_OUTPUT"; echo "invalid=1" >> "$GITHUB_OUTPUT" ;;
             *) echo "::error::check-versions-upstream.sh did not run (exit $rc)"; exit 1 ;;
           esac
 
@@ -56,3 +66,9 @@ jobs:
               echo 'Every pin is current.'
             fi
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail on an invalid Ready-to-paste block
+        if: steps.check.outputs.invalid == '1'
+        run: |
+          grep -F '**invalid:**' report.md | sed 's/^- \*\*invalid:\*\* /::error file=VERSIONS.md::/'
+          exit 1

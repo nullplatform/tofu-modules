@@ -1,7 +1,3 @@
-resource "terraform_data" "api_key_trigger" {
-  input = var.api_key
-}
-
 resource "nullplatform_notification_channel" "from_template" {
   nrn         = var.nrn
   type        = "agent"
@@ -21,8 +17,5 @@ resource "nullplatform_notification_channel" "from_template" {
         }
       }
     }
-  }
-  lifecycle {
-    replace_triggered_by = [terraform_data.api_key_trigger]
   }
 }

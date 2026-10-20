@@ -3,6 +3,13 @@ resource "azurerm_user_assigned_identity" "this" {
   resource_group_name = var.resource_group_name
   location            = var.location
   tags                = var.tags
+
+  lifecycle {
+    precondition {
+      condition     = var.scope == null || var.role_definition_name != null
+      error_message = "scope is set but role_definition_name is not: set both, or leave both null and use role_assignments."
+    }
+  }
 }
 
 resource "azurerm_federated_identity_credential" "this" {
@@ -15,7 +22,30 @@ resource "azurerm_federated_identity_credential" "this" {
 }
 
 resource "azurerm_role_assignment" "this" {
+  # count depends only on role_definition_name: scope may be unknown at plan.
+  count = var.role_definition_name != null ? 1 : 0
+
   scope                = var.scope
   role_definition_name = var.role_definition_name
+  principal_id         = azurerm_user_assigned_identity.this.principal_id
+
+  lifecycle {
+    precondition {
+      condition     = var.scope != null
+      error_message = "scope is required when role_definition_name is set."
+    }
+  }
+}
+
+moved {
+  from = azurerm_role_assignment.this
+  to   = azurerm_role_assignment.this[0]
+}
+
+resource "azurerm_role_assignment" "additional" {
+  for_each = var.role_assignments
+
+  scope                = each.value.scope
+  role_definition_name = each.value.role_definition_name
   principal_id         = azurerm_user_assigned_identity.this.principal_id
 }

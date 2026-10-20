@@ -145,11 +145,20 @@ locals {
     local.ingress_paths,
   )
 
-  worker_all_config = merge(
-    local.deploy_config,
-    lookup(local.shared_cloud_config, var.cloud_provider, {}),
-    var.extra_envs,
-  )
+  worker_all_config = {
+    for k, v in merge(
+      local.deploy_config,
+      lookup(local.shared_cloud_config, var.cloud_provider, {}),
+      var.extra_envs,
+    ) : k => v if v != null
+  }
+
+  pod_labels = var.cloud_provider == "azure" && var.azure_workload_identity ? {
+    "azure.workload.identity/use" = "true"
+  } : {}
+
+  # The WI webhook sets AZURE_CLIENT_ID from this annotation, overriding envFrom.
+  azure_sa_client_id = var.cloud_provider == "azure" && var.azure_workload_identity && var.azure_client_id != null ? var.azure_client_id : ""
 
   # Generic identity + resources — one patch per package in
   # var.worker_orchestrated_packages, so any worker-orchestrated package's pod
@@ -162,16 +171,19 @@ locals {
   worker_common_patches = var.worker_orchestrator ? [
     for pkg in var.worker_orchestrated_packages : {
       target = { package = pkg }
-      merge = {
-        spec = merge(
-          var.service_account_name != "" ? { serviceAccountName = var.service_account_name } : {},
-          {
-            containers = [
-              { name = "worker", resources = { limits = { memory = var.worker_memory_limit } } }
-            ]
-          }
-        )
-      }
+      merge = merge(
+        {
+          spec = merge(
+            var.service_account_name != "" ? { serviceAccountName = var.service_account_name } : {},
+            {
+              containers = [
+                { name = "worker", resources = { limits = { memory = var.worker_memory_limit } } }
+              ]
+            }
+          )
+        },
+        length(local.pod_labels) > 0 ? { metadata = { labels = local.pod_labels } } : {}
+      )
     }
   ] : []
 
@@ -214,10 +226,20 @@ locals {
     }
   ] : []
 
+  # Disruption protection for every worker: an empty target matches all of
+  # them, whatever package they run. First in the list so a per-package patch
+  # (or var.worker.patches) can still override an annotation.
+  worker_annotation_patches = var.worker_orchestrator && length(var.worker_pod_annotations) > 0 ? [
+    {
+      target = {}
+      merge  = { metadata = { annotations = var.worker_pod_annotations } }
+    }
+  ] : []
+
   worker_defaults = {
     backend           = "kubernetes"
     allowedRegistries = ["public.ecr.aws/nullplatform/*"]
-    patches           = concat(local.worker_common_patches, local.worker_k8s_env_patches)
+    patches           = concat(local.worker_annotation_patches, local.worker_common_patches, local.worker_k8s_env_patches)
     # Reap worker-orchestrated pods (and their Deployments) after 30m with no
     # activity. Previously unset (NP_WORKER_IDLE_TTL empty), which disables
     # the reaper entirely — stale workers from old package revisions or
@@ -251,9 +273,18 @@ locals {
     aws_iam_role_arn       = var.cloud_provider == "aws" ? var.aws_iam_role_arn : ""
     init_scripts           = var.init_scripts
     service_account_name   = var.service_account_name
+    pod_labels             = local.pod_labels
+    azure_sa_client_id     = local.azure_sa_client_id
     worker_orchestrator    = var.worker_orchestrator
     worker                 = local.worker_final
     liveness_probe         = var.liveness_probe
     readiness_probe        = var.readiness_probe
+    startup_probe          = var.startup_probe
+    pod_annotations        = var.pod_annotations
+    termination_grace      = var.termination_grace_period_seconds
+    shutdown_drain_timeout = var.shutdown_drain_timeout_seconds
+    pod_disruption_budget  = var.pod_disruption_budget
+    node_selector          = var.node_selector
+    tolerations            = var.tolerations
   })
 }

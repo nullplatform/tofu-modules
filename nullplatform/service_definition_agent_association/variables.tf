@@ -5,8 +5,9 @@ variable "nrn" {
 }
 
 variable "api_key" {
-  description = "API key for authenticating with the nullplatform API"
+  description = "Deprecated: omit it. When null (default) the platform creates and manages the channel credential (an API key holding only controlplane:agent-dispatcher on the channel NRN); the identity running the apply must be able to assign that role. Passing a key keeps using it; removing it later converts the channel in place (same id). Requires nullplatform provider >= 0.0.107."
   type        = string
+  default     = null
   sensitive   = true
 }
 
@@ -17,7 +18,7 @@ variable "tags_selectors" {
 
 variable "channel_sources" {
   type        = list(string)
-  description = "List of sources for the notification channel (e.g., ['monitoring', 'alerts'])"
+  description = "List of sources for the notification channel (e.g., ['service', 'telemetry']). Add 'telemetry' to receive metric:list and metric:data notifications for the service"
   default     = ["service"]
 }
 

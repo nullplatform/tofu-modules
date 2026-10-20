@@ -730,6 +730,64 @@ run "worker_orchestrator_true_renders_the_block_and_patches" {
   }
 }
 
+################################################################################
+# Worker disruption protection
+################################################################################
+
+# Workers run the actions, so evicting one fails the action in flight. An empty
+# target makes the chart apply the patch to every worker, whatever its package.
+run "workers_are_protected_from_autoscaler_evictions_by_default" {
+  command = plan
+
+  assert {
+    condition = yamldecode(helm_release.agent.values[0]).worker.patches[0] == {
+      target = {}
+      merge = { metadata = { annotations = {
+        "karpenter.sh/do-not-disrupt"                    = "true"
+        "cluster-autoscaler.kubernetes.io/safe-to-evict" = "false"
+      } } }
+    }
+    error_message = "the first worker patch must target every worker and carry the autoscaler annotations"
+  }
+
+  assert {
+    condition = length([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches : p
+      if try(p.merge.metadata.annotations, null) != null
+    ]) == 1
+    error_message = "the annotations must come from a single patch, not be repeated per package"
+  }
+}
+
+run "worker_annotation_set_to_null_is_rendered_as_null" {
+  command = plan
+
+  variables {
+    worker_pod_annotations = { "karpenter.sh/do-not-disrupt" = null, team = "platform" }
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).worker.patches[0].merge.metadata.annotations == { "karpenter.sh/do-not-disrupt" = null, team = "platform" }
+    error_message = "worker_pod_annotations must be rendered as given, null included"
+  }
+}
+
+run "empty_worker_annotations_render_no_patch" {
+  command = plan
+
+  variables {
+    worker_pod_annotations = {}
+  }
+
+  assert {
+    condition = length([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches : p
+      if try(p.merge.metadata.annotations, null) != null
+    ]) == 0
+    error_message = "an empty worker_pod_annotations must not render the annotation patch"
+  }
+}
+
 run "extra_envs_reaches_the_agent_with_orchestration_off" {
   command = plan
 
@@ -945,5 +1003,308 @@ run "probe_overrides_are_rendered" {
   assert {
     condition     = !strcontains(helm_release.agent.values[0], "httpGet")
     error_message = "the module must not restate the chart's httpGet; only the given fields are rendered"
+  }
+}
+
+################################################################################
+# Disruption protection (chart >= 3.2.0)
+################################################################################
+
+# The chart carries the defaults (autoscaler annotations, startupProbe, grace
+# period); the module renders nothing unless asked, so an existing install sees
+# no diff and the chart stays the single source of those defaults.
+run "disruption_settings_are_left_to_the_chart_by_default" {
+  command = plan
+
+  assert {
+    condition = alltrue([
+      for key in ["startupProbe", "podAnnotations", "terminationGracePeriodSeconds", "shutdownDrainTimeoutSeconds", "podDisruptionBudget", "nodeSelector", "tolerations"] :
+      !contains(keys(yamldecode(helm_release.agent.values[0])), key)
+    ])
+    error_message = "with no overrides the module must not render any disruption-related key"
+  }
+}
+
+run "disruption_overrides_are_rendered" {
+  command = plan
+
+  variables {
+    startup_probe                    = { failureThreshold = 60 }
+    pod_annotations                  = { team = "platform" }
+    termination_grace_period_seconds = 120
+    shutdown_drain_timeout_seconds   = 90
+    pod_disruption_budget            = { enabled = true, maxUnavailable = 1 }
+    node_selector                    = { "karpenter.sh/nodepool" = "platform" }
+    tolerations = [
+      { key = "dedicated", operator = "Equal", value = "platform", effect = "NoSchedule" },
+      { key = "node.kubernetes.io/unreachable", operator = "Exists", effect = "NoExecute", tolerationSeconds = 300 },
+    ]
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).startupProbe == { failureThreshold = 60 }
+    error_message = "startup_probe must render only its own fields under startupProbe, so helm merges them over the chart's httpGet"
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).podAnnotations == { team = "platform" }
+    error_message = "pod_annotations must render under podAnnotations"
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).terminationGracePeriodSeconds == 120
+    error_message = "termination_grace_period_seconds must render as a number"
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).shutdownDrainTimeoutSeconds == 90
+    error_message = "shutdown_drain_timeout_seconds must render as a number under shutdownDrainTimeoutSeconds"
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).podDisruptionBudget == { enabled = true, maxUnavailable = 1 }
+    error_message = "pod_disruption_budget must render under podDisruptionBudget"
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).nodeSelector == { "karpenter.sh/nodepool" = "platform" }
+    error_message = "node_selector must render under nodeSelector"
+  }
+
+  assert {
+    condition     = length(yamldecode(helm_release.agent.values[0]).tolerations) == 2 && yamldecode(helm_release.agent.values[0]).tolerations[1].tolerationSeconds == 300
+    error_message = "tolerations with different keys must render as-is under tolerations"
+  }
+}
+
+# Helm deletes a chart default when the override is null: this is how an
+# install drops one of the chart's autoscaler annotations.
+run "pod_annotation_set_to_null_drops_the_chart_default" {
+  command = plan
+
+  variables {
+    pod_annotations = { "karpenter.sh/do-not-disrupt" = null }
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "\"karpenter.sh/do-not-disrupt\": null")
+    error_message = "a null annotation must render as null so helm removes the chart's default"
+  }
+}
+
+run "termination_grace_period_must_outlast_the_prestop_sleep" {
+  command = plan
+
+  variables {
+    termination_grace_period_seconds = 30
+  }
+
+  expect_failures = [var.termination_grace_period_seconds]
+}
+
+run "shutdown_drain_must_fit_in_the_grace_period" {
+  command = plan
+
+  variables {
+    termination_grace_period_seconds = 60
+    shutdown_drain_timeout_seconds   = 55
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "shutdown_drain_must_be_whole_seconds" {
+  command = plan
+
+  variables {
+    shutdown_drain_timeout_seconds = 1.5
+  }
+
+  expect_failures = [var.shutdown_drain_timeout_seconds]
+}
+
+run "tolerations_must_be_a_list" {
+  command = plan
+
+  variables {
+    tolerations = { key = "dedicated", operator = "Exists" }
+  }
+
+  expect_failures = [var.tolerations]
+}
+
+run "azure_workload_identity_labels_the_agent_and_its_workers" {
+  command = plan
+
+  variables {
+    cloud_provider               = "azure"
+    aws_iam_role_arn             = ""
+    cluster_name                 = ""
+    azure_workload_identity      = true
+    azure_subscription_id        = "azure-subscription-id"
+    azure_resource_group         = "azure-rg"
+    azure_tenant_id              = "azure-tenant-id"
+    private_hosted_zone_rg       = "azure-dns-rg"
+    worker_orchestrated_packages = ["containers", "aks"]
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "podLabels:\n  \"azure.workload.identity/use\": \"true\"")
+    error_message = "the agent pod must carry the azure.workload.identity/use label"
+  }
+
+  assert {
+    condition     = length(regexall("\"azure.workload.identity/use\": \"true\"", helm_release.agent.values[0])) == 3
+    error_message = "the label must appear once for the agent and once per worker-orchestrated package (here 1 + 2)"
+  }
+
+  assert {
+    condition     = !strcontains(helm_release.agent.values[0], "AZURE_CLIENT_SECRET")
+    error_message = "with workload identity and no secret, AZURE_CLIENT_SECRET must not be rendered"
+  }
+
+  assert {
+    condition     = !strcontains(helm_release.agent.values[0], "azure.workload.identity/client-id")
+    error_message = "without azure_client_id the ServiceAccount must not get a client-id annotation"
+  }
+}
+
+run "azure_workload_identity_coexists_with_the_client_secret" {
+  command = plan
+
+  variables {
+    cloud_provider          = "azure"
+    aws_iam_role_arn        = ""
+    cluster_name            = ""
+    azure_workload_identity = true
+    azure_client_id         = "azure-client-id"
+    azure_client_secret     = "azure-client-secret"
+    azure_subscription_id   = "azure-subscription-id"
+    azure_resource_group    = "azure-rg"
+    azure_tenant_id         = "azure-tenant-id"
+    private_hosted_zone_rg  = "azure-dns-rg"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "\"azure.workload.identity/use\": \"true\"") && strcontains(helm_release.agent.values[0], "\n    AZURE_CLIENT_SECRET: \"azure-client-secret\"")
+    error_message = "the label and the legacy secret must both render while migrating"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "azure.workload.identity/client-id: \"azure-client-id\"")
+    error_message = "the ServiceAccount must be annotated with the client ID while the Service Principal is still set"
+  }
+}
+
+run "azure_without_workload_identity_renders_no_label" {
+  command = plan
+
+  variables {
+    cloud_provider         = "azure"
+    aws_iam_role_arn       = ""
+    cluster_name           = ""
+    azure_client_id        = "azure-client-id"
+    azure_client_secret    = "azure-client-secret"
+    azure_subscription_id  = "azure-subscription-id"
+    azure_resource_group   = "azure-rg"
+    azure_tenant_id        = "azure-tenant-id"
+    private_hosted_zone_rg = "azure-dns-rg"
+  }
+
+  assert {
+    condition     = !strcontains(helm_release.agent.values[0], "azure.workload.identity") && !strcontains(helm_release.agent.values[0], "podLabels")
+    error_message = "azure_workload_identity = false must not add any label"
+  }
+}
+
+run "azure_workload_identity_is_ignored_off_azure" {
+  command = plan
+
+  variables {
+    azure_workload_identity = true
+  }
+
+  assert {
+    condition     = !strcontains(helm_release.agent.values[0], "azure.workload.identity")
+    error_message = "the label must only be added when cloud_provider is azure"
+  }
+}
+
+run "azure_requires_workload_identity_or_a_client_secret" {
+  command = plan
+
+  variables {
+    cloud_provider         = "azure"
+    aws_iam_role_arn       = ""
+    cluster_name           = ""
+    azure_client_id        = "azure-client-id"
+    azure_subscription_id  = "azure-subscription-id"
+    azure_resource_group   = "azure-rg"
+    azure_tenant_id        = "azure-tenant-id"
+    private_hosted_zone_rg = "azure-dns-rg"
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "azure_client_secret_without_client_id_is_rejected" {
+  command = plan
+
+  variables {
+    cloud_provider          = "azure"
+    aws_iam_role_arn        = ""
+    cluster_name            = ""
+    azure_workload_identity = true
+    azure_client_secret     = "azure-client-secret"
+    azure_subscription_id   = "azure-subscription-id"
+    azure_resource_group    = "azure-rg"
+    azure_tenant_id         = "azure-tenant-id"
+    private_hosted_zone_rg  = "azure-dns-rg"
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "azure_workload_identity_requires_a_service_account_name" {
+  command = plan
+
+  variables {
+    cloud_provider          = "azure"
+    aws_iam_role_arn        = ""
+    cluster_name            = ""
+    azure_workload_identity = true
+    service_account_name    = ""
+    azure_subscription_id   = "azure-subscription-id"
+    azure_resource_group    = "azure-rg"
+    azure_tenant_id         = "azure-tenant-id"
+    private_hosted_zone_rg  = "azure-dns-rg"
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "azure_workload_identity_without_worker_orchestrator_labels_only_the_agent" {
+  command = plan
+
+  variables {
+    cloud_provider          = "azure"
+    aws_iam_role_arn        = ""
+    cluster_name            = ""
+    azure_workload_identity = true
+    worker_orchestrator     = false
+    azure_subscription_id   = "azure-subscription-id"
+    azure_resource_group    = "azure-rg"
+    azure_tenant_id         = "azure-tenant-id"
+    private_hosted_zone_rg  = "azure-dns-rg"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "podLabels:")
+    error_message = "the agent pod must still carry podLabels with the orchestrator off"
+  }
+
+  assert {
+    condition     = length(regexall("\"azure.workload.identity/use\": \"true\"", helm_release.agent.values[0])) == 1
+    error_message = "the label must render exactly once (agent only) with worker_orchestrator = false"
   }
 }

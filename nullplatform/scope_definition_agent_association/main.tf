@@ -2,10 +2,6 @@
 # Notification Channel Resource
 ################################################################################
 
-resource "terraform_data" "api_key_trigger" {
-  input = var.api_key
-}
-
 # Create notification channel with agent configuration and optional overrides
 resource "nullplatform_notification_channel" "from_template" {
   nrn         = var.nrn
@@ -17,7 +13,7 @@ resource "nullplatform_notification_channel" "from_template" {
     dynamic "agent" {
       for_each = local.notification_channel_def.type == "agent" ? [local.notification_channel_def.configuration] : []
       content {
-        api_key = agent.value.api_key
+        api_key = var.api_key
         command {
           # Worker-orchestrator: route package-exec to an agent that spawns the
           # package's worker image and runs its baked entrypoint (matches
@@ -52,7 +48,6 @@ resource "nullplatform_notification_channel" "from_template" {
   }
   filters = local.merged_filters_json
   lifecycle {
-    replace_triggered_by = [terraform_data.api_key_trigger]
     precondition {
       condition     = !var.worker_orchestrator || var.package_slug != ""
       error_message = "package_slug is required when worker_orchestrator = true."
