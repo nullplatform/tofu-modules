@@ -22,7 +22,7 @@ The module fetches service specification, scope type, and action specification t
 
 ```hcl
 module "scope_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v9.2.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v9.3.0"
 
   np_api_key = "your-np-api-key"
   nrn        = "your-nrn"
