@@ -57,8 +57,8 @@ run "visible_to_rejects_empty_list" {
   expect_failures = [var.visible_to]
 }
 
-# visible_to only narrows the specification: the package keeps var.nrn
-# (owner and default visibility), so it is never replaced.
+# visible_to only narrows the specification: the package keeps var.nrn as owner
+# and default visibility, so narrowing the spec does not force a package replacement.
 run "visible_to_does_not_touch_package" {
   command = plan
 
