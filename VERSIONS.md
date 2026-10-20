@@ -14,7 +14,7 @@ a specific release, so an upgrade is something someone decides.
 
 ## What to pin
 
-Verified 2026-10-19.
+Verified 2026-10-20.
 
 | Component | Current | Variable | Module |
 | --- | --- | --- | --- |
@@ -26,7 +26,7 @@ Verified 2026-10-19.
 | `istiod` chart | `1.30.6` | `istiod_version` | `infrastructure/commons/istio` |
 | `gateway-api` CRDs | `v1.5.1` | `gateway_api_crd_ref` | `nullplatform/base` |
 | `k8s-logs-controller` | `v1.6.3` | `logging_controller_image_tag` | `nullplatform/base` |
-| `controlplane-agent` | `0.13.0` | `image_tag` | `nullplatform/agent` |
+| `controlplane-agent` | `0.14.0` | `image_tag` | `nullplatform/agent` |
 | `k8s-traffic-manager` | `1.8.1` | `agent_traffic_manager_tag` | `nullplatform/agent` |
 | traffic manager (provider config) | `1.8.1` | `traffic_manager_version` | `container_orchestration/eks` |
 | `scopes` repository | `v1.18.0` | `agent_repo` (as `"https://github.com/nullplatform/scopes.git#v1.18.0"`; only without packages) | `nullplatform/agent` |
@@ -59,7 +59,7 @@ module "base" {
 
 module "agent" {
   nullplatform_agent_helm_version = "3.2.0"
-  image_tag                       = "0.13.0"
+  image_tag                       = "0.14.0"
   agent_traffic_manager_tag       = "1.8.1"
 
   # Only for an install without packages (worker_orchestrator = false, the legacy
