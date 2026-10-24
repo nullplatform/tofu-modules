@@ -179,7 +179,10 @@ run "worker_orchestrated_packages_gets_its_own_service_account_patch" {
   }
 
   assert {
-    condition     = length(regexall("\"memory\": \"2Gi\"", helm_release.agent.values[0])) == 2
+    condition = length([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches : p
+      if try(p.target.package, null) != null && try(p.merge.spec.containers[0].resources.limits.memory, null) == "2Gi"
+    ]) == 2
     error_message = "each package in worker_orchestrated_packages must get its own memory limit patch (one per package, here 2) — a package left out would silently OOM on the chart's thin default"
   }
 }
@@ -785,6 +788,100 @@ run "empty_worker_annotations_render_no_patch" {
       if try(p.merge.metadata.annotations, null) != null
     ]) == 0
     error_message = "an empty worker_pod_annotations must not render the annotation patch"
+  }
+}
+
+################################################################################
+# Agent and worker resources
+################################################################################
+
+# The chart ships the agent with resources: {}; the module reserves capacity.
+run "agent_gets_default_requests" {
+  command = plan
+
+  assert {
+    condition = yamldecode(helm_release.agent.values[0]).resources == {
+      requests = { cpu = "100m", memory = "2Gi" }
+    }
+    error_message = "the agent must request 100m CPU and 2Gi memory by default, with no limits"
+  }
+}
+
+run "agent_resources_are_overridable" {
+  command = plan
+
+  variables {
+    resources = { requests = { cpu = "1", memory = "4Gi" }, limits = { memory = "4Gi" } }
+  }
+
+  assert {
+    condition = yamldecode(helm_release.agent.values[0]).resources == {
+      requests = { cpu = "1", memory = "4Gi" }
+      limits   = { memory = "4Gi" }
+    }
+    error_message = "resources must be rendered as given"
+  }
+}
+
+run "agent_resources_null_renders_nothing" {
+  command = plan
+
+  variables {
+    resources = null
+  }
+
+  assert {
+    condition     = try(yamldecode(helm_release.agent.values[0]).resources, null) == null
+    error_message = "a null resources must leave the chart's resources untouched"
+  }
+}
+
+# Second patch, right after the annotations: it targets every worker, and the
+# per-package patches after it can still raise the memory limit.
+run "workers_get_default_resources" {
+  command = plan
+
+  assert {
+    condition = yamldecode(helm_release.agent.values[0]).worker.patches[1] == {
+      target = {}
+      merge = { spec = { containers = [{
+        name = "worker"
+        resources = {
+          requests = { cpu = "100m", memory = "2Gi" }
+          limits   = { memory = "2Gi" }
+        }
+      }] } }
+    }
+    error_message = "every worker must request 100m CPU and 2Gi memory, with a 2Gi memory limit so the request fits"
+  }
+}
+
+run "worker_resources_are_overridable" {
+  command = plan
+
+  variables {
+    worker_resources = { requests = { cpu = "250m" } }
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).worker.patches[1].merge.spec.containers[0].resources == { requests = { cpu = "250m" } }
+    error_message = "worker_resources must be rendered as given, empty maps dropped"
+  }
+}
+
+run "worker_resources_null_renders_no_patch" {
+  command = plan
+
+  variables {
+    worker_resources = null
+  }
+
+  assert {
+    condition = length([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches : p
+      if try(p.target.package, null) == null && try(p.merge.spec.containers[0].resources, null) != null
+    ]) == 0
+    error_message = "a null worker_resources must not render the base resources patch"
   }
 }
 
