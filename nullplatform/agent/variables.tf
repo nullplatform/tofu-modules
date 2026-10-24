@@ -309,6 +309,40 @@ variable "worker_pod_annotations" {
   }
 }
 
+# The chart ships the agent with resources: {} (no requests), so the scheduler
+# can place it on a node with no CPU or memory to spare and it is the first pod
+# evicted under memory pressure. The agent runs every legacy exec action itself
+# (clones, aws-cli, np CLI), so it needs real capacity reserved.
+variable "resources" {
+  description = "resources (requests/limits) for the agent container, e.g. { requests = { cpu = \"1\", memory = \"4Gi\" }, limits = { memory = \"4Gi\" } }. Defaults to requests of 100m CPU and 2Gi memory with no limits, so the agent can use more CPU when the node has it free. Null, or empty requests and limits, renders nothing and keeps the chart's resources: {}."
+  type = object({
+    requests = optional(map(string), {})
+    limits   = optional(map(string), {})
+  })
+  default = {
+    requests = { cpu = "100m", memory = "2Gi" }
+  }
+}
+
+# Worker pods are spawned by the agent, so the chart's resources don't reach
+# them: the module applies these through a worker patch with an empty target,
+# which the chart applies to every worker. The chart's own worker defaults are
+# requests 50m/64Mi and limits 500m/256Mi; a memory request above 256Mi needs
+# its own memory limit too, or Kubernetes rejects the pod (request > limit).
+# Packages in var.worker_orchestrated_packages then get var.worker_memory_limit
+# on top, so keep that at or above the memory request.
+variable "worker_resources" {
+  description = "resources (requests/limits) for the worker container of every worker pod (worker_orchestrator only), rendered as a patch with an empty target. Defaults to requests of 100m CPU and 2Gi memory, plus a 2Gi memory limit so the request fits under it (the chart's limit is 256Mi). The chart's 500m CPU limit is kept unless you set limits.cpu, so a worker can burst to 5x its request when the node has CPU free. Packages in worker_orchestrated_packages get worker_memory_limit over this limit, so keep worker_memory_limit >= requests.memory. Null, or empty requests and limits, renders no patch."
+  type = object({
+    requests = optional(map(string), {})
+    limits   = optional(map(string), {})
+  })
+  default = {
+    requests = { cpu = "100m", memory = "2Gi" }
+    limits   = { memory = "2Gi" }
+  }
+}
+
 variable "node_selector" {
   description = "nodeSelector for the agent pod, e.g. to pin it to a node pool that is not consolidated. Empty (the default) renders nothing."
   type        = map(string)

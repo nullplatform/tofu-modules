@@ -236,10 +236,30 @@ locals {
     }
   ] : []
 
+  # Empty requests/limits maps are dropped so they render nothing.
+  agent_resources  = var.resources == null ? {} : { for k, v in var.resources : k => v if length(v) > 0 }
+  worker_resources = var.worker_resources == null ? {} : { for k, v in var.worker_resources : k => v if length(v) > 0 }
+
+  # Base resources for every worker: an empty target matches all of them.
+  # Before the per-package patches, so worker_memory_limit (and any
+  # var.worker.patches) still override the memory limit for their packages.
+  worker_resources_patches = var.worker_orchestrator && length(local.worker_resources) > 0 ? [
+    {
+      target = {}
+      merge = {
+        spec = {
+          containers = [
+            { name = "worker", resources = local.worker_resources }
+          ]
+        }
+      }
+    }
+  ] : []
+
   worker_defaults = {
     backend           = "kubernetes"
     allowedRegistries = ["public.ecr.aws/nullplatform/*"]
-    patches           = concat(local.worker_annotation_patches, local.worker_common_patches, local.worker_k8s_env_patches)
+    patches           = concat(local.worker_annotation_patches, local.worker_resources_patches, local.worker_common_patches, local.worker_k8s_env_patches)
     # Reap worker-orchestrated pods (and their Deployments) after 30m with no
     # activity. Previously unset (NP_WORKER_IDLE_TTL empty), which disables
     # the reaper entirely — stale workers from old package revisions or
@@ -286,5 +306,6 @@ locals {
     pod_disruption_budget  = var.pod_disruption_budget
     node_selector          = var.node_selector
     tolerations            = var.tolerations
+    resources              = local.agent_resources
   })
 }

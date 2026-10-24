@@ -88,3 +88,7 @@ nodeSelector:
 tolerations:
   ${indent(2, yamlencode(tolerations))}
 %{ endif ~}
+%{ if length(resources) > 0 ~}
+resources:
+  ${indent(2, yamlencode(resources))}
+%{ endif ~}
