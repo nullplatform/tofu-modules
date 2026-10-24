@@ -795,15 +795,17 @@ run "empty_worker_annotations_render_no_patch" {
 # Agent and worker resources
 ################################################################################
 
-# The chart ships the agent with resources: {}; the module reserves capacity.
-run "agent_gets_default_requests" {
+# The chart ships the agent with resources: {}. The 1Gi memory limit keeps an
+# excess from taking the node down; there is no CPU limit on purpose.
+run "agent_gets_default_resources" {
   command = plan
 
   assert {
     condition = yamldecode(helm_release.agent.values[0]).resources == {
-      requests = { cpu = "100m", memory = "2Gi" }
+      requests = { cpu = "100m", memory = "256Mi" }
+      limits   = { memory = "1Gi" }
     }
-    error_message = "the agent must request 100m CPU and 2Gi memory by default, with no limits"
+    error_message = "the agent must request 100m CPU and 256Mi memory with a 1Gi memory limit and no CPU limit by default"
   }
 }
 
@@ -837,7 +839,7 @@ run "agent_resources_null_renders_nothing" {
 }
 
 # Second patch, right after the annotations: it targets every worker, and the
-# per-package patches after it can still raise the memory limit.
+# per-package patches after it raise the sizing for the tofu-running packages.
 run "workers_get_default_resources" {
   command = plan
 
@@ -847,12 +849,51 @@ run "workers_get_default_resources" {
       merge = { spec = { containers = [{
         name = "worker"
         resources = {
-          requests = { cpu = "100m", memory = "2Gi" }
-          limits   = { memory = "2Gi" }
+          requests = { cpu = "50m", memory = "128Mi" }
+          limits   = { memory = "512Mi" }
         }
       }] } }
     }
-    error_message = "every worker must request 100m CPU and 2Gi memory, with a 2Gi memory limit so the request fits"
+    error_message = "every worker must request 50m CPU and 128Mi memory, with a 512Mi memory limit"
+  }
+}
+
+run "orchestrated_packages_get_their_own_requests_and_limit" {
+  command = plan
+
+  assert {
+    condition = one([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches : p.merge.spec.containers[0].resources
+      if try(p.target.package, null) == "containers" && try(p.merge.spec.containers[0].resources, null) != null
+      ]) == {
+      requests = { cpu = "100m", memory = "256Mi" }
+      limits   = { memory = "2Gi" }
+    }
+    error_message = "the containers worker must request 100m CPU and 256Mi memory, with a 2Gi memory limit"
+  }
+
+  # Applied after the base patch, so it wins for its package.
+  assert {
+    condition = index([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches : try(p.target.package, "") == "containers" && try(p.merge.spec.containers[0].resources, null) != null
+    ], true) > 1
+    error_message = "the per-package sizing patch must come after the base resources patch"
+  }
+}
+
+run "worker_orchestrated_requests_empty_keeps_only_the_limit" {
+  command = plan
+
+  variables {
+    worker_orchestrated_requests = {}
+  }
+
+  assert {
+    condition = one([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches : p.merge.spec.containers[0].resources
+      if try(p.target.package, null) == "containers" && try(p.merge.spec.containers[0].resources, null) != null
+    ]) == { limits = { memory = "2Gi" } }
+    error_message = "an empty worker_orchestrated_requests must render only the memory limit in the per-package patch"
   }
 }
 

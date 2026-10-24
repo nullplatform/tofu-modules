@@ -177,7 +177,13 @@ locals {
             var.service_account_name != "" ? { serviceAccountName = var.service_account_name } : {},
             {
               containers = [
-                { name = "worker", resources = { limits = { memory = var.worker_memory_limit } } }
+                {
+                  name = "worker"
+                  resources = merge(
+                    length(var.worker_orchestrated_requests) > 0 ? { requests = var.worker_orchestrated_requests } : {},
+                    { limits = { memory = var.worker_memory_limit } }
+                  )
+                }
               ]
             }
           )
