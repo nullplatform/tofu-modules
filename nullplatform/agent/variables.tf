@@ -84,12 +84,12 @@ variable "worker_orchestrated_packages" {
   description = <<-EOT
     Package slugs whose worker-orchestrator (package-exec) pods should run
     under var.service_account_name (the same IRSA identity as the agent
-    itself) with var.worker_orchestrated_requests and var.worker_memory_limit, via a per-package worker-container
-    patch. Add a package's slug here whenever its worker needs to assume an
-    AWS role or needs Azure workload identity (the azure.workload.identity/use
-    label is added through the same per-package patch), or needs more memory
-    than the chart's own default (e.g. to run tofu/terraform); a worker for a package not listed here falls back to the
-    namespace's default ServiceAccount and the chart's own memory default.
+    itself), via a per-package worker patch. Add a package's slug here
+    whenever its worker needs to assume an AWS role or needs Azure workload
+    identity (the azure.workload.identity/use label is added through the same
+    per-package patch); a worker for a package not listed here falls back to
+    the namespace's default ServiceAccount. Resources are the same for every
+    worker either way (var.worker_resources).
 
     This is separate from the "containers" scope's own k8s-deployment env
     vars (DNS_TYPE, DOMAIN, etc.), which remain specific to that package
@@ -132,20 +132,9 @@ variable "cluster_name" {
 }
 
 variable "worker_memory_limit" {
-  description = "Memory limit for a worker-orchestrated package's pod (packages in var.worker_orchestrated_packages). The chart's own default is small enough to OOM mid-tofu-apply for packages that run real IaC tooling."
+  description = "Deprecated: use worker_resources.limits.memory. When set, overrides the memory limit of every worker (it used to apply only to packages in worker_orchestrated_packages). Null (the default) leaves worker_resources as is."
   type        = string
-  default     = "2Gi"
-}
-
-# The containers worker idles at ~201Mi, so the chart's 64Mi request is far
-# below what it really holds on the node.
-variable "worker_orchestrated_requests" {
-  description = "Resource requests for a worker-orchestrated package's pod (packages in var.worker_orchestrated_packages), rendered in the same per-package patch as worker_memory_limit. Keep requests.memory at or below worker_memory_limit. Empty renders no requests in that patch, leaving worker_resources' requests."
-  type        = map(string)
-  default = {
-    cpu    = "100m"
-    memory = "256Mi"
-  }
+  default     = null
 }
 
 # example: 2.37.0 — 2.37.0+ ships the worker orchestrator (patches, per-install
@@ -167,9 +156,9 @@ variable "worker" {
     (["public.ecr.aws/nullplatform/*"] by default, so the platform's own scope
     images keep working), idleTTL ("30m" by default, so worker Deployments
     left behind by an old/removed package revision get reaped instead of
-    accumulating forever), and a patch for the worker container (2Gi memory
-    limit, the deploy/DNS env vars below, and a serviceAccountName that always
-    mirrors service_account_name). allowedRegistries and patches set here are
+    accumulating forever), and patches for the worker container
+    (worker_resources for every worker, the deploy/DNS env vars below, and a
+    serviceAccountName that always mirrors service_account_name). allowedRegistries and patches set here are
     concatenated with (not replacing) the module defaults — add your own
     registries or an extra patch rather than having to repeat the defaults;
     set backend or idleTTL here to override them outright (e.g. idleTTL = ""
@@ -342,25 +331,21 @@ variable "resources" {
 
 # Worker pods are spawned by the agent, so the chart's resources don't reach
 # them: the module applies these through a worker patch with an empty target,
-# which the chart applies to every worker. The chart's own worker defaults are
-# requests 50m/64Mi and limits 500m/256Mi. Requests stay small so several
-# workers fit on a node (a 2Gi request each leaves room for one worker per
-# t3.medium); packages that run tofu get more through the per-package patch
-# (var.worker_orchestrated_requests and var.worker_memory_limit), which is
-# applied after this one.
-#
-# A worker that needs its own sizing (e.g. the parameters-provider worker,
-# 50m/128Mi with limits of 1 CPU and 512Mi) goes in var.worker.patches with
-# target = { package = "<slug>" }.
+# which the chart applies to every worker. Every worker gets the same
+# resources, whatever its package. The chart's own worker defaults are
+# requests 50m/64Mi and limits 500m/256Mi: too little, since the containers
+# worker idles at ~201Mi and workers that run tofu use 1.5Gi or more. So the
+# limit covers tofu, and the requests stay small (real idle use) so several
+# workers fit on a node; a 2Gi request each leaves room for one per t3.medium.
 variable "worker_resources" {
-  description = "resources (requests/limits) for the worker container of every worker pod (worker_orchestrator only), rendered as a patch with an empty target. Defaults to requests of 50m CPU and 128Mi memory and a 512Mi memory limit; the chart's 500m CPU limit is kept unless you set limits.cpu. Packages in worker_orchestrated_packages get worker_orchestrated_requests and worker_memory_limit on top. Null, or empty requests and limits, renders no patch."
+  description = "resources (requests/limits) for the worker container of every worker pod, whatever its package (worker_orchestrator only), rendered as a patch with an empty target. Defaults to requests of 100m CPU and 256Mi memory and a 2Gi memory limit; the chart's 500m CPU limit is kept unless you set limits.cpu. Null, or empty requests and limits, renders no patch."
   type = object({
     requests = optional(map(string), {})
     limits   = optional(map(string), {})
   })
   default = {
-    requests = { cpu = "50m", memory = "128Mi" }
-    limits   = { memory = "512Mi" }
+    requests = { cpu = "100m", memory = "256Mi" }
+    limits   = { memory = "2Gi" }
   }
 }
 

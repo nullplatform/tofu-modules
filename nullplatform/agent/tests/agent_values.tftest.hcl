@@ -178,26 +178,31 @@ run "worker_orchestrated_packages_gets_its_own_service_account_patch" {
     error_message = "each package in worker_orchestrated_packages must get its own serviceAccountName patch (one per package, here 2)"
   }
 
+  # Resources come from the base patch only, so every worker gets the same.
   assert {
     condition = length([
       for p in yamldecode(helm_release.agent.values[0]).worker.patches : p
-      if try(p.target.package, null) != null && try(p.merge.spec.containers[0].resources.limits.memory, null) == "2Gi"
-    ]) == 2
-    error_message = "each package in worker_orchestrated_packages must get its own memory limit patch (one per package, here 2) — a package left out would silently OOM on the chart's thin default"
+      if try(p.target.package, null) != null && try(p.merge.spec.containers[0].resources, null) != null
+    ]) == 0
+    error_message = "no per-package patch may set resources: every worker must get the same ones"
   }
 }
 
-run "worker_memory_limit_is_overridable" {
+# Deprecated, kept so existing callers still plan; it now sets the limit of
+# every worker.
+run "worker_memory_limit_still_overrides_the_limit_of_every_worker" {
   command = plan
 
   variables {
-    worker_orchestrated_packages = ["containers", "aws-s3-bucket"]
-    worker_memory_limit          = "4Gi"
+    worker_memory_limit = "4Gi"
   }
 
   assert {
-    condition     = length(regexall("\"memory\": \"4Gi\"", helm_release.agent.values[0])) == 2
-    error_message = "worker_memory_limit must apply to every package in worker_orchestrated_packages"
+    condition = yamldecode(helm_release.agent.values[0]).worker.patches[1].merge.spec.containers[0].resources == {
+      requests = { cpu = "100m", memory = "256Mi" }
+      limits   = { memory = "4Gi" }
+    }
+    error_message = "a set worker_memory_limit must override the memory limit of the base patch"
   }
 }
 
@@ -838,8 +843,8 @@ run "agent_resources_null_renders_nothing" {
   }
 }
 
-# Second patch, right after the annotations: it targets every worker, and the
-# per-package patches after it raise the sizing for the tofu-running packages.
+# Second patch, right after the annotations: it targets every worker, so all
+# of them get the same resources whatever their package.
 run "workers_get_default_resources" {
   command = plan
 
@@ -849,51 +854,12 @@ run "workers_get_default_resources" {
       merge = { spec = { containers = [{
         name = "worker"
         resources = {
-          requests = { cpu = "50m", memory = "128Mi" }
-          limits   = { memory = "512Mi" }
+          requests = { cpu = "100m", memory = "256Mi" }
+          limits   = { memory = "2Gi" }
         }
       }] } }
     }
-    error_message = "every worker must request 50m CPU and 128Mi memory, with a 512Mi memory limit"
-  }
-}
-
-run "orchestrated_packages_get_their_own_requests_and_limit" {
-  command = plan
-
-  assert {
-    condition = one([
-      for p in yamldecode(helm_release.agent.values[0]).worker.patches : p.merge.spec.containers[0].resources
-      if try(p.target.package, null) == "containers" && try(p.merge.spec.containers[0].resources, null) != null
-      ]) == {
-      requests = { cpu = "100m", memory = "256Mi" }
-      limits   = { memory = "2Gi" }
-    }
-    error_message = "the containers worker must request 100m CPU and 256Mi memory, with a 2Gi memory limit"
-  }
-
-  # Applied after the base patch, so it wins for its package.
-  assert {
-    condition = index([
-      for p in yamldecode(helm_release.agent.values[0]).worker.patches : try(p.target.package, "") == "containers" && try(p.merge.spec.containers[0].resources, null) != null
-    ], true) > 1
-    error_message = "the per-package sizing patch must come after the base resources patch"
-  }
-}
-
-run "worker_orchestrated_requests_empty_keeps_only_the_limit" {
-  command = plan
-
-  variables {
-    worker_orchestrated_requests = {}
-  }
-
-  assert {
-    condition = one([
-      for p in yamldecode(helm_release.agent.values[0]).worker.patches : p.merge.spec.containers[0].resources
-      if try(p.target.package, null) == "containers" && try(p.merge.spec.containers[0].resources, null) != null
-    ]) == { limits = { memory = "2Gi" } }
-    error_message = "an empty worker_orchestrated_requests must render only the memory limit in the per-package patch"
+    error_message = "every worker must request 100m CPU and 256Mi memory, with a 2Gi memory limit"
   }
 }
 
