@@ -160,11 +160,11 @@ locals {
   # The WI webhook sets AZURE_CLIENT_ID from this annotation, overriding envFrom.
   azure_sa_client_id = var.cloud_provider == "azure" && var.azure_workload_identity && var.azure_client_id != null ? var.azure_client_id : ""
 
-  # Generic identity + resources — one patch per package in
+  # Generic identity — one patch per package in
   # var.worker_orchestrated_packages, so any worker-orchestrated package's pod
   # (not just "containers") gets the agent's own ServiceAccount (to assume its
-  # role's trusted AWS roles) and enough memory to run its own tooling (e.g.
-  # tofu init/apply), instead of the chart's own thin defaults.
+  # role's trusted AWS roles). Resources are not set here: every worker gets
+  # the same ones from the base patch (worker_resources_patches).
   #
   # Built only while var.worker_orchestrator is true; with the toggle off the
   # module writes no worker block at all, so there is nothing to patch.
@@ -172,16 +172,7 @@ locals {
     for pkg in var.worker_orchestrated_packages : {
       target = { package = pkg }
       merge = merge(
-        {
-          spec = merge(
-            var.service_account_name != "" ? { serviceAccountName = var.service_account_name } : {},
-            {
-              containers = [
-                { name = "worker", resources = { limits = { memory = var.worker_memory_limit } } }
-              ]
-            }
-          )
-        },
+        { spec = var.service_account_name != "" ? { serviceAccountName = var.service_account_name } : {} },
         length(local.pod_labels) > 0 ? { metadata = { labels = local.pod_labels } } : {}
       )
     }
@@ -236,10 +227,43 @@ locals {
     }
   ] : []
 
+  # Empty requests/limits maps are dropped so they render nothing. The
+  # deprecated var.worker_memory_limit, when set, still wins for the memory
+  # limit, now for every worker.
+  agent_resources = var.resources == null ? {} : { for k, v in var.resources : k => v if length(v) > 0 }
+  worker_resources_input = merge(
+    { requests = {}, limits = {} },
+    var.worker_resources == null ? {} : var.worker_resources,
+  )
+  worker_resources_merged = {
+    requests = local.worker_resources_input.requests
+    limits = merge(
+      local.worker_resources_input.limits,
+      var.worker_memory_limit != null ? { memory = var.worker_memory_limit } : {}
+    )
+  }
+  worker_resources = { for k, v in local.worker_resources_merged : k => v if length(v) > 0 }
+
+  # The same resources for every worker, whatever its package: an empty target
+  # matches all of them. Only var.worker.patches, applied last, can still
+  # resize a single package.
+  worker_resources_patches = var.worker_orchestrator && length(local.worker_resources) > 0 ? [
+    {
+      target = {}
+      merge = {
+        spec = {
+          containers = [
+            { name = "worker", resources = local.worker_resources }
+          ]
+        }
+      }
+    }
+  ] : []
+
   worker_defaults = {
     backend           = "kubernetes"
     allowedRegistries = ["public.ecr.aws/nullplatform/*"]
-    patches           = concat(local.worker_annotation_patches, local.worker_common_patches, local.worker_k8s_env_patches)
+    patches           = concat(local.worker_annotation_patches, local.worker_resources_patches, local.worker_common_patches, local.worker_k8s_env_patches)
     # Reap worker-orchestrated pods (and their Deployments) after 30m with no
     # activity. Previously unset (NP_WORKER_IDLE_TTL empty), which disables
     # the reaper entirely — stale workers from old package revisions or
@@ -286,5 +310,6 @@ locals {
     pod_disruption_budget  = var.pod_disruption_budget
     node_selector          = var.node_selector
     tolerations            = var.tolerations
+    resources              = local.agent_resources
   })
 }

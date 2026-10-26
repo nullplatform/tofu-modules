@@ -178,23 +178,28 @@ run "worker_orchestrated_packages_gets_its_own_service_account_patch" {
     error_message = "each package in worker_orchestrated_packages must get its own serviceAccountName patch (one per package, here 2)"
   }
 
+  # Resources come from the base patch only, so every worker gets the same.
   assert {
-    condition     = length(regexall("\"memory\": \"2Gi\"", helm_release.agent.values[0])) == 2
-    error_message = "each package in worker_orchestrated_packages must get its own memory limit patch (one per package, here 2) — a package left out would silently OOM on the chart's thin default"
+    condition = length([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches : p
+      if try(p.target.package, null) != null && try(p.merge.spec.containers[0].resources, null) != null
+    ]) == 0
+    error_message = "no per-package patch may set resources: every worker must get the same ones"
   }
 }
 
-run "worker_memory_limit_is_overridable" {
+# Deprecated, kept so existing callers still plan; it now sets the limit of
+# every worker.
+run "worker_memory_limit_still_overrides_the_limit_of_every_worker" {
   command = plan
 
   variables {
-    worker_orchestrated_packages = ["containers", "aws-s3-bucket"]
-    worker_memory_limit          = "4Gi"
+    worker_memory_limit = "4Gi"
   }
 
   assert {
-    condition     = length(regexall("\"memory\": \"4Gi\"", helm_release.agent.values[0])) == 2
-    error_message = "worker_memory_limit must apply to every package in worker_orchestrated_packages"
+    condition     = yamldecode(helm_release.agent.values[0]).worker.patches[1].merge.spec.containers[0].resources == { limits = { memory = "4Gi" } }
+    error_message = "a set worker_memory_limit must render the memory limit in the base patch"
   }
 }
 
@@ -204,11 +209,6 @@ run "worker_defaults" {
   assert {
     condition     = strcontains(helm_release.agent.values[0], "public.ecr.aws/nullplatform/*")
     error_message = "allowedRegistries must default to public.ecr.aws/nullplatform/* so the platform's own scope images keep pulling"
-  }
-
-  assert {
-    condition     = strcontains(helm_release.agent.values[0], "\"memory\": \"2Gi\"")
-    error_message = "the worker container's memory limit must default to 2Gi"
   }
 
   assert {
@@ -785,6 +785,108 @@ run "empty_worker_annotations_render_no_patch" {
       if try(p.merge.metadata.annotations, null) != null
     ]) == 0
     error_message = "an empty worker_pod_annotations must not render the annotation patch"
+  }
+}
+
+################################################################################
+# Agent and worker resources
+################################################################################
+
+# The chart owns the resources: by default the module renders none, for the
+# agent or for the workers.
+run "resources_default_to_the_chart" {
+  command = plan
+
+  assert {
+    condition     = try(yamldecode(helm_release.agent.values[0]).resources, null) == null
+    error_message = "by default the module must not render the agent's resources"
+  }
+
+  assert {
+    condition = length([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches : p
+      if try(p.merge.spec.containers[0].resources, null) != null
+    ]) == 0
+    error_message = "by default no worker patch may set resources"
+  }
+}
+
+run "agent_resources_are_overridable" {
+  command = plan
+
+  variables {
+    resources = { requests = { cpu = "1", memory = "4Gi" }, limits = { memory = "4Gi" } }
+  }
+
+  assert {
+    condition = yamldecode(helm_release.agent.values[0]).resources == {
+      requests = { cpu = "1", memory = "4Gi" }
+      limits   = { memory = "4Gi" }
+    }
+    error_message = "resources must be rendered as given"
+  }
+}
+
+run "agent_resources_empty_renders_nothing" {
+  command = plan
+
+  variables {
+    resources = { requests = {}, limits = {} }
+  }
+
+  assert {
+    condition     = try(yamldecode(helm_release.agent.values[0]).resources, null) == null
+    error_message = "empty requests and limits must leave the chart's resources untouched"
+  }
+}
+
+# Second patch, right after the annotations: it targets every worker, so all
+# of them get the same resources whatever their package.
+run "worker_resources_target_every_worker" {
+  command = plan
+
+  variables {
+    worker_resources = { requests = { cpu = "500m" }, limits = { memory = "4Gi" } }
+  }
+
+  assert {
+    condition = yamldecode(helm_release.agent.values[0]).worker.patches[1] == {
+      target = {}
+      merge = { spec = { containers = [{
+        name      = "worker"
+        resources = { requests = { cpu = "500m" }, limits = { memory = "4Gi" } }
+      }] } }
+    }
+    error_message = "worker_resources must render as a single patch with an empty target"
+  }
+}
+
+run "worker_resources_are_overridable" {
+  command = plan
+
+  variables {
+    worker_resources = { requests = { cpu = "250m" } }
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).worker.patches[1].merge.spec.containers[0].resources == { requests = { cpu = "250m" } }
+    error_message = "worker_resources must be rendered as given, empty maps dropped"
+  }
+}
+
+run "worker_resources_empty_renders_no_patch" {
+  command = plan
+
+  variables {
+    worker_resources = { requests = {}, limits = {} }
+  }
+
+  assert {
+    condition = length([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches : p
+      if try(p.target.package, null) == null && try(p.merge.spec.containers[0].resources, null) != null
+    ]) == 0
+    error_message = "empty requests and limits must not render the base resources patch"
   }
 }
 

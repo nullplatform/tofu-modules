@@ -84,12 +84,12 @@ variable "worker_orchestrated_packages" {
   description = <<-EOT
     Package slugs whose worker-orchestrator (package-exec) pods should run
     under var.service_account_name (the same IRSA identity as the agent
-    itself) and var.worker_memory_limit, via a per-package worker-container
-    patch. Add a package's slug here whenever its worker needs to assume an
-    AWS role or needs Azure workload identity (the azure.workload.identity/use
-    label is added through the same per-package patch), or needs more memory
-    than the chart's own default (e.g. to run tofu/terraform); a worker for a package not listed here falls back to the
-    namespace's default ServiceAccount and the chart's own memory default.
+    itself), via a per-package worker patch. Add a package's slug here
+    whenever its worker needs to assume an AWS role or needs Azure workload
+    identity (the azure.workload.identity/use label is added through the same
+    per-package patch); a worker for a package not listed here falls back to
+    the namespace's default ServiceAccount. Resources are the same for every
+    worker either way (var.worker_resources).
 
     This is separate from the "containers" scope's own k8s-deployment env
     vars (DNS_TYPE, DOMAIN, etc.), which remain specific to that package
@@ -132,9 +132,9 @@ variable "cluster_name" {
 }
 
 variable "worker_memory_limit" {
-  description = "Memory limit for a worker-orchestrated package's pod (packages in var.worker_orchestrated_packages). The chart's own default is small enough to OOM mid-tofu-apply for packages that run real IaC tooling."
+  description = "Deprecated: use worker_resources.limits.memory; the chart now sets the workers' memory limit (2Gi from chart 3.4.0). When set, overrides the memory limit of every worker (it used to apply only to packages in worker_orchestrated_packages). Null (the default) renders nothing."
   type        = string
-  default     = "2Gi"
+  default     = null
 }
 
 # example: 2.37.0 — 2.37.0+ ships the worker orchestrator (patches, per-install
@@ -156,9 +156,9 @@ variable "worker" {
     (["public.ecr.aws/nullplatform/*"] by default, so the platform's own scope
     images keep working), idleTTL ("30m" by default, so worker Deployments
     left behind by an old/removed package revision get reaped instead of
-    accumulating forever), and a patch for the worker container (2Gi memory
-    limit, the deploy/DNS env vars below, and a serviceAccountName that always
-    mirrors service_account_name). allowedRegistries and patches set here are
+    accumulating forever), and patches for the worker container
+    (worker_resources for every worker, the deploy/DNS env vars below, and a
+    serviceAccountName that always mirrors service_account_name). allowedRegistries and patches set here are
     concatenated with (not replacing) the module defaults — add your own
     registries or an extra patch rather than having to repeat the defaults;
     set backend or idleTTL here to override them outright (e.g. idleTTL = ""
@@ -307,6 +307,35 @@ variable "worker_pod_annotations" {
     "karpenter.sh/do-not-disrupt"                    = "true"
     "cluster-autoscaler.kubernetes.io/safe-to-evict" = "false"
   }
+}
+
+# The chart owns the agent's and the workers' resources (chart >= 3.4.0: agent
+# requests 100m/256Mi with a 1Gi memory limit; every worker requests 100m/256Mi
+# with limits 500m/2Gi). These variables are only for the cases that need
+# something else: null (the default) renders nothing and the chart decides.
+#
+#   resources        = { requests = { cpu = "500m" } }
+#   worker_resources = { limits = { memory = "4Gi" } }
+variable "resources" {
+  description = "Fields merged over the chart's resources for the agent container, e.g. { requests = { cpu = \"500m\" } }; Helm merges them key by key, so unset fields keep the chart's values. Null (the default), or empty requests and limits, renders nothing and leaves the chart's resources untouched."
+  type = object({
+    requests = optional(map(string), {})
+    limits   = optional(map(string), {})
+  })
+  default = null
+}
+
+# Worker pods are spawned by the agent, so the agent's resources don't reach
+# them: the module sets these through a worker patch with an empty target,
+# which the chart applies to every worker, whatever its package, on top of the
+# chart's worker.defaults.resources.
+variable "worker_resources" {
+  description = "Fields merged over the chart's worker resources (worker.defaults.resources) for every worker pod, whatever its package (worker_orchestrator only), rendered as a patch with an empty target, e.g. { limits = { memory = \"4Gi\" } }; unset fields keep the chart's values. To resize a single package, add a patch with target = { package = \"<slug>\" } in var.worker.patches instead. Null (the default), or empty requests and limits, renders no patch."
+  type = object({
+    requests = optional(map(string), {})
+    limits   = optional(map(string), {})
+  })
+  default = null
 }
 
 variable "node_selector" {
