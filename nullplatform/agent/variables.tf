@@ -132,7 +132,7 @@ variable "cluster_name" {
 }
 
 variable "worker_memory_limit" {
-  description = "Deprecated: use worker_resources.limits.memory. When set, overrides the memory limit of every worker (it used to apply only to packages in worker_orchestrated_packages). Null (the default) leaves worker_resources as is."
+  description = "Deprecated: use worker_resources.limits.memory; the chart now sets the workers' memory limit (2Gi from chart 3.4.0). When set, overrides the memory limit of every worker (it used to apply only to packages in worker_orchestrated_packages). Null (the default) renders nothing."
   type        = string
   default     = null
 }
@@ -309,44 +309,33 @@ variable "worker_pod_annotations" {
   }
 }
 
-# The chart ships the agent with resources: {} (no requests, no limits). In
-# load tests on t3.medium nodes (64 secrets per deploy) the agent idled at
-# 14-47Mi and, without the parameters-provider value cache, spiked past 2.29Gi
-# and took its node down twice; with the cache it stayed under 143Mi and 600m.
-# So the request reflects real use and the 1Gi memory limit is the safety
-# ceiling: an excess OOM-restarts the agent instead of starving the node. No
-# CPU limit: the spikes are short (~600m for ~2s) and throttling the process
-# that fills the cache delays every retrieve waiting on it.
+# The chart owns the agent's and the workers' resources (chart >= 3.4.0: agent
+# requests 100m/256Mi with a 1Gi memory limit; every worker requests 100m/256Mi
+# with limits 500m/2Gi). These variables are only for the cases that need
+# something else: null (the default) renders nothing and the chart decides.
+#
+#   resources        = { requests = { cpu = "500m" } }
+#   worker_resources = { limits = { memory = "4Gi" } }
 variable "resources" {
-  description = "resources (requests/limits) for the agent container, e.g. { requests = { cpu = \"500m\", memory = \"512Mi\" }, limits = { memory = \"2Gi\" } }. Defaults to requests of 100m CPU and 256Mi memory and a 1Gi memory limit, with no CPU limit. Null, or empty requests and limits, renders nothing and keeps the chart's resources: {}."
+  description = "Fields merged over the chart's resources for the agent container, e.g. { requests = { cpu = \"500m\" } }; Helm merges them key by key, so unset fields keep the chart's values. Null (the default), or empty requests and limits, renders nothing and leaves the chart's resources untouched."
   type = object({
     requests = optional(map(string), {})
     limits   = optional(map(string), {})
   })
-  default = {
-    requests = { cpu = "100m", memory = "256Mi" }
-    limits   = { memory = "1Gi" }
-  }
+  default = null
 }
 
-# Worker pods are spawned by the agent, so the chart's resources don't reach
-# them: the module applies these through a worker patch with an empty target,
-# which the chart applies to every worker. Every worker gets the same
-# resources, whatever its package. The chart's own worker defaults are
-# requests 50m/64Mi and limits 500m/256Mi: too little, since the containers
-# worker idles at ~201Mi and workers that run tofu use 1.5Gi or more. So the
-# limit covers tofu, and the requests stay small (real idle use) so several
-# workers fit on a node; a 2Gi request each leaves room for one per t3.medium.
+# Worker pods are spawned by the agent, so the agent's resources don't reach
+# them: the module sets these through a worker patch with an empty target,
+# which the chart applies to every worker, whatever its package, on top of the
+# chart's worker.defaults.resources.
 variable "worker_resources" {
-  description = "resources (requests/limits) for the worker container of every worker pod, whatever its package (worker_orchestrator only), rendered as a patch with an empty target. Defaults to requests of 100m CPU and 256Mi memory and a 2Gi memory limit; the chart's 500m CPU limit is kept unless you set limits.cpu. Null, or empty requests and limits, renders no patch."
+  description = "Fields merged over the chart's worker resources (worker.defaults.resources) for every worker pod, whatever its package (worker_orchestrator only), rendered as a patch with an empty target, e.g. { limits = { memory = \"4Gi\" } }; unset fields keep the chart's values. To resize a single package, add a patch with target = { package = \"<slug>\" } in var.worker.patches instead. Null (the default), or empty requests and limits, renders no patch."
   type = object({
     requests = optional(map(string), {})
     limits   = optional(map(string), {})
   })
-  default = {
-    requests = { cpu = "100m", memory = "256Mi" }
-    limits   = { memory = "2Gi" }
-  }
+  default = null
 }
 
 variable "node_selector" {
