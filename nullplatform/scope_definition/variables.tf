@@ -45,6 +45,20 @@ variable "repository_action_templates_branch" {
 
 }
 
+variable "local_specs_path" {
+  description = <<-EOT
+    Absolute path to a local directory holding the scope's `specs/` (the
+    `service_path` directory of a checkout of the scope repository). When set,
+    every template is read from disk and the `repository_*` inputs are ignored,
+    so a stack running from the repository itself (a release publishing its own
+    package, a private repository) publishes exactly the files of its checkout.
+    Null (the default) fetches the templates over HTTP. Same contract as
+    service_definition's `local_specs_path`.
+  EOT
+  type        = string
+  default     = null
+}
+
 variable "service_path" {
   description = "Path within the repository where the service specification files are stored (e.g., 'services/api')"
   type        = string

@@ -10,7 +10,7 @@ The module fetches a notification channel template via the `http` data source fr
 
 ## Features
 
-- Creates a nullplatform_notification_channel resource from a remotely fetched and gomplate-processed JSON template
+- Creates a nullplatform_notification_channel resource from a gomplate-processed JSON template, fetched remotely or read from a local checkout of the scope repository with local_specs_path
 - Supports worker-orchestrator mode that routes package-exec commands to an agent spawning a package worker image with a baked entrypoint
 - Configures dynamic agent blocks with API key authentication and tag-based agent selector maps
 - Merges extra MongoDB-style filter expressions with base template filters using $and logic
@@ -73,6 +73,7 @@ resource "example_resource" "this" {
 | <a name="input_extra_filters"></a> [extra\_filters](#input\_extra\_filters) | Additional filter expression to merge with the base template filters using $and.<br/>Accepts any valid MongoDB-style filter expression, including logical operators<br/>($and, $or, $nor, $not) and comparison operators ($eq, $ne, $in, $nin, $gt,<br/>$gte, $lt, $lte, $regex). If null, only the base template filters are applied.<br/><br/>Examples:<br/>  Simple equality:    { "dimensions.environment" = "production" }<br/>  Comparison:         { "action" = { "$in" = ["deployment:create", "deployment:update"] } }<br/>  Logical OR:         { "$or" = [{ "details.namespace.slug" = "prod" }, { "details.namespace.slug" = "staging" }] }<br/>  Negation:           { "$not" = { "entity\_data.status" = "failed" } }<br/>  Combined:           { "$and" = [{ "action" = { "$regex" = "^deployment" } }, { "$or" = [...] }] } | `any` | `null` | no |
 | <a name="input_github_ref"></a> [github\_ref](#input\_github\_ref) | Git reference to use (branch name, tag, or commit SHA) | `string` | `"beta"` | no |
 | <a name="input_github_repo_url"></a> [github\_repo\_url](#input\_github\_repo\_url) | GitHub repository URL containing scope and action templates | `string` | `"https://github.com/nullplatform/scopes"` | no |
+| <a name="input_local_specs_path"></a> [local\_specs\_path](#input\_local\_specs\_path) | Absolute path to a local directory holding the scope's `specs/` (the<br/>`service_path` directory of a checkout of the scope repository). When set,<br/>`specs/notification-channel.json.tpl` is read from disk and<br/>`repository_notification_channel(_branch)` are ignored. Null (the default)<br/>fetches the template over HTTP. | `string` | `null` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name (NRN) — unique identifier for the target resource | `string` | n/a | yes |
 | <a name="input_override_repo_path"></a> [override\_repo\_path](#input\_override\_repo\_path) | Local filesystem path where the scope repository will be cloned | `string` | `null` | no |
 | <a name="input_overrides_service_path"></a> [overrides\_service\_path](#input\_overrides\_service\_path) | Local filesystem path to the directory containing override configurations | `string` | `null` | no |

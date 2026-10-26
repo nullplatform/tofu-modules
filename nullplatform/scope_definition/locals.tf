@@ -1,4 +1,18 @@
 locals {
+  # Templates come from var.local_specs_path when set (a checkout of the scope
+  # repository, e.g. the one a release is published from), or over HTTP.
+  reads_local_specs = var.local_specs_path != null
+
+  service_spec_template = local.reads_local_specs ? file("${var.local_specs_path}/specs/service-spec.json.tpl") : data.http.service_spec_template[0].response_body
+  scope_type_template   = local.reads_local_specs ? file("${var.local_specs_path}/specs/scope-type-definition.json.tpl") : data.http.scope_type_template[0].response_body
+  action_templates = {
+    for name in local.static_action_specs :
+    name => local.reads_local_specs ? file("${var.local_specs_path}/specs/actions/${name}.json.tpl") : data.http.action_templates[name].response_body
+  }
+  scope_configuration_template = !var.create_scope_configuration ? null : (
+    local.reads_local_specs ? file("${var.local_specs_path}/specs/scope-configuration.json.tpl") : data.http.scope_configuration_template[0].response_body
+  )
+
   service_spec_parsed = jsondecode(data.external.service_spec.result.json)
 
   service_specification_id = nullplatform_service_specification.from_template.id
@@ -26,7 +40,7 @@ locals {
   # Not gomplate: each quoted `"{{ env.Getenv ... }}"` string becomes the NRN
   # (greedy `.*`: one placeholder per line), so template_env_vars do not apply.
   scope_configuration_rendered = var.create_scope_configuration ? replace(
-    data.http.scope_configuration_template[0].response_body,
+    local.scope_configuration_template,
     "/\"{{\\s+env.Getenv\\s+\".*\"\\s+}}\"/",
     "\"${var.nrn}\""
   ) : "{}"

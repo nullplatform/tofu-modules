@@ -5,9 +5,13 @@
 # a missing template's body (`404: Not Found`) renders as the template and dies
 # later in jq. Branch defaults track a moving ref, so an upstream rename can
 # break an already-applied state.
+#
+# None of these run with var.local_specs_path: the templates are read from disk
+# (locals.tf).
 ################################################################################
 data "http" "service_spec_template" {
-  url = "${var.repository_service_spec}/${var.repository_service_spec_branch}/${var.service_path}/specs/service-spec.json.tpl"
+  count = local.reads_local_specs ? 0 : 1
+  url   = "${var.repository_service_spec}/${var.repository_service_spec_branch}/${var.service_path}/specs/service-spec.json.tpl"
 
   lifecycle {
     postcondition {
@@ -18,7 +22,8 @@ data "http" "service_spec_template" {
 }
 
 data "http" "scope_type_template" {
-  url = "${var.repository_scope_template}/${var.repository_scope_template_branch}/${var.service_path}/specs/scope-type-definition.json.tpl"
+  count = local.reads_local_specs ? 0 : 1
+  url   = "${var.repository_scope_template}/${var.repository_scope_template_branch}/${var.service_path}/specs/scope-type-definition.json.tpl"
 
   lifecycle {
     postcondition {
@@ -29,7 +34,7 @@ data "http" "scope_type_template" {
 }
 
 data "http" "action_templates" {
-  for_each = local.static_action_specs
+  for_each = local.reads_local_specs ? toset([]) : local.static_action_specs
   url      = "${var.repository_action_templates}/${var.repository_action_templates_branch}/${var.service_path}/specs/actions/${each.key}.json.tpl"
 
   lifecycle {
@@ -41,7 +46,7 @@ data "http" "action_templates" {
 }
 
 data "http" "scope_configuration_template" {
-  count = var.create_scope_configuration ? 1 : 0
+  count = var.create_scope_configuration && !local.reads_local_specs ? 1 : 0
   url   = "${var.repository_scope_template}/${var.repository_scope_template_branch}/${var.service_path}/specs/scope-configuration.json.tpl"
 
   lifecycle {
@@ -57,7 +62,7 @@ data "external" "service_spec" {
   depends_on = [data.http.service_spec_template]
 
   program = ["sh", "-c", <<-EOT
-    template_b64="${base64encode(data.http.service_spec_template.response_body)}"
+    template_b64="${base64encode(local.service_spec_template)}"
     processed_json=$(echo "$template_b64" | base64 -d | \
     NRN='${var.nrn}' ${local.template_env_assignments}\
     gomplate)
@@ -80,7 +85,7 @@ data "external" "scope_type" {
   ]
 
   program = ["sh", "-c", <<-EOT
-    template_b64="${base64encode(data.http.scope_type_template.response_body)}"
+    template_b64="${base64encode(local.scope_type_template)}"
     processed_json=$(echo "$template_b64" | base64 -d | \
     NRN='${local.dependent_env_vars.NRN}' ${local.template_env_assignments}\
     SERVICE_SPECIFICATION_ID='${local.dependent_env_vars.SERVICE_SPECIFICATION_ID}' \
@@ -102,7 +107,7 @@ data "external" "action_specs" {
   ]
 
   program = ["sh", "-c", <<-EOT
-    template_b64="${base64encode(try(data.http.action_templates[each.key].response_body, "{}"))}"
+    template_b64="${base64encode(local.action_templates[each.key])}"
     processed_json=$(echo "$template_b64" | base64 -d | \
     NRN='${local.dependent_env_vars.NRN}' ${local.template_env_assignments}\
     SERVICE_SPECIFICATION_ID='${local.dependent_env_vars.SERVICE_SPECIFICATION_ID}' \
