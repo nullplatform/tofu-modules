@@ -44,3 +44,26 @@ run "templates_are_read_from_disk" {
     error_message = "The scope configuration must come from the local scope-configuration.json.tpl"
   }
 }
+
+run "package_declares_its_required_providers" {
+  command = plan
+
+  variables {
+    package = {
+      version = "1.0.0"
+      requires_providers = [
+        { category = "scope-configurations" },
+        { category = "metrics", optional = true },
+      ]
+      artifacts = [{ resource_id = "artifact-1", resource_revision_id = "revision-1" }]
+    }
+  }
+
+  assert {
+    condition = [for r in nullplatform_package.this[0].requires_provider : [r.category, r.optional]] == [
+      ["scope-configurations", false],
+      ["metrics", true],
+    ]
+    error_message = "requires_providers should become the package's requires_provider blocks, in order."
+  }
+}

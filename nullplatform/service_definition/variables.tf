@@ -169,6 +169,14 @@ variable "package" {
     release in that case; every other artifact type gets no meta defaults
     (their meta shape is unrelated to a container registry).
 
+    `requires_providers` declares the providers an organization must already
+    have configured at the installation NRN or above it before installing the
+    package: by `category` (any provider specification in it) or by
+    `specification`. A missing required one refuses the install; a missing
+    `optional` one is reported on the installation. It is the package's
+    declaration, not a revision's: the list replaces it whole on each apply,
+    and an empty list clears it. Requires provider >= 0.0.110.
+
     Null (the default) keeps the classic module behavior — no package.
   EOT
   type = object({
@@ -178,6 +186,11 @@ variable "package" {
     default    = optional(bool, true)      # promote each published revision to the package default
     tags       = optional(map(string), {}) # release tags: name => version (requires an API with the package release-tag routes)
     visible_to = optional(list(string))    # default: [var.nrn]
+    requires_providers = optional(list(object({
+      category      = optional(string) # any provider specification in this category satisfies it…
+      specification = optional(string) # …or this one in particular (exactly one of the two)
+      optional      = optional(bool, false)
+    })), [])
     artifacts = optional(list(object({
       name                 = optional(string, "impl")           # default: a single service-implementation artifact
       type                 = optional(string, "git_repository") # oci_image | oras_artifact | git_repository | blob
@@ -202,6 +215,13 @@ variable "package" {
       for a in var.package.artifacts : a.lookup ? a.meta != null : true
     ])
     error_message = "`lookup = true` requires `meta` with the identity fields of the existing artifact."
+  }
+
+  validation {
+    condition = var.package == null ? true : alltrue([
+      for r in var.package.requires_providers : (r.category == null) != (r.specification == null)
+    ])
+    error_message = "Each package requires_providers entry names exactly one of `category`, `specification`."
   }
 }
 
