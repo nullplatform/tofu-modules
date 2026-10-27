@@ -11,13 +11,20 @@ locals {
   # `np asset push` runs on the GitHub Actions runner, which has no AWS identity:
   # it assumes the role with the job's OIDC token, limited to the organization
   # nullplatform creates application repositories in.
+  # GitHub issues the sub claim in two formats depending on the repository:
+  # "repo:<org>/<repo>:..." and, with immutable subjects enabled,
+  # "repo:<org>@<org_id>/<repo>@<repo_id>:...". Both are accepted; the org id is
+  # pinned when github_organization_id is set.
   github_statements = [for org in compact([var.github_organization]) : {
     Effect    = "Allow",
     Principal = { Federated = local.github_oidc_provider_arn },
     Action    = "sts:AssumeRoleWithWebIdentity",
     Condition = {
       StringEquals = { "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com" }
-      StringLike   = { "token.actions.githubusercontent.com:sub" = "repo:${org}/*" }
+      StringLike = { "token.actions.githubusercontent.com:sub" = [
+        "repo:${org}/*",
+        "repo:${org}@${coalesce(var.github_organization_id, "*")}/*",
+      ] }
     }
   }]
 }

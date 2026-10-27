@@ -74,8 +74,22 @@ run "github_organization_trusts_existing_oidc_provider" {
   }
 
   assert {
-    condition     = jsondecode(aws_iam_role.nullplatform_build_workflow_role.assume_role_policy).Statement[1].Condition.StringLike["token.actions.githubusercontent.com:sub"] == "repo:my-org/*"
-    error_message = "trust policy should restrict the subject to the organization's repositories"
+    condition     = jsondecode(aws_iam_role.nullplatform_build_workflow_role.assume_role_policy).Statement[1].Condition.StringLike["token.actions.githubusercontent.com:sub"] == ["repo:my-org/*", "repo:my-org@*/*"]
+    error_message = "trust policy should accept both sub formats, restricted to the organization's repositories"
+  }
+}
+
+run "github_organization_id_pins_immutable_subject" {
+  command = plan
+
+  variables {
+    github_organization    = "my-org"
+    github_organization_id = "239821853"
+  }
+
+  assert {
+    condition     = contains(jsondecode(aws_iam_role.nullplatform_build_workflow_role.assume_role_policy).Statement[1].Condition.StringLike["token.actions.githubusercontent.com:sub"], "repo:my-org@239821853/*")
+    error_message = "immutable sub pattern should pin the organization ID"
   }
 }
 

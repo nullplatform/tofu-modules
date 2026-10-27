@@ -21,6 +21,17 @@ variable "github_organization" {
   }
 }
 
+variable "github_organization_id" {
+  description = "Numeric ID of github_organization. Pins the organization in immutable sub claims (repo:<org>@<org_id>/<repo>@<repo_id>:...); null accepts any ID after the organization name."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.github_organization_id == null || can(regex("^[0-9]+$", var.github_organization_id))
+    error_message = "github_organization_id must be the numeric GitHub organization ID"
+  }
+}
+
 variable "create_github_oidc_provider" {
   description = "Create the GitHub Actions OIDC provider (token.actions.githubusercontent.com). Leave false when the account already has one: an account holds a single provider per issuer URL, and the existing one is looked up."
   type        = bool
