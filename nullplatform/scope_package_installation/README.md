@@ -114,6 +114,7 @@ resource "nullplatform_provider_config" "scope_configuration" {
 | <a name="input_package_slug"></a> [package\_slug](#input\_package\_slug) | Slug of the scope package to install. | `string` | n/a | yes |
 | <a name="input_package_version"></a> [package\_version](#input\_package\_version) | Exact semver of the package revision to install (X.Y.Z, without a leading v). Scope repositories pass the version of the tag their installation module is referenced at. | `string` | n/a | yes |
 | <a name="input_scope_configuration_name"></a> [scope\_configuration\_name](#input\_scope\_configuration\_name) | Name of the scope-configuration provider specification. Null uses the template's; override it when that name collides with one already visible in the organization. | `string` | `null` | no |
+| <a name="input_scope_type_name"></a> [scope\_type\_name](#input\_scope\_type\_name) | Name of the scope type. Null uses the template's; override it when that name collides with a scope type already in the organization, such as one registered with scope\_definition. | `string` | `null` | no |
 | <a name="input_service_path"></a> [service\_path](#input\_service\_path) | Path of the scope inside its repository (e.g. "lambda"), exported as SERVICE\_PATH to the channel template. | `string` | n/a | yes |
 | <a name="input_visible_to"></a> [visible\_to](#input\_visible\_to) | Where inside the installing organization the scope can be used. Null uses [nrn]. Every entry must be under the installing organization. | `list(string)` | `null` | no |
 

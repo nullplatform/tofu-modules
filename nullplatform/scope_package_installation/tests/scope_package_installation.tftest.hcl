@@ -137,6 +137,19 @@ run "scope_configuration_name_can_be_overridden" {
   }
 }
 
+run "scope_type_name_can_be_overridden" {
+  command = plan
+
+  variables {
+    scope_type_name = "Example Functions (global)"
+  }
+
+  assert {
+    condition     = nullplatform_scope_type.this.name == "Example Functions (global)"
+    error_message = "scope_type_name must override the template's name"
+  }
+}
+
 run "a_package_with_two_specifications_is_refused" {
   command = plan
 

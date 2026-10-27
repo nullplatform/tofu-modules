@@ -60,6 +60,12 @@ variable "external_logging_provider" {
   default     = "external"
 }
 
+variable "scope_type_name" {
+  description = "Name of the scope type. Null uses the template's; override it when that name collides with a scope type already in the organization, such as one registered with scope_definition."
+  type        = string
+  default     = null
+}
+
 variable "create_scope_configuration" {
   description = "Create the scope-configuration provider specification from specs/scope-configuration.json.tpl. Set it to true only when the scope ships that file."
   type        = bool

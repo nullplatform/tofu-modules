@@ -57,7 +57,7 @@ data "external" "scope_type" {
 
 resource "nullplatform_scope_type" "this" {
   nrn           = var.nrn
-  name          = local.scope_type_template.name
+  name          = coalesce(var.scope_type_name, local.scope_type_template.name)
   description   = local.scope_type_template.description
   provider_type = local.scope_type_template.provider_type
   provider_id   = local.specification_id
