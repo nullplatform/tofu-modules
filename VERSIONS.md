@@ -138,6 +138,12 @@ The traffic manager image is assembled from `agent_traffic_manager_tag` and publ
 agent as `TRAFFIC_CONTAINER_IMAGE`. `extra_envs` still takes precedence over it, so a digest
 or a mirrored registry path can be passed the way it was before the tag was exposed.
 
+That variable is what the sidecar actually runs. The k8s scope reads `TRAFFIC_CONTAINER_IMAGE`
+before the image it would build from the container orchestration provider's
+`traffic_manager_version`, so that one only applies to an agent that does not publish the
+variable. Keep the two equal. `web_sockets` scopes ignore both and always run the `websocket2`
+tag.
+
 ## Caveats
 
 **The scopes repositories follow their latest release.** `scopes`, `scopes-lambda` and
