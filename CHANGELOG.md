@@ -7,6 +7,13 @@
 
 * **external_dns:** support public and private DNS on Azure with ExternalDNS: `label_filter` now applies to the `azure` and `azure-private-dns` providers, and the new `gateway_name` limits route sources to one Gateway, so a public instance keeps internal scopes out of the public zone while an `azure-private-dns` instance publishes them in the Private DNS zone (split-horizon)
 
+## [9.6.0](https://github.com/nullplatform/tofu-modules/compare/v9.5.0...v9.6.0) (2026-10-27)
+
+
+### Features
+
+* **iam:** add ci-build-workflow-role to push assets with CI OIDC instead of access keys ([#652](https://github.com/nullplatform/tofu-modules/issues/652)) ([c616cc9](https://github.com/nullplatform/tofu-modules/commit/c616cc92b2781e2d267d22dca7c23c0c7b611261))
+
 ## [9.5.0](https://github.com/nullplatform/tofu-modules/compare/v9.4.0...v9.5.0) (2026-10-26)
 
 
