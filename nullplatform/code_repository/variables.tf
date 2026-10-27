@@ -39,6 +39,12 @@ variable "gitlab_installation_url" {
   }
 }
 
+variable "gitlab_keep_namespace" {
+  description = "Create the GitLab configuration at var.nrn as given. By default a namespace in var.nrn is stripped and the configuration lands at the account; set true to scope it to that namespace, as the other providers already are."
+  type        = bool
+  default     = false
+}
+
 # Neither of the two below is read by main.tf, so tflint's
 # terraform_unused_declarations flags them. They are NOT removed: their own
 # validation blocks make them REQUIRED whenever git_provider is "gitlab", so every

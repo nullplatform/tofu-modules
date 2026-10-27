@@ -1,7 +1,7 @@
 /* If the git_provider variable is set to gitlab, create this resource. */
 resource "nullplatform_provider_config" "gitlab" {
   count      = local.is_gitlab ? 1 : 0
-  nrn        = try(regex("(.*):namespace.*", var.nrn)[0], var.nrn)
+  nrn        = var.gitlab_keep_namespace ? var.nrn : try(regex("(.*):namespace.*", var.nrn)[0], var.nrn)
   type       = "gitlab-configuration"
   dimensions = var.dimensions
   attributes = jsonencode({
