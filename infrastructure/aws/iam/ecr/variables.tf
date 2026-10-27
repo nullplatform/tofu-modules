@@ -4,8 +4,15 @@ variable "cluster_name" {
 }
 
 variable "build_workflow_group_name" {
-  description = "Name of the IAM group (from the ci-build-workflow-user module) to which the ECR manager policy is attached. The build workflow user is a member of this group."
+  description = "Name of the IAM group (from the ci-build-workflow-user module) to which the ECR manager policy is attached. The build workflow user is a member of this group. Set this, build_workflow_role_name, or both while migrating from access keys to the role."
   type        = string
+  default     = null
+}
+
+variable "build_workflow_role_name" {
+  description = "Name of the IAM role (from the ci-build-workflow-role module) to which the ECR manager policy is attached. Set this, build_workflow_group_name, or both while migrating from access keys to the role."
+  type        = string
+  default     = null
 }
 
 variable "application_manager_assume_role" {
