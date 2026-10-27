@@ -30,7 +30,7 @@ run "templates_are_read_from_disk" {
   }
 
   assert {
-    condition     = nullplatform_scope_type.from_template.provider_type == "service"
+    condition     = nullplatform_scope_type.from_template[0].provider_type == "service"
     error_message = "The scope type must come from the local scope-type-definition.json.tpl"
   }
 
@@ -65,5 +65,44 @@ run "package_declares_its_required_providers" {
       ["metrics", true],
     ]
     error_message = "requires_providers should become the package's requires_provider blocks, in order."
+  }
+}
+
+run "a_published_package_creates_only_what_it_pins" {
+  command = plan
+
+  variables {
+    create_scope_type          = false
+    configure_nrn_settings     = false
+    create_scope_configuration = false
+    package = {
+      version   = "1.0.0"
+      artifacts = [{ resource_id = "artifact-1", resource_revision_id = "revision-1" }]
+    }
+  }
+
+  assert {
+    condition     = length(nullplatform_scope_type.from_template) == 0 && length(data.external.scope_type) == 0
+    error_message = "Without create_scope_type no scope type may be rendered or created"
+  }
+
+  assert {
+    condition     = length(null_resource.nrn_patch) == 0
+    error_message = "Without configure_nrn_settings the NRN settings must not be patched"
+  }
+
+  assert {
+    condition     = length(nullplatform_provider_specification.from_scope_configuration) == 0
+    error_message = "Without create_scope_configuration no provider specification may be created"
+  }
+
+  assert {
+    condition     = length(nullplatform_package.this) == 1 && nullplatform_action_specification.from_templates["create-scope"].type == "create"
+    error_message = "The specification, its actions and the package must still be published"
+  }
+
+  assert {
+    condition     = output.scope_type_id == null
+    error_message = "scope_type_id must be null without create_scope_type"
   }
 }

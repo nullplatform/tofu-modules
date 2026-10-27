@@ -130,6 +130,18 @@ variable "external_logging_provider" {
   default     = "external"
 }
 
+variable "create_scope_type" {
+  type        = bool
+  default     = true
+  description = "Create the scope type from scope-type-definition.json.tpl at nrn. Set to false when the specification is published as a package for other organizations: each one creates its own scope type when it installs the package, so the publisher's would only duplicate it."
+}
+
+variable "configure_nrn_settings" {
+  type        = bool
+  default     = true
+  description = "Write the metrics and logs providers of the scope to the NRN settings at nrn (`np nrn patch`, needs `np` on the machine running the apply). Set to false when the specification is published as a package for other organizations: each one writes its own when it installs the package."
+}
+
 variable "create_scope_configuration" {
   type        = bool
   default     = false

@@ -22,7 +22,7 @@ data "http" "service_spec_template" {
 }
 
 data "http" "scope_type_template" {
-  count = local.reads_local_specs ? 0 : 1
+  count = local.reads_local_specs || !var.create_scope_type ? 0 : 1
   url   = "${var.repository_scope_template}/${var.repository_scope_template_branch}/${var.service_path}/specs/scope-type-definition.json.tpl"
 
   lifecycle {
@@ -80,6 +80,7 @@ data "external" "service_spec" {
 # destroy+recreate of scope_type (provider_type is ForceNew). Confirmed by
 # forcing a drift on service_specification with/without this depends_on.
 data "external" "scope_type" {
+  count = var.create_scope_type ? 1 : 0
   depends_on = [
     data.http.scope_type_template
   ]
