@@ -142,6 +142,36 @@ run "rejects_leading_wildcard_subject" {
   expect_failures = [var.oidc_providers]
 }
 
+run "rejects_wildcard_github_organization" {
+  command = plan
+
+  variables {
+    oidc_providers = {
+      github = {
+        url      = "https://token.actions.githubusercontent.com"
+        subjects = ["repo:*"]
+      }
+    }
+  }
+
+  expect_failures = [var.oidc_providers]
+}
+
+run "rejects_wildcard_gitlab_group" {
+  command = plan
+
+  variables {
+    oidc_providers = {
+      gitlab = {
+        url      = "https://gitlab.com"
+        subjects = ["project_path:*/my-project:*"]
+      }
+    }
+  }
+
+  expect_failures = [var.oidc_providers]
+}
+
 run "rejects_non_https_url" {
   command = plan
 

@@ -40,6 +40,14 @@ variable "oidc_providers" {
   }
 
   validation {
+    # GitHub (repo:<org>/...) and GitLab (project_path:<group>/...) name the
+    # owner before the first slash: a wildcard there ("repo:*", "repo:*/x")
+    # spans every organization or group of the issuer.
+    condition     = alltrue([for p in values(var.oidc_providers) : alltrue([for s in p.subjects : !can(regex("^(repo|project_path):", s)) || can(regex("^(repo|project_path):[^*?/]+/", s))])])
+    error_message = "repo: and project_path: subject patterns must name a literal organization or group before the first '/' (e.g. repo:my-org/*, project_path:my-group/*)"
+  }
+
+  validation {
     condition     = alltrue([for p in values(var.oidc_providers) : length(p.audiences) > 0])
     error_message = "every oidc_providers entry needs at least one audience"
   }
