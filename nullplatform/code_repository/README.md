@@ -2,21 +2,21 @@
 
 ## Description
 
-Configures a nullplatform git provider integration by creating a nullplatform_provider_config resource for one of four supported providers: GitHub, GitLab, Azure DevOps, or Bitbucket
+Configures a nullplatform provider integration for one of four supported Git providers (GitHub, GitLab, Azure DevOps, or Bitbucket) by creating a conditional nullplatform_provider_config resource
 
 ## Architecture
 
-The module uses local boolean flags (is_gitlab, is_github, is_azure, is_bitbucket) derived from var.git_provider to conditionally create exactly one nullplatform_provider_config resource via count = local.is_X ? 1 : 0. Each nullplatform_provider_config resource is bound to a scoped NRN (namespace-stripped via regex or replace), a provider-specific type string (e.g. gitlab-configuration, github-configuration, azure-devops-configuration, bitbucket), and a JSON-encoded attributes block containing provider-specific setup credentials and configuration. The dimensions input flows directly into every resource to support multi-environment or multi-region segmentation within the nullplatform platform.
+The module evaluates the git_provider input variable through four local booleans (is_gitlab, is_github, is_azure, is_bitbucket) and uses count-based conditional creation to instantiate exactly one nullplatform_provider_config resource. Each provider variant sets a distinct type string (gitlab-configuration, github-configuration, azure-devops-configuration, or bitbucket) and serializes provider-specific credentials and settings into a jsonencode attributes block. The nrn input is transformed per-provider: GitLab optionally strips the namespace segment based on gitlab_keep_namespace, while GitHub, Azure, and Bitbucket always strip it via regex replace. An optional dimensions map allows segmentation of the resulting provider config across environments or regions.
 
 ## Features
 
-- Creates a nullplatform_provider_config resource with GitLab-specific setup including group path, access token, and installation URL
-- Creates a nullplatform_provider_config resource with GitHub-specific setup including organization name and App installation ID
-- Creates a nullplatform_provider_config resource with Azure DevOps setup including project name, personal access token, and CI agent pool
-- Creates a nullplatform_provider_config resource with Bitbucket setup including workspace, project key, installation URL, and collaborator access list
-- Enforces provider-specific required variables at plan time using Terraform validation blocks tied to the git_provider selector
-- Supports dimensional segmentation of provider configs via a flexible map of key-value dimension labels
-- Strips namespace scope from the NRN automatically to ensure provider configs are registered at the correct platform hierarchy level
+- Creates a GitLab provider config with group path, access token, and installation URL attributes
+- Creates a GitHub provider config with organization name and App installation ID
+- Creates an Azure DevOps provider config with project name, personal access token, and CI agent pool
+- Creates a Bitbucket provider config with workspace, project key, installation URL, and collaborator access list
+- Supports optional namespace scoping for GitLab via the gitlab_keep_namespace flag
+- Applies optional dimension segmentation to all provider configurations for environment or region partitioning
+- Enforces provider-specific required variables at plan time using cross-variable Terraform validations
 
 ## Basic Usage
 
@@ -136,6 +136,7 @@ resource "example_resource" "this" {
 | <a name="input_gitlab_access_token"></a> [gitlab\_access\_token](#input\_gitlab\_access\_token) | Access token for authenticating with the Git provider API. | `string` | `null` | no |
 | <a name="input_gitlab_group_path"></a> [gitlab\_group\_path](#input\_gitlab\_group\_path) | GitLab group path where repositories will be created. | `string` | `null` | no |
 | <a name="input_gitlab_installation_url"></a> [gitlab\_installation\_url](#input\_gitlab\_installation\_url) | Installation URL for the Git provider integration. | `string` | `null` | no |
+| <a name="input_gitlab_keep_namespace"></a> [gitlab\_keep\_namespace](#input\_gitlab\_keep\_namespace) | Create the GitLab configuration at var.nrn as given. By default a namespace in var.nrn is stripped and the configuration lands at the account; set true to scope it to that namespace, as the other providers already are. | `bool` | `false` | no |
 | <a name="input_gitlab_repository_prefix"></a> [gitlab\_repository\_prefix](#input\_gitlab\_repository\_prefix) | Prefix to use for GitLab repository names. | `string` | `null` | no |
 | <a name="input_gitlab_slug"></a> [gitlab\_slug](#input\_gitlab\_slug) | GitLab project slug identifier. | `string` | `null` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name (NRN) — unique identifier for resources. | `string` | n/a | yes |
@@ -144,16 +145,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "code_repository",
-  "description": "Configures a nullplatform git provider integration by creating a nullplatform_provider_config resource for one of four supported providers: GitHub, GitLab, Azure DevOps, or Bitbucket",
-  "architecture": "The module uses local boolean flags (is_gitlab, is_github, is_azure, is_bitbucket) derived from var.git_provider to conditionally create exactly one nullplatform_provider_config resource via count = local.is_X ? 1 : 0. Each nullplatform_provider_config resource is bound to a scoped NRN (namespace-stripped via regex or replace), a provider-specific type string (e.g. gitlab-configuration, github-configuration, azure-devops-configuration, bitbucket), and a JSON-encoded attributes block containing provider-specific setup credentials and configuration. The dimensions input flows directly into every resource to support multi-environment or multi-region segmentation within the nullplatform platform.",
+  "description": "Configures a nullplatform provider integration for one of four supported Git providers (GitHub, GitLab, Azure DevOps, or Bitbucket) by creating a conditional nullplatform_provider_config resource",
+  "architecture": "The module evaluates the git_provider input variable through four local booleans (is_gitlab, is_github, is_azure, is_bitbucket) and uses count-based conditional creation to instantiate exactly one nullplatform_provider_config resource. Each provider variant sets a distinct type string (gitlab-configuration, github-configuration, azure-devops-configuration, or bitbucket) and serializes provider-specific credentials and settings into a jsonencode attributes block. The nrn input is transformed per-provider: GitLab optionally strips the namespace segment based on gitlab_keep_namespace, while GitHub, Azure, and Bitbucket always strip it via regex replace. An optional dimensions map allows segmentation of the resulting provider config across environments or regions.",
   "features": [
-    "Creates a nullplatform_provider_config resource with GitLab-specific setup including group path, access token, and installation URL",
-    "Creates a nullplatform_provider_config resource with GitHub-specific setup including organization name and App installation ID",
-    "Creates a nullplatform_provider_config resource with Azure DevOps setup including project name, personal access token, and CI agent pool",
-    "Creates a nullplatform_provider_config resource with Bitbucket setup including workspace, project key, installation URL, and collaborator access list",
-    "Enforces provider-specific required variables at plan time using Terraform validation blocks tied to the git_provider selector",
-    "Supports dimensional segmentation of provider configs via a flexible map of key-value dimension labels",
-    "Strips namespace scope from the NRN automatically to ensure provider configs are registered at the correct platform hierarchy level"
+    "Creates a GitLab provider config with group path, access token, and installation URL attributes",
+    "Creates a GitHub provider config with organization name and App installation ID",
+    "Creates an Azure DevOps provider config with project name, personal access token, and CI agent pool",
+    "Creates a Bitbucket provider config with workspace, project key, installation URL, and collaborator access list",
+    "Supports optional namespace scoping for GitLab via the gitlab_keep_namespace flag",
+    "Applies optional dimension segmentation to all provider configurations for environment or region partitioning",
+    "Enforces provider-specific required variables at plan time using cross-variable Terraform validations"
   ],
   "inputs": [
     {
@@ -237,12 +238,17 @@ resource "example_resource" "this" {
       "required": false
     },
     {
+      "name": "gitlab_keep_namespace",
+      "description": "Create the GitLab configuration at var.nrn as given. By default a namespace in var.nrn is stripped and the configuration lands at the account; set true to scope it to that namespace, as the other providers already are.",
+      "required": false
+    },
+    {
       "name": "dimensions",
       "description": "Dimensions to segment the nullplatform provider config (e.g. by region, environment)",
       "required": false
     }
   ],
   "outputs": [],
-  "hash": "78d2c8b0829524bd28615a692ff9331c"
+  "hash": "ee4407021de6fcb79537d9defa9902b9"
 }
 END_AI_METADATA -->
