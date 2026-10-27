@@ -74,6 +74,7 @@ run "a_published_package_creates_only_what_it_pins" {
   variables {
     create_scope_type          = false
     configure_nrn_settings     = false
+    np_api_key                 = null
     create_scope_configuration = false
     package = {
       version   = "1.0.0"
@@ -105,4 +106,14 @@ run "a_published_package_creates_only_what_it_pins" {
     condition     = output.scope_type_id == null
     error_message = "scope_type_id must be null without create_scope_type"
   }
+}
+
+run "nrn_settings_need_an_api_key" {
+  command = plan
+
+  variables {
+    np_api_key = null
+  }
+
+  expect_failures = [null_resource.nrn_patch]
 }

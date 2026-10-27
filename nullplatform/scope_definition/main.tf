@@ -116,6 +116,13 @@ resource "null_resource" "nrn_patch" {
     logging_provider = var.external_logging_provider
   }
 
+  lifecycle {
+    precondition {
+      condition     = var.np_api_key != null
+      error_message = "np_api_key is required to write the NRN settings (configure_nrn_settings = true)."
+    }
+  }
+
   provisioner "local-exec" {
     command = <<-EOT
       np nrn patch --nrn "${var.nrn}" --body "{

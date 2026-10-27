@@ -109,9 +109,10 @@ variable "nrn" {
 }
 
 variable "np_api_key" {
-  description = "Nullplatform API key used for executing local commands (e.g., 'np nrn patch')"
+  description = "Nullplatform API key used for executing local commands (e.g., 'np nrn patch'). Required with configure_nrn_settings."
   type        = string
   sensitive   = true
+  default     = null
 }
 
 ################################################################################
