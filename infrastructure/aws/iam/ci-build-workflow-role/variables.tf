@@ -9,31 +9,38 @@ variable "application_manager_assume_role" {
   default     = "arn:aws:iam::283477532906:role/application_manager"
 }
 
-variable "github_organization" {
-  description = "GitHub organization nullplatform creates application repositories in (the code_repository module's github_organization). GitHub Actions workflows of any repository in it can assume the role with their OIDC token, which is how `np asset push` gets AWS credentials on the runner. Null leaves the role assumable only by the application manager."
-  type        = string
-  default     = null
+variable "oidc_providers" {
+  description = <<-EOT
+    CI OIDC issuers whose jobs can assume the role, keyed by a free-form name (e.g. github, gitlab, bitbucket).
+    - url: issuer URL, e.g. https://token.actions.githubusercontent.com, https://gitlab.com or https://api.bitbucket.org/2.0/workspaces/<workspace>/pipelines-config/identity/oidc
+    - subjects: StringLike patterns on the sub claim, scoped to your organization, group or repositories (e.g. repo:<org>/* for GitHub, project_path:<group>/* for GitLab)
+    - audiences: accepted aud claims; sts.amazonaws.com unless the CI tool fixes its own (Bitbucket uses ari:cloud:bitbucket::workspace/<uuid>)
+    - create: create the IAM OIDC provider instead of looking up the existing one (an account holds one per issuer URL)
+    - thumbprints: only for self-managed issuers whose certificate is not publicly trusted
+  EOT
+  type = map(object({
+    url         = string
+    subjects    = list(string)
+    audiences   = optional(list(string), ["sts.amazonaws.com"])
+    create      = optional(bool, false)
+    thumbprints = optional(list(string), [])
+  }))
+  default = {}
 
   validation {
-    # A wildcard or a slash would widen the trust to repositories of other organizations.
-    condition     = var.github_organization == null || can(regex("^[A-Za-z0-9-]+$", var.github_organization))
-    error_message = "github_organization must be a literal GitHub organization name (letters, digits and hyphens)"
+    condition     = alltrue([for p in values(var.oidc_providers) : startswith(p.url, "https://")])
+    error_message = "every oidc_providers url must start with https://"
   }
-}
-
-variable "github_organization_id" {
-  description = "Numeric ID of github_organization. Pins the organization in immutable sub claims (repo:<org>@<org_id>/<repo>@<repo_id>:...); null accepts any ID after the organization name."
-  type        = string
-  default     = null
 
   validation {
-    condition     = var.github_organization_id == null || can(regex("^[0-9]+$", var.github_organization_id))
-    error_message = "github_organization_id must be the numeric GitHub organization ID"
+    # A bare or leading wildcard would let any job of the issuer (any GitHub
+    # organization, any GitLab group) assume the role.
+    condition     = alltrue([for p in values(var.oidc_providers) : length(p.subjects) > 0 && alltrue([for s in p.subjects : !startswith(s, "*")])])
+    error_message = "every oidc_providers entry needs at least one subject pattern, and none may start with a wildcard"
   }
-}
 
-variable "create_github_oidc_provider" {
-  description = "Create the GitHub Actions OIDC provider (token.actions.githubusercontent.com). Leave false when the account already has one: an account holds a single provider per issuer URL, and the existing one is looked up."
-  type        = bool
-  default     = false
+  validation {
+    condition     = alltrue([for p in values(var.oidc_providers) : length(p.audiences) > 0])
+    error_message = "every oidc_providers entry needs at least one audience"
+  }
 }

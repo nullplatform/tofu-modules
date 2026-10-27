@@ -1,6 +1,11 @@
 locals {
-  github_oidc_url          = "https://token.actions.githubusercontent.com"
-  github_oidc_provider_arn = var.github_organization == null ? null : (var.create_github_oidc_provider ? aws_iam_openid_connect_provider.github[0].arn : data.aws_iam_openid_connect_provider.github[0].arn)
+  # IAM condition keys for an OIDC provider are its issuer URL without the scheme.
+  oidc_hosts = { for k, p in var.oidc_providers : k => trimprefix(p.url, "https://") }
+
+  oidc_provider_arns = merge(
+    { for k, p in aws_iam_openid_connect_provider.this : k => p.arn },
+    { for k, p in data.aws_iam_openid_connect_provider.this : k => p.arn },
+  )
 
   application_manager_statement = {
     Effect    = "Allow",
@@ -8,46 +13,37 @@ locals {
     Action    = "sts:AssumeRole",
   }
 
-  # `np asset push` runs on the GitHub Actions runner, which has no AWS identity:
-  # it assumes the role with the job's OIDC token, limited to the organization
-  # nullplatform creates application repositories in.
-  # GitHub issues the sub claim in two formats depending on the repository:
-  # "repo:<org>/<repo>:..." and, with immutable subjects enabled,
-  # "repo:<org>@<org_id>/<repo>@<repo_id>:...". Both are accepted; the org id is
-  # pinned when github_organization_id is set.
-  github_statements = [for org in compact([var.github_organization]) : {
+  # `np asset push` runs on the CI runner, which has no AWS identity: it
+  # exchanges the job's OIDC token for the role's credentials, either requested
+  # by the CLI itself (GitHub Actions) or read from AWS_WEB_IDENTITY_TOKEN_FILE
+  # (GitLab CI, Bitbucket Pipelines and any other tool that issues OIDC tokens).
+  oidc_statements = [for k, p in var.oidc_providers : {
     Effect    = "Allow",
-    Principal = { Federated = local.github_oidc_provider_arn },
+    Principal = { Federated = local.oidc_provider_arns[k] },
     Action    = "sts:AssumeRoleWithWebIdentity",
     Condition = {
-      StringEquals = { "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com" }
-      StringLike = { "token.actions.githubusercontent.com:sub" = [
-        "repo:${org}/*",
-        "repo:${org}@${coalesce(var.github_organization_id, "*")}/*",
-      ] }
+      StringEquals = { "${local.oidc_hosts[k]}:aud" = p.audiences }
+      StringLike   = { "${local.oidc_hosts[k]}:sub" = p.subjects }
     }
   }]
 }
 
-# An AWS account holds a single OIDC provider per issuer URL, so by default the
-# existing GitHub Actions provider is looked up instead of created.
-resource "aws_iam_openid_connect_provider" "github" {
-  count = var.github_organization != null && var.create_github_oidc_provider ? 1 : 0
+# An AWS account holds a single OIDC provider per issuer URL, so by default an
+# existing one is looked up and only created when asked to.
+resource "aws_iam_openid_connect_provider" "this" {
+  for_each = { for k, p in var.oidc_providers : k => p if p.create }
 
-  url            = local.github_oidc_url
-  client_id_list = ["sts.amazonaws.com"]
-  # AWS validates GitHub's issuer against its own trusted CA library and
-  # ignores these, but older AWS providers still require the argument.
-  thumbprint_list = [
-    "6938fd4d98bab03faadb97b34396831e3780aea1",
-    "1c58a3a8518e8759bf075b76b750d4f2df264fcd",
-  ]
+  url            = each.value.url
+  client_id_list = each.value.audiences
+  # AWS validates issuers with publicly trusted certificates against its own CA
+  # library; thumbprints are only needed for self-managed issuers.
+  thumbprint_list = length(each.value.thumbprints) > 0 ? each.value.thumbprints : null
 }
 
-data "aws_iam_openid_connect_provider" "github" {
-  count = var.github_organization != null && !var.create_github_oidc_provider ? 1 : 0
+data "aws_iam_openid_connect_provider" "this" {
+  for_each = { for k, p in var.oidc_providers : k => p if !p.create }
 
-  url = local.github_oidc_url
+  url = each.value.url
 }
 
 # Replaces the ci-build-workflow-user access keys. Asset-repository permission
@@ -58,6 +54,6 @@ resource "aws_iam_role" "nullplatform_build_workflow_role" {
 
   assume_role_policy = jsonencode({
     Version   = "2012-10-17",
-    Statement = concat([local.application_manager_statement], local.github_statements)
+    Statement = concat([local.application_manager_statement], local.oidc_statements)
   })
 }

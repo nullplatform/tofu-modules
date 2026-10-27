@@ -1,14 +1,16 @@
 mock_provider "aws" {
+  # Overrides apply to every instance of the resource, so looked-up and created
+  # providers each get a single placeholder ARN.
   override_data {
-    target = data.aws_iam_openid_connect_provider.github
+    target = data.aws_iam_openid_connect_provider.this
     values = {
       arn = "arn:aws:iam::123456789012:oidc-provider/token.actions.githubusercontent.com"
     }
   }
   override_resource {
-    target = aws_iam_openid_connect_provider.github
+    target = aws_iam_openid_connect_provider.this
     values = {
-      arn = "arn:aws:iam::123456789012:oidc-provider/token.actions.githubusercontent.com"
+      arn = "arn:aws:iam::123456789012:oidc-provider/created"
     }
   }
 }
@@ -17,7 +19,7 @@ variables {
   cluster_name = "test-cluster"
 }
 
-run "application_manager_only_without_github_organization" {
+run "application_manager_only_without_oidc_providers" {
   command = plan
 
   assert {
@@ -27,35 +29,30 @@ run "application_manager_only_without_github_organization" {
 
   assert {
     condition     = length(jsondecode(aws_iam_role.nullplatform_build_workflow_role.assume_role_policy).Statement) == 1
-    error_message = "only the application manager should be trusted without github_organization"
+    error_message = "only the application manager should be trusted without oidc_providers"
   }
 
   assert {
     condition     = jsondecode(aws_iam_role.nullplatform_build_workflow_role.assume_role_policy).Statement[0].Principal.AWS == "arn:aws:iam::283477532906:role/application_manager"
     error_message = "role should trust nullplatform's application manager by default"
   }
-
-  assert {
-    condition     = length(data.aws_iam_openid_connect_provider.github) == 0 && length(aws_iam_openid_connect_provider.github) == 0
-    error_message = "no OIDC provider should be looked up or created without github_organization"
-  }
 }
 
-run "github_organization_trusts_existing_oidc_provider" {
+run "github_looks_up_existing_provider" {
   command = apply
 
   variables {
-    github_organization = "my-org"
+    oidc_providers = {
+      github = {
+        url      = "https://token.actions.githubusercontent.com"
+        subjects = ["repo:my-org/*", "repo:my-org@239821853/*"]
+      }
+    }
   }
 
   assert {
-    condition     = length(data.aws_iam_openid_connect_provider.github) == 1 && length(aws_iam_openid_connect_provider.github) == 0
-    error_message = "the existing GitHub OIDC provider should be looked up, not created, by default"
-  }
-
-  assert {
-    condition     = jsondecode(aws_iam_role.nullplatform_build_workflow_role.assume_role_policy).Statement[0].Principal.AWS == "arn:aws:iam::283477532906:role/application_manager"
-    error_message = "the application manager should stay trusted"
+    condition     = length(data.aws_iam_openid_connect_provider.this) == 1 && length(aws_iam_openid_connect_provider.this) == 0
+    error_message = "the existing OIDC provider should be looked up, not created, by default"
   }
 
   assert {
@@ -65,54 +62,97 @@ run "github_organization_trusts_existing_oidc_provider" {
 
   assert {
     condition     = jsondecode(aws_iam_role.nullplatform_build_workflow_role.assume_role_policy).Statement[1].Action == "sts:AssumeRoleWithWebIdentity"
-    error_message = "GitHub workflows should assume the role through web identity"
+    error_message = "CI jobs should assume the role through web identity"
   }
 
   assert {
-    condition     = jsondecode(aws_iam_role.nullplatform_build_workflow_role.assume_role_policy).Statement[1].Condition.StringEquals["token.actions.githubusercontent.com:aud"] == "sts.amazonaws.com"
-    error_message = "trust policy should pin the audience to sts.amazonaws.com"
+    condition     = jsondecode(aws_iam_role.nullplatform_build_workflow_role.assume_role_policy).Statement[1].Condition.StringEquals["token.actions.githubusercontent.com:aud"] == ["sts.amazonaws.com"]
+    error_message = "audience should default to sts.amazonaws.com"
   }
 
   assert {
-    condition     = jsondecode(aws_iam_role.nullplatform_build_workflow_role.assume_role_policy).Statement[1].Condition.StringLike["token.actions.githubusercontent.com:sub"] == ["repo:my-org/*", "repo:my-org@*/*"]
-    error_message = "trust policy should accept both sub formats, restricted to the organization's repositories"
+    condition     = jsondecode(aws_iam_role.nullplatform_build_workflow_role.assume_role_policy).Statement[1].Condition.StringLike["token.actions.githubusercontent.com:sub"] == ["repo:my-org/*", "repo:my-org@239821853/*"]
+    error_message = "sub should be restricted to the given patterns"
   }
 }
 
-run "github_organization_id_pins_immutable_subject" {
-  command = plan
+run "several_providers_with_own_audience_and_creation" {
+  command = apply
 
   variables {
-    github_organization    = "my-org"
-    github_organization_id = "239821853"
+    oidc_providers = {
+      gitlab = {
+        url      = "https://gitlab.com"
+        subjects = ["project_path:my-group/*"]
+        create   = true
+      }
+      bitbucket = {
+        url       = "https://api.bitbucket.org/2.0/workspaces/my-ws/pipelines-config/identity/oidc"
+        subjects  = ["{11111111-2222-3333-4444-555555555555}:*"]
+        audiences = ["ari:cloud:bitbucket::workspace/11111111-2222-3333-4444-555555555555"]
+        create    = true
+      }
+    }
   }
 
   assert {
-    condition     = contains(jsondecode(aws_iam_role.nullplatform_build_workflow_role.assume_role_policy).Statement[1].Condition.StringLike["token.actions.githubusercontent.com:sub"], "repo:my-org@239821853/*")
-    error_message = "immutable sub pattern should pin the organization ID"
-  }
-}
-
-run "creates_oidc_provider_when_asked" {
-  command = plan
-
-  variables {
-    github_organization         = "my-org"
-    create_github_oidc_provider = true
+    condition     = length(aws_iam_openid_connect_provider.this) == 2 && length(data.aws_iam_openid_connect_provider.this) == 0
+    error_message = "both OIDC providers should be created"
   }
 
   assert {
-    condition     = length(aws_iam_openid_connect_provider.github) == 1 && length(data.aws_iam_openid_connect_provider.github) == 0
-    error_message = "the GitHub OIDC provider should be created instead of looked up"
+    condition     = aws_iam_openid_connect_provider.this["bitbucket"].client_id_list == toset(["ari:cloud:bitbucket::workspace/11111111-2222-3333-4444-555555555555"])
+    error_message = "a created provider should register the entry's audiences as client IDs"
+  }
+
+  assert {
+    condition     = length(jsondecode(aws_iam_role.nullplatform_build_workflow_role.assume_role_policy).Statement) == 3
+    error_message = "the application manager plus one statement per OIDC provider should be trusted"
+  }
+
+  assert {
+    condition = anytrue([
+      for s in jsondecode(aws_iam_role.nullplatform_build_workflow_role.assume_role_policy).Statement :
+      try(s.Condition.StringEquals["api.bitbucket.org/2.0/workspaces/my-ws/pipelines-config/identity/oidc:aud"] == ["ari:cloud:bitbucket::workspace/11111111-2222-3333-4444-555555555555"], false)
+    ])
+    error_message = "condition keys should use the issuer host and path, with the entry's own audience"
+  }
+
+  assert {
+    condition = anytrue([
+      for s in jsondecode(aws_iam_role.nullplatform_build_workflow_role.assume_role_policy).Statement :
+      try(s.Condition.StringLike["gitlab.com:sub"] == ["project_path:my-group/*"], false)
+    ])
+    error_message = "GitLab sub patterns should be keyed by its issuer host"
   }
 }
 
-run "rejects_wildcard_organization" {
+run "rejects_leading_wildcard_subject" {
   command = plan
 
   variables {
-    github_organization = "*"
+    oidc_providers = {
+      github = {
+        url      = "https://token.actions.githubusercontent.com"
+        subjects = ["*"]
+      }
+    }
   }
 
-  expect_failures = [var.github_organization]
+  expect_failures = [var.oidc_providers]
+}
+
+run "rejects_non_https_url" {
+  command = plan
+
+  variables {
+    oidc_providers = {
+      github = {
+        url      = "token.actions.githubusercontent.com"
+        subjects = ["repo:my-org/*"]
+      }
+    }
+  }
+
+  expect_failures = [var.oidc_providers]
 }

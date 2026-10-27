@@ -8,7 +8,7 @@ output "role_name" {
   value       = aws_iam_role.nullplatform_build_workflow_role.name
 }
 
-output "github_oidc_provider_arn" {
-  description = "ARN of the GitHub Actions OIDC provider the role trusts (created or looked up). Null when github_organization is not set."
-  value       = local.github_oidc_provider_arn
+output "oidc_provider_arns" {
+  description = "ARNs of the OIDC providers the role trusts (created or looked up), keyed like oidc_providers"
+  value       = local.oidc_provider_arns
 }
