@@ -7,6 +7,15 @@
 
 * **external_dns:** support public and private DNS on Azure with ExternalDNS: `label_filter` now applies to the `azure` and `azure-private-dns` providers, and the new `gateway_name` limits route sources to one Gateway, so a public instance keeps internal scopes out of the public zone while an `azure-private-dns` instance publishes them in the Private DNS zone (split-horizon)
 
+## [9.7.0](https://github.com/nullplatform/tofu-modules/compare/v9.6.0...v9.7.0) (2026-10-29)
+
+
+### Features
+
+* **packages:** add package installation modules ([#651](https://github.com/nullplatform/tofu-modules/issues/651)) ([cc219fe](https://github.com/nullplatform/tofu-modules/commit/cc219fe6955083e283d1a991c3c8300fd41a6c68))
+* **scope_definition:** let a published package skip the scope type and NRN settings ([315f35b](https://github.com/nullplatform/tofu-modules/commit/315f35ba951fc6f505aeb3311da339b1c7634f1a))
+* **scope_definition:** require np_api_key only to write the NRN settings ([c681cbc](https://github.com/nullplatform/tofu-modules/commit/c681cbcaa5dd04dd166708fdf69df8fc60371786))
+
 ## [9.6.0](https://github.com/nullplatform/tofu-modules/compare/v9.5.0...v9.6.0) (2026-10-27)
 
 
