@@ -187,3 +187,23 @@ run "gitlab_strips_namespace_from_nrn" {
     error_message = "GitLab NRN should have namespace stripped via regex"
   }
 }
+
+run "gitlab_keeps_namespace_when_asked" {
+  command = plan
+
+  variables {
+    git_provider             = "gitlab"
+    nrn                      = "organization=myorg:account=myaccount:namespace=mynamespace"
+    gitlab_keep_namespace    = true
+    gitlab_group_path        = "myorg/projects"
+    gitlab_access_token      = "glpat-xxxx"
+    gitlab_installation_url  = "https://gitlab.example.com"
+    gitlab_repository_prefix = "myorg"
+    gitlab_slug              = "myorg-projects"
+  }
+
+  assert {
+    condition     = nullplatform_provider_config.gitlab[0].nrn == "organization=myorg:account=myaccount:namespace=mynamespace"
+    error_message = "GitLab NRN should keep the namespace when gitlab_keep_namespace is true"
+  }
+}
