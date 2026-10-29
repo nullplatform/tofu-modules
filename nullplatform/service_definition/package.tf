@@ -125,6 +125,16 @@ resource "nullplatform_package" "this" {
   tags       = var.package.tags
   visible_to = local.package_visible_to
 
+  # What an organization must already have configured before installing it.
+  dynamic "requires_provider" {
+    for_each = var.package.requires_providers
+    content {
+      category      = requires_provider.value.category
+      specification = requires_provider.value.specification
+      optional      = requires_provider.value.optional
+    }
+  }
+
   # The service specification — the CLI publishes this component as "service".
   components {
     name                 = "service"

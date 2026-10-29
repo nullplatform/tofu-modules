@@ -1,4 +1,9 @@
 locals {
+  notification_channel_template = (
+    var.local_specs_path != null
+    ? file("${var.local_specs_path}/specs/notification-channel.json.tpl")
+    : data.http.notification_channel_template[0].response_body
+  )
   notification_channel_def = jsondecode(data.external.notification_channel.result.json)
   # Build overrides flag only when override feature is enabled
   overrides_flag = var.enabled_override ? "--overrides-path=${var.override_repo_path}${var.overrides_service_path}" : ""

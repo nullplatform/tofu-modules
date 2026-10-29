@@ -45,6 +45,20 @@ variable "repository_action_templates_branch" {
 
 }
 
+variable "local_specs_path" {
+  description = <<-EOT
+    Absolute path to a local directory holding the scope's `specs/` (the
+    `service_path` directory of a checkout of the scope repository). When set,
+    every template is read from disk and the `repository_*` inputs are ignored,
+    so a stack running from the repository itself (a release publishing its own
+    package, a private repository) publishes exactly the files of its checkout.
+    Null (the default) fetches the templates over HTTP. Same contract as
+    service_definition's `local_specs_path`.
+  EOT
+  type        = string
+  default     = null
+}
+
 variable "service_path" {
   description = "Path within the repository where the service specification files are stored (e.g., 'services/api')"
   type        = string
@@ -95,9 +109,10 @@ variable "nrn" {
 }
 
 variable "np_api_key" {
-  description = "Nullplatform API key used for executing local commands (e.g., 'np nrn patch')"
+  description = "Nullplatform API key used for executing local commands (e.g., 'np nrn patch'). Required with configure_nrn_settings."
   type        = string
   sensitive   = true
+  default     = null
 }
 
 ################################################################################
@@ -114,6 +129,18 @@ variable "external_logging_provider" {
   description = "Name of the external log provider"
   type        = string
   default     = "external"
+}
+
+variable "create_scope_type" {
+  type        = bool
+  default     = true
+  description = "Create the scope type from scope-type-definition.json.tpl at nrn. Set to false when the specification is published as a package for other organizations: each one creates its own scope type when it installs the package, so the publisher's would only duplicate it."
+}
+
+variable "configure_nrn_settings" {
+  type        = bool
+  default     = true
+  description = "Write the metrics and logs providers of the scope to the NRN settings at nrn (`np nrn patch`, needs `np` on the machine running the apply). Set to false when the specification is published as a package for other organizations: each one writes its own when it installs the package."
 }
 
 variable "create_scope_configuration" {
@@ -260,6 +287,14 @@ variable "package" {
     artifact type gets no meta defaults (their meta shape is unrelated to a
     container registry).
 
+    `requires_providers` declares the providers an organization must already
+    have configured at the installation NRN or above it before installing the
+    package: by `category` (any provider specification in it) or by
+    `specification`. A missing required one refuses the install; a missing
+    `optional` one is reported on the installation. It is the package's
+    declaration, not a revision's: the list replaces it whole on each apply,
+    and an empty list clears it. Requires provider >= 0.0.110.
+
     Null (the default) keeps the classic module behavior — no package.
   EOT
   type = object({
@@ -269,6 +304,11 @@ variable "package" {
     default    = optional(bool, true)      # promote each published revision to the package default
     tags       = optional(map(string), {}) # release tags: name => version (requires an API with the package release-tag routes)
     visible_to = optional(list(string))    # default: [var.nrn]
+    requires_providers = optional(list(object({
+      category      = optional(string) # any provider specification in this category satisfies it…
+      specification = optional(string) # …or this one in particular (exactly one of the two)
+      optional      = optional(bool, false)
+    })), [])
     artifacts = optional(list(object({
       name                 = optional(string, "worker-image")
       type                 = optional(string, "oci_image") # oci_image | oras_artifact | git_repository | blob
@@ -293,6 +333,13 @@ variable "package" {
       for a in var.package.artifacts : a.lookup ? a.meta != null : true
     ])
     error_message = "`lookup = true` requires `meta` with the identity fields of the existing artifact."
+  }
+
+  validation {
+    condition = var.package == null ? true : alltrue([
+      for r in var.package.requires_providers : (r.category == null) != (r.specification == null)
+    ])
+    error_message = "Each package requires_providers entry names exactly one of `category`, `specification`."
   }
 }
 

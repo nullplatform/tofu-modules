@@ -83,3 +83,53 @@ run "visible_to_does_not_touch_package" {
     error_message = "The package visibility should not follow visible_to."
   }
 }
+
+# The providers an organization must hold before installing the package travel
+# on the package, in order; none declared leaves the package without them.
+run "package_declares_its_required_providers" {
+  command = plan
+
+  variables {
+    package = {
+      version = "1.0.0"
+      requires_providers = [
+        { category = "cloud-providers" },
+        { specification = "datadog", optional = true },
+      ]
+    }
+  }
+
+  assert {
+    condition = [for r in nullplatform_package.this[0].requires_provider : "${coalesce(r.category, "-")}|${coalesce(r.specification, "-")}|${r.optional}"] == [
+      "cloud-providers|-|false",
+      "-|datadog|true",
+    ]
+    error_message = "requires_providers should become the package's requires_provider blocks, in order."
+  }
+}
+
+run "package_without_required_providers" {
+  command = plan
+
+  variables {
+    package = { version = "1.0.0" }
+  }
+
+  assert {
+    condition     = length(nullplatform_package.this[0].requires_provider) == 0
+    error_message = "A package that declares nothing should carry no requires_provider block."
+  }
+}
+
+run "required_provider_names_exactly_one_of_category_or_specification" {
+  command = plan
+
+  variables {
+    package = {
+      version            = "1.0.0"
+      requires_providers = [{ category = "cloud-providers", specification = "aws" }]
+    }
+  }
+
+  expect_failures = [var.package]
+}

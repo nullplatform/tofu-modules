@@ -52,6 +52,7 @@ resource "nullplatform_service_specification" "from_template" {
 ################################################################################
 # Create scope type resource linked to service specification
 resource "nullplatform_scope_type" "from_template" {
+  count = var.create_scope_type ? 1 : 0
   depends_on = [
     data.external.scope_type,
   nullplatform_service_specification.from_template]
@@ -61,6 +62,18 @@ resource "nullplatform_scope_type" "from_template" {
   description   = var.service_spec_description
   provider_id   = local.service_specification_id
   provider_type = local.scope_type_def.provider_type
+}
+
+# Both used to be single instances: keep existing states on the same objects
+# instead of replacing them.
+moved {
+  from = nullplatform_scope_type.from_template
+  to   = nullplatform_scope_type.from_template[0]
+}
+
+moved {
+  from = null_resource.nrn_patch
+  to   = null_resource.nrn_patch[0]
 }
 
 ################################################################################
@@ -89,6 +102,7 @@ resource "nullplatform_action_specification" "from_templates" {
 
 # Patch NRN with external provider configuration for metrics and logging
 resource "null_resource" "nrn_patch" {
+  count = var.configure_nrn_settings ? 1 : 0
   depends_on = [
     nullplatform_action_specification.from_templates,
     nullplatform_scope_type.from_template,
@@ -100,6 +114,13 @@ resource "null_resource" "nrn_patch" {
     service_slug     = local.service_slug
     metrics_provider = var.external_metrics_provider
     logging_provider = var.external_logging_provider
+  }
+
+  lifecycle {
+    precondition {
+      condition     = var.np_api_key != null
+      error_message = "np_api_key is required to write the NRN settings (configure_nrn_settings = true)."
+    }
   }
 
   provisioner "local-exec" {

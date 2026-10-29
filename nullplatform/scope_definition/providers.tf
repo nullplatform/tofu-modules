@@ -1,8 +1,9 @@
 terraform {
   required_providers {
     nullplatform = {
-      source  = "nullplatform/nullplatform"
-      version = ">= 0.0.104"
+      source = "nullplatform/nullplatform"
+      # nullplatform_package.requires_provider
+      version = ">= 0.0.110"
     }
 
     external = {
