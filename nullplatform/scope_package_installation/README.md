@@ -22,7 +22,7 @@ The module chains a `package_installation` child module to register the package 
 
 ```hcl
 module "scope_package_installation" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_package_installation?ref=v9.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_package_installation?ref=v9.7.0"
 
   agent_tags_selectors = "your-agent-tags-selectors"
   local_specs_path     = "your-local-specs-path"
