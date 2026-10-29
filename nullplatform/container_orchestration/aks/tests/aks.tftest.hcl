@@ -353,12 +353,12 @@ run "with_all_options" {
   }
 }
 
-run "naming_absent_by_default" {
+run "naming_qualified_by_default" {
   command = plan
 
   assert {
-    condition     = !contains(keys(jsondecode(nullplatform_provider_config.aks_config.attributes)), "naming")
-    error_message = "Attributes should not contain naming when not set"
+    condition     = jsondecode(nullplatform_provider_config.aks_config.attributes).naming == { strategy = "qualified" }
+    error_message = "Naming strategy should default to qualified"
   }
 }
 

@@ -3,6 +3,10 @@
 ## Unreleased
 
 
+### Features
+
+* **container_orchestration:** `naming_strategy` defaults to `qualified` in the aks, eks, gke and oke modules
+
 ### Bug Fixes
 
 * **external_dns:** support public and private DNS on Azure with ExternalDNS: `label_filter` now applies to the `azure` and `azure-private-dns` providers, and the new `gateway_name` limits route sources to one Gateway, so a public instance keeps internal scopes out of the public zone while an `azure-private-dns` instance publishes them in the Private DNS zone (split-horizon)

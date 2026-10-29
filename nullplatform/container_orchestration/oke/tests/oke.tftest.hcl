@@ -35,8 +35,11 @@ run "attributes_with_defaults" {
         public_name  = "public-gateway"
         private_name = "private-gateway"
       }
+      naming = {
+        strategy = "qualified"
+      }
     }
-    error_message = "Attributes should only carry cluster and gateway with their defaults"
+    error_message = "Attributes should only carry cluster, gateway and naming with their defaults"
   }
 }
 
@@ -55,12 +58,12 @@ run "with_dimensions" {
   }
 }
 
-run "naming_absent_by_default" {
+run "naming_qualified_by_default" {
   command = plan
 
   assert {
-    condition     = !contains(keys(jsondecode(nullplatform_provider_config.oke_config.attributes)), "naming")
-    error_message = "Attributes should not contain naming when not set"
+    condition     = jsondecode(nullplatform_provider_config.oke_config.attributes).naming == { strategy = "qualified" }
+    error_message = "Naming strategy should default to qualified"
   }
 }
 
