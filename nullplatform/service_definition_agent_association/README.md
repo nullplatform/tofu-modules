@@ -22,7 +22,7 @@ The module creates a single nullplatform_notification_channel resource configure
 
 ```hcl
 module "service_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v9.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition_agent_association?ref=v9.7.0"
 
   tags_selectors = "your-tags-selectors"
 }
