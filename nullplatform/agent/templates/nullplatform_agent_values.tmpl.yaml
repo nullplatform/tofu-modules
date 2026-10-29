@@ -92,3 +92,10 @@ tolerations:
 resources:
   ${indent(2, yamlencode(resources))}
 %{ endif ~}
+%{ if replicas != null ~}
+replicaCount: ${replicas}
+%{ endif ~}
+%{ if affinity != null ~}
+affinity:
+  ${indent(2, yamlencode(affinity))}
+%{ endif ~}
