@@ -2,21 +2,21 @@
 
 ## Description
 
-Registers a nullplatform service specification from remote Git repository templates (GitHub, GitLab, Bitbucket) or a local filesystem path, along with its associated action and link specifications
+Registers a Nullplatform service specification with its associated action and link specifications by fetching JSON templates from a remote Git repository (GitHub, GitLab, or Bitbucket) or a local filesystem path
 
 ## Architecture
 
-The module fetches JSON template files via `data.http` resources from GitHub, GitLab, or Bitbucket raw endpoints (or reads them from local disk when git_provider is 'local'), then parses them to drive three resource types: `nullplatform_service_specification` is created first with parsed attributes, selectors, and dimensions; `nullplatform_action_specification` resources are created in a for_each loop depending on `available_actions`, each linked to the service specification ID; `nullplatform_link_specification` resources are created similarly for `available_links`, inheriting selectors from the service spec. When `var.package` is set, additional `nullplatform_package` and `nullplatform_artifact` resources are created to publish a versioned, immutable bill-of-materials revision.
+The module fetches service, action, and link specification templates via the `http` data source from GitHub raw content URLs, GitLab API v4 file endpoints, or Bitbucket raw endpoints, or reads them directly from the local filesystem using `file()`. The parsed JSON templates are fed into `nullplatform_service_specification`, `nullplatform_action_specification`, and `nullplatform_link_specification` resources, with action and link specifications depending on the service specification via `depends_on`. When `var.package` is set, the module additionally creates `nullplatform_package` and `nullplatform_artifact` resources that publish a versioned, immutable bill-of-materials revision pinning all specifications and artifacts.
 
 ## Features
 
-- Fetches service, action, and link specification templates from GitHub, GitLab, Bitbucket, or local filesystem
-- Creates nullplatform_service_specification with parsed type, attributes, selectors, and dimensions
-- Creates nullplatform_action_specification resources for each entry in available_actions using remote or local templates
-- Creates nullplatform_link_specification resources for each entry in available_links, inheriting service selectors
-- Supports provider-specific authentication including Bearer tokens, GitLab PRIVATE-TOKEN headers, and Bitbucket Basic auth
-- Publishes versioned nullplatform_package with immutable bill-of-materials including artifact registrations, lookups, or explicit ID pins
-- Controls service specification visibility via NRN lists with optional override through visible_to
+- Creates a nullplatform_service_specification from a JSON template with configurable name, visibility, type, attributes, selectors, and dimensions
+- Creates nullplatform_action_specification resources for each named action template fetched from the service repository
+- Creates nullplatform_link_specification resources for each named link template with selectors, scopes, dimensions, and assignability settings
+- Fetches specification templates from GitHub, GitLab, or Bitbucket using provider-specific URL schemes and authentication headers, including Basic auth for Bitbucket API tokens
+- Supports local filesystem template loading as an alternative to remote Git providers, bypassing all HTTP fetching
+- Publishes versioned nullplatform_package revisions with a bill-of-materials pinning specifications and artifacts when the package variable is configured
+- Controls service specification visibility via explicit NRN lists or automatic derivation from nrn and extra_visibile_to_nrns
 
 ## Basic Usage
 
@@ -106,7 +106,7 @@ resource "example_resource" "this" {
 | Name | Version |
 |------|---------|
 | <a name="provider_http"></a> [http](#provider\_http) | 3.6.1 |
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.104 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.110 |
 
 ## Resources
 
@@ -158,16 +158,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "service_definition",
-  "description": "Registers a nullplatform service specification from remote Git repository templates (GitHub, GitLab, Bitbucket) or a local filesystem path, along with its associated action and link specifications",
-  "architecture": "The module fetches JSON template files via `data.http` resources from GitHub, GitLab, or Bitbucket raw endpoints (or reads them from local disk when git_provider is 'local'), then parses them to drive three resource types: `nullplatform_service_specification` is created first with parsed attributes, selectors, and dimensions; `nullplatform_action_specification` resources are created in a for_each loop depending on `available_actions`, each linked to the service specification ID; `nullplatform_link_specification` resources are created similarly for `available_links`, inheriting selectors from the service spec. When `var.package` is set, additional `nullplatform_package` and `nullplatform_artifact` resources are created to publish a versioned, immutable bill-of-materials revision.",
+  "description": "Registers a Nullplatform service specification with its associated action and link specifications by fetching JSON templates from a remote Git repository (GitHub, GitLab, or Bitbucket) or a local filesystem path",
+  "architecture": "The module fetches service, action, and link specification templates via the `http` data source from GitHub raw content URLs, GitLab API v4 file endpoints, or Bitbucket raw endpoints, or reads them directly from the local filesystem using `file()`. The parsed JSON templates are fed into `nullplatform_service_specification`, `nullplatform_action_specification`, and `nullplatform_link_specification` resources, with action and link specifications depending on the service specification via `depends_on`. When `var.package` is set, the module additionally creates `nullplatform_package` and `nullplatform_artifact` resources that publish a versioned, immutable bill-of-materials revision pinning all specifications and artifacts.",
   "features": [
-    "Fetches service, action, and link specification templates from GitHub, GitLab, Bitbucket, or local filesystem",
-    "Creates nullplatform_service_specification with parsed type, attributes, selectors, and dimensions",
-    "Creates nullplatform_action_specification resources for each entry in available_actions using remote or local templates",
-    "Creates nullplatform_link_specification resources for each entry in available_links, inheriting service selectors",
-    "Supports provider-specific authentication including Bearer tokens, GitLab PRIVATE-TOKEN headers, and Bitbucket Basic auth",
-    "Publishes versioned nullplatform_package with immutable bill-of-materials including artifact registrations, lookups, or explicit ID pins",
-    "Controls service specification visibility via NRN lists with optional override through visible_to"
+    "Creates a nullplatform_service_specification from a JSON template with configurable name, visibility, type, attributes, selectors, and dimensions",
+    "Creates nullplatform_action_specification resources for each named action template fetched from the service repository",
+    "Creates nullplatform_link_specification resources for each named link template with selectors, scopes, dimensions, and assignability settings",
+    "Fetches specification templates from GitHub, GitLab, or Bitbucket using provider-specific URL schemes and authentication headers, including Basic auth for Bitbucket API tokens",
+    "Supports local filesystem template loading as an alternative to remote Git providers, bypassing all HTTP fetching",
+    "Publishes versioned nullplatform_package revisions with a bill-of-materials pinning specifications and artifacts when the package variable is configured",
+    "Controls service specification visibility via explicit NRN lists or automatic derivation from nrn and extra_visibile_to_nrns"
   ],
   "inputs": [
     {
@@ -279,6 +279,6 @@ resource "example_resource" "this" {
     "package_default_version",
     "package_artifacts"
   ],
-  "hash": "190c831e03e3ad225ca8c5e5881d374e"
+  "hash": "17e06633a41548a6ad08a04b81963470"
 }
 END_AI_METADATA -->

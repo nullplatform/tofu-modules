@@ -2,45 +2,39 @@
 
 ## Description
 
-Installs a nullplatform package in an organization: finds the package by where it is visible (it is usually owned by another organization that published it for every organization) and creates the installation that pins the revision new services and scopes are born with.
+Installs a versioned nullplatform package at a specified NRN scope, pinning new services and scopes to a specific semver revision
 
 ## Architecture
 
-The module reads the package with `data.nullplatform_package`, filtering by `visible_at = nrn`, `slug` and the exact `version` to install, so it finds packages owned elsewhere and published with `visible_to = ["organization=*"]`. It then creates one `nullplatform_package_installation` at `nrn` whose `default_revision_id` is the revision of that version. The installation never follows the publisher's default afterwards: upgrading is changing `package_version`, and only new services and scopes move; existing ones keep their revision until they are moved one by one.
-
-It also exposes the revision's bill of materials. An installing organization does not own the package's resources, and the BOM is how it finds them: `service_specification_ids` is what a scope type has to point at.
+The module uses a `nullplatform_package` data source to look up a package by slug and version as visible at the target NRN, resolving the exact revision ID to pin. A `nullplatform_package_installation` resource is then created, binding the package to the specified NRN with the resolved revision set as the default for new services and scopes. The `visible_to` input controls which child NRNs within the installing organization can use the package's specifications. Outputs expose the installation ID, package ID, revision ID, installed version, missing optional requirements, and a filtered list of service specification IDs from the package's bill of materials.
 
 ## Features
 
-- Finds a package by visibility, not by owner, so packages published for every organization can be installed
-- Pins the installation to the exact revision of `package_version`, independent of the publisher's default
-- Restricts where the package is usable inside the organization with `visible_to`
-- Reports the optional providers the package can use and the organization has not configured
-- Exposes the installed revision's bill of materials and its service specification IDs
+- Looks up a nullplatform package by slug and semver version as visible at the target NRN
+- Creates a nullplatform_package_installation resource pinning new services and scopes to an exact revision
+- Validates package_version as a strict X.Y.Z semver format without a leading v
+- Controls visibility scope of installed package specifications via configurable NRN list
+- Exposes service specification IDs filtered from the package bill of materials for downstream dependencies
+- Outputs missing optional requirements to surface unconfigured provider gaps at install time
 
 ## Basic Usage
 
 ```hcl
 module "package_installation" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/package_installation?ref=v9.5.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/package_installation?ref=v9.6.0"
 
-  nrn             = "organization=123:account=456"
-  package_slug    = "my-package"
-  package_version = "1.2.3"
+  nrn             = "your-nrn"
+  package_slug    = "your-package-slug"
+  package_version = "your-package-version"
 }
 ```
-
-Services and scopes have their own modules on top of this one, which also create the agent channel and, for scopes, the pieces each organization owns: [`service_package_installation`](../service_package_installation) and [`scope_package_installation`](../scope_package_installation).
 
 ## Using Outputs
 
 ```hcl
-# The scope type of a scope package points at the package's specification
-resource "nullplatform_scope_type" "this" {
-  nrn           = "organization=123:account=456"
-  name          = "My Scope"
-  provider_type = "service"
-  provider_id   = one(module.package_installation.service_specification_ids)
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.package_installation.installation_id
 }
 ```
 
@@ -55,7 +49,7 @@ resource "nullplatform_scope_type" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | >= 0.0.110 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.110 |
 
 ## Resources
 
@@ -84,3 +78,51 @@ resource "nullplatform_scope_type" "this" {
 | <a name="output_revision_id"></a> [revision\_id](#output\_revision\_id) | ID of the installed package revision: the one new services and scopes are born with. |
 | <a name="output_service_specification_ids"></a> [service\_specification\_ids](#output\_service\_specification\_ids) | IDs of the service specifications in the installed revision. They are readable at nrn once the installation exists: depend on installation\_id before reading them. |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "package_installation",
+  "description": "Installs a versioned nullplatform package at a specified NRN scope, pinning new services and scopes to a specific semver revision",
+  "architecture": "The module uses a `nullplatform_package` data source to look up a package by slug and version as visible at the target NRN, resolving the exact revision ID to pin. A `nullplatform_package_installation` resource is then created, binding the package to the specified NRN with the resolved revision set as the default for new services and scopes. The `visible_to` input controls which child NRNs within the installing organization can use the package's specifications. Outputs expose the installation ID, package ID, revision ID, installed version, missing optional requirements, and a filtered list of service specification IDs from the package's bill of materials.",
+  "features": [
+    "Looks up a nullplatform package by slug and semver version as visible at the target NRN",
+    "Creates a nullplatform_package_installation resource pinning new services and scopes to an exact revision",
+    "Validates package_version as a strict X.Y.Z semver format without a leading v",
+    "Controls visibility scope of installed package specifications via configurable NRN list",
+    "Exposes service specification IDs filtered from the package bill of materials for downstream dependencies",
+    "Outputs missing optional requirements to surface unconfigured provider gaps at install time"
+  ],
+  "inputs": [
+    {
+      "name": "nrn",
+      "description": "NRN of the installing organization where the package is installed (an organization, account, namespace or application). The package is looked up as visible there.",
+      "required": true
+    },
+    {
+      "name": "package_slug",
+      "description": "Slug of the package to install.",
+      "required": true
+    },
+    {
+      "name": "package_version",
+      "description": "Exact semver of the package revision to install (X.Y.Z, without a leading v). New services and scopes are born with it.",
+      "required": true
+    },
+    {
+      "name": "visible_to",
+      "description": "Where inside the installing organization the package's specifications are usable: these NRNs and everything below them. Null uses [nrn]. Every entry must be under the installing organization.",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "installation_id",
+    "package_id",
+    "revision_id",
+    "installed_version",
+    "missing_optional_requirements",
+    "components",
+    "service_specification_ids"
+  ],
+  "hash": "6b60f547b5804a3b5f8e6d89b68496a6"
+}
+END_AI_METADATA -->

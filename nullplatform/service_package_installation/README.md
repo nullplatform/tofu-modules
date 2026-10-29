@@ -2,52 +2,41 @@
 
 ## Description
 
-Installs a service package published by another organization and creates the agent channel that routes the service's actions to the package worker. Service repositories call it from their `installation/` module, next to their own cloud requirements.
+Installs a nullplatform service package and creates an agent channel that routes service actions to the package worker
 
 ## Architecture
 
-The module composes [`package_installation`](../package_installation), which finds the package by visibility and pins the installation to `package_version`, with [`service_definition_agent_association`](../service_definition_agent_association) in worker-orchestrator mode: a `package-exec` channel to the package worker, filtered to the service specification slug (by default the package slug, which is what a package published with `service_definition` gets). The channel is created after the installation, because it routes nothing until the specification is reachable at `nrn`.
-
-Cloud permissions are deliberately out of this module: each service repository creates them with its own requirements module (`specs/requirements/<cloud>`), so the same installation works on any cloud.
+The module composes two child modules: `package_installation` and `service_definition_agent_association`. The `package_installation` module registers the specified package version at the given NRN scope with optional visibility controls. After installation completes, the `service_definition_agent_association` module creates an agent notification channel that selects the package worker via tag-based agent matching and routes service and telemetry events to it. Outputs surface the installation ID, installed version, missing optional requirements, and the notification channel ID from both child modules.
 
 ## Features
 
-- Installs the service package at the version of the tag the caller references
-- Creates the `package-exec` agent channel to the package worker, filtered to the service specification
-- Uses a platform-managed credential for the channel (no API key to pass)
-- Reports the optional providers the package can use and the organization has not configured
+- Installs a versioned nullplatform service package at a specified organization NRN scope
+- Controls package visibility within the installing organization via configurable NRN list
+- Creates an agent notification channel with tag-based worker selection for routing service actions
+- Configures the agent channel as a worker orchestrator linked to the installed package
+- Supports customizable notification sources including service and telemetry events
+- Enforces channel creation only after successful package installation via explicit dependency
+- Exposes installation metadata including version, missing optional requirements, and channel ID
 
 ## Basic Usage
 
-A service repository's `installation/main.tf`, referenced by its users at a release tag:
-
 ```hcl
-locals {
-  package_slug = "my-service"
-  version      = trimspace(file("${path.module}/../../version.txt"))
-}
+module "service_package_installation" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_package_installation?ref=v9.6.0"
 
-module "requirements" {
-  source = "../specs/requirements/aws"
-  # ...
-}
-
-module "package" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_package_installation?ref=v9.5.0"
-
-  nrn                  = var.nrn
-  package_slug         = local.package_slug
-  package_version      = local.version
-  visible_to           = var.visible_to
-  agent_tags_selectors = var.agent_tags_selectors
+  agent_tags_selectors = "your-agent-tags-selectors"
+  nrn                  = "your-nrn"
+  package_slug         = "your-package-slug"
+  package_version      = "your-package-version"
 }
 ```
 
 ## Using Outputs
 
 ```hcl
-output "installed_version" {
-  value = module.package.installed_version
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.service_package_installation.installation_id
 }
 ```
 
@@ -88,3 +77,74 @@ output "installed_version" {
 | <a name="output_missing_optional_requirements"></a> [missing\_optional\_requirements](#output\_missing\_optional\_requirements) | Optional providers the package can use that were not configured at nrn or above it when it was installed. |
 | <a name="output_notification_channel_id"></a> [notification\_channel\_id](#output\_notification\_channel\_id) | ID of the agent notification channel. |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "service_package_installation",
+  "description": "Installs a nullplatform service package and creates an agent channel that routes service actions to the package worker",
+  "architecture": "The module composes two child modules: `package_installation` and `service_definition_agent_association`. The `package_installation` module registers the specified package version at the given NRN scope with optional visibility controls. After installation completes, the `service_definition_agent_association` module creates an agent notification channel that selects the package worker via tag-based agent matching and routes service and telemetry events to it. Outputs surface the installation ID, installed version, missing optional requirements, and the notification channel ID from both child modules.",
+  "features": [
+    "Installs a versioned nullplatform service package at a specified organization NRN scope",
+    "Controls package visibility within the installing organization via configurable NRN list",
+    "Creates an agent notification channel with tag-based worker selection for routing service actions",
+    "Configures the agent channel as a worker orchestrator linked to the installed package",
+    "Supports customizable notification sources including service and telemetry events",
+    "Enforces channel creation only after successful package installation via explicit dependency",
+    "Exposes installation metadata including version, missing optional requirements, and channel ID"
+  ],
+  "inputs": [
+    {
+      "name": "nrn",
+      "description": "NRN of the installing organization where the service is installed (e.g. organization=123:account=456). The package is looked up as visible there, installed there, and the agent channel is created there.",
+      "required": true
+    },
+    {
+      "name": "package_slug",
+      "description": "Slug of the service package to install.",
+      "required": true
+    },
+    {
+      "name": "package_version",
+      "description": "Exact semver of the package revision to install (X.Y.Z, without a leading v). Service repositories pass the version of the tag their installation module is referenced at.",
+      "required": true
+    },
+    {
+      "name": "agent_tags_selectors",
+      "description": "Tags that select the agent running the package worker (must match the agent's TAGS), e.g. { cluster = \\",
+      "required": true
+    },
+    {
+      "name": "visible_to",
+      "description": "Where inside the installing organization the service can be used. Null uses [nrn]. Every entry must be under the installing organization.",
+      "required": false
+    },
+    {
+      "name": "service_specification_slug",
+      "description": "Slug of the service specification the channel routes. Null uses package_slug, which is what a package published with service_definition gets.",
+      "required": false
+    },
+    {
+      "name": "channel_sources",
+      "description": "Notification sources the agent channel listens to.",
+      "required": false
+    },
+    {
+      "name": "channel_description",
+      "description": "Description of the agent channel. Null uses \\",
+      "required": false
+    },
+    {
+      "name": "entrypoint",
+      "description": "Command the channel sends to the worker. Empty uses the module default (/app/packages/<package_slug>/entrypoint). worker-bridge images ignore it and run their baked NP_SCOPE_ENTRYPOINT.",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "installation_id",
+    "installed_version",
+    "missing_optional_requirements",
+    "notification_channel_id"
+  ],
+  "hash": "ee87673ec931791d5e586751bcf1b029"
+}
+END_AI_METADATA -->
