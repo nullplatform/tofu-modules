@@ -21,7 +21,7 @@ The module creates an aws_iam_role named nullplatform-{cluster_name}-build-workf
 
 ```hcl
 module "ci-build-workflow-role" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/ci-build-workflow-role?ref=v9.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/ci-build-workflow-role?ref=v9.9.0"
 
   cluster_name = "your-cluster-name"
 }

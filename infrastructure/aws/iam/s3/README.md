@@ -20,7 +20,7 @@ The module creates an aws_iam_policy resource named with the cluster name that a
 
 ```hcl
 module "s3" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/s3?ref=v9.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/s3?ref=v9.9.0"
 
   bucket       = "your-bucket"
   cluster_name = "your-cluster-name"

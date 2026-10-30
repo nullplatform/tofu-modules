@@ -22,7 +22,7 @@ The module composes two child modules: `package_installation` creates the packag
 
 ```hcl
 module "service_package_installation" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_package_installation?ref=v9.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_package_installation?ref=v9.9.0"
 
   agent_tags_selectors = "your-agent-tags-selectors"
   nrn                  = "your-nrn"

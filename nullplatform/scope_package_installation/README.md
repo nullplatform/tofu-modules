@@ -22,7 +22,7 @@ The module composes a `package_installation` child module to register the packag
 
 ```hcl
 module "scope_package_installation" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_package_installation?ref=v9.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_package_installation?ref=v9.9.0"
 
   nrn                      = "your-nrn"
   package_slug             = "your-package-slug"

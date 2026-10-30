@@ -19,7 +19,7 @@ The module creates an azurerm_user_assigned_identity resource as the core Manage
 
 ```hcl
 module "unknown_scope" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/iam/tests/fixtures/unknown_scope?ref=v9.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/iam/tests/fixtures/unknown_scope?ref=v9.9.0"
 }
 ```
 

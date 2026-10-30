@@ -21,7 +21,7 @@ The module uses a `nullplatform_package` data source to resolve the exact packag
 
 ```hcl
 module "package_installation" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/package_installation?ref=v9.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/package_installation?ref=v9.9.0"
 
   nrn             = "your-nrn"
   package_slug    = "your-package-slug"
