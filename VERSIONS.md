@@ -14,29 +14,29 @@ a specific release, so an upgrade is something someone decides.
 
 ## What to pin
 
-Verified 2026-10-26.
+Verified 2026-10-30.
 
 | Component | Current | Variable | Module |
 | --- | --- | --- | --- |
 | `nullplatform-base` chart | `2.44.7` | `nullplatform_base_helm_version` | `nullplatform/base` |
-| `nullplatform-agent` chart | `3.3.0` | `nullplatform_agent_helm_version` | `nullplatform/agent` |
+| `nullplatform-agent` chart | `3.5.0` | `nullplatform_agent_helm_version` | `nullplatform/agent` |
 | `cert-manager` chart | `v1.21.3` | `cert_manager_version` | `infrastructure/commons/cert_manager` |
-| `prometheus` chart | `29.38.2` | `prometheus_version` | `infrastructure/commons/prometheus` |
+| `prometheus` chart | `29.40.0` | `prometheus_version` | `infrastructure/commons/prometheus` |
 | `istio-base` chart | `1.30.7` | `istio_base_version` | `infrastructure/commons/istio` |
 | `istiod` chart | `1.30.7` | `istiod_version` | `infrastructure/commons/istio` |
 | `gateway-api` CRDs | `v1.5.1` | `gateway_api_crd_ref` | `nullplatform/base` |
-| `k8s-logs-controller` | `v1.6.4` | `logging_controller_image_tag` | `nullplatform/base` |
-| `controlplane-agent` | `0.14.1` | `image_tag` | `nullplatform/agent` |
-| `k8s-traffic-manager` | `1.8.1` | `agent_traffic_manager_tag` | `nullplatform/agent` |
-| traffic manager (provider config) | `1.8.1` | `traffic_manager_version` | `container_orchestration/eks` |
-| `scopes` repository | `v1.18.0` | `agent_repo` (as `"https://github.com/nullplatform/scopes.git#v1.18.0"`; only without packages) | `nullplatform/agent` |
-| `scopes-lambda` repository | `v0.11.0` | `agent_repo` (as `"https://github.com/nullplatform/scopes-lambda.git#v0.11.0"`; only without packages) | `nullplatform/agent` |
-| `scopes-static-files` repository | `v4.1.1` | `agent_repo` (as `"https://github.com/nullplatform/scopes-static-files.git#v4.1.1"`; only without packages) | `nullplatform/agent` |
+| `k8s-logs-controller` | `v1.7.0` | `logging_controller_image_tag` | `nullplatform/base` |
+| `controlplane-agent` | `0.15.0` | `image_tag` | `nullplatform/agent` |
+| `k8s-traffic-manager` | `v1.9.0` | `agent_traffic_manager_tag` | `nullplatform/agent` |
+| traffic manager (provider config) | `v1.9.0` | `traffic_manager_version` | `container_orchestration/eks` |
+| `scopes` repository | `v1.19.0` | `agent_repo` (as `"https://github.com/nullplatform/scopes.git#v1.19.0"`; only without packages) | `nullplatform/agent` |
+| `scopes-lambda` repository | `v0.11.2` | `agent_repo` (as `"https://github.com/nullplatform/scopes-lambda.git#v0.11.2"`; only without packages) | `nullplatform/agent` |
+| `scopes-static-files` repository | `v4.1.2` | `agent_repo` (as `"https://github.com/nullplatform/scopes-static-files.git#v4.1.2"`; only without packages) | `nullplatform/agent` |
 | `external-dns` chart | `1.23.0` | `external_dns_version` | `infrastructure/commons/external_dns` |
 | `aws-load-balancer-controller` chart | `3.6.2` | `aws_load_balancer_controller_version` | `infrastructure/aws/aws_load_balancer_controller` |
 | `nullplatform-cert-manager-config` chart | `2.35.0` | `cert_manager_config_version` | `infrastructure/commons/cert_manager` |
 | EKS Kubernetes version | `1.36` | `kubernetes_version` | `infrastructure/aws/eks` |
-| EKS node AMI | `1.36.5-20261023` | `ami_release_version` (with `use_latest_ami_release_version = false`) | `infrastructure/aws/eks` |
+| EKS node AMI | `1.36.5-20261026` | `ami_release_version` (with `use_latest_ami_release_version = false`) | `infrastructure/aws/eks` |
 | `vpc-cni` addon | `v1.22.4-eksbuild.3` | `addon_versions["vpc-cni"]` | `infrastructure/aws/eks` |
 | `coredns` addon | `v1.14.7-eksbuild.10` | `addon_versions["coredns"]` | `infrastructure/aws/eks` |
 | `kube-proxy` addon | `v1.36.0-eksbuild.25` | `addon_versions["kube-proxy"]` | `infrastructure/aws/eks` |
@@ -53,28 +53,28 @@ at deploy time, so what you run may not match the table: `cert_manager_version`,
 ```hcl
 module "base" {
   nullplatform_base_helm_version = "2.44.7"
-  logging_controller_image_tag   = "v1.6.4"
+  logging_controller_image_tag   = "v1.7.0"
   gateway_api_crd_ref            = "v1.5.1"
 }
 
 module "agent" {
-  nullplatform_agent_helm_version = "3.3.0"
-  image_tag                       = "0.14.1"
-  agent_traffic_manager_tag       = "1.8.1"
+  nullplatform_agent_helm_version = "3.5.0"
+  image_tag                       = "0.15.0"
+  agent_traffic_manager_tag       = "v1.9.0"
 
   # Only for an install without packages (worker_orchestrator = false, the legacy
   # exec flow): the agent clones these repositories at startup. With packages the
   # scopes and services come from each package, so leave agent_repo unset.
   # agent_repo = [
-  #   "https://github.com/nullplatform/scopes.git#v1.18.0",
-  #   "https://github.com/nullplatform/scopes-lambda.git#v0.11.0",
-  #   "https://github.com/nullplatform/scopes-static-files.git#v4.1.1",
+  #   "https://github.com/nullplatform/scopes.git#v1.19.0",
+  #   "https://github.com/nullplatform/scopes-lambda.git#v0.11.2",
+  #   "https://github.com/nullplatform/scopes-static-files.git#v4.1.2",
   # ]
 }
 
 # eks, aks and gke all take this
 module "container_orchestration" {
-  traffic_manager_version = "1.8.1"
+  traffic_manager_version = "v1.9.0"
 }
 
 module "cert_manager" {
@@ -84,7 +84,7 @@ module "cert_manager" {
 
 module "eks" {
   kubernetes_version             = "1.36"
-  ami_release_version            = "1.36.5-20261023"
+  ami_release_version            = "1.36.5-20261026"
   use_latest_ami_release_version = false
 
   addon_versions = {
@@ -105,7 +105,7 @@ module "aws_load_balancer_controller" {
 }
 
 module "prometheus" {
-  prometheus_version = "29.38.2"
+  prometheus_version = "29.40.0"
 }
 
 module "istio" {

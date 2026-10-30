@@ -2,21 +2,21 @@
 
 ## Description
 
-Installs a nullplatform service package and creates an agent channel that routes service actions to the package worker
+Installs a published nullplatform service package at an organization scope and wires an agent notification channel to route the package worker's actions to the installed service specification
 
 ## Architecture
 
-The module composes two child modules: `package_installation` and `service_definition_agent_association`. The `package_installation` module registers the specified package version at the given NRN scope with optional visibility controls. After installation completes, the `service_definition_agent_association` module creates an agent notification channel that selects the package worker via tag-based agent matching and routes service and telemetry events to it. Outputs surface the installation ID, installed version, missing optional requirements, and the notification channel ID from both child modules.
+The module composes two child modules: `package_installation` creates the package installation resource binding the specified semver revision to the target NRN, and `service_definition_agent_association` creates an agent notification channel that routes package-exec actions to the worker filtered by tag selectors. The agent channel explicitly depends on the installation module so the service specification is reachable before the channel activates. Inputs such as `nrn`, `package_slug`, `package_version`, and `agent_tags_selectors` flow directly into these child modules, while outputs like `installation_id`, `service_specification_id`, and `notification_channel_id` are surfaced from their respective child module outputs.
 
 ## Features
 
-- Installs a versioned nullplatform service package at a specified organization NRN scope
-- Controls package visibility within the installing organization via configurable NRN list
-- Creates an agent notification channel with tag-based worker selection for routing service actions
-- Configures the agent channel as a worker orchestrator linked to the installed package
-- Supports customizable notification sources including service and telemetry events
-- Enforces channel creation only after successful package installation via explicit dependency
-- Exposes installation metadata including version, missing optional requirements, and channel ID
+- Creates a versioned package installation binding an exact semver revision to a target NRN organization scope
+- Creates an agent notification channel that routes package-exec actions to the package worker via tag-based agent selection
+- Enforces non-empty agent tag selectors to prevent unbounded channel delivery to all agents
+- Configures the agent channel as a worker orchestrator with a customizable entrypoint command
+- Supports scoping service visibility within the installing organization via an optional NRN list
+- Defaults channel notification sources to service and telemetry event types with override support
+- Exposes installation ID, installed version, service specification identifiers, and notification channel ID as outputs
 
 ## Basic Usage
 
@@ -76,21 +76,23 @@ resource "example_resource" "this" {
 | <a name="output_installed_version"></a> [installed\_version](#output\_installed\_version) | Version new services are born with. |
 | <a name="output_missing_optional_requirements"></a> [missing\_optional\_requirements](#output\_missing\_optional\_requirements) | Optional providers the package can use that were not configured at nrn or above it when it was installed. |
 | <a name="output_notification_channel_id"></a> [notification\_channel\_id](#output\_notification\_channel\_id) | ID of the agent notification channel. |
+| <a name="output_service_specification_id"></a> [service\_specification\_id](#output\_service\_specification\_id) | ID of the package's service specification. |
+| <a name="output_service_specification_slug"></a> [service\_specification\_slug](#output\_service\_specification\_slug) | Slug of the package's service specification. |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
 {
   "name": "service_package_installation",
-  "description": "Installs a nullplatform service package and creates an agent channel that routes service actions to the package worker",
-  "architecture": "The module composes two child modules: `package_installation` and `service_definition_agent_association`. The `package_installation` module registers the specified package version at the given NRN scope with optional visibility controls. After installation completes, the `service_definition_agent_association` module creates an agent notification channel that selects the package worker via tag-based agent matching and routes service and telemetry events to it. Outputs surface the installation ID, installed version, missing optional requirements, and the notification channel ID from both child modules.",
+  "description": "Installs a published nullplatform service package at an organization scope and wires an agent notification channel to route the package worker's actions to the installed service specification",
+  "architecture": "The module composes two child modules: `package_installation` creates the package installation resource binding the specified semver revision to the target NRN, and `service_definition_agent_association` creates an agent notification channel that routes package-exec actions to the worker filtered by tag selectors. The agent channel explicitly depends on the installation module so the service specification is reachable before the channel activates. Inputs such as `nrn`, `package_slug`, `package_version`, and `agent_tags_selectors` flow directly into these child modules, while outputs like `installation_id`, `service_specification_id`, and `notification_channel_id` are surfaced from their respective child module outputs.",
   "features": [
-    "Installs a versioned nullplatform service package at a specified organization NRN scope",
-    "Controls package visibility within the installing organization via configurable NRN list",
-    "Creates an agent notification channel with tag-based worker selection for routing service actions",
-    "Configures the agent channel as a worker orchestrator linked to the installed package",
-    "Supports customizable notification sources including service and telemetry events",
-    "Enforces channel creation only after successful package installation via explicit dependency",
-    "Exposes installation metadata including version, missing optional requirements, and channel ID"
+    "Creates a versioned package installation binding an exact semver revision to a target NRN organization scope",
+    "Creates an agent notification channel that routes package-exec actions to the package worker via tag-based agent selection",
+    "Enforces non-empty agent tag selectors to prevent unbounded channel delivery to all agents",
+    "Configures the agent channel as a worker orchestrator with a customizable entrypoint command",
+    "Supports scoping service visibility within the installing organization via an optional NRN list",
+    "Defaults channel notification sources to service and telemetry event types with override support",
+    "Exposes installation ID, installed version, service specification identifiers, and notification channel ID as outputs"
   ],
   "inputs": [
     {
@@ -143,8 +145,10 @@ resource "example_resource" "this" {
     "installation_id",
     "installed_version",
     "missing_optional_requirements",
+    "service_specification_id",
+    "service_specification_slug",
     "notification_channel_id"
   ],
-  "hash": "ee87673ec931791d5e586751bcf1b029"
+  "hash": "68d833abf6e90a71324386d282ea361c"
 }
 END_AI_METADATA -->

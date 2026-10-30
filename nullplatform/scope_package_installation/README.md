@@ -2,83 +2,42 @@
 
 ## Description
 
-Installs a scope package published by another organization and creates what the installing organization owns around it: the package installation, the scope type, the NRN settings and, optionally, the scope-configuration provider specification and the agent channel. A drop-in for `scope_definition`: same scope inputs, same template inputs, same output names, no copy of the specification.
+Installs a published nullplatform scope package into an organization and creates the associated scope type, NRN settings, optional scope-configuration provider specification, and optional agent channel
 
 ## Architecture
 
-The module chains a `package_installation` child module, which finds the package among those visible at `nrn`, installs the pinned `package_version` and reads the specification the revision pins. A `nullplatform_scope_type` points at that specification (`provider_type` is always `service`, so no template is rendered for it; name and description are inputs). A `terraform_data` resource runs `np nrn patch` as a local-exec provisioner to write the metrics and logs providers. With `create_scope_configuration`, a `nullplatform_provider_specification` is created from the scope repository's `scope-configuration.json.tpl`, read from a checkout (`local_specs_path`) or fetched over HTTP from `repository_scope_template` at `repository_scope_template_branch`, the URL shape `scope_definition` uses. With `create_agent_channel`, the `scope_definition_agent_association` child module creates the `package-exec` channel from the same checkout or repository ref.
+The module composes a `package_installation` child module to register the package at the given NRN, then creates a `nullplatform_scope_type` resource wired to the installed specification ID resolved from that child module. A `terraform_data` resource runs a `np nrn patch` local-exec provisioner to write metrics and logging provider slugs into NRN settings. Optionally, a `nullplatform_provider_specification` resource is created from a JSON template read either from disk via `file()` or fetched via the `http` data source, and a `scope_definition_agent_association` child module creates the agent notification channel routing scope actions to the package worker.
 
 ## Features
 
-- Installs a versioned scope package through the `package_installation` child module and pins the installed version: new scopes are born with it and nothing moves until `package_version` changes
-- Creates the scope type over the installed specification from `service_spec_name` and `service_spec_description`, the inputs `scope_definition` takes, with no template and no gomplate
-- Writes the NRN settings for the scope's metrics and logs providers (`np nrn patch`, same as `scope_definition`)
-- Optionally creates the scope-configuration provider specification from the scope repository's template, fetched over HTTP by repository URL and tag or read from a checkout
-- Optionally creates the agent channel, or leaves it to a bindings layer (`create_agent_channel = false`) that already runs `scope_definition_agent_association`
-- Exposes the outputs `scope_definition` exposes (`service_specification_id`, `service_slug`, `provider_specification_slug`, `package_id`, `package_default_version`), so whatever reads them keeps working
-
-## Switching a catalog entry from `scope_definition` to the global package
-
-An organization that registers scopes from a catalog and a `for_each` over `scope_definition` adds the package's slug and version to the entry and points a second module block at this module. The catalog fields the entry already has feed it unchanged:
-
-| `scope_definition` input                          | here                                                          |
-| ------------------------------------------------- | ------------------------------------------------------------- |
-| `nrn`, `np_api_key`                               | same                                                          |
-| `service_spec_name`, `service_spec_description`   | same (the scope type)                                         |
-| `service_path`                                    | same                                                          |
-| `create_scope_configuration`                      | same                                                          |
-| `scope_configuration_name_override`               | same                                                          |
-| `repository_scope_template`, `_branch`            | same (scope-configuration and channel templates)              |
-| `external_metrics_provider`, `_logging_provider`  | same                                                          |
-| `repository_service_spec`, `repository_action_templates`, `action_spec_names`, `package` | not needed: the specification, its actions and the package are the publisher's |
-| —                                                 | `package_slug`, `package_version`: what to install            |
-| —                                                 | `create_agent_channel = false` when a bindings layer creates the channel |
-
-The specification is a different one from the copy `scope_definition` registered, so existing scopes stay on the copy: a scope cannot change specification, and the API refuses to delete a specification with live scopes. Add the global package as a new catalog entry, with a scope type name that tells the two apart, and remove the copy's entry once it has no scopes left.
+- Installs a versioned scope package into a nullplatform organization via the package_installation child module
+- Creates a nullplatform_scope_type resource linked to the package's service specification ID with a precondition enforcing exactly one pinned specification
+- Writes scope metrics and logging provider slugs to NRN settings via a terraform_data local-exec provisioner running np nrn patch
+- Optionally creates a nullplatform_provider_specification for the scope-configuration schema from a template fetched over HTTP or read from a local checkout
+- Optionally creates an agent notification channel via the scope_definition_agent_association child module routing scope actions to the package worker
+- Supports template retrieval from a local repository checkout or from a raw HTTP URL with a pinned ref for catalog-driven deployments
+- Exposes compatibility-named outputs matching scope_definition so switching from a self-registered scope to a global package requires no downstream changes
 
 ## Basic Usage
 
 ```hcl
-# The layered shape: installation, scope type and NRN settings here; the
-# channel in the bindings layer (scope_definition_agent_association).
 module "scope_package_installation" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_package_installation?ref=v9.8.0"
 
-  nrn        = "organization=123:account=456"
-  np_api_key = var.np_api_key
-
-  package_slug    = "nullplatform-aws-lambda"
-  package_version = "0.12.0"
-
-  service_spec_name        = "AWS Lambda"
-  service_spec_description = "Serverless functions on AWS Lambda"
-
-  # Templates come from the scope repository at the tag the package was
-  # published from, like scope_definition fetches them.
-  service_path                     = "lambda"
-  repository_scope_template        = "https://raw.githubusercontent.com/nullplatform/scopes-lambda/refs/tags"
-  repository_scope_template_branch = "v0.12.0"
-  create_scope_configuration       = true
-
-  create_agent_channel = false
+  nrn                      = "your-nrn"
+  package_slug             = "your-package-slug"
+  package_version          = "your-package-version"
+  service_spec_description = "your-service-spec-description"
+  service_spec_name        = "your-service-spec-name"
 }
 ```
-
-A scope repository's own `installation/` module passes `local_specs_path = abspath("${path.module}/..")` instead of the repository pair, so the templates come from the same checkout as the package, and may create the channel here with `agent_tags_selectors`.
 
 ## Using Outputs
 
 ```hcl
-# Same names as scope_definition's, e.g. for a bindings layer that reads them
-# through remote state.
-output "scope_definitions" {
-  value = {
-    lambda = {
-      id                          = module.scope_package_installation.service_specification_id
-      slug                        = module.scope_package_installation.service_slug
-      provider_specification_slug = module.scope_package_installation.provider_specification_slug
-    }
-  }
+# Reference outputs in other resources
+resource "example_resource" "this" {
+  example_attribute = module.scope_package_installation.installation_id
 }
 ```
 
@@ -112,7 +71,6 @@ output "scope_definitions" {
 | [nullplatform_provider_specification.scope_configuration](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/provider_specification) | resource |
 | [nullplatform_scope_type.this](https://registry.terraform.io/providers/nullplatform/nullplatform/latest/docs/resources/scope_type) | resource |
 | [terraform_data.nrn_settings](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
-| [http_http.scope_configuration_template](https://registry.terraform.io/providers/hashicorp/http/latest/docs/data-sources/http) | data source |
 
 ## Inputs
 
@@ -156,3 +114,133 @@ output "scope_definitions" {
 | <a name="output_service_specification_id"></a> [service\_specification\_id](#output\_service\_specification\_id) | ID of the package's scope specification, the one the scope type points at. |
 | <a name="output_service_specification_slug"></a> [service\_specification\_slug](#output\_service\_specification\_slug) | Slug of the package's scope specification. |
 <!-- END_TF_DOCS -->
+
+<!-- BEGIN_AI_METADATA
+{
+  "name": "scope_package_installation",
+  "description": "Installs a published nullplatform scope package into an organization and creates the associated scope type, NRN settings, optional scope-configuration provider specification, and optional agent channel",
+  "architecture": "The module composes a `package_installation` child module to register the package at the given NRN, then creates a `nullplatform_scope_type` resource wired to the installed specification ID resolved from that child module. A `terraform_data` resource runs a `np nrn patch` local-exec provisioner to write metrics and logging provider slugs into NRN settings. Optionally, a `nullplatform_provider_specification` resource is created from a JSON template read either from disk via `file()` or fetched via the `http` data source, and a `scope_definition_agent_association` child module creates the agent notification channel routing scope actions to the package worker.",
+  "features": [
+    "Installs a versioned scope package into a nullplatform organization via the package_installation child module",
+    "Creates a nullplatform_scope_type resource linked to the package's service specification ID with a precondition enforcing exactly one pinned specification",
+    "Writes scope metrics and logging provider slugs to NRN settings via a terraform_data local-exec provisioner running np nrn patch",
+    "Optionally creates a nullplatform_provider_specification for the scope-configuration schema from a template fetched over HTTP or read from a local checkout",
+    "Optionally creates an agent notification channel via the scope_definition_agent_association child module routing scope actions to the package worker",
+    "Supports template retrieval from a local repository checkout or from a raw HTTP URL with a pinned ref for catalog-driven deployments",
+    "Exposes compatibility-named outputs matching scope_definition so switching from a self-registered scope to a global package requires no downstream changes"
+  ],
+  "inputs": [
+    {
+      "name": "nrn",
+      "description": "NRN of the installing organization where the scope is installed (e.g. organization=123:account=456). The package is looked up as visible there, and the installation, scope type, NRN settings, scope-configuration schema and agent channel are created there.",
+      "required": true
+    },
+    {
+      "name": "package_slug",
+      "description": "Slug of the scope package to install.",
+      "required": true
+    },
+    {
+      "name": "package_version",
+      "description": "Exact semver of the package revision to install (X.Y.Z, without a leading v). New scopes are born with it; moving to another version is changing this value.",
+      "required": true
+    },
+    {
+      "name": "service_spec_name",
+      "description": "Name of the scope type developers pick when they create a scope. Same input as scope_definition's. While a copy of the same scope registered with scope_definition lives in the organization, pick a name that tells the two apart.",
+      "required": true
+    },
+    {
+      "name": "service_spec_description",
+      "description": "Description of the scope type. Same input as scope_definition's.",
+      "required": true
+    },
+    {
+      "name": "repository_scope_template",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "service_path",
+      "description": "Path of the scope inside its repository (e.g. \\",
+      "required": false
+    },
+    {
+      "name": "agent_tags_selectors",
+      "description": "Tags that select the agent running the package worker (must match the agent's TAGS), e.g. { cluster = \\",
+      "required": false
+    },
+    {
+      "name": "visible_to",
+      "description": "Where inside the installing organization the scope can be used. Null uses [nrn]. Every entry must be under the installing organization.",
+      "required": false
+    },
+    {
+      "name": "local_specs_path",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "repository_scope_template_branch",
+      "description": "Ref the templates are fetched at, a tag or a branch name under `repository_scope_template`. Pin the tag the installed package version was published from, so the schema and the channel match the specification.",
+      "required": false
+    },
+    {
+      "name": "create_scope_configuration",
+      "description": "Create the scope-configuration provider specification from specs/scope-configuration.json.tpl. Set it to true only when the scope ships that file.",
+      "required": false
+    },
+    {
+      "name": "scope_configuration_name_override",
+      "description": "Name of the scope-configuration provider specification. Null uses the template's; override it when that name collides with one already visible in the organization. Same input as scope_definition's.",
+      "required": false
+    },
+    {
+      "name": "np_api_key",
+      "description": "nullplatform API key for the `np nrn patch` that sets the scope's metrics and logs providers. Null uses the NP_API_KEY of the environment running the apply.",
+      "required": false
+    },
+    {
+      "name": "external_metrics_provider",
+      "description": "Metrics provider recorded in the NRN settings for this scope.",
+      "required": false
+    },
+    {
+      "name": "external_logging_provider",
+      "description": "Logs provider recorded in the NRN settings for this scope.",
+      "required": false
+    },
+    {
+      "name": "create_agent_channel",
+      "description": "Create the agent channel that routes the scope's actions to the package worker. Turn it off when the organization creates its channels in a separate bindings layer with scope_definition_agent_association.",
+      "required": false
+    },
+    {
+      "name": "channel_description",
+      "description": "Description of the agent channel. Null uses \\",
+      "required": false
+    },
+    {
+      "name": "entrypoint",
+      "description": "Command the channel sends to the worker. Empty uses the module default (/app/packages/<package_slug>/entrypoint). worker-bridge images ignore it and run their baked NP_SCOPE_ENTRYPOINT.",
+      "required": false
+    }
+  ],
+  "outputs": [
+    "installation_id",
+    "installed_version",
+    "missing_optional_requirements",
+    "service_specification_id",
+    "service_specification_slug",
+    "scope_type_id",
+    "scope_configuration_specification_id",
+    "scope_configuration_specification_slug",
+    "notification_channel_id",
+    "service_slug",
+    "provider_specification_slug",
+    "package_id",
+    "package_default_version"
+  ],
+  "hash": "5865fe30479ddcedef082dddc6c1cca2"
+}
+END_AI_METADATA -->
