@@ -26,8 +26,14 @@ variable "local_specs_path" {
 }
 
 variable "service_path" {
-  description = "Path of the scope inside its repository (e.g. \"lambda\"), exported as SERVICE_PATH to the channel template."
+  description = "Path of the scope inside its repository (e.g. \"lambda\"), exported as SERVICE_PATH to the channel template. Required with create_agent_channel."
   type        = string
+  default     = null
+
+  validation {
+    condition     = !var.create_agent_channel || var.service_path != null
+    error_message = "service_path is required when create_agent_channel is true."
+  }
 }
 
 variable "visible_to" {
@@ -36,9 +42,21 @@ variable "visible_to" {
   default     = null
 }
 
+variable "create_agent_channel" {
+  description = "Create the agent channel that routes the scope's actions to the package worker. Turn it off when the organization creates its channels in a separate bindings layer with scope_definition_agent_association."
+  type        = bool
+  default     = true
+}
+
 variable "agent_tags_selectors" {
-  description = "Tags that select the agent running the package worker (must match the agent's TAGS), e.g. { cluster = \"runtime\" }."
+  description = "Tags that select the agent running the package worker (must match the agent's TAGS), e.g. { cluster = \"runtime\" }. Required with create_agent_channel."
   type        = map(string)
+  default     = null
+
+  validation {
+    condition     = !var.create_agent_channel || length(coalesce(var.agent_tags_selectors, {})) > 0
+    error_message = "agent_tags_selectors must select at least one tag when create_agent_channel is true: a channel with an empty selector is refused when it delivers to the agent."
+  }
 }
 
 variable "np_api_key" {

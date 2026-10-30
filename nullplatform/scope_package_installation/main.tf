@@ -10,7 +10,10 @@
 #   2. the scope type pointing at the package's specification;
 #   3. the NRN settings that pick the scope's metrics and logs providers;
 #   4. optionally, the scope-configuration provider specification (its schema);
-#   5. the agent channel routing the scope's actions to the package worker.
+#   5. optionally, the agent channel routing the scope's actions to the package
+#      worker. Organizations that keep channels in a separate bindings layer
+#      turn it off and create it there with scope_definition_agent_association,
+#      the same as for a scope they register themselves.
 # The scope's cloud permissions are not here: each scope repository creates
 # them with its own requirements module, next to this one.
 ################################################################################
@@ -23,23 +26,6 @@ module "installation" {
   package_slug    = var.package_slug
   package_version = var.package_version
   visible_to      = var.visible_to
-}
-
-# The specification belongs to the publisher: this organization reaches it only
-# through the bill of materials, and can read it only once the installation
-# covers nrn. The condition references installation_id instead of a
-# depends_on: the id is unknown only while the installation is being created,
-# so later plans (a version upgrade) read the specification at plan time and
-# do not cascade unknown values into the scope type and the channel.
-data "nullplatform_service_specification" "this" {
-  id = module.installation.installation_id != "" ? local.specification_id : local.specification_id
-
-  lifecycle {
-    precondition {
-      condition     = length(module.installation.service_specification_ids) == 1
-      error_message = "A scope package pins exactly one service specification; ${var.package_slug} ${var.package_version} pins ${length(module.installation.service_specification_ids)}."
-    }
-  }
 }
 
 # 2. Scope type, rendered from the repository's template like scope_definition does
@@ -61,6 +47,13 @@ resource "nullplatform_scope_type" "this" {
   description   = local.scope_type_template.description
   provider_type = local.scope_type_template.provider_type
   provider_id   = local.specification_id
+
+  lifecycle {
+    precondition {
+      condition     = length(module.installation.service_specification_ids) == 1
+      error_message = "A scope package pins exactly one service specification; ${var.package_slug} ${var.package_version} pins ${length(module.installation.service_specification_ids)}."
+    }
+  }
 }
 
 # 3. NRN settings: which providers serve this scope's metrics and logs. No
@@ -103,6 +96,7 @@ resource "nullplatform_provider_specification" "scope_configuration" {
 # 5. Agent channel: package-exec to the package worker.
 module "agent_channel" {
   source = "../scope_definition_agent_association"
+  count  = var.create_agent_channel ? 1 : 0
 
   nrn         = var.nrn
   description = coalesce(var.channel_description, "${var.package_slug} package worker")

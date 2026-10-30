@@ -27,7 +27,7 @@ override_data {
 }
 
 override_data {
-  target = data.nullplatform_service_specification.this
+  target = module.installation.data.nullplatform_service_specification.this
   values = {
     slug = "example-functions"
   }
@@ -165,5 +165,79 @@ run "a_package_with_two_specifications_is_refused" {
     }
   }
 
-  expect_failures = [data.nullplatform_service_specification.this]
+  expect_failures = [nullplatform_scope_type.this]
+}
+
+run "the_channel_can_be_left_to_the_bindings_layer" {
+  command = plan
+
+  variables {
+    create_agent_channel = false
+    agent_tags_selectors = null
+    service_path         = null
+  }
+
+  assert {
+    condition     = output.notification_channel_id == null
+    error_message = "Without create_agent_channel no channel may be created: the organization creates it in its bindings layer"
+  }
+
+  assert {
+    condition     = nullplatform_scope_type.this.provider_id == "dummy-spec-id"
+    error_message = "The scope type is created whether or not the module creates the channel"
+  }
+}
+
+run "a_channel_without_tags_is_refused" {
+  command = plan
+
+  variables {
+    agent_tags_selectors = {}
+  }
+
+  expect_failures = [var.agent_tags_selectors]
+}
+
+run "a_channel_without_service_path_is_refused" {
+  command = plan
+
+  variables {
+    service_path = null
+  }
+
+  expect_failures = [var.service_path]
+}
+
+# The installation is overridden whole: the specification slug comes from a
+# read that waits for the installation, so it is unknown at plan otherwise.
+run "outputs_carry_the_names_scope_definition_uses" {
+  command = plan
+
+  override_module {
+    target = module.installation
+    outputs = {
+      installation_id               = "dummy-installation-id"
+      package_id                    = "dummy-package-id"
+      installed_version             = "1.2.3"
+      missing_optional_requirements = []
+      service_specification_ids     = ["dummy-spec-id"]
+      service_specification_id      = "dummy-spec-id"
+      service_specification_slug    = "example-functions"
+    }
+  }
+
+  assert {
+    condition     = output.service_slug == "example-functions" && output.service_specification_slug == "example-functions"
+    error_message = "service_slug must be the specification slug, as scope_definition reports it"
+  }
+
+  assert {
+    condition     = output.package_id == "dummy-package-id"
+    error_message = "package_id must be the installed package"
+  }
+
+  assert {
+    condition     = output.package_default_version == "1.2.3"
+    error_message = "package_default_version must be the installed version"
+  }
 }

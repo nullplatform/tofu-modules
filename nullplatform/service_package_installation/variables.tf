@@ -22,6 +22,11 @@ variable "visible_to" {
 variable "agent_tags_selectors" {
   description = "Tags that select the agent running the package worker (must match the agent's TAGS), e.g. { cluster = \"runtime\" }."
   type        = map(string)
+
+  validation {
+    condition     = length(var.agent_tags_selectors) > 0
+    error_message = "agent_tags_selectors must select at least one tag: a channel with an empty selector is refused when it delivers to the agent."
+  }
 }
 
 variable "service_specification_slug" {
