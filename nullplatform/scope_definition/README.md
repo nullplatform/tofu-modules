@@ -22,7 +22,7 @@ Templates are fetched via `data.http` resources or read from disk, then rendered
 
 ```hcl
 module "scope_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v9.8.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition?ref=v9.9.0"
 
   nrn = "your-nrn"
 }
