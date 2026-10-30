@@ -473,3 +473,65 @@ run "naming_rejects_too_long_deployment_pattern" {
 
   expect_failures = [var.naming_deployment_pattern]
 }
+
+run "with_namespace_parity" {
+  command = plan
+
+  variables {
+    use_nullplatform_namespace    = true
+    namespace_strategy            = "np_account_namespace"
+    namespace_bootstrap_resources = ["networkpolicy/default-deny", "limitrange/defaults"]
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.eks_config.attributes).cluster.use_nullplatform_namespace == true
+    error_message = "cluster.use_nullplatform_namespace should be true when enabled"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.eks_config.attributes).cluster.namespace_strategy == "np_account_namespace"
+    error_message = "cluster.namespace_strategy should match input"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.eks_config.attributes).cluster.namespace_bootstrap_resources == ["networkpolicy/default-deny", "limitrange/defaults"]
+    error_message = "cluster.namespace_bootstrap_resources should match input"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.eks_config.attributes).cluster.namespace == "nullplatform"
+    error_message = "cluster.namespace should stay as the static namespace"
+  }
+}
+
+run "without_namespace_parity" {
+  command = plan
+
+  assert {
+    condition = length(setintersection(
+      keys(jsondecode(nullplatform_provider_config.eks_config.attributes).cluster),
+      ["use_nullplatform_namespace", "namespace_strategy", "namespace_bootstrap_resources"]
+    )) == 0
+    error_message = "Namespace parity attributes should not be written by default"
+  }
+}
+
+run "rejects_unknown_namespace_strategy" {
+  command = plan
+
+  variables {
+    namespace_strategy = "by_team"
+  }
+
+  expect_failures = [var.namespace_strategy]
+}
+
+run "rejects_secrets_in_namespace_bootstrap_resources" {
+  command = plan
+
+  variables {
+    namespace_bootstrap_resources = ["secret/agent-credentials"]
+  }
+
+  expect_failures = [var.namespace_bootstrap_resources]
+}

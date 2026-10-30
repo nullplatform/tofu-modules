@@ -6,6 +6,9 @@ locals {
       namespace      = var.namespace_application_default
     },
     var.authentication_mode != "" ? { authentication_mode = var.authentication_mode } : {},
+    var.use_nullplatform_namespace ? { use_nullplatform_namespace = var.use_nullplatform_namespace } : {},
+    var.namespace_strategy != "" ? { namespace_strategy = var.namespace_strategy } : {},
+    length(var.namespace_bootstrap_resources) > 0 ? { namespace_bootstrap_resources = var.namespace_bootstrap_resources } : {},
   )
 
   gateway = merge(

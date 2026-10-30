@@ -25,6 +25,37 @@ variable "namespace_application_default" {
   default     = "nullplatform"
 }
 
+variable "use_nullplatform_namespace" {
+  description = "Namespace parity: when enabled, each nullplatform namespace gets its own Kubernetes namespace (named after its slug, see namespace_strategy) instead of every scope sharing namespace_application_default, which becomes the static namespace for shared objects"
+  type        = bool
+  default     = false
+}
+
+variable "namespace_strategy" {
+  description = "How namespace parity names the Kubernetes namespace: np_namespace (the nullplatform namespace slug) or np_account_namespace (<account slug>-<namespace slug>, for clusters shared by several accounts). Empty leaves the scope default (np_namespace)"
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = contains(["", "np_namespace", "np_account_namespace"], var.namespace_strategy)
+    error_message = "namespace_strategy must be empty, np_namespace or np_account_namespace."
+  }
+}
+
+variable "namespace_bootstrap_resources" {
+  description = "Extra objects copied from namespace_application_default into each namespace parity namespace, as kind/name. Only networkpolicy, limitrange, resourcequota and configmap; image pull secrets and the traffic manager ConfigMap are always copied"
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition = alltrue([
+      for ref in var.namespace_bootstrap_resources :
+      can(regex("^(networkpolic(y|ies)|limitranges?|resourcequotas?|configmaps?)/[a-z0-9]([-a-z0-9.]*[a-z0-9])?$", lower(ref)))
+    ])
+    error_message = "namespace_bootstrap_resources entries must be kind/name with kind networkpolicy, limitrange, resourcequota or configmap."
+  }
+}
+
 variable "authentication_mode" {
   description = "The type of authentication used to connect the cluster (localAccounts, azureActiveDirectory, localandAAD)"
   type        = string
