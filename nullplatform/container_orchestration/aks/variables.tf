@@ -26,21 +26,11 @@ variable "namespace_application_default" {
 }
 
 variable "use_nullplatform_namespace" {
-  description = "Namespace parity: when enabled, each nullplatform namespace gets its own Kubernetes namespace (named after its slug, see namespace_strategy) instead of every scope sharing namespace_application_default, which becomes the static namespace for shared objects"
+  description = "Namespace parity shorthand: when enabled, each nullplatform namespace gets its own Kubernetes namespace named after its slug (same as naming_namespace_pattern = {.namespace.slug}), and namespace_application_default becomes the static namespace shared objects are copied from. A naming_namespace_pattern wins"
   type        = bool
   default     = false
 }
 
-variable "namespace_strategy" {
-  description = "How namespace parity names the Kubernetes namespace: np_namespace (the nullplatform namespace slug) or np_account_namespace (<account slug>-<namespace slug>, for clusters shared by several accounts). Empty leaves the scope default (np_namespace)"
-  type        = string
-  default     = ""
-
-  validation {
-    condition     = contains(["", "np_namespace", "np_account_namespace"], var.namespace_strategy)
-    error_message = "namespace_strategy must be empty, np_namespace or np_account_namespace."
-  }
-}
 
 variable "namespace_bootstrap_resources" {
   description = "Extra objects copied from namespace_application_default into each namespace parity namespace, as kind/name. Only networkpolicy, limitrange, resourcequota and configmap; image pull secrets and the traffic manager ConfigMap are always copied"
@@ -164,5 +154,15 @@ variable "naming_scope_pattern" {
   validation {
     condition     = var.naming_scope_pattern == "" || (length(var.naming_scope_pattern) <= 200 && can(regex("^[A-Za-z0-9.{}\\[\\]\"_-]+$", var.naming_scope_pattern)))
     error_message = "naming_scope_pattern must be at most 200 characters of letters, digits, and . { } [ ] \" _ -"
+  }
+}
+
+variable "naming_namespace_pattern" {
+  description = "Namespace parity: each nullplatform namespace gets its own Kubernetes namespace, named by this pattern, rendered like naming_deployment_pattern (e.g. {.namespace.slug}, {.account.slug}-{.namespace.slug} for clusters shared by several accounts, {.namespace.slug}-{.scope.dimensions.environment}). Empty keeps every scope in namespace_application_default; use_nullplatform_namespace is the shorthand for {.namespace.slug}"
+  type        = string
+  default     = ""
+  validation {
+    condition     = var.naming_namespace_pattern == "" || (length(var.naming_namespace_pattern) <= 200 && can(regex("^[A-Za-z0-9.{}\\[\\]\"_-]+$", var.naming_namespace_pattern)) && strcontains(var.naming_namespace_pattern, "{."))
+    error_message = "naming_namespace_pattern must be empty, or at most 200 characters of letters, digits, and . { } [ ] \" _ - with at least one {.path} placeholder"
   }
 }

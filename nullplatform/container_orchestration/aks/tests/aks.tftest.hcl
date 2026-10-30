@@ -467,7 +467,7 @@ run "with_namespace_parity" {
 
   variables {
     use_nullplatform_namespace    = true
-    namespace_strategy            = "np_account_namespace"
+    naming_namespace_pattern      = "{.account.slug}-{.namespace.slug}"
     namespace_bootstrap_resources = ["networkpolicy/default-deny", "limitrange/defaults"]
   }
 
@@ -477,8 +477,8 @@ run "with_namespace_parity" {
   }
 
   assert {
-    condition     = jsondecode(nullplatform_provider_config.aks_config.attributes).cluster.namespace_strategy == "np_account_namespace"
-    error_message = "cluster.namespace_strategy should match input"
+    condition     = jsondecode(nullplatform_provider_config.aks_config.attributes).naming.namespace_pattern == "{.account.slug}-{.namespace.slug}"
+    error_message = "naming.namespace_pattern should match input"
   }
 
   assert {
@@ -498,20 +498,25 @@ run "without_namespace_parity" {
   assert {
     condition = length(setintersection(
       keys(jsondecode(nullplatform_provider_config.aks_config.attributes).cluster),
-      ["use_nullplatform_namespace", "namespace_strategy", "namespace_bootstrap_resources"]
+      ["use_nullplatform_namespace", "namespace_bootstrap_resources"]
     )) == 0
     error_message = "Namespace parity attributes should not be written by default"
   }
+
+  assert {
+    condition     = !strcontains(nullplatform_provider_config.aks_config.attributes, "namespace_pattern")
+    error_message = "naming.namespace_pattern should not be written by default"
+  }
 }
 
-run "rejects_unknown_namespace_strategy" {
+run "rejects_namespace_pattern_without_placeholder" {
   command = plan
 
   variables {
-    namespace_strategy = "by_team"
+    naming_namespace_pattern = "payments"
   }
 
-  expect_failures = [var.namespace_strategy]
+  expect_failures = [var.naming_namespace_pattern]
 }
 
 run "rejects_secrets_in_namespace_bootstrap_resources" {
