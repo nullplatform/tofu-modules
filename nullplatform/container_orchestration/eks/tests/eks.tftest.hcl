@@ -365,12 +365,12 @@ run "no_moving_reference_reaches_the_provider_config" {
   }
 }
 
-run "naming_absent_by_default" {
+run "naming_qualified_by_default" {
   command = plan
 
   assert {
-    condition     = !contains(keys(jsondecode(nullplatform_provider_config.eks_config.attributes)), "naming")
-    error_message = "Attributes should not contain naming when not set"
+    condition     = jsondecode(nullplatform_provider_config.eks_config.attributes).naming == { strategy = "qualified" }
+    error_message = "Naming strategy should default to qualified"
   }
 }
 
