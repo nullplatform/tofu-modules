@@ -49,44 +49,44 @@ variable "private_gateway_name" {
 }
 
 variable "memory_cpu_ratio" {
-  description = "Amount of MiB of ram per CPU. Default value is 2048, it means 1 core for every 2 GiB of RAM"
+  description = "Amount of MiB of ram per CPU. Default value is 2048, it means 1 core for every 2 GiB of RAM. Not read by the nullplatform/scopes k8s scope (checked at v1.18.0): setting it has no effect."
   type        = string
   default     = ""
 }
 
 variable "memory_request_to_limit_ratio" {
-  description = "Sets the ratio between requested and limit memory. Default value is 1, must be a number greater than or equal to 1"
+  description = "Sets the ratio between requested and limit memory. Default value is 1, must be a number greater than or equal to 1. Not read by the nullplatform/scopes k8s scope (checked at v1.18.0): setting it has no effect."
   type        = string
   default     = ""
 }
 
 variable "max_cores_multiplier" {
-  description = "Sets the ratio between requested and limit CPU. Default value is 3, must be a number greater than or equal to 1"
+  description = "Sets the ratio between requested and limit CPU. Default value is 3, must be a number greater than or equal to 1. Not read by the nullplatform/scopes k8s scope (checked at v1.18.0): setting it has no effect."
   type        = string
   default     = ""
 }
 
 variable "max_milicores" {
-  description = "Sets the maximum amount of CPU mili cores a pod can use"
+  description = "Sets the maximum amount of CPU mili cores a pod can use. Not read by the nullplatform/scopes k8s scope (checked at v1.18.0): setting it has no effect."
   type        = string
   default     = ""
 }
 
 variable "image_pull_secrets" {
-  description = "List of secret names to use image pull secrets"
+  description = "List of secret names to use image pull secrets. Not read from this provider by the nullplatform/scopes k8s scope (checked at v1.18.0): it takes the agent's PULL_SECRETS or IMAGE_PULL_SECRETS env first, then security.image_pull_secrets from the scope-configurations provider."
   type        = list(string)
   default     = []
 }
 
 variable "service_account_name" {
-  description = "The name of the Kubernetes service account used for deployments"
+  description = "The name of the Kubernetes service account used for deployments. Not read by the nullplatform/scopes k8s scope (checked at v1.18.0): the deployment's service account is named after the IAM prefix and the scope id."
   type        = string
   default     = ""
 }
 
 variable "traffic_manager_version" {
   # example: 1.8.0
-  description = "No default: every install pins this deliberately — see VERSIONS.md. Tag for the traffic manager sidecar container"
+  description = "No default: every install pins this deliberately — see VERSIONS.md. Tag for the traffic manager sidecar container. It only builds the scope's fallback image: the nullplatform/agent module always publishes TRAFFIC_CONTAINER_IMAGE from agent_traffic_manager_tag, which takes precedence, and web_sockets scopes always use the websocket2 tag. Keep it equal to agent_traffic_manager_tag."
   type        = string
 
   validation {
@@ -96,7 +96,7 @@ variable "traffic_manager_version" {
 }
 
 variable "object_modifiers" {
-  description = "List of modifications to dynamically modify k8s objects"
+  description = "List of modifications to dynamically modify k8s objects. Not read from this provider by the nullplatform/scopes k8s scope (checked at v1.18.0): it takes object_modifiers from the scope-configurations provider first, then the agent's K8S_MODIFIERS env."
   type = list(object({
     selector = string
     action   = string
