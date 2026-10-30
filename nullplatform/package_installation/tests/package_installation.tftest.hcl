@@ -13,6 +13,13 @@ override_data {
   }
 }
 
+override_data {
+  target = data.nullplatform_service_specification.this
+  values = {
+    slug = "dummy-spec"
+  }
+}
+
 variables {
   nrn             = "organization=1:account=2"
   package_slug    = "dummy-package"
@@ -40,6 +47,61 @@ run "installs_the_revision_of_the_requested_version" {
   assert {
     condition     = output.service_specification_ids == ["dummy-spec-id"]
     error_message = "Only the service specifications of the bill of materials must be reported"
+  }
+}
+
+# Apply: the specification is read once the installation exists, so its slug
+# is unknown at plan on a first install.
+run "outputs_carry_the_names_service_definition_uses" {
+  command = apply
+
+  override_resource {
+    target = nullplatform_package_installation.this
+    values = {
+      id              = "dummy-installation-id"
+      default_version = "1.2.3"
+    }
+  }
+
+  assert {
+    condition     = output.service_specification_id == "dummy-spec-id"
+    error_message = "service_specification_id must be the package's one specification"
+  }
+
+  assert {
+    condition     = output.service_specification_slug == "dummy-spec"
+    error_message = "service_specification_slug must be read from the specification"
+  }
+
+  assert {
+    condition     = output.package_default_version == "1.2.3"
+    error_message = "package_default_version must be the installed version"
+  }
+}
+
+run "a_package_with_two_specifications_reports_none" {
+  command = plan
+
+  override_data {
+    target = data.nullplatform_package.this
+    values = {
+      id          = "dummy-package-id"
+      revision_id = "dummy-revision-3"
+      components = [
+        { name = "server", resource_type = "service_specification", resource_id = "dummy-spec-a", resource_revision_id = "dummy-a", parent_id = null },
+        { name = "db", resource_type = "service_specification", resource_id = "dummy-spec-b", resource_revision_id = "dummy-b", parent_id = null },
+      ]
+    }
+  }
+
+  assert {
+    condition     = output.service_specification_id == null && output.service_specification_slug == null
+    error_message = "With more than one specification there is no single id or slug to report"
+  }
+
+  assert {
+    condition     = length(output.service_specification_ids) == 2
+    error_message = "service_specification_ids must still list every specification"
   }
 }
 
