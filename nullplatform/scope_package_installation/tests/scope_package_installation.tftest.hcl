@@ -1,18 +1,5 @@
 mock_provider "nullplatform" {}
-mock_provider "external" {}
-
-# Templates come from the fixture checkout. The gomplate render of the scope
-# type is mocked because the CI runner has no gomplate; scope_definition's
-# tests render the same template with the real one. The scope configuration is
-# not gomplate and is read from the fixture.
-override_data {
-  target = data.external.scope_type
-  values = {
-    result = {
-      json = "{\"name\":\"Example Functions\",\"description\":\"Example functions\",\"provider_type\":\"service\"}"
-    }
-  }
-}
+mock_provider "http" {}
 
 override_data {
   target = module.installation.data.nullplatform_package.this
@@ -33,11 +20,32 @@ override_data {
   }
 }
 
-# The channel has its own tests (scope_definition_agent_association, local
-# template). Mocked here because the test framework's mock provider cannot plan
-# a resource whose dynamic block count is still unknown, which is the case for
-# the channel on a first install: its template renders once the specification
-# is readable, after the installation exists.
+# What the scope repository serves at <repository>/<ref>/<service_path>/specs/
+# scope-configuration.json.tpl. The same file as the fixture checkout holds, so
+# the two template sources can be asserted against the same values.
+override_data {
+  target = data.http.scope_configuration_template
+  values = {
+    status_code   = 200
+    response_body = <<-EOT
+      {
+        "name": "Example Functions",
+        "description": "Scope-wide configuration for example scopes",
+        "category": "scope-configurations",
+        "icon": "np:example",
+        "visible_to": ["{{ env.Getenv "NRN" }}"],
+        "allow_dimensions": true,
+        "schema": { "type": "object", "properties": { "state_bucket": { "type": "string" } } }
+      }
+    EOT
+  }
+}
+
+# The channel has its own tests (scope_definition_agent_association, local and
+# HTTP template). Mocked here because the test framework's mock provider cannot
+# plan a resource whose dynamic block count is still unknown, which is the case
+# for the channel on a first install: its template renders once the
+# specification is readable, after the installation exists.
 override_module {
   target = module.agent_channel
   outputs = {
@@ -45,16 +53,25 @@ override_module {
   }
 }
 
+# The shape of a catalog entry that fed scope_definition in a layered setup: a
+# repository URL and a tag, no checkout, and the channel left to the bindings
+# layer. The runs that create the channel read its template from the fixture
+# checkout: the channel module is overridden whole (see above), and an
+# overridden module still evaluates its locals, which index the HTTP read that
+# no longer exists.
 variables {
-  nrn                  = "organization=1:account=2"
-  package_slug         = "dummy-scope"
-  package_version      = "1.2.3"
-  local_specs_path     = "./tests/fixtures/scope"
-  service_path         = "scope"
-  agent_tags_selectors = { cluster = "test" }
+  nrn                              = "organization=1:account=2"
+  package_slug                     = "dummy-scope"
+  package_version                  = "1.2.3"
+  service_spec_name                = "Example Functions"
+  service_spec_description         = "Example functions"
+  service_path                     = "scope"
+  repository_scope_template        = "https://example.test/scopes/refs/tags"
+  repository_scope_template_branch = "v1.2.3"
+  create_agent_channel             = false
 }
 
-run "the_scope_type_points_at_the_package_specification" {
+run "the_scope_type_points_at_the_package_specification_and_needs_no_template" {
   command = plan
 
   assert {
@@ -63,8 +80,13 @@ run "the_scope_type_points_at_the_package_specification" {
   }
 
   assert {
-    condition     = nullplatform_scope_type.this.name == "Example Functions" && nullplatform_scope_type.this.provider_type == "service"
-    error_message = "The scope type must take its name and provider type from the rendered template"
+    condition     = nullplatform_scope_type.this.name == "Example Functions" && nullplatform_scope_type.this.description == "Example functions"
+    error_message = "The scope type must take its name and description from the same inputs scope_definition takes"
+  }
+
+  assert {
+    condition     = nullplatform_scope_type.this.provider_type == "service"
+    error_message = "A scope type over an installed specification always delegates to a service"
   }
 
   assert {
@@ -103,9 +125,14 @@ run "scope_configuration_is_opt_in" {
     condition     = length(nullplatform_provider_specification.scope_configuration) == 0
     error_message = "Without create_scope_configuration no provider specification may be created"
   }
+
+  assert {
+    condition     = length(data.http.scope_configuration_template) == 0
+    error_message = "Without create_scope_configuration nothing may be fetched from the scope repository"
+  }
 }
 
-run "scope_configuration_is_created_from_the_template" {
+run "scope_configuration_is_fetched_from_the_scope_repository_at_the_pinned_ref" {
   command = plan
 
   variables {
@@ -113,13 +140,49 @@ run "scope_configuration_is_created_from_the_template" {
   }
 
   assert {
+    condition     = data.http.scope_configuration_template[0].url == "https://example.test/scopes/refs/tags/v1.2.3/scope/specs/scope-configuration.json.tpl"
+    error_message = "The template must be fetched from <repository_scope_template>/<repository_scope_template_branch>/<service_path>/specs/, the URL shape scope_definition uses"
+  }
+
+  assert {
     condition     = nullplatform_provider_specification.scope_configuration[0].name == "Example Functions"
-    error_message = "The provider specification must take the template's name"
+    error_message = "The provider specification must take the fetched template's name"
   }
 
   assert {
     condition     = nullplatform_provider_specification.scope_configuration[0].visible_to == tolist(["organization=1:account=2"])
     error_message = "The provider specification must be visible only at nrn"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_specification.scope_configuration[0].schema).properties.state_bucket.type == "string"
+    error_message = "The provider specification schema must be the template's"
+  }
+}
+
+run "scope_configuration_is_read_from_a_checkout_with_local_specs_path" {
+  command = plan
+
+  variables {
+    create_scope_configuration       = true
+    local_specs_path                 = "./tests/fixtures/scope"
+    repository_scope_template        = null
+    repository_scope_template_branch = null
+  }
+
+  assert {
+    condition     = length(data.http.scope_configuration_template) == 0
+    error_message = "With local_specs_path the template must not be fetched over HTTP"
+  }
+
+  assert {
+    condition     = nullplatform_provider_specification.scope_configuration[0].name == "Example Functions"
+    error_message = "The provider specification must come from the checkout's scope-configuration.json.tpl"
+  }
+
+  assert {
+    condition     = nullplatform_provider_specification.scope_configuration[0].visible_to == tolist(["organization=1:account=2"])
+    error_message = "The template's NRN placeholder must be replaced by nrn"
   }
 }
 
@@ -127,27 +190,37 @@ run "scope_configuration_name_can_be_overridden" {
   command = plan
 
   variables {
-    create_scope_configuration = true
-    scope_configuration_name   = "Example Functions (account 2)"
+    create_scope_configuration        = true
+    scope_configuration_name_override = "Example Functions (account 2)"
   }
 
   assert {
     condition     = nullplatform_provider_specification.scope_configuration[0].name == "Example Functions (account 2)"
-    error_message = "scope_configuration_name must override the template's name"
+    error_message = "scope_configuration_name_override must override the template's name"
   }
 }
 
-run "scope_type_name_can_be_overridden" {
+run "fetching_a_template_needs_the_repository_and_the_ref" {
   command = plan
 
   variables {
-    scope_type_name = "Example Functions (global)"
+    create_scope_configuration       = true
+    repository_scope_template        = null
+    repository_scope_template_branch = null
   }
 
-  assert {
-    condition     = nullplatform_scope_type.this.name == "Example Functions (global)"
-    error_message = "scope_type_name must override the template's name"
+  expect_failures = [var.repository_scope_template]
+}
+
+run "fetching_the_scope_configuration_needs_service_path" {
+  command = plan
+
+  variables {
+    create_scope_configuration = true
+    service_path               = null
   }
+
+  expect_failures = [var.service_path]
 }
 
 run "a_package_with_two_specifications_is_refused" {
@@ -168,13 +241,15 @@ run "a_package_with_two_specifications_is_refused" {
   expect_failures = [nullplatform_scope_type.this]
 }
 
+# The layered shape: the installation, scope type and NRN settings here, the
+# channel in the bindings layer. Nothing is fetched, so no repository is needed.
 run "the_channel_can_be_left_to_the_bindings_layer" {
   command = plan
 
   variables {
-    create_agent_channel = false
-    agent_tags_selectors = null
-    service_path         = null
+    service_path                     = null
+    repository_scope_template        = null
+    repository_scope_template_branch = null
   }
 
   assert {
@@ -188,11 +263,28 @@ run "the_channel_can_be_left_to_the_bindings_layer" {
   }
 }
 
+run "the_channel_is_created_from_the_same_templates" {
+  command = plan
+
+  variables {
+    create_agent_channel = true
+    agent_tags_selectors = { cluster = "test" }
+    local_specs_path     = "./tests/fixtures/scope"
+  }
+
+  assert {
+    condition     = output.notification_channel_id == "dummy-channel-id"
+    error_message = "With create_agent_channel the channel module must be called"
+  }
+}
+
 run "a_channel_without_tags_is_refused" {
   command = plan
 
   variables {
+    create_agent_channel = true
     agent_tags_selectors = {}
+    local_specs_path     = "./tests/fixtures/scope"
   }
 
   expect_failures = [var.agent_tags_selectors]
@@ -202,11 +294,19 @@ run "a_channel_without_service_path_is_refused" {
   command = plan
 
   variables {
-    service_path = null
+    create_agent_channel = true
+    agent_tags_selectors = { cluster = "test" }
+    local_specs_path     = "./tests/fixtures/scope"
+    service_path         = null
   }
 
   expect_failures = [var.service_path]
 }
+
+# The same rule guards the channel template fetched over HTTP. It is not run
+# here: the channel module is overridden, and an overridden module still
+# evaluates the locals that index its HTTP read, so the run would fail for that
+# reason and not for the validation.
 
 # The installation is overridden whole: the specification slug comes from a
 # read that waits for the installation, so it is unknown at plan otherwise.

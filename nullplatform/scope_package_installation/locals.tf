@@ -5,12 +5,19 @@ locals {
   specification_id   = module.installation.service_specification_id != null ? module.installation.service_specification_id : ""
   specification_slug = module.installation.service_specification_slug
 
-  scope_type_template = jsondecode(data.external.scope_type.result.json)
+  # The scope-configuration template, from the checkout or over HTTP. Only the
+  # taken branch is evaluated, so no file is read and nothing is fetched when
+  # the schema is not created.
+  scope_configuration_template = !var.create_scope_configuration ? null : (
+    var.local_specs_path != null
+    ? file("${var.local_specs_path}/specs/scope-configuration.json.tpl")
+    : data.http.scope_configuration_template[0].response_body
+  )
 
   # Not gomplate, same as scope_definition: each quoted `"{{ env.Getenv ... }}"`
   # string becomes the NRN (greedy `.*`: one placeholder per line).
   scope_configuration = var.create_scope_configuration ? jsondecode(replace(
-    file("${var.local_specs_path}/specs/scope-configuration.json.tpl"),
+    local.scope_configuration_template,
     "/\"{{\\s+env.Getenv\\s+\".*\"\\s+}}\"/",
     "\"${var.nrn}\""
   )) : null
