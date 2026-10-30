@@ -1,4 +1,15 @@
 locals {
+  cluster = merge(
+    {
+      id        = var.cluster_name
+      location  = var.location
+      namespace = var.namespace_application_default
+    },
+    var.use_nullplatform_namespace ? { use_nullplatform_namespace = var.use_nullplatform_namespace } : {},
+    var.namespace_strategy != "" ? { namespace_strategy = var.namespace_strategy } : {},
+    length(var.namespace_bootstrap_resources) > 0 ? { namespace_bootstrap_resources = var.namespace_bootstrap_resources } : {},
+  )
+
   gateway = merge(
     {
       public_name = var.public_gateway_name
@@ -27,11 +38,7 @@ locals {
 
   attributes = merge(
     {
-      cluster = {
-        id        = var.cluster_name
-        location  = var.location
-        namespace = var.namespace_application_default
-      }
+      cluster = local.cluster
       gateway = local.gateway
     },
     length(local.resource_management) > 0 ? { resource_management = local.resource_management } : {},

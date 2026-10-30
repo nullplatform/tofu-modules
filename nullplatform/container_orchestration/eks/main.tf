@@ -5,6 +5,8 @@ locals {
     },
     var.namespace_application_default != "" ? { namespace = var.namespace_application_default } : {},
     var.use_nullplatform_namespace ? { use_nullplatform_namespace = var.use_nullplatform_namespace } : {},
+    var.namespace_strategy != "" ? { namespace_strategy = var.namespace_strategy } : {},
+    length(var.namespace_bootstrap_resources) > 0 ? { namespace_bootstrap_resources = var.namespace_bootstrap_resources } : {},
   )
 
   balancer = merge(
