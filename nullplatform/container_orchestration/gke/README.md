@@ -2,75 +2,33 @@
 
 ## Description
 
-Configures a Nullplatform GKE provider by creating a nullplatform_provider_config resource that encodes cluster identity, gateway references, resource management ratios, security settings, traffic manager version, and Kubernetes object naming strategy into a single JSON attributes blob
+Configures a GKE provider configuration in Nullplatform by creating a nullplatform_provider_config resource with cluster, gateway, traffic manager, and naming settings
 
 ## Architecture
 
-The module constructs several local maps (gateway, resource_management, security, naming) by conditionally merging input variables, then encodes them into a single JSON string via jsonencode() passed to a single nullplatform_provider_config resource of type 'gke-configuration'. The nrn and dimensions variables scope the provider config to a specific Nullplatform hierarchy node, while cluster_name, location, and namespace_application_default populate the nested cluster block. Optional locals are omitted from the attributes JSON entirely when their source variables are empty or empty lists, keeping the payload minimal.
+The module constructs a single nullplatform_provider_config resource of type 'gke-configuration' by merging multiple local maps (gateway, resource_management, security, naming) into a JSON-encoded attributes payload. Input variables for cluster identity (cluster_name, location), gateway routing (public_gateway_name, private_gateway_name, additional_public_gateways, additional_private_gateways), traffic manager versioning, and Kubernetes naming strategy are composed into nested locals before being serialized via jsonencode. The nullplatform_provider_config resource binds all configuration to the target NRN scope using the nrn and dimensions inputs, enabling Nullplatform to manage GKE workload deployments against the described cluster.
 
 ## Features
 
-- Creates a nullplatform_provider_config resource of type 'gke-configuration' scoped to a Nullplatform NRN hierarchy node
-- Encodes GKE cluster identity (name, location, default namespace) into the provider configuration attributes
-- Configures public and optional private gateway references with a configurable Kubernetes namespace
-- Pins a fixed traffic manager sidecar container version with validation that rejects empty or moving references like 'latest', 'main', or 'master'
-- Supports flexible Kubernetes object naming via ids, qualified, or custom strategies with optional deployment and scope name patterns
-- Configures resource management ratios including memory-to-CPU ratio, memory request-to-limit ratio, max cores multiplier, and max milicores
-- Attaches optional image pull secrets and a Kubernetes service account name for secure workload identity
+- Creates a nullplatform_provider_config resource encoding GKE cluster identity and location for Nullplatform workload management
+- Configures public and private Kubernetes Gateway API gateway references with optional namespace and additional gateway attachments
+- Pins traffic manager sidecar container to an explicit version tag, rejecting moving references like 'latest', 'main', or 'master'
+- Supports flexible Kubernetes object naming strategies including id-based, slug-qualified, and fully custom pattern modes
+- Configures resource management tuning parameters including memory-to-CPU ratio, request-to-limit ratios, and max milicores limits
+- Manages image pull secrets and Kubernetes service account bindings for secure private container image access
+- Applies dynamic Kubernetes object modifiers for post-render patching of cluster resources
 
 ## Basic Usage
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v9.9.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v9.10.0"
 
   cluster_name            = "your-cluster-name"
   location                = "your-location"
   nrn                     = "your-nrn"
   public_gateway_name     = "your-public-gateway-name"
   traffic_manager_version = "your-traffic-manager-version"
-}
-```
-
-### Usage with Latest/Moving Reference Version (blocked)
-
-```hcl
-module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v9.9.0"
-
-  cluster_name            = "your-cluster-name"
-  location                = "your-location"
-  nrn                     = "your-nrn"
-  public_gateway_name     = "your-public-gateway-name"
-  traffic_manager_version = "latest"
-}
-```
-
-### Usage with Main Branch Reference (blocked)
-
-```hcl
-module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v9.9.0"
-
-  cluster_name            = "your-cluster-name"
-  location                = "your-location"
-  nrn                     = "your-nrn"
-  public_gateway_name     = "your-public-gateway-name"
-  traffic_manager_version = "main"
-}
-```
-
-### Usage with Master Branch Reference (blocked)
-
-```hcl
-module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v9.9.0"
-
-  cluster_name            = "your-cluster-name"
-  location                = "your-location"
-  nrn                     = "your-nrn"
-  public_gateway_name     = "your-public-gateway-name"
-  traffic_manager_version = "master"
 }
 ```
 
@@ -106,6 +64,8 @@ resource "example_resource" "this" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_additional_private_gateways"></a> [additional\_private\_gateways](#input\_additional\_private\_gateways) | Extra gateways the HTTPRoute of private scopes is also attached to, besides the private gateway. namespace defaults to the gateway namespace. Every gateway must exist in the cluster | <pre>list(object({<br/>    name      = string<br/>    namespace = optional(string)<br/>  }))</pre> | `[]` | no |
+| <a name="input_additional_public_gateways"></a> [additional\_public\_gateways](#input\_additional\_public\_gateways) | Extra gateways the HTTPRoute of public scopes is also attached to, besides the public gateway. namespace defaults to the gateway namespace. Every gateway must exist in the cluster | <pre>list(object({<br/>    name      = string<br/>    namespace = optional(string)<br/>  }))</pre> | `[]` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The name of the GKE cluster | `string` | n/a | yes |
 | <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Dimensions for the provider configuration | `map(any)` | `{}` | no |
 | <a name="input_gateway_namespace"></a> [gateway\_namespace](#input\_gateway\_namespace) | Kubernetes namespace where the gateway is deployed | `string` | `"istio-ingress-system"` | no |
@@ -130,16 +90,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "gke",
-  "description": "Configures a Nullplatform GKE provider by creating a nullplatform_provider_config resource that encodes cluster identity, gateway references, resource management ratios, security settings, traffic manager version, and Kubernetes object naming strategy into a single JSON attributes blob",
-  "architecture": "The module constructs several local maps (gateway, resource_management, security, naming) by conditionally merging input variables, then encodes them into a single JSON string via jsonencode() passed to a single nullplatform_provider_config resource of type 'gke-configuration'. The nrn and dimensions variables scope the provider config to a specific Nullplatform hierarchy node, while cluster_name, location, and namespace_application_default populate the nested cluster block. Optional locals are omitted from the attributes JSON entirely when their source variables are empty or empty lists, keeping the payload minimal.",
+  "description": "Configures a GKE provider configuration in Nullplatform by creating a nullplatform_provider_config resource with cluster, gateway, traffic manager, and naming settings",
+  "architecture": "The module constructs a single nullplatform_provider_config resource of type 'gke-configuration' by merging multiple local maps (gateway, resource_management, security, naming) into a JSON-encoded attributes payload. Input variables for cluster identity (cluster_name, location), gateway routing (public_gateway_name, private_gateway_name, additional_public_gateways, additional_private_gateways), traffic manager versioning, and Kubernetes naming strategy are composed into nested locals before being serialized via jsonencode. The nullplatform_provider_config resource binds all configuration to the target NRN scope using the nrn and dimensions inputs, enabling Nullplatform to manage GKE workload deployments against the described cluster.",
   "features": [
-    "Creates a nullplatform_provider_config resource of type 'gke-configuration' scoped to a Nullplatform NRN hierarchy node",
-    "Encodes GKE cluster identity (name, location, default namespace) into the provider configuration attributes",
-    "Configures public and optional private gateway references with a configurable Kubernetes namespace",
-    "Pins a fixed traffic manager sidecar container version with validation that rejects empty or moving references like 'latest', 'main', or 'master'",
-    "Supports flexible Kubernetes object naming via ids, qualified, or custom strategies with optional deployment and scope name patterns",
-    "Configures resource management ratios including memory-to-CPU ratio, memory request-to-limit ratio, max cores multiplier, and max milicores",
-    "Attaches optional image pull secrets and a Kubernetes service account name for secure workload identity"
+    "Creates a nullplatform_provider_config resource encoding GKE cluster identity and location for Nullplatform workload management",
+    "Configures public and private Kubernetes Gateway API gateway references with optional namespace and additional gateway attachments",
+    "Pins traffic manager sidecar container to an explicit version tag, rejecting moving references like 'latest', 'main', or 'master'",
+    "Supports flexible Kubernetes object naming strategies including id-based, slug-qualified, and fully custom pattern modes",
+    "Configures resource management tuning parameters including memory-to-CPU ratio, request-to-limit ratios, and max milicores limits",
+    "Manages image pull secrets and Kubernetes service account bindings for secure private container image access",
+    "Applies dynamic Kubernetes object modifiers for post-render patching of cluster resources"
   ],
   "inputs": [
     {
@@ -168,6 +128,26 @@ resource "example_resource" "this" {
       "required": true
     },
     {
+      "name": "gateway_namespace",
+      "description": "Kubernetes namespace where the gateway is deployed",
+      "required": false
+    },
+    {
+      "name": "private_gateway_name",
+      "description": "Name of the private gateway",
+      "required": false
+    },
+    {
+      "name": "additional_public_gateways",
+      "description": "Extra gateways the HTTPRoute of public scopes is also attached to, besides the public gateway. namespace defaults to the gateway namespace. Every gateway must exist in the cluster",
+      "required": false
+    },
+    {
+      "name": "additional_private_gateways",
+      "description": "Extra gateways the HTTPRoute of private scopes is also attached to, besides the private gateway. namespace defaults to the gateway namespace. Every gateway must exist in the cluster",
+      "required": false
+    },
+    {
       "name": "naming_strategy",
       "description": "How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'ids' when unset",
       "required": false
@@ -190,16 +170,6 @@ resource "example_resource" "this" {
     {
       "name": "namespace_application_default",
       "description": "Default Kubernetes namespace for applications",
-      "required": false
-    },
-    {
-      "name": "gateway_namespace",
-      "description": "Kubernetes namespace where the gateway is deployed",
-      "required": false
-    },
-    {
-      "name": "private_gateway_name",
-      "description": "Name of the private gateway",
       "required": false
     },
     {
@@ -239,6 +209,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "a3a627d1a19d47ef484c110b119c6a22"
+  "hash": "66e67cd1142b230e902c6d701c48748f"
 }
 END_AI_METADATA -->
