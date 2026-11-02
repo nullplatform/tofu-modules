@@ -90,8 +90,8 @@ variable "public_gateway_name" {
   type        = string
   default     = ""
   validation {
-    condition     = var.public_gateway_name == "" || can(regex("^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$", var.public_gateway_name))
-    error_message = "public_gateway_name must start with a letter and be a lowercase DNS label of up to 63 characters."
+    condition     = var.public_gateway_name == "" || can(regex("^[a-z0-9]([-a-z0-9.]{0,251}[a-z0-9])?$", var.public_gateway_name))
+    error_message = "public_gateway_name must be a lowercase DNS subdomain of up to 253 characters."
   }
 }
 
@@ -100,8 +100,8 @@ variable "private_gateway_name" {
   type        = string
   default     = ""
   validation {
-    condition     = var.private_gateway_name == "" || can(regex("^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$", var.private_gateway_name))
-    error_message = "private_gateway_name must start with a letter and be a lowercase DNS label of up to 63 characters."
+    condition     = var.private_gateway_name == "" || can(regex("^[a-z0-9]([-a-z0-9.]{0,251}[a-z0-9])?$", var.private_gateway_name))
+    error_message = "private_gateway_name must be a lowercase DNS subdomain of up to 253 characters."
   }
 }
 

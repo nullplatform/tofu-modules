@@ -35,17 +35,29 @@ variable "gateway_namespace" {
   description = "Kubernetes namespace where the gateway is deployed"
   type        = string
   default     = "istio-ingress"
+  validation {
+    condition     = var.gateway_namespace == "" || can(regex("^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$", var.gateway_namespace))
+    error_message = "gateway_namespace must be a lowercase DNS label of up to 63 characters."
+  }
 }
 
 variable "public_gateway_name" {
   description = "Name of the public Application Gateway in AKS"
   type        = string
+  validation {
+    condition     = can(regex("^[a-z0-9]([-a-z0-9.]{0,251}[a-z0-9])?$", var.public_gateway_name))
+    error_message = "public_gateway_name must be a lowercase DNS subdomain of up to 253 characters."
+  }
 }
 
 variable "private_gateway_name" {
   description = "Name of the private Application Gateway in AKS"
   type        = string
   default     = ""
+  validation {
+    condition     = var.private_gateway_name == "" || can(regex("^[a-z0-9]([-a-z0-9.]{0,251}[a-z0-9])?$", var.private_gateway_name))
+    error_message = "private_gateway_name must be a lowercase DNS subdomain of up to 253 characters."
+  }
 }
 
 variable "additional_public_gateways" {

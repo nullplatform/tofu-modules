@@ -536,3 +536,53 @@ run "additional_gateways_reject_invalid_namespace" {
 
   expect_failures = [var.additional_private_gateways]
 }
+
+run "main_gateway_names_accept_dns_subdomains" {
+  command = plan
+
+  variables {
+    gateway_namespace    = "istio-ingress"
+    public_gateway_name  = "public.edge"
+    private_gateway_name = "0-internal"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.aks_config.attributes).gateway.public_name == "public.edge"
+    error_message = "a dotted public gateway name should be accepted, as it is for additional gateways"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.aks_config.attributes).gateway.private_name == "0-internal"
+    error_message = "a private gateway name starting with a digit should be accepted"
+  }
+}
+
+run "main_gateway_rejects_uppercase_public_name" {
+  command = plan
+
+  variables {
+    public_gateway_name = "Public-Gateway"
+  }
+
+  expect_failures = [var.public_gateway_name]
+}
+
+run "main_gateway_rejects_invalid_private_name" {
+  command = plan
+
+  variables {
+    private_gateway_name = "private_gateway"
+  }
+
+  expect_failures = [var.private_gateway_name]
+}
+
+run "main_gateway_rejects_dotted_namespace" {
+  command = plan
+
+  variables {
+    gateway_namespace = "istio.ingress"
+  }
+
+  expect_failures = [var.gateway_namespace]
+}
