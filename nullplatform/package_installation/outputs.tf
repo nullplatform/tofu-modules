@@ -30,8 +30,24 @@ output "components" {
 
 output "service_specification_ids" {
   description = "IDs of the service specifications in the installed revision. They are readable at nrn once the installation exists: depend on installation_id before reading them."
-  value = [
-    for component in data.nullplatform_package.this.components : component.resource_id
-    if component.resource_type == "service_specification"
-  ]
+  value       = local.specification_ids
+}
+
+# The three outputs below carry the names service_definition and
+# scope_definition use, so an organization that registered a package with those
+# modules switches to its global copy by changing the module, not what reads it.
+
+output "service_specification_id" {
+  description = "ID of the package's service specification. Null when the revision pins more than one."
+  value       = try(one(local.specification_ids), null)
+}
+
+output "service_specification_slug" {
+  description = "Slug of the package's service specification: what agent channels filter on. Null when the revision pins more than one."
+  value       = try(data.nullplatform_service_specification.this[0].slug, null)
+}
+
+output "package_default_version" {
+  description = "Same as installed_version: the version new services and scopes are born with."
+  value       = nullplatform_package_installation.this.default_version
 }
