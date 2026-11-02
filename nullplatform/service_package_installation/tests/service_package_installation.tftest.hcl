@@ -44,3 +44,13 @@ run "installs_the_package_and_creates_its_channel" {
     error_message = "The agent channel must be created next to the installation"
   }
 }
+
+run "a_channel_without_tags_is_refused" {
+  command = plan
+
+  variables {
+    agent_tags_selectors = {}
+  }
+
+  expect_failures = [var.agent_tags_selectors]
+}

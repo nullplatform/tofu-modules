@@ -39,6 +39,30 @@ output "scope_configuration_specification_slug" {
 }
 
 output "notification_channel_id" {
-  description = "ID of the agent notification channel."
-  value       = module.agent_channel.notification_channel_id
+  description = "ID of the agent notification channel, or null without create_agent_channel."
+  value       = var.create_agent_channel ? module.agent_channel[0].notification_channel_id : null
+}
+
+# The outputs below carry the names scope_definition uses, so an organization
+# that registered a scope with it switches to the global package by changing
+# the module, not what reads it.
+
+output "service_slug" {
+  description = "Same as service_specification_slug."
+  value       = local.specification_slug
+}
+
+output "provider_specification_slug" {
+  description = "Same as scope_configuration_specification_slug."
+  value       = var.create_scope_configuration ? nullplatform_provider_specification.scope_configuration[0].slug : null
+}
+
+output "package_id" {
+  description = "ID of the installed package."
+  value       = module.installation.package_id
+}
+
+output "package_default_version" {
+  description = "Same as installed_version: the version new scopes are born with."
+  value       = module.installation.installed_version
 }

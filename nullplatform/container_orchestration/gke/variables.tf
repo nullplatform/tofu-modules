@@ -50,17 +50,61 @@ variable "gateway_namespace" {
   description = "Kubernetes namespace where the gateway is deployed"
   type        = string
   default     = "istio-ingress-system"
+  validation {
+    condition     = var.gateway_namespace == "" || can(regex("^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$", var.gateway_namespace))
+    error_message = "gateway_namespace must be a lowercase DNS label of up to 63 characters."
+  }
 }
 
 variable "public_gateway_name" {
   description = "Name of the public gateway"
   type        = string
+  validation {
+    condition     = can(regex("^[a-z0-9]([-a-z0-9.]{0,251}[a-z0-9])?$", var.public_gateway_name))
+    error_message = "public_gateway_name must be a lowercase DNS subdomain of up to 253 characters."
+  }
 }
 
 variable "private_gateway_name" {
   description = "Name of the private gateway"
   type        = string
   default     = ""
+  validation {
+    condition     = var.private_gateway_name == "" || can(regex("^[a-z0-9]([-a-z0-9.]{0,251}[a-z0-9])?$", var.private_gateway_name))
+    error_message = "private_gateway_name must be a lowercase DNS subdomain of up to 253 characters."
+  }
+}
+
+variable "additional_public_gateways" {
+  description = "Extra gateways the HTTPRoute of public scopes is also attached to, besides the public gateway. namespace defaults to the gateway namespace. Every gateway must exist in the cluster"
+  type = list(object({
+    name      = string
+    namespace = optional(string)
+  }))
+  default = []
+  validation {
+    condition = alltrue([for gateway in var.additional_public_gateways :
+      can(regex("^[a-z0-9]([-a-z0-9.]{0,251}[a-z0-9])?$", gateway.name)) &&
+      (gateway.namespace == null || can(regex("^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$", gateway.namespace)))
+    ])
+    error_message = "Gateway names must be lowercase DNS subdomains (up to 253 characters) and namespaces lowercase DNS labels (up to 63 characters)."
+  }
+}
+
+variable "additional_private_gateways" {
+  description = "Extra gateways the HTTPRoute of private scopes is also attached to, besides the private gateway. namespace defaults to the gateway namespace. Every gateway must exist in the cluster"
+  type = list(object({
+    name      = string
+    namespace = optional(string)
+  }))
+  default = []
+  validation {
+    condition = alltrue([for gateway in var.additional_private_gateways :
+      can(regex("^[a-z0-9]([-a-z0-9.]{0,251}[a-z0-9])?$", gateway.name)) &&
+      (gateway.namespace == null || can(regex("^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$", gateway.namespace)))
+    ])
+    error_message = "Gateway names must be lowercase DNS subdomains (up to 253 characters) and namespaces lowercase DNS labels (up to 63 characters)."
+  }
 }
 
 variable "memory_cpu_ratio" {
