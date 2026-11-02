@@ -3,6 +3,10 @@
 ## Unreleased
 
 
+### Features
+
+* **container_orchestration:** `additional_public_gateways` and `additional_private_gateways` publish the routes of EKS, AKS and GKE scopes on extra gateways, and EKS can now set its Istio gateway namespace and names
+
 ### Bug Fixes
 
 * **external_dns:** support public and private DNS on Azure with ExternalDNS: `label_filter` now applies to the `azure` and `azure-private-dns` providers, and the new `gateway_name` limits route sources to one Gateway, so a public instance keeps internal scopes out of the public zone while an `azure-private-dns` instance publishes them in the Private DNS zone (split-horizon)

@@ -461,3 +461,78 @@ run "naming_rejects_too_long_scope_pattern" {
 
   expect_failures = [var.naming_scope_pattern]
 }
+
+run "additional_gateways_absent_by_default" {
+  command = plan
+
+  assert {
+    condition     = !contains(keys(try(jsondecode(nullplatform_provider_config.aks_config.attributes).gateway, {})), "additional_public_gateways")
+    error_message = "gateway should not carry additional_public_gateways when not set"
+  }
+
+  assert {
+    condition     = !contains(keys(try(jsondecode(nullplatform_provider_config.aks_config.attributes).gateway, {})), "additional_private_gateways")
+    error_message = "gateway should not carry additional_private_gateways when not set"
+  }
+}
+
+run "additional_public_gateways_omit_unset_namespace" {
+  command = plan
+
+  variables {
+    additional_public_gateways = [
+      { name = "edge", namespace = "istio-edge" },
+      { name = "public-gateway-eu" },
+    ]
+  }
+
+  assert {
+    condition = jsondecode(nullplatform_provider_config.aks_config.attributes).gateway.additional_public_gateways == [
+      { name = "edge", namespace = "istio-edge" },
+      { name = "public-gateway-eu" },
+    ]
+    error_message = "additional_public_gateways should keep each entry and drop the namespace that was not set"
+  }
+
+  assert {
+    condition     = !contains(keys(jsondecode(nullplatform_provider_config.aks_config.attributes).gateway), "additional_private_gateways")
+    error_message = "additional_private_gateways should stay out when only the public list is set"
+  }
+}
+
+run "additional_private_gateways" {
+  command = plan
+
+  variables {
+    additional_private_gateways = [
+      { name = "internal.edge", namespace = "istio-internal" },
+    ]
+  }
+
+  assert {
+    condition = jsondecode(nullplatform_provider_config.aks_config.attributes).gateway.additional_private_gateways == [
+      { name = "internal.edge", namespace = "istio-internal" },
+    ]
+    error_message = "additional_private_gateways should reach the provider config"
+  }
+}
+
+run "additional_gateways_reject_invalid_name" {
+  command = plan
+
+  variables {
+    additional_public_gateways = [{ name = "Edge_Gateway" }]
+  }
+
+  expect_failures = [var.additional_public_gateways]
+}
+
+run "additional_gateways_reject_invalid_namespace" {
+  command = plan
+
+  variables {
+    additional_private_gateways = [{ name = "edge", namespace = "istio.edge" }]
+  }
+
+  expect_failures = [var.additional_private_gateways]
+}
