@@ -22,7 +22,7 @@ The module constructs a single nullplatform_provider_config resource of type 'gk
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v9.9.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v9.10.0"
 
   cluster_name            = "your-cluster-name"
   location                = "your-location"
