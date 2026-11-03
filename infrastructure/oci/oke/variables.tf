@@ -21,7 +21,8 @@ variable "node_pool_subnet_id" {
 
 variable "home_region" {
   type        = string
-  description = "The tenancy's home region"
+  description = "Deprecated, ignored: the module never read it. The home region reaches the module through the oci.home provider the caller passes in."
+  default     = null
 }
 
 variable "cluster_name" {
@@ -123,4 +124,13 @@ variable "tenancy_id" {
   type        = string
   default     = null
   description = "The tenancy OCID (required when enable_ocir_pull is true)"
+}
+
+# Surfaces the deprecation at plan time (a check failure is a warning, never an
+# error) instead of silently ignoring a value callers still pass.
+check "home_region_deprecated" {
+  assert {
+    condition     = var.home_region == null
+    error_message = "home_region is deprecated and ignored: the module never read it. Remove it; the home region comes from the oci.home provider you pass to the module."
+  }
 }
