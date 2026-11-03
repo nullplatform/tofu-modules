@@ -37,6 +37,8 @@ Verified 2026-11-02.
 | `nullplatform-cert-manager-config` chart | `2.35.0` | `cert_manager_config_version` | `infrastructure/commons/cert_manager` |
 | `cert-manager-webhook-oci` chart | `1.4.1` | `cert_manager_webhook_oci_version` (only with `cloud_provider = "oci"`) | `infrastructure/commons/cert_manager` |
 | EKS Kubernetes version | `1.36` | `kubernetes_version` | `infrastructure/aws/eks` |
+| AKS Kubernetes version | — (the version your cluster runs) | `kubernetes_version` | `infrastructure/azure/aks` |
+| OKE Kubernetes version | — (the version your cluster runs) | `kubernetes_version` | `infrastructure/oci/oke` |
 | EKS node AMI | `1.36.5-20261031` | `ami_release_version` (with `use_latest_ami_release_version = false`) | `infrastructure/aws/eks` |
 | `vpc-cni` addon | `v1.22.4-eksbuild.3` | `addon_versions["vpc-cni"]` | `infrastructure/aws/eks` |
 | `coredns` addon | `v1.14.7-eksbuild.10` | `addon_versions["coredns"]` | `infrastructure/aws/eks` |
@@ -55,6 +57,11 @@ set them kept running an old release without noticing: `external_dns_version` (`
 (`1.30.4`), `cert_manager_config_version` (`2.35.0`), and `cert_manager_webhook_oci_version`
 (`1.4.1`). They are now required. If you never set one, pin the old default to keep the plan
 empty, then upgrade on its own.
+
+The same goes for `kubernetes_version` on eks (`1.34`), aks (`1.32.7`) and oke (`v1.34.1`). With a
+default, the day it moved every cluster that never set it would upgrade its control plane on the
+next apply. Pin the version the cluster runs today (`aws eks describe-cluster`, `az aks show`,
+`oci ce cluster get`); a control plane upgrade is its own change, one minor at a time.
 
 **`aws-load-balancer-controller` 1.x → 3.x is a major upgrade of the controller (app v2 → v3).**
 Helm does not upgrade CRDs, so apply the v3 CRDs by hand before you bump the chart. From v3.2.0
@@ -99,7 +106,7 @@ module "cert_manager" {
 }
 
 module "eks" {
-  kubernetes_version             = "1.36"
+  kubernetes_version             = "1.36" # aks and oke take kubernetes_version too: pin what the cluster runs
   ami_release_version            = "1.36.5-20261031"
   use_latest_ami_release_version = false
 

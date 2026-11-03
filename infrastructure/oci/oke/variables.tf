@@ -78,9 +78,14 @@ variable "worker_pool_size" {
 }
 
 variable "kubernetes_version" {
+  # example: v1.34.1
   type        = string
-  default     = "v1.34.1"
-  description = "Kubernetes version for the OKE cluster"
+  description = "No default: every install pins this deliberately — see VERSIONS.md. Kubernetes version of the OKE cluster, with the leading v. A default here would upgrade the control plane of every cluster that never set it the day the default moved, so the version is always the caller's decision."
+
+  validation {
+    condition     = var.kubernetes_version != "" && !contains(["latest", "main", "master"], lower(var.kubernetes_version))
+    error_message = "kubernetes_version must be a non-empty fixed version, not empty and not a moving reference."
+  }
 }
 
 variable "cni_type" {
