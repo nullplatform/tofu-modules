@@ -5,7 +5,6 @@ locals {
     },
     var.namespace_application_default != "" ? { namespace = var.namespace_application_default } : {},
     var.use_nullplatform_namespace ? { use_nullplatform_namespace = var.use_nullplatform_namespace } : {},
-    length(var.namespace_bootstrap_resources) > 0 ? { namespace_bootstrap_resources = var.namespace_bootstrap_resources } : {},
   )
 
   balancer = merge(
@@ -61,7 +60,6 @@ locals {
     strategy           = var.naming_strategy
     deployment_pattern = var.naming_deployment_pattern
     scope_pattern      = var.naming_scope_pattern
-    namespace_pattern  = var.naming_namespace_pattern
   } : k => v if v != "" }
 
   attributes = merge(

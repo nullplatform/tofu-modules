@@ -20,23 +20,9 @@ variable "resource_group" {
 }
 
 variable "namespace_application_default" {
-  description = "Default Kubernetes namespace for applications"
+  description = "Default Kubernetes namespace for applications. Accepts a pattern the k8s scope renders per scope, e.g. {.namespace.slug} for one Kubernetes namespace per nullplatform namespace"
   type        = string
   default     = "nullplatform"
-}
-
-variable "namespace_bootstrap_resources" {
-  description = "Extra objects copied from namespace_application_default into each namespace parity namespace, as kind/name. Only networkpolicy, limitrange, resourcequota and configmap; image pull secrets and the traffic manager ConfigMap are always copied"
-  type        = list(string)
-  default     = []
-
-  validation {
-    condition = alltrue([
-      for ref in var.namespace_bootstrap_resources :
-      can(regex("^(networkpolic(y|ies)|limitranges?|resourcequotas?|configmaps?)/[a-z0-9]([-a-z0-9.]*[a-z0-9])?$", lower(ref)))
-    ])
-    error_message = "namespace_bootstrap_resources entries must be kind/name with kind networkpolicy, limitrange, resourcequota or configmap."
-  }
 }
 
 variable "authentication_mode" {
@@ -191,15 +177,5 @@ variable "naming_scope_pattern" {
   validation {
     condition     = var.naming_scope_pattern == "" || (length(var.naming_scope_pattern) <= 200 && can(regex("^[A-Za-z0-9.{}\\[\\]\"_-]+$", var.naming_scope_pattern)))
     error_message = "naming_scope_pattern must be at most 200 characters of letters, digits, and . { } [ ] \" _ -"
-  }
-}
-
-variable "naming_namespace_pattern" {
-  description = "Namespace parity: each nullplatform namespace gets its own Kubernetes namespace, named by this pattern, rendered like naming_deployment_pattern (e.g. {.namespace.slug}, {.account.slug}-{.namespace.slug} for clusters shared by several accounts, {.namespace.slug}-{.scope.dimensions.environment}). Empty keeps every scope in namespace_application_default"
-  type        = string
-  default     = ""
-  validation {
-    condition     = var.naming_namespace_pattern == "" || (length(var.naming_namespace_pattern) <= 200 && can(regex("^[A-Za-z0-9.{}\\[\\]\"_-]+$", var.naming_namespace_pattern)) && strcontains(var.naming_namespace_pattern, "{."))
-    error_message = "naming_namespace_pattern must be empty, or at most 200 characters of letters, digits, and . { } [ ] \" _ - with at least one {.path} placeholder"
   }
 }

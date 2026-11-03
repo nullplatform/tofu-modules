@@ -40,6 +40,19 @@ run "attributes_with_defaults" {
   }
 }
 
+run "namespace_accepts_a_pattern" {
+  command = plan
+
+  variables {
+    namespace_application_default = "{.namespace.slug}"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.oke_config.attributes).cluster.namespace == "{.namespace.slug}"
+    error_message = "cluster.namespace should carry the pattern as is, for the scope to render it"
+  }
+}
+
 run "with_dimensions" {
   command = plan
 
@@ -162,62 +175,4 @@ run "naming_rejects_too_long_scope_pattern" {
   }
 
   expect_failures = [var.naming_scope_pattern]
-}
-
-run "with_namespace_parity" {
-  command = plan
-
-  variables {
-    naming_namespace_pattern      = "{.account.slug}-{.namespace.slug}"
-    namespace_bootstrap_resources = ["networkpolicy/default-deny", "limitrange/defaults"]
-  }
-
-  assert {
-    condition     = jsondecode(nullplatform_provider_config.oke_config.attributes).naming.namespace_pattern == "{.account.slug}-{.namespace.slug}"
-    error_message = "naming.namespace_pattern should match input"
-  }
-
-  assert {
-    condition     = jsondecode(nullplatform_provider_config.oke_config.attributes).cluster.namespace_bootstrap_resources == ["networkpolicy/default-deny", "limitrange/defaults"]
-    error_message = "cluster.namespace_bootstrap_resources should match input"
-  }
-
-  assert {
-    condition     = jsondecode(nullplatform_provider_config.oke_config.attributes).cluster.namespace == "nullplatform"
-    error_message = "cluster.namespace should stay as the static namespace"
-  }
-}
-
-run "without_namespace_parity" {
-  command = plan
-
-  assert {
-    condition     = !contains(keys(jsondecode(nullplatform_provider_config.oke_config.attributes).cluster), "namespace_bootstrap_resources")
-    error_message = "cluster.namespace_bootstrap_resources should not be written by default"
-  }
-
-  assert {
-    condition     = !strcontains(nullplatform_provider_config.oke_config.attributes, "namespace_pattern")
-    error_message = "naming.namespace_pattern should not be written by default"
-  }
-}
-
-run "rejects_namespace_pattern_without_placeholder" {
-  command = plan
-
-  variables {
-    naming_namespace_pattern = "payments"
-  }
-
-  expect_failures = [var.naming_namespace_pattern]
-}
-
-run "rejects_secrets_in_namespace_bootstrap_resources" {
-  command = plan
-
-  variables {
-    namespace_bootstrap_resources = ["secret/agent-credentials"]
-  }
-
-  expect_failures = [var.namespace_bootstrap_resources]
 }

@@ -1,13 +1,4 @@
 locals {
-  cluster = merge(
-    {
-      id        = var.cluster_name
-      location  = var.location
-      namespace = var.namespace_application_default
-    },
-    length(var.namespace_bootstrap_resources) > 0 ? { namespace_bootstrap_resources = var.namespace_bootstrap_resources } : {},
-  )
-
   additional_gateways = merge(
     length(var.additional_public_gateways) > 0 ? {
       additional_public_gateways = [for gateway in var.additional_public_gateways : { for k, v in gateway : k => v if v != null }]
@@ -42,12 +33,15 @@ locals {
     strategy           = var.naming_strategy
     deployment_pattern = var.naming_deployment_pattern
     scope_pattern      = var.naming_scope_pattern
-    namespace_pattern  = var.naming_namespace_pattern
   } : k => v if v != "" }
 
   attributes = merge(
     {
-      cluster = local.cluster
+      cluster = {
+        id        = var.cluster_name
+        location  = var.location
+        namespace = var.namespace_application_default
+      }
       gateway = local.gateway
     },
     length(local.resource_management) > 0 ? { resource_management = local.resource_management } : {},

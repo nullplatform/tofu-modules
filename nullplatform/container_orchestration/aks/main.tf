@@ -6,7 +6,6 @@ locals {
       namespace      = var.namespace_application_default
     },
     var.authentication_mode != "" ? { authentication_mode = var.authentication_mode } : {},
-    length(var.namespace_bootstrap_resources) > 0 ? { namespace_bootstrap_resources = var.namespace_bootstrap_resources } : {},
   )
 
   additional_gateways = merge(
@@ -43,7 +42,6 @@ locals {
     strategy           = var.naming_strategy
     deployment_pattern = var.naming_deployment_pattern
     scope_pattern      = var.naming_scope_pattern
-    namespace_pattern  = var.naming_namespace_pattern
   } : k => v if v != "" }
 
   attributes = merge(
