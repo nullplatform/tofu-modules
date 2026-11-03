@@ -5,7 +5,6 @@ locals {
       namespace = var.namespace_application_default
       location  = var.region
     },
-    var.use_nullplatform_namespace ? { use_nullplatform_namespace = var.use_nullplatform_namespace } : {},
     length(var.namespace_bootstrap_resources) > 0 ? { namespace_bootstrap_resources = var.namespace_bootstrap_resources } : {},
   )
 

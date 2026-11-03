@@ -21,11 +21,10 @@ variable "namespace_application_default" {
 }
 
 variable "use_nullplatform_namespace" {
-  description = "Namespace parity shorthand: when enabled, each nullplatform namespace gets its own Kubernetes namespace named after its slug (same as naming_namespace_pattern = {.namespace.slug}), and namespace_application_default becomes the static namespace shared objects are copied from. A naming_namespace_pattern wins"
+  description = "When enabled, uses the nullplatform system namespace instead of a custom namespace"
   type        = bool
   default     = false
 }
-
 
 variable "namespace_bootstrap_resources" {
   description = "Extra objects copied from namespace_application_default into each namespace parity namespace, as kind/name. Only networkpolicy, limitrange, resourcequota and configmap; image pull secrets and the traffic manager ConfigMap are always copied"
@@ -252,7 +251,7 @@ variable "naming_scope_pattern" {
 }
 
 variable "naming_namespace_pattern" {
-  description = "Namespace parity: each nullplatform namespace gets its own Kubernetes namespace, named by this pattern, rendered like naming_deployment_pattern (e.g. {.namespace.slug}, {.account.slug}-{.namespace.slug} for clusters shared by several accounts, {.namespace.slug}-{.scope.dimensions.environment}). Empty keeps every scope in namespace_application_default; use_nullplatform_namespace is the shorthand for {.namespace.slug}"
+  description = "Namespace parity: each nullplatform namespace gets its own Kubernetes namespace, named by this pattern, rendered like naming_deployment_pattern (e.g. {.namespace.slug}, {.account.slug}-{.namespace.slug} for clusters shared by several accounts, {.namespace.slug}-{.scope.dimensions.environment}). Empty keeps every scope in namespace_application_default"
   type        = string
   default     = ""
   validation {

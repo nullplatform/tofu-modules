@@ -383,14 +383,8 @@ run "with_namespace_parity" {
   command = plan
 
   variables {
-    use_nullplatform_namespace    = true
     naming_namespace_pattern      = "{.account.slug}-{.namespace.slug}"
     namespace_bootstrap_resources = ["networkpolicy/default-deny", "limitrange/defaults"]
-  }
-
-  assert {
-    condition     = jsondecode(nullplatform_provider_config.gke_config.attributes).cluster.use_nullplatform_namespace == true
-    error_message = "cluster.use_nullplatform_namespace should be true when enabled"
   }
 
   assert {
@@ -413,11 +407,8 @@ run "without_namespace_parity" {
   command = plan
 
   assert {
-    condition = length(setintersection(
-      keys(jsondecode(nullplatform_provider_config.gke_config.attributes).cluster),
-      ["use_nullplatform_namespace", "namespace_bootstrap_resources"]
-    )) == 0
-    error_message = "Namespace parity attributes should not be written by default"
+    condition     = !contains(keys(jsondecode(nullplatform_provider_config.gke_config.attributes).cluster), "namespace_bootstrap_resources")
+    error_message = "cluster.namespace_bootstrap_resources should not be written by default"
   }
 
   assert {
