@@ -35,6 +35,7 @@ Verified 2026-11-02.
 | `external-dns` chart | `1.23.0` | `external_dns_version` | `infrastructure/commons/external_dns` |
 | `aws-load-balancer-controller` chart | `3.6.2` | `aws_load_balancer_controller_version` | `infrastructure/aws/aws_load_balancer_controller` |
 | `nullplatform-cert-manager-config` chart | `2.35.0` | `cert_manager_config_version` | `infrastructure/commons/cert_manager` |
+| `cert-manager-webhook-oci` chart | `1.4.1` | `cert_manager_webhook_oci_version` (only with `cloud_provider = "oci"`) | `infrastructure/commons/cert_manager` |
 | EKS Kubernetes version | `1.36` | `kubernetes_version` | `infrastructure/aws/eks` |
 | EKS node AMI | `1.36.5-20261031` | `ami_release_version` (with `use_latest_ami_release_version = false`) | `infrastructure/aws/eks` |
 | `vpc-cni` addon | `v1.22.4-eksbuild.3` | `addon_versions["vpc-cni"]` | `infrastructure/aws/eks` |
@@ -47,6 +48,18 @@ Verified 2026-11-02.
 so the change stays functionally inert. Four of these were previously unpinnable and resolved
 at deploy time, so what you run may not match the table: `cert_manager_version`,
 `prometheus_version`, `logging_controller_image_tag`, and `traffic_manager_version` on eks.
+
+Six chart versions used to have a default that fell behind this table, so an install that never
+set them kept running an old release without noticing: `external_dns_version` (`1.19.0`),
+`aws_load_balancer_controller_version` (`1.13.4`), `istio_base_version` and `istiod_version`
+(`1.30.4`), `cert_manager_config_version` (`2.35.0`), and `cert_manager_webhook_oci_version`
+(`1.4.1`). They are now required. If you never set one, pin the old default to keep the plan
+empty, then upgrade on its own.
+
+**`aws-load-balancer-controller` 1.x → 3.x is a major upgrade of the controller (app v2 → v3).**
+Helm does not upgrade CRDs, so apply the v3 CRDs by hand before you bump the chart. From v3.2.0
+the controller also reconciles Gateway API resources, so check how it coexists with Istio on the
+same cluster.
 
 ## Ready to paste
 
@@ -80,6 +93,9 @@ module "container_orchestration" {
 module "cert_manager" {
   cert_manager_version        = "v1.21.3"
   cert_manager_config_version = "2.35.0"
+
+  # Only with cloud_provider = "oci"
+  # cert_manager_webhook_oci_version = "1.4.1"
 }
 
 module "eks" {
