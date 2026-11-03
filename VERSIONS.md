@@ -14,7 +14,7 @@ a specific release, so an upgrade is something someone decides.
 
 ## What to pin
 
-Verified 2026-11-02.
+Verified 2026-11-03.
 
 | Component | Current | Variable | Module |
 | --- | --- | --- | --- |
@@ -30,8 +30,8 @@ Verified 2026-11-02.
 | `k8s-traffic-manager` | `v1.9.0` | `agent_traffic_manager_tag` | `nullplatform/agent` |
 | traffic manager (provider config) | `v1.9.0` | `traffic_manager_version` | `container_orchestration/eks` |
 | `scopes` repository | `v1.19.0` | `agent_repo` (as `"https://github.com/nullplatform/scopes.git#v1.19.0"`; only without packages) | `nullplatform/agent` |
-| `scopes-lambda` repository | `v0.12.0` | `agent_repo` (as `"https://github.com/nullplatform/scopes-lambda.git#v0.12.0"`; only without packages) | `nullplatform/agent` |
-| `scopes-static-files` repository | `v4.1.2` | `agent_repo` (as `"https://github.com/nullplatform/scopes-static-files.git#v4.1.2"`; only without packages) | `nullplatform/agent` |
+| `scopes-lambda` repository | `v0.12.2` | `agent_repo` (as `"https://github.com/nullplatform/scopes-lambda.git#v0.12.2"`; only without packages) | `nullplatform/agent` |
+| `scopes-static-files` repository | `v4.1.4` | `agent_repo` (as `"https://github.com/nullplatform/scopes-static-files.git#v4.1.4"`; only without packages) | `nullplatform/agent` |
 | `external-dns` chart | `1.23.0` | `external_dns_version` | `infrastructure/commons/external_dns` |
 | `aws-load-balancer-controller` chart | `3.6.2` | `aws_load_balancer_controller_version` | `infrastructure/aws/aws_load_balancer_controller` |
 | `nullplatform-cert-manager-config` chart | `2.35.0` | `cert_manager_config_version` | `infrastructure/commons/cert_manager` |
@@ -67,8 +67,8 @@ module "agent" {
   # scopes and services come from each package, so leave agent_repo unset.
   # agent_repo = [
   #   "https://github.com/nullplatform/scopes.git#v1.19.0",
-  #   "https://github.com/nullplatform/scopes-lambda.git#v0.12.0",
-  #   "https://github.com/nullplatform/scopes-static-files.git#v4.1.2",
+  #   "https://github.com/nullplatform/scopes-lambda.git#v0.12.2",
+  #   "https://github.com/nullplatform/scopes-static-files.git#v4.1.4",
   # ]
 }
 
