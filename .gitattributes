@@ -1,0 +1,3 @@
+# Checkout with LF regardless of core.autocrlf: templates rendered into Helm values with CRLF
+# differ from an LF render, so plans show changes depending on the machine that ran init.
+* text=auto eol=lf

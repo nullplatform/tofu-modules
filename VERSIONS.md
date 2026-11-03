@@ -14,7 +14,7 @@ a specific release, so an upgrade is something someone decides.
 
 ## What to pin
 
-Verified 2026-11-02.
+Verified 2026-11-03.
 
 | Component | Current | Variable | Module |
 | --- | --- | --- | --- |
@@ -25,13 +25,13 @@ Verified 2026-11-02.
 | `istio-base` chart | `1.30.7` | `istio_base_version` | `infrastructure/commons/istio` |
 | `istiod` chart | `1.30.7` | `istiod_version` | `infrastructure/commons/istio` |
 | `gateway-api` CRDs | `v1.5.1` | `gateway_api_crd_ref` | `nullplatform/base` |
-| `k8s-logs-controller` | `v1.7.0` | `logging_controller_image_tag` | `nullplatform/base` |
+| `k8s-logs-controller` | `v1.7.1` | `logging_controller_image_tag` | `nullplatform/base` |
 | `controlplane-agent` | `0.15.0` | `image_tag` | `nullplatform/agent` |
 | `k8s-traffic-manager` | `v1.9.0` | `agent_traffic_manager_tag` | `nullplatform/agent` |
 | traffic manager (provider config) | `v1.9.0` | `traffic_manager_version` | `container_orchestration/eks` |
 | `scopes` repository | `v1.19.0` | `agent_repo` (as `"https://github.com/nullplatform/scopes.git#v1.19.0"`; only without packages) | `nullplatform/agent` |
-| `scopes-lambda` repository | `v0.12.0` | `agent_repo` (as `"https://github.com/nullplatform/scopes-lambda.git#v0.12.0"`; only without packages) | `nullplatform/agent` |
-| `scopes-static-files` repository | `v4.1.2` | `agent_repo` (as `"https://github.com/nullplatform/scopes-static-files.git#v4.1.2"`; only without packages) | `nullplatform/agent` |
+| `scopes-lambda` repository | `v0.12.2` | `agent_repo` (as `"https://github.com/nullplatform/scopes-lambda.git#v0.12.2"`; only without packages) | `nullplatform/agent` |
+| `scopes-static-files` repository | `v4.1.4` | `agent_repo` (as `"https://github.com/nullplatform/scopes-static-files.git#v4.1.4"`; only without packages) | `nullplatform/agent` |
 | `external-dns` chart | `1.23.0` | `external_dns_version` | `infrastructure/commons/external_dns` |
 | `aws-load-balancer-controller` chart | `3.6.2` | `aws_load_balancer_controller_version` | `infrastructure/aws/aws_load_balancer_controller` |
 | `nullplatform-cert-manager-config` chart | `2.35.0` | `cert_manager_config_version` | `infrastructure/commons/cert_manager` |
@@ -53,7 +53,7 @@ at deploy time, so what you run may not match the table: `cert_manager_version`,
 ```hcl
 module "base" {
   nullplatform_base_helm_version = "2.44.7"
-  logging_controller_image_tag   = "v1.7.0"
+  logging_controller_image_tag   = "v1.7.1"
   gateway_api_crd_ref            = "v1.5.1"
 }
 
@@ -67,8 +67,8 @@ module "agent" {
   # scopes and services come from each package, so leave agent_repo unset.
   # agent_repo = [
   #   "https://github.com/nullplatform/scopes.git#v1.19.0",
-  #   "https://github.com/nullplatform/scopes-lambda.git#v0.12.0",
-  #   "https://github.com/nullplatform/scopes-static-files.git#v4.1.2",
+  #   "https://github.com/nullplatform/scopes-lambda.git#v0.12.2",
+  #   "https://github.com/nullplatform/scopes-static-files.git#v4.1.4",
   # ]
 }
 
