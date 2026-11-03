@@ -2,27 +2,27 @@
 
 ## Description
 
-Configures a Nullplatform EKS provider configuration resource that registers an Amazon EKS cluster with the Nullplatform platform, including load balancer, traffic manager, resource management, security, and Kubernetes object naming settings
+Configures a Nullplatform EKS provider configuration resource that registers an Amazon EKS cluster with the Nullplatform control plane, including traffic routing, gateway, naming, and resource management settings
 
 ## Architecture
 
-The module assembles a set of deeply nested local maps from input variables — cluster identity, balancer configuration, network settings, resource management ratios, security secrets, traffic manager sidecar settings, and naming strategy — then encodes them as JSON and writes a single nullplatform_provider_config resource of type 'eks-configuration'. All optional sub-sections (balancer, network, resource_management, security, traffic_manager, naming, object_modifiers) are conditionally merged into the attributes map only when their governing variables are non-empty or non-null, so the resulting JSON payload contains only explicitly configured fields. The nrn and dimensions inputs wire directly into the top-level resource to scope the configuration to the correct Nullplatform hierarchy.
+The module builds a structured `local.attributes` map from all input variables, merging cluster identity, ALB/gateway routing configuration, resource management ratios, security settings, traffic manager sidecar configuration, and Kubernetes object naming strategy into a single JSON payload. A single `nullplatform_provider_config` resource of type `eks-configuration` is created, consuming the `nrn`, `dimensions`, and JSON-encoded `attributes` to register the EKS cluster with the Nullplatform API. Optional fields are conditionally included in the attributes map only when non-empty or non-null, preventing unintended overrides of Nullplatform defaults. Outputs surface the created provider config resource for downstream consumption.
 
 ## Features
 
 - Creates a nullplatform_provider_config resource that registers an EKS cluster with the Nullplatform control plane
-- Configures public and private ALB load balancers with capacity thresholds and support for additional balancers beyond the 100-rule limit
-- Pins the traffic manager sidecar container to a fixed version tag and configurable pod-level port to prevent uncontrolled image drift
-- Manages Kubernetes resource tuning via memory/CPU ratio, request-to-limit ratios, and maximum milicores settings
-- Supports Kubernetes object naming strategies (ids, qualified, or custom) with per-deployment and per-scope name patterns
-- Attaches image pull secrets and a named service account to deployments for private registry access
-- Applies dynamic Kubernetes object modifiers for patching arbitrary fields on generated k8s resources
+- Configures ALB-based traffic routing with public and private load balancer names, capacity thresholds, and overflow balancers
+- Configures Istio gateway-based routing with public, private, and additional gateway names and namespaces
+- Pins the traffic manager sidecar container to a fixed version tag to prevent unintended runtime upgrades
+- Supports custom Kubernetes object naming strategies including ID-based, qualified slug-based, and fully custom patterns
+- Configures pod resource management via memory-to-CPU ratio, memory request-to-limit ratio, and max milicores
+- Applies dynamic Kubernetes object modifiers to patch manifests at deploy time via the object_modifiers list
 
 ## Basic Usage
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.9.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.11.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -30,11 +30,11 @@ module "eks" {
 }
 ```
 
-### Usage with Latest Tag (blocked)
+### Usage with Latest Tag (Blocked)
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.9.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.11.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -42,11 +42,11 @@ module "eks" {
 }
 ```
 
-### Usage with Main Branch Tag (blocked)
+### Usage with Main Branch Tag (Blocked)
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.9.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.11.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -54,11 +54,11 @@ module "eks" {
 }
 ```
 
-### Usage with Master Branch Tag (blocked)
+### Usage with Master Branch Tag (Blocked)
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.9.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.11.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -99,11 +99,14 @@ resource "example_resource" "this" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_additional_private_balancer_names"></a> [additional\_private\_balancer\_names](#input\_additional\_private\_balancer\_names) | Additional private load balancers to support scope deployments beyond the 100-rule ALB limit | `list(string)` | `[]` | no |
+| <a name="input_additional_private_gateways"></a> [additional\_private\_gateways](#input\_additional\_private\_gateways) | Extra gateways the HTTPRoute of private scopes is also attached to, besides the private gateway. namespace defaults to the gateway namespace. Every gateway must exist in the cluster | <pre>list(object({<br/>    name      = string<br/>    namespace = optional(string)<br/>  }))</pre> | `[]` | no |
 | <a name="input_additional_public_balancer_names"></a> [additional\_public\_balancer\_names](#input\_additional\_public\_balancer\_names) | Additional public-facing load balancers to support scope deployments beyond the 100-rule ALB limit | `list(string)` | `[]` | no |
+| <a name="input_additional_public_gateways"></a> [additional\_public\_gateways](#input\_additional\_public\_gateways) | Extra gateways the HTTPRoute of public scopes is also attached to, besides the public gateway. namespace defaults to the gateway namespace. Every gateway must exist in the cluster | <pre>list(object({<br/>    name      = string<br/>    namespace = optional(string)<br/>  }))</pre> | `[]` | no |
 | <a name="input_alb_capacity_threshold"></a> [alb\_capacity\_threshold](#input\_alb\_capacity\_threshold) | Maximum ALB rule usage percentage (50-99). The remaining capacity reserves slots for concurrent deployments. Higher values maximize ALB utilization but increase the risk of hitting the rule limit | `number` | `null` | no |
 | <a name="input_balancer_group_suffix"></a> [balancer\_group\_suffix](#input\_balancer\_group\_suffix) | Suffix added to the ALB name, enabling management across multiple clusters in the same account | `string` | `""` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The name of the Amazon EKS cluster | `string` | n/a | yes |
 | <a name="input_dimensions"></a> [dimensions](#input\_dimensions) | Dimensions for the provider configuration | `map(any)` | `{}` | no |
+| <a name="input_gateway_namespace"></a> [gateway\_namespace](#input\_gateway\_namespace) | Kubernetes namespace where the gateways are deployed. Only used when scopes route through Istio gateways instead of an ALB. Defaults to 'gateways' when unset | `string` | `""` | no |
 | <a name="input_image_pull_secrets"></a> [image\_pull\_secrets](#input\_image\_pull\_secrets) | List of secret names to use image pull secrets for secure access to private container images | `list(string)` | `[]` | no |
 | <a name="input_max_cores_multiplier"></a> [max\_cores\_multiplier](#input\_max\_cores\_multiplier) | Sets the ratio between requested and limit CPU. Default value is 3, must be a number greater than or equal to 1 | `string` | `""` | no |
 | <a name="input_max_milicores"></a> [max\_milicores](#input\_max\_milicores) | Sets the maximum amount of CPU mili cores a pod can use | `string` | `""` | no |
@@ -116,7 +119,9 @@ resource "example_resource" "this" {
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform NRN (e.g., organization=X:account=Y:namespace=Z) | `string` | n/a | yes |
 | <a name="input_object_modifiers"></a> [object\_modifiers](#input\_object\_modifiers) | List of modifications to dynamically modify k8s objects | <pre>list(object({<br/>    selector = string<br/>    action   = string<br/>    type     = string<br/>    value    = optional(string, "")<br/>  }))</pre> | `[]` | no |
 | <a name="input_private_balancer_name"></a> [private\_balancer\_name](#input\_private\_balancer\_name) | The name of the private load balancer for internal traffic routing | `string` | `""` | no |
+| <a name="input_private_gateway_name"></a> [private\_gateway\_name](#input\_private\_gateway\_name) | Name of the private gateway. Only used when scopes route through Istio gateways instead of an ALB. Defaults to 'gateway-internal' when unset | `string` | `""` | no |
 | <a name="input_public_balancer_name"></a> [public\_balancer\_name](#input\_public\_balancer\_name) | The name of the public-facing load balancer for external traffic routing | `string` | `""` | no |
+| <a name="input_public_gateway_name"></a> [public\_gateway\_name](#input\_public\_gateway\_name) | Name of the public gateway. Only used when scopes route through Istio gateways instead of an ALB. Defaults to 'gateway-public' when unset | `string` | `""` | no |
 | <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | The name of the Kubernetes service account used for deployments | `string` | `""` | no |
 | <a name="input_traffic_manager_port"></a> [traffic\_manager\_port](#input\_traffic\_manager\_port) | Port the traffic manager sidecar binds inside the pod. Defaults to 80 when unset. Set a different port (10080 recommended) when the cluster does not allow pod-to-pod traffic on port 80, which surfaces as a healthy pod that receives no traffic because kubelet probes are node-local and bypass the filtering. Open the port for pod-to-pod traffic before setting this value | `number` | `null` | no |
 | <a name="input_traffic_manager_version"></a> [traffic\_manager\_version](#input\_traffic\_manager\_version) | No default: every install pins this deliberately — see VERSIONS.md. Pinned rather than tracking latest: a moving tag means a pod restart can pull a different build with no apply in between. Tag for the traffic manager sidecar container | `string` | n/a | yes |
@@ -126,16 +131,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "eks",
-  "description": "Configures a Nullplatform EKS provider configuration resource that registers an Amazon EKS cluster with the Nullplatform platform, including load balancer, traffic manager, resource management, security, and Kubernetes object naming settings",
-  "architecture": "The module assembles a set of deeply nested local maps from input variables — cluster identity, balancer configuration, network settings, resource management ratios, security secrets, traffic manager sidecar settings, and naming strategy — then encodes them as JSON and writes a single nullplatform_provider_config resource of type 'eks-configuration'. All optional sub-sections (balancer, network, resource_management, security, traffic_manager, naming, object_modifiers) are conditionally merged into the attributes map only when their governing variables are non-empty or non-null, so the resulting JSON payload contains only explicitly configured fields. The nrn and dimensions inputs wire directly into the top-level resource to scope the configuration to the correct Nullplatform hierarchy.",
+  "description": "Configures a Nullplatform EKS provider configuration resource that registers an Amazon EKS cluster with the Nullplatform control plane, including traffic routing, gateway, naming, and resource management settings",
+  "architecture": "The module builds a structured `local.attributes` map from all input variables, merging cluster identity, ALB/gateway routing configuration, resource management ratios, security settings, traffic manager sidecar configuration, and Kubernetes object naming strategy into a single JSON payload. A single `nullplatform_provider_config` resource of type `eks-configuration` is created, consuming the `nrn`, `dimensions`, and JSON-encoded `attributes` to register the EKS cluster with the Nullplatform API. Optional fields are conditionally included in the attributes map only when non-empty or non-null, preventing unintended overrides of Nullplatform defaults. Outputs surface the created provider config resource for downstream consumption.",
   "features": [
     "Creates a nullplatform_provider_config resource that registers an EKS cluster with the Nullplatform control plane",
-    "Configures public and private ALB load balancers with capacity thresholds and support for additional balancers beyond the 100-rule limit",
-    "Pins the traffic manager sidecar container to a fixed version tag and configurable pod-level port to prevent uncontrolled image drift",
-    "Manages Kubernetes resource tuning via memory/CPU ratio, request-to-limit ratios, and maximum milicores settings",
-    "Supports Kubernetes object naming strategies (ids, qualified, or custom) with per-deployment and per-scope name patterns",
-    "Attaches image pull secrets and a named service account to deployments for private registry access",
-    "Applies dynamic Kubernetes object modifiers for patching arbitrary fields on generated k8s resources"
+    "Configures ALB-based traffic routing with public and private load balancer names, capacity thresholds, and overflow balancers",
+    "Configures Istio gateway-based routing with public, private, and additional gateway names and namespaces",
+    "Pins the traffic manager sidecar container to a fixed version tag to prevent unintended runtime upgrades",
+    "Supports custom Kubernetes object naming strategies including ID-based, qualified slug-based, and fully custom patterns",
+    "Configures pod resource management via memory-to-CPU ratio, memory request-to-limit ratio, and max milicores",
+    "Applies dynamic Kubernetes object modifiers to patch manifests at deploy time via the object_modifiers list"
   ],
   "inputs": [
     {
@@ -166,6 +171,31 @@ resource "example_resource" "this" {
     {
       "name": "alb_capacity_threshold",
       "description": "Maximum ALB rule usage percentage (50-99). The remaining capacity reserves slots for concurrent deployments. Higher values maximize ALB utilization but increase the risk of hitting the rule limit",
+      "required": false
+    },
+    {
+      "name": "gateway_namespace",
+      "description": "Kubernetes namespace where the gateways are deployed. Only used when scopes route through Istio gateways instead of an ALB. Defaults to 'gateways' when unset",
+      "required": false
+    },
+    {
+      "name": "public_gateway_name",
+      "description": "Name of the public gateway. Only used when scopes route through Istio gateways instead of an ALB. Defaults to 'gateway-public' when unset",
+      "required": false
+    },
+    {
+      "name": "private_gateway_name",
+      "description": "Name of the private gateway. Only used when scopes route through Istio gateways instead of an ALB. Defaults to 'gateway-internal' when unset",
+      "required": false
+    },
+    {
+      "name": "additional_public_gateways",
+      "description": "Extra gateways the HTTPRoute of public scopes is also attached to, besides the public gateway. namespace defaults to the gateway namespace. Every gateway must exist in the cluster",
+      "required": false
+    },
+    {
+      "name": "additional_private_gateways",
+      "description": "Extra gateways the HTTPRoute of private scopes is also attached to, besides the private gateway. namespace defaults to the gateway namespace. Every gateway must exist in the cluster",
       "required": false
     },
     {
@@ -255,6 +285,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "87b380a7c30e77737cb5b92c2cf7029c"
+  "hash": "5a806e353473eefb75e5516c1e591522"
 }
 END_AI_METADATA -->
