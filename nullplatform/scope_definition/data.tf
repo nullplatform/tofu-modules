@@ -65,7 +65,7 @@ data "external" "service_spec" {
     template_b64="${base64encode(local.service_spec_template)}"
     processed_json=$(echo "$template_b64" | base64 -d | \
     NRN='${var.nrn}' ${local.template_env_assignments}\
-    gomplate)
+    gomplate) || exit 1
     printf '%s\n' "$processed_json" | jq -c '{json: tojson}'
   EOT
   ]
@@ -90,7 +90,7 @@ data "external" "scope_type" {
     processed_json=$(echo "$template_b64" | base64 -d | \
     NRN='${local.dependent_env_vars.NRN}' ${local.template_env_assignments}\
     SERVICE_SPECIFICATION_ID='${local.dependent_env_vars.SERVICE_SPECIFICATION_ID}' \
-    gomplate)
+    gomplate) || exit 1
     printf '%s\n' "$processed_json" | jq -c '{json: tojson}'
   EOT
   ]
@@ -115,7 +115,7 @@ data "external" "action_specs" {
     SERVICE_SLUG='${local.dependent_env_vars.SERVICE_SLUG}' \
     SERVICE_PATH='${local.dependent_env_vars.SERVICE_PATH}' \
     REPO_PATH='${local.dependent_env_vars.REPO_PATH}' \
-    gomplate)
+    gomplate) || exit 1
     printf '%s\n' "$processed_json" | jq -c '{json_b64: (tojson | @base64)}'
   EOT
   ]
