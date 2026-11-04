@@ -25,3 +25,18 @@ resource "nullplatform_package_installation" "this" {
   default_revision_id = data.nullplatform_package.this.revision_id
   visible_to          = var.visible_to
 }
+
+################################################################################
+# Specification
+#
+# A service or scope package pins one specification. It belongs to the
+# publisher and is readable at nrn only once the installation covers it. The
+# id references the installation id instead of a depends_on: the id is unknown
+# only while the installation is being created, so later plans (a version
+# upgrade) read the specification at plan time.
+################################################################################
+data "nullplatform_service_specification" "this" {
+  count = length(local.specification_ids) == 1 ? 1 : 0
+
+  id = nullplatform_package_installation.this.id != "" ? one(local.specification_ids) : one(local.specification_ids)
+}

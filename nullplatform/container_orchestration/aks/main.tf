@@ -8,12 +8,22 @@ locals {
     var.authentication_mode != "" ? { authentication_mode = var.authentication_mode } : {},
   )
 
+  additional_gateways = merge(
+    length(var.additional_public_gateways) > 0 ? {
+      additional_public_gateways = [for gateway in var.additional_public_gateways : { for k, v in gateway : k => v if v != null }]
+    } : {},
+    length(var.additional_private_gateways) > 0 ? {
+      additional_private_gateways = [for gateway in var.additional_private_gateways : { for k, v in gateway : k => v if v != null }]
+    } : {},
+  )
+
   gateway = merge(
     {
       namespace   = var.gateway_namespace
       public_name = var.public_gateway_name
     },
     var.private_gateway_name != "" ? { private_name = var.private_gateway_name } : {},
+    local.additional_gateways,
   )
 
   resource_management = { for k, v in {

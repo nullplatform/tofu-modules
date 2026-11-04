@@ -4,3 +4,7 @@ tags_selectors = { environment = "production" }
 
 # Optional: override only if the agent entrypoint differs from the default.
 # script_path = "nullplatform/parameters/parameters/entrypoint"
+
+# Optional: run the provider as a worker in its own pod instead of inside the
+# agent. The agent must pin package "parameters" to the worker image.
+# worker_orchestrator = true

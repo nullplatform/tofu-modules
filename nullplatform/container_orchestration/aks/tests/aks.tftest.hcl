@@ -41,6 +41,19 @@ run "attributes_contain_cluster" {
   }
 }
 
+run "namespace_accepts_a_pattern" {
+  command = plan
+
+  variables {
+    namespace_application_default = "{.namespace.slug}"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.aks_config.attributes).cluster.namespace == "{.namespace.slug}"
+    error_message = "cluster.namespace should carry the pattern as is, for the scope to render it"
+  }
+}
+
 run "attributes_contain_gateway" {
   command = plan
 
@@ -460,4 +473,129 @@ run "naming_rejects_too_long_scope_pattern" {
   }
 
   expect_failures = [var.naming_scope_pattern]
+}
+
+run "additional_gateways_absent_by_default" {
+  command = plan
+
+  assert {
+    condition     = !contains(keys(try(jsondecode(nullplatform_provider_config.aks_config.attributes).gateway, {})), "additional_public_gateways")
+    error_message = "gateway should not carry additional_public_gateways when not set"
+  }
+
+  assert {
+    condition     = !contains(keys(try(jsondecode(nullplatform_provider_config.aks_config.attributes).gateway, {})), "additional_private_gateways")
+    error_message = "gateway should not carry additional_private_gateways when not set"
+  }
+}
+
+run "additional_public_gateways_omit_unset_namespace" {
+  command = plan
+
+  variables {
+    additional_public_gateways = [
+      { name = "edge", namespace = "istio-edge" },
+      { name = "public-gateway-eu" },
+    ]
+  }
+
+  assert {
+    condition = jsondecode(nullplatform_provider_config.aks_config.attributes).gateway.additional_public_gateways == [
+      { name = "edge", namespace = "istio-edge" },
+      { name = "public-gateway-eu" },
+    ]
+    error_message = "additional_public_gateways should keep each entry and drop the namespace that was not set"
+  }
+
+  assert {
+    condition     = !contains(keys(jsondecode(nullplatform_provider_config.aks_config.attributes).gateway), "additional_private_gateways")
+    error_message = "additional_private_gateways should stay out when only the public list is set"
+  }
+}
+
+run "additional_private_gateways" {
+  command = plan
+
+  variables {
+    additional_private_gateways = [
+      { name = "internal.edge", namespace = "istio-internal" },
+    ]
+  }
+
+  assert {
+    condition = jsondecode(nullplatform_provider_config.aks_config.attributes).gateway.additional_private_gateways == [
+      { name = "internal.edge", namespace = "istio-internal" },
+    ]
+    error_message = "additional_private_gateways should reach the provider config"
+  }
+}
+
+run "additional_gateways_reject_invalid_name" {
+  command = plan
+
+  variables {
+    additional_public_gateways = [{ name = "Edge_Gateway" }]
+  }
+
+  expect_failures = [var.additional_public_gateways]
+}
+
+run "additional_gateways_reject_invalid_namespace" {
+  command = plan
+
+  variables {
+    additional_private_gateways = [{ name = "edge", namespace = "istio.edge" }]
+  }
+
+  expect_failures = [var.additional_private_gateways]
+}
+
+run "main_gateway_names_accept_dns_subdomains" {
+  command = plan
+
+  variables {
+    gateway_namespace    = "istio-ingress"
+    public_gateway_name  = "public.edge"
+    private_gateway_name = "0-internal"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.aks_config.attributes).gateway.public_name == "public.edge"
+    error_message = "a dotted public gateway name should be accepted, as it is for additional gateways"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.aks_config.attributes).gateway.private_name == "0-internal"
+    error_message = "a private gateway name starting with a digit should be accepted"
+  }
+}
+
+run "main_gateway_rejects_uppercase_public_name" {
+  command = plan
+
+  variables {
+    public_gateway_name = "Public-Gateway"
+  }
+
+  expect_failures = [var.public_gateway_name]
+}
+
+run "main_gateway_rejects_invalid_private_name" {
+  command = plan
+
+  variables {
+    private_gateway_name = "private_gateway"
+  }
+
+  expect_failures = [var.private_gateway_name]
+}
+
+run "main_gateway_rejects_dotted_namespace" {
+  command = plan
+
+  variables {
+    gateway_namespace = "istio.ingress"
+  }
+
+  expect_failures = [var.gateway_namespace]
 }

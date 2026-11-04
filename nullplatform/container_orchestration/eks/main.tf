@@ -17,6 +17,24 @@ locals {
     length(var.additional_private_balancer_names) > 0 ? { additional_private_names = var.additional_private_balancer_names } : {},
   )
 
+  additional_gateways = merge(
+    length(var.additional_public_gateways) > 0 ? {
+      additional_public_gateways = [for gateway in var.additional_public_gateways : { for k, v in gateway : k => v if v != null }]
+    } : {},
+    length(var.additional_private_gateways) > 0 ? {
+      additional_private_gateways = [for gateway in var.additional_private_gateways : { for k, v in gateway : k => v if v != null }]
+    } : {},
+  )
+
+  gateway = merge(
+    { for k, v in {
+      namespace    = var.gateway_namespace
+      public_name  = var.public_gateway_name
+      private_name = var.private_gateway_name
+    } : k => v if v != "" },
+    local.additional_gateways,
+  )
+
   network = { for k, v in {
     balancer_group_suffix = var.balancer_group_suffix
   } : k => v if v != "" }
@@ -49,6 +67,7 @@ locals {
       cluster = local.cluster
     },
     length(local.balancer) > 0 ? { balancer = local.balancer } : {},
+    length(local.gateway) > 0 ? { gateway = local.gateway } : {},
     length(local.network) > 0 ? { network = local.network } : {},
     length(local.resource_management) > 0 ? { resource_management = local.resource_management } : {},
     length(local.security) > 0 ? { security = local.security } : {},

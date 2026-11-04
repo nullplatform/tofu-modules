@@ -311,5 +311,7 @@ locals {
     node_selector          = var.node_selector
     tolerations            = var.tolerations
     resources              = local.agent_resources
+    replicas               = var.replicas
+    affinity               = var.affinity
   })
 }

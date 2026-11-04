@@ -7,6 +7,50 @@
 
 * **external_dns:** support public and private DNS on Azure with ExternalDNS: `label_filter` now applies to the `azure` and `azure-private-dns` providers, and the new `gateway_name` limits route sources to one Gateway, so a public instance keeps internal scopes out of the public zone while an `azure-private-dns` instance publishes them in the Private DNS zone (split-horizon)
 
+## [9.11.1](https://github.com/nullplatform/tofu-modules/compare/v9.11.0...v9.11.1) (2026-11-03)
+
+
+### Bug Fixes
+
+* check out files with LF line endings on every platform ([#665](https://github.com/nullplatform/tofu-modules/issues/665)) ([ce98923](https://github.com/nullplatform/tofu-modules/commit/ce98923e3c220a9fea2887d374a106eb510aeece))
+
+## [9.11.0](https://github.com/nullplatform/tofu-modules/compare/v9.10.0...v9.11.0) (2026-11-03)
+
+
+### Features
+
+* **parameters:** run the parameters provider as a worker (package-exec) ([#660](https://github.com/nullplatform/tofu-modules/issues/660)) ([bdc7162](https://github.com/nullplatform/tofu-modules/commit/bdc71624e5eeaff0a98d1de80b3662d46b52edae))
+
+## [9.10.0](https://github.com/nullplatform/tofu-modules/compare/v9.9.0...v9.10.0) (2026-11-02)
+
+
+### Features
+
+* **container_orchestration:** publish scope routes on additional gateways ([#666](https://github.com/nullplatform/tofu-modules/issues/666)) ([ab47292](https://github.com/nullplatform/tofu-modules/commit/ab47292b346571728ebd1c29be39b95aa1739113))
+
+## [9.9.0](https://github.com/nullplatform/tofu-modules/compare/v9.8.0...v9.9.0) (2026-10-30)
+
+
+### Features
+
+* **package-installation:** layered installs and a drop-in for scope_definition ([#662](https://github.com/nullplatform/tofu-modules/issues/662)) ([fa5230b](https://github.com/nullplatform/tofu-modules/commit/fa5230b6617d426383b0775049e336de05148a1f))
+
+## [9.8.0](https://github.com/nullplatform/tofu-modules/compare/v9.7.0...v9.8.0) (2026-10-29)
+
+
+### Features
+
+* **agent:** add replicas and affinity variables ([#658](https://github.com/nullplatform/tofu-modules/issues/658)) ([a1fd490](https://github.com/nullplatform/tofu-modules/commit/a1fd490e3467aff43637881bc495a0c510ca96d9))
+
+## [9.7.0](https://github.com/nullplatform/tofu-modules/compare/v9.6.0...v9.7.0) (2026-10-29)
+
+
+### Features
+
+* **packages:** add package installation modules ([#651](https://github.com/nullplatform/tofu-modules/issues/651)) ([cc219fe](https://github.com/nullplatform/tofu-modules/commit/cc219fe6955083e283d1a991c3c8300fd41a6c68))
+* **scope_definition:** let a published package skip the scope type and NRN settings ([315f35b](https://github.com/nullplatform/tofu-modules/commit/315f35ba951fc6f505aeb3311da339b1c7634f1a))
+* **scope_definition:** require np_api_key only to write the NRN settings ([c681cbc](https://github.com/nullplatform/tofu-modules/commit/c681cbcaa5dd04dd166708fdf69df8fc60371786))
+
 ## [9.6.0](https://github.com/nullplatform/tofu-modules/compare/v9.5.0...v9.6.0) (2026-10-27)
 
 

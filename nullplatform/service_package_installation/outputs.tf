@@ -13,6 +13,16 @@ output "missing_optional_requirements" {
   value       = module.installation.missing_optional_requirements
 }
 
+output "service_specification_id" {
+  description = "ID of the package's service specification."
+  value       = module.installation.service_specification_id
+}
+
+output "service_specification_slug" {
+  description = "Slug of the package's service specification."
+  value       = module.installation.service_specification_slug
+}
+
 output "notification_channel_id" {
   description = "ID of the agent notification channel."
   value       = module.agent_channel.id

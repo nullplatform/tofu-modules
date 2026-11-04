@@ -357,6 +357,28 @@ variable "tolerations" {
   }
 }
 
+variable "replicas" {
+  description = "Number of agent replicas, rendered as the chart's replicaCount, which the chart ignores when its autoscaling is enabled. Null (the default) renders nothing and the chart keeps its own replica count."
+  type        = number
+  default     = null
+
+  validation {
+    condition     = var.replicas == null ? true : var.replicas >= 1 && floor(var.replicas) == var.replicas
+    error_message = "replicas must be a whole number greater than or equal to 1."
+  }
+}
+
+variable "affinity" {
+  description = "Affinity for the agent pod, rendered as-is under the chart's affinity, e.g. a podAntiAffinity on kubernetes.io/hostname to run one agent per node. A required anti-affinity leaves a replica Pending when no node is free for it. Null (the default) renders nothing."
+  type        = any
+  default     = null
+
+  validation {
+    condition     = var.affinity == null || can(keys(var.affinity))
+    error_message = "affinity must be an object (nodeAffinity, podAffinity, podAntiAffinity)."
+  }
+}
+
 variable "image_repository" {
   description = "Container image repository for the agent. Defaults to the official nullplatform image."
   type        = string
