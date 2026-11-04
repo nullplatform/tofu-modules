@@ -1,7 +1,8 @@
 mock_provider "helm" {}
 
 variables {
-  cert_manager_version = "v1.21.1"
+  cert_manager_version        = "v1.21.1"
+  cert_manager_config_version = "2.35.0"
 }
 
 # Validates invalid cloud_provider is rejected

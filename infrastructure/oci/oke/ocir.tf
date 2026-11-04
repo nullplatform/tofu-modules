@@ -9,9 +9,6 @@
 # https://github.com/oracle-devrel/oke-credential-provider-for-ocir
 
 locals {
-  # Validate tenancy_id is provided when enable_ocir_pull is true
-  validate_tenancy_id = var.enable_ocir_pull && var.tenancy_id == null ? tobool("tenancy_id is required when enable_ocir_pull is true") : true
-
   # Build policy statements for workload identity (pods)
   ocir_workload_policy_statements = var.enable_ocir_pull ? (
     length(var.ocir_pull_namespaces) > 0
@@ -95,6 +92,12 @@ resource "oci_identity_policy" "ocir_workload_identity" {
 
   lifecycle {
     ignore_changes = [defined_tags, freeform_tags]
+
+    # Was a local that nothing referenced, so tofu never evaluated it and the check never ran.
+    precondition {
+      condition     = var.tenancy_id != null
+      error_message = "tenancy_id is required when enable_ocir_pull is true."
+    }
   }
 }
 
@@ -109,6 +112,12 @@ resource "oci_identity_dynamic_group" "ocir_nodes" {
 
   lifecycle {
     ignore_changes = [defined_tags, freeform_tags]
+
+    # Was a local that nothing referenced, so tofu never evaluated it and the check never ran.
+    precondition {
+      condition     = var.tenancy_id != null
+      error_message = "tenancy_id is required when enable_ocir_pull is true."
+    }
   }
 }
 
@@ -125,5 +134,11 @@ resource "oci_identity_policy" "ocir_nodes" {
 
   lifecycle {
     ignore_changes = [defined_tags, freeform_tags]
+
+    # Was a local that nothing referenced, so tofu never evaluated it and the check never ran.
+    precondition {
+      condition     = var.tenancy_id != null
+      error_message = "tenancy_id is required when enable_ocir_pull is true."
+    }
   }
 }
