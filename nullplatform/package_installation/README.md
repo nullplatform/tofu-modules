@@ -73,7 +73,6 @@ resource "example_resource" "this" {
 | <a name="output_components"></a> [components](#output\_components) | Bill of materials of the installed revision. How the installing organization finds the resources of a package it does not own. |
 | <a name="output_installation_id"></a> [installation\_id](#output\_installation\_id) | ID of the package installation. |
 | <a name="output_installed_version"></a> [installed\_version](#output\_installed\_version) | Semver of the installed package revision. |
-| <a name="output_missing_optional_requirements"></a> [missing\_optional\_requirements](#output\_missing\_optional\_requirements) | Optional providers the package can use that were not configured at nrn or above it when it was installed. |
 | <a name="output_package_default_version"></a> [package\_default\_version](#output\_package\_default\_version) | Same as installed\_version: the version new services and scopes are born with. |
 | <a name="output_package_id"></a> [package\_id](#output\_package\_id) | ID of the installed package. |
 | <a name="output_revision_id"></a> [revision\_id](#output\_revision\_id) | ID of the installed package revision: the one new services and scopes are born with. |
@@ -122,7 +121,6 @@ resource "example_resource" "this" {
     "package_id",
     "revision_id",
     "installed_version",
-    "missing_optional_requirements",
     "components",
     "service_specification_ids",
     "service_specification_id",
