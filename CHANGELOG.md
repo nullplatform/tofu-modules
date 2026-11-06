@@ -3,6 +3,10 @@
 ## Unreleased
 
 
+### Features
+
+* **packages:** `scope_definition` takes `service_spec_slug`, and `service_definition` takes `service_slug` and `link_slugs`, to publish a specification under a plain name with a namespaced slug ("AWS Lambda" as `np-aws-lambda`), so a specification published for every organization can live next to the copies organizations already run under the derived slug. Omitted, the platform keeps deriving the slug from the name. Requires provider >= 0.0.113
+
 ### Bug Fixes
 
 * **packages:** drop `package.requires_providers` from `scope_definition` and `service_definition`, and the `missing_optional_requirements` output from `package_installation`, `scope_package_installation` and `service_package_installation`: the platform never accepted the declaration and provider 0.0.112 removed both, so a `tofu init -upgrade` under the `>= 0.0.110` pin failed to validate. The modules now require provider >= 0.0.112

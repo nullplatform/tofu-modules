@@ -93,6 +93,29 @@ variable "service_spec_name" {
   default     = "Containers"
 }
 
+variable "service_spec_slug" {
+  description = <<-EOT
+    Slug of the service specification. Null (the default) lets the platform
+    derive it from `service_spec_name`, as it always did. Give one to keep a
+    namespaced identifier under a plain name: a scope published for every
+    organization ("AWS Lambda") lives next to the copies organizations already
+    run under the derived slug only if its own slug differs (`np-aws-lambda`);
+    channels filter by the specification slug and the agent resolves the
+    package worker by slug, so equal slugs double-route. The package the
+    module publishes takes this slug too unless `package.slug` says otherwise.
+    Lowercase letters and digits joined by single dashes; it never changes
+    afterwards, so changing it replaces the specification. Requires provider
+    >= 0.0.113.
+  EOT
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.service_spec_slug == null || can(regex("^[a-z0-9]+(?:-[a-z0-9]+)*$", var.service_spec_slug))
+    error_message = "A slug is lowercase letters and digits joined by single dashes, exactly what the platform derives from a name."
+  }
+}
+
 variable "service_spec_description" {
   description = "Description of the created service or associated scope type"
   type        = string
