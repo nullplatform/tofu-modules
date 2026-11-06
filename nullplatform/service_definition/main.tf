@@ -1,5 +1,6 @@
 resource "nullplatform_service_specification" "from_template" {
   name                = var.service_name
+  slug                = var.service_slug # null: derived from the name by the platform
   visible_to          = local.visible_to_nrns
   type                = local.service_spec_parsed.type
   attributes          = jsonencode(local.service_spec_parsed.attributes)
@@ -33,6 +34,7 @@ resource "nullplatform_link_specification" "from_templates" {
   depends_on = [nullplatform_service_specification.from_template]
 
   name                = local.link_specs_parsed[each.key].name
+  slug                = lookup(var.link_slugs, each.key, null) # null: derived from the template's name
   unique              = try(local.link_specs_parsed[each.key].unique, false)
   specification_id    = local.service_specification_id
   attributes          = jsonencode(local.link_specs_parsed[each.key].attributes)
