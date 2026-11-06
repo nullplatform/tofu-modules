@@ -44,9 +44,9 @@ variable "private_gateway_name" {
 }
 
 variable "naming_strategy" {
-  description = "How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'ids' when unset"
+  description = "How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'qualified'"
   type        = string
-  default     = ""
+  default     = "qualified"
   validation {
     condition     = contains(["", "ids", "qualified", "custom"], var.naming_strategy)
     error_message = "naming_strategy must be one of: ids, qualified, custom."
