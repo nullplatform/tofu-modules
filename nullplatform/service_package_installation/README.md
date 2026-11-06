@@ -74,7 +74,6 @@ resource "example_resource" "this" {
 |------|-------------|
 | <a name="output_installation_id"></a> [installation\_id](#output\_installation\_id) | ID of the package installation. |
 | <a name="output_installed_version"></a> [installed\_version](#output\_installed\_version) | Version new services are born with. |
-| <a name="output_missing_optional_requirements"></a> [missing\_optional\_requirements](#output\_missing\_optional\_requirements) | Optional providers the package can use that were not configured at nrn or above it when it was installed. |
 | <a name="output_notification_channel_id"></a> [notification\_channel\_id](#output\_notification\_channel\_id) | ID of the agent notification channel. |
 | <a name="output_service_specification_id"></a> [service\_specification\_id](#output\_service\_specification\_id) | ID of the package's service specification. |
 | <a name="output_service_specification_slug"></a> [service\_specification\_slug](#output\_service\_specification\_slug) | Slug of the package's service specification. |
@@ -144,7 +143,6 @@ resource "example_resource" "this" {
   "outputs": [
     "installation_id",
     "installed_version",
-    "missing_optional_requirements",
     "service_specification_id",
     "service_specification_slug",
     "notification_channel_id"

@@ -45,29 +45,6 @@ run "templates_are_read_from_disk" {
   }
 }
 
-run "package_declares_its_required_providers" {
-  command = plan
-
-  variables {
-    package = {
-      version = "1.0.0"
-      requires_providers = [
-        { category = "scope-configurations" },
-        { category = "metrics", optional = true },
-      ]
-      artifacts = [{ resource_id = "artifact-1", resource_revision_id = "revision-1" }]
-    }
-  }
-
-  assert {
-    condition = [for r in nullplatform_package.this[0].requires_provider : [r.category, r.optional]] == [
-      ["scope-configurations", false],
-      ["metrics", true],
-    ]
-    error_message = "requires_providers should become the package's requires_provider blocks, in order."
-  }
-}
-
 run "a_published_package_creates_only_what_it_pins" {
   command = plan
 
