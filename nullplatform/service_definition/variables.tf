@@ -62,6 +62,28 @@ variable "service_name" {
   description = "Name of the scope type to be created"
 }
 
+variable "service_slug" {
+  type        = string
+  default     = null
+  description = "Slug of the service specification. Null (the default) lets the platform derive it from `service_name`, as it always did. Give one to keep a namespaced identifier under a plain name: a service published for every organization (\"AWS S3 Bucket\") lives next to the copies organizations already run under the derived slug only if its own slug differs (`np-aws-s3-bucket`); channels filter by the specification slug and the agent resolves the package worker by slug. The package the module publishes takes this slug too unless `package.slug` says otherwise. Lowercase letters and digits joined by single dashes; it never changes afterwards, so changing it replaces the specification. Requires provider >= 0.0.113."
+
+  validation {
+    condition     = var.service_slug == null || can(regex("^[a-z0-9]+(?:-[a-z0-9]+)*$", var.service_slug))
+    error_message = "A slug is lowercase letters and digits joined by single dashes, exactly what the platform derives from a name."
+  }
+}
+
+variable "link_slugs" {
+  type        = map(string)
+  default     = {}
+  description = "Slug per link specification, keyed by the link template name (`available_links`). A link not listed derives its slug from its template's name, as it always did. Same shape and rules as `service_slug`. Requires provider >= 0.0.113."
+
+  validation {
+    condition     = alltrue([for slug in values(var.link_slugs) : can(regex("^[a-z0-9]+(?:-[a-z0-9]+)*$", slug))])
+    error_message = "A slug is lowercase letters and digits joined by single dashes, exactly what the platform derives from a name."
+  }
+}
+
 variable "available_actions" {
   type        = list(string)
   default     = []
