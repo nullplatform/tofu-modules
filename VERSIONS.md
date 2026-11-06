@@ -14,22 +14,22 @@ a specific release, so an upgrade is something someone decides.
 
 ## What to pin
 
-Verified 2026-11-03.
+Verified 2026-11-06.
 
 | Component | Current | Variable | Module |
 | --- | --- | --- | --- |
-| `nullplatform-base` chart | `2.44.7` | `nullplatform_base_helm_version` | `nullplatform/base` |
+| `nullplatform-base` chart | `2.44.8` | `nullplatform_base_helm_version` | `nullplatform/base` |
 | `nullplatform-agent` chart | `3.5.0` | `nullplatform_agent_helm_version` | `nullplatform/agent` |
 | `cert-manager` chart | `v1.21.3` | `cert_manager_version` | `infrastructure/commons/cert_manager` |
-| `prometheus` chart | `29.40.3` | `prometheus_version` | `infrastructure/commons/prometheus` |
+| `prometheus` chart | `29.44.0` | `prometheus_version` | `infrastructure/commons/prometheus` |
 | `istio-base` chart | `1.30.7` | `istio_base_version` | `infrastructure/commons/istio` |
 | `istiod` chart | `1.30.7` | `istiod_version` | `infrastructure/commons/istio` |
 | `gateway-api` CRDs | `v1.5.1` | `gateway_api_crd_ref` | `nullplatform/base` |
 | `k8s-logs-controller` | `v1.7.1` | `logging_controller_image_tag` | `nullplatform/base` |
-| `controlplane-agent` | `0.15.0` | `image_tag` | `nullplatform/agent` |
+| `controlplane-agent` | `0.15.1` | `image_tag` | `nullplatform/agent` |
 | `k8s-traffic-manager` | `v1.9.0` | `agent_traffic_manager_tag` | `nullplatform/agent` |
 | traffic manager (provider config) | `v1.9.0` | `traffic_manager_version` | `container_orchestration/eks` |
-| `scopes` repository | `v1.19.0` | `agent_repo` (as `"https://github.com/nullplatform/scopes.git#v1.19.0"`; only without packages) | `nullplatform/agent` |
+| `scopes` repository | `v1.20.0` | `agent_repo` (as `"https://github.com/nullplatform/scopes.git#v1.20.0"`; only without packages) | `nullplatform/agent` |
 | `scopes-lambda` repository | `v0.12.2` | `agent_repo` (as `"https://github.com/nullplatform/scopes-lambda.git#v0.12.2"`; only without packages) | `nullplatform/agent` |
 | `scopes-static-files` repository | `v4.1.4` | `agent_repo` (as `"https://github.com/nullplatform/scopes-static-files.git#v4.1.4"`; only without packages) | `nullplatform/agent` |
 | `external-dns` chart | `1.23.0` | `external_dns_version` | `infrastructure/commons/external_dns` |
@@ -52,21 +52,21 @@ at deploy time, so what you run may not match the table: `cert_manager_version`,
 
 ```hcl
 module "base" {
-  nullplatform_base_helm_version = "2.44.7"
+  nullplatform_base_helm_version = "2.44.8"
   logging_controller_image_tag   = "v1.7.1"
   gateway_api_crd_ref            = "v1.5.1"
 }
 
 module "agent" {
   nullplatform_agent_helm_version = "3.5.0"
-  image_tag                       = "0.15.0"
+  image_tag                       = "0.15.1"
   agent_traffic_manager_tag       = "v1.9.0"
 
   # Only for an install without packages (worker_orchestrator = false, the legacy
   # exec flow): the agent clones these repositories at startup. With packages the
   # scopes and services come from each package, so leave agent_repo unset.
   # agent_repo = [
-  #   "https://github.com/nullplatform/scopes.git#v1.19.0",
+  #   "https://github.com/nullplatform/scopes.git#v1.20.0",
   #   "https://github.com/nullplatform/scopes-lambda.git#v0.12.2",
   #   "https://github.com/nullplatform/scopes-static-files.git#v4.1.4",
   # ]
@@ -105,7 +105,7 @@ module "aws_load_balancer_controller" {
 }
 
 module "prometheus" {
-  prometheus_version = "29.40.3"
+  prometheus_version = "29.44.0"
 }
 
 module "istio" {

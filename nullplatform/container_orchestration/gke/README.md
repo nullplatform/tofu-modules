@@ -2,27 +2,27 @@
 
 ## Description
 
-Configures a GKE provider configuration in Nullplatform by creating a nullplatform_provider_config resource with cluster, gateway, traffic manager, and naming settings
+Configures a GKE cluster provider in Nullplatform by creating a nullplatform_provider_config resource with gateway, traffic manager, resource management, security, and naming settings
 
 ## Architecture
 
-The module constructs a single nullplatform_provider_config resource of type 'gke-configuration' by merging multiple local maps (gateway, resource_management, security, naming) into a JSON-encoded attributes payload. Input variables for cluster identity (cluster_name, location), gateway routing (public_gateway_name, private_gateway_name, additional_public_gateways, additional_private_gateways), traffic manager versioning, and Kubernetes naming strategy are composed into nested locals before being serialized via jsonencode. The nullplatform_provider_config resource binds all configuration to the target NRN scope using the nrn and dimensions inputs, enabling Nullplatform to manage GKE workload deployments against the described cluster.
+The module constructs a set of locals that merge gateway configuration (public/private gateway names, namespace, additional gateways), resource management ratios, security settings (image pull secrets, service account), and naming strategy into a single attributes map. This map is JSON-encoded and passed to a single nullplatform_provider_config resource of type 'gke-configuration', scoped by the NRN and optional dimensions. Input variables flow through conditional locals that strip empty strings and null values before encoding, ensuring only explicitly set options appear in the final provider configuration payload.
 
 ## Features
 
-- Creates a nullplatform_provider_config resource encoding GKE cluster identity and location for Nullplatform workload management
-- Configures public and private Kubernetes Gateway API gateway references with optional namespace and additional gateway attachments
-- Pins traffic manager sidecar container to an explicit version tag, rejecting moving references like 'latest', 'main', or 'master'
-- Supports flexible Kubernetes object naming strategies including id-based, slug-qualified, and fully custom pattern modes
-- Configures resource management tuning parameters including memory-to-CPU ratio, request-to-limit ratios, and max milicores limits
-- Manages image pull secrets and Kubernetes service account bindings for secure private container image access
-- Applies dynamic Kubernetes object modifiers for post-render patching of cluster resources
+- Creates a nullplatform_provider_config resource of type 'gke-configuration' linking a GKE cluster to Nullplatform
+- Configures public and private Kubernetes Gateway API gateway references with optional namespace override
+- Supports additional public and private gateways for multi-gateway HTTPRoute attachment
+- Pins the traffic manager sidecar container to an explicit version tag, rejecting moving references like 'latest'
+- Configures resource management ratios (memory/CPU ratio, request-to-limit ratio, max cores multiplier, max milicores)
+- Supports custom Kubernetes object naming strategies (ids, qualified, or custom patterns for deployments and scopes)
+- Configures security context with image pull secrets and a dedicated Kubernetes service account for deployments
 
 ## Basic Usage
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v9.11.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v9.11.2"
 
   cluster_name            = "your-cluster-name"
   location                = "your-location"
@@ -75,7 +75,7 @@ resource "example_resource" "this" {
 | <a name="input_max_milicores"></a> [max\_milicores](#input\_max\_milicores) | Sets the maximum amount of CPU mili cores a pod can use | `string` | `""` | no |
 | <a name="input_memory_cpu_ratio"></a> [memory\_cpu\_ratio](#input\_memory\_cpu\_ratio) | Amount of MiB of ram per CPU. Default value is 2048, it means 1 core for every 2 GiB of RAM | `string` | `""` | no |
 | <a name="input_memory_request_to_limit_ratio"></a> [memory\_request\_to\_limit\_ratio](#input\_memory\_request\_to\_limit\_ratio) | Sets the ratio between requested and limit memory. Default value is 1, must be a number greater than or equal to 1 | `string` | `""` | no |
-| <a name="input_namespace_application_default"></a> [namespace\_application\_default](#input\_namespace\_application\_default) | Default Kubernetes namespace for applications | `string` | `"nullplatform"` | no |
+| <a name="input_namespace_application_default"></a> [namespace\_application\_default](#input\_namespace\_application\_default) | Default Kubernetes namespace for applications. Accepts a pattern the k8s scope renders per scope, e.g. {.namespace.slug} for one Kubernetes namespace per nullplatform namespace | `string` | `"nullplatform"` | no |
 | <a name="input_naming_deployment_pattern"></a> [naming\_deployment\_pattern](#input\_naming\_deployment\_pattern) | Name pattern for the objects a deployment creates (Deployment, Service, HPA, Secret, PodDisruptionBudget), e.g. {.application.slug}-{.scope.slug}-{.deployment.id}. Read only when naming\_strategy is 'custom' | `string` | `""` | no |
 | <a name="input_naming_scope_pattern"></a> [naming\_scope\_pattern](#input\_naming\_scope\_pattern) | Name pattern for the objects that outlive a deployment (Ingress, HTTPRoute, serving certificate), e.g. {.application.slug}-{.scope.slug}-{.scope.id}. Read only when naming\_strategy is 'custom'. Only applies to scopes created after the change | `string` | `""` | no |
 | <a name="input_naming_strategy"></a> [naming\_strategy](#input\_naming\_strategy) | How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'ids' when unset | `string` | `""` | no |
@@ -90,16 +90,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "gke",
-  "description": "Configures a GKE provider configuration in Nullplatform by creating a nullplatform_provider_config resource with cluster, gateway, traffic manager, and naming settings",
-  "architecture": "The module constructs a single nullplatform_provider_config resource of type 'gke-configuration' by merging multiple local maps (gateway, resource_management, security, naming) into a JSON-encoded attributes payload. Input variables for cluster identity (cluster_name, location), gateway routing (public_gateway_name, private_gateway_name, additional_public_gateways, additional_private_gateways), traffic manager versioning, and Kubernetes naming strategy are composed into nested locals before being serialized via jsonencode. The nullplatform_provider_config resource binds all configuration to the target NRN scope using the nrn and dimensions inputs, enabling Nullplatform to manage GKE workload deployments against the described cluster.",
+  "description": "Configures a GKE cluster provider in Nullplatform by creating a nullplatform_provider_config resource with gateway, traffic manager, resource management, security, and naming settings",
+  "architecture": "The module constructs a set of locals that merge gateway configuration (public/private gateway names, namespace, additional gateways), resource management ratios, security settings (image pull secrets, service account), and naming strategy into a single attributes map. This map is JSON-encoded and passed to a single nullplatform_provider_config resource of type 'gke-configuration', scoped by the NRN and optional dimensions. Input variables flow through conditional locals that strip empty strings and null values before encoding, ensuring only explicitly set options appear in the final provider configuration payload.",
   "features": [
-    "Creates a nullplatform_provider_config resource encoding GKE cluster identity and location for Nullplatform workload management",
-    "Configures public and private Kubernetes Gateway API gateway references with optional namespace and additional gateway attachments",
-    "Pins traffic manager sidecar container to an explicit version tag, rejecting moving references like 'latest', 'main', or 'master'",
-    "Supports flexible Kubernetes object naming strategies including id-based, slug-qualified, and fully custom pattern modes",
-    "Configures resource management tuning parameters including memory-to-CPU ratio, request-to-limit ratios, and max milicores limits",
-    "Manages image pull secrets and Kubernetes service account bindings for secure private container image access",
-    "Applies dynamic Kubernetes object modifiers for post-render patching of cluster resources"
+    "Creates a nullplatform_provider_config resource of type 'gke-configuration' linking a GKE cluster to Nullplatform",
+    "Configures public and private Kubernetes Gateway API gateway references with optional namespace override",
+    "Supports additional public and private gateways for multi-gateway HTTPRoute attachment",
+    "Pins the traffic manager sidecar container to an explicit version tag, rejecting moving references like 'latest'",
+    "Configures resource management ratios (memory/CPU ratio, request-to-limit ratio, max cores multiplier, max milicores)",
+    "Supports custom Kubernetes object naming strategies (ids, qualified, or custom patterns for deployments and scopes)",
+    "Configures security context with image pull secrets and a dedicated Kubernetes service account for deployments"
   ],
   "inputs": [
     {
@@ -169,7 +169,7 @@ resource "example_resource" "this" {
     },
     {
       "name": "namespace_application_default",
-      "description": "Default Kubernetes namespace for applications",
+      "description": "Default Kubernetes namespace for applications. Accepts a pattern the k8s scope renders per scope, e.g. {.namespace.slug} for one Kubernetes namespace per nullplatform namespace",
       "required": false
     },
     {
@@ -209,6 +209,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "66e67cd1142b230e902c6d701c48748f"
+  "hash": "02ead1ba7cb63c1c958afd8b125b5e48"
 }
 END_AI_METADATA -->
