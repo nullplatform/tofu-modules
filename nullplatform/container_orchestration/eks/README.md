@@ -2,21 +2,21 @@
 
 ## Description
 
-Configures a Nullplatform EKS provider configuration resource that registers an Amazon EKS cluster with the Nullplatform control plane, including traffic routing, gateway, naming, and resource management settings
+Configures a Nullplatform EKS provider configuration resource by encoding cluster, load balancer, gateway, networking, resource management, security, traffic manager, and naming settings into a single nullplatform_provider_config resource
 
 ## Architecture
 
-The module builds a structured `local.attributes` map from all input variables, merging cluster identity, ALB/gateway routing configuration, resource management ratios, security settings, traffic manager sidecar configuration, and Kubernetes object naming strategy into a single JSON payload. A single `nullplatform_provider_config` resource of type `eks-configuration` is created, consuming the `nrn`, `dimensions`, and JSON-encoded `attributes` to register the EKS cluster with the Nullplatform API. Optional fields are conditionally included in the attributes map only when non-empty or non-null, preventing unintended overrides of Nullplatform defaults. Outputs surface the created provider config resource for downstream consumption.
+The module constructs a set of locals that merge optional inputs into structured attribute maps, then encodes them as JSON into a single nullplatform_provider_config resource of type 'eks-configuration'. The cluster identity is built from var.cluster_name and optional namespace settings, while balancer, gateway, traffic manager, and naming blocks are conditionally included only when their respective inputs are non-empty or non-null. All attributes flow through jsonencode(local.attributes) into the nullplatform_provider_config.eks_config resource, which is scoped to the target NRN and optional dimensions.
 
 ## Features
 
-- Creates a nullplatform_provider_config resource that registers an EKS cluster with the Nullplatform control plane
-- Configures ALB-based traffic routing with public and private load balancer names, capacity thresholds, and overflow balancers
-- Configures Istio gateway-based routing with public, private, and additional gateway names and namespaces
-- Pins the traffic manager sidecar container to a fixed version tag to prevent unintended runtime upgrades
-- Supports custom Kubernetes object naming strategies including ID-based, qualified slug-based, and fully custom patterns
-- Configures pod resource management via memory-to-CPU ratio, memory request-to-limit ratio, and max milicores
-- Applies dynamic Kubernetes object modifiers to patch manifests at deploy time via the object_modifiers list
+- Creates a nullplatform_provider_config resource that registers EKS cluster configuration with the Nullplatform control plane
+- Configures public and private ALB load balancer names with optional overflow balancers for clusters exceeding the 100-rule limit
+- Configures Istio gateway routing as an alternative to ALB, supporting public, private, and additional gateways with namespace overrides
+- Pins the traffic manager sidecar container to an explicit version tag to prevent uncontrolled image updates on pod restarts
+- Supports flexible Kubernetes object naming strategies including ID-based, slug-qualified, and fully custom pattern templates
+- Applies dynamic Kubernetes object modifiers via a structured list of selector, action, type, and value entries
+- Controls pod resource allocation through configurable memory-to-CPU ratio, request-to-limit ratios, and CPU millicore caps
 
 ## Basic Usage
 
@@ -27,42 +27,6 @@ module "eks" {
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
   traffic_manager_version = "your-traffic-manager-version"
-}
-```
-
-### Usage with Latest Tag (Blocked)
-
-```hcl
-module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.11.1"
-
-  cluster_name            = "your-cluster-name"
-  nrn                     = "your-nrn"
-  traffic_manager_version = "latest"
-}
-```
-
-### Usage with Main Branch Tag (Blocked)
-
-```hcl
-module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.11.1"
-
-  cluster_name            = "your-cluster-name"
-  nrn                     = "your-nrn"
-  traffic_manager_version = "main"
-}
-```
-
-### Usage with Master Branch Tag (Blocked)
-
-```hcl
-module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.11.1"
-
-  cluster_name            = "your-cluster-name"
-  nrn                     = "your-nrn"
-  traffic_manager_version = "master"
 }
 ```
 
@@ -112,7 +76,7 @@ resource "example_resource" "this" {
 | <a name="input_max_milicores"></a> [max\_milicores](#input\_max\_milicores) | Sets the maximum amount of CPU mili cores a pod can use | `string` | `""` | no |
 | <a name="input_memory_cpu_ratio"></a> [memory\_cpu\_ratio](#input\_memory\_cpu\_ratio) | Amount of MiB of ram per CPU. Default value is 2048, it means 1 core for every 2 GiB of RAM | `string` | `""` | no |
 | <a name="input_memory_request_to_limit_ratio"></a> [memory\_request\_to\_limit\_ratio](#input\_memory\_request\_to\_limit\_ratio) | Sets the ratio between requested and limit memory. Default value is 1, must be a number greater than or equal to 1 | `string` | `""` | no |
-| <a name="input_namespace_application_default"></a> [namespace\_application\_default](#input\_namespace\_application\_default) | Default Kubernetes namespace for applications | `string` | `"nullplatform"` | no |
+| <a name="input_namespace_application_default"></a> [namespace\_application\_default](#input\_namespace\_application\_default) | Default Kubernetes namespace for applications. Accepts a pattern the k8s scope renders per scope, e.g. {.namespace.slug} for one Kubernetes namespace per nullplatform namespace | `string` | `"nullplatform"` | no |
 | <a name="input_naming_deployment_pattern"></a> [naming\_deployment\_pattern](#input\_naming\_deployment\_pattern) | Name pattern for the objects a deployment creates (Deployment, Service, HPA, Secret, PodDisruptionBudget), e.g. {.application.slug}-{.scope.slug}-{.deployment.id}. Read only when naming\_strategy is 'custom' | `string` | `""` | no |
 | <a name="input_naming_scope_pattern"></a> [naming\_scope\_pattern](#input\_naming\_scope\_pattern) | Name pattern for the objects that outlive a deployment (Ingress, HTTPRoute, serving certificate), e.g. {.application.slug}-{.scope.slug}-{.scope.id}. Read only when naming\_strategy is 'custom'. Only applies to scopes created after the change | `string` | `""` | no |
 | <a name="input_naming_strategy"></a> [naming\_strategy](#input\_naming\_strategy) | How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'ids' when unset | `string` | `""` | no |
@@ -131,16 +95,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "eks",
-  "description": "Configures a Nullplatform EKS provider configuration resource that registers an Amazon EKS cluster with the Nullplatform control plane, including traffic routing, gateway, naming, and resource management settings",
-  "architecture": "The module builds a structured `local.attributes` map from all input variables, merging cluster identity, ALB/gateway routing configuration, resource management ratios, security settings, traffic manager sidecar configuration, and Kubernetes object naming strategy into a single JSON payload. A single `nullplatform_provider_config` resource of type `eks-configuration` is created, consuming the `nrn`, `dimensions`, and JSON-encoded `attributes` to register the EKS cluster with the Nullplatform API. Optional fields are conditionally included in the attributes map only when non-empty or non-null, preventing unintended overrides of Nullplatform defaults. Outputs surface the created provider config resource for downstream consumption.",
+  "description": "Configures a Nullplatform EKS provider configuration resource by encoding cluster, load balancer, gateway, networking, resource management, security, traffic manager, and naming settings into a single nullplatform_provider_config resource",
+  "architecture": "The module constructs a set of locals that merge optional inputs into structured attribute maps, then encodes them as JSON into a single nullplatform_provider_config resource of type 'eks-configuration'. The cluster identity is built from var.cluster_name and optional namespace settings, while balancer, gateway, traffic manager, and naming blocks are conditionally included only when their respective inputs are non-empty or non-null. All attributes flow through jsonencode(local.attributes) into the nullplatform_provider_config.eks_config resource, which is scoped to the target NRN and optional dimensions.",
   "features": [
-    "Creates a nullplatform_provider_config resource that registers an EKS cluster with the Nullplatform control plane",
-    "Configures ALB-based traffic routing with public and private load balancer names, capacity thresholds, and overflow balancers",
-    "Configures Istio gateway-based routing with public, private, and additional gateway names and namespaces",
-    "Pins the traffic manager sidecar container to a fixed version tag to prevent unintended runtime upgrades",
-    "Supports custom Kubernetes object naming strategies including ID-based, qualified slug-based, and fully custom patterns",
-    "Configures pod resource management via memory-to-CPU ratio, memory request-to-limit ratio, and max milicores",
-    "Applies dynamic Kubernetes object modifiers to patch manifests at deploy time via the object_modifiers list"
+    "Creates a nullplatform_provider_config resource that registers EKS cluster configuration with the Nullplatform control plane",
+    "Configures public and private ALB load balancer names with optional overflow balancers for clusters exceeding the 100-rule limit",
+    "Configures Istio gateway routing as an alternative to ALB, supporting public, private, and additional gateways with namespace overrides",
+    "Pins the traffic manager sidecar container to an explicit version tag to prevent uncontrolled image updates on pod restarts",
+    "Supports flexible Kubernetes object naming strategies including ID-based, slug-qualified, and fully custom pattern templates",
+    "Applies dynamic Kubernetes object modifiers via a structured list of selector, action, type, and value entries",
+    "Controls pod resource allocation through configurable memory-to-CPU ratio, request-to-limit ratios, and CPU millicore caps"
   ],
   "inputs": [
     {
@@ -225,7 +189,7 @@ resource "example_resource" "this" {
     },
     {
       "name": "namespace_application_default",
-      "description": "Default Kubernetes namespace for applications",
+      "description": "Default Kubernetes namespace for applications. Accepts a pattern the k8s scope renders per scope, e.g. {.namespace.slug} for one Kubernetes namespace per nullplatform namespace",
       "required": false
     },
     {
@@ -285,6 +249,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "5a806e353473eefb75e5516c1e591522"
+  "hash": "47b1b3fd573a71e8c4a4d3f0d99bd060"
 }
 END_AI_METADATA -->
