@@ -21,7 +21,7 @@ A `nullplatform_package` data source resolves the exact package revision by look
 
 ```hcl
 module "package_installation" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/package_installation?ref=v9.11.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/package_installation?ref=v9.11.3"
 
   nrn             = "your-nrn"
   package_slug    = "your-package-slug"
