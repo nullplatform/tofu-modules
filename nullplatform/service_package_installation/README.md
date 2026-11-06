@@ -2,27 +2,27 @@
 
 ## Description
 
-Installs a published nullplatform service package at an organization scope and wires an agent notification channel to route the package worker's actions to the installed service specification
+Installs a published nullplatform service package and wires an agent notification channel that routes service actions to the package worker
 
 ## Architecture
 
-The module composes two child modules: `package_installation` creates the package installation resource binding the specified semver revision to the target NRN, and `service_definition_agent_association` creates an agent notification channel that routes package-exec actions to the worker filtered by tag selectors. The agent channel explicitly depends on the installation module so the service specification is reachable before the channel activates. Inputs such as `nrn`, `package_slug`, `package_version`, and `agent_tags_selectors` flow directly into these child modules, while outputs like `installation_id`, `service_specification_id`, and `notification_channel_id` are surfaced from their respective child module outputs.
+The module composes two child modules: `package_installation` creates the package installation resource binding the specified semver to the target organization NRN with visibility controls, and `service_definition_agent_association` creates an agent notification channel that routes package-exec actions to the package worker filtered by agent tag selectors. The agent channel depends on the installation completing first, ensuring the service specification is reachable before routing begins. Outputs surface the installation ID, installed version, service specification identifiers, and the notification channel ID from the respective child modules.
 
 ## Features
 
-- Creates a versioned package installation binding an exact semver revision to a target NRN organization scope
-- Creates an agent notification channel that routes package-exec actions to the package worker via tag-based agent selection
-- Enforces non-empty agent tag selectors to prevent unbounded channel delivery to all agents
-- Configures the agent channel as a worker orchestrator with a customizable entrypoint command
-- Supports scoping service visibility within the installing organization via an optional NRN list
-- Defaults channel notification sources to service and telemetry event types with override support
-- Exposes installation ID, installed version, service specification identifiers, and notification channel ID as outputs
+- Creates a package installation binding an exact semver revision to a nullplatform organization NRN
+- Configures visibility scope for installed services within the installing organization
+- Creates an agent notification channel routing service and telemetry actions to the package worker
+- Enforces agent tag selector filtering so the channel targets only matching worker agents
+- Coalesces service specification slug from package slug when not explicitly provided
+- Supports custom channel entrypoint commands for package worker invocation
+- Outputs installation ID, installed version, service specification metadata, and notification channel ID
 
 ## Basic Usage
 
 ```hcl
 module "service_package_installation" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_package_installation?ref=v9.11.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_package_installation?ref=v9.11.3"
 
   agent_tags_selectors = "your-agent-tags-selectors"
   nrn                  = "your-nrn"
@@ -82,16 +82,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "service_package_installation",
-  "description": "Installs a published nullplatform service package at an organization scope and wires an agent notification channel to route the package worker's actions to the installed service specification",
-  "architecture": "The module composes two child modules: `package_installation` creates the package installation resource binding the specified semver revision to the target NRN, and `service_definition_agent_association` creates an agent notification channel that routes package-exec actions to the worker filtered by tag selectors. The agent channel explicitly depends on the installation module so the service specification is reachable before the channel activates. Inputs such as `nrn`, `package_slug`, `package_version`, and `agent_tags_selectors` flow directly into these child modules, while outputs like `installation_id`, `service_specification_id`, and `notification_channel_id` are surfaced from their respective child module outputs.",
+  "description": "Installs a published nullplatform service package and wires an agent notification channel that routes service actions to the package worker",
+  "architecture": "The module composes two child modules: `package_installation` creates the package installation resource binding the specified semver to the target organization NRN with visibility controls, and `service_definition_agent_association` creates an agent notification channel that routes package-exec actions to the package worker filtered by agent tag selectors. The agent channel depends on the installation completing first, ensuring the service specification is reachable before routing begins. Outputs surface the installation ID, installed version, service specification identifiers, and the notification channel ID from the respective child modules.",
   "features": [
-    "Creates a versioned package installation binding an exact semver revision to a target NRN organization scope",
-    "Creates an agent notification channel that routes package-exec actions to the package worker via tag-based agent selection",
-    "Enforces non-empty agent tag selectors to prevent unbounded channel delivery to all agents",
-    "Configures the agent channel as a worker orchestrator with a customizable entrypoint command",
-    "Supports scoping service visibility within the installing organization via an optional NRN list",
-    "Defaults channel notification sources to service and telemetry event types with override support",
-    "Exposes installation ID, installed version, service specification identifiers, and notification channel ID as outputs"
+    "Creates a package installation binding an exact semver revision to a nullplatform organization NRN",
+    "Configures visibility scope for installed services within the installing organization",
+    "Creates an agent notification channel routing service and telemetry actions to the package worker",
+    "Enforces agent tag selector filtering so the channel targets only matching worker agents",
+    "Coalesces service specification slug from package slug when not explicitly provided",
+    "Supports custom channel entrypoint commands for package worker invocation",
+    "Outputs installation ID, installed version, service specification metadata, and notification channel ID"
   ],
   "inputs": [
     {
@@ -147,6 +147,6 @@ resource "example_resource" "this" {
     "service_specification_slug",
     "notification_channel_id"
   ],
-  "hash": "68d833abf6e90a71324386d282ea361c"
+  "hash": "802dc2ab8d7182c740a74a424edd55bf"
 }
 END_AI_METADATA -->

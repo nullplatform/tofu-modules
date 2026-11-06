@@ -22,8 +22,8 @@ Verified 2026-11-06.
 | `nullplatform-agent` chart | `3.5.0` | `nullplatform_agent_helm_version` | `nullplatform/agent` |
 | `cert-manager` chart | `v1.21.3` | `cert_manager_version` | `infrastructure/commons/cert_manager` |
 | `prometheus` chart | `29.44.0` | `prometheus_version` | `infrastructure/commons/prometheus` |
-| `istio-base` chart | `1.30.7` | `istio_base_version` | `infrastructure/commons/istio` |
-| `istiod` chart | `1.30.7` | `istiod_version` | `infrastructure/commons/istio` |
+| `istio-base` chart | `1.30.8` | `istio_base_version` | `infrastructure/commons/istio` |
+| `istiod` chart | `1.30.8` | `istiod_version` | `infrastructure/commons/istio` |
 | `gateway-api` CRDs | `v1.5.1` | `gateway_api_crd_ref` | `nullplatform/base` |
 | `k8s-logs-controller` | `v1.7.1` | `logging_controller_image_tag` | `nullplatform/base` |
 | `controlplane-agent` | `0.15.1` | `image_tag` | `nullplatform/agent` |
@@ -109,8 +109,8 @@ module "prometheus" {
 }
 
 module "istio" {
-  istio_base_version = "1.30.7"
-  istiod_version     = "1.30.7"
+  istio_base_version = "1.30.8"
+  istiod_version     = "1.30.8"
 }
 
 module "service_definition" {
