@@ -379,6 +379,37 @@ variable "affinity" {
   }
 }
 
+variable "topology_spread_constraints" {
+  description = <<-EOT
+    Topology spread for the agent's replicas (chart >= 3.6.0), rendered as the
+    chart's topologySpreadConstraints values. `{ enabled = true }` spreads the
+    replicas across nodes (kubernetes.io/hostname, ScheduleAnyway); `constraints`
+    replaces that default, and an entry without a labelSelector gets the agent's
+    selector labels. Needs replicas above 1: with a single replica the module and
+    the chart refuse it. Null (the default) renders nothing.
+
+    Example:
+      topology_spread_constraints = {
+        enabled = true
+        constraints = [
+          { maxSkew = 1, topologyKey = "topology.kubernetes.io/zone", whenUnsatisfiable = "DoNotSchedule" },
+        ]
+      }
+  EOT
+  type        = any
+  default     = null
+
+  validation {
+    condition     = var.topology_spread_constraints == null || can(keys(var.topology_spread_constraints))
+    error_message = "topology_spread_constraints must be an object with enabled and, optionally, constraints."
+  }
+
+  validation {
+    condition     = var.topology_spread_constraints == null || try(var.topology_spread_constraints.constraints == null, true) || can([for c in var.topology_spread_constraints.constraints : keys(c)])
+    error_message = "topology_spread_constraints.constraints must be a list of topology spread constraint objects."
+  }
+}
+
 variable "image_repository" {
   description = "Container image repository for the agent. Defaults to the official nullplatform image."
   type        = string

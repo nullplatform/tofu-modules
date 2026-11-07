@@ -313,5 +313,6 @@ locals {
     resources              = local.agent_resources
     replicas               = var.replicas
     affinity               = var.affinity
+    topology_spread        = var.topology_spread_constraints
   })
 }

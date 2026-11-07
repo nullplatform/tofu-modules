@@ -1120,7 +1120,7 @@ run "disruption_settings_are_left_to_the_chart_by_default" {
 
   assert {
     condition = alltrue([
-      for key in ["startupProbe", "podAnnotations", "terminationGracePeriodSeconds", "shutdownDrainTimeoutSeconds", "podDisruptionBudget", "nodeSelector", "tolerations", "replicaCount", "affinity"] :
+      for key in ["startupProbe", "podAnnotations", "terminationGracePeriodSeconds", "shutdownDrainTimeoutSeconds", "podDisruptionBudget", "nodeSelector", "tolerations", "replicaCount", "affinity", "topologySpreadConstraints"] :
       !contains(keys(yamldecode(helm_release.agent.values[0])), key)
     ])
     error_message = "with no overrides the module must not render any disruption-related key"
@@ -1304,6 +1304,105 @@ run "affinity_must_be_an_object" {
   }
 
   expect_failures = [var.affinity]
+}
+
+run "topology_spread_enabled_alone_leaves_the_constraints_to_the_chart" {
+  command = plan
+
+  variables {
+    replicas                    = 2
+    topology_spread_constraints = { enabled = true }
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).topologySpreadConstraints == { enabled = true }
+    error_message = "topology_spread_constraints must render as-is, so the chart applies its default constraint"
+  }
+}
+
+run "topology_spread_custom_constraints_are_rendered" {
+  command = plan
+
+  variables {
+    replicas = 3
+    topology_spread_constraints = {
+      enabled = true
+      constraints = [
+        { maxSkew = 1, topologyKey = "topology.kubernetes.io/zone", whenUnsatisfiable = "DoNotSchedule" },
+        {
+          maxSkew           = 2
+          topologyKey       = "kubernetes.io/hostname"
+          whenUnsatisfiable = "ScheduleAnyway"
+          labelSelector     = { matchLabels = { name = "nullplatform-agent" } }
+        },
+      ]
+    }
+  }
+
+  assert {
+    condition     = jsonencode(yamldecode(helm_release.agent.values[0]).topologySpreadConstraints) == jsonencode(var.topology_spread_constraints)
+    error_message = "custom constraints must render as-is under topologySpreadConstraints.constraints"
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).topologySpreadConstraints.constraints[0].maxSkew == 1
+    error_message = "maxSkew must render as a number"
+  }
+}
+
+run "topology_spread_with_the_default_single_replica_is_rejected" {
+  command = plan
+
+  variables {
+    topology_spread_constraints = { enabled = true }
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "topology_spread_with_an_explicit_single_replica_is_rejected" {
+  command = plan
+
+  variables {
+    replicas                    = 1
+    topology_spread_constraints = { enabled = true }
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "topology_spread_disabled_is_accepted_with_a_single_replica" {
+  command = plan
+
+  variables {
+    topology_spread_constraints = { enabled = false }
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).topologySpreadConstraints == { enabled = false }
+    error_message = "a disabled topology spread must still render, so an install can turn it off"
+  }
+}
+
+run "topology_spread_must_be_an_object" {
+  command = plan
+
+  variables {
+    topology_spread_constraints = [{ maxSkew = 1, topologyKey = "kubernetes.io/hostname" }]
+  }
+
+  expect_failures = [var.topology_spread_constraints]
+}
+
+run "topology_spread_constraints_must_be_a_list" {
+  command = plan
+
+  variables {
+    replicas                    = 2
+    topology_spread_constraints = { enabled = true, constraints = { maxSkew = 1 } }
+  }
+
+  expect_failures = [var.topology_spread_constraints]
 }
 
 run "azure_workload_identity_labels_the_agent_and_its_workers" {

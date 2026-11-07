@@ -99,3 +99,7 @@ replicaCount: ${replicas}
 affinity:
   ${indent(2, yamlencode(affinity))}
 %{ endif ~}
+%{ if topology_spread != null ~}
+topologySpreadConstraints:
+  ${indent(2, yamlencode(topology_spread))}
+%{ endif ~}
