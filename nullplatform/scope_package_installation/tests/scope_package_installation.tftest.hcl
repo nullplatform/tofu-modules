@@ -332,13 +332,12 @@ run "outputs_carry_the_names_scope_definition_uses" {
   override_module {
     target = module.installation
     outputs = {
-      installation_id               = "dummy-installation-id"
-      package_id                    = "dummy-package-id"
-      installed_version             = "1.2.3"
-      missing_optional_requirements = []
-      service_specification_ids     = ["dummy-spec-id"]
-      service_specification_id      = "dummy-spec-id"
-      service_specification_slug    = "example-functions"
+      installation_id            = "dummy-installation-id"
+      package_id                 = "dummy-package-id"
+      installed_version          = "1.2.3"
+      service_specification_ids  = ["dummy-spec-id"]
+      service_specification_id   = "dummy-spec-id"
+      service_specification_slug = "example-functions"
     }
   }
 

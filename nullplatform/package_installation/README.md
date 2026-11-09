@@ -2,26 +2,26 @@
 
 ## Description
 
-Installs a versioned nullplatform package at a specified NRN scope and exposes its service specifications for downstream consumption
+Installs a versioned nullplatform package into an organization and exposes its service specifications for downstream consumption
 
 ## Architecture
 
-The module uses a `nullplatform_package` data source to resolve the exact package revision by slug and semver version visible at the target NRN. A `nullplatform_package_installation` resource pins that revision as the default for new services and scopes, optionally scoping visibility via `visible_to`. A conditional `nullplatform_service_specification` data source then reads the single service specification from the installed revision using the installation ID as an implicit dependency gate. Outputs expose the installation ID, revision ID, installed version, components bill of materials, and derived service specification identifiers.
+A `nullplatform_package` data source resolves the exact package revision by looking up the package slug visible at the given NRN and pinning it to the specified semver version. A `nullplatform_package_installation` resource then creates the installation, binding the package ID and default revision ID to the target NRN with optional visibility scoping. A `nullplatform_service_specification` data source is conditionally read (count = 1 when exactly one specification exists) using the installation ID as a soft dependency guard to ensure the specification is only resolved after installation. Outputs surface the installation ID, package ID, revision ID, installed version, component bill of materials, and service specification identifiers and slugs.
 
 ## Features
 
-- Resolves a nullplatform package by slug and exact semver using a data source lookup scoped to the installing NRN
-- Creates a nullplatform_package_installation resource that pins the resolved revision as the default for new services and scopes
-- Enforces strict semver format (X.Y.Z without leading v) on the package version input via validation
-- Exposes service specification ID and slug outputs compatible with service_definition and scope_definition module interfaces
-- Reports missing optional provider requirements detected at installation time
-- Supports configurable visibility scoping so specifications are usable only within designated NRN subtrees
+- Resolves a versioned nullplatform package revision by slug and semver using a data source lookup scoped to the installing organization's NRN
+- Creates a nullplatform_package_installation resource that pins the package's default revision for new services and scopes
+- Configures visibility scoping on the installation to control which NRNs within the organization can access the package's specifications
+- Conditionally reads the nullplatform_service_specification data source when exactly one specification exists in the installed revision
+- Validates package_version as a strict X.Y.Z semver format without a leading v
+- Exports service specification IDs and slugs that downstream modules can consume after installation
 
 ## Basic Usage
 
 ```hcl
 module "package_installation" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/package_installation?ref=v9.10.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/package_installation?ref=v9.11.3"
 
   nrn             = "your-nrn"
   package_slug    = "your-package-slug"
@@ -43,13 +43,13 @@ resource "example_resource" "this" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.110 |
+| <a name="requirement_nullplatform"></a> [nullplatform](#requirement\_nullplatform) | >= 0.0.112 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.110 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.112 |
 
 ## Resources
 
@@ -73,7 +73,6 @@ resource "example_resource" "this" {
 | <a name="output_components"></a> [components](#output\_components) | Bill of materials of the installed revision. How the installing organization finds the resources of a package it does not own. |
 | <a name="output_installation_id"></a> [installation\_id](#output\_installation\_id) | ID of the package installation. |
 | <a name="output_installed_version"></a> [installed\_version](#output\_installed\_version) | Semver of the installed package revision. |
-| <a name="output_missing_optional_requirements"></a> [missing\_optional\_requirements](#output\_missing\_optional\_requirements) | Optional providers the package can use that were not configured at nrn or above it when it was installed. |
 | <a name="output_package_default_version"></a> [package\_default\_version](#output\_package\_default\_version) | Same as installed\_version: the version new services and scopes are born with. |
 | <a name="output_package_id"></a> [package\_id](#output\_package\_id) | ID of the installed package. |
 | <a name="output_revision_id"></a> [revision\_id](#output\_revision\_id) | ID of the installed package revision: the one new services and scopes are born with. |
@@ -85,15 +84,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "package_installation",
-  "description": "Installs a versioned nullplatform package at a specified NRN scope and exposes its service specifications for downstream consumption",
-  "architecture": "The module uses a `nullplatform_package` data source to resolve the exact package revision by slug and semver version visible at the target NRN. A `nullplatform_package_installation` resource pins that revision as the default for new services and scopes, optionally scoping visibility via `visible_to`. A conditional `nullplatform_service_specification` data source then reads the single service specification from the installed revision using the installation ID as an implicit dependency gate. Outputs expose the installation ID, revision ID, installed version, components bill of materials, and derived service specification identifiers.",
+  "description": "Installs a versioned nullplatform package into an organization and exposes its service specifications for downstream consumption",
+  "architecture": "A `nullplatform_package` data source resolves the exact package revision by looking up the package slug visible at the given NRN and pinning it to the specified semver version. A `nullplatform_package_installation` resource then creates the installation, binding the package ID and default revision ID to the target NRN with optional visibility scoping. A `nullplatform_service_specification` data source is conditionally read (count = 1 when exactly one specification exists) using the installation ID as a soft dependency guard to ensure the specification is only resolved after installation. Outputs surface the installation ID, package ID, revision ID, installed version, component bill of materials, and service specification identifiers and slugs.",
   "features": [
-    "Resolves a nullplatform package by slug and exact semver using a data source lookup scoped to the installing NRN",
-    "Creates a nullplatform_package_installation resource that pins the resolved revision as the default for new services and scopes",
-    "Enforces strict semver format (X.Y.Z without leading v) on the package version input via validation",
-    "Exposes service specification ID and slug outputs compatible with service_definition and scope_definition module interfaces",
-    "Reports missing optional provider requirements detected at installation time",
-    "Supports configurable visibility scoping so specifications are usable only within designated NRN subtrees"
+    "Resolves a versioned nullplatform package revision by slug and semver using a data source lookup scoped to the installing organization's NRN",
+    "Creates a nullplatform_package_installation resource that pins the package's default revision for new services and scopes",
+    "Configures visibility scoping on the installation to control which NRNs within the organization can access the package's specifications",
+    "Conditionally reads the nullplatform_service_specification data source when exactly one specification exists in the installed revision",
+    "Validates package_version as a strict X.Y.Z semver format without a leading v",
+    "Exports service specification IDs and slugs that downstream modules can consume after installation"
   ],
   "inputs": [
     {
@@ -122,13 +121,12 @@ resource "example_resource" "this" {
     "package_id",
     "revision_id",
     "installed_version",
-    "missing_optional_requirements",
     "components",
     "service_specification_ids",
     "service_specification_id",
     "service_specification_slug",
     "package_default_version"
   ],
-  "hash": "523589665aa2aa0a8c67767a6256a8ac"
+  "hash": "65f23ecd05102a03ca68286156a70544"
 }
 END_AI_METADATA -->

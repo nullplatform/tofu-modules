@@ -20,7 +20,7 @@ variable "location" {
 }
 
 variable "namespace_application_default" {
-  description = "Default Kubernetes namespace for applications"
+  description = "Default Kubernetes namespace for applications. Accepts a pattern the k8s scope renders per scope, e.g. {.namespace.slug} for one Kubernetes namespace per nullplatform namespace"
   type        = string
   default     = "nullplatform"
 }

@@ -41,6 +41,19 @@ run "attributes_contain_cluster" {
   }
 }
 
+run "namespace_accepts_a_pattern" {
+  command = plan
+
+  variables {
+    namespace_application_default = "{.namespace.slug}"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.aks_config.attributes).cluster.namespace == "{.namespace.slug}"
+    error_message = "cluster.namespace should carry the pattern as is, for the scope to render it"
+  }
+}
+
 run "attributes_contain_gateway" {
   command = plan
 

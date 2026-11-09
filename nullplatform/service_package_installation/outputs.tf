@@ -8,11 +8,6 @@ output "installed_version" {
   value       = module.installation.installed_version
 }
 
-output "missing_optional_requirements" {
-  description = "Optional providers the package can use that were not configured at nrn or above it when it was installed."
-  value       = module.installation.missing_optional_requirements
-}
-
 output "service_specification_id" {
   description = "ID of the package's service specification."
   value       = module.installation.service_specification_id
