@@ -286,11 +286,11 @@ locals {
     }
   )
 
-  topology_spread = var.topology_spread_constraints == null ? null : merge(
-    { enabled = var.topology_spread_constraints.enabled },
-    var.topology_spread_constraints.constraints == null ? {} : {
+  topology_spread = var.topology_spread_constraints_enabled ? merge(
+    { enabled = true },
+    length(var.topology_spread_constraints) == 0 ? {} : {
       constraints = [
-        for c in var.topology_spread_constraints.constraints : merge(
+        for c in var.topology_spread_constraints : merge(
           { for k, v in c : k => v if v != null && k != "labelSelector" },
           c.labelSelector == null ? {} : {
             labelSelector = merge(
@@ -303,7 +303,7 @@ locals {
         )
       ]
     },
-  )
+  ) : null
 
   # Single combined values document — worker is just another top-level key
   # of the same agent chart values, not a second Helm values layer.

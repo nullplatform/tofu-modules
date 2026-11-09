@@ -379,53 +379,53 @@ variable "affinity" {
   }
 }
 
+variable "topology_spread_constraints_enabled" {
+  description = "Spread the agent's replicas with topology spread constraints (chart >= 3.6.0). Alone, it spreads them across nodes (kubernetes.io/hostname, ScheduleAnyway); topology_spread_constraints replaces that default. Needs replicas above 1: with a single replica the module and the chart refuse it. False (the default) renders nothing."
+  type        = bool
+  default     = false
+  nullable    = false
+}
+
 variable "topology_spread_constraints" {
   description = <<-EOT
-    Topology spread for the agent's replicas (chart >= 3.6.0), rendered as the
-    chart's topologySpreadConstraints values. `{ enabled = true }` spreads the
-    replicas across nodes (kubernetes.io/hostname, ScheduleAnyway); `constraints`
-    replaces that default, and an entry without a labelSelector gets the agent's
-    selector labels. Needs replicas above 1: with a single replica the module and
-    the chart refuse it. Null (the default) renders nothing.
+    Topology spread constraints for the agent pod, replacing the chart's default
+    when topology_spread_constraints_enabled is true. An entry without a
+    labelSelector gets the agent's selector labels. Empty (the default) keeps the
+    chart's default constraint.
 
     Example:
-      topology_spread_constraints = {
-        enabled = true
-        constraints = [
-          { maxSkew = 1, topologyKey = "topology.kubernetes.io/zone", whenUnsatisfiable = "DoNotSchedule" },
-        ]
-      }
+      topology_spread_constraints = [
+        { maxSkew = 1, topologyKey = "topology.kubernetes.io/zone", whenUnsatisfiable = "DoNotSchedule" },
+      ]
   EOT
-  type = object({
-    enabled = bool
-    constraints = optional(list(object({
-      maxSkew            = number
-      topologyKey        = string
-      whenUnsatisfiable  = string
-      minDomains         = optional(number)
-      nodeAffinityPolicy = optional(string)
-      nodeTaintsPolicy   = optional(string)
-      matchLabelKeys     = optional(list(string))
-      labelSelector = optional(object({
-        matchLabels = optional(map(string))
-        matchExpressions = optional(list(object({
-          key      = string
-          operator = string
-          values   = optional(list(string))
-        })))
-      }))
-    })))
-  })
-  default = null
+  type = list(object({
+    maxSkew            = number
+    topologyKey        = string
+    whenUnsatisfiable  = string
+    minDomains         = optional(number)
+    nodeAffinityPolicy = optional(string)
+    nodeTaintsPolicy   = optional(string)
+    matchLabelKeys     = optional(list(string))
+    labelSelector = optional(object({
+      matchLabels = optional(map(string))
+      matchExpressions = optional(list(object({
+        key      = string
+        operator = string
+        values   = optional(list(string))
+      })))
+    }))
+  }))
+  default  = []
+  nullable = false
 
   validation {
-    condition     = var.topology_spread_constraints == null || alltrue([for c in coalesce(var.topology_spread_constraints.constraints, []) : contains(["DoNotSchedule", "ScheduleAnyway"], c.whenUnsatisfiable)])
-    error_message = "topology_spread_constraints.constraints[*].whenUnsatisfiable must be DoNotSchedule or ScheduleAnyway."
+    condition     = alltrue([for c in var.topology_spread_constraints : contains(["DoNotSchedule", "ScheduleAnyway"], c.whenUnsatisfiable)])
+    error_message = "topology_spread_constraints[*].whenUnsatisfiable must be DoNotSchedule or ScheduleAnyway."
   }
 
   validation {
-    condition     = var.topology_spread_constraints == null || alltrue([for c in coalesce(var.topology_spread_constraints.constraints, []) : c.maxSkew >= 1 && floor(c.maxSkew) == c.maxSkew])
-    error_message = "topology_spread_constraints.constraints[*].maxSkew must be a whole number of 1 or more."
+    condition     = alltrue([for c in var.topology_spread_constraints : c.maxSkew >= 1 && floor(c.maxSkew) == c.maxSkew])
+    error_message = "topology_spread_constraints[*].maxSkew must be a whole number of 1 or more."
   }
 }
 
