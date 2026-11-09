@@ -396,17 +396,36 @@ variable "topology_spread_constraints" {
         ]
       }
   EOT
-  type        = any
-  default     = null
+  type = object({
+    enabled = bool
+    constraints = optional(list(object({
+      maxSkew            = number
+      topologyKey        = string
+      whenUnsatisfiable  = string
+      minDomains         = optional(number)
+      nodeAffinityPolicy = optional(string)
+      nodeTaintsPolicy   = optional(string)
+      matchLabelKeys     = optional(list(string))
+      labelSelector = optional(object({
+        matchLabels = optional(map(string))
+        matchExpressions = optional(list(object({
+          key      = string
+          operator = string
+          values   = optional(list(string))
+        })))
+      }))
+    })))
+  })
+  default = null
 
   validation {
-    condition     = var.topology_spread_constraints == null || can(keys(var.topology_spread_constraints))
-    error_message = "topology_spread_constraints must be an object with enabled and, optionally, constraints."
+    condition     = var.topology_spread_constraints == null || alltrue([for c in coalesce(var.topology_spread_constraints.constraints, []) : contains(["DoNotSchedule", "ScheduleAnyway"], c.whenUnsatisfiable)])
+    error_message = "topology_spread_constraints.constraints[*].whenUnsatisfiable must be DoNotSchedule or ScheduleAnyway."
   }
 
   validation {
-    condition     = var.topology_spread_constraints == null || try(var.topology_spread_constraints.constraints == null, true) || can([for c in var.topology_spread_constraints.constraints : keys(c)])
-    error_message = "topology_spread_constraints.constraints must be a list of topology spread constraint objects."
+    condition     = var.topology_spread_constraints == null || alltrue([for c in coalesce(var.topology_spread_constraints.constraints, []) : c.maxSkew >= 1 && floor(c.maxSkew) == c.maxSkew])
+    error_message = "topology_spread_constraints.constraints[*].maxSkew must be a whole number of 1 or more."
   }
 }
 

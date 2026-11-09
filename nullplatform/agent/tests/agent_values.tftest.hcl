@@ -1320,7 +1320,7 @@ run "topology_spread_enabled_alone_leaves_the_constraints_to_the_chart" {
   }
 }
 
-run "topology_spread_custom_constraints_are_rendered" {
+run "topology_spread_custom_constraints_are_rendered_without_nulls" {
   command = plan
 
   variables {
@@ -1333,20 +1333,28 @@ run "topology_spread_custom_constraints_are_rendered" {
           maxSkew           = 2
           topologyKey       = "kubernetes.io/hostname"
           whenUnsatisfiable = "ScheduleAnyway"
-          labelSelector     = { matchLabels = { name = "nullplatform-agent" } }
+          labelSelector = {
+            matchExpressions = [{ key = "name", operator = "Exists" }]
+          }
         },
       ]
     }
   }
 
   assert {
-    condition     = jsonencode(yamldecode(helm_release.agent.values[0]).topologySpreadConstraints) == jsonencode(var.topology_spread_constraints)
-    error_message = "custom constraints must render as-is under topologySpreadConstraints.constraints"
-  }
-
-  assert {
-    condition     = yamldecode(helm_release.agent.values[0]).topologySpreadConstraints.constraints[0].maxSkew == 1
-    error_message = "maxSkew must render as a number"
+    condition = jsonencode(yamldecode(helm_release.agent.values[0]).topologySpreadConstraints) == jsonencode({
+      enabled = true
+      constraints = [
+        { maxSkew = 1, topologyKey = "topology.kubernetes.io/zone", whenUnsatisfiable = "DoNotSchedule" },
+        {
+          labelSelector     = { matchExpressions = [{ key = "name", operator = "Exists" }] }
+          maxSkew           = 2
+          topologyKey       = "kubernetes.io/hostname"
+          whenUnsatisfiable = "ScheduleAnyway"
+        },
+      ]
+    })
+    error_message = "unset optional fields must not render, so the chart still injects the labelSelector and the API server gets no nulls"
   }
 }
 
@@ -1384,22 +1392,29 @@ run "topology_spread_disabled_is_accepted_with_a_single_replica" {
   }
 }
 
-run "topology_spread_must_be_an_object" {
+run "topology_spread_rejects_an_unknown_when_unsatisfiable" {
   command = plan
 
   variables {
-    topology_spread_constraints = [{ maxSkew = 1, topologyKey = "kubernetes.io/hostname" }]
+    replicas = 2
+    topology_spread_constraints = {
+      enabled     = true
+      constraints = [{ maxSkew = 1, topologyKey = "kubernetes.io/hostname", whenUnsatisfiable = "Always" }]
+    }
   }
 
   expect_failures = [var.topology_spread_constraints]
 }
 
-run "topology_spread_constraints_must_be_a_list" {
+run "topology_spread_rejects_a_max_skew_below_one" {
   command = plan
 
   variables {
-    replicas                    = 2
-    topology_spread_constraints = { enabled = true, constraints = { maxSkew = 1 } }
+    replicas = 2
+    topology_spread_constraints = {
+      enabled     = true
+      constraints = [{ maxSkew = 0, topologyKey = "kubernetes.io/hostname", whenUnsatisfiable = "ScheduleAnyway" }]
+    }
   }
 
   expect_failures = [var.topology_spread_constraints]
