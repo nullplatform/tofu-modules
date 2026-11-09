@@ -89,6 +89,33 @@ run "static_files_distribution_defaults" {
     error_message = "azure_distribution must match the spec's own value, front-door"
   }
 
+  # The API fills these spec defaults on write; omitting any is a perpetual diff.
+  assert {
+    condition = (
+      jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.azure_front_door_cache_days == 7
+      && jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.azure_front_door_security_headers == false
+      && jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.azure_front_door_certificate_secret == ""
+      && jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.azure_front_door_cached_path_prefixes == ["/static/"]
+      && jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.azure_front_door_content_security_policy == ""
+    )
+    error_message = "the azure_front_door_* spec defaults must be sent, or the API-filled values show up as drift"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).provider.azure_state_auth == "azuread"
+    error_message = "provider.azure_state_auth must mirror the spec default, azuread"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).provider.aws_state_bucket == "tf-state"
+    error_message = "merging provider defaults must keep aws_state_bucket"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).security.azure_security == "none"
+    error_message = "security.azure_security must mirror the spec default, none"
+  }
+
   assert {
     condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.default_viewer_protocol_policy == "redirect-to-https"
     error_message = "default_viewer_protocol_policy should mirror the spec default"

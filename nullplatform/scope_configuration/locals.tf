@@ -2,21 +2,31 @@ locals {
   ##############################################################################
   # static-files
   ##############################################################################
-  # Mirrors the "static-files" provider spec's own defaults  to avoid drift.
+  # Mirrors the "static-files" provider spec's own defaults to avoid drift.
   # azure_* fields are included even though only cloud_provider = "aws" is
-  # supported: the API persists them regardless of the selected cloud.
+  # supported: the API fills every non-null spec default on write, whatever
+  # the selected cloud, so leaving one out shows up as a perpetual diff.
   static_files_defaults = {
     cloud_provider = "aws"
+    provider = {
+      azure_state_auth = "azuread"
+    }
     distribution = {
-      aws_distribution   = "cloudfront"
-      azure_distribution = "front-door"
+      aws_distribution                         = "cloudfront"
+      azure_distribution                       = "front-door"
+      azure_front_door_cache_days              = 7
+      azure_front_door_security_headers        = false
+      azure_front_door_certificate_secret      = ""
+      azure_front_door_cached_path_prefixes    = ["/static/"]
+      azure_front_door_content_security_policy = ""
     }
     network = {
       aws_network   = "route53"
       azure_network = "azure_dns"
     }
     security = {
-      aws_security = "none"
+      aws_security   = "none"
+      azure_security = "none"
     }
   }
 
@@ -45,10 +55,10 @@ locals {
   static_files_cloud_overrides = {
     "aws" = {
       cloud_provider = var.cloud_provider
-      provider = {
+      provider = merge(local.static_files_defaults.provider, {
         aws_region       = var.aws_region
         aws_state_bucket = var.aws_state_bucket
-      }
+      })
       distribution = merge(
         local.static_files_defaults.distribution,
         {
