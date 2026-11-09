@@ -14,14 +14,14 @@ a specific release, so an upgrade is something someone decides.
 
 ## What to pin
 
-Verified 2026-11-06.
+Verified 2026-11-09.
 
 | Component | Current | Variable | Module |
 | --- | --- | --- | --- |
 | `nullplatform-base` chart | `2.44.8` | `nullplatform_base_helm_version` | `nullplatform/base` |
-| `nullplatform-agent` chart | `3.5.0` | `nullplatform_agent_helm_version` | `nullplatform/agent` |
+| `nullplatform-agent` chart | `3.6.0` | `nullplatform_agent_helm_version` | `nullplatform/agent` |
 | `cert-manager` chart | `v1.21.3` | `cert_manager_version` | `infrastructure/commons/cert_manager` |
-| `prometheus` chart | `29.44.0` | `prometheus_version` | `infrastructure/commons/prometheus` |
+| `prometheus` chart | `29.46.0` | `prometheus_version` | `infrastructure/commons/prometheus` |
 | `istio-base` chart | `1.30.8` | `istio_base_version` | `infrastructure/commons/istio` |
 | `istiod` chart | `1.30.8` | `istiod_version` | `infrastructure/commons/istio` |
 | `gateway-api` CRDs | `v1.5.1` | `gateway_api_crd_ref` | `nullplatform/base` |
@@ -58,7 +58,7 @@ module "base" {
 }
 
 module "agent" {
-  nullplatform_agent_helm_version = "3.5.0"
+  nullplatform_agent_helm_version = "3.6.0"
   image_tag                       = "0.15.1"
   agent_traffic_manager_tag       = "v1.9.0"
 
@@ -105,7 +105,7 @@ module "aws_load_balancer_controller" {
 }
 
 module "prometheus" {
-  prometheus_version = "29.44.0"
+  prometheus_version = "29.46.0"
 }
 
 module "istio" {
