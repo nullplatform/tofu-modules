@@ -2,10 +2,10 @@ locals {
   ##############################################################################
   # static-files
   ##############################################################################
-  # Mirrors the "static-files" provider spec's own defaults to avoid drift.
-  # azure_* fields are included even though only cloud_provider = "aws" is
-  # supported: the API fills every non-null spec default on write, whatever
-  # the selected cloud, so leaving one out shows up as a perpetual diff.
+  # Mirrors the "static-files" provider spec's own defaults. azure_* fields are
+  # included although only cloud_provider = "aws" is supported: the API fills
+  # every non-null spec default on write whatever the cloud, so omitting one
+  # is a perpetual diff. Fields with no spec default are sent only when set.
   static_files_defaults = {
     cloud_provider = "aws"
     provider = {

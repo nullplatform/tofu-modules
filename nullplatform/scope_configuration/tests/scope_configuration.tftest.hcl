@@ -91,16 +91,31 @@ run "static_files_distribution_defaults" {
 
   # The API fills these spec defaults on write; omitting any is a perpetual diff.
   assert {
-    condition = (
-      jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.azure_front_door_cache_days == 7
-      && jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.azure_front_door_security_headers == false
-      && jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.azure_front_door_certificate_secret == ""
-      && jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.azure_front_door_cached_path_prefixes == ["/static/"]
-      && jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.azure_front_door_content_security_policy == ""
-    )
-    error_message = "the azure_front_door_* spec defaults must be sent, or the API-filled values show up as drift"
+    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.azure_front_door_cache_days == 7
+    error_message = "distribution.azure_front_door_cache_days must mirror the spec default, 7"
   }
 
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.azure_front_door_security_headers == false
+    error_message = "distribution.azure_front_door_security_headers must mirror the spec default, false"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.azure_front_door_certificate_secret == ""
+    error_message = "distribution.azure_front_door_certificate_secret must mirror the spec default, \"\""
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.azure_front_door_cached_path_prefixes == ["/static/"]
+    error_message = "distribution.azure_front_door_cached_path_prefixes must mirror the spec default, [\"/static/\"]"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.azure_front_door_content_security_policy == ""
+    error_message = "distribution.azure_front_door_content_security_policy must mirror the spec default, \"\""
+  }
+
+  # provider.* and security.* defaults follow the same rule.
   assert {
     condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).provider.azure_state_auth == "azuread"
     error_message = "provider.azure_state_auth must mirror the spec default, azuread"
@@ -304,4 +319,55 @@ run "static_files_rejects_unknown_invocation_event" {
   }
 
   expect_failures = [var.aws_default_invocations]
+}
+
+# Each section merges its defaults: overriding an aws_* field must keep the azure_* siblings.
+run "static_files_defaults_survive_aws_overrides" {
+  command = plan
+
+  variables {
+    type                      = "static-files"
+    cloud_provider            = "aws"
+    aws_region                = "eu-west-1"
+    aws_state_bucket          = "tf-state"
+    aws_hosted_public_zone_id = "Z0000000000000"
+    aws_security              = "waf"
+    aws_web_acl_name          = "my-acl"
+    aws_price_class           = "PriceClass_All"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).provider.aws_region == "eu-west-1"
+    error_message = "provider must keep the aws_region override"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).provider.azure_state_auth == "azuread"
+    error_message = "a provider override must not drop azure_state_auth"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).security.aws_security == "waf"
+    error_message = "the aws_security override must apply"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).security.azure_security == "none"
+    error_message = "an aws_security override must not drop azure_security"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.price_class == "PriceClass_All"
+    error_message = "the aws_price_class override must apply"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.azure_front_door_cache_days == 7
+    error_message = "a distribution override must not drop the azure_front_door_* defaults"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).network.azure_network == "azure_dns"
+    error_message = "a network override must not drop azure_network"
+  }
 }
