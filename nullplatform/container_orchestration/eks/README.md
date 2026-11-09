@@ -22,7 +22,7 @@ The module constructs a set of locals that merge optional inputs into structured
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.11.4"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.12.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
