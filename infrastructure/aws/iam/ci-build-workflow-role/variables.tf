@@ -13,7 +13,11 @@ variable "oidc_providers" {
   description = <<-EOT
     CI OIDC issuers whose jobs can assume the role, keyed by a free-form name (e.g. github, gitlab, bitbucket).
     - url: issuer URL, e.g. https://token.actions.githubusercontent.com, https://gitlab.com or https://api.bitbucket.org/2.0/workspaces/<workspace>/pipelines-config/identity/oidc
-    - subjects: StringLike patterns on the sub claim, scoped to your organization, group or repositories (e.g. repo:<org>/* for GitHub, project_path:<group>/* for GitLab)
+    - subjects: StringLike patterns on the sub claim, scoped to your organization, group or repositories (e.g. ["repo:<org>/*", "repo:<org>@<org_id>/*"] for GitHub, project_path:<group>/* for GitLab).
+      GitHub picks the sub format per repository, so one organization can mix both: older repositories send repo:<org>/<repo>:...,
+      and repositories created, renamed or transferred more recently send the immutable repo:<org>@<org_id>/<repo>@<repo_id>:...
+      List both patterns to cover the whole organization. Check a repository with gh api repos/<org>/<repo>/actions/oidc/customization/sub
+      (use_immutable_subject, sub_claim_prefix) and the org id with gh api orgs/<org> --jq .id.
     - audiences: accepted aud claims; sts.amazonaws.com unless the CI tool fixes its own (Bitbucket uses ari:cloud:bitbucket::workspace/<uuid>)
     - create: create the IAM OIDC provider instead of looking up the existing one (an account holds one per issuer URL)
     - thumbprints: only for self-managed issuers whose certificate is not publicly trusted
@@ -40,11 +44,12 @@ variable "oidc_providers" {
   }
 
   validation {
-    # GitHub (repo:<org>/...) and GitLab (project_path:<group>/...) name the
-    # owner before the first slash: a wildcard there ("repo:*", "repo:*/x")
-    # spans every organization or group of the issuer.
+    # GitHub (repo:<org>/... or, on the immutable format, repo:<org>@<org_id>/...)
+    # and GitLab (project_path:<group>/...) name the owner before the first
+    # slash: a wildcard there ("repo:*", "repo:*/x") spans every organization or
+    # group of the issuer.
     condition     = alltrue([for p in values(var.oidc_providers) : alltrue([for s in p.subjects : !can(regex("^(repo|project_path):", s)) || can(regex("^(repo|project_path):[^*?/]+/", s))])])
-    error_message = "repo: and project_path: subject patterns must name a literal organization or group before the first '/' (e.g. repo:my-org/*, project_path:my-group/*)"
+    error_message = "repo: and project_path: subject patterns must name a literal organization or group before the first '/' (e.g. repo:my-org@123456/*, repo:my-org/*, project_path:my-group/*)"
   }
 
   validation {
