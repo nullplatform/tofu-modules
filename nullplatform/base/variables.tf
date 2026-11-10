@@ -185,6 +185,12 @@ variable "logging_controller_image_repository" {
   default     = "public.ecr.aws/nullplatform/k8s-logs-controller"
 }
 
+variable "logging_istio_access_logs_enabled" {
+  type        = bool
+  description = "Build HTTP logs and metrics from the Istio gateway access log for scopes without the nginx sidecar (TRAFFIC_PROXY=istio). Renders one Telemetry per gateway; istiod needs the np-gateway-access-log provider (infrastructure/commons/istio gateway_access_log_enabled)."
+  default     = false
+}
+
 variable "logging_controller_image_tag" {
   # example: 1.6.0
   type        = string

@@ -45,3 +45,9 @@ variable "namespace" {
   default     = "istio-system"
 
 }
+
+variable "gateway_access_log_enabled" {
+  description = "Add the np-gateway-access-log extension provider (JSON access log to stdout) to istiod's meshConfig. Required by the logs-controller for scopes without the nginx sidecar (nullplatform/base logging_istio_access_logs_enabled)."
+  type        = bool
+  default     = false
+}

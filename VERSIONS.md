@@ -147,6 +147,28 @@ rewrite replaces the `url#ref` in the table and in the commented `agent_repo` li
 cross major versions freely (`scopes-static-files` went from `v0.4.0` to `v4.1.1`), so read the
 release notes of a major bump before merging the release that carries it.
 
+**Upgrading `nullplatform-base` from a chart older than 2.43.1 deletes namespaces.** Charts
+before 2.43.1 create `gateways` (and `nullplatform`/`nullplatform-tools` when nothing created
+them first) without `helm.sh/resource-policy: keep`, and the next upgrade, to any version, drops
+them along with everything inside: Gateways, their load balancers, Certificates and Telemetry.
+List the namespaces at risk and protect them before the upgrade:
+
+```bash
+helm -n nullplatform-tools get manifest nullplatform-base | grep -A3 'kind: Namespace' | grep 'name:'
+kubectl annotate namespace gateways helm.sh/resource-policy=keep --overwrite
+```
+
+If it already happened, run `helm upgrade --reuse-values` on `nullplatform-base` and
+`cert-manager-config` (same versions) to recreate them, then point the scopes' `DNSEndpoint`
+targets at the new gateway address: the load balancer is recreated with a new hostname.
+
+**Scopes without the nginx sidecar need matching versions.** `TRAFFIC_PROXY=istio` takes
+`logging_istio_access_logs_enabled` in `nullplatform/base` and `gateway_access_log_enabled` in
+`infrastructure/commons/istio` together, a `nullplatform-base` chart and a `k8s-logs-controller`
+that ship the feature (nullplatform/helm-charts#218, nullplatform/k8s-tools#156), and an agent
+whose `np` CLI is 2.6 or newer: older ones pick an arbitrary `scope-configurations` provider when
+the hierarchy holds more than one, so the scope's `traffic_proxy` can be silently ignored.
+
 **The agent repositories only matter without packages.** `agent_repos_scope_tag` and
 `agent_repos_extra` are gone; `agent_repo` replaced both, as one list of `url#ref`. The agent
 clones it only in the legacy exec flow (`worker_orchestrator = false`). An install that runs

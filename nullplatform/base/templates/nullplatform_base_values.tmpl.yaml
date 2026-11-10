@@ -81,6 +81,8 @@ logging:
   applicationLogs:
     enabled: ${logging_application_logs_enabled}
   mountDockerContainers: ${logging_mount_docker_containers}
+  istioAccessLogs:
+    enabled: ${logging_istio_access_logs_enabled}
   controller:
     image: "${logging_controller_image_repository}:${logging_controller_image_tag}"
     resources:
