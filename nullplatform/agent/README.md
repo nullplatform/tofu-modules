@@ -2,21 +2,20 @@
 
 ## Description
 
-Deploys the nullplatform agent as a Helm release on Kubernetes, configuring cloud-provider-specific identity, ingress stack templates, worker orchestration patches, and environment variables for scope execution
+Deploys the nullplatform agent to a Kubernetes cluster via a Helm release, configuring cloud-provider-specific identity, ingress stack templates, worker orchestration patches, and runtime environment variables
 
 ## Architecture
 
-A single helm_release resource named 'agent' deploys the nullplatform-agent chart from the official Helm repository, with its values document rendered by templatefile() from a YAML template that merges all computed locals. A terraform_data.api_key_trigger resource forces helm_release replacement when the API key rotates, while a terraform_data.cross_variable_validation resource enforces cross-variable preconditions (e.g. aws_iam_role_arn required for AWS, azure credentials required for Azure) at plan time. All environment variables, worker patches, ingress path derivations, cloud-specific config slices, and per-package worker env injections are composed entirely in locals.tf before being passed as a single values string to the helm_release.
+The module renders a single Helm values document via templatefile() from locals.tf and passes it to a helm_release resource targeting the nullplatform-agent chart from the official Helm repository. A terraform_data resource tracks the api_key and triggers helm_release replacement when it changes, while a second terraform_data resource enforces cross-variable preconditions at plan time. Cloud-provider-specific environment variables (AWS_IAM_ROLE_ARN, AZURE_CLIENT_ID, etc.) are merged into the agent container env, and worker orchestration patches are built per-package from worker_orchestrated_packages and worker_k8s_packages and embedded in the same values document under the chart's top-level worker key.
 
 ## Features
 
-- Deploys nullplatform-agent via helm_release with atomic rollback, cleanup-on-fail, and capped history of 10 revisions
-- Configures cloud-provider-specific identity including AWS IAM role ARN via IRSA, Azure Service Principal or Workload Identity with federated ServiceAccount annotation, and GCP/OCI/onprem passthroughs
-- Builds per-package worker orchestration patches injecting k8s scope env vars (DNS_TYPE, K8S_NAMESPACE, CLUSTER_NAME, ingress template paths) into worker pods for each package in worker_k8s_packages
-- Derives ingress template paths (SERVICE_TEMPLATE, INITIAL_INGRESS_PATH, BLUE_GREEN_INGRESS_PATH) from ingress_stack selection between ALB and Istio Gateway API, with per-variable override escape hatches
-- Merges agent and worker resource requests/limits, tolerations, affinity, node selectors, pod annotations, and disruption budgets into the Helm values document
-- Enforces pinned versions for the Helm chart and traffic manager image tag via validation rules that reject empty strings and moving references like latest/main/master
-- Publishes TRAFFIC_CONTAINER_IMAGE, IMAGE_PULL_SECRETS, DOMAIN, DNS_TYPE, and gateway names to both the agent container env and worker pods regardless of execution mode
+- Deploys nullplatform-agent Helm chart with atomic installation, cleanup on failure, and capped revision history
+- Configures cloud-provider-specific identity for AWS (IRSA via aws_iam_role_arn), Azure (Service Principal or Workload Identity), GCP, OCI, and on-premises clusters
+- Builds per-package worker orchestration patches injecting k8s-scope environment variables, ServiceAccount identity, and pod annotations into every worker pod
+- Derives ingress stack template paths (ALB or Istio Gateway API HTTPRoutes) and injects SERVICE_TEMPLATE, INITIAL_INGRESS_PATH, and BLUE_GREEN_INGRESS_PATH into both agent and worker environments
+- Manages agent and worker resource requests and limits, termination grace period, shutdown drain timeout, tolerations, affinity, topology spread constraints, and pod disruption budgets
+- Supports Azure Workload Identity by injecting azure.workload.identity/use labels onto agent and worker pods and annotating the ServiceAccount with AZURE_CLIENT_ID
 
 ## Basic Usage
 
@@ -228,6 +227,8 @@ resource "example_resource" "this" {
 | <a name="input_tags_selectors"></a> [tags\_selectors](#input\_tags\_selectors) | Map of tags used to select and filter channels and agents | `map(string)` | n/a | yes |
 | <a name="input_termination_grace_period_seconds"></a> [termination\_grace\_period\_seconds](#input\_termination\_grace\_period\_seconds) | Seconds the agent gets to stop after SIGTERM (chart >= 3.2.0, which defaults to 60, and 120 from 3.3.0). It has to fit shutdown\_drain\_timeout\_seconds plus 10s for the disconnect. Null (the default) renders nothing. | `number` | `null` | no |
 | <a name="input_tolerations"></a> [tolerations](#input\_tolerations) | Tolerations for the agent pod. Helm replaces lists instead of merging them, so this replaces the chart's defaults (node.kubernetes.io/not-ready and node.kubernetes.io/unreachable, NoExecute for 300s): include them if you still want them. Null (the default) renders nothing and keeps the chart's tolerations. | `any` | `null` | no |
+| <a name="input_topology_spread_constraints"></a> [topology\_spread\_constraints](#input\_topology\_spread\_constraints) | Topology spread constraints for the agent pod, replacing the chart's default<br/>when topology\_spread\_constraints\_enabled is true. An entry without a<br/>labelSelector gets the agent's selector labels. Empty (the default) keeps the<br/>chart's default constraint.<br/><br/>Example:<br/>  topology\_spread\_constraints = [<br/>    { maxSkew = 1, topologyKey = "topology.kubernetes.io/zone", whenUnsatisfiable = "DoNotSchedule" },<br/>  ] | <pre>list(object({<br/>    maxSkew            = number<br/>    topologyKey        = string<br/>    whenUnsatisfiable  = string<br/>    minDomains         = optional(number)<br/>    nodeAffinityPolicy = optional(string)<br/>    nodeTaintsPolicy   = optional(string)<br/>    matchLabelKeys     = optional(list(string))<br/>    labelSelector = optional(object({<br/>      matchLabels = optional(map(string))<br/>      matchExpressions = optional(list(object({<br/>        key      = string<br/>        operator = string<br/>        values   = optional(list(string))<br/>      })))<br/>    }))<br/>  }))</pre> | `[]` | no |
+| <a name="input_topology_spread_constraints_enabled"></a> [topology\_spread\_constraints\_enabled](#input\_topology\_spread\_constraints\_enabled) | Spread the agent's replicas with topology spread constraints (chart >= 3.6.0). Alone, it spreads them across nodes (kubernetes.io/hostname, ScheduleAnyway); topology\_spread\_constraints replaces that default. Needs replicas above 1: with a single replica the module and the chart refuse it. False (the default) renders nothing. | `bool` | `false` | no |
 | <a name="input_use_account_slug"></a> [use\_account\_slug](#input\_use\_account\_slug) | Flag to determine whether to use the account slug in resource naming | `string` | `""` | no |
 | <a name="input_worker"></a> [worker](#input\_worker) | Extra worker-orchestration config, merged on top of the module's own computed<br/>worker block: backend ("kubernetes" by default), allowedRegistries<br/>(["public.ecr.aws/nullplatform/*"] by default, so the platform's own scope<br/>images keep working), idleTTL ("30m" by default, so worker Deployments<br/>left behind by an old/removed package revision get reaped instead of<br/>accumulating forever), and patches for the worker container<br/>(worker\_resources for every worker, the deploy/DNS env vars below, and a<br/>serviceAccountName that always mirrors service\_account\_name). allowedRegistries and patches set here are<br/>concatenated with (not replacing) the module defaults — add your own<br/>registries or an extra patch rather than having to repeat the defaults;<br/>set backend or idleTTL here to override them outright (e.g. idleTTL = ""<br/>to disable the reaper, matching this module's pre-idleTTL-default<br/>behavior). Anything else — security, the legacy defaults/rules/pins —<br/>passes through as-is. See the nullplatform-agent chart values (>= 2.37.0)<br/>for the full shape. null = nothing extra beyond the defaults above.<br/><br/>Example:<br/>  worker = {<br/>    allowedRegistries = ["123456789012.dkr.ecr.us-east-1.amazonaws.com/your-org/*"]<br/>    patches           = [{ target = { package = "my-pkg" }, merge = { spec = { serviceAccountName = "np-agent-sa" } } }]<br/>    idleTTL           = "1h"<br/>  } | `any` | `null` | no |
 | <a name="input_worker_k8s_packages"></a> [worker\_k8s\_packages](#input\_worker\_k8s\_packages) | Package slugs whose worker runs the k8s scope and must receive its env vars (DNS\_TYPE, K8S\_NAMESPACE, template paths, CLUSTER\_NAME, extra\_envs). Add every package that runs the k8s scope code, e.g. ["containers", "scheduled-task"]. | `list(string)` | <pre>[<br/>  "containers"<br/>]</pre> | no |
@@ -242,16 +243,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "agent",
-  "description": "Deploys the nullplatform agent as a Helm release on Kubernetes, configuring cloud-provider-specific identity, ingress stack templates, worker orchestration patches, and environment variables for scope execution",
-  "architecture": "A single helm_release resource named 'agent' deploys the nullplatform-agent chart from the official Helm repository, with its values document rendered by templatefile() from a YAML template that merges all computed locals. A terraform_data.api_key_trigger resource forces helm_release replacement when the API key rotates, while a terraform_data.cross_variable_validation resource enforces cross-variable preconditions (e.g. aws_iam_role_arn required for AWS, azure credentials required for Azure) at plan time. All environment variables, worker patches, ingress path derivations, cloud-specific config slices, and per-package worker env injections are composed entirely in locals.tf before being passed as a single values string to the helm_release.",
+  "description": "Deploys the nullplatform agent to a Kubernetes cluster via a Helm release, configuring cloud-provider-specific identity, ingress stack templates, worker orchestration patches, and runtime environment variables",
+  "architecture": "The module renders a single Helm values document via templatefile() from locals.tf and passes it to a helm_release resource targeting the nullplatform-agent chart from the official Helm repository. A terraform_data resource tracks the api_key and triggers helm_release replacement when it changes, while a second terraform_data resource enforces cross-variable preconditions at plan time. Cloud-provider-specific environment variables (AWS_IAM_ROLE_ARN, AZURE_CLIENT_ID, etc.) are merged into the agent container env, and worker orchestration patches are built per-package from worker_orchestrated_packages and worker_k8s_packages and embedded in the same values document under the chart's top-level worker key.",
   "features": [
-    "Deploys nullplatform-agent via helm_release with atomic rollback, cleanup-on-fail, and capped history of 10 revisions",
-    "Configures cloud-provider-specific identity including AWS IAM role ARN via IRSA, Azure Service Principal or Workload Identity with federated ServiceAccount annotation, and GCP/OCI/onprem passthroughs",
-    "Builds per-package worker orchestration patches injecting k8s scope env vars (DNS_TYPE, K8S_NAMESPACE, CLUSTER_NAME, ingress template paths) into worker pods for each package in worker_k8s_packages",
-    "Derives ingress template paths (SERVICE_TEMPLATE, INITIAL_INGRESS_PATH, BLUE_GREEN_INGRESS_PATH) from ingress_stack selection between ALB and Istio Gateway API, with per-variable override escape hatches",
-    "Merges agent and worker resource requests/limits, tolerations, affinity, node selectors, pod annotations, and disruption budgets into the Helm values document",
-    "Enforces pinned versions for the Helm chart and traffic manager image tag via validation rules that reject empty strings and moving references like latest/main/master",
-    "Publishes TRAFFIC_CONTAINER_IMAGE, IMAGE_PULL_SECRETS, DOMAIN, DNS_TYPE, and gateway names to both the agent container env and worker pods regardless of execution mode"
+    "Deploys nullplatform-agent Helm chart with atomic installation, cleanup on failure, and capped revision history",
+    "Configures cloud-provider-specific identity for AWS (IRSA via aws_iam_role_arn), Azure (Service Principal or Workload Identity), GCP, OCI, and on-premises clusters",
+    "Builds per-package worker orchestration patches injecting k8s-scope environment variables, ServiceAccount identity, and pod annotations into every worker pod",
+    "Derives ingress stack template paths (ALB or Istio Gateway API HTTPRoutes) and injects SERVICE_TEMPLATE, INITIAL_INGRESS_PATH, and BLUE_GREEN_INGRESS_PATH into both agent and worker environments",
+    "Manages agent and worker resource requests and limits, termination grace period, shutdown drain timeout, tolerations, affinity, topology spread constraints, and pod disruption budgets",
+    "Supports Azure Workload Identity by injecting azure.workload.identity/use labels onto agent and worker pods and annotating the ServiceAccount with AZURE_CLIENT_ID"
   ],
   "inputs": [
     {
@@ -307,6 +307,11 @@ resource "example_resource" "this" {
     {
       "name": "affinity",
       "description": "Affinity for the agent pod, rendered as-is under the chart's affinity, e.g. a podAntiAffinity on kubernetes.io/hostname to run one agent per node. A required anti-affinity leaves a replica Pending when no node is free for it. Null (the default) renders nothing.",
+      "required": false
+    },
+    {
+      "name": "topology_spread_constraints",
+      "description": "",
       "required": false
     },
     {
@@ -430,6 +435,11 @@ resource "example_resource" "this" {
       "required": false
     },
     {
+      "name": "topology_spread_constraints_enabled",
+      "description": "Spread the agent's replicas with topology spread constraints (chart >= 3.6.0). Alone, it spreads them across nodes (kubernetes.io/hostname, ScheduleAnyway); topology_spread_constraints replaces that default. Needs replicas above 1: with a single replica the module and the chart refuse it. False (the default) renders nothing.",
+      "required": false
+    },
+    {
       "name": "image_repository",
       "description": "Container image repository for the agent. Defaults to the official nullplatform image.",
       "required": false
@@ -531,6 +541,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "7d95fab308ade488035c19fe21775709"
+  "hash": "edf402d99a4ce15eb04262425ce44ecf"
 }
 END_AI_METADATA -->
