@@ -112,6 +112,28 @@ run "mount_docker_containers_enabled" {
   }
 }
 
+run "istio_access_logs_disabled_by_default" {
+  command = plan
+
+  assert {
+    condition     = strcontains(output.rendered_values, "istioAccessLogs:\n    enabled: false")
+    error_message = "istioAccessLogs should default to false"
+  }
+}
+
+run "istio_access_logs_enabled" {
+  command = plan
+
+  variables {
+    logging_istio_access_logs_enabled = true
+  }
+
+  assert {
+    condition     = strcontains(output.rendered_values, "istioAccessLogs:\n    enabled: true")
+    error_message = "istioAccessLogs should be true when enabled"
+  }
+}
+
 ############################################
 # Datadog logs/metrics split
 ############################################

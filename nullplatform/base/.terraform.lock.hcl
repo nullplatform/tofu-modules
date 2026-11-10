@@ -5,6 +5,14 @@ provider "registry.opentofu.org/hashicorp/helm" {
   version     = "3.1.1"
   constraints = "~> 3.0"
   hashes = [
+    "h1:0EBPFRAzAnwXiyr7LVBoCtSwaoMDHEe4dbQvS4rNFuk=",
+    "h1:0wgeXcPlOUPpnOodoSxGnN8MMoS5wWcfVOnbY3u49xM=",
+    "h1:1TvLWj0VSBgoIQy2qo0yvDTvb/7tk1t/7iQRZ9cv0CA=",
+    "h1:8SOQHxpTUK0rYBsCoxqrvDRc75KZl9hBt1m7QLrs+QM=",
+    "h1:I0TSwVK/TX2Ib2sVKa6d4P0YVl3lnmAqgAHuJBaKpqw=",
+    "h1:P2BZ+BypXgswdoU/jZQ4rsGE3Wo73bJ60v67HBVljzA=",
+    "h1:ZtUXluNfM+IkwW9Sys5WTlRwXJnNxanSNEQ51j1cq1Y=",
+    "h1:b/2C4cvO9g0di6mok8Tfm4uhgY7qTHZi2VNXSR+S66s=",
     "h1:brfn5YltnzexsfqpWKw+5gS9U/m77e0An3hZQamlEZk=",
     "zh:09b38905e234c2e0b185332819614224660050b7e4b25e9e858b593ab01adafe",
     "zh:09fed1b19b8bcded169fb76304e06c5b1216d5ceba92948c23384f34ddbf1fac",
@@ -21,7 +29,21 @@ provider "registry.opentofu.org/hashicorp/helm" {
 provider "registry.opentofu.org/hashicorp/kubernetes" {
   version = "3.1.0"
   hashes = [
+    "h1:/D/wtR7M2/M8XyFisCgunY6xuO08qZyY5l9JJUrE9G4=",
     "h1:0M9Nu8YersHl84pfFTRiW5UfmoxQC3xKJ+Zkt5WjEv8=",
+    "h1:4R9y0ysMZovTnl4szxToceJ5JS1uu7OOgekjwuovQ6k=",
+    "h1:DyKnb8Iyd3s+aZGk1xZtz11e/NZ0wHepF5wlliyD42E=",
+    "h1:G/xDJLXRCSnsGV68TBmziSUUDBSMkq8STHX+6A5zj2U=",
+    "h1:H3HBAfrFZXjnphHsxX5CMdA/F+It0mZOcvNpRktyFl4=",
+    "h1:N0CDf4vyABZZVeqm0ugeOn8QleQDuOiFjsPjrhxbZvA=",
+    "h1:RAnhix31hZNl70BPnRUg1FL5pn+MO7vXVMw3bSBcWk4=",
+    "h1:S0NfuadaHnXovFhjDBJJxyNKwJiv5Akp7qim51UEPEE=",
+    "h1:feDLnMsw5S8mROkE9q+pRiuMqXwklHYr+YBvbKiUZF4=",
+    "h1:jvaX3zytN4Yjj4bj87mEyNDSlwP6kyZOFW9Yx3w3fk4=",
+    "h1:oRv5IPg0yU6CG1UdLXzfd6P3/SMxfe7+6R8CpZso9f0=",
+    "h1:uzK7fv/bO4Pd6E2wu9NX29I52aPuYOtmWOYafBoRT4U=",
+    "h1:xncv/7mJnTS43BojW0zDzCbawJDKnQhe8zVLR6NZ3CQ=",
+    "h1:zZ6pD4oz5Yrcloaceq7/KGSH6fFbwyzC++PEMucx3XM=",
     "zh:06f1310b47ff31593766b4b664a508276e57f911c9e0237c6cb197a590e2d799",
     "zh:54aad7284e03c49996477f777c20b75ad12acbd68e80e86ecd1bd1ae6cfa5bea",
     "zh:5ad86522ff9343ac8a2b8b595ba7280de82966dd6feb6aa87b6b9103b694bf82",
@@ -44,9 +66,19 @@ provider "registry.opentofu.org/nullplatform/nullplatform" {
   version     = "0.0.95"
   constraints = "~> 0.0.86"
   hashes = [
+    "h1:+3hxz5C+5N68SrEpI6oDjeCyVwKkH51K/eJMsw+p4x0=",
+    "h1:4CaCSOIxZUr3EAa4mirUzsZOIN44jWeDhiyjEeRiyXY=",
+    "h1:8BikIRFdrXRNMHDYoKu67MFCoTWOXOwvVfdggmkJf4s=",
+    "h1:9oc3qCrTBlY4zVOtMFUai4C9GnBfRrwyuzAp1rDJNIs=",
+    "h1:C2PthkRsysKK9QvdvOvilHzEnnX9Eu5hVWgOL++WsEI=",
     "h1:CwWF67wR7+i4kIqtQ6t6wDwJTCnnfwbK60B5zH2xMCo=",
+    "h1:DldeAD+NSUQdnQxyTfbmV46wYFWDwdFRIpGzml3uKuo=",
+    "h1:FQbdFOw6q4ClYSq7uoa9loG4ynYNzUcOb4sSQ8b/h3Q=",
+    "h1:IOKbeoCEkDeDrGLG4OH6kPfo4x7HuJFqFLvlbEgTTCM=",
     "h1:TOKlvQhgsNAlXDVB9jNfTUTMIOgxgMJgHsr7AqTVtdA=",
     "h1:UYs+ehJD8m3YGSb1vZUfFbYBHBRBj/Kn15Lp6OK2M5Y=",
+    "h1:Ujp/YxKbUtGh5t18uCoJaajoNXqeZwhAsARvBqFKnPU=",
+    "h1:zG149oqii+6TuZ1lXblYJLjTWmVEKKQ9Z7OmAB5wAjU=",
     "zh:02ec1e02e738e5f138e919d17391966e4b92d6933b6cd318eaed85e908f5cc8c",
     "zh:1b2015fa088a40c4dcaef803d71942909ec45036524c12ca18272bf37dbf9283",
     "zh:213f5ab10cc4c95e4568fdd10fec55886615978617b5815c9a900f233b4dca6e",

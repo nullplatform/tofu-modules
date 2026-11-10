@@ -61,6 +61,7 @@ locals {
       logging_enabled                     = var.logging_enabled ? "true" : "false"
       logging_application_logs_enabled    = var.logging_application_logs_enabled ? "true" : "false"
       logging_mount_docker_containers     = var.logging_mount_docker_containers ? "true" : "false"
+      logging_istio_access_logs_enabled   = var.logging_istio_access_logs_enabled ? "true" : "false"
       logging_controller_image_repository = var.logging_controller_image_repository
       logging_controller_image_tag        = var.logging_controller_image_tag
 

@@ -97,3 +97,32 @@ run "custom_repository" {
     error_message = "All components should use custom repository"
   }
 }
+
+# Validates the gateway access log provider is off by default
+run "gateway_access_log_disabled_by_default" {
+  command = plan
+
+  assert {
+    condition     = length(helm_release.istiod.values) == 0
+    error_message = "istiod should get no extra values unless gateway_access_log_enabled is set"
+  }
+}
+
+# Validates the access log provider the logs-controller expects
+run "gateway_access_log_enabled" {
+  command = plan
+
+  variables {
+    gateway_access_log_enabled = true
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.istiod.values[0]).meshConfig.extensionProviders[0].name == "np-gateway-access-log"
+    error_message = "istiod meshConfig should declare the np-gateway-access-log provider"
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.istiod.values[0]).meshConfig.extensionProviders[0].envoyFileAccessLog.logFormat.labels.upstream_cluster == "%UPSTREAM_CLUSTER_RAW%"
+    error_message = "the access log must be JSON (logFormat.labels) with the fields the logs-controller parses"
+  }
+}
