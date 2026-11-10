@@ -22,7 +22,7 @@ The module constructs a set of locals that merge gateway configuration (public/p
 
 ```hcl
 module "gke" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v9.11.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/gke?ref=v9.12.0"
 
   cluster_name            = "your-cluster-name"
   location                = "your-location"

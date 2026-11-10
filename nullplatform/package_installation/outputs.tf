@@ -18,11 +18,6 @@ output "installed_version" {
   value       = nullplatform_package_installation.this.default_version
 }
 
-output "missing_optional_requirements" {
-  description = "Optional providers the package can use that were not configured at nrn or above it when it was installed."
-  value       = nullplatform_package_installation.this.missing_optional_requirements
-}
-
 output "components" {
   description = "Bill of materials of the installed revision. How the installing organization finds the resources of a package it does not own."
   value       = data.nullplatform_package.this.components

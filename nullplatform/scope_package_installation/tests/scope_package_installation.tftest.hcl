@@ -71,8 +71,24 @@ variables {
   create_agent_channel             = false
 }
 
+# The installation is overridden whole here: the scope type's provider_id waits
+# for the installation id (see main.tf), so on a first install it is unknown at
+# plan and the assertion below could not read it.
 run "the_scope_type_points_at_the_package_specification_and_needs_no_template" {
   command = plan
+
+  override_module {
+    target = module.installation
+    outputs = {
+      installation_id               = "dummy-installation-id"
+      package_id                    = "dummy-package-id"
+      installed_version             = "1.2.3"
+      missing_optional_requirements = []
+      service_specification_ids     = ["dummy-spec-id"]
+      service_specification_id      = "dummy-spec-id"
+      service_specification_slug    = "example-functions"
+    }
+  }
 
   assert {
     condition     = nullplatform_scope_type.this.provider_id == "dummy-spec-id"
@@ -316,13 +332,12 @@ run "outputs_carry_the_names_scope_definition_uses" {
   override_module {
     target = module.installation
     outputs = {
-      installation_id               = "dummy-installation-id"
-      package_id                    = "dummy-package-id"
-      installed_version             = "1.2.3"
-      missing_optional_requirements = []
-      service_specification_ids     = ["dummy-spec-id"]
-      service_specification_id      = "dummy-spec-id"
-      service_specification_slug    = "example-functions"
+      installation_id            = "dummy-installation-id"
+      package_id                 = "dummy-package-id"
+      installed_version          = "1.2.3"
+      service_specification_ids  = ["dummy-spec-id"]
+      service_specification_id   = "dummy-spec-id"
+      service_specification_slug = "example-functions"
     }
   }
 

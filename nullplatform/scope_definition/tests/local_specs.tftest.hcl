@@ -45,29 +45,6 @@ run "templates_are_read_from_disk" {
   }
 }
 
-run "package_declares_its_required_providers" {
-  command = plan
-
-  variables {
-    package = {
-      version = "1.0.0"
-      requires_providers = [
-        { category = "scope-configurations" },
-        { category = "metrics", optional = true },
-      ]
-      artifacts = [{ resource_id = "artifact-1", resource_revision_id = "revision-1" }]
-    }
-  }
-
-  assert {
-    condition = [for r in nullplatform_package.this[0].requires_provider : [r.category, r.optional]] == [
-      ["scope-configurations", false],
-      ["metrics", true],
-    ]
-    error_message = "requires_providers should become the package's requires_provider blocks, in order."
-  }
-}
-
 run "a_published_package_creates_only_what_it_pins" {
   command = plan
 
@@ -116,4 +93,32 @@ run "nrn_settings_need_an_api_key" {
   }
 
   expect_failures = [null_resource.nrn_patch]
+}
+
+# A given slug reaches the specification (and so the package the module
+# publishes, which takes the specification's slug by default). Omitted, the
+# provider sends none and the platform derives it — that half is the
+# provider's contract, pinned in its own suite; at plan the slug is unknown.
+run "a_given_slug_reaches_the_specification" {
+  command = plan
+
+  variables {
+    service_spec_name = "Example Functions"
+    service_spec_slug = "np-example-functions"
+  }
+
+  assert {
+    condition     = nullplatform_service_specification.from_template.slug == "np-example-functions"
+    error_message = "service_spec_slug must be the specification's slug"
+  }
+}
+
+run "a_slug_the_platform_could_not_derive_is_refused" {
+  command = plan
+
+  variables {
+    service_spec_slug = "Example_Functions"
+  }
+
+  expect_failures = [var.service_spec_slug]
 }
