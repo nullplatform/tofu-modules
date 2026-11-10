@@ -10,9 +10,18 @@ variable "prometheus_version" {
 }
 
 variable "nullplatform_port" {
-  description = "Port number for nullplatform service communication"
+  description = "Deprecated and ignored: Prometheus finds the logs-controller through its prometheus.io/scrape pod annotations. Remove it."
   type        = number
-  default     = 2021
+  default     = null
+}
+
+# The null-platform-metrics job scraped every node on this port, the same exporters the chart's
+# kubernetes-pods job already scrapes by annotation, so every nullplatform_* series was doubled.
+check "nullplatform_port_deprecated" {
+  assert {
+    condition     = var.nullplatform_port == null
+    error_message = "nullplatform_port is deprecated and ignored: the logs-controller is scraped through its pod annotations. Remove it."
+  }
 }
 
 variable "prometheus_namespace" {
