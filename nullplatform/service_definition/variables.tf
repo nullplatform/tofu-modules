@@ -62,6 +62,28 @@ variable "service_name" {
   description = "Name of the scope type to be created"
 }
 
+variable "service_slug" {
+  type        = string
+  default     = null
+  description = "Slug of the service specification. Null (the default) lets the platform derive it from `service_name`, as it always did. Give one to keep a namespaced identifier under a plain name: a service published for every organization (\"AWS S3 Bucket\") lives next to the copies organizations already run under the derived slug only if its own slug differs (`np-aws-s3-bucket`); channels filter by the specification slug and the agent resolves the package worker by slug. The package the module publishes takes this slug too unless `package.slug` says otherwise. Lowercase letters and digits joined by single dashes; it never changes afterwards, so changing it replaces the specification. Requires provider >= 0.0.113."
+
+  validation {
+    condition     = var.service_slug == null || can(regex("^[a-z0-9]+(?:-[a-z0-9]+)*$", var.service_slug))
+    error_message = "A slug is lowercase letters and digits joined by single dashes, exactly what the platform derives from a name."
+  }
+}
+
+variable "link_slugs" {
+  type        = map(string)
+  default     = {}
+  description = "Slug per link specification, keyed by the link template name (`available_links`). A link not listed derives its slug from its template's name, as it always did. Same shape and rules as `service_slug`. Requires provider >= 0.0.113."
+
+  validation {
+    condition     = alltrue([for slug in values(var.link_slugs) : can(regex("^[a-z0-9]+(?:-[a-z0-9]+)*$", slug))])
+    error_message = "A slug is lowercase letters and digits joined by single dashes, exactly what the platform derives from a name."
+  }
+}
+
 variable "available_actions" {
   type        = list(string)
   default     = []
@@ -169,14 +191,6 @@ variable "package" {
     release in that case; every other artifact type gets no meta defaults
     (their meta shape is unrelated to a container registry).
 
-    `requires_providers` declares the providers an organization must already
-    have configured at the installation NRN or above it before installing the
-    package: by `category` (any provider specification in it) or by
-    `specification`. A missing required one refuses the install; a missing
-    `optional` one is reported on the installation. It is the package's
-    declaration, not a revision's: the list replaces it whole on each apply,
-    and an empty list clears it. Requires provider >= 0.0.110.
-
     Null (the default) keeps the classic module behavior — no package.
   EOT
   type = object({
@@ -186,11 +200,6 @@ variable "package" {
     default    = optional(bool, true)      # promote each published revision to the package default
     tags       = optional(map(string), {}) # release tags: name => version (requires an API with the package release-tag routes)
     visible_to = optional(list(string))    # default: [var.nrn]
-    requires_providers = optional(list(object({
-      category      = optional(string) # any provider specification in this category satisfies it…
-      specification = optional(string) # …or this one in particular (exactly one of the two)
-      optional      = optional(bool, false)
-    })), [])
     artifacts = optional(list(object({
       name                 = optional(string, "impl")           # default: a single service-implementation artifact
       type                 = optional(string, "git_repository") # oci_image | oras_artifact | git_repository | blob
@@ -215,13 +224,6 @@ variable "package" {
       for a in var.package.artifacts : a.lookup ? a.meta != null : true
     ])
     error_message = "`lookup = true` requires `meta` with the identity fields of the existing artifact."
-  }
-
-  validation {
-    condition = var.package == null ? true : alltrue([
-      for r in var.package.requires_providers : (r.category == null) != (r.specification == null)
-    ])
-    error_message = "Each package requires_providers entry names exactly one of `category`, `specification`."
   }
 }
 

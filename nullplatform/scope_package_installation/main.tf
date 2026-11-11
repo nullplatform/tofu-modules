@@ -37,12 +37,22 @@ module "installation" {
 #    what a scope type that delegates to a service specification (provider_id)
 #    is, and a package installs exactly such a specification. Name and
 #    description come from the same inputs scope_definition takes.
+#
+#    The scope type must wait for the installation: core-entities validates
+#    provider_id by listing the specifications visible at nrn, and the
+#    package's specification is listed there only once the installation
+#    exists. The specification id itself is known at plan (it comes from the
+#    package's bill of materials), so a plain reference would let OpenTofu
+#    create both in parallel and the scope type fail once with
+#    SCOPE_TYPE.INVALID_SCOPE_TYPE_ID on every first install. Referencing the
+#    installation id orders them without a depends_on, which would make the
+#    scope type unknown on every later plan (a version upgrade included).
 resource "nullplatform_scope_type" "this" {
   nrn           = var.nrn
   name          = var.service_spec_name
   description   = var.service_spec_description
   provider_type = "service"
-  provider_id   = local.specification_id
+  provider_id   = module.installation.installation_id != "" ? local.specification_id : local.specification_id
 
   lifecycle {
     precondition {

@@ -21,6 +21,14 @@ resource "terraform_data" "cross_variable_validation" {
       error_message = "shutdown_drain_timeout_seconds must be at least 10s below termination_grace_period_seconds: the agent is killed when the grace period runs out, cutting the drain and the disconnect after it."
     }
     precondition {
+      condition     = !var.topology_spread_constraints_enabled || coalesce(var.replicas, 1) > 1
+      error_message = "topology_spread_constraints_enabled needs more than one agent replica: raise replicas, or disable topology spread."
+    }
+    precondition {
+      condition     = var.topology_spread_constraints_enabled || length(var.topology_spread_constraints) == 0
+      error_message = "topology_spread_constraints is set but topology_spread_constraints_enabled is false, so nothing would apply them: enable it or drop the constraints."
+    }
+    precondition {
       condition     = var.cloud_provider != "azure" || var.azure_workload_identity || (var.azure_client_id != null && var.azure_client_secret != null)
       error_message = "On 'azure', set azure_workload_identity = true or provide both azure_client_id and azure_client_secret."
     }

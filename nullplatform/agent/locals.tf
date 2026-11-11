@@ -286,6 +286,25 @@ locals {
     }
   )
 
+  topology_spread = var.topology_spread_constraints_enabled ? merge(
+    { enabled = true },
+    length(var.topology_spread_constraints) == 0 ? {} : {
+      constraints = [
+        for c in var.topology_spread_constraints : merge(
+          { for k, v in c : k => v if v != null && k != "labelSelector" },
+          c.labelSelector == null ? {} : {
+            labelSelector = merge(
+              c.labelSelector.matchLabels == null ? {} : { matchLabels = c.labelSelector.matchLabels },
+              c.labelSelector.matchExpressions == null ? {} : {
+                matchExpressions = [for e in c.labelSelector.matchExpressions : { for k, v in e : k => v if v != null }]
+              },
+            )
+          },
+        )
+      ]
+    },
+  ) : null
+
   # Single combined values document — worker is just another top-level key
   # of the same agent chart values, not a second Helm values layer.
   nullplatform_agent_values = templatefile("${path.module}/templates/nullplatform_agent_values.tmpl.yaml", {
@@ -313,5 +332,6 @@ locals {
     resources              = local.agent_resources
     replicas               = var.replicas
     affinity               = var.affinity
+    topology_spread        = local.topology_spread
   })
 }

@@ -6,23 +6,23 @@ Installs a published nullplatform scope package into an organization and creates
 
 ## Architecture
 
-The module composes a `package_installation` child module to register the package at the given NRN, then creates a `nullplatform_scope_type` resource wired to the installed specification ID resolved from that child module. A `terraform_data` resource runs a `np nrn patch` local-exec provisioner to write metrics and logging provider slugs into NRN settings. Optionally, a `nullplatform_provider_specification` resource is created from a JSON template read either from disk via `file()` or fetched via the `http` data source, and a `scope_definition_agent_association` child module creates the agent notification channel routing scope actions to the package worker.
+The module invokes a child module (package_installation) to create the package installation and resolve the service specification, then creates a nullplatform_scope_type resource referencing the installation to enforce ordering. A terraform_data resource with a local-exec provisioner runs `np nrn patch` to write metrics and logging provider settings at the NRN level. Optionally, a nullplatform_provider_specification resource is created from a JSON template read via data.http or from disk, and a second child module (scope_definition_agent_association) creates the agent notification channel referencing the same specification id and slug.
 
 ## Features
 
-- Installs a versioned scope package into a nullplatform organization via the package_installation child module
-- Creates a nullplatform_scope_type resource linked to the package's service specification ID with a precondition enforcing exactly one pinned specification
-- Writes scope metrics and logging provider slugs to NRN settings via a terraform_data local-exec provisioner running np nrn patch
-- Optionally creates a nullplatform_provider_specification for the scope-configuration schema from a template fetched over HTTP or read from a local checkout
-- Optionally creates an agent notification channel via the scope_definition_agent_association child module routing scope actions to the package worker
-- Supports template retrieval from a local repository checkout or from a raw HTTP URL with a pinned ref for catalog-driven deployments
-- Exposes compatibility-named outputs matching scope_definition so switching from a self-registered scope to a global package requires no downstream changes
+- Installs a versioned nullplatform scope package at a specified NRN and resolves its service specification
+- Creates a nullplatform_scope_type pointing at the installed package specification with enforced installation ordering
+- Patches NRN settings with configurable external metrics and logging providers via `np nrn patch`
+- Optionally creates a nullplatform_provider_specification scope-configuration schema from a repository template fetched over HTTP or from a local checkout
+- Optionally creates an agent channel routing scope actions to the package worker via the scope_definition_agent_association child module
+- Supports template resolution from either a local directory checkout or raw HTTP URL with pinned repository ref
+- Exports scope type, specification, installation, provider specification, and channel identifiers as outputs
 
 ## Basic Usage
 
 ```hcl
 module "scope_package_installation" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_package_installation?ref=v9.10.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_package_installation?ref=v9.13.1"
 
   nrn                      = "your-nrn"
   package_slug             = "your-package-slug"
@@ -54,7 +54,7 @@ resource "example_resource" "this" {
 | Name | Version |
 |------|---------|
 | <a name="provider_http"></a> [http](#provider\_http) | 3.6.3 |
-| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.110 |
+| <a name="provider_nullplatform"></a> [nullplatform](#provider\_nullplatform) | 0.0.112 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Modules
@@ -102,7 +102,6 @@ resource "example_resource" "this" {
 |------|-------------|
 | <a name="output_installation_id"></a> [installation\_id](#output\_installation\_id) | ID of the package installation. |
 | <a name="output_installed_version"></a> [installed\_version](#output\_installed\_version) | Version new scopes are born with. |
-| <a name="output_missing_optional_requirements"></a> [missing\_optional\_requirements](#output\_missing\_optional\_requirements) | Optional providers the package can use that were not configured at nrn or above it when it was installed. |
 | <a name="output_notification_channel_id"></a> [notification\_channel\_id](#output\_notification\_channel\_id) | ID of the agent notification channel, or null without create\_agent\_channel. |
 | <a name="output_package_default_version"></a> [package\_default\_version](#output\_package\_default\_version) | Same as installed\_version: the version new scopes are born with. |
 | <a name="output_package_id"></a> [package\_id](#output\_package\_id) | ID of the installed package. |
@@ -119,15 +118,15 @@ resource "example_resource" "this" {
 {
   "name": "scope_package_installation",
   "description": "Installs a published nullplatform scope package into an organization and creates the associated scope type, NRN settings, optional scope-configuration provider specification, and optional agent channel",
-  "architecture": "The module composes a `package_installation` child module to register the package at the given NRN, then creates a `nullplatform_scope_type` resource wired to the installed specification ID resolved from that child module. A `terraform_data` resource runs a `np nrn patch` local-exec provisioner to write metrics and logging provider slugs into NRN settings. Optionally, a `nullplatform_provider_specification` resource is created from a JSON template read either from disk via `file()` or fetched via the `http` data source, and a `scope_definition_agent_association` child module creates the agent notification channel routing scope actions to the package worker.",
+  "architecture": "The module invokes a child module (package_installation) to create the package installation and resolve the service specification, then creates a nullplatform_scope_type resource referencing the installation to enforce ordering. A terraform_data resource with a local-exec provisioner runs `np nrn patch` to write metrics and logging provider settings at the NRN level. Optionally, a nullplatform_provider_specification resource is created from a JSON template read via data.http or from disk, and a second child module (scope_definition_agent_association) creates the agent notification channel referencing the same specification id and slug.",
   "features": [
-    "Installs a versioned scope package into a nullplatform organization via the package_installation child module",
-    "Creates a nullplatform_scope_type resource linked to the package's service specification ID with a precondition enforcing exactly one pinned specification",
-    "Writes scope metrics and logging provider slugs to NRN settings via a terraform_data local-exec provisioner running np nrn patch",
-    "Optionally creates a nullplatform_provider_specification for the scope-configuration schema from a template fetched over HTTP or read from a local checkout",
-    "Optionally creates an agent notification channel via the scope_definition_agent_association child module routing scope actions to the package worker",
-    "Supports template retrieval from a local repository checkout or from a raw HTTP URL with a pinned ref for catalog-driven deployments",
-    "Exposes compatibility-named outputs matching scope_definition so switching from a self-registered scope to a global package requires no downstream changes"
+    "Installs a versioned nullplatform scope package at a specified NRN and resolves its service specification",
+    "Creates a nullplatform_scope_type pointing at the installed package specification with enforced installation ordering",
+    "Patches NRN settings with configurable external metrics and logging providers via `np nrn patch`",
+    "Optionally creates a nullplatform_provider_specification scope-configuration schema from a repository template fetched over HTTP or from a local checkout",
+    "Optionally creates an agent channel routing scope actions to the package worker via the scope_definition_agent_association child module",
+    "Supports template resolution from either a local directory checkout or raw HTTP URL with pinned repository ref",
+    "Exports scope type, specification, installation, provider specification, and channel identifiers as outputs"
   ],
   "inputs": [
     {
@@ -229,7 +228,6 @@ resource "example_resource" "this" {
   "outputs": [
     "installation_id",
     "installed_version",
-    "missing_optional_requirements",
     "service_specification_id",
     "service_specification_slug",
     "scope_type_id",
@@ -241,6 +239,6 @@ resource "example_resource" "this" {
     "package_id",
     "package_default_version"
   ],
-  "hash": "5865fe30479ddcedef082dddc6c1cca2"
+  "hash": "52759d760c0aa0bba286ac2880b88a6f"
 }
 END_AI_METADATA -->

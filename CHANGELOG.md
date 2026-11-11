@@ -3,9 +3,71 @@
 ## Unreleased
 
 
+### Features
+
+* **packages:** `scope_definition` takes `service_spec_slug`, and `service_definition` takes `service_slug` and `link_slugs`, to publish a specification under a plain name with a namespaced slug ("AWS Lambda" as `np-aws-lambda`), so a specification published for every organization can live next to the copies organizations already run under the derived slug. Omitted, the platform keeps deriving the slug from the name. Requires provider >= 0.0.113
+
 ### Bug Fixes
 
+* **packages:** drop `package.requires_providers` from `scope_definition` and `service_definition`, and the `missing_optional_requirements` output from `package_installation`, `scope_package_installation` and `service_package_installation`: the platform never accepted the declaration and provider 0.0.112 removed both, so a `tofu init -upgrade` under the `>= 0.0.110` pin failed to validate. The modules now require provider >= 0.0.112
 * **external_dns:** support public and private DNS on Azure with ExternalDNS: `label_filter` now applies to the `azure` and `azure-private-dns` providers, and the new `gateway_name` limits route sources to one Gateway, so a public instance keeps internal scopes out of the public zone while an `azure-private-dns` instance publishes them in the Private DNS zone (split-horizon)
+
+## [9.13.1](https://github.com/nullplatform/tofu-modules/compare/v9.13.0...v9.13.1) (2026-11-11)
+
+
+### Bug Fixes
+
+* **scope_configuration:** mirror every static-files spec default to stop drift ([#680](https://github.com/nullplatform/tofu-modules/issues/680)) ([adba7fb](https://github.com/nullplatform/tofu-modules/commit/adba7fb604dad9009fbdd594024b77e12af7a5be))
+
+## [9.13.0](https://github.com/nullplatform/tofu-modules/compare/v9.12.0...v9.13.0) (2026-11-10)
+
+
+### Features
+
+* **agent:** add topology_spread_constraints variable ([#678](https://github.com/nullplatform/tofu-modules/issues/678)) ([0509917](https://github.com/nullplatform/tofu-modules/commit/0509917c3debaf86edbee75c8ee59a31916b104e))
+
+## [9.12.0](https://github.com/nullplatform/tofu-modules/compare/v9.11.4...v9.12.0) (2026-11-09)
+
+
+### Features
+
+* **packages:** publish a specification under a plain name with a slug of its own ([#676](https://github.com/nullplatform/tofu-modules/issues/676)) ([d73bef6](https://github.com/nullplatform/tofu-modules/commit/d73bef600f7ba67f6aacee387a07f59785502f8e))
+
+## [9.11.4](https://github.com/nullplatform/tofu-modules/compare/v9.11.3...v9.11.4) (2026-11-09)
+
+
+### Bug Fixes
+
+* **scope_package_installation:** create the scope type after the installation ([#669](https://github.com/nullplatform/tofu-modules/issues/669)) ([611cbc8](https://github.com/nullplatform/tofu-modules/commit/611cbc8eb372c9a88b4b86364d979f1b72024257))
+
+## [9.11.3](https://github.com/nullplatform/tofu-modules/compare/v9.11.2...v9.11.3) (2026-11-06)
+
+
+### Bug Fixes
+
+* **packages:** drop requires_providers and missing_optional_requirements, removed from the provider ([39dbb4f](https://github.com/nullplatform/tofu-modules/commit/39dbb4f1a69cd05771a8bcf3a6abfe9c6993d7c1))
+* **packages:** drop requires_providers and missing_optional_requirements, removed from the provider ([#675](https://github.com/nullplatform/tofu-modules/issues/675)) ([0e0cde1](https://github.com/nullplatform/tofu-modules/commit/0e0cde1881e105239405aa1f3111da1e1b047771))
+
+## [9.11.2](https://github.com/nullplatform/tofu-modules/compare/v9.11.1...v9.11.2) (2026-11-06)
+
+
+### Bug Fixes
+
+* **scope_definition:** surface gomplate errors when a template fails to render ([#672](https://github.com/nullplatform/tofu-modules/issues/672)) ([d46bd20](https://github.com/nullplatform/tofu-modules/commit/d46bd20407e1a49042bf1ef0d0c60a2d68dd43e8))
+
+## [9.11.1](https://github.com/nullplatform/tofu-modules/compare/v9.11.0...v9.11.1) (2026-11-03)
+
+
+### Bug Fixes
+
+* check out files with LF line endings on every platform ([#665](https://github.com/nullplatform/tofu-modules/issues/665)) ([ce98923](https://github.com/nullplatform/tofu-modules/commit/ce98923e3c220a9fea2887d374a106eb510aeece))
+
+## [9.11.0](https://github.com/nullplatform/tofu-modules/compare/v9.10.0...v9.11.0) (2026-11-03)
+
+
+### Features
+
+* **parameters:** run the parameters provider as a worker (package-exec) ([#660](https://github.com/nullplatform/tofu-modules/issues/660)) ([bdc7162](https://github.com/nullplatform/tofu-modules/commit/bdc71624e5eeaff0a98d1de80b3662d46b52edae))
 
 ## [9.10.0](https://github.com/nullplatform/tofu-modules/compare/v9.9.0...v9.10.0) (2026-11-02)
 
