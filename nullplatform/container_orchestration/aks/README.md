@@ -22,7 +22,7 @@ The module constructs several local value maps (cluster, gateway, resource_manag
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v9.12.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v9.14.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"

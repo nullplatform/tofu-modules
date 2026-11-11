@@ -2,30 +2,31 @@
 
 ## Description
 
-Deploys ExternalDNS via Helm onto Kubernetes with multi-provider DNS backend support including Cloudflare, AWS Route53, OCI, Azure, Google Cloud DNS, PowerDNS, and RFC2136
+Deploys ExternalDNS via Helm on Kubernetes with multi-provider DNS backend support including AWS Route53, Cloudflare, Azure, GCP, OCI, PowerDNS, and RFC2136
 
 ## Architecture
 
-The module optionally creates a kubernetes_namespace_v1 resource, then provisions a helm_release resource targeting the official external-dns Helm chart. Provider-specific configuration is assembled in locals.tf by merging a base_config with a provider-specific config block selected from a local map keyed on dns_provider_name. Sensitive credentials for each provider (Cloudflare API token, OCI config, Azure config, PowerDNS API key, RFC2136 TSIG secret) are injected as kubernetes_secret_v1 resources that the helm_release depends on, while IAM identity (IRSA annotations, GKE Workload Identity annotations, Azure Workload Identity labels) is wired through serviceAccount annotations inside the Helm values.
+The module creates an optional kubernetes_namespace_v1 resource when create_namespace is true, then deploys a helm_release resource for the official ExternalDNS chart from kubernetes-sigs. Provider-specific kubernetes_secret_v1 resources are created for credentials (Cloudflare API token, OCI config, Azure config, PowerDNS API key, RFC2136 TSIG secret) and wired as dependencies to the helm_release. Locals merge a base_config with the selected provider_config — chosen by indexing a provider_configs map with dns_provider_name — to produce the final Helm values, including service account annotations, extra args, environment variables, and volume mounts.
 
 ## Features
 
-- Deploys ExternalDNS Helm chart with provider-specific values assembled from modular local config blocks
-- Creates kubernetes_namespace_v1 for ExternalDNS with optional namespace creation control
-- Manages kubernetes_secret_v1 resources for provider credentials including Cloudflare API token, OCI config file, Azure config, PowerDNS API key, and RFC2136 TSIG secret
-- Configures AWS IRSA or EKS Pod Identity for Route53 access via service account annotations
-- Supports Azure Workload Identity and Service Principal authentication for both public and private DNS zones
-- Configures GKE Workload Identity binding via iam.gke.io/gcp-service-account service account annotation
-- Supports on-premise DNS backends via PowerDNS REST API and RFC2136 dynamic updates with optional TSIG authentication
+- Deploys ExternalDNS Helm chart with pinned version enforcement via validation
+- Supports eight DNS providers including cloud (AWS Route53, Cloudflare, Azure Public/Private DNS, GCP Cloud DNS, OCI DNS) and self-hosted (PowerDNS, RFC2136) backends
+- Configures AWS IRSA or EKS Pod Identity service account annotation based on aws_identity_mode
+- Mounts provider credentials as Kubernetes secrets with sensitive values kept out of pod command lines
+- Applies label-filter and zone-type extra args per provider to scope DNS record management
+- Supports Azure Workload Identity and Service Principal authentication modes for Azure DNS providers
+- Creates optional Kubernetes namespace and supports multi-instance deployments with public/private type namespacing
 
 ## Basic Usage
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v9.12.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v9.14.0"
 
-  dns_provider_name = "your-dns-provider-name"
-  domain_filters    = "your-domain-filters"
+  dns_provider_name    = "your-dns-provider-name"
+  domain_filters       = "your-domain-filters"
+  external_dns_version = "your-external-dns-version"
 }
 ```
 
@@ -33,11 +34,12 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v9.12.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v9.14.0"
 
-  cloudflare_token  = "your-cloudflare-token"  # Required when dns_provider_name = "cloudflare"
-  dns_provider_name = "cloudflare"
-  domain_filters    = "your-domain-filters"
+  cloudflare_token     = "your-cloudflare-token"  # Required when dns_provider_name = "cloudflare"
+  dns_provider_name    = "cloudflare"
+  domain_filters       = "your-domain-filters"
+  external_dns_version = "your-external-dns-version"
 }
 ```
 
@@ -45,15 +47,16 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v9.12.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v9.14.0"
 
-  aws_iam_role_arn  = "your-aws-iam-role-arn"  # Required when dns_provider_name = "aws"
-  aws_identity_mode = "your-aws-identity-mode"  # Required when dns_provider_name = "aws"
-  aws_region        = "your-aws-region"  # Required when dns_provider_name = "aws"
-  dns_provider_name = "aws"
-  domain_filters    = "your-domain-filters"
-  zone_id_filter    = "your-zone-id-filter"  # Required when dns_provider_name = "aws"
-  zone_type         = "your-zone-type"  # Required when dns_provider_name = "aws"
+  aws_iam_role_arn     = "your-aws-iam-role-arn"  # Required when dns_provider_name = "aws"
+  aws_identity_mode    = "your-aws-identity-mode"  # Required when dns_provider_name = "aws"
+  aws_region           = "your-aws-region"  # Required when dns_provider_name = "aws"
+  dns_provider_name    = "aws"
+  domain_filters       = "your-domain-filters"
+  external_dns_version = "your-external-dns-version"
+  zone_id_filter       = "your-zone-id-filter"  # Required when dns_provider_name = "aws"
+  zone_type            = "your-zone-type"  # Required when dns_provider_name = "aws"
 }
 ```
 
@@ -61,10 +64,11 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v9.12.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v9.14.0"
 
   dns_provider_name        = "oci"
   domain_filters           = "your-domain-filters"
+  external_dns_version     = "your-external-dns-version"
   oci_compartment_ocid     = "your-oci-compartment-ocid"  # Required when dns_provider_name = "oci"
   oci_region               = "your-oci-region"  # Required when dns_provider_name = "oci"
   oci_service_account_name = "your-oci-service-account-name"  # Required when dns_provider_name = "oci"
@@ -77,7 +81,7 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v9.12.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v9.14.0"
 
   azure_client_id                 = "your-azure-client-id"  # Required when dns_provider_name = "azure"
   azure_federated_credential_id   = "your-azure-federated-credential-id"  # Required when dns_provider_name = "azure"
@@ -87,6 +91,7 @@ module "external_dns" {
   azure_workload_identity_enabled = "your-azure-workload-identity-enabled"  # Required when dns_provider_name = "azure"
   dns_provider_name               = "azure"
   domain_filters                  = "your-domain-filters"
+  external_dns_version            = "your-external-dns-version"
 }
 ```
 
@@ -94,7 +99,7 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v9.12.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v9.14.0"
 
   azure_client_id                 = "your-azure-client-id"  # Required when dns_provider_name = "azure-private-dns"
   azure_federated_credential_id   = "your-azure-federated-credential-id"  # Required when dns_provider_name = "azure-private-dns"
@@ -104,6 +109,7 @@ module "external_dns" {
   azure_workload_identity_enabled = "your-azure-workload-identity-enabled"  # Required when dns_provider_name = "azure-private-dns"
   dns_provider_name               = "azure-private-dns"
   domain_filters                  = "your-domain-filters"
+  external_dns_version            = "your-external-dns-version"
 }
 ```
 
@@ -111,10 +117,11 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v9.12.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v9.14.0"
 
   dns_provider_name         = "google"
   domain_filters            = "your-domain-filters"
+  external_dns_version      = "your-external-dns-version"
   gcp_project_id            = "your-gcp-project-id"  # Required when dns_provider_name = "google"
   gcp_service_account_email = "your-gcp-service-account-email"  # Required when dns_provider_name = "google"
   gcp_service_account_name  = "your-gcp-service-account-name"  # Required when dns_provider_name = "google"
@@ -126,10 +133,11 @@ module "external_dns" {
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v9.12.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v9.14.0"
 
   dns_provider_name    = "pdns"
   domain_filters       = "your-domain-filters"
+  external_dns_version = "your-external-dns-version"
   pdns_api_key         = "your-pdns-api-key"  # Required when dns_provider_name = "pdns"
   pdns_server          = "your-pdns-server"  # Required when dns_provider_name = "pdns"
   pdns_server_id       = "your-pdns-server-id"  # Required when dns_provider_name = "pdns"
@@ -137,14 +145,15 @@ module "external_dns" {
 }
 ```
 
-### Usage with RFC2136 Dynamic DNS
+### Usage with RFC2136 (BIND/Knot)
 
 ```hcl
 module "external_dns" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v9.12.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/external_dns?ref=v9.14.0"
 
   dns_provider_name       = "rfc2136"
   domain_filters          = "your-domain-filters"
+  external_dns_version    = "your-external-dns-version"
   rfc2136_host            = "your-rfc2136-host"  # Required when dns_provider_name = "rfc2136"
   rfc2136_insecure        = "your-rfc2136-insecure"  # Required when dns_provider_name = "rfc2136"
   rfc2136_port            = "your-rfc2136-port"  # Required when dns_provider_name = "rfc2136"
@@ -211,7 +220,7 @@ resource "example_resource" "this" {
 | <a name="input_dns_provider_name"></a> [dns\_provider\_name](#input\_dns\_provider\_name) | The DNS provider to use with ExternalDNS. Use 'azure' for Azure Public DNS zones and 'azure-private-dns' for Azure Private DNS zones — both share the same auth, secret, and ServiceAccount wiring. 'pdns' and 'rfc2136' target a self-hosted PowerDNS or RFC2136-compliant DNS server, for on-premise deployments without a cloud DNS provider. | `string` | n/a | yes |
 | <a name="input_domain_filters"></a> [domain\_filters](#input\_domain\_filters) | The domain filter to limit ExternalDNS to manage DNS records only for specific domains | `string` | n/a | yes |
 | <a name="input_external_dns_namespace"></a> [external\_dns\_namespace](#input\_external\_dns\_namespace) | The Kubernetes namespace where ExternalDNS will be deployed | `string` | `"external-dns"` | no |
-| <a name="input_external_dns_version"></a> [external\_dns\_version](#input\_external\_dns\_version) | The version of ExternalDNS Helm chart to deploy | `string` | `"1.19.0"` | no |
+| <a name="input_external_dns_version"></a> [external\_dns\_version](#input\_external\_dns\_version) | No default: every install pins this deliberately — see VERSIONS.md. The version of ExternalDNS Helm chart to deploy | `string` | n/a | yes |
 | <a name="input_gateway_name"></a> [gateway\_name](#input\_gateway\_name) | Limit Gateway API route sources (e.g. gateway-httproute) to routes attached to this Gateway name, via --gateway-name. Empty means routes of every Gateway. | `string` | `""` | no |
 | <a name="input_gcp_project_id"></a> [gcp\_project\_id](#input\_gcp\_project\_id) | The GCP project ID where the Cloud DNS zones are located (required when dns\_provider\_name is 'google') | `string` | `""` | no |
 | <a name="input_gcp_service_account_email"></a> [gcp\_service\_account\_email](#input\_gcp\_service\_account\_email) | Email of the GCP service account bound via Workload Identity for Cloud DNS access (required when dns\_provider\_name is 'google'). Create the service account and the Workload Identity binding outside this module (e.g. with infrastructure/gcp/iam) and pass its email here. | `string` | `""` | no |
@@ -244,21 +253,26 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "external_dns",
-  "description": "Deploys ExternalDNS via Helm onto Kubernetes with multi-provider DNS backend support including Cloudflare, AWS Route53, OCI, Azure, Google Cloud DNS, PowerDNS, and RFC2136",
-  "architecture": "The module optionally creates a kubernetes_namespace_v1 resource, then provisions a helm_release resource targeting the official external-dns Helm chart. Provider-specific configuration is assembled in locals.tf by merging a base_config with a provider-specific config block selected from a local map keyed on dns_provider_name. Sensitive credentials for each provider (Cloudflare API token, OCI config, Azure config, PowerDNS API key, RFC2136 TSIG secret) are injected as kubernetes_secret_v1 resources that the helm_release depends on, while IAM identity (IRSA annotations, GKE Workload Identity annotations, Azure Workload Identity labels) is wired through serviceAccount annotations inside the Helm values.",
+  "description": "Deploys ExternalDNS via Helm on Kubernetes with multi-provider DNS backend support including AWS Route53, Cloudflare, Azure, GCP, OCI, PowerDNS, and RFC2136",
+  "architecture": "The module creates an optional kubernetes_namespace_v1 resource when create_namespace is true, then deploys a helm_release resource for the official ExternalDNS chart from kubernetes-sigs. Provider-specific kubernetes_secret_v1 resources are created for credentials (Cloudflare API token, OCI config, Azure config, PowerDNS API key, RFC2136 TSIG secret) and wired as dependencies to the helm_release. Locals merge a base_config with the selected provider_config — chosen by indexing a provider_configs map with dns_provider_name — to produce the final Helm values, including service account annotations, extra args, environment variables, and volume mounts.",
   "features": [
-    "Deploys ExternalDNS Helm chart with provider-specific values assembled from modular local config blocks",
-    "Creates kubernetes_namespace_v1 for ExternalDNS with optional namespace creation control",
-    "Manages kubernetes_secret_v1 resources for provider credentials including Cloudflare API token, OCI config file, Azure config, PowerDNS API key, and RFC2136 TSIG secret",
-    "Configures AWS IRSA or EKS Pod Identity for Route53 access via service account annotations",
-    "Supports Azure Workload Identity and Service Principal authentication for both public and private DNS zones",
-    "Configures GKE Workload Identity binding via iam.gke.io/gcp-service-account service account annotation",
-    "Supports on-premise DNS backends via PowerDNS REST API and RFC2136 dynamic updates with optional TSIG authentication"
+    "Deploys ExternalDNS Helm chart with pinned version enforcement via validation",
+    "Supports eight DNS providers including cloud (AWS Route53, Cloudflare, Azure Public/Private DNS, GCP Cloud DNS, OCI DNS) and self-hosted (PowerDNS, RFC2136) backends",
+    "Configures AWS IRSA or EKS Pod Identity service account annotation based on aws_identity_mode",
+    "Mounts provider credentials as Kubernetes secrets with sensitive values kept out of pod command lines",
+    "Applies label-filter and zone-type extra args per provider to scope DNS record management",
+    "Supports Azure Workload Identity and Service Principal authentication modes for Azure DNS providers",
+    "Creates optional Kubernetes namespace and supports multi-instance deployments with public/private type namespacing"
   ],
   "inputs": [
     {
       "name": "domain_filters",
       "description": "The domain filter to limit ExternalDNS to manage DNS records only for specific domains",
+      "required": true
+    },
+    {
+      "name": "external_dns_version",
+      "description": "No default: every install pins this deliberately — see VERSIONS.md. The version of ExternalDNS Helm chart to deploy",
       "required": true
     },
     {
@@ -284,11 +298,6 @@ resource "example_resource" "this" {
     {
       "name": "oci_zone_scope",
       "description": "The scope of the DNS zones in OCI (GLOBAL or PRIVATE)",
-      "required": false
-    },
-    {
-      "name": "external_dns_version",
-      "description": "The version of ExternalDNS Helm chart to deploy",
       "required": false
     },
     {
@@ -473,6 +482,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "fa23f847444823bfc4830c4e06a31c4b"
+  "hash": "19a26492fdb37185d85bf25e7e893fb2"
 }
 END_AI_METADATA -->

@@ -1120,7 +1120,7 @@ run "disruption_settings_are_left_to_the_chart_by_default" {
 
   assert {
     condition = alltrue([
-      for key in ["startupProbe", "podAnnotations", "terminationGracePeriodSeconds", "shutdownDrainTimeoutSeconds", "podDisruptionBudget", "nodeSelector", "tolerations", "replicaCount", "affinity"] :
+      for key in ["startupProbe", "podAnnotations", "terminationGracePeriodSeconds", "shutdownDrainTimeoutSeconds", "podDisruptionBudget", "nodeSelector", "tolerations", "replicaCount", "affinity", "topologySpreadConstraints"] :
       !contains(keys(yamldecode(helm_release.agent.values[0])), key)
     ])
     error_message = "with no overrides the module must not render any disruption-related key"
@@ -1304,6 +1304,112 @@ run "affinity_must_be_an_object" {
   }
 
   expect_failures = [var.affinity]
+}
+
+run "topology_spread_enabled_alone_leaves_the_constraints_to_the_chart" {
+  command = plan
+
+  variables {
+    replicas                            = 2
+    topology_spread_constraints_enabled = true
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).topologySpreadConstraints == { enabled = true }
+    error_message = "enabled alone must render only enabled, so the chart applies its default constraint"
+  }
+}
+
+run "topology_spread_custom_constraints_are_rendered_without_nulls" {
+  command = plan
+
+  variables {
+    replicas                            = 3
+    topology_spread_constraints_enabled = true
+    topology_spread_constraints = [
+      { maxSkew = 1, topologyKey = "topology.kubernetes.io/zone", whenUnsatisfiable = "DoNotSchedule" },
+      {
+        maxSkew           = 2
+        topologyKey       = "kubernetes.io/hostname"
+        whenUnsatisfiable = "ScheduleAnyway"
+        labelSelector = {
+          matchExpressions = [{ key = "name", operator = "Exists" }]
+        }
+      },
+    ]
+  }
+
+  assert {
+    condition = jsonencode(yamldecode(helm_release.agent.values[0]).topologySpreadConstraints) == jsonencode({
+      enabled = true
+      constraints = [
+        { maxSkew = 1, topologyKey = "topology.kubernetes.io/zone", whenUnsatisfiable = "DoNotSchedule" },
+        {
+          labelSelector     = { matchExpressions = [{ key = "name", operator = "Exists" }] }
+          maxSkew           = 2
+          topologyKey       = "kubernetes.io/hostname"
+          whenUnsatisfiable = "ScheduleAnyway"
+        },
+      ]
+    })
+    error_message = "unset optional fields must not render, so the chart still injects the labelSelector and the API server gets no nulls"
+  }
+}
+
+run "topology_spread_with_the_default_single_replica_is_rejected" {
+  command = plan
+
+  variables {
+    topology_spread_constraints_enabled = true
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "topology_spread_with_an_explicit_single_replica_is_rejected" {
+  command = plan
+
+  variables {
+    replicas                            = 1
+    topology_spread_constraints_enabled = true
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "topology_spread_constraints_without_enabled_are_rejected" {
+  command = plan
+
+  variables {
+    replicas                    = 2
+    topology_spread_constraints = [{ maxSkew = 1, topologyKey = "kubernetes.io/hostname", whenUnsatisfiable = "ScheduleAnyway" }]
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "topology_spread_rejects_an_unknown_when_unsatisfiable" {
+  command = plan
+
+  variables {
+    replicas                            = 2
+    topology_spread_constraints_enabled = true
+    topology_spread_constraints         = [{ maxSkew = 1, topologyKey = "kubernetes.io/hostname", whenUnsatisfiable = "Always" }]
+  }
+
+  expect_failures = [var.topology_spread_constraints]
+}
+
+run "topology_spread_rejects_a_max_skew_below_one" {
+  command = plan
+
+  variables {
+    replicas                            = 2
+    topology_spread_constraints_enabled = true
+    topology_spread_constraints         = [{ maxSkew = 0, topologyKey = "kubernetes.io/hostname", whenUnsatisfiable = "ScheduleAnyway" }]
+  }
+
+  expect_failures = [var.topology_spread_constraints]
 }
 
 run "azure_workload_identity_labels_the_agent_and_its_workers" {

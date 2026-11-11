@@ -10,6 +10,7 @@ variables {
   azure_subscription_id         = "00000000-0000-0000-0000-000000000002"
   azure_resource_group          = "rg-dns"
   azure_tenant_id               = "00000000-0000-0000-0000-000000000003"
+  external_dns_version          = "1.23.0"
 }
 
 run "azure_without_filters_renders_no_extra_args" {
