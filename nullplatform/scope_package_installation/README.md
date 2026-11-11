@@ -22,7 +22,7 @@ The module invokes a child module (package_installation) to create the package i
 
 ```hcl
 module "scope_package_installation" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_package_installation?ref=v9.11.4"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_package_installation?ref=v9.13.0"
 
   nrn                      = "your-nrn"
   package_slug             = "your-package-slug"
