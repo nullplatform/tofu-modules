@@ -3,9 +3,14 @@
 ###############################################################################
 
 variable "external_dns_version" {
-  description = "The version of ExternalDNS Helm chart to deploy"
+  # example: 1.23.0
+  description = "No default: every install pins this deliberately — see VERSIONS.md. The version of ExternalDNS Helm chart to deploy"
   type        = string
-  default     = "1.19.0"
+
+  validation {
+    condition     = var.external_dns_version != "" && !contains(["latest", "main", "master"], lower(var.external_dns_version))
+    error_message = "external_dns_version must be a non-empty fixed version, not empty and not a moving reference."
+  }
 }
 
 variable "external_dns_namespace" {
