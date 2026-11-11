@@ -1,0 +1,192 @@
+{
+  "type": "object",
+  "required": [
+    "state",
+    "deployment"
+  ],
+  "properties": {
+    "state": {
+      "type": "object",
+      "title": "OpenTofu state",
+      "description": "Backend used by the create/delete workflows to persist per-scope OpenTofu state.",
+      "required": [
+        "tofu_state_bucket"
+      ],
+      "properties": {
+        "tofu_state_bucket": {
+          "type": "string",
+          "title": "OpenTofu state bucket",
+          "description": "S3 bucket where per-scope OpenTofu state files are stored by the create/delete workflows. Can be shared across scope types — each scope writes under its own key prefix."
+        },
+        "tofu_state_bucket_region": {
+          "type": "string",
+          "title": "OpenTofu state bucket region",
+          "description": "AWS region of the OpenTofu state bucket. Optional; defaults to the region of the cloud-providers account."
+        }
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "title": "Deployment",
+      "description": "Default Lambda image deployed when a scope is created. Replaced by the real application image on the first deployment.",
+      "required": [
+        "placeholder_image_uri"
+      ],
+      "properties": {
+        "placeholder_image_uri": {
+          "type": "string",
+          "title": "Placeholder image URI",
+          "description": "ECR URI of the Lambda placeholder image. A tag ending in -arm64 or -amd64 is swapped to match the scope architecture; any other tag is used as is."
+        }
+      }
+    },
+    "agent": {
+      "type": "object",
+      "title": "Nullplatform agent (optional)",
+      "description": "Lambda layer ARN for the nullplatform agent runtime. Only needed when scope sets USE_NULL_AGENT=true.",
+      "properties": {
+        "null_agent_layer_arn": {
+          "type": "string",
+          "title": "Nullplatform agent Lambda layer ARN",
+          "description": "Optional ARN of the nullplatform agent Lambda layer (e.g. arn:aws:lambda:us-east-1:123456789012:layer:nullplatform-agent:1)."
+        }
+      }
+    },
+    "triggers": {
+      "type": "object",
+      "title": "External invocation (optional)",
+      "description": "Extra AWS principals allowed to invoke the scope's Lambda, beyond the API Gateway or ALB the scope provisions itself.",
+      "properties": {
+        "invoke_permissions": {
+          "type": "array",
+          "title": "Invoke permissions",
+          "description": "Each entry becomes a Lambda resource policy statement on the scope's main alias, so external triggers respect blue/green traffic weights.",
+          "default": [],
+          "items": {
+            "type": "object",
+            "required": [
+              "statement_id",
+              "principal"
+            ],
+            "properties": {
+              "statement_id": {
+                "type": "string",
+                "title": "Statement ID",
+                "description": "Short symbolic name, unique within the scope (letters, digits, '-' and '_'). Example: apigw-authorizer.",
+                "pattern": "^[a-zA-Z0-9_-]+$"
+              },
+              "principal": {
+                "type": "string",
+                "title": "Principal",
+                "description": "AWS service principal allowed to invoke. Example: apigateway.amazonaws.com, events.amazonaws.com, s3.amazonaws.com."
+              },
+              "source_arn": {
+                "type": "string",
+                "title": "Source ARN",
+                "description": "Optional but strongly recommended: restricts the grant to a single caller. Example: arn:aws:execute-api:us-east-1:123456789012:abcd1234/authorizers/*."
+              },
+              "source_account": {
+                "type": "string",
+                "title": "Source account",
+                "description": "Optional. Required by S3, whose bucket ARNs carry no account ID."
+              },
+              "action": {
+                "type": "string",
+                "title": "Action",
+                "description": "Lambda action to grant.",
+                "default": "lambda:InvokeFunction"
+              },
+              "scope": {
+                "type": "string",
+                "title": "Only for scope",
+                "description": "Scope slug or id this grant belongs to. Leave empty only when the grant is meant for every Lambda scope under this NRN — a value set at the application or namespace level is inherited by all of them."
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "uiSchema": {
+    "type": "VerticalLayout",
+    "elements": [
+      {
+        "type": "Categorization",
+        "elements": [
+          {
+            "type": "Category",
+            "label": "State",
+            "elements": [
+              {
+                "type": "Label",
+                "text": "> **ℹ️ Agent IAM (IRSA)**\n\nThe nullplatform agent must run with an IAM role attached to its Kubernetes service account. The role needs `s3:GetObject`, `s3:PutObject`, `s3:DeleteObject`, and `s3:ListBucket` on the state bucket below (and any per-scope key prefixes the workflow writes).",
+                "options": {
+                  "format": "markdown"
+                }
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/state/properties/tofu_state_bucket"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/state/properties/tofu_state_bucket_region"
+              }
+            ]
+          },
+          {
+            "type": "Category",
+            "label": "Deployment",
+            "elements": [
+              {
+                "type": "Label",
+                "text": "> **ℹ️ Placeholder image**\n\nThe placeholder image is the container the agent deploys as the initial Lambda when a scope is created; it's replaced with the real application image on the first deployment. Lambda doesn't support multi-arch manifest lists — push two images with `-arm64` / `-amd64` suffixes on top of the same base tag and point this URI at either one; the agent swaps the suffix to match the scope architecture (default `arm64`).\n\nSee `install/prerequisites.md` for the buildx push commands.",
+                "options": {
+                  "format": "markdown"
+                }
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/deployment/properties/placeholder_image_uri"
+              }
+            ]
+          },
+          {
+            "type": "Category",
+            "label": "Agent (optional)",
+            "elements": [
+              {
+                "type": "Label",
+                "text": "Optional. Set this only if your Lambda functions opt into the nullplatform agent runtime (scope or app sets `USE_NULL_AGENT=true`). Leave empty otherwise.",
+                "options": {
+                  "format": "markdown"
+                }
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/agent/properties/null_agent_layer_arn"
+              }
+            ]
+          },
+          {
+            "type": "Category",
+            "label": "External invocation (optional)",
+            "elements": [
+              {
+                "type": "Label",
+                "text": "> **⚠️ This grants invoke rights**\n\nEach entry lets another AWS service call this scope's Lambda. Only needed when the function is triggered by something other than the scope's own HTTP endpoint — an API Gateway authorizer, an EventBridge rule or scheduler, or an S3 bucket notification.\n\nAlways set a **Source ARN** so the grant is limited to one caller; a principal without it lets *any* resource of that service in the account invoke the function. S3 additionally requires **Source account**, because bucket ARNs carry no account ID.\n\nPermissions are attached to the scope's `main` alias, so external triggers follow blue/green traffic weights.\n\nThis provider resolves against the scope's NRN, so a value set at the application or namespace level applies to **every** Lambda scope beneath it. Set **Only for scope** on any grant that belongs to one function.",
+                "options": {
+                  "format": "markdown"
+                }
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/triggers/properties/invoke_permissions"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

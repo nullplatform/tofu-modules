@@ -19,6 +19,14 @@ variable "dimensions" {
   default     = {}
 }
 
+variable "spec_schema" {
+  description = <<-EOT
+    JSON schema of the provider specification `type` points at, as an object: the `schema` of scope-configuration.json.tpl (e.g. `module.scope_definition.scope_configuration.schema` or `module.scope_package_installation.scope_configuration_schema`). When set, the payload's defaults are read from it (top-level and one section deep) instead of the module's built-in copy, so a default the spec adds never drifts. Null keeps the built-in defaults.
+  EOT
+  type        = any
+  default     = null
+}
+
 ################################################################################
 # static-files
 ################################################################################

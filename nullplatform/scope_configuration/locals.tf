@@ -1,12 +1,33 @@
 locals {
   ##############################################################################
+  # Defaults from var.spec_schema
+  ##############################################################################
+  # Top-level defaults plus each object section's field defaults: the depth
+  # the API fills on write. A section with no defaults is left out, since an
+  # empty object is drift against a config that never had it.
+  spec_properties = try(var.spec_schema.properties, {})
+
+  spec_section_defaults = {
+    for section, p in local.spec_properties : section => {
+      for field, fp in try(p.properties, {}) : field => fp.default
+      if try(fp.default, null) != null
+    }
+  }
+
+  spec_defaults = merge(
+    { for k, p in local.spec_properties : k => p.default if try(p.default, null) != null },
+    { for k, v in local.spec_section_defaults : k => v if length(v) > 0 },
+  )
+
+  ##############################################################################
   # static-files
   ##############################################################################
-  # Mirrors the "static-files" provider spec's own defaults. azure_* fields are
-  # included although only cloud_provider = "aws" is supported: the API fills
-  # every non-null spec default on write whatever the cloud, so omitting one
-  # is a perpetual diff. Fields with no spec default are sent only when set.
-  static_files_defaults = {
+  # Built-in copy of the "static-files" spec defaults, used without
+  # var.spec_schema. azure_* fields are included although only
+  # cloud_provider = "aws" is supported: the API fills every non-null spec
+  # default on write whatever the cloud, so omitting one is a perpetual diff.
+  # Fields with no spec default are sent only when set.
+  static_files_builtin_defaults = {
     cloud_provider = "aws"
     provider = {
       azure_state_auth = "azuread"
@@ -30,6 +51,13 @@ locals {
     }
   }
 
+  # jsonencode round-trip: the two branches are objects of different shapes,
+  # which a conditional can't unify.
+  static_files_defaults = jsondecode(var.spec_schema == null
+    ? jsonencode(local.static_files_builtin_defaults)
+    : jsonencode(local.spec_defaults)
+  )
+
   # The spec replaced distribution.lambda_associations with
   # distribution.default_invocations, which names the runtime alongside the
   # event ("Lambda@Edge - viewer response") so a behavior can also carry a
@@ -50,47 +78,44 @@ locals {
     : local.static_files_legacy_invocations
   )
 
-  # Per-cloud override, merged on top of static_files_defaults. Adding a
-  # cloud: new key here + its variables, new allowed value in variables.tf.
+  # Per-cloud override; local.payload merges each section over
+  # static_files_defaults. Adding a cloud: new key here + its variables, new
+  # allowed value in variables.tf.
   static_files_cloud_overrides = {
     "aws" = {
       cloud_provider = var.cloud_provider
-      provider = merge(local.static_files_defaults.provider, {
+      provider = {
         aws_region       = var.aws_region
         aws_state_bucket = var.aws_state_bucket
-      })
-      distribution = merge(
-        local.static_files_defaults.distribution,
-        {
-          aws_distribution                = var.aws_distribution
-          default_viewer_protocol_policy  = var.aws_default_viewer_protocol_policy
-          default_compress                = var.aws_default_compress
-          default_cache_mode              = var.aws_default_cache_mode
-          default_cache_policy            = var.aws_default_cache_policy
-          default_origin_request_policy   = var.aws_default_origin_request_policy
-          default_response_headers_policy = var.aws_default_response_headers_policy
-          default_invocations             = local.static_files_default_invocations
-          behaviors                       = var.aws_behaviors
-          custom_error_responses          = var.aws_custom_error_responses
-          price_class                     = var.aws_price_class
-          default_root_object             = var.aws_default_root_object
-          # locations has no default in the spec: only sent when the caller
-          # declares some, so a config without a restriction never drifts.
-          geo_restriction = merge(
-            { restriction_type = var.aws_geo_restriction.restriction_type },
-            length(var.aws_geo_restriction.locations) > 0 ? { locations = var.aws_geo_restriction.locations } : {},
-          )
-        },
-      )
-      network = merge(local.static_files_defaults.network, {
+      }
+      distribution = {
+        aws_distribution                = var.aws_distribution
+        default_viewer_protocol_policy  = var.aws_default_viewer_protocol_policy
+        default_compress                = var.aws_default_compress
+        default_cache_mode              = var.aws_default_cache_mode
+        default_cache_policy            = var.aws_default_cache_policy
+        default_origin_request_policy   = var.aws_default_origin_request_policy
+        default_response_headers_policy = var.aws_default_response_headers_policy
+        default_invocations             = local.static_files_default_invocations
+        behaviors                       = var.aws_behaviors
+        custom_error_responses          = var.aws_custom_error_responses
+        price_class                     = var.aws_price_class
+        default_root_object             = var.aws_default_root_object
+        # locations has no default in the spec: only sent when the caller
+        # declares some, so a config without a restriction never drifts.
+        geo_restriction = merge(
+          { restriction_type = var.aws_geo_restriction.restriction_type },
+          length(var.aws_geo_restriction.locations) > 0 ? { locations = var.aws_geo_restriction.locations } : {},
+        )
+      }
+      network = {
         aws_network               = var.aws_network
         aws_hosted_public_zone_id = var.aws_hosted_public_zone_id
-      })
+      }
       # aws_web_acl_name has no default in the spec, and is only read when
       # aws_security = "waf": sending an empty string adds a key a config
       # without a WebACL never had.
       security = merge(
-        local.static_files_defaults.security,
         { aws_security = var.aws_security },
         var.aws_web_acl_name != "" ? { aws_web_acl_name = var.aws_web_acl_name } : {},
       )
@@ -100,13 +125,19 @@ locals {
   ##############################################################################
   # aws-lambda
   ##############################################################################
-  # Mirrors scopes-lambda's specs/scope-configuration.json.tpl. `agent` is
-  # omitted unless a layer ARN is given: the schema makes it optional, and an
-  # empty object would show up as drift against a config that never had it.
-  aws_lambda_defaults = {
+  # Built-in copy of scopes-lambda's specs/scope-configuration.json.tpl, used
+  # without var.spec_schema. `agent` is omitted unless a layer ARN is given:
+  # the schema makes it optional, and an empty object would show up as drift
+  # against a config that never had it.
+  aws_lambda_builtin_defaults = {
     state      = {}
     deployment = {}
   }
+
+  aws_lambda_defaults = jsondecode(var.spec_schema == null
+    ? jsonencode(local.aws_lambda_builtin_defaults)
+    : jsonencode(local.spec_defaults)
+  )
 
   aws_lambda_overrides = merge(
     {
@@ -142,4 +173,11 @@ locals {
 
   defaults  = local.type_defaults[var.type]
   overrides = local.type_overrides[var.type]
+
+  # Overrides win, but an object section is merged one level deep so a spec
+  # default survives next to the fields the module sets in that section.
+  payload = merge(local.defaults, local.overrides, {
+    for k, v in local.overrides : k => merge(local.defaults[k], v)
+    if can(keys(v)) && can(keys(local.defaults[k]))
+  })
 }

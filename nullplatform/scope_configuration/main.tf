@@ -3,5 +3,5 @@ resource "nullplatform_provider_config" "scope_configuration" {
   type       = var.type
   dimensions = var.dimensions
 
-  attributes = jsonencode(merge(local.defaults, local.overrides))
+  attributes = jsonencode(local.payload)
 }
