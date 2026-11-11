@@ -2,20 +2,21 @@
 
 ## Description
 
-Creates an Oracle Kubernetes Engine (OKE) cluster in an existing VCN with configurable CNI types, worker pools, and optional OCIR image pull integration via workload identity
+Provisions an Oracle Container Engine for Kubernetes (OKE) cluster on an existing VCN with configurable CNI, worker pools, and optional OCIR image pull authentication via workload identity
 
 ## Architecture
 
-The module instantiates the oracle-terraform-modules/oke/oci module to create an oci_containerengine_cluster resource with enhanced cluster type and OIDC discovery enabled. When enable_ocir_pull is true, it creates oci_identity_policy and oci_identity_dynamic_group resources to grant workload identity permissions for OCIR access, and injects cloud-init scripts into worker nodes to install the OCIR credential provider with kubelet configuration. The module references existing subnet IDs for control plane (cp), workers, and load balancers (pub_lb), and conditionally adds a pods subnet when cni_type is set to npn for Native Pod Networking.
+The module delegates cluster creation to the oracle-terraform-modules/oke/oci community module (v5.3.3), passing existing subnet IDs for the control plane, worker nodes, and service load balancers — and optionally a pod subnet when CNI is set to NPN. When enable_ocir_pull is true, the module also creates oci_identity_dynamic_group and oci_identity_policy resources for both workload identity and node-level OCIR access, and injects a credential provider cloud-init snippet into the worker_cloud_init list passed to the OKE module. OIDC discovery is unconditionally enabled on the cluster to support workload identity federation.
 
 ## Features
 
-- Creates OKE enhanced cluster with OIDC discovery enabled for workload identity integration
-- Configures CNI networking with either Flannel or Native Pod Networking (NPN) modes
-- Integrates OCIR credential provider via cloud-init scripts with kubelet extra arguments for authenticated image pulls
-- Provisions dynamic groups and IAM policies for workload-level OCIR access control per namespace
-- Supports custom worker pool configurations with flexible shape, OCPU, memory, and boot volume sizing
-- Manages control plane endpoint visibility with configurable public IP assignment and NSG associations
+- Creates an OKE enhanced cluster reusing an existing VCN and pre-provisioned subnets for the API endpoint, worker nodes, and service load balancers
+- Configures CNI as either Flannel or Native Pod Networking (NPN), conditionally attaching a dedicated pod subnet when NPN is selected
+- Provisions OCI IAM dynamic groups and policies to allow worker nodes and Kubernetes workloads to pull images from OCIR using workload identity
+- Injects an OCIR credential provider cloud-init script and kubelet extra arguments into worker nodes when OCIR pull is enabled
+- Enables OIDC discovery on the cluster endpoint to support OCI workload identity federation for pod-level IAM access
+- Supports fully customizable worker pool definitions including shape, OCPU, memory, boot volume size, and OS configuration
+- Exposes cluster CA certificate, API endpoints, and all OCIR policy OCIDs as outputs for downstream consumer modules
 
 ## Basic Usage
 
@@ -27,7 +28,41 @@ module "oke" {
   cluster_name           = "your-cluster-name"
   compartment_id         = "your-compartment-id"
   existing_vcn_id        = "your-existing-vcn-id"
-  home_region            = "your-home-region"
+  kubernetes_version     = "your-kubernetes-version"
+  node_pool_subnet_id    = "your-node-pool-subnet-id"
+  region                 = "your-region"
+  service_lb_subnet_id   = "your-service-lb-subnet-id"
+}
+```
+
+### Usage with Flannel CNI
+
+```hcl
+module "oke" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/oke?ref=v9.13.1"
+
+  api_endpoint_subnet_id = "your-api-endpoint-subnet-id"
+  cluster_name           = "your-cluster-name"
+  compartment_id         = "your-compartment-id"
+  existing_vcn_id        = "your-existing-vcn-id"
+  kubernetes_version     = "latest"
+  node_pool_subnet_id    = "your-node-pool-subnet-id"
+  region                 = "your-region"
+  service_lb_subnet_id   = "your-service-lb-subnet-id"
+}
+```
+
+### Usage with Fixed Kubernetes Version
+
+```hcl
+module "oke" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/oci/oke?ref=v9.13.1"
+
+  api_endpoint_subnet_id = "your-api-endpoint-subnet-id"
+  cluster_name           = "your-cluster-name"
+  compartment_id         = "your-compartment-id"
+  existing_vcn_id        = "your-existing-vcn-id"
+  kubernetes_version     = "v1.34.1"
   node_pool_subnet_id    = "your-node-pool-subnet-id"
   region                 = "your-region"
   service_lb_subnet_id   = "your-service-lb-subnet-id"
@@ -83,8 +118,8 @@ resource "example_resource" "this" {
 | <a name="input_control_plane_nsg_ids"></a> [control\_plane\_nsg\_ids](#input\_control\_plane\_nsg\_ids) | Set of NSG IDs to associate with the control plane | `set(string)` | <pre>[<br/>  "0.0.0.0/0"<br/>]</pre> | no |
 | <a name="input_enable_ocir_pull"></a> [enable\_ocir\_pull](#input\_enable\_ocir\_pull) | Enable IAM policy to allow workloads to pull images from OCIR | `bool` | `false` | no |
 | <a name="input_existing_vcn_id"></a> [existing\_vcn\_id](#input\_existing\_vcn\_id) | ID of the existing VCN to use for the OKE cluster | `string` | n/a | yes |
-| <a name="input_home_region"></a> [home\_region](#input\_home\_region) | The tenancy's home region | `string` | n/a | yes |
-| <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | Kubernetes version for the OKE cluster | `string` | `"v1.34.1"` | no |
+| <a name="input_home_region"></a> [home\_region](#input\_home\_region) | Deprecated, ignored: the module never read it. The home region reaches the module through the oci.home provider the caller passes in. | `string` | `null` | no |
+| <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | No default: every install pins this deliberately — see VERSIONS.md. Kubernetes version of the OKE cluster, with the leading v. A default here would upgrade the control plane of every cluster that never set it the day the default moved, so the version is always the caller's decision. | `string` | n/a | yes |
 | <a name="input_node_pool_subnet_id"></a> [node\_pool\_subnet\_id](#input\_node\_pool\_subnet\_id) | Subnet ID for the worker node pool (private subnet) | `string` | n/a | yes |
 | <a name="input_ocir_pull_namespaces"></a> [ocir\_pull\_namespaces](#input\_ocir\_pull\_namespaces) | List of Kubernetes namespaces allowed to pull from OCIR. If empty, all namespaces in the cluster are allowed. | `list(string)` | `[]` | no |
 | <a name="input_pod_subnet_id"></a> [pod\_subnet\_id](#input\_pod\_subnet\_id) | Subnet ID for pod networking (required when cni\_type = 'npn'). | `string` | `""` | no |
@@ -113,15 +148,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "oke",
-  "description": "Creates an Oracle Kubernetes Engine (OKE) cluster in an existing VCN with configurable CNI types, worker pools, and optional OCIR image pull integration via workload identity",
-  "architecture": "The module instantiates the oracle-terraform-modules/oke/oci module to create an oci_containerengine_cluster resource with enhanced cluster type and OIDC discovery enabled. When enable_ocir_pull is true, it creates oci_identity_policy and oci_identity_dynamic_group resources to grant workload identity permissions for OCIR access, and injects cloud-init scripts into worker nodes to install the OCIR credential provider with kubelet configuration. The module references existing subnet IDs for control plane (cp), workers, and load balancers (pub_lb), and conditionally adds a pods subnet when cni_type is set to npn for Native Pod Networking.",
+  "description": "Provisions an Oracle Container Engine for Kubernetes (OKE) cluster on an existing VCN with configurable CNI, worker pools, and optional OCIR image pull authentication via workload identity",
+  "architecture": "The module delegates cluster creation to the oracle-terraform-modules/oke/oci community module (v5.3.3), passing existing subnet IDs for the control plane, worker nodes, and service load balancers — and optionally a pod subnet when CNI is set to NPN. When enable_ocir_pull is true, the module also creates oci_identity_dynamic_group and oci_identity_policy resources for both workload identity and node-level OCIR access, and injects a credential provider cloud-init snippet into the worker_cloud_init list passed to the OKE module. OIDC discovery is unconditionally enabled on the cluster to support workload identity federation.",
   "features": [
-    "Creates OKE enhanced cluster with OIDC discovery enabled for workload identity integration",
-    "Configures CNI networking with either Flannel or Native Pod Networking (NPN) modes",
-    "Integrates OCIR credential provider via cloud-init scripts with kubelet extra arguments for authenticated image pulls",
-    "Provisions dynamic groups and IAM policies for workload-level OCIR access control per namespace",
-    "Supports custom worker pool configurations with flexible shape, OCPU, memory, and boot volume sizing",
-    "Manages control plane endpoint visibility with configurable public IP assignment and NSG associations"
+    "Creates an OKE enhanced cluster reusing an existing VCN and pre-provisioned subnets for the API endpoint, worker nodes, and service load balancers",
+    "Configures CNI as either Flannel or Native Pod Networking (NPN), conditionally attaching a dedicated pod subnet when NPN is selected",
+    "Provisions OCI IAM dynamic groups and policies to allow worker nodes and Kubernetes workloads to pull images from OCIR using workload identity",
+    "Injects an OCIR credential provider cloud-init script and kubelet extra arguments into worker nodes when OCIR pull is enabled",
+    "Enables OIDC discovery on the cluster endpoint to support OCI workload identity federation for pod-level IAM access",
+    "Supports fully customizable worker pool definitions including shape, OCPU, memory, boot volume size, and OS configuration",
+    "Exposes cluster CA certificate, API endpoints, and all OCIR policy OCIDs as outputs for downstream consumer modules"
   ],
   "inputs": [
     {
@@ -150,11 +186,6 @@ resource "example_resource" "this" {
       "required": true
     },
     {
-      "name": "home_region",
-      "description": "The tenancy's home region",
-      "required": true
-    },
-    {
       "name": "cluster_name",
       "description": "Name of the OKE cluster",
       "required": true
@@ -165,8 +196,18 @@ resource "example_resource" "this" {
       "required": true
     },
     {
+      "name": "kubernetes_version",
+      "description": "No default: every install pins this deliberately — see VERSIONS.md. Kubernetes version of the OKE cluster, with the leading v. A default here would upgrade the control plane of every cluster that never set it the day the default moved, so the version is always the caller's decision.",
+      "required": true
+    },
+    {
       "name": "cni_type",
       "description": "CNI type for the OKE cluster. Valid values: 'flannel' or 'npn' (Native Pod Networking).",
+      "required": false
+    },
+    {
+      "name": "home_region",
+      "description": "Deprecated, ignored: the module never read it. The home region reaches the module through the oci.home provider the caller passes in.",
       "required": false
     },
     {
@@ -192,11 +233,6 @@ resource "example_resource" "this" {
     {
       "name": "worker_pool_size",
       "description": "Default number of worker nodes per pool",
-      "required": false
-    },
-    {
-      "name": "kubernetes_version",
-      "description": "Kubernetes version for the OKE cluster",
       "required": false
     },
     {
@@ -236,6 +272,6 @@ resource "example_resource" "this" {
     "ocir_credential_provider_cloud_init",
     "ocir_kubelet_extra_args"
   ],
-  "hash": "6cc8d3c76707f0797f42c719103062c5"
+  "hash": "a99a4be01354845703aafec6d29a6025"
 }
 END_AI_METADATA -->
