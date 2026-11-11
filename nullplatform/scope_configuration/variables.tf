@@ -21,10 +21,24 @@ variable "dimensions" {
 
 variable "spec_schema" {
   description = <<-EOT
-    JSON schema of the provider specification `type` points at, as an object: the `schema` of scope-configuration.json.tpl (e.g. `module.scope_definition.scope_configuration.schema` or `module.scope_package_installation.scope_configuration_schema`). When set, the payload's defaults are read from it (top-level and one section deep) instead of the module's built-in copy, so a default the spec adds never drifts. Null keeps the built-in defaults.
+    The `schema` object of the scope-configuration.json.tpl `type` points at (`module.scope_package_installation.scope_configuration_schema` or `module.scope_definition.scope_configuration.schema`). When set, it replaces the built-in defaults: top-level and section-field defaults are read from it, deeper ones (e.g. inside array items) are not. Null keeps the built-in defaults.
   EOT
   type        = any
   default     = null
+
+  # A wrong shape would otherwise read as "no defaults" and bring the drift back.
+  validation {
+    condition     = var.spec_schema == null || try(length(keys(var.spec_schema.properties)) > 0, false)
+    error_message = "spec_schema must be the template's `schema` object, with a non-empty `properties`: pass `.schema`, not the whole template, and jsondecode a JSON string."
+  }
+
+  validation {
+    condition = var.spec_schema == null || try(alltrue([
+      for k, p in var.spec_schema.properties :
+      can(keys(p)) && (!can(p.properties) || (can(keys(p.properties)) && try(p.default, null) == null))
+    ]), true)
+    error_message = "Each spec_schema property must be an object, and a section's `properties` an object; a section with fields can't carry its own `default`."
+  }
 }
 
 ################################################################################

@@ -1,10 +1,7 @@
 locals {
-  ##############################################################################
-  # Defaults from var.spec_schema
-  ##############################################################################
-  # Top-level defaults plus each object section's field defaults: the depth
-  # the API fills on write. A section with no defaults is left out, since an
-  # empty object is drift against a config that never had it.
+  # Defaults read from var.spec_schema (shape enforced by its validations):
+  # top-level defaults plus each section's field defaults. A section with none
+  # is left out, since an empty object is drift against a config without it.
   spec_properties = try(var.spec_schema.properties, {})
 
   spec_section_defaults = {
@@ -125,10 +122,8 @@ locals {
   ##############################################################################
   # aws-lambda
   ##############################################################################
-  # Built-in copy of scopes-lambda's specs/scope-configuration.json.tpl, used
-  # without var.spec_schema. `agent` is omitted unless a layer ARN is given:
-  # the schema makes it optional, and an empty object would show up as drift
-  # against a config that never had it.
+  # Built-in copy of scopes-lambda's scope-configuration defaults, used without
+  # var.spec_schema.
   aws_lambda_builtin_defaults = {
     state      = {}
     deployment = {}
@@ -139,6 +134,8 @@ locals {
     : jsonencode(local.spec_defaults)
   )
 
+  # `agent` is omitted unless a layer ARN is given: the schema makes it
+  # optional, and an empty object would show up as drift.
   aws_lambda_overrides = merge(
     {
       state = {
@@ -176,6 +173,7 @@ locals {
 
   # Overrides win, but an object section is merged one level deep so a spec
   # default survives next to the fields the module sets in that section.
+  # Deeper objects and lists are replaced whole.
   payload = merge(local.defaults, local.overrides, {
     for k, v in local.overrides : k => merge(local.defaults[k], v)
     if can(keys(v)) && can(keys(local.defaults[k]))
