@@ -21,7 +21,8 @@ variable "node_pool_subnet_id" {
 
 variable "home_region" {
   type        = string
-  description = "The tenancy's home region"
+  description = "Deprecated, ignored: the module never read it. The home region reaches the module through the oci.home provider the caller passes in."
+  default     = null
 }
 
 variable "cluster_name" {
@@ -77,9 +78,14 @@ variable "worker_pool_size" {
 }
 
 variable "kubernetes_version" {
+  # example: v1.34.1
   type        = string
-  default     = "v1.34.1"
-  description = "Kubernetes version for the OKE cluster"
+  description = "No default: every install pins this deliberately — see VERSIONS.md. Kubernetes version of the OKE cluster, with the leading v. A default here would upgrade the control plane of every cluster that never set it the day the default moved, so the version is always the caller's decision."
+
+  validation {
+    condition     = var.kubernetes_version != "" && !contains(["latest", "main", "master"], lower(var.kubernetes_version))
+    error_message = "kubernetes_version must be a non-empty fixed version, not empty and not a moving reference."
+  }
 }
 
 variable "cni_type" {
@@ -123,4 +129,13 @@ variable "tenancy_id" {
   type        = string
   default     = null
   description = "The tenancy OCID (required when enable_ocir_pull is true)"
+}
+
+# Surfaces the deprecation at plan time (a check failure is a warning, never an
+# error) instead of silently ignoring a value callers still pass.
+check "home_region_deprecated" {
+  assert {
+    condition     = var.home_region == null
+    error_message = "home_region is deprecated and ignored: the module never read it. Remove it; the home region comes from the oci.home provider you pass to the module."
+  }
 }
