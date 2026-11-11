@@ -11,7 +11,8 @@ cd "$(git rev-parse --show-toplevel)"
 WORKFLOW=".github/workflows/tofu-test.yml"
 
 with_tests="$(git ls-files '*.tftest.hcl' | sed -E 's#/[^/]+$##; s#/tests$##' | sort -u)"
-listed_all="$(grep -E "^[[:space:]]*modules:" "$WORKFLOW" | grep -oE '"[^"]+"' | tr -d '"' | sort)"
+# "modules:" is the shared workflow's input, "module:" a job's own matrix.
+listed_all="$(grep -E "^[[:space:]]*modules?:" "$WORKFLOW" | grep -oE '"[^"]+"' | tr -d '"' | sort)"
 listed="$(printf '%s\n' "$listed_all" | sort -u)"
 
 missing="$(comm -23 <(printf '%s\n' "$with_tests") <(printf '%s\n' "$listed"))"
