@@ -2,21 +2,21 @@
 
 ## Description
 
-Creates and manages a nullplatform provider scope configuration resource for either static-files (CloudFront-based CDN) or aws-lambda deployments, encoding type-specific attributes as a JSON payload
+Creates and manages a nullplatform_provider_config resource that configures scope-level provider settings for either static-files (CloudFront-backed S3) or aws-lambda deployments within the Nullplatform platform
 
 ## Architecture
 
-The module defines a single nullplatform_provider_config.scope_configuration resource that receives a jsonencode()-merged attributes payload built from local.defaults and local.overrides computed in locals.tf. For static-files, locals assemble a nested map covering cloud_provider, provider (aws_region, aws_state_bucket), distribution (CloudFront settings, cache behaviors, invocations), network (Route53 zone), and security (WAF) blocks, dispatching per cloud via static_files_cloud_overrides. For aws-lambda, locals build a flat map with state.tofu_state_bucket, deployment.placeholder_image_uri, and an optional agent.null_agent_layer_arn block, then merge both paths through a type_defaults/type_overrides dispatch table keyed on var.type.
+The module defines a single nullplatform_provider_config resource that receives a JSON-encoded attributes payload built entirely from locals. Two local maps — type_defaults and type_overrides — are keyed by var.type, and their merged result is passed as the attributes argument; for static-files the override map is further indexed by var.cloud_provider so per-cloud fields (aws_region, aws_state_bucket, CloudFront distribution settings, Route53 network, WAF security) are layered on top of spec defaults, while for aws-lambda the override carries state bucket, placeholder image URI, and an optional agent block that is omitted when lambda_null_agent_layer_arn is null. The module outputs the resource id as provider_config_id.
 
 ## Features
 
 - Creates a nullplatform_provider_config resource with type-dispatched JSON attributes for static-files or aws-lambda scope configurations
-- Configures CloudFront distribution settings including cache behaviors, viewer protocol policies, Lambda@Edge and CloudFront Function invocations, and geo-restriction rules
+- Configures CloudFront distribution settings including viewer protocol policy, cache behaviors, custom error responses, price class, and geo-restriction for static-files deployments
 - Supports WAF WebACL attachment to CloudFront distributions via aws_security and aws_web_acl_name variables
-- Manages Route53 DNS integration with a configurable public hosted zone for static-files deployments
-- Configures AWS Lambda scope state bucket, placeholder ECR image URI, and optional nullplatform agent Lambda layer ARN
-- Translates legacy aws_lambda_associations into the current distribution.default_invocations spec format to preserve backward compatibility
-- Outputs the created provider config ID for downstream module consumption
+- Attaches CloudFront Functions and Lambda@Edge invocations to default and ordered cache behaviors with event-type validation
+- Configures managed cache, origin-request, and response-headers policies per cache behavior using policy or legacy cache mode
+- Provisions aws-lambda scope configuration with OpenTofu state bucket, placeholder ECR image URI, and optional nullplatform agent Lambda layer ARN
+- Translates legacy aws_lambda_associations into the current aws_default_invocations spec format for backward compatibility
 
 ## Basic Usage
 
@@ -127,16 +127,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "scope_configuration",
-  "description": "Creates and manages a nullplatform provider scope configuration resource for either static-files (CloudFront-based CDN) or aws-lambda deployments, encoding type-specific attributes as a JSON payload",
-  "architecture": "The module defines a single nullplatform_provider_config.scope_configuration resource that receives a jsonencode()-merged attributes payload built from local.defaults and local.overrides computed in locals.tf. For static-files, locals assemble a nested map covering cloud_provider, provider (aws_region, aws_state_bucket), distribution (CloudFront settings, cache behaviors, invocations), network (Route53 zone), and security (WAF) blocks, dispatching per cloud via static_files_cloud_overrides. For aws-lambda, locals build a flat map with state.tofu_state_bucket, deployment.placeholder_image_uri, and an optional agent.null_agent_layer_arn block, then merge both paths through a type_defaults/type_overrides dispatch table keyed on var.type.",
+  "description": "Creates and manages a nullplatform_provider_config resource that configures scope-level provider settings for either static-files (CloudFront-backed S3) or aws-lambda deployments within the Nullplatform platform",
+  "architecture": "The module defines a single nullplatform_provider_config resource that receives a JSON-encoded attributes payload built entirely from locals. Two local maps — type_defaults and type_overrides — are keyed by var.type, and their merged result is passed as the attributes argument; for static-files the override map is further indexed by var.cloud_provider so per-cloud fields (aws_region, aws_state_bucket, CloudFront distribution settings, Route53 network, WAF security) are layered on top of spec defaults, while for aws-lambda the override carries state bucket, placeholder image URI, and an optional agent block that is omitted when lambda_null_agent_layer_arn is null. The module outputs the resource id as provider_config_id.",
   "features": [
     "Creates a nullplatform_provider_config resource with type-dispatched JSON attributes for static-files or aws-lambda scope configurations",
-    "Configures CloudFront distribution settings including cache behaviors, viewer protocol policies, Lambda@Edge and CloudFront Function invocations, and geo-restriction rules",
+    "Configures CloudFront distribution settings including viewer protocol policy, cache behaviors, custom error responses, price class, and geo-restriction for static-files deployments",
     "Supports WAF WebACL attachment to CloudFront distributions via aws_security and aws_web_acl_name variables",
-    "Manages Route53 DNS integration with a configurable public hosted zone for static-files deployments",
-    "Configures AWS Lambda scope state bucket, placeholder ECR image URI, and optional nullplatform agent Lambda layer ARN",
-    "Translates legacy aws_lambda_associations into the current distribution.default_invocations spec format to preserve backward compatibility",
-    "Outputs the created provider config ID for downstream module consumption"
+    "Attaches CloudFront Functions and Lambda@Edge invocations to default and ordered cache behaviors with event-type validation",
+    "Configures managed cache, origin-request, and response-headers policies per cache behavior using policy or legacy cache mode",
+    "Provisions aws-lambda scope configuration with OpenTofu state bucket, placeholder ECR image URI, and optional nullplatform agent Lambda layer ARN",
+    "Translates legacy aws_lambda_associations into the current aws_default_invocations spec format for backward compatibility"
   ],
   "inputs": [
     {
@@ -278,6 +278,6 @@ resource "example_resource" "this" {
   "outputs": [
     "provider_config_id"
   ],
-  "hash": "3cebd60b77c09ad2fad731d7a4038335"
+  "hash": "4d1c7dda995c12265f05e50fee791a18"
 }
 END_AI_METADATA -->
