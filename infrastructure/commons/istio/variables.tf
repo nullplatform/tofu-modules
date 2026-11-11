@@ -3,15 +3,25 @@
 ###############################################################################
 
 variable "istio_base_version" {
-  description = "Helm chart version for the istio-base component"
+  # example: 1.30.7
+  description = "No default: every install pins this deliberately — see VERSIONS.md. Helm chart version for the istio-base component"
   type        = string
-  default     = "1.30.4"
+
+  validation {
+    condition     = var.istio_base_version != "" && !contains(["latest", "main", "master"], lower(var.istio_base_version))
+    error_message = "istio_base_version must be a non-empty fixed version, not empty and not a moving reference."
+  }
 }
 
 variable "istiod_version" {
-  description = "Helm chart version for istiod (Istio control plane)"
+  # example: 1.30.7
+  description = "No default: every install pins this deliberately — see VERSIONS.md. Helm chart version for istiod (Istio control plane)"
   type        = string
-  default     = "1.30.4"
+
+  validation {
+    condition     = var.istiod_version != "" && !contains(["latest", "main", "master"], lower(var.istiod_version))
+    error_message = "istiod_version must be a non-empty fixed version, not empty and not a moving reference."
+  }
 }
 
 variable "istiod_replicas" {

@@ -14,14 +14,14 @@ a specific release, so an upgrade is something someone decides.
 
 ## What to pin
 
-Verified 2026-11-09.
+Verified 2026-11-11.
 
 | Component | Current | Variable | Module |
 | --- | --- | --- | --- |
 | `nullplatform-base` chart | `2.44.8` | `nullplatform_base_helm_version` | `nullplatform/base` |
 | `nullplatform-agent` chart | `3.6.0` | `nullplatform_agent_helm_version` | `nullplatform/agent` |
 | `cert-manager` chart | `v1.21.3` | `cert_manager_version` | `infrastructure/commons/cert_manager` |
-| `prometheus` chart | `29.46.0` | `prometheus_version` | `infrastructure/commons/prometheus` |
+| `prometheus` chart | `29.47.1` | `prometheus_version` | `infrastructure/commons/prometheus` |
 | `istio-base` chart | `1.30.8` | `istio_base_version` | `infrastructure/commons/istio` |
 | `istiod` chart | `1.30.8` | `istiod_version` | `infrastructure/commons/istio` |
 | `gateway-api` CRDs | `v1.5.1` | `gateway_api_crd_ref` | `nullplatform/base` |
@@ -30,12 +30,15 @@ Verified 2026-11-09.
 | `k8s-traffic-manager` | `v1.9.0` | `agent_traffic_manager_tag` | `nullplatform/agent` |
 | traffic manager (provider config) | `v1.9.0` | `traffic_manager_version` | `container_orchestration/eks` |
 | `scopes` repository | `v1.20.0` | `agent_repo` (as `"https://github.com/nullplatform/scopes.git#v1.20.0"`; only without packages) | `nullplatform/agent` |
-| `scopes-lambda` repository | `v0.12.2` | `agent_repo` (as `"https://github.com/nullplatform/scopes-lambda.git#v0.12.2"`; only without packages) | `nullplatform/agent` |
+| `scopes-lambda` repository | `v0.13.1` | `agent_repo` (as `"https://github.com/nullplatform/scopes-lambda.git#v0.13.1"`; only without packages) | `nullplatform/agent` |
 | `scopes-static-files` repository | `v4.1.4` | `agent_repo` (as `"https://github.com/nullplatform/scopes-static-files.git#v4.1.4"`; only without packages) | `nullplatform/agent` |
 | `external-dns` chart | `1.23.0` | `external_dns_version` | `infrastructure/commons/external_dns` |
 | `aws-load-balancer-controller` chart | `3.6.2` | `aws_load_balancer_controller_version` | `infrastructure/aws/aws_load_balancer_controller` |
 | `nullplatform-cert-manager-config` chart | `2.35.0` | `cert_manager_config_version` | `infrastructure/commons/cert_manager` |
+| `cert-manager-webhook-oci` chart | `1.4.1` | `cert_manager_webhook_oci_version` (only with `cloud_provider = "oci"`) | `infrastructure/commons/cert_manager` |
 | EKS Kubernetes version | `1.36` | `kubernetes_version` | `infrastructure/aws/eks` |
+| AKS Kubernetes version | — (the version your cluster runs) | `kubernetes_version` | `infrastructure/azure/aks` |
+| OKE Kubernetes version | — (the version your cluster runs) | `kubernetes_version` | `infrastructure/oci/oke` |
 | EKS node AMI | `1.36.5-20261031` | `ami_release_version` (with `use_latest_ami_release_version = false`) | `infrastructure/aws/eks` |
 | `vpc-cni` addon | `v1.22.4-eksbuild.3` | `addon_versions["vpc-cni"]` | `infrastructure/aws/eks` |
 | `coredns` addon | `v1.14.7-eksbuild.10` | `addon_versions["coredns"]` | `infrastructure/aws/eks` |
@@ -47,6 +50,23 @@ Verified 2026-11-09.
 so the change stays functionally inert. Four of these were previously unpinnable and resolved
 at deploy time, so what you run may not match the table: `cert_manager_version`,
 `prometheus_version`, `logging_controller_image_tag`, and `traffic_manager_version` on eks.
+
+Six chart versions used to have a default that fell behind this table, so an install that never
+set them kept running an old release without noticing: `external_dns_version` (`1.19.0`),
+`aws_load_balancer_controller_version` (`1.13.4`), `istio_base_version` and `istiod_version`
+(`1.30.4`), `cert_manager_config_version` (`2.35.0`), and `cert_manager_webhook_oci_version`
+(`1.4.1`). They are now required. If you never set one, pin the old default to keep the plan
+empty, then upgrade on its own.
+
+The same goes for `kubernetes_version` on eks (`1.34`), aks (`1.32.7`) and oke (`v1.34.1`). With a
+default, the day it moved every cluster that never set it would upgrade its control plane on the
+next apply. Pin the version the cluster runs today (`aws eks describe-cluster`, `az aks show`,
+`oci ce cluster get`); a control plane upgrade is its own change, one minor at a time.
+
+**`aws-load-balancer-controller` 1.x → 3.x is a major upgrade of the controller (app v2 → v3).**
+Helm does not upgrade CRDs, so apply the v3 CRDs by hand before you bump the chart. From v3.2.0
+the controller also reconciles Gateway API resources, so check how it coexists with Istio on the
+same cluster.
 
 ## Ready to paste
 
@@ -67,7 +87,7 @@ module "agent" {
   # scopes and services come from each package, so leave agent_repo unset.
   # agent_repo = [
   #   "https://github.com/nullplatform/scopes.git#v1.20.0",
-  #   "https://github.com/nullplatform/scopes-lambda.git#v0.12.2",
+  #   "https://github.com/nullplatform/scopes-lambda.git#v0.13.1",
   #   "https://github.com/nullplatform/scopes-static-files.git#v4.1.4",
   # ]
 }
@@ -80,10 +100,13 @@ module "container_orchestration" {
 module "cert_manager" {
   cert_manager_version        = "v1.21.3"
   cert_manager_config_version = "2.35.0"
+
+  # Only with cloud_provider = "oci"
+  # cert_manager_webhook_oci_version = "1.4.1"
 }
 
 module "eks" {
-  kubernetes_version             = "1.36"
+  kubernetes_version             = "1.36" # aks and oke take kubernetes_version too: pin what the cluster runs
   ami_release_version            = "1.36.5-20261031"
   use_latest_ami_release_version = false
 
@@ -105,7 +128,7 @@ module "aws_load_balancer_controller" {
 }
 
 module "prometheus" {
-  prometheus_version = "29.46.0"
+  prometheus_version = "29.47.1"
 }
 
 module "istio" {

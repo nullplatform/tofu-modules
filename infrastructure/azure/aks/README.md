@@ -2,29 +2,45 @@
 
 ## Description
 
-Deploys an Azure Kubernetes Service (AKS) cluster with configurable system and user node pools, OIDC/workload identity, Azure RBAC integration, and optional ACR attachment using the Azure/aks/azurerm upstream module
+Deploys a production-ready Azure Kubernetes Service (AKS) cluster with dual node pools, OIDC/workload identity, Azure RBAC integration, and optional ACR attachment using the Azure/aks/azurerm upstream module
 
 ## Architecture
 
-The module wraps the Azure/aks/azurerm community module (version 11.0.0) and wires all inputs into it as a single module block. A data.azurerm_client_config resource is used to resolve the current tenant ID for AAD/RBAC configuration. The module creates a system node pool via agents_* parameters and a separate autoscaling user node pool via the node_pools map, both attached to the provided vnet_subnet_id. Network Contributor role assignments are applied to the node subnet and any additional subnets, and an optional AcrPull role binding is conditionally created based on attach_acr and acr_id inputs.
+The module wraps the Azure/aks/azurerm community module (v11.0.0) and feeds all inputs into a single module block that internally creates the azurerm_kubernetes_cluster resource along with associated role assignments and node pool resources. A data source azurerm_client_config fetches the current tenant ID which is wired into the RBAC AAD configuration. The network_contributor_role_assigned_subnet_ids map is built by merging the mandatory vnet_subnet_id with any caller-supplied additional subnets, ensuring the cluster identity can provision internal load balancers. ACR attachment is conditionally expressed via attached_acr_id_map, which resolves to either an empty map or a singleton map keyed 'acr' depending on the attach_acr and acr_id inputs.
 
 ## Features
 
-- Creates AKS cluster with a fixed system node pool and an autoscaling user node pool across configurable availability zones
-- Enables OIDC issuer and workload identity on the cluster for Kubernetes service account federation
-- Configures Azure AD RBAC integration with tenant-scoped admin group object IDs and optional Azure RBAC delegation
-- Attaches Azure Container Registry with AcrPull role assignment when acr_id is provided
-- Assigns Network Contributor role to the node subnet and any additional subnets required for internal load balancer provisioning
-- Exposes cluster credentials and OIDC issuer URL as outputs for downstream Kubernetes provider configuration
-- Supports private cluster mode and API server authorized IP range restrictions
+- Creates a dual-pool AKS cluster with a fixed system node pool and an autoscaling user node pool in the caller-specified VNet subnet
+- Enables OIDC issuer and workload identity on the control plane for pod-level Azure identity federation
+- Configures Azure AD RBAC integration with optional admin group object IDs and Azure RBAC delegation
+- Attaches an Azure Container Registry and grants AcrPull role to the cluster identity when acr_id is provided
+- Grants Network Contributor on the node subnet and any additional subnets to allow internal load balancer provisioning
+- Supports availability zone spread for both the system and user node pools via independently typed zone variables
+- Pins Kubernetes version explicitly per cluster, rejecting empty strings and moving references like 'latest' or 'main'
 
 ## Basic Usage
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v9.12.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v9.14.0"
 
   cluster_name        = "your-cluster-name"
+  kubernetes_version  = "your-kubernetes-version"
+  location            = "your-location"
+  resource_group_name = "your-resource-group-name"
+  subscription_id     = "your-subscription-id"
+  vnet_subnet_id      = "your-vnet-subnet-id"
+}
+```
+
+### Usage with Fixed Semantic Version
+
+```hcl
+module "aks" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/aks?ref=v9.14.0"
+
+  cluster_name        = "your-cluster-name"
+  kubernetes_version  = "1.32.7"
   location            = "your-location"
   resource_group_name = "your-resource-group-name"
   subscription_id     = "your-subscription-id"
@@ -80,7 +96,7 @@ resource "example_resource" "this" {
 | <a name="input_azure_rbac_enabled"></a> [azure\_rbac\_enabled](#input\_azure\_rbac\_enabled) | Whether Kubernetes authorization is delegated to Azure RBAC, so cluster access is granted with Azure role assignments such as 'Azure Kubernetes Service RBAC Cluster Admin'. Defaults to false, which keeps authorization inside Kubernetes RBAC. | `bool` | `false` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The name of the AKS cluster | `string` | n/a | yes |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment name used for tagging and naming purposes | `string` | `"nullplatform"` | no |
-| <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | The version of Kubernetes to use for the AKS cluster | `string` | `"1.32.7"` | no |
+| <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | No default: every install pins this deliberately — see VERSIONS.md. Kubernetes version of the AKS cluster, as major.minor.patch. A default here would upgrade the control plane of every cluster that never set it the day the default moved, so the version is always the caller's decision. | `string` | n/a | yes |
 | <a name="input_local_account_disabled"></a> [local\_account\_disabled](#input\_local\_account\_disabled) | Whether to disable the AKS local (certificate-based) admin accounts. Null (default) leaves the Azure default, which keeps them enabled. When true, Entra ID becomes the only way into the API server, so an authorization path must be configured as well — see azure\_rbac\_enabled and admin\_group\_object\_ids. | `bool` | `null` | no |
 | <a name="input_location"></a> [location](#input\_location) | The Azure region where the AKS cluster will be deployed (e.g., eastus, westus2) | `string` | n/a | yes |
 | <a name="input_node_pool_zones"></a> [node\_pool\_zones](#input\_node\_pool\_zones) | Availability zones for the user node pool, e.g. ["1", "2", "3"].<br/>Null (default) leaves the pool unzoned. Set it deliberately on a live<br/>cluster: Azure treats a pool's zones as immutable, and upstream rotates the<br/>pool through `temporary_name_for_rotation` to honour the change. | `set(string)` | `null` | no |
@@ -116,16 +132,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "aks",
-  "description": "Deploys an Azure Kubernetes Service (AKS) cluster with configurable system and user node pools, OIDC/workload identity, Azure RBAC integration, and optional ACR attachment using the Azure/aks/azurerm upstream module",
-  "architecture": "The module wraps the Azure/aks/azurerm community module (version 11.0.0) and wires all inputs into it as a single module block. A data.azurerm_client_config resource is used to resolve the current tenant ID for AAD/RBAC configuration. The module creates a system node pool via agents_* parameters and a separate autoscaling user node pool via the node_pools map, both attached to the provided vnet_subnet_id. Network Contributor role assignments are applied to the node subnet and any additional subnets, and an optional AcrPull role binding is conditionally created based on attach_acr and acr_id inputs.",
+  "description": "Deploys a production-ready Azure Kubernetes Service (AKS) cluster with dual node pools, OIDC/workload identity, Azure RBAC integration, and optional ACR attachment using the Azure/aks/azurerm upstream module",
+  "architecture": "The module wraps the Azure/aks/azurerm community module (v11.0.0) and feeds all inputs into a single module block that internally creates the azurerm_kubernetes_cluster resource along with associated role assignments and node pool resources. A data source azurerm_client_config fetches the current tenant ID which is wired into the RBAC AAD configuration. The network_contributor_role_assigned_subnet_ids map is built by merging the mandatory vnet_subnet_id with any caller-supplied additional subnets, ensuring the cluster identity can provision internal load balancers. ACR attachment is conditionally expressed via attached_acr_id_map, which resolves to either an empty map or a singleton map keyed 'acr' depending on the attach_acr and acr_id inputs.",
   "features": [
-    "Creates AKS cluster with a fixed system node pool and an autoscaling user node pool across configurable availability zones",
-    "Enables OIDC issuer and workload identity on the cluster for Kubernetes service account federation",
-    "Configures Azure AD RBAC integration with tenant-scoped admin group object IDs and optional Azure RBAC delegation",
-    "Attaches Azure Container Registry with AcrPull role assignment when acr_id is provided",
-    "Assigns Network Contributor role to the node subnet and any additional subnets required for internal load balancer provisioning",
-    "Exposes cluster credentials and OIDC issuer URL as outputs for downstream Kubernetes provider configuration",
-    "Supports private cluster mode and API server authorized IP range restrictions"
+    "Creates a dual-pool AKS cluster with a fixed system node pool and an autoscaling user node pool in the caller-specified VNet subnet",
+    "Enables OIDC issuer and workload identity on the control plane for pod-level Azure identity federation",
+    "Configures Azure AD RBAC integration with optional admin group object IDs and Azure RBAC delegation",
+    "Attaches an Azure Container Registry and grants AcrPull role to the cluster identity when acr_id is provided",
+    "Grants Network Contributor on the node subnet and any additional subnets to allow internal load balancer provisioning",
+    "Supports availability zone spread for both the system and user node pools via independently typed zone variables",
+    "Pins Kubernetes version explicitly per cluster, rejecting empty strings and moving references like 'latest' or 'main'"
   ],
   "inputs": [
     {
@@ -154,13 +170,13 @@ resource "example_resource" "this" {
       "required": true
     },
     {
-      "name": "additional_network_contributor_subnet_ids",
-      "description": "Extra subnet IDs, keyed by an arbitrary stable name, where the cluster identity also needs Network Contributor. The node subnet is granted automatically; add an entry for any other subnet the cloud-provider must write into -- typically the one an internal load balancer is pinned to via service.beta.kubernetes.io/azure-load-balancer-internal-subnet, which otherwise fails to provision with a 403 on virtualNetworks/subnets/read.",
-      "required": false
+      "name": "kubernetes_version",
+      "description": "No default: every install pins this deliberately — see VERSIONS.md. Kubernetes version of the AKS cluster, as major.minor.patch. A default here would upgrade the control plane of every cluster that never set it the day the default moved, so the version is always the caller's decision.",
+      "required": true
     },
     {
-      "name": "kubernetes_version",
-      "description": "The version of Kubernetes to use for the AKS cluster",
+      "name": "additional_network_contributor_subnet_ids",
+      "description": "Extra subnet IDs, keyed by an arbitrary stable name, where the cluster identity also needs Network Contributor. The node subnet is granted automatically; add an entry for any other subnet the cloud-provider must write into -- typically the one an internal load balancer is pinned to via service.beta.kubernetes.io/azure-load-balancer-internal-subnet, which otherwise fails to provision with a 403 on virtualNetworks/subnets/read.",
       "required": false
     },
     {
@@ -261,6 +277,6 @@ resource "example_resource" "this" {
     "oidc_issuer_url",
     "node_resource_group"
   ],
-  "hash": "6bc75daa678ed4082a51b6723427f95a"
+  "hash": "55863f5d526eb6128ed579e7832d5f09"
 }
 END_AI_METADATA -->
