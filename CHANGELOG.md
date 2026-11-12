@@ -12,6 +12,18 @@
 * **packages:** drop `package.requires_providers` from `scope_definition` and `service_definition`, and the `missing_optional_requirements` output from `package_installation`, `scope_package_installation` and `service_package_installation`: the platform never accepted the declaration and provider 0.0.112 removed both, so a `tofu init -upgrade` under the `>= 0.0.110` pin failed to validate. The modules now require provider >= 0.0.112
 * **external_dns:** support public and private DNS on Azure with ExternalDNS: `label_filter` now applies to the `azure` and `azure-private-dns` providers, and the new `gateway_name` limits route sources to one Gateway, so a public instance keeps internal scopes out of the public zone while an `azure-private-dns` instance publishes them in the Private DNS zone (split-horizon)
 
+## [9.15.0](https://github.com/nullplatform/tofu-modules/compare/v9.14.0...v9.15.0) (2026-11-12)
+
+
+### Features
+
+* **container_orchestration:** default naming_strategy to qualified ([#657](https://github.com/nullplatform/tofu-modules/issues/657)) ([4009913](https://github.com/nullplatform/tofu-modules/commit/400991394148fe7db739cefb2340d2040488a835))
+
+
+### Bug Fixes
+
+* **prometheus:** stop scraping the logs-controller twice ([#683](https://github.com/nullplatform/tofu-modules/issues/683)) ([2576c30](https://github.com/nullplatform/tofu-modules/commit/2576c303156e2234ed0a40e7e966114467b7d114))
+
 ## [9.14.0](https://github.com/nullplatform/tofu-modules/compare/v9.13.1...v9.14.0) (2026-11-11)
 
 
