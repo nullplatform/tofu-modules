@@ -4,7 +4,7 @@ variable "nrn" {
 }
 
 variable "type" {
-  description = "Provider specification slug this scope configuration targets. Determines which set of variables below applies — see README for each type's payload."
+  description = "Scope type: selects which variables below apply and the payload shape (see README). Also the provider specification slug the configuration targets, unless `specification_slug` is set."
   type        = string
 
   validation {
@@ -14,9 +14,15 @@ variable "type" {
 }
 
 variable "specification_slug" {
-  description = "Slug of the provider specification the configuration targets, when it differs from `type` (a spec registered with a name override). `type` still selects the payload shape. Defaults to `type`."
+  description = "Slug of the provider specification the configuration targets, when it differs from `type` (a spec registered with a name override, e.g. `module.scope_package_installation.scope_configuration_specification_slug`). `type` still selects the payload shape. Defaults to `type`."
   type        = string
   default     = null
+
+  # coalesce() would treat "" as unset and silently target `type`'s spec.
+  validation {
+    condition     = var.specification_slug == null || try(trimspace(var.specification_slug) != "", false)
+    error_message = "specification_slug must be null or a non-empty slug."
+  }
 }
 
 variable "dimensions" {
@@ -27,7 +33,7 @@ variable "dimensions" {
 
 variable "spec_schema" {
   description = <<-EOT
-    The `schema` object of the scope-configuration.json.tpl `type` points at (`module.scope_package_installation.scope_configuration_schema` or `module.scope_definition.scope_configuration.schema`). When set, it replaces the built-in defaults: top-level and section-field defaults are read from it, deeper ones (e.g. inside array items) are not. Null keeps the built-in defaults.
+    The `schema` object of the scope's scope-configuration spec (`module.scope_package_installation.scope_configuration_schema` or `module.scope_definition.scope_configuration.schema`). When set, it replaces the built-in defaults: top-level and section-field defaults are read for the keys and sections the module sends; deeper ones (e.g. inside array items) are not. Null keeps the built-in defaults.
   EOT
   type        = any
   default     = null
@@ -43,7 +49,7 @@ variable "spec_schema" {
       for k, p in var.spec_schema.properties :
       can(keys(p)) && (!can(p.properties) || (can(keys(p.properties)) && try(p.default, null) == null))
     ]), true)
-    error_message = "Each spec_schema property must be an object, and a section's `properties` an object; a section with fields can't carry its own `default`."
+    error_message = "Each spec_schema property must be an object, and a section's `properties` an object; a section with a `properties` key can't carry its own `default`."
   }
 }
 

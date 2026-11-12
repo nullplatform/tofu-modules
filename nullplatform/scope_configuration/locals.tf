@@ -1,9 +1,9 @@
 locals {
-  # Defaults read from var.spec_schema (shape enforced by its validations):
-  # top-level defaults plus the field defaults of each section the module
-  # sends. The API only fills defaults inside sections it receives, so a
-  # section the module never sends stays out, as does one with no defaults
-  # (an empty object is drift against a config without it).
+  # Defaults read from var.spec_schema (shape enforced by its validations), for
+  # the keys the module sends only: the API fills defaults inside what it
+  # receives, so a default for an unsent key would be a key the stored config
+  # never has. A section with no defaults stays out too (an empty object is
+  # drift against a config without it).
   spec_properties = try(var.spec_schema.properties, {})
 
   spec_section_defaults = {
@@ -14,7 +14,7 @@ locals {
   }
 
   spec_defaults = merge(
-    { for k, p in local.spec_properties : k => p.default if try(p.default, null) != null },
+    { for k, p in local.spec_properties : k => p.default if try(p.default, null) != null && contains(keys(local.overrides), k) },
     { for k, v in local.spec_section_defaults : k => v if length(v) > 0 && contains(keys(local.overrides), k) },
   )
 
@@ -77,8 +77,7 @@ locals {
     : local.static_files_legacy_invocations
   )
 
-  # Per-cloud override; local.payload merges each section over
-  # static_files_defaults. Adding a cloud: new key here + its variables, new
+  # Per-cloud override, layered over the defaults in local.payload. Adding a cloud: new key here + its variables, new
   # allowed value in variables.tf.
   static_files_cloud_overrides = {
     "aws" = {
@@ -124,8 +123,8 @@ locals {
   ##############################################################################
   # aws-lambda
   ##############################################################################
-  # Built-in copy of scopes-lambda's scope-configuration defaults, used without
-  # var.spec_schema.
+  # Built-in defaults, used without var.spec_schema: the spec has none for these
+  # sections; the empty objects give local.payload's per-section merge a base.
   aws_lambda_builtin_defaults = {
     state      = {}
     deployment = {}

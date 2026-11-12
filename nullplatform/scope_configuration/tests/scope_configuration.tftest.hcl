@@ -395,3 +395,19 @@ run "specification_slug_overrides_type" {
     error_message = "the payload should still be shaped by type"
   }
 }
+
+# An empty slug would silently fall back to type and target the wrong spec.
+run "rejects_an_empty_specification_slug" {
+  command = plan
+
+  variables {
+    type                      = "static-files"
+    specification_slug        = ""
+    cloud_provider            = "aws"
+    aws_region                = "us-east-1"
+    aws_state_bucket          = "tf-state"
+    aws_hosted_public_zone_id = "Z0000000000000"
+  }
+
+  expect_failures = [var.specification_slug]
+}

@@ -1,13 +1,16 @@
 mock_provider "nullplatform" {}
 
 # spec_schema is shaped like scope-configuration.json.tpl's schema. future_field
-# and schema_version stand for defaults the spec adds after the module's
-# built-in copy was written.
+# stands for a default the spec adds after the module's built-in copy was
+# written; schema_version and unsent_section for defaults of keys the module
+# doesn't send.
 #
-# fixtures/: *-schema.json are the `schema` of the real templates
-# (scopes-static-files b061db1, scopes-lambda 3d8dfb6); refresh with
-# `jq .schema <scope>/specs/scope-configuration.json.tpl`. static-files-payload.json
-# is the payload this module sent before spec_schema existed, for the inputs below.
+# fixtures/: *-schema.json are snapshots of the real templates' `schema`
+# (scopes-static-files b061db1, scopes-lambda 3d8dfb6). Refresh from a checkout
+# of the scope repo (the placeholders aren't valid JSON until replaced):
+#   sed 's/"{{[^}]*}}"/"x"/' <scope>/specs/scope-configuration.json.tpl | jq .schema
+# static-files-payload.json is the payload this module sent before spec_schema
+# existed, for the static-files inputs of builtin_static_files_payload_is_unchanged.
 variables {
   nrn = "organization=1:account=2"
 
@@ -85,8 +88,8 @@ run "static_files_defaults_come_from_spec_schema" {
   }
 
   assert {
-    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).schema_version == "v1"
-    error_message = "a top-level default no override sets must reach the payload"
+    condition     = !can(jsondecode(nullplatform_provider_config.scope_configuration.attributes).schema_version)
+    error_message = "a top-level default for a key the module doesn't send must stay omitted"
   }
 
   assert {
@@ -108,7 +111,7 @@ run "static_files_defaults_come_from_spec_schema" {
     error_message = "a section the module doesn't send must stay omitted: the API doesn't fill it"
   }
 
-  # azure_front_door_cache_days is a built-in default this fixture lacks.
+  # azure_front_door_cache_days is a built-in default this spec_schema lacks.
   assert {
     condition     = !can(jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.azure_front_door_cache_days)
     error_message = "with a schema, the built-in defaults must not be merged in"
@@ -197,6 +200,92 @@ run "aws_lambda_layer_arn_with_spec_schema" {
   assert {
     condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).agent.null_agent_layer_arn == "arn:aws:lambda:us-east-1:123456789012:layer:agent:1"
     error_message = "the layer ARN must reach the payload when the spec gives agent no defaults"
+  }
+}
+
+run "aws_lambda_agent_spec_defaults_with_layer_arn" {
+  command = plan
+
+  variables {
+    type                         = "aws-lambda"
+    lambda_tofu_state_bucket     = "lambda-state"
+    lambda_placeholder_image_uri = "123456789012.dkr.ecr.us-east-1.amazonaws.com/placeholder:latest"
+    lambda_null_agent_layer_arn  = "arn:aws:lambda:us-east-1:123456789012:layer:agent:1"
+    spec_schema = {
+      type = "object"
+      properties = {
+        state      = { type = "object", properties = { tofu_state_bucket = { type = "string" } } }
+        deployment = { type = "object", properties = { placeholder_image_uri = { type = "string" } } }
+        agent = {
+          type = "object"
+          properties = {
+            null_agent_layer_arn = { type = "string" }
+            memory               = { type = "integer", default = 128 }
+          }
+        }
+      }
+    }
+  }
+
+  assert {
+    condition = jsondecode(nullplatform_provider_config.scope_configuration.attributes).agent == {
+      null_agent_layer_arn = "arn:aws:lambda:us-east-1:123456789012:layer:agent:1"
+      memory               = 128
+    }
+    error_message = "agent's spec defaults must merge with the layer ARN"
+  }
+}
+
+run "aws_lambda_agent_spec_defaults_without_layer_arn" {
+  command = plan
+
+  variables {
+    type                         = "aws-lambda"
+    lambda_tofu_state_bucket     = "lambda-state"
+    lambda_placeholder_image_uri = "123456789012.dkr.ecr.us-east-1.amazonaws.com/placeholder:latest"
+    spec_schema = {
+      type = "object"
+      properties = {
+        state      = { type = "object", properties = { tofu_state_bucket = { type = "string" } } }
+        deployment = { type = "object", properties = { placeholder_image_uri = { type = "string" } } }
+        agent      = { type = "object", properties = { memory = { type = "integer", default = 128 } } }
+      }
+    }
+  }
+
+  assert {
+    condition     = !can(jsondecode(nullplatform_provider_config.scope_configuration.attributes).agent)
+    error_message = "without a layer ARN agent isn't sent, so its spec defaults must stay out"
+  }
+}
+
+# A section the module sends but the spec lacks still carries the caller's values.
+run "static_files_section_missing_from_spec" {
+  command = plan
+
+  variables {
+    type                      = "static-files"
+    cloud_provider            = "aws"
+    aws_region                = "us-east-1"
+    aws_state_bucket          = "tf-state"
+    aws_hosted_public_zone_id = "Z0000000000000"
+    spec_schema = {
+      type = "object"
+      properties = {
+        cloud_provider = { type = "string", default = "aws" }
+        provider       = { type = "object", properties = { aws_region = { type = "string" } } }
+      }
+    }
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).network.aws_hosted_public_zone_id == "Z0000000000000"
+    error_message = "the caller's network settings must reach the payload without spec defaults"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).cloud_provider == "aws"
+    error_message = "cloud_provider must be sent"
   }
 }
 
@@ -348,7 +437,8 @@ run "rejects_section_properties_that_are_not_an_object" {
   expect_failures = [var.spec_schema]
 }
 
-# Its own default and its fields' would have to be merged; no spec does this.
+# A section with both its own default and fields is rejected: merging the two is
+# unsupported and no spec needs it.
 run "rejects_a_section_with_its_own_default" {
   command = plan
 
