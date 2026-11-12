@@ -2,20 +2,20 @@
 
 ## Description
 
-Configures a Nullplatform OKE (Oracle Kubernetes Engine) provider by registering cluster, gateway, and naming settings via a nullplatform_provider_config resource
+Configures a Nullplatform OKE (Oracle Kubernetes Engine) provider configuration resource with cluster, gateway, and Kubernetes object naming settings
 
 ## Architecture
 
-The module creates a single nullplatform_provider_config resource of type 'oke' that encodes cluster identity (name, namespace, region), gateway configuration (namespace, public and private gateway names), and an optional naming block into a JSON attributes payload. Local values filter out empty naming fields so only explicitly set naming options are included in the encoded attributes. The nrn variable scopes the provider config to a specific Nullplatform organizational hierarchy, while dimensions allow additional metadata tagging of the provider record.
+The module creates a single nullplatform_provider_config resource of type 'oke' that encodes cluster connection details, gateway configuration, and optional naming strategy into a JSON attributes payload. Input variables for cluster name, region, namespace, and gateway settings are merged into a structured jsonencode() call, with naming fields conditionally included only when non-empty. The dimensions variable allows arbitrary key-value metadata to be attached to the provider configuration. No additional Terraform resource types or data sources are used; all configuration flows directly into the nullplatform_provider_config attributes.
 
 ## Features
 
-- Creates a nullplatform_provider_config resource of type 'oke' linking an OKE cluster to a Nullplatform NRN hierarchy
-- Encodes cluster identity including name, default application namespace, and OCI region into the provider attributes
-- Configures gateway settings with separate public and private gateway names and a dedicated gateway namespace
-- Supports flexible Kubernetes object naming strategies including id-based, qualified slug-based, and fully custom pattern modes
-- Applies custom deployment-scoped and scope-scoped naming patterns with length and character validation
-- Accepts arbitrary dimensions map for additional provider configuration metadata
+- Creates a nullplatform_provider_config resource of type 'oke' linking an OKE cluster by name and OCI region
+- Configures default Kubernetes namespace for applications with support for dynamic scope-rendered patterns
+- Configures public and private gateway references including their Kubernetes namespace and names
+- Supports three Kubernetes object naming strategies: ids, qualified, and custom pattern-based naming
+- Applies custom naming patterns for deployment-scoped objects (Deployment, Service, HPA, Secret, PodDisruptionBudget) and scope-scoped objects (Ingress, HTTPRoute, certificates)
+- Conditionally omits naming configuration from the attributes payload when no naming fields are specified
 
 ## Basic Usage
 
@@ -67,7 +67,7 @@ resource "example_resource" "this" {
 | <a name="input_namespace_application_default"></a> [namespace\_application\_default](#input\_namespace\_application\_default) | Default Kubernetes namespace for applications. Accepts a pattern the k8s scope renders per scope, e.g. {.namespace.slug} for one Kubernetes namespace per nullplatform namespace | `string` | `"nullplatform"` | no |
 | <a name="input_naming_deployment_pattern"></a> [naming\_deployment\_pattern](#input\_naming\_deployment\_pattern) | Name pattern for the objects a deployment creates (Deployment, Service, HPA, Secret, PodDisruptionBudget), e.g. {.application.slug}-{.scope.slug}-{.deployment.id}. Read only when naming\_strategy is 'custom' | `string` | `""` | no |
 | <a name="input_naming_scope_pattern"></a> [naming\_scope\_pattern](#input\_naming\_scope\_pattern) | Name pattern for the objects that outlive a deployment (Ingress, HTTPRoute, serving certificate), e.g. {.application.slug}-{.scope.slug}-{.scope.id}. Read only when naming\_strategy is 'custom'. Only applies to scopes created after the change | `string` | `""` | no |
-| <a name="input_naming_strategy"></a> [naming\_strategy](#input\_naming\_strategy) | How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'ids' when unset | `string` | `""` | no |
+| <a name="input_naming_strategy"></a> [naming\_strategy](#input\_naming\_strategy) | How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'qualified' | `string` | `"qualified"` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform NRN (e.g., organization=X:account=Y:namespace=Z) | `string` | n/a | yes |
 | <a name="input_private_gateway_name"></a> [private\_gateway\_name](#input\_private\_gateway\_name) | Name of the private gateway | `string` | `"private-gateway"` | no |
 | <a name="input_public_gateway_name"></a> [public\_gateway\_name](#input\_public\_gateway\_name) | Name of the public gateway | `string` | `"public-gateway"` | no |
@@ -77,15 +77,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "oke",
-  "description": "Configures a Nullplatform OKE (Oracle Kubernetes Engine) provider by registering cluster, gateway, and naming settings via a nullplatform_provider_config resource",
-  "architecture": "The module creates a single nullplatform_provider_config resource of type 'oke' that encodes cluster identity (name, namespace, region), gateway configuration (namespace, public and private gateway names), and an optional naming block into a JSON attributes payload. Local values filter out empty naming fields so only explicitly set naming options are included in the encoded attributes. The nrn variable scopes the provider config to a specific Nullplatform organizational hierarchy, while dimensions allow additional metadata tagging of the provider record.",
+  "description": "Configures a Nullplatform OKE (Oracle Kubernetes Engine) provider configuration resource with cluster, gateway, and Kubernetes object naming settings",
+  "architecture": "The module creates a single nullplatform_provider_config resource of type 'oke' that encodes cluster connection details, gateway configuration, and optional naming strategy into a JSON attributes payload. Input variables for cluster name, region, namespace, and gateway settings are merged into a structured jsonencode() call, with naming fields conditionally included only when non-empty. The dimensions variable allows arbitrary key-value metadata to be attached to the provider configuration. No additional Terraform resource types or data sources are used; all configuration flows directly into the nullplatform_provider_config attributes.",
   "features": [
-    "Creates a nullplatform_provider_config resource of type 'oke' linking an OKE cluster to a Nullplatform NRN hierarchy",
-    "Encodes cluster identity including name, default application namespace, and OCI region into the provider attributes",
-    "Configures gateway settings with separate public and private gateway names and a dedicated gateway namespace",
-    "Supports flexible Kubernetes object naming strategies including id-based, qualified slug-based, and fully custom pattern modes",
-    "Applies custom deployment-scoped and scope-scoped naming patterns with length and character validation",
-    "Accepts arbitrary dimensions map for additional provider configuration metadata"
+    "Creates a nullplatform_provider_config resource of type 'oke' linking an OKE cluster by name and OCI region",
+    "Configures default Kubernetes namespace for applications with support for dynamic scope-rendered patterns",
+    "Configures public and private gateway references including their Kubernetes namespace and names",
+    "Supports three Kubernetes object naming strategies: ids, qualified, and custom pattern-based naming",
+    "Applies custom naming patterns for deployment-scoped objects (Deployment, Service, HPA, Secret, PodDisruptionBudget) and scope-scoped objects (Ingress, HTTPRoute, certificates)",
+    "Conditionally omits naming configuration from the attributes payload when no naming fields are specified"
   ],
   "inputs": [
     {
@@ -105,7 +105,7 @@ resource "example_resource" "this" {
     },
     {
       "name": "naming_strategy",
-      "description": "How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'ids' when unset",
+      "description": "How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'qualified'",
       "required": false
     },
     {
@@ -145,6 +145,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "0a8ff980d1ec96dcadfbc8b9ac1b4058"
+  "hash": "fd51b85b010a1a67cd241c9cba590084"
 }
 END_AI_METADATA -->

@@ -2,20 +2,20 @@
 
 ## Description
 
-Creates an AWS IAM role for CI/CD build workflows that trusts an application manager role and one or more OIDC identity providers from CI platforms like GitHub Actions, GitLab CI, or Bitbucket Pipelines
+Creates an AWS IAM role for CI/CD build workflows that trusts both an application manager role and multiple OIDC identity providers (GitHub Actions, GitLab CI, Bitbucket Pipelines, etc.) to enable keyless authentication
 
 ## Architecture
 
-The module creates an aws_iam_role named nullplatform-{cluster_name}-build-workflow-role with a composite assume-role policy built from a static application manager principal and dynamic OIDC federated principals. For each entry in oidc_providers, it either creates an aws_iam_openid_connect_provider resource (when create=true) or looks one up via a data source (when create=false), and the resulting ARNs are wired into the role's trust policy as StringEquals audience and StringLike subject conditions. The role ARN and name are exported so downstream asset-repository modules (ecr, s3-assets) can attach their own IAM policies to the same role.
+The module creates or looks up `aws_iam_openid_connect_provider` resources for each entry in `oidc_providers` based on the `create` flag, then builds an `aws_iam_role` named `nullplatform-{cluster_name}-build-workflow-role` whose assume-role policy concatenates a direct `sts:AssumeRole` statement for the application manager ARN with `sts:AssumeRoleWithWebIdentity` statements for each OIDC provider. Each OIDC trust statement uses the provider ARN from either the created or looked-up provider and enforces `StringEquals` on audience claims and `StringLike` on subject claims. The role ARN and name are exposed as outputs so downstream asset-repository permission modules (ECR, S3) can attach their policies to it.
 
 ## Features
 
-- Creates an aws_iam_role with a trust policy that allows both an application manager IAM role and OIDC-federated CI identities to assume it
-- Creates aws_iam_openid_connect_provider resources for new issuers or looks up existing ones via data source, controlled per-provider with the create flag
-- Configures sts:AssumeRoleWithWebIdentity trust conditions scoped to specific OIDC audiences and subject patterns to prevent cross-organization token reuse
-- Validates all OIDC provider URLs require HTTPS and subject patterns cannot start with wildcards or span entire issuers
-- Supports multiple simultaneous CI OIDC providers keyed by free-form names (e.g. github, gitlab, bitbucket) in a single role trust policy
-- Exports role ARN, role name, and OIDC provider ARNs for consumption by asset-repository permission modules
+- Creates or looks up aws_iam_openid_connect_provider resources per CI issuer based on the create flag
+- Creates an aws_iam_role with a compound assume-role policy supporting both direct role assumption and OIDC web identity federation
+- Enforces audience and subject claim conditions on each OIDC trust statement to scope access to specific organizations, groups, or repositories
+- Validates all OIDC provider URLs use HTTPS and that subject patterns do not start with wildcards or expose entire issuers
+- Supports multiple simultaneous OIDC providers (GitHub Actions, GitLab CI, Bitbucket Pipelines) keyed by free-form name
+- Outputs role ARN and name for consumption by asset-repository permission modules such as ECR and S3
 
 ## Basic Usage
 
@@ -58,7 +58,7 @@ resource "example_resource" "this" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_application_manager_assume_role"></a> [application\_manager\_assume\_role](#input\_application\_manager\_assume\_role) | ARN of the IAM role assumed by the application manager | `string` | `"arn:aws:iam::283477532906:role/application_manager"` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the cluster, used to namespace IAM resource names | `string` | n/a | yes |
-| <a name="input_oidc_providers"></a> [oidc\_providers](#input\_oidc\_providers) | CI OIDC issuers whose jobs can assume the role, keyed by a free-form name (e.g. github, gitlab, bitbucket).<br/>- url: issuer URL, e.g. https://token.actions.githubusercontent.com, https://gitlab.com or https://api.bitbucket.org/2.0/workspaces/<workspace>/pipelines-config/identity/oidc<br/>- subjects: StringLike patterns on the sub claim, scoped to your organization, group or repositories (e.g. repo:<org>/* for GitHub, project\_path:<group>/* for GitLab)<br/>- audiences: accepted aud claims; sts.amazonaws.com unless the CI tool fixes its own (Bitbucket uses ari:cloud:bitbucket::workspace/<uuid>)<br/>- create: create the IAM OIDC provider instead of looking up the existing one (an account holds one per issuer URL)<br/>- thumbprints: only for self-managed issuers whose certificate is not publicly trusted | <pre>map(object({<br/>    url         = string<br/>    subjects    = list(string)<br/>    audiences   = optional(list(string), ["sts.amazonaws.com"])<br/>    create      = optional(bool, false)<br/>    thumbprints = optional(list(string), [])<br/>  }))</pre> | `{}` | no |
+| <a name="input_oidc_providers"></a> [oidc\_providers](#input\_oidc\_providers) | CI OIDC issuers whose jobs can assume the role, keyed by a free-form name (e.g. github, gitlab, bitbucket).<br/>- url: issuer URL, e.g. https://token.actions.githubusercontent.com, https://gitlab.com or https://api.bitbucket.org/2.0/workspaces/<workspace>/pipelines-config/identity/oidc<br/>- subjects: StringLike patterns on the sub claim, scoped to your organization, group or repositories (e.g. ["repo:<org>/*", "repo:<org>@<org\_id>/*"] for GitHub, project\_path:<group>/* for GitLab).<br/>  GitHub picks the sub format per repository, so one organization can mix both: older repositories send repo:<org>/<repo>:...,<br/>  and repositories created, renamed or transferred more recently send the immutable repo:<org>@<org\_id>/<repo>@<repo\_id>:...<br/>  List both patterns to cover the whole organization. Check a repository with gh api repos/<org>/<repo>/actions/oidc/customization/sub<br/>  (use\_immutable\_subject, sub\_claim\_prefix) and the org id with gh api orgs/<org> --jq .id.<br/>- audiences: accepted aud claims; sts.amazonaws.com unless the CI tool fixes its own (Bitbucket uses ari:cloud:bitbucket::workspace/<uuid>)<br/>- create: create the IAM OIDC provider instead of looking up the existing one (an account holds one per issuer URL)<br/>- thumbprints: only for self-managed issuers whose certificate is not publicly trusted | <pre>map(object({<br/>    url         = string<br/>    subjects    = list(string)<br/>    audiences   = optional(list(string), ["sts.amazonaws.com"])<br/>    create      = optional(bool, false)<br/>    thumbprints = optional(list(string), [])<br/>  }))</pre> | `{}` | no |
 
 ## Outputs
 
@@ -72,15 +72,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "ci-build-workflow-role",
-  "description": "Creates an AWS IAM role for CI/CD build workflows that trusts an application manager role and one or more OIDC identity providers from CI platforms like GitHub Actions, GitLab CI, or Bitbucket Pipelines",
-  "architecture": "The module creates an aws_iam_role named nullplatform-{cluster_name}-build-workflow-role with a composite assume-role policy built from a static application manager principal and dynamic OIDC federated principals. For each entry in oidc_providers, it either creates an aws_iam_openid_connect_provider resource (when create=true) or looks one up via a data source (when create=false), and the resulting ARNs are wired into the role's trust policy as StringEquals audience and StringLike subject conditions. The role ARN and name are exported so downstream asset-repository modules (ecr, s3-assets) can attach their own IAM policies to the same role.",
+  "description": "Creates an AWS IAM role for CI/CD build workflows that trusts both an application manager role and multiple OIDC identity providers (GitHub Actions, GitLab CI, Bitbucket Pipelines, etc.) to enable keyless authentication",
+  "architecture": "The module creates or looks up `aws_iam_openid_connect_provider` resources for each entry in `oidc_providers` based on the `create` flag, then builds an `aws_iam_role` named `nullplatform-{cluster_name}-build-workflow-role` whose assume-role policy concatenates a direct `sts:AssumeRole` statement for the application manager ARN with `sts:AssumeRoleWithWebIdentity` statements for each OIDC provider. Each OIDC trust statement uses the provider ARN from either the created or looked-up provider and enforces `StringEquals` on audience claims and `StringLike` on subject claims. The role ARN and name are exposed as outputs so downstream asset-repository permission modules (ECR, S3) can attach their policies to it.",
   "features": [
-    "Creates an aws_iam_role with a trust policy that allows both an application manager IAM role and OIDC-federated CI identities to assume it",
-    "Creates aws_iam_openid_connect_provider resources for new issuers or looks up existing ones via data source, controlled per-provider with the create flag",
-    "Configures sts:AssumeRoleWithWebIdentity trust conditions scoped to specific OIDC audiences and subject patterns to prevent cross-organization token reuse",
-    "Validates all OIDC provider URLs require HTTPS and subject patterns cannot start with wildcards or span entire issuers",
-    "Supports multiple simultaneous CI OIDC providers keyed by free-form names (e.g. github, gitlab, bitbucket) in a single role trust policy",
-    "Exports role ARN, role name, and OIDC provider ARNs for consumption by asset-repository permission modules"
+    "Creates or looks up aws_iam_openid_connect_provider resources per CI issuer based on the create flag",
+    "Creates an aws_iam_role with a compound assume-role policy supporting both direct role assumption and OIDC web identity federation",
+    "Enforces audience and subject claim conditions on each OIDC trust statement to scope access to specific organizations, groups, or repositories",
+    "Validates all OIDC provider URLs use HTTPS and that subject patterns do not start with wildcards or expose entire issuers",
+    "Supports multiple simultaneous OIDC providers (GitHub Actions, GitLab CI, Bitbucket Pipelines) keyed by free-form name",
+    "Outputs role ARN and name for consumption by asset-repository permission modules such as ECR and S3"
   ],
   "inputs": [
     {
@@ -104,6 +104,6 @@ resource "example_resource" "this" {
     "role_name",
     "oidc_provider_arns"
   ],
-  "hash": "bc8f999f284849edd922180088c1d740"
+  "hash": "92923254acfa6b1a15c73f792e179fe8"
 }
 END_AI_METADATA -->

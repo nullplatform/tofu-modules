@@ -6,17 +6,17 @@ Configures a GKE cluster provider in Nullplatform by creating a nullplatform_pro
 
 ## Architecture
 
-The module constructs a set of locals that merge gateway configuration (public/private gateway names, namespace, additional gateways), resource management ratios, security settings (image pull secrets, service account), and naming strategy into a single attributes map. This map is JSON-encoded and passed to a single nullplatform_provider_config resource of type 'gke-configuration', scoped by the NRN and optional dimensions. Input variables flow through conditional locals that strip empty strings and null values before encoding, ensuring only explicitly set options appear in the final provider configuration payload.
+The module constructs a set of locals that merge gateway configuration (public/private names, namespace, additional gateways), resource management ratios, security settings (image pull secrets, service account), and naming strategy into a single attributes map. This map is JSON-encoded and passed to a single nullplatform_provider_config resource of type 'gke-configuration', which registers the GKE cluster with the Nullplatform control plane. Input variables flow through conditional merge logic to omit empty/default values from the final attributes payload, ensuring only explicitly set options are transmitted to the provider config API.
 
 ## Features
 
-- Creates a nullplatform_provider_config resource of type 'gke-configuration' linking a GKE cluster to Nullplatform
-- Configures public and private Kubernetes Gateway API gateway references with optional namespace override
-- Supports additional public and private gateways for multi-gateway HTTPRoute attachment
-- Pins the traffic manager sidecar container to an explicit version tag, rejecting moving references like 'latest'
-- Configures resource management ratios (memory/CPU ratio, request-to-limit ratio, max cores multiplier, max milicores)
-- Supports custom Kubernetes object naming strategies (ids, qualified, or custom patterns for deployments and scopes)
-- Configures security context with image pull secrets and a dedicated Kubernetes service account for deployments
+- Creates a nullplatform_provider_config resource that registers a GKE cluster with the Nullplatform control plane
+- Configures public and private Kubernetes Gateway API gateway references with DNS-validated name constraints
+- Supports additional public and private gateway attachments for HTTPRoute multi-gateway routing
+- Pins the traffic manager sidecar container to an explicit, non-moving version tag
+- Configures Kubernetes object naming strategy with 'ids', 'qualified', or 'custom' pattern modes
+- Sets resource management tuning parameters including memory/CPU ratio, request-to-limit ratios, and max milicores
+- Configures pod security context via image pull secrets and a named Kubernetes service account
 
 ## Basic Usage
 
@@ -78,7 +78,7 @@ resource "example_resource" "this" {
 | <a name="input_namespace_application_default"></a> [namespace\_application\_default](#input\_namespace\_application\_default) | Default Kubernetes namespace for applications. Accepts a pattern the k8s scope renders per scope, e.g. {.namespace.slug} for one Kubernetes namespace per nullplatform namespace | `string` | `"nullplatform"` | no |
 | <a name="input_naming_deployment_pattern"></a> [naming\_deployment\_pattern](#input\_naming\_deployment\_pattern) | Name pattern for the objects a deployment creates (Deployment, Service, HPA, Secret, PodDisruptionBudget), e.g. {.application.slug}-{.scope.slug}-{.deployment.id}. Read only when naming\_strategy is 'custom' | `string` | `""` | no |
 | <a name="input_naming_scope_pattern"></a> [naming\_scope\_pattern](#input\_naming\_scope\_pattern) | Name pattern for the objects that outlive a deployment (Ingress, HTTPRoute, serving certificate), e.g. {.application.slug}-{.scope.slug}-{.scope.id}. Read only when naming\_strategy is 'custom'. Only applies to scopes created after the change | `string` | `""` | no |
-| <a name="input_naming_strategy"></a> [naming\_strategy](#input\_naming\_strategy) | How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'ids' when unset | `string` | `""` | no |
+| <a name="input_naming_strategy"></a> [naming\_strategy](#input\_naming\_strategy) | How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'qualified' | `string` | `"qualified"` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform NRN (e.g., organization=X:account=Y:namespace=Z) | `string` | n/a | yes |
 | <a name="input_object_modifiers"></a> [object\_modifiers](#input\_object\_modifiers) | List of modifications to dynamically modify k8s objects | <pre>list(object({<br/>    selector = string<br/>    action   = string<br/>    type     = string<br/>    value    = optional(string, "")<br/>  }))</pre> | `[]` | no |
 | <a name="input_private_gateway_name"></a> [private\_gateway\_name](#input\_private\_gateway\_name) | Name of the private gateway | `string` | `""` | no |
@@ -91,15 +91,15 @@ resource "example_resource" "this" {
 {
   "name": "gke",
   "description": "Configures a GKE cluster provider in Nullplatform by creating a nullplatform_provider_config resource with gateway, traffic manager, resource management, security, and naming settings",
-  "architecture": "The module constructs a set of locals that merge gateway configuration (public/private gateway names, namespace, additional gateways), resource management ratios, security settings (image pull secrets, service account), and naming strategy into a single attributes map. This map is JSON-encoded and passed to a single nullplatform_provider_config resource of type 'gke-configuration', scoped by the NRN and optional dimensions. Input variables flow through conditional locals that strip empty strings and null values before encoding, ensuring only explicitly set options appear in the final provider configuration payload.",
+  "architecture": "The module constructs a set of locals that merge gateway configuration (public/private names, namespace, additional gateways), resource management ratios, security settings (image pull secrets, service account), and naming strategy into a single attributes map. This map is JSON-encoded and passed to a single nullplatform_provider_config resource of type 'gke-configuration', which registers the GKE cluster with the Nullplatform control plane. Input variables flow through conditional merge logic to omit empty/default values from the final attributes payload, ensuring only explicitly set options are transmitted to the provider config API.",
   "features": [
-    "Creates a nullplatform_provider_config resource of type 'gke-configuration' linking a GKE cluster to Nullplatform",
-    "Configures public and private Kubernetes Gateway API gateway references with optional namespace override",
-    "Supports additional public and private gateways for multi-gateway HTTPRoute attachment",
-    "Pins the traffic manager sidecar container to an explicit version tag, rejecting moving references like 'latest'",
-    "Configures resource management ratios (memory/CPU ratio, request-to-limit ratio, max cores multiplier, max milicores)",
-    "Supports custom Kubernetes object naming strategies (ids, qualified, or custom patterns for deployments and scopes)",
-    "Configures security context with image pull secrets and a dedicated Kubernetes service account for deployments"
+    "Creates a nullplatform_provider_config resource that registers a GKE cluster with the Nullplatform control plane",
+    "Configures public and private Kubernetes Gateway API gateway references with DNS-validated name constraints",
+    "Supports additional public and private gateway attachments for HTTPRoute multi-gateway routing",
+    "Pins the traffic manager sidecar container to an explicit, non-moving version tag",
+    "Configures Kubernetes object naming strategy with 'ids', 'qualified', or 'custom' pattern modes",
+    "Sets resource management tuning parameters including memory/CPU ratio, request-to-limit ratios, and max milicores",
+    "Configures pod security context via image pull secrets and a named Kubernetes service account"
   ],
   "inputs": [
     {
@@ -149,7 +149,7 @@ resource "example_resource" "this" {
     },
     {
       "name": "naming_strategy",
-      "description": "How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'ids' when unset",
+      "description": "How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'qualified'",
       "required": false
     },
     {
@@ -209,6 +209,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "02ead1ba7cb63c1c958afd8b125b5e48"
+  "hash": "0651ceea1ce42a15b9bc6a64701fa0a4"
 }
 END_AI_METADATA -->

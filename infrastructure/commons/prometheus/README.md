@@ -2,19 +2,19 @@
 
 ## Description
 
-Deploys Prometheus monitoring stack into a Kubernetes cluster using the prometheus-community Helm chart with a pinned version and templated values
+Deploys Prometheus monitoring stack into a Kubernetes cluster using the prometheus-community Helm chart with pinned versioning and opinionated release settings
 
 ## Architecture
 
-The module renders a YAML values file via templatefile() in locals.tf, injecting the nullplatform_port variable into a prometheus_values.tmpl.yaml template. A single helm_release resource named 'prometheus' is created targeting the prometheus-community/prometheus chart at the specified pinned version, deploying into the configured Kubernetes namespace. The rendered template values are passed directly to the helm_release values argument, and Helm lifecycle options such as atomic, cleanup_on_fail, and wait_for_jobs are hardcoded to enforce reliable deployment behavior.
+The module renders a YAML values file via templatefile() into a local, then passes it to a single helm_release resource targeting the prometheus-community/prometheus chart. The helm_release is configured with atomic installs, cleanup on failure, and namespace auto-creation, with the chart version and namespace driven directly from input variables. No additional Kubernetes resources, IAM roles, or service accounts are created outside of what the Helm chart itself provisions.
 
 ## Features
 
-- Deploys prometheus-community/prometheus Helm chart with a mandatory pinned version to prevent version drift
-- Creates a dedicated Kubernetes namespace automatically via helm_release create_namespace
-- Renders a templated Prometheus values YAML file with configurable nullplatform service port
-- Enforces atomic Helm releases with automatic cleanup on failure and pod recreation
-- Configures Helm release with dependency_update and max_history tracking for safe upgrades
+- Deploys prometheus-community/prometheus Helm chart with a pinned, explicitly required version to prevent drift
+- Creates the target Kubernetes namespace automatically via helm_release namespace management
+- Enforces atomic Helm releases with automatic rollback and cleanup on failure
+- Renders Prometheus configuration from a template file for consistent, repeatable values
+- Maintains Helm release history capped at 10 revisions for auditability
 
 ## Basic Usage
 
@@ -23,36 +23,6 @@ module "prometheus" {
   source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v9.14.0"
 
   prometheus_version = "your-prometheus-version"
-}
-```
-
-### Usage with Latest Version (Blocked)
-
-```hcl
-module "prometheus" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v9.14.0"
-
-  prometheus_version = "latest"
-}
-```
-
-### Usage with Main Branch Reference (Blocked)
-
-```hcl
-module "prometheus" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v9.14.0"
-
-  prometheus_version = "main"
-}
-```
-
-### Usage with Master Branch Reference (Blocked)
-
-```hcl
-module "prometheus" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v9.14.0"
-
-  prometheus_version = "master"
 }
 ```
 
@@ -88,7 +58,7 @@ resource "example_resource" "this" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_nullplatform_port"></a> [nullplatform\_port](#input\_nullplatform\_port) | Port number for nullplatform service communication | `number` | `2021` | no |
+| <a name="input_nullplatform_port"></a> [nullplatform\_port](#input\_nullplatform\_port) | Deprecated and ignored: Prometheus finds the logs-controller through its prometheus.io/scrape pod annotations. Remove it. | `number` | `null` | no |
 | <a name="input_prometheus_namespace"></a> [prometheus\_namespace](#input\_prometheus\_namespace) | Kubernetes namespace where Prometheus will be deployed | `string` | `"prometheus"` | no |
 | <a name="input_prometheus_version"></a> [prometheus\_version](#input\_prometheus\_version) | No default: every install pins this deliberately — see VERSIONS.md. Helm chart version for the prometheus-community/prometheus chart. The helm\_release carried no version at all, so every apply resolved to whatever the repository served latest; the default is the version that resolved to as of 2026-08-27, which keeps behaviour unchanged while removing the drift. | `string` | n/a | yes |
 <!-- END_TF_DOCS -->
@@ -96,14 +66,14 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "prometheus",
-  "description": "Deploys Prometheus monitoring stack into a Kubernetes cluster using the prometheus-community Helm chart with a pinned version and templated values",
-  "architecture": "The module renders a YAML values file via templatefile() in locals.tf, injecting the nullplatform_port variable into a prometheus_values.tmpl.yaml template. A single helm_release resource named 'prometheus' is created targeting the prometheus-community/prometheus chart at the specified pinned version, deploying into the configured Kubernetes namespace. The rendered template values are passed directly to the helm_release values argument, and Helm lifecycle options such as atomic, cleanup_on_fail, and wait_for_jobs are hardcoded to enforce reliable deployment behavior.",
+  "description": "Deploys Prometheus monitoring stack into a Kubernetes cluster using the prometheus-community Helm chart with pinned versioning and opinionated release settings",
+  "architecture": "The module renders a YAML values file via templatefile() into a local, then passes it to a single helm_release resource targeting the prometheus-community/prometheus chart. The helm_release is configured with atomic installs, cleanup on failure, and namespace auto-creation, with the chart version and namespace driven directly from input variables. No additional Kubernetes resources, IAM roles, or service accounts are created outside of what the Helm chart itself provisions.",
   "features": [
-    "Deploys prometheus-community/prometheus Helm chart with a mandatory pinned version to prevent version drift",
-    "Creates a dedicated Kubernetes namespace automatically via helm_release create_namespace",
-    "Renders a templated Prometheus values YAML file with configurable nullplatform service port",
-    "Enforces atomic Helm releases with automatic cleanup on failure and pod recreation",
-    "Configures Helm release with dependency_update and max_history tracking for safe upgrades"
+    "Deploys prometheus-community/prometheus Helm chart with a pinned, explicitly required version to prevent drift",
+    "Creates the target Kubernetes namespace automatically via helm_release namespace management",
+    "Enforces atomic Helm releases with automatic rollback and cleanup on failure",
+    "Renders Prometheus configuration from a template file for consistent, repeatable values",
+    "Maintains Helm release history capped at 10 revisions for auditability"
   ],
   "inputs": [
     {
@@ -113,7 +83,7 @@ resource "example_resource" "this" {
     },
     {
       "name": "nullplatform_port",
-      "description": "Port number for nullplatform service communication",
+      "description": "Deprecated and ignored: Prometheus finds the logs-controller through its prometheus.io/scrape pod annotations. Remove it.",
       "required": false
     },
     {
@@ -123,6 +93,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "79442cc6d407bd4ef2dcfbbf74c63933"
+  "hash": "ae4312a533ab1f6de83b9a0e7d266126"
 }
 END_AI_METADATA -->
