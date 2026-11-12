@@ -6,10 +6,14 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
+  # Dependabot PRs must run these jobs: the ruleset requires the reusable workflows'
+  # inner contexts ("branch-name / Validate Branch Name", "commitlint / build"), and a
+  # skipped caller job never reports them, leaving the PR waiting forever. The shared
+  # workflows already accept dependabot branches and long bodies.
   branch-name:
-    if: ${{ !startsWith(github.head_ref, 'release-please--') && !startsWith(github.head_ref, 'dependabot/') }}
+    if: ${{ !startsWith(github.head_ref, 'release-please--') }}
     uses: nullplatform/actions-nullplatform/.github/workflows/branch-validation.yml@main
 
   commitlint:
-    if: ${{ !startsWith(github.head_ref, 'release-please--') && !startsWith(github.head_ref, 'dependabot/') }}
+    if: ${{ !startsWith(github.head_ref, 'release-please--') }}
     uses: nullplatform/actions-nullplatform/.github/workflows/conventional-commit.yml@main

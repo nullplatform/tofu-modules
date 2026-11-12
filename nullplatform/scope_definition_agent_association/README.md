@@ -2,27 +2,27 @@
 
 ## Description
 
-Creates a nullplatform notification channel by fetching and processing a JSON template from a remote repository and configuring it with agent, selector, and filter settings
+Creates and configures a nullplatform notification channel resource from a JSON template fetched remotely or read locally, routing deployment events to agents with optional worker-orchestrator and override support
 
 ## Architecture
 
-The module fetches a notification channel template via the `http` data source from a configurable raw GitHub URL, then processes it through an `external` data source using `gomplate` and `jq` to inject NRN, API key, and service path variables. The processed template drives a `nullplatform_notification_channel` resource that dynamically configures an agent block (when type is 'agent') with either a legacy git-clone exec command or a worker-orchestrator package-exec command depending on the `worker_orchestrator` flag. Tag selectors, optional overrides flags, and merged MongoDB-style filters are wired directly into the resource from locals and input variables.
+The module fetches a notification channel template via the `http` data source (or reads it from disk when `local_specs_path` is set) and processes it through a `data.external` shell script using `gomplate` and `jq` to interpolate variables. The rendered template drives a single `nullplatform_notification_channel` resource, whose `configuration.agent` block is conditionally populated using a dynamic block based on the channel type. When `worker_orchestrator` is true, the command block switches to `package-exec` mode, injecting `package_slug` and a merged environment map; otherwise the legacy git-clone exec path is used with optional override flags appended to the cmdline.
 
 ## Features
 
-- Creates a nullplatform_notification_channel resource from a remotely fetched and gomplate-processed JSON template
-- Supports worker-orchestrator mode that routes package-exec commands to an agent spawning a package worker image with a baked entrypoint
-- Configures dynamic agent blocks with API key authentication and tag-based agent selector maps
-- Merges extra MongoDB-style filter expressions with base template filters using $and logic
-- Appends override configuration flags to the agent command when custom overrides are enabled
-- Injects additional environment variables into the agent command environment with precedence over defaults
-- Outputs the created notification channel ID for downstream resource references
+- Fetches notification channel JSON template from a configurable remote GitHub raw URL or reads it from a local directory
+- Processes templates using gomplate to interpolate NRN, API key, service path, and specification identifiers
+- Creates a nullplatform_notification_channel resource with dynamic agent configuration and tag-based selector
+- Supports worker-orchestrator mode that emits package-exec commands targeting a named package slug and baked entrypoint
+- Merges extra environment variables on top of default NP_ACTION_CONTEXT and NP_PLUGIN entries for agent commands
+- Applies MongoDB-style filter expressions to the notification channel, merging base template filters with optional extra_filters under an $and clause
+- Supports command-line override flags via configurable override repository and service paths
 
 ## Basic Usage
 
 ```hcl
 module "scope_definition_agent_association" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=v9.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_definition_agent_association?ref=v9.14.0"
 
   nrn                      = "your-nrn"
   scope_specification_id   = "your-scope-specification-id"
@@ -73,6 +73,7 @@ resource "example_resource" "this" {
 | <a name="input_extra_filters"></a> [extra\_filters](#input\_extra\_filters) | Additional filter expression to merge with the base template filters using $and.<br/>Accepts any valid MongoDB-style filter expression, including logical operators<br/>($and, $or, $nor, $not) and comparison operators ($eq, $ne, $in, $nin, $gt,<br/>$gte, $lt, $lte, $regex). If null, only the base template filters are applied.<br/><br/>Examples:<br/>  Simple equality:    { "dimensions.environment" = "production" }<br/>  Comparison:         { "action" = { "$in" = ["deployment:create", "deployment:update"] } }<br/>  Logical OR:         { "$or" = [{ "details.namespace.slug" = "prod" }, { "details.namespace.slug" = "staging" }] }<br/>  Negation:           { "$not" = { "entity\_data.status" = "failed" } }<br/>  Combined:           { "$and" = [{ "action" = { "$regex" = "^deployment" } }, { "$or" = [...] }] } | `any` | `null` | no |
 | <a name="input_github_ref"></a> [github\_ref](#input\_github\_ref) | Git reference to use (branch name, tag, or commit SHA) | `string` | `"beta"` | no |
 | <a name="input_github_repo_url"></a> [github\_repo\_url](#input\_github\_repo\_url) | GitHub repository URL containing scope and action templates | `string` | `"https://github.com/nullplatform/scopes"` | no |
+| <a name="input_local_specs_path"></a> [local\_specs\_path](#input\_local\_specs\_path) | Absolute path to a local directory holding the scope's `specs/` (the<br/>`service_path` directory of a checkout of the scope repository). When set,<br/>`specs/notification-channel.json.tpl` is read from disk and<br/>`repository_notification_channel(_branch)` are ignored. Null (the default)<br/>fetches the template over HTTP. | `string` | `null` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name (NRN) — unique identifier for the target resource | `string` | n/a | yes |
 | <a name="input_override_repo_path"></a> [override\_repo\_path](#input\_override\_repo\_path) | Local filesystem path where the scope repository will be cloned | `string` | `null` | no |
 | <a name="input_overrides_service_path"></a> [overrides\_service\_path](#input\_overrides\_service\_path) | Local filesystem path to the directory containing override configurations | `string` | `null` | no |
@@ -96,16 +97,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "scope_definition_agent_association",
-  "description": "Creates a nullplatform notification channel by fetching and processing a JSON template from a remote repository and configuring it with agent, selector, and filter settings",
-  "architecture": "The module fetches a notification channel template via the `http` data source from a configurable raw GitHub URL, then processes it through an `external` data source using `gomplate` and `jq` to inject NRN, API key, and service path variables. The processed template drives a `nullplatform_notification_channel` resource that dynamically configures an agent block (when type is 'agent') with either a legacy git-clone exec command or a worker-orchestrator package-exec command depending on the `worker_orchestrator` flag. Tag selectors, optional overrides flags, and merged MongoDB-style filters are wired directly into the resource from locals and input variables.",
+  "description": "Creates and configures a nullplatform notification channel resource from a JSON template fetched remotely or read locally, routing deployment events to agents with optional worker-orchestrator and override support",
+  "architecture": "The module fetches a notification channel template via the `http` data source (or reads it from disk when `local_specs_path` is set) and processes it through a `data.external` shell script using `gomplate` and `jq` to interpolate variables. The rendered template drives a single `nullplatform_notification_channel` resource, whose `configuration.agent` block is conditionally populated using a dynamic block based on the channel type. When `worker_orchestrator` is true, the command block switches to `package-exec` mode, injecting `package_slug` and a merged environment map; otherwise the legacy git-clone exec path is used with optional override flags appended to the cmdline.",
   "features": [
-    "Creates a nullplatform_notification_channel resource from a remotely fetched and gomplate-processed JSON template",
-    "Supports worker-orchestrator mode that routes package-exec commands to an agent spawning a package worker image with a baked entrypoint",
-    "Configures dynamic agent blocks with API key authentication and tag-based agent selector maps",
-    "Merges extra MongoDB-style filter expressions with base template filters using $and logic",
-    "Appends override configuration flags to the agent command when custom overrides are enabled",
-    "Injects additional environment variables into the agent command environment with precedence over defaults",
-    "Outputs the created notification channel ID for downstream resource references"
+    "Fetches notification channel JSON template from a configurable remote GitHub raw URL or reads it from a local directory",
+    "Processes templates using gomplate to interpolate NRN, API key, service path, and specification identifiers",
+    "Creates a nullplatform_notification_channel resource with dynamic agent configuration and tag-based selector",
+    "Supports worker-orchestrator mode that emits package-exec commands targeting a named package slug and baked entrypoint",
+    "Merges extra environment variables on top of default NP_ACTION_CONTEXT and NP_PLUGIN entries for agent commands",
+    "Applies MongoDB-style filter expressions to the notification channel, merging base template filters with optional extra_filters under an $and clause",
+    "Supports command-line override flags via configurable override repository and service paths"
   ],
   "inputs": [
     {
@@ -169,6 +170,11 @@ resource "example_resource" "this" {
       "required": false
     },
     {
+      "name": "local_specs_path",
+      "description": "",
+      "required": false
+    },
+    {
       "name": "repository_notification_channel",
       "description": "repository of notification channel template",
       "required": false
@@ -212,6 +218,6 @@ resource "example_resource" "this" {
   "outputs": [
     "notification_channel_id"
   ],
-  "hash": "7f5f76e24bdd08d94cea185d2bd76970"
+  "hash": "2ae746e42cf4f2ebd1d8b80c53b541fa"
 }
 END_AI_METADATA -->

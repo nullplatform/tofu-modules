@@ -63,6 +63,18 @@ variable "github_ref" {
   default     = "beta"
 }
 
+variable "local_specs_path" {
+  description = <<-EOT
+    Absolute path to a local directory holding the scope's `specs/` (the
+    `service_path` directory of a checkout of the scope repository). When set,
+    `specs/notification-channel.json.tpl` is read from disk and
+    `repository_notification_channel(_branch)` are ignored. Null (the default)
+    fetches the template over HTTP.
+  EOT
+  type        = string
+  default     = null
+}
+
 variable "repository_notification_channel" {
   description = "repository of notification channel template"
   type        = string

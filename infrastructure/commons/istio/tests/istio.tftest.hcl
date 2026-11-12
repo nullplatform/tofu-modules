@@ -1,5 +1,10 @@
 mock_provider "helm" {}
 
+variables {
+  istio_base_version = "1.30.7"
+  istiod_version     = "1.30.7"
+}
+
 # Validates Istio plans with default config
 run "default_config" {
   command = plan
@@ -96,4 +101,16 @@ run "custom_repository" {
     condition     = helm_release.istio_base.repository == "https://custom-registry.example.com/charts"
     error_message = "All components should use custom repository"
   }
+}
+
+# No default: an install that does not pin the charts must fail, not drift (CLIEN-1176)
+run "rejects_moving_chart_versions" {
+  command = plan
+
+  variables {
+    istio_base_version = ""
+    istiod_version     = "latest"
+  }
+
+  expect_failures = [var.istio_base_version, var.istiod_version]
 }

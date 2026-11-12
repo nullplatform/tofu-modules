@@ -1,13 +1,14 @@
 mock_provider "helm" {}
 
 variables {
-  cloud_provider       = "aws"
-  hosted_zone_name     = "myorg.example.com"
-  account_slug         = "myorg"
-  private_domain_name  = "myorg.example.com"
-  aws_sa_arn           = "arn:aws:iam::123456789012:role/cert-manager"
-  aws_region           = "us-east-1"
-  cert_manager_version = "v1.21.1"
+  cloud_provider              = "aws"
+  hosted_zone_name            = "myorg.example.com"
+  account_slug                = "myorg"
+  private_domain_name         = "myorg.example.com"
+  aws_sa_arn                  = "arn:aws:iam::123456789012:role/cert-manager"
+  aws_region                  = "us-east-1"
+  cert_manager_version        = "v1.21.1"
+  cert_manager_config_version = "2.35.0"
 }
 
 # Validates AWS provider config plans successfully

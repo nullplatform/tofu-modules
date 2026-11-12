@@ -1120,7 +1120,7 @@ run "disruption_settings_are_left_to_the_chart_by_default" {
 
   assert {
     condition = alltrue([
-      for key in ["startupProbe", "podAnnotations", "terminationGracePeriodSeconds", "shutdownDrainTimeoutSeconds", "podDisruptionBudget", "nodeSelector", "tolerations"] :
+      for key in ["startupProbe", "podAnnotations", "terminationGracePeriodSeconds", "shutdownDrainTimeoutSeconds", "podDisruptionBudget", "nodeSelector", "tolerations", "replicaCount", "affinity", "topologySpreadConstraints"] :
       !contains(keys(yamldecode(helm_release.agent.values[0])), key)
     ])
     error_message = "with no overrides the module must not render any disruption-related key"
@@ -1233,6 +1233,183 @@ run "tolerations_must_be_a_list" {
   }
 
   expect_failures = [var.tolerations]
+}
+
+run "replicas_and_affinity_are_rendered" {
+  command = plan
+
+  variables {
+    replicas = 4
+    affinity = {
+      podAntiAffinity = {
+        requiredDuringSchedulingIgnoredDuringExecution = [
+          {
+            labelSelector = { matchLabels = { "app.kubernetes.io/name" = "nullplatform-agent" } }
+            topologyKey   = "kubernetes.io/hostname"
+          },
+        ]
+      }
+    }
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).replicaCount == 4
+    error_message = "replicas must render as a number under replicaCount"
+  }
+
+  assert {
+    condition     = jsonencode(yamldecode(helm_release.agent.values[0]).affinity) == jsonencode(var.affinity)
+    error_message = "affinity must render as-is under affinity"
+  }
+}
+
+run "replicas_must_be_at_least_one" {
+  command = plan
+
+  variables {
+    replicas = 0
+  }
+
+  expect_failures = [var.replicas]
+}
+
+run "a_single_replica_is_accepted" {
+  command = plan
+
+  variables {
+    replicas = 1
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).replicaCount == 1
+    error_message = "the lower bound of one replica must be accepted and rendered"
+  }
+}
+
+run "replicas_must_be_whole" {
+  command = plan
+
+  variables {
+    replicas = 1.5
+  }
+
+  expect_failures = [var.replicas]
+}
+
+run "affinity_must_be_an_object" {
+  command = plan
+
+  variables {
+    affinity = [{ topologyKey = "kubernetes.io/hostname" }]
+  }
+
+  expect_failures = [var.affinity]
+}
+
+run "topology_spread_enabled_alone_leaves_the_constraints_to_the_chart" {
+  command = plan
+
+  variables {
+    replicas                            = 2
+    topology_spread_constraints_enabled = true
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.agent.values[0]).topologySpreadConstraints == { enabled = true }
+    error_message = "enabled alone must render only enabled, so the chart applies its default constraint"
+  }
+}
+
+run "topology_spread_custom_constraints_are_rendered_without_nulls" {
+  command = plan
+
+  variables {
+    replicas                            = 3
+    topology_spread_constraints_enabled = true
+    topology_spread_constraints = [
+      { maxSkew = 1, topologyKey = "topology.kubernetes.io/zone", whenUnsatisfiable = "DoNotSchedule" },
+      {
+        maxSkew           = 2
+        topologyKey       = "kubernetes.io/hostname"
+        whenUnsatisfiable = "ScheduleAnyway"
+        labelSelector = {
+          matchExpressions = [{ key = "name", operator = "Exists" }]
+        }
+      },
+    ]
+  }
+
+  assert {
+    condition = jsonencode(yamldecode(helm_release.agent.values[0]).topologySpreadConstraints) == jsonencode({
+      enabled = true
+      constraints = [
+        { maxSkew = 1, topologyKey = "topology.kubernetes.io/zone", whenUnsatisfiable = "DoNotSchedule" },
+        {
+          labelSelector     = { matchExpressions = [{ key = "name", operator = "Exists" }] }
+          maxSkew           = 2
+          topologyKey       = "kubernetes.io/hostname"
+          whenUnsatisfiable = "ScheduleAnyway"
+        },
+      ]
+    })
+    error_message = "unset optional fields must not render, so the chart still injects the labelSelector and the API server gets no nulls"
+  }
+}
+
+run "topology_spread_with_the_default_single_replica_is_rejected" {
+  command = plan
+
+  variables {
+    topology_spread_constraints_enabled = true
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "topology_spread_with_an_explicit_single_replica_is_rejected" {
+  command = plan
+
+  variables {
+    replicas                            = 1
+    topology_spread_constraints_enabled = true
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "topology_spread_constraints_without_enabled_are_rejected" {
+  command = plan
+
+  variables {
+    replicas                    = 2
+    topology_spread_constraints = [{ maxSkew = 1, topologyKey = "kubernetes.io/hostname", whenUnsatisfiable = "ScheduleAnyway" }]
+  }
+
+  expect_failures = [terraform_data.cross_variable_validation]
+}
+
+run "topology_spread_rejects_an_unknown_when_unsatisfiable" {
+  command = plan
+
+  variables {
+    replicas                            = 2
+    topology_spread_constraints_enabled = true
+    topology_spread_constraints         = [{ maxSkew = 1, topologyKey = "kubernetes.io/hostname", whenUnsatisfiable = "Always" }]
+  }
+
+  expect_failures = [var.topology_spread_constraints]
+}
+
+run "topology_spread_rejects_a_max_skew_below_one" {
+  command = plan
+
+  variables {
+    replicas                            = 2
+    topology_spread_constraints_enabled = true
+    topology_spread_constraints         = [{ maxSkew = 0, topologyKey = "kubernetes.io/hostname", whenUnsatisfiable = "ScheduleAnyway" }]
+  }
+
+  expect_failures = [var.topology_spread_constraints]
 }
 
 run "azure_workload_identity_labels_the_agent_and_its_workers" {

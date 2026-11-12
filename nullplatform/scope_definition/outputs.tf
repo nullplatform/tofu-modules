@@ -30,8 +30,8 @@ output "service_slug" {
 # ID of the scope type created from the template.
 # Scope types define the context or environment under which services operate.
 output "scope_type_id" {
-  description = "ID of the scope type created from the template."
-  value       = nullplatform_scope_type.from_template.id
+  description = "ID of the scope type created from the template, or null with create_scope_type = false."
+  value       = var.create_scope_type ? nullplatform_scope_type.from_template[0].id : null
 }
 
 # ------------------------------------------------------------------------------

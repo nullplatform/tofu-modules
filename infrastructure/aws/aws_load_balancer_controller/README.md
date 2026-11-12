@@ -2,26 +2,65 @@
 
 ## Description
 
-Deploys the AWS Load Balancer Controller Helm chart to an EKS cluster
+Deploys the AWS Load Balancer Controller onto an EKS cluster via a Helm release with a pinned chart version
 
 ## Architecture
 
-This module creates a helm_release resource to deploy the AWS Load Balancer Controller chart to a Kubernetes cluster, utilizing a locals template to populate the chart values with input variables such as cluster_name, service_account_name, and vpc_id, and then connects the chart to the cluster via the helm_release resource, the chart values are then used to configure the AWS Load Balancer Controller, the module also relies on the aws_load_balancer_controller_version variable to determine the version of the chart to deploy, the helm_release resource is configured to create the namespace if it does not exist, and to wait for the deployment to complete before considering the resource created
+The module renders a Helm values file from a template using `templatefile()` with `cluster_name`, `service_account_name`, and `vpc_id` inputs stored in `locals`. A single `helm_release` resource targets the `aws-load-balancer-controller` chart from the official EKS Helm repository, installing into the `kube-system` namespace with atomic deployment, cleanup-on-fail, and a 600-second timeout. The chart version is enforced via a validation that rejects empty strings and floating references like `latest`, `main`, or `master`, ensuring every deployment pins an explicit chart version.
 
 ## Features
 
-- Deploys AWS Load Balancer Controller Helm chart to EKS cluster
-- Configures AWS Load Balancer Controller with input variables
-- Creates Kubernetes namespace for AWS Load Balancer Controller
+- Deploys AWS Load Balancer Controller into kube-system namespace using helm_release with atomic and cleanup-on-fail guarantees
+- Renders cluster-specific Helm values via templatefile() injecting cluster_name, vpc_id, and service_account_name
+- Enforces explicit chart version pinning by rejecting empty strings and moving references such as latest, main, or master
+- Configures Helm release with force_update, recreate_pods, and reset_values for idempotent and predictable upgrades
+- Limits Helm history to 10 releases to prevent unbounded revision accumulation in the cluster
 
 ## Basic Usage
 
 ```hcl
 module "aws_load_balancer_controller" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/aws_load_balancer_controller?ref=v9.6.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/aws_load_balancer_controller?ref=v9.14.0"
 
-  cluster_name = "your-cluster-name"
-  vpc_id       = "your-vpc-id"
+  aws_load_balancer_controller_version = "your-aws-load-balancer-controller-version"
+  cluster_name                         = "your-cluster-name"
+  vpc_id                               = "your-vpc-id"
+}
+```
+
+### Usage with Pinned Chart Version
+
+```hcl
+module "aws_load_balancer_controller" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/aws_load_balancer_controller?ref=v9.14.0"
+
+  aws_load_balancer_controller_version = "latest"
+  cluster_name                         = "your-cluster-name"
+  vpc_id                               = "your-vpc-id"
+}
+```
+
+### Usage with Pinned Chart Version
+
+```hcl
+module "aws_load_balancer_controller" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/aws_load_balancer_controller?ref=v9.14.0"
+
+  aws_load_balancer_controller_version = "main"
+  cluster_name                         = "your-cluster-name"
+  vpc_id                               = "your-vpc-id"
+}
+```
+
+### Usage with Pinned Chart Version
+
+```hcl
+module "aws_load_balancer_controller" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/aws_load_balancer_controller?ref=v9.14.0"
+
+  aws_load_balancer_controller_version = "master"
+  cluster_name                         = "your-cluster-name"
+  vpc_id                               = "your-vpc-id"
 }
 ```
 
@@ -58,7 +97,7 @@ resource "example_resource" "this" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_aws_load_balancer_controller_version"></a> [aws\_load\_balancer\_controller\_version](#input\_aws\_load\_balancer\_controller\_version) | Version of the AWS Load Balancer Controller Helm chart | `string` | `"1.13.4"` | no |
+| <a name="input_aws_load_balancer_controller_version"></a> [aws\_load\_balancer\_controller\_version](#input\_aws\_load\_balancer\_controller\_version) | No default: every install pins this deliberately — see VERSIONS.md. Version of the AWS Load Balancer Controller Helm chart. Chart 3.x ships app v3, which needs its CRDs applied by hand (Helm does not upgrade them): pin what the cluster already runs and upgrade deliberately | `string` | n/a | yes |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the EKS cluster | `string` | n/a | yes |
 | <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | Name of the Kubernetes service account for the AWS Load Balancer Controller | `string` | `"aws-load-balancer-controller"` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID where load balancers controller will be deployed | `string` | n/a | yes |
@@ -67,12 +106,14 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "aws_load_balancer_controller",
-  "description": "Deploys the AWS Load Balancer Controller Helm chart to an EKS cluster",
-  "architecture": "This module creates a helm_release resource to deploy the AWS Load Balancer Controller chart to a Kubernetes cluster, utilizing a locals template to populate the chart values with input variables such as cluster_name, service_account_name, and vpc_id, and then connects the chart to the cluster via the helm_release resource, the chart values are then used to configure the AWS Load Balancer Controller, the module also relies on the aws_load_balancer_controller_version variable to determine the version of the chart to deploy, the helm_release resource is configured to create the namespace if it does not exist, and to wait for the deployment to complete before considering the resource created",
+  "description": "Deploys the AWS Load Balancer Controller onto an EKS cluster via a Helm release with a pinned chart version",
+  "architecture": "The module renders a Helm values file from a template using `templatefile()` with `cluster_name`, `service_account_name`, and `vpc_id` inputs stored in `locals`. A single `helm_release` resource targets the `aws-load-balancer-controller` chart from the official EKS Helm repository, installing into the `kube-system` namespace with atomic deployment, cleanup-on-fail, and a 600-second timeout. The chart version is enforced via a validation that rejects empty strings and floating references like `latest`, `main`, or `master`, ensuring every deployment pins an explicit chart version.",
   "features": [
-    "Deploys AWS Load Balancer Controller Helm chart to EKS cluster",
-    "Configures AWS Load Balancer Controller with input variables",
-    "Creates Kubernetes namespace for AWS Load Balancer Controller"
+    "Deploys AWS Load Balancer Controller into kube-system namespace using helm_release with atomic and cleanup-on-fail guarantees",
+    "Renders cluster-specific Helm values via templatefile() injecting cluster_name, vpc_id, and service_account_name",
+    "Enforces explicit chart version pinning by rejecting empty strings and moving references such as latest, main, or master",
+    "Configures Helm release with force_update, recreate_pods, and reset_values for idempotent and predictable upgrades",
+    "Limits Helm history to 10 releases to prevent unbounded revision accumulation in the cluster"
   ],
   "inputs": [
     {
@@ -87,8 +128,8 @@ resource "example_resource" "this" {
     },
     {
       "name": "aws_load_balancer_controller_version",
-      "description": "Version of the AWS Load Balancer Controller Helm chart",
-      "required": false
+      "description": "No default: every install pins this deliberately — see VERSIONS.md. Version of the AWS Load Balancer Controller Helm chart. Chart 3.x ships app v3, which needs its CRDs applied by hand (Helm does not upgrade them): pin what the cluster already runs and upgrade deliberately",
+      "required": true
     },
     {
       "name": "service_account_name",
@@ -97,6 +138,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "8f8818b74caceb9db90def379612e433"
+  "hash": "2da1f97cc5271e4588cd83e8c084d160"
 }
 END_AI_METADATA -->

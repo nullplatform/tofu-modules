@@ -83,3 +83,4 @@ run "visible_to_does_not_touch_package" {
     error_message = "The package visibility should not follow visible_to."
   }
 }
+

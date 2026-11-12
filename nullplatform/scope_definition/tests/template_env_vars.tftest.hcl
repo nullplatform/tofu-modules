@@ -91,7 +91,7 @@ run "extra_var_reaches_scope_type_and_actions" {
   }
 
   assert {
-    condition     = jsondecode(data.external.scope_type.result.json).flag == "zip"
+    condition     = jsondecode(data.external.scope_type[0].result.json).flag == "zip"
     error_message = "template_env_vars must reach the scope type render"
   }
 

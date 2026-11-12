@@ -45,6 +45,20 @@ variable "repository_action_templates_branch" {
 
 }
 
+variable "local_specs_path" {
+  description = <<-EOT
+    Absolute path to a local directory holding the scope's `specs/` (the
+    `service_path` directory of a checkout of the scope repository). When set,
+    every template is read from disk and the `repository_*` inputs are ignored,
+    so a stack running from the repository itself (a release publishing its own
+    package, a private repository) publishes exactly the files of its checkout.
+    Null (the default) fetches the templates over HTTP. Same contract as
+    service_definition's `local_specs_path`.
+  EOT
+  type        = string
+  default     = null
+}
+
 variable "service_path" {
   description = "Path within the repository where the service specification files are stored (e.g., 'services/api')"
   type        = string
@@ -79,6 +93,29 @@ variable "service_spec_name" {
   default     = "Containers"
 }
 
+variable "service_spec_slug" {
+  description = <<-EOT
+    Slug of the service specification. Null (the default) lets the platform
+    derive it from `service_spec_name`, as it always did. Give one to keep a
+    namespaced identifier under a plain name: a scope published for every
+    organization ("AWS Lambda") lives next to the copies organizations already
+    run under the derived slug only if its own slug differs (`np-aws-lambda`);
+    channels filter by the specification slug and the agent resolves the
+    package worker by slug, so equal slugs double-route. The package the
+    module publishes takes this slug too unless `package.slug` says otherwise.
+    Lowercase letters and digits joined by single dashes; it never changes
+    afterwards, so changing it replaces the specification. Requires provider
+    >= 0.0.113.
+  EOT
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.service_spec_slug == null || can(regex("^[a-z0-9]+(?:-[a-z0-9]+)*$", var.service_spec_slug))
+    error_message = "A slug is lowercase letters and digits joined by single dashes, exactly what the platform derives from a name."
+  }
+}
+
 variable "service_spec_description" {
   description = "Description of the created service or associated scope type"
   type        = string
@@ -95,9 +132,10 @@ variable "nrn" {
 }
 
 variable "np_api_key" {
-  description = "Nullplatform API key used for executing local commands (e.g., 'np nrn patch')"
+  description = "Nullplatform API key used for executing local commands (e.g., 'np nrn patch'). Required with configure_nrn_settings."
   type        = string
   sensitive   = true
+  default     = null
 }
 
 ################################################################################
@@ -114,6 +152,18 @@ variable "external_logging_provider" {
   description = "Name of the external log provider"
   type        = string
   default     = "external"
+}
+
+variable "create_scope_type" {
+  type        = bool
+  default     = true
+  description = "Create the scope type from scope-type-definition.json.tpl at nrn. Set to false when the specification is published as a package for other organizations: each one creates its own scope type when it installs the package, so the publisher's would only duplicate it."
+}
+
+variable "configure_nrn_settings" {
+  type        = bool
+  default     = true
+  description = "Write the metrics and logs providers of the scope to the NRN settings at nrn (`np nrn patch`, needs `np` on the machine running the apply). Set to false when the specification is published as a package for other organizations: each one writes its own when it installs the package."
 }
 
 variable "create_scope_configuration" {
