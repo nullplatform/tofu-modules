@@ -371,3 +371,27 @@ run "static_files_defaults_survive_aws_overrides" {
     error_message = "a network override must not drop azure_network"
   }
 }
+
+# A spec registered under a name override has a slug other than its type.
+run "specification_slug_overrides_type" {
+  command = plan
+
+  variables {
+    type                      = "static-files"
+    specification_slug        = "static-files-acme"
+    cloud_provider            = "aws"
+    aws_region                = "us-east-1"
+    aws_state_bucket          = "tf-state"
+    aws_hosted_public_zone_id = "Z0000000000000"
+  }
+
+  assert {
+    condition     = nullplatform_provider_config.scope_configuration.type == "static-files-acme"
+    error_message = "the config should target specification_slug"
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.aws_distribution == "cloudfront"
+    error_message = "the payload should still be shaped by type"
+  }
+}

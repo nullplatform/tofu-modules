@@ -13,6 +13,12 @@ variable "type" {
   }
 }
 
+variable "specification_slug" {
+  description = "Slug of the provider specification the configuration targets, when it differs from `type` (a spec registered with a name override). `type` still selects the payload shape. Defaults to `type`."
+  type        = string
+  default     = null
+}
+
 variable "dimensions" {
   description = "Dimension values for this configuration."
   type        = map(string)
