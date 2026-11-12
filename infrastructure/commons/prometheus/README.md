@@ -20,7 +20,7 @@ The module renders a YAML values file via templatefile() into a local, then pass
 
 ```hcl
 module "prometheus" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v9.14.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/prometheus?ref=v9.15.0"
 
   prometheus_version = "your-prometheus-version"
 }
