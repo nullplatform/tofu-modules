@@ -111,6 +111,15 @@ run "the_scope_type_points_at_the_package_specification_and_needs_no_template" {
   }
 }
 
+run "nrn_settings_are_not_written_by_default" {
+  command = plan
+
+  assert {
+    condition     = length(terraform_data.nrn_settings) == 0
+    error_message = "Telemetry needs no NRN settings: nothing may be patched unless asked"
+  }
+}
+
 # Plan only, in every run: the NRN settings are written by a local-exec `np nrn
 # patch`, which an override does not skip, so an apply would call the API. On
 # a first install the specification slug is unknown at plan (the specification
@@ -119,17 +128,18 @@ run "nrn_settings_record_the_providers" {
   command = plan
 
   variables {
+    configure_nrn_settings    = true
     external_metrics_provider = "dummy-metrics"
     external_logging_provider = "dummy-logs"
   }
 
   assert {
-    condition     = terraform_data.nrn_settings.triggers_replace.metrics_provider == "dummy-metrics" && terraform_data.nrn_settings.triggers_replace.logging_provider == "dummy-logs"
+    condition     = terraform_data.nrn_settings[0].triggers_replace.metrics_provider == "dummy-metrics" && terraform_data.nrn_settings[0].triggers_replace.logging_provider == "dummy-logs"
     error_message = "The NRN settings must record the metrics and logs providers"
   }
 
   assert {
-    condition     = terraform_data.nrn_settings.triggers_replace.nrn == "organization=1:account=2"
+    condition     = terraform_data.nrn_settings[0].triggers_replace.nrn == "organization=1:account=2"
     error_message = "The NRN settings are written at nrn"
   }
 }
