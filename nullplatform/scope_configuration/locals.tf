@@ -1,7 +1,9 @@
 locals {
   # Defaults read from var.spec_schema (shape enforced by its validations):
-  # top-level defaults plus each section's field defaults. A section with none
-  # is left out, since an empty object is drift against a config without it.
+  # top-level defaults plus the field defaults of each section the module
+  # sends. The API only fills defaults inside sections it receives, so a
+  # section the module never sends stays out, as does one with no defaults
+  # (an empty object is drift against a config without it).
   spec_properties = try(var.spec_schema.properties, {})
 
   spec_section_defaults = {
@@ -13,7 +15,7 @@ locals {
 
   spec_defaults = merge(
     { for k, p in local.spec_properties : k => p.default if try(p.default, null) != null },
-    { for k, v in local.spec_section_defaults : k => v if length(v) > 0 },
+    { for k, v in local.spec_section_defaults : k => v if length(v) > 0 && contains(keys(local.overrides), k) },
   )
 
   ##############################################################################

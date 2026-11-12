@@ -50,6 +50,10 @@ variables {
         type       = "object"
         properties = { aws_security = { type = "string", default = "none" } }
       }
+      unsent_section = {
+        type       = "object"
+        properties = { enabled = { type = "boolean", default = true } }
+      }
     }
   }
 }
@@ -97,6 +101,11 @@ run "static_files_defaults_come_from_spec_schema" {
   assert {
     condition     = !can(jsondecode(nullplatform_provider_config.scope_configuration.attributes).distribution.null_default)
     error_message = "a null default is no default: the API doesn't fill it"
+  }
+
+  assert {
+    condition     = !can(jsondecode(nullplatform_provider_config.scope_configuration.attributes).unsent_section)
+    error_message = "a section the module doesn't send must stay omitted: the API doesn't fill it"
   }
 
   # azure_front_door_cache_days is a built-in default this fixture lacks.
@@ -152,8 +161,8 @@ run "aws_lambda_defaults_come_from_spec_schema" {
   }
 
   assert {
-    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).triggers.invoke_permissions == []
-    error_message = "triggers.invoke_permissions must mirror the spec default"
+    condition     = !can(jsondecode(nullplatform_provider_config.scope_configuration.attributes).triggers)
+    error_message = "triggers must stay omitted: the module doesn't send it, so the API doesn't fill it"
   }
 
   assert {
@@ -228,7 +237,7 @@ run "real_static_files_spec_sends_the_same_payload" {
   }
 }
 
-run "real_aws_lambda_spec_keeps_agent_omitted" {
+run "real_aws_lambda_spec_sends_the_same_payload" {
   command = plan
 
   variables {
@@ -238,14 +247,13 @@ run "real_aws_lambda_spec_keeps_agent_omitted" {
     spec_schema                  = jsondecode(file("tests/fixtures/lambda-schema.json"))
   }
 
+  # Same as without spec_schema: triggers is never sent and agent has no layer ARN.
   assert {
-    condition     = !can(jsondecode(nullplatform_provider_config.scope_configuration.attributes).agent)
-    error_message = "the real spec gives agent no defaults: it must stay omitted"
-  }
-
-  assert {
-    condition     = jsondecode(nullplatform_provider_config.scope_configuration.attributes).triggers.invoke_permissions == []
-    error_message = "triggers.invoke_permissions must mirror the real spec default"
+    condition = jsondecode(nullplatform_provider_config.scope_configuration.attributes) == {
+      state      = { tofu_state_bucket = "lambda-state" }
+      deployment = { placeholder_image_uri = "123456789012.dkr.ecr.us-east-1.amazonaws.com/placeholder:latest" }
+    }
+    error_message = "the real spec must yield the payload the module sends without it"
   }
 }
 
