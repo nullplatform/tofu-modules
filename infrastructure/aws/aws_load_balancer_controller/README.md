@@ -20,7 +20,7 @@ The module renders a Helm values file from a template using `templatefile()` wit
 
 ```hcl
 module "aws_load_balancer_controller" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/aws_load_balancer_controller?ref=v9.15.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/aws_load_balancer_controller?ref=v9.16.0"
 
   aws_load_balancer_controller_version = "your-aws-load-balancer-controller-version"
   cluster_name                         = "your-cluster-name"
@@ -32,7 +32,7 @@ module "aws_load_balancer_controller" {
 
 ```hcl
 module "aws_load_balancer_controller" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/aws_load_balancer_controller?ref=v9.15.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/aws_load_balancer_controller?ref=v9.16.0"
 
   aws_load_balancer_controller_version = "latest"
   cluster_name                         = "your-cluster-name"
@@ -44,7 +44,7 @@ module "aws_load_balancer_controller" {
 
 ```hcl
 module "aws_load_balancer_controller" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/aws_load_balancer_controller?ref=v9.15.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/aws_load_balancer_controller?ref=v9.16.0"
 
   aws_load_balancer_controller_version = "main"
   cluster_name                         = "your-cluster-name"
@@ -56,7 +56,7 @@ module "aws_load_balancer_controller" {
 
 ```hcl
 module "aws_load_balancer_controller" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/aws_load_balancer_controller?ref=v9.15.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/aws_load_balancer_controller?ref=v9.16.0"
 
   aws_load_balancer_controller_version = "master"
   cluster_name                         = "your-cluster-name"
