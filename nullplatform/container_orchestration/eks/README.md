@@ -22,7 +22,7 @@ The module constructs a set of local maps (cluster, balancer, gateway, network, 
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.15.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.16.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
