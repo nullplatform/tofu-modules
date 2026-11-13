@@ -2,38 +2,38 @@
 
 ## Description
 
-Creates and manages a nullplatform_provider_config resource that configures scope-level provider settings for either static-files (CloudFront-backed S3) or aws-lambda deployments within the Nullplatform platform
+Creates and manages a nullplatform provider configuration (nullplatform_provider_config) for either static-files or aws-lambda scope types, encoding type-specific infrastructure settings as a JSON attributes payload
 
 ## Architecture
 
-The module defines a single nullplatform_provider_config resource that receives a JSON-encoded attributes payload built entirely from locals. Two local maps — type_defaults and type_overrides — are keyed by var.type, and their merged result is passed as the attributes argument; for static-files the override map is further indexed by var.cloud_provider so per-cloud fields (aws_region, aws_state_bucket, CloudFront distribution settings, Route53 network, WAF security) are layered on top of spec defaults, while for aws-lambda the override carries state bucket, placeholder image URI, and an optional agent block that is omitted when lambda_null_agent_layer_arn is null. The module outputs the resource id as provider_config_id.
+The module creates a single nullplatform_provider_config resource whose attributes field is populated by merging spec-schema-derived or built-in defaults with caller-supplied overrides, dispatched by var.type. For static-files, cloud-specific overrides (currently AWS only) are assembled from CloudFront distribution, Route53 network, WAF security, and S3 state variables and deep-merged with section defaults from local.static_files_defaults. For aws-lambda, state bucket and placeholder image URI are merged into deployment and state sections, with an optional agent block injected only when lambda_null_agent_layer_arn is provided. The final local.payload is JSON-encoded and written to the API via the nullplatform provider.
 
 ## Features
 
-- Creates a nullplatform_provider_config resource with type-dispatched JSON attributes for static-files or aws-lambda scope configurations
-- Configures CloudFront distribution settings including viewer protocol policy, cache behaviors, custom error responses, price class, and geo-restriction for static-files deployments
-- Supports WAF WebACL attachment to CloudFront distributions via aws_security and aws_web_acl_name variables
-- Attaches CloudFront Functions and Lambda@Edge invocations to default and ordered cache behaviors with event-type validation
-- Configures managed cache, origin-request, and response-headers policies per cache behavior using policy or legacy cache mode
-- Provisions aws-lambda scope configuration with OpenTofu state bucket, placeholder ECR image URI, and optional nullplatform agent Lambda layer ARN
-- Translates legacy aws_lambda_associations into the current aws_default_invocations spec format for backward compatibility
+- Creates a nullplatform_provider_config resource encoding scope infrastructure settings as a versioned JSON payload
+- Supports static-files scope type with CloudFront distribution, Route53 DNS, S3 state backend, and optional WAF WebACL configuration
+- Supports aws-lambda scope type with S3 OpenTofu state bucket, ECR placeholder image URI, and optional nullplatform agent Lambda layer
+- Merges built-in or spec-schema-derived section defaults with caller overrides using a one-level-deep merge strategy to prevent drift
+- Translates legacy aws_lambda_associations format into the current aws_default_invocations spec format for backward compatibility
+- Configures ordered CloudFront cache behaviors with per-behavior cache mode, compression, invocations, and response header policies
+- Allows specification_slug override to target a renamed provider spec while keeping the type-driven payload shape
 
 ## Basic Usage
 
 ```hcl
 module "scope_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v9.16.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v9.17.0"
 
   nrn  = "your-nrn"
   type = "your-type"
 }
 ```
 
-### Usage with Static Files
+### Usage with Static Files Scope
 
 ```hcl
 module "scope_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v9.16.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v9.17.0"
 
   aws_hosted_public_zone_id = "your-aws-hosted-public-zone-id"  # Required when type = "static-files"
   aws_region                = "your-aws-region"  # Required when type = "static-files"
@@ -44,11 +44,11 @@ module "scope_configuration" {
 }
 ```
 
-### Usage with AWS Lambda
+### Usage with AWS Lambda Scope
 
 ```hcl
 module "scope_configuration" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v9.16.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_configuration?ref=v9.17.0"
 
   lambda_placeholder_image_uri = "your-lambda-placeholder-image-uri"  # Required when type = "aws-lambda"
   lambda_tofu_state_bucket     = "your-lambda-tofu-state-bucket"  # Required when type = "aws-lambda"
@@ -115,7 +115,9 @@ resource "example_resource" "this" {
 | <a name="input_lambda_placeholder_image_uri"></a> [lambda\_placeholder\_image\_uri](#input\_lambda\_placeholder\_image\_uri) | aws-lambda only. ECR URI of the placeholder image, without the architecture suffix — the workflow appends -arm64 or -amd64 from the scope's architecture. | `string` | `null` | no |
 | <a name="input_lambda_tofu_state_bucket"></a> [lambda\_tofu\_state\_bucket](#input\_lambda\_tofu\_state\_bucket) | aws-lambda only. S3 bucket where each Lambda scope writes its OpenTofu state. Scopes use distinct key prefixes, so one bucket can be shared. | `string` | `null` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform Resource Name (NRN) — unique identifier for the target resource. | `string` | n/a | yes |
-| <a name="input_type"></a> [type](#input\_type) | Provider specification slug this scope configuration targets. Determines which set of variables below applies — see README for each type's payload. | `string` | n/a | yes |
+| <a name="input_spec_schema"></a> [spec\_schema](#input\_spec\_schema) | The `schema` object of the scope's scope-configuration spec (`module.scope_package_installation.scope_configuration_schema` or `module.scope_definition.scope_configuration.schema`). When set, it replaces the built-in defaults: top-level and section-field defaults are read for the keys and sections the module sends; deeper ones (e.g. inside array items) are not. Null keeps the built-in defaults. | `any` | `null` | no |
+| <a name="input_specification_slug"></a> [specification\_slug](#input\_specification\_slug) | Slug of the provider specification the configuration targets, when it differs from `type` (a spec registered with a name override, e.g. `module.scope_package_installation.scope_configuration_specification_slug`). `type` still selects the payload shape. Defaults to `type`. | `string` | `null` | no |
+| <a name="input_type"></a> [type](#input\_type) | Scope type: selects which variables below apply and the payload shape (see README). Also the provider specification slug the configuration targets, unless `specification_slug` is set. | `string` | n/a | yes |
 
 ## Outputs
 
@@ -127,16 +129,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "scope_configuration",
-  "description": "Creates and manages a nullplatform_provider_config resource that configures scope-level provider settings for either static-files (CloudFront-backed S3) or aws-lambda deployments within the Nullplatform platform",
-  "architecture": "The module defines a single nullplatform_provider_config resource that receives a JSON-encoded attributes payload built entirely from locals. Two local maps — type_defaults and type_overrides — are keyed by var.type, and their merged result is passed as the attributes argument; for static-files the override map is further indexed by var.cloud_provider so per-cloud fields (aws_region, aws_state_bucket, CloudFront distribution settings, Route53 network, WAF security) are layered on top of spec defaults, while for aws-lambda the override carries state bucket, placeholder image URI, and an optional agent block that is omitted when lambda_null_agent_layer_arn is null. The module outputs the resource id as provider_config_id.",
+  "description": "Creates and manages a nullplatform provider configuration (nullplatform_provider_config) for either static-files or aws-lambda scope types, encoding type-specific infrastructure settings as a JSON attributes payload",
+  "architecture": "The module creates a single nullplatform_provider_config resource whose attributes field is populated by merging spec-schema-derived or built-in defaults with caller-supplied overrides, dispatched by var.type. For static-files, cloud-specific overrides (currently AWS only) are assembled from CloudFront distribution, Route53 network, WAF security, and S3 state variables and deep-merged with section defaults from local.static_files_defaults. For aws-lambda, state bucket and placeholder image URI are merged into deployment and state sections, with an optional agent block injected only when lambda_null_agent_layer_arn is provided. The final local.payload is JSON-encoded and written to the API via the nullplatform provider.",
   "features": [
-    "Creates a nullplatform_provider_config resource with type-dispatched JSON attributes for static-files or aws-lambda scope configurations",
-    "Configures CloudFront distribution settings including viewer protocol policy, cache behaviors, custom error responses, price class, and geo-restriction for static-files deployments",
-    "Supports WAF WebACL attachment to CloudFront distributions via aws_security and aws_web_acl_name variables",
-    "Attaches CloudFront Functions and Lambda@Edge invocations to default and ordered cache behaviors with event-type validation",
-    "Configures managed cache, origin-request, and response-headers policies per cache behavior using policy or legacy cache mode",
-    "Provisions aws-lambda scope configuration with OpenTofu state bucket, placeholder ECR image URI, and optional nullplatform agent Lambda layer ARN",
-    "Translates legacy aws_lambda_associations into the current aws_default_invocations spec format for backward compatibility"
+    "Creates a nullplatform_provider_config resource encoding scope infrastructure settings as a versioned JSON payload",
+    "Supports static-files scope type with CloudFront distribution, Route53 DNS, S3 state backend, and optional WAF WebACL configuration",
+    "Supports aws-lambda scope type with S3 OpenTofu state bucket, ECR placeholder image URI, and optional nullplatform agent Lambda layer",
+    "Merges built-in or spec-schema-derived section defaults with caller overrides using a one-level-deep merge strategy to prevent drift",
+    "Translates legacy aws_lambda_associations format into the current aws_default_invocations spec format for backward compatibility",
+    "Configures ordered CloudFront cache behaviors with per-behavior cache mode, compression, invocations, and response header policies",
+    "Allows specification_slug override to target a renamed provider spec while keeping the type-driven payload shape"
   ],
   "inputs": [
     {
@@ -146,8 +148,18 @@ resource "example_resource" "this" {
     },
     {
       "name": "type",
-      "description": "Provider specification slug this scope configuration targets. Determines which set of variables below applies — see README for each type's payload.",
+      "description": "Scope type: selects which variables below apply and the payload shape (see README). Also the provider specification slug the configuration targets, unless `specification_slug` is set.",
       "required": true
+    },
+    {
+      "name": "specification_slug",
+      "description": "Slug of the provider specification the configuration targets, when it differs from `type` (a spec registered with a name override, e.g. `module.scope_package_installation.scope_configuration_specification_slug`). `type` still selects the payload shape. Defaults to `type`.",
+      "required": false
+    },
+    {
+      "name": "spec_schema",
+      "description": "",
+      "required": false
     },
     {
       "name": "cloud_provider",
@@ -278,6 +290,6 @@ resource "example_resource" "this" {
   "outputs": [
     "provider_config_id"
   ],
-  "hash": "4d1c7dda995c12265f05e50fee791a18"
+  "hash": "51394d663a6518cfec5256c2ff0cf215"
 }
 END_AI_METADATA -->

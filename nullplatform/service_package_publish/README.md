@@ -21,7 +21,7 @@ The module delegates entirely to a child `service_definition` module, passing a 
 
 ```hcl
 module "service_package_publish" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_package_publish?ref=v9.16.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_package_publish?ref=v9.17.0"
 
   image_digest     = "your-image-digest"
   image_repository = "your-image-repository"

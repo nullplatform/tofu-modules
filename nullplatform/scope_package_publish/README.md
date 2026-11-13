@@ -21,7 +21,7 @@ The module delegates all resource creation to a child `scope_definition` module,
 
 ```hcl
 module "scope_package_publish" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_package_publish?ref=v9.16.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/scope_package_publish?ref=v9.17.0"
 
   action_spec_names        = "your-action-spec-names"
   image_digest             = "your-image-digest"
