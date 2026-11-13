@@ -21,7 +21,7 @@ The module creates two core helm_release resources: cert-manager from charts.jet
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v9.15.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v9.16.0"
 
   account_slug                = "your-account-slug"
   cert_manager_config_version = "your-cert-manager-config-version"
@@ -36,7 +36,7 @@ module "cert_manager" {
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v9.15.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v9.16.0"
 
   account_slug                = "your-account-slug"
   cert_manager_config_version = "your-cert-manager-config-version"
@@ -51,7 +51,7 @@ module "cert_manager" {
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v9.15.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v9.16.0"
 
   account_slug                = "your-account-slug"
   cert_manager_config_version = "your-cert-manager-config-version"
@@ -66,7 +66,7 @@ module "cert_manager" {
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v9.15.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v9.16.0"
 
   account_slug                = "your-account-slug"
   cert_manager_config_version = "your-cert-manager-config-version"
@@ -81,7 +81,7 @@ module "cert_manager" {
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v9.15.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v9.16.0"
 
   account_slug                = "your-account-slug"
   cert_manager_config_version = "your-cert-manager-config-version"
@@ -96,7 +96,7 @@ module "cert_manager" {
 
 ```hcl
 module "cert_manager" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v9.15.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/cert_manager?ref=v9.16.0"
 
   account_slug                     = "your-account-slug"
   cert_manager_config_version      = "your-cert-manager-config-version"
