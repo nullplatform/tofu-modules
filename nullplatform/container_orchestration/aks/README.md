@@ -2,27 +2,27 @@
 
 ## Description
 
-Configures a Nullplatform AKS provider by creating a nullplatform_provider_config resource that registers an Azure Kubernetes Service cluster with gateway, traffic manager, naming, and resource management settings
+Configures a Nullplatform AKS provider by creating a nullplatform_provider_config resource that registers cluster, gateway, traffic manager, naming, and resource management settings for an Azure Kubernetes Service cluster
 
 ## Architecture
 
-The module constructs several local value maps (cluster, gateway, resource_management, security, naming) from input variables and merges them into a single attributes object. A single nullplatform_provider_config resource of type 'aks-configuration' is created, receiving the NRN, optional dimensions, and the JSON-encoded attributes payload. Conditional locals use length checks and ternary expressions to omit empty or unset fields from the final attributes, ensuring only explicitly configured values are sent to the provider API.
+The module constructs a set of nested locals that merge optional inputs into structured attribute maps for cluster identity, gateway routing, resource management, security, and naming configuration. A single nullplatform_provider_config resource of type 'aks-configuration' is created, binding the NRN and optional dimensions to the JSON-encoded attributes map. Inputs such as cluster_name, resource_group, public_gateway_name, and traffic_manager_version flow directly into the attributes payload, while optional inputs like private_gateway_name, additional_public_gateways, and naming_strategy are conditionally included only when non-empty. The resulting provider config registers the AKS cluster with the Nullplatform control plane so it can schedule and route workloads.
 
 ## Features
 
-- Creates a nullplatform_provider_config resource that registers an AKS cluster with the Nullplatform platform
-- Configures public and private Application Gateway bindings with optional additional gateway lists for HTTPRoute attachment
-- Supports flexible Kubernetes object naming strategies including ids, qualified slugs, and custom patterns with deployment and scope pattern overrides
-- Pins traffic manager sidecar container to an explicit version tag, rejecting moving references like latest, main, or master
-- Configures resource management tuning parameters including memory-to-CPU ratio, request-to-limit ratios, and maximum milicores
-- Supports image pull secrets and a named Kubernetes service account for deployment security configuration
-- Applies dynamic Kubernetes object modifiers via a structured list of selector, action, type, and value entries
+- Creates a nullplatform_provider_config resource that registers an AKS cluster with the Nullplatform control plane
+- Configures public and optional private Application Gateway references with DNS-validated name constraints
+- Supports additional public and private gateway attachments for multi-gateway HTTPRoute fan-out
+- Pins the traffic manager sidecar container to an explicit, immutable version tag
+- Configures Kubernetes object naming strategy with ids, qualified, or custom pattern modes
+- Applies optional resource management tuning including memory-to-CPU ratio, request-to-limit ratio, and millicore limits
+- Supports image pull secrets and a custom Kubernetes service account for deployment workloads
 
 ## Basic Usage
 
 ```hcl
 module "aks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v9.14.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/aks?ref=v9.15.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -78,7 +78,7 @@ resource "example_resource" "this" {
 | <a name="input_namespace_application_default"></a> [namespace\_application\_default](#input\_namespace\_application\_default) | Default Kubernetes namespace for applications. Accepts a pattern the k8s scope renders per scope, e.g. {.namespace.slug} for one Kubernetes namespace per nullplatform namespace | `string` | `"nullplatform"` | no |
 | <a name="input_naming_deployment_pattern"></a> [naming\_deployment\_pattern](#input\_naming\_deployment\_pattern) | Name pattern for the objects a deployment creates (Deployment, Service, HPA, Secret, PodDisruptionBudget), e.g. {.application.slug}-{.scope.slug}-{.deployment.id}. Read only when naming\_strategy is 'custom' | `string` | `""` | no |
 | <a name="input_naming_scope_pattern"></a> [naming\_scope\_pattern](#input\_naming\_scope\_pattern) | Name pattern for the objects that outlive a deployment (Ingress, HTTPRoute, serving certificate), e.g. {.application.slug}-{.scope.slug}-{.scope.id}. Read only when naming\_strategy is 'custom'. Only applies to scopes created after the change | `string` | `""` | no |
-| <a name="input_naming_strategy"></a> [naming\_strategy](#input\_naming\_strategy) | How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'ids' when unset | `string` | `""` | no |
+| <a name="input_naming_strategy"></a> [naming\_strategy](#input\_naming\_strategy) | How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'qualified' | `string` | `"qualified"` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform NRN (e.g., organization=X:account=Y:namespace=Z) | `string` | n/a | yes |
 | <a name="input_object_modifiers"></a> [object\_modifiers](#input\_object\_modifiers) | List of modifications to dynamically modify k8s objects | <pre>list(object({<br/>    selector = string<br/>    action   = string<br/>    type     = string<br/>    value    = optional(string, "")<br/>  }))</pre> | `[]` | no |
 | <a name="input_private_gateway_name"></a> [private\_gateway\_name](#input\_private\_gateway\_name) | Name of the private Application Gateway in AKS | `string` | `""` | no |
@@ -91,16 +91,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "aks",
-  "description": "Configures a Nullplatform AKS provider by creating a nullplatform_provider_config resource that registers an Azure Kubernetes Service cluster with gateway, traffic manager, naming, and resource management settings",
-  "architecture": "The module constructs several local value maps (cluster, gateway, resource_management, security, naming) from input variables and merges them into a single attributes object. A single nullplatform_provider_config resource of type 'aks-configuration' is created, receiving the NRN, optional dimensions, and the JSON-encoded attributes payload. Conditional locals use length checks and ternary expressions to omit empty or unset fields from the final attributes, ensuring only explicitly configured values are sent to the provider API.",
+  "description": "Configures a Nullplatform AKS provider by creating a nullplatform_provider_config resource that registers cluster, gateway, traffic manager, naming, and resource management settings for an Azure Kubernetes Service cluster",
+  "architecture": "The module constructs a set of nested locals that merge optional inputs into structured attribute maps for cluster identity, gateway routing, resource management, security, and naming configuration. A single nullplatform_provider_config resource of type 'aks-configuration' is created, binding the NRN and optional dimensions to the JSON-encoded attributes map. Inputs such as cluster_name, resource_group, public_gateway_name, and traffic_manager_version flow directly into the attributes payload, while optional inputs like private_gateway_name, additional_public_gateways, and naming_strategy are conditionally included only when non-empty. The resulting provider config registers the AKS cluster with the Nullplatform control plane so it can schedule and route workloads.",
   "features": [
-    "Creates a nullplatform_provider_config resource that registers an AKS cluster with the Nullplatform platform",
-    "Configures public and private Application Gateway bindings with optional additional gateway lists for HTTPRoute attachment",
-    "Supports flexible Kubernetes object naming strategies including ids, qualified slugs, and custom patterns with deployment and scope pattern overrides",
-    "Pins traffic manager sidecar container to an explicit version tag, rejecting moving references like latest, main, or master",
-    "Configures resource management tuning parameters including memory-to-CPU ratio, request-to-limit ratios, and maximum milicores",
-    "Supports image pull secrets and a named Kubernetes service account for deployment security configuration",
-    "Applies dynamic Kubernetes object modifiers via a structured list of selector, action, type, and value entries"
+    "Creates a nullplatform_provider_config resource that registers an AKS cluster with the Nullplatform control plane",
+    "Configures public and optional private Application Gateway references with DNS-validated name constraints",
+    "Supports additional public and private gateway attachments for multi-gateway HTTPRoute fan-out",
+    "Pins the traffic manager sidecar container to an explicit, immutable version tag",
+    "Configures Kubernetes object naming strategy with ids, qualified, or custom pattern modes",
+    "Applies optional resource management tuning including memory-to-CPU ratio, request-to-limit ratio, and millicore limits",
+    "Supports image pull secrets and a custom Kubernetes service account for deployment workloads"
   ],
   "inputs": [
     {
@@ -150,7 +150,7 @@ resource "example_resource" "this" {
     },
     {
       "name": "naming_strategy",
-      "description": "How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'ids' when unset",
+      "description": "How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'qualified'",
       "required": false
     },
     {
@@ -215,6 +215,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "97b5263dd1aaa909416a8f8a4fa51a2c"
+  "hash": "89ac1fd90dc1c9b3e28700220c7586f2"
 }
 END_AI_METADATA -->
