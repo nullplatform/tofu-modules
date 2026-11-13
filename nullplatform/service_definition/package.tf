@@ -58,10 +58,12 @@ locals {
   # service that relies on default actions still pins them (this is what the
   # standalone packaged_service module does).
   #
-  # NOTE: these are known only once the spec exists (server-side ids/snapshots).
-  # On a first apply that CREATES the spec they are not yet known, so pin them on
-  # a subsequent apply (or create specs first, then package) — same two-step the
-  # packaged_service module formalizes.
+  # They are known as soon as the spec exists: the provider's create answers
+  # with `action_specifications` and their first snapshot (provider 0.0.113+),
+  # so one apply that creates the spec, its links and the package pins every
+  # default action, and a link added later pins its own in the apply that
+  # creates it. The snapshot filter below is a guard for an action without a
+  # snapshot, not a second-apply requirement.
 
   # Explicit actions (from available_actions) win over the same action arriving
   # through a spec's default expansion — its name/parent are author-chosen and
@@ -148,8 +150,7 @@ resource "nullplatform_package" "this" {
 
   # Default-created action specifications (use_default_actions), expanded from the
   # service spec's and each link's computed action_specifications. Only pins
-  # actions that already have a snapshot (known once the spec exists) — see the
-  # two-step note in locals above.
+  # actions that have a snapshot — see the note in locals above.
   dynamic "components" {
     for_each = local.package_default_actions
     content {
