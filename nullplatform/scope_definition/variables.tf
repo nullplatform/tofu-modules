@@ -143,13 +143,13 @@ variable "np_api_key" {
 ################################################################################
 
 variable "external_metrics_provider" {
-  description = "Name of the external metrics provider for monitoring integration"
+  description = "Metrics provider written to the NRN settings for this scope. Only used with configure_nrn_settings."
   type        = string
   default     = "externalmetrics"
 }
 
 variable "external_logging_provider" {
-  description = "Name of the external log provider"
+  description = "Logs provider written to the NRN settings for this scope. Only used with configure_nrn_settings."
   type        = string
   default     = "external"
 }
@@ -162,8 +162,8 @@ variable "create_scope_type" {
 
 variable "configure_nrn_settings" {
   type        = bool
-  default     = true
-  description = "Write the metrics and logs providers of the scope to the NRN settings at nrn (`np nrn patch`, needs `np` on the machine running the apply). Set to false when the specification is published as a package for other organizations: each one writes its own when it installs the package."
+  default     = false
+  description = "Write the metrics and logs providers of the scope to the NRN settings at nrn (`np nrn patch`, needs `np` on the machine running the apply and `np_api_key`). Not needed for a scope to get telemetry: nullplatform already asks the scope's own implementation for the logs and metrics of a custom scope. Turn it on only to point the scope at another provider with `external_metrics_provider` / `external_logging_provider`."
 }
 
 variable "create_scope_configuration" {

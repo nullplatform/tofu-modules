@@ -121,21 +121,27 @@ variable "scope_configuration_name_override" {
 # NRN settings
 ################################################################################
 
+variable "configure_nrn_settings" {
+  description = "Write the metrics and logs providers of the scope to the NRN settings at nrn (`np nrn patch`, needs `np` on the machine running the apply). Not needed for a scope to get telemetry: nullplatform already asks the scope's own implementation for the logs and metrics of a custom scope. Turn it on only to point the scope at another provider with `external_metrics_provider` / `external_logging_provider`."
+  type        = bool
+  default     = false
+}
+
 variable "np_api_key" {
-  description = "nullplatform API key for the `np nrn patch` that sets the scope's metrics and logs providers. Null uses the NP_API_KEY of the environment running the apply."
+  description = "nullplatform API key for the `np nrn patch` of configure_nrn_settings. Null uses the NP_API_KEY of the environment running the apply."
   type        = string
   default     = null
   sensitive   = true
 }
 
 variable "external_metrics_provider" {
-  description = "Metrics provider recorded in the NRN settings for this scope."
+  description = "Metrics provider recorded in the NRN settings for this scope. Only used with configure_nrn_settings."
   type        = string
   default     = "externalmetrics"
 }
 
 variable "external_logging_provider" {
-  description = "Logs provider recorded in the NRN settings for this scope."
+  description = "Logs provider recorded in the NRN settings for this scope. Only used with configure_nrn_settings."
   type        = string
   default     = "external"
 }

@@ -101,7 +101,9 @@ resource "nullplatform_action_specification" "from_templates" {
 # NRN Configuration Patch
 ################################################################################
 
-# Patch NRN with external provider configuration for metrics and logging
+# Optional override of the providers that serve this scope's metrics and logs.
+# Off by default: a custom scope's telemetry already goes to its own
+# implementation without any NRN setting.
 resource "null_resource" "nrn_patch" {
   count = var.configure_nrn_settings ? 1 : 0
   depends_on = [

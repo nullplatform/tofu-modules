@@ -89,7 +89,8 @@ run "nrn_settings_need_an_api_key" {
   command = plan
 
   variables {
-    np_api_key = null
+    configure_nrn_settings = true
+    np_api_key             = null
   }
 
   expect_failures = [null_resource.nrn_patch]

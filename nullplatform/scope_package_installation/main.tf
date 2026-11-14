@@ -6,7 +6,8 @@
 # this module creates them:
 #   1. the installation of the package at var.nrn;
 #   2. the scope type pointing at the package's specification;
-#   3. the NRN settings that pick the scope's metrics and logs providers;
+#   3. optionally, NRN settings that point the scope's metrics and logs at
+#      another provider (by default they go to the scope's own implementation);
 #   4. optionally, the scope-configuration provider specification (its schema),
 #      from the scope repository's template;
 #   5. optionally, the agent channel routing the scope's actions to the package
@@ -62,10 +63,13 @@ resource "nullplatform_scope_type" "this" {
   }
 }
 
-# 3. NRN settings: which providers serve this scope's metrics and logs. No
-#    provider resource writes NRN settings, so this is the same `np nrn patch`
-#    scope_definition runs.
+# 3. NRN settings: an override of the providers that serve this scope's
+#    metrics and logs. Off by default, a custom scope's telemetry already goes
+#    to its own implementation. No provider resource writes NRN settings, so
+#    this is the same `np nrn patch` scope_definition runs.
 resource "terraform_data" "nrn_settings" {
+  count = var.configure_nrn_settings ? 1 : 0
+
   triggers_replace = {
     nrn              = var.nrn
     slug             = local.specification_slug
@@ -83,6 +87,12 @@ resource "terraform_data" "nrn_settings" {
 
     environment = var.np_api_key == null ? {} : { NP_API_KEY = var.np_api_key }
   }
+}
+
+# It used to be a single instance: keep existing states on the same object.
+moved {
+  from = terraform_data.nrn_settings
+  to   = terraform_data.nrn_settings[0]
 }
 
 # 4. Scope-configuration schema. Provider specifications are not package
