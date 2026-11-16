@@ -8,6 +8,8 @@ resource "kubernetes_secret_v1" "external_dns_cloudflare" {
   data = {
     "api-token" = var.cloudflare_token
   }
+
+  depends_on = [kubernetes_namespace_v1.external_dns]
 }
 
 resource "kubernetes_secret_v1" "external_dns_azure_config" {
@@ -46,6 +48,8 @@ resource "kubernetes_secret_v1" "external_dns_pdns" {
   data = {
     "api-key" = var.pdns_api_key
   }
+
+  depends_on = [kubernetes_namespace_v1.external_dns]
 }
 
 resource "kubernetes_secret_v1" "external_dns_rfc2136" {
@@ -58,6 +62,8 @@ resource "kubernetes_secret_v1" "external_dns_rfc2136" {
   data = {
     "tsig-secret" = var.rfc2136_tsig_secret
   }
+
+  depends_on = [kubernetes_namespace_v1.external_dns]
 }
 
 resource "kubernetes_secret_v1" "external_dns_oci_config" {
