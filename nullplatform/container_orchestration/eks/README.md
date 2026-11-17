@@ -2,31 +2,67 @@
 
 ## Description
 
-Configures an EKS cluster provider in Nullplatform by creating a nullplatform_provider_config resource with cluster, load balancer, gateway, networking, resource management, security, traffic manager, and naming settings encoded as JSON attributes
+Configures an EKS provider configuration resource in Nullplatform by registering cluster, load balancer, gateway, resource management, security, traffic manager, and naming settings via a nullplatform_provider_config resource
 
 ## Architecture
 
-The module constructs a set of local maps (cluster, balancer, gateway, network, resource_management, security, traffic_manager, naming) by conditionally merging input variables, then encodes the merged result as JSON and passes it to a single nullplatform_provider_config resource of type 'eks-configuration'. The nullplatform_provider_config resource is keyed by the nrn variable and optionally scoped via a dimensions map, allowing multi-environment or multi-account targeting. All optional sub-configurations are omitted from the JSON payload when their controlling variables are empty or null, keeping the API payload minimal.
+The module constructs a set of deeply merged local maps (cluster, balancer, gateway, network, resource_management, security, traffic_manager, naming) from input variables, omitting any keys with empty or null values to avoid plan drift. All assembled locals are JSON-encoded and passed as the attributes argument to a single nullplatform_provider_config resource of type 'eks-configuration', scoped by the NRN and optional dimension map. The nullplatform provider serializes these attributes to the Nullplatform API, which the EKS k8s-scope controller reads to manage Kubernetes objects such as Deployments, Services, Ingresses, and HTTPRoutes on the target cluster.
 
 ## Features
 
-- Creates a nullplatform_provider_config resource of type 'eks-configuration' that registers an EKS cluster with the Nullplatform control plane
-- Configures ALB-based traffic routing with public and private load balancer names, additional overflow balancers, and a configurable rule-usage capacity threshold
-- Configures Istio gateway-based routing with public and private gateway names, namespace, and additional gateway attachments for HTTPRoute resources
-- Pins the traffic manager sidecar container to an explicit version and optionally overrides its pod-binding port to handle clusters that restrict port 80
-- Supports flexible Kubernetes object naming via 'ids', 'qualified', or 'custom' strategies with configurable deployment and scope name patterns
-- Applies per-deployment resource management tuning including memory-to-CPU ratio, memory request-to-limit ratio, CPU multiplier, and milicore cap
-- Attaches image pull secrets and a custom service account to deployments for secure access to private container registries
+- Creates a nullplatform_provider_config resource that registers EKS cluster settings with the Nullplatform control plane
+- Configures ALB-based traffic routing with public and private load balancer names, capacity thresholds, and overflow balancer lists
+- Configures Istio gateway-based traffic routing with public, private, and additional gateway names and namespaces
+- Pins the traffic manager sidecar container to an explicit, immutable version tag to prevent unintended image changes on pod restarts
+- Supports custom Kubernetes object naming strategies (ids, qualified, or custom patterns) for deployments, scopes, and long-lived resources
+- Applies resource management tuning including memory-to-CPU ratio, memory request-to-limit ratio, CPU multiplier, and milicore caps
+- Configures security settings including image pull secrets and a custom Kubernetes service account for workload deployments
 
 ## Basic Usage
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.17.2"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.17.3"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
   traffic_manager_version = "your-traffic-manager-version"
+}
+```
+
+### Usage with Latest Traffic Manager Version
+
+```hcl
+module "eks" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.17.3"
+
+  cluster_name            = "your-cluster-name"
+  nrn                     = "your-nrn"
+  traffic_manager_version = "latest"
+}
+```
+
+### Usage with Main Branch Traffic Manager Version
+
+```hcl
+module "eks" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.17.3"
+
+  cluster_name            = "your-cluster-name"
+  nrn                     = "your-nrn"
+  traffic_manager_version = "main"
+}
+```
+
+### Usage with Master Branch Traffic Manager Version
+
+```hcl
+module "eks" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.17.3"
+
+  cluster_name            = "your-cluster-name"
+  nrn                     = "your-nrn"
+  traffic_manager_version = "master"
 }
 ```
 
@@ -77,8 +113,8 @@ resource "example_resource" "this" {
 | <a name="input_memory_cpu_ratio"></a> [memory\_cpu\_ratio](#input\_memory\_cpu\_ratio) | Amount of MiB of ram per CPU. Default value is 2048, it means 1 core for every 2 GiB of RAM | `string` | `""` | no |
 | <a name="input_memory_request_to_limit_ratio"></a> [memory\_request\_to\_limit\_ratio](#input\_memory\_request\_to\_limit\_ratio) | Sets the ratio between requested and limit memory. Default value is 1, must be a number greater than or equal to 1 | `string` | `""` | no |
 | <a name="input_namespace_application_default"></a> [namespace\_application\_default](#input\_namespace\_application\_default) | Default Kubernetes namespace for applications. Accepts a pattern the k8s scope renders per scope, e.g. {.namespace.slug} for one Kubernetes namespace per nullplatform namespace | `string` | `"nullplatform"` | no |
-| <a name="input_naming_deployment_pattern"></a> [naming\_deployment\_pattern](#input\_naming\_deployment\_pattern) | Name pattern for the objects a deployment creates (Deployment, Service, HPA, Secret, PodDisruptionBudget), e.g. {.application.slug}-{.scope.slug}-{.deployment.id}. Read only when naming\_strategy is 'custom' | `string` | `""` | no |
-| <a name="input_naming_scope_pattern"></a> [naming\_scope\_pattern](#input\_naming\_scope\_pattern) | Name pattern for the objects that outlive a deployment (Ingress, HTTPRoute, serving certificate), e.g. {.application.slug}-{.scope.slug}-{.scope.id}. Read only when naming\_strategy is 'custom'. Only applies to scopes created after the change | `string` | `""` | no |
+| <a name="input_naming_deployment_pattern"></a> [naming\_deployment\_pattern](#input\_naming\_deployment\_pattern) | Name pattern for the objects a deployment creates (Deployment, Service, HPA, Secret, PodDisruptionBudget), e.g. {.application.slug}-{.scope.slug}-{.deployment.id}. Read only when naming\_strategy is 'custom' | `string` | `"{.application.slug}-{.scope.slug}-{.deployment.id}"` | no |
+| <a name="input_naming_scope_pattern"></a> [naming\_scope\_pattern](#input\_naming\_scope\_pattern) | Name pattern for the objects that outlive a deployment (Ingress, HTTPRoute, serving certificate), e.g. {.application.slug}-{.scope.slug}-{.scope.id}. Read only when naming\_strategy is 'custom'. Only applies to scopes created after the change | `string` | `"{.application.slug}-{.scope.slug}-{.scope.id}"` | no |
 | <a name="input_naming_strategy"></a> [naming\_strategy](#input\_naming\_strategy) | How Kubernetes object names are built: 'ids' (e.g. d-123456-789012), 'qualified' (application and scope slugs) or 'custom' (the naming patterns). Existing objects are never renamed. Defaults to 'qualified' | `string` | `"qualified"` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | Nullplatform NRN (e.g., organization=X:account=Y:namespace=Z) | `string` | n/a | yes |
 | <a name="input_object_modifiers"></a> [object\_modifiers](#input\_object\_modifiers) | List of modifications to dynamically modify k8s objects | <pre>list(object({<br/>    selector = string<br/>    action   = string<br/>    type     = string<br/>    value    = optional(string, "")<br/>  }))</pre> | `[]` | no |
@@ -87,7 +123,7 @@ resource "example_resource" "this" {
 | <a name="input_public_balancer_name"></a> [public\_balancer\_name](#input\_public\_balancer\_name) | The name of the public-facing load balancer for external traffic routing | `string` | `""` | no |
 | <a name="input_public_gateway_name"></a> [public\_gateway\_name](#input\_public\_gateway\_name) | Name of the public gateway. Only used when scopes route through Istio gateways instead of an ALB. Defaults to 'gateway-public' when unset | `string` | `""` | no |
 | <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | The name of the Kubernetes service account used for deployments | `string` | `""` | no |
-| <a name="input_traffic_manager_port"></a> [traffic\_manager\_port](#input\_traffic\_manager\_port) | Port the traffic manager sidecar binds inside the pod. Defaults to 80 when unset. Set a different port (10080 recommended) when the cluster does not allow pod-to-pod traffic on port 80, which surfaces as a healthy pod that receives no traffic because kubelet probes are node-local and bypass the filtering. Open the port for pod-to-pod traffic before setting this value | `number` | `null` | no |
+| <a name="input_traffic_manager_port"></a> [traffic\_manager\_port](#input\_traffic\_manager\_port) | Port the traffic manager sidecar binds inside the pod. Defaults to 80 when unset. Set a different port (10080 recommended) when the cluster does not allow pod-to-pod traffic on port 80, which surfaces as a healthy pod that receives no traffic because kubelet probes are node-local and bypass the filtering. Open the port for pod-to-pod traffic before setting this value | `number` | `80` | no |
 | <a name="input_traffic_manager_version"></a> [traffic\_manager\_version](#input\_traffic\_manager\_version) | No default: every install pins this deliberately — see VERSIONS.md. Pinned rather than tracking latest: a moving tag means a pod restart can pull a different build with no apply in between. Tag for the traffic manager sidecar container | `string` | n/a | yes |
 | <a name="input_use_nullplatform_namespace"></a> [use\_nullplatform\_namespace](#input\_use\_nullplatform\_namespace) | When enabled, uses the nullplatform system namespace instead of a custom namespace | `bool` | `false` | no |
 <!-- END_TF_DOCS -->
@@ -95,16 +131,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "eks",
-  "description": "Configures an EKS cluster provider in Nullplatform by creating a nullplatform_provider_config resource with cluster, load balancer, gateway, networking, resource management, security, traffic manager, and naming settings encoded as JSON attributes",
-  "architecture": "The module constructs a set of local maps (cluster, balancer, gateway, network, resource_management, security, traffic_manager, naming) by conditionally merging input variables, then encodes the merged result as JSON and passes it to a single nullplatform_provider_config resource of type 'eks-configuration'. The nullplatform_provider_config resource is keyed by the nrn variable and optionally scoped via a dimensions map, allowing multi-environment or multi-account targeting. All optional sub-configurations are omitted from the JSON payload when their controlling variables are empty or null, keeping the API payload minimal.",
+  "description": "Configures an EKS provider configuration resource in Nullplatform by registering cluster, load balancer, gateway, resource management, security, traffic manager, and naming settings via a nullplatform_provider_config resource",
+  "architecture": "The module constructs a set of deeply merged local maps (cluster, balancer, gateway, network, resource_management, security, traffic_manager, naming) from input variables, omitting any keys with empty or null values to avoid plan drift. All assembled locals are JSON-encoded and passed as the attributes argument to a single nullplatform_provider_config resource of type 'eks-configuration', scoped by the NRN and optional dimension map. The nullplatform provider serializes these attributes to the Nullplatform API, which the EKS k8s-scope controller reads to manage Kubernetes objects such as Deployments, Services, Ingresses, and HTTPRoutes on the target cluster.",
   "features": [
-    "Creates a nullplatform_provider_config resource of type 'eks-configuration' that registers an EKS cluster with the Nullplatform control plane",
-    "Configures ALB-based traffic routing with public and private load balancer names, additional overflow balancers, and a configurable rule-usage capacity threshold",
-    "Configures Istio gateway-based routing with public and private gateway names, namespace, and additional gateway attachments for HTTPRoute resources",
-    "Pins the traffic manager sidecar container to an explicit version and optionally overrides its pod-binding port to handle clusters that restrict port 80",
-    "Supports flexible Kubernetes object naming via 'ids', 'qualified', or 'custom' strategies with configurable deployment and scope name patterns",
-    "Applies per-deployment resource management tuning including memory-to-CPU ratio, memory request-to-limit ratio, CPU multiplier, and milicore cap",
-    "Attaches image pull secrets and a custom service account to deployments for secure access to private container registries"
+    "Creates a nullplatform_provider_config resource that registers EKS cluster settings with the Nullplatform control plane",
+    "Configures ALB-based traffic routing with public and private load balancer names, capacity thresholds, and overflow balancer lists",
+    "Configures Istio gateway-based traffic routing with public, private, and additional gateway names and namespaces",
+    "Pins the traffic manager sidecar container to an explicit, immutable version tag to prevent unintended image changes on pod restarts",
+    "Supports custom Kubernetes object naming strategies (ids, qualified, or custom patterns) for deployments, scopes, and long-lived resources",
+    "Applies resource management tuning including memory-to-CPU ratio, memory request-to-limit ratio, CPU multiplier, and milicore caps",
+    "Configures security settings including image pull secrets and a custom Kubernetes service account for workload deployments"
   ],
   "inputs": [
     {
@@ -249,6 +285,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "2686db185045f7b1f2579707f7e38ca2"
+  "hash": "ec8a1fd313735da156fb85cf2afbc5bb"
 }
 END_AI_METADATA -->
