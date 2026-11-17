@@ -131,7 +131,7 @@ resource "example_resource" "this" {
 | <a name="input_istiod_replicas"></a> [istiod\_replicas](#input\_istiod\_replicas) | Number of istiod replicas. Set to 2+ to avoid PDB blocking node drains. Applied to both pilot.replicaCount and pilot.autoscaleMin to prevent the HPA from scaling back to 1. | `number` | `2` | no |
 | <a name="input_istiod_version"></a> [istiod\_version](#input\_istiod\_version) | No default: every install pins this deliberately — see VERSIONS.md. Helm chart version for istiod (Istio control plane) | `string` | n/a | yes |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | The Kubernetes namespace where Istio will be installed. | `string` | `"istio-system"` | no |
-| <a name="input_repository"></a> [repository](#input\_repository) | The Helm repository URL (e.g., https://istio-release.storage.googleapis.com/charts). | `string` | `"https://istio-release.storage.googleapis.com/charts"` | no |
+| <a name="input_repository"></a> [repository](#input\_repository) | The Helm repository URL (e.g., https://blob.istio.io/istio-release/charts). | `string` | `"https://blob.istio.io/istio-release/charts"` | no |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_AI_METADATA
@@ -165,7 +165,7 @@ resource "example_resource" "this" {
     },
     {
       "name": "repository",
-      "description": "The Helm repository URL (e.g., https://istio-release.storage.googleapis.com/charts).",
+      "description": "The Helm repository URL (e.g., https://blob.istio.io/istio-release/charts).",
       "required": false
     },
     {
