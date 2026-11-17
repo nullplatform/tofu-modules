@@ -256,3 +256,17 @@ run "image_pull_secrets_rejects_invalid_name" {
 
   expect_failures = [var.image_pull_secrets]
 }
+
+# null means "not set", as for image_hub, instead of breaking the plan
+run "image_pull_secrets_accepts_null" {
+  command = plan
+
+  variables {
+    image_pull_secrets = null
+  }
+
+  assert {
+    condition     = length(coalesce(helm_release.istiod.set_list, [])) == 0
+    error_message = "a null image_pull_secrets should behave like the empty default"
+  }
+}

@@ -60,6 +60,7 @@ variable "image_pull_secrets" {
   type        = list(string)
   description = "Names of image pull secrets for istiod and for the proxy injected into sidecars and gateways, for a hub that needs credentials (see image_hub). Sets global.imagePullSecrets. The module does not create them: each must exist in istio-system and in every namespace with injected pods. Empty keeps the chart default."
   default     = []
+  nullable    = false
 
   validation {
     condition     = alltrue([for n in var.image_pull_secrets : can(regex("^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$", n))])
