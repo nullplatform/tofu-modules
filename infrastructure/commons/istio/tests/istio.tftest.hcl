@@ -114,3 +114,53 @@ run "rejects_moving_chart_versions" {
 
   expect_failures = [var.istio_base_version, var.istiod_version]
 }
+
+# Without image_hub the chart keeps its own image source
+run "image_hub_unset_by_default" {
+  command = plan
+
+  assert {
+    condition     = length([for s in helm_release.istiod.set : s if s.name == "global.hub"]) == 0
+    error_message = "global.hub must not be set unless image_hub is given"
+  }
+}
+
+# image_hub reaches istiod as global.hub, untouched
+run "image_hub_sets_global_hub" {
+  command = plan
+
+  variables {
+    image_hub = "myregistry.example.com/mirror/istio"
+  }
+
+  assert {
+    condition     = one([for s in helm_release.istiod.set : s.value if s.name == "global.hub"]) == "myregistry.example.com/mirror/istio"
+    error_message = "image_hub should be passed to istiod as global.hub"
+  }
+
+  assert {
+    condition     = length([for s in helm_release.istiod.set : s if s.name == "pilot.replicaCount"]) == 1
+    error_message = "image_hub must not drop the replica settings"
+  }
+}
+
+# A hub carries no tag: the chart adds the version
+run "image_hub_rejects_tag" {
+  command = plan
+
+  variables {
+    image_hub = "docker.io/istio:1.30.8"
+  }
+
+  expect_failures = [var.image_hub]
+}
+
+run "image_hub_rejects_bare_host" {
+  command = plan
+
+  variables {
+    image_hub = "docker.io"
+  }
+
+  expect_failures = [var.image_hub]
+}

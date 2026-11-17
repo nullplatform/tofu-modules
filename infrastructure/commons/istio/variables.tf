@@ -45,6 +45,17 @@ variable "repository" {
   default     = "https://blob.istio.io/istio-release/charts"
 }
 
+variable "image_hub" {
+  type        = string
+  description = "Registry and path the Istio images are pulled from (e.g., docker.io/istio, or a private mirror such as myregistry.example.com/istio). Applies to istiod and to the proxy injected into sidecars and gateways. Null keeps the chart default, which for 1.30 and earlier is registry.istio.io/release, retired by upstream on 2026-12-16."
+  default     = null
+
+  validation {
+    condition     = var.image_hub == null || can(regex("^[^\\s/:]+(:[0-9]+)?(/[^\\s/:]+)+$", var.image_hub))
+    error_message = "image_hub must be a registry host plus path with no tag (e.g., docker.io/istio), or null."
+  }
+}
+
 ###############################################################################
 # DEPLOYMENT CONFIGURATION
 ###############################################################################
