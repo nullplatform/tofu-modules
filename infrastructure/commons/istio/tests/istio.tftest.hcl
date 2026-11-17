@@ -123,9 +123,17 @@ run "image_hub_unset_by_default" {
     condition     = length([for s in helm_release.istiod.set : s if s.name == "global.hub"]) == 0
     error_message = "global.hub must not be set unless image_hub is given"
   }
+
+  assert {
+    condition = alltrue([
+      for n in ["pilot.replicaCount", "pilot.autoscaleMin"] :
+      length([for s in helm_release.istiod.set : s if s.name == n]) == 1
+    ])
+    error_message = "image_hub must not drop the replica and autoscale settings"
+  }
 }
 
-# image_hub reaches istiod as global.hub, untouched
+# image_hub reaches istiod as global.hub, unmodified
 run "image_hub_sets_global_hub" {
   command = plan
 
@@ -139,8 +147,11 @@ run "image_hub_sets_global_hub" {
   }
 
   assert {
-    condition     = length([for s in helm_release.istiod.set : s if s.name == "pilot.replicaCount"]) == 1
-    error_message = "image_hub must not drop the replica settings"
+    condition = alltrue([
+      for n in ["pilot.replicaCount", "pilot.autoscaleMin"] :
+      length([for s in helm_release.istiod.set : s if s.name == n]) == 1
+    ])
+    error_message = "image_hub must not drop the replica and autoscale settings"
   }
 }
 
@@ -149,17 +160,63 @@ run "image_hub_rejects_tag" {
   command = plan
 
   variables {
-    image_hub = "docker.io/istio:1.30.8"
+    image_hub = "docker.io/istio:1.0"
   }
 
   expect_failures = [var.image_hub]
 }
 
+# A bare host has no path: Istio images live under one
 run "image_hub_rejects_bare_host" {
   command = plan
 
   variables {
     image_hub = "docker.io"
+  }
+
+  expect_failures = [var.image_hub]
+}
+
+# A private registry on a port, with a nested path
+run "image_hub_accepts_registry_with_port" {
+  command = plan
+
+  variables {
+    image_hub = "myreg.example.com:5000/mirror/istio"
+  }
+
+  assert {
+    condition     = one([for s in helm_release.istiod.set : s.value if s.name == "global.hub"]) == "myreg.example.com:5000/mirror/istio"
+    error_message = "a registry host:port with a nested path must be accepted and passed through"
+  }
+}
+
+# Values people paste that would render a broken image reference
+run "image_hub_rejects_url_scheme" {
+  command = plan
+
+  variables {
+    image_hub = "https://docker.io/istio"
+  }
+
+  expect_failures = [var.image_hub]
+}
+
+run "image_hub_rejects_trailing_slash" {
+  command = plan
+
+  variables {
+    image_hub = "docker.io/istio/"
+  }
+
+  expect_failures = [var.image_hub]
+}
+
+run "image_hub_rejects_digest" {
+  command = plan
+
+  variables {
+    image_hub = "docker.io/istio@sha256:0123456789abcdef"
   }
 
   expect_failures = [var.image_hub]

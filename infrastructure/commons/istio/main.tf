@@ -61,8 +61,7 @@ resource "helm_release" "istiod" {
         value = var.istiod_replicas
       },
     ],
-    # global.hub covers both the istiod image and the proxy image istiod injects
-    # into sidecars and gateways. Unset keeps the chart's own default.
+    # global.hub sets the istiod image and the proxy image injected into sidecars and gateways.
     var.image_hub == null ? [] : [
       {
         name  = "global.hub"

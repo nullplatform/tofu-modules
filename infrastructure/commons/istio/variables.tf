@@ -47,7 +47,7 @@ variable "repository" {
 
 variable "image_hub" {
   type        = string
-  description = "Registry and path the Istio images are pulled from (e.g., docker.io/istio, or a private mirror such as myregistry.example.com/istio). Applies to istiod and to the proxy injected into sidecars and gateways. Null keeps the chart default, which for 1.30 and earlier is registry.istio.io/release, retired by upstream on 2026-12-16."
+  description = "Registry and path Istio images are pulled from, without a tag (e.g., docker.io/istio, or a private mirror such as myregistry.example.com/istio). Sets global.hub, which applies to istiod and to the proxy injected into sidecars and gateways. Null keeps the chart default: docker.io/istio up to 1.29, registry.istio.io/release in 1.30.x, which upstream is decommissioning."
   default     = null
 
   validation {
