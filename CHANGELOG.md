@@ -12,6 +12,13 @@
 * **packages:** drop `package.requires_providers` from `scope_definition` and `service_definition`, and the `missing_optional_requirements` output from `package_installation`, `scope_package_installation` and `service_package_installation`: the platform never accepted the declaration and provider 0.0.112 removed both, so a `tofu init -upgrade` under the `>= 0.0.110` pin failed to validate. The modules now require provider >= 0.0.112
 * **external_dns:** support public and private DNS on Azure with ExternalDNS: `label_filter` now applies to the `azure` and `azure-private-dns` providers, and the new `gateway_name` limits route sources to one Gateway, so a public instance keeps internal scopes out of the public zone while an `azure-private-dns` instance publishes them in the Private DNS zone (split-horizon)
 
+## [9.17.3](https://github.com/nullplatform/tofu-modules/compare/v9.17.2...v9.17.3) (2026-11-17)
+
+
+### Bug Fixes
+
+* **eks:** mirror API default attrs to stop provider_config plan drift ([#698](https://github.com/nullplatform/tofu-modules/issues/698)) ([2d0ade9](https://github.com/nullplatform/tofu-modules/commit/2d0ade9a8da12e1b6ddcc45822bde53115431c79))
+
 ## [9.17.2](https://github.com/nullplatform/tofu-modules/compare/v9.17.1...v9.17.2) (2026-11-17)
 
 
