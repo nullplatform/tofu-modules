@@ -221,3 +221,38 @@ run "image_hub_rejects_digest" {
 
   expect_failures = [var.image_hub]
 }
+
+# Without image_pull_secrets the chart keeps its own setting
+run "image_pull_secrets_unset_by_default" {
+  command = plan
+
+  assert {
+    condition     = length(coalesce(helm_release.istiod.set_list, [])) == 0
+    error_message = "global.imagePullSecrets must not be set unless image_pull_secrets is given"
+  }
+}
+
+# image_pull_secrets reaches istiod as global.imagePullSecrets, in order
+run "image_pull_secrets_sets_global_list" {
+  command = plan
+
+  variables {
+    image_hub          = "myreg.example.com/mirror/istio"
+    image_pull_secrets = ["mirror-pull", "mirror-pull-2"]
+  }
+
+  assert {
+    condition     = one([for s in helm_release.istiod.set_list : s.value if s.name == "global.imagePullSecrets"]) == tolist(["mirror-pull", "mirror-pull-2"])
+    error_message = "image_pull_secrets should be passed to istiod as global.imagePullSecrets"
+  }
+}
+
+run "image_pull_secrets_rejects_invalid_name" {
+  command = plan
+
+  variables {
+    image_pull_secrets = ["Mirror_Pull"]
+  }
+
+  expect_failures = [var.image_pull_secrets]
+}

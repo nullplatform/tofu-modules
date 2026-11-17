@@ -62,6 +62,7 @@ resource "example_resource" "this" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_image_hub"></a> [image\_hub](#input\_image\_hub) | Registry and path Istio images are pulled from, without a tag (e.g., docker.io/istio, or a private mirror such as myregistry.example.com/istio). Sets global.hub, which applies to istiod and to the proxy injected into sidecars and gateways. Null keeps the chart default: docker.io/istio up to 1.29, registry.istio.io/release in 1.30.x, which upstream is decommissioning. | `string` | `null` | no |
+| <a name="input_image_pull_secrets"></a> [image\_pull\_secrets](#input\_image\_pull\_secrets) | Names of image pull secrets for istiod and for the proxy injected into sidecars and gateways, for a hub that needs credentials (see image\_hub). Sets global.imagePullSecrets. The module does not create them: each must exist in istio-system and in every namespace with injected pods. Empty keeps the chart default. | `list(string)` | `[]` | no |
 | <a name="input_istio_base_version"></a> [istio\_base\_version](#input\_istio\_base\_version) | No default: every install pins this deliberately — see VERSIONS.md. Helm chart version for the istio-base component | `string` | n/a | yes |
 | <a name="input_istiod_replicas"></a> [istiod\_replicas](#input\_istiod\_replicas) | Number of istiod replicas. Set to 2+ to avoid PDB blocking node drains. Applied to both pilot.replicaCount and pilot.autoscaleMin to prevent the HPA from scaling back to 1. | `number` | `2` | no |
 | <a name="input_istiod_version"></a> [istiod\_version](#input\_istiod\_version) | No default: every install pins this deliberately — see VERSIONS.md. Helm chart version for istiod (Istio control plane) | `string` | n/a | yes |
@@ -73,7 +74,7 @@ resource "example_resource" "this" {
 {
   "name": "istio",
   "description": "Deploys Istio service mesh onto a Kubernetes cluster by installing the istio-base CRDs and the istiod control plane via Helm releases with pinned versions and configurable HA replica counts",
-  "architecture": "The module creates two sequential helm_release resources: istio-base (chart: base) and istiod (chart: istiod), where istiod depends_on istio-base to ensure CRDs exist before the control plane installs. Both helm_release resources target the same Kubernetes namespace (default: istio-system) and Helm repository, with atomic and cleanup_on_fail enabled for safe rollouts. The istiod helm_release injects pilot.replicaCount and pilot.autoscaleMin set blocks driven by var.istiod_replicas to lock in an HA floor and prevent the HPA from scaling back to 1 replica, plus a global.hub set block when var.image_hub is given.",
+  "architecture": "The module creates two sequential helm_release resources: istio-base (chart: base) and istiod (chart: istiod), where istiod depends_on istio-base to ensure CRDs exist before the control plane installs. Both helm_release resources target the same Kubernetes namespace (default: istio-system) and Helm repository, with atomic and cleanup_on_fail enabled for safe rollouts. The istiod helm_release injects pilot.replicaCount and pilot.autoscaleMin set blocks driven by var.istiod_replicas to lock in an HA floor and prevent the HPA from scaling back to 1 replica, plus a global.hub set block when var.image_hub is given and a global.imagePullSecrets set_list block when var.image_pull_secrets is not empty.",
   "features": [
     "Installs istio-base Helm chart with CRDs required by the Istio control plane",
     "Installs istiod Helm chart as the Istio control plane with an explicit dependency on istio-base",
@@ -81,7 +82,7 @@ resource "example_resource" "this" {
     "Configures high-availability istiod replicas by setting both pilot.replicaCount and pilot.autoscaleMin to prevent HPA from scaling below the defined floor",
     "Enables atomic Helm releases with cleanup_on_fail and timeout controls for safe, self-healing deployments",
     "Creates the target Kubernetes namespace automatically via create_namespace on both releases",
-    "Optionally pulls the istiod and injected proxy images from a chosen hub (docker.io/istio or a private mirror) via image_hub"
+    "Optionally pulls the istiod and injected proxy images from a chosen hub (docker.io/istio or a private mirror) via image_hub, with image_pull_secrets for registries that need credentials"
   ],
   "inputs": [
     {
@@ -107,6 +108,11 @@ resource "example_resource" "this" {
     {
       "name": "image_hub",
       "description": "Registry and path Istio images are pulled from, without a tag (e.g., docker.io/istio, or a private mirror such as myregistry.example.com/istio). Sets global.hub, which applies to istiod and to the proxy injected into sidecars and gateways. Null keeps the chart default: docker.io/istio up to 1.29, registry.istio.io/release in 1.30.x, which upstream is decommissioning.",
+      "required": false
+    },
+    {
+      "name": "image_pull_secrets",
+      "description": "Names of image pull secrets for istiod and for the proxy injected into sidecars and gateways, for a hub that needs credentials (see image_hub). Sets global.imagePullSecrets. The module does not create them: each must exist in istio-system and in every namespace with injected pods. Empty keeps the chart default.",
       "required": false
     },
     {
