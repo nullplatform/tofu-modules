@@ -41,8 +41,8 @@ variable "istiod_replicas" {
 
 variable "repository" {
   type        = string
-  description = "The Helm repository URL (e.g., https://istio-release.storage.googleapis.com/charts)."
-  default     = "https://istio-release.storage.googleapis.com/charts"
+  description = "The Helm repository URL (e.g., https://blob.istio.io/istio-release/charts)."
+  default     = "https://blob.istio.io/istio-release/charts"
 }
 
 ###############################################################################
