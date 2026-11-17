@@ -21,7 +21,7 @@ The module creates two sequential helm_release resources: istio-base (chart: bas
 
 ```hcl
 module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.17.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.17.2"
 
   istio_base_version = "your-istio-base-version"
   istiod_version     = "your-istiod-version"
