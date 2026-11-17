@@ -1,0 +1,42 @@
+{
+  "cloud_provider": "aws",
+  "distribution": {
+    "aws_distribution": "cloudfront",
+    "azure_distribution": "front-door",
+    "azure_front_door_cache_days": 7,
+    "azure_front_door_cached_path_prefixes": [
+      "/static/"
+    ],
+    "azure_front_door_certificate_secret": "",
+    "azure_front_door_content_security_policy": "",
+    "azure_front_door_security_headers": false,
+    "behaviors": [],
+    "custom_error_responses": [],
+    "default_cache_mode": "legacy",
+    "default_cache_policy": "CachingOptimized",
+    "default_compress": true,
+    "default_invocations": [],
+    "default_origin_request_policy": "AllViewerExceptHostHeader",
+    "default_response_headers_policy": "",
+    "default_root_object": "index.html",
+    "default_viewer_protocol_policy": "redirect-to-https",
+    "geo_restriction": {
+      "restriction_type": "none"
+    },
+    "price_class": "PriceClass_100"
+  },
+  "network": {
+    "aws_hosted_public_zone_id": "Z0000000000000",
+    "aws_network": "route53",
+    "azure_network": "azure_dns"
+  },
+  "provider": {
+    "aws_region": "us-east-1",
+    "aws_state_bucket": "tf-state",
+    "azure_state_auth": "azuread"
+  },
+  "security": {
+    "aws_security": "none",
+    "azure_security": "none"
+  }
+}

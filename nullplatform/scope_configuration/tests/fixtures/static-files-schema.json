@@ -1,0 +1,1764 @@
+{
+  "type": "object",
+  "required": [
+    "cloud_provider"
+  ],
+  "if": {
+    "properties": {
+      "cloud_provider": {
+        "const": "aws"
+      }
+    },
+    "required": [
+      "cloud_provider"
+    ]
+  },
+  "then": {
+    "properties": {
+      "provider": {
+        "required": [
+          "aws_region",
+          "aws_state_bucket"
+        ]
+      }
+    }
+  },
+  "else": {
+    "if": {
+      "properties": {
+        "cloud_provider": {
+          "const": "azure"
+        }
+      },
+      "required": [
+        "cloud_provider"
+      ]
+    },
+    "then": {
+      "properties": {
+        "provider": {
+          "required": [
+            "azure_subscription_id",
+            "azure_resource_group",
+            "azure_state_storage_account",
+            "azure_state_container"
+          ]
+        },
+        "distribution": {
+          "required": [
+            "azure_front_door_profile",
+            "azure_front_door_endpoint"
+          ]
+        }
+      }
+    }
+  },
+  "properties": {
+    "cloud_provider": {
+      "type": "string",
+      "title": "Cloud Provider",
+      "description": "Select the cloud provider for this scope configuration",
+      "oneOf": [
+        {
+          "const": "aws",
+          "title": "Amazon Web Services"
+        },
+        {
+          "const": "azure",
+          "title": "Microsoft Azure"
+        }
+      ],
+      "default": "aws"
+    },
+    "provider": {
+      "type": "object",
+      "title": "Provider Configuration",
+      "properties": {
+        "aws_region": {
+          "type": "string",
+          "title": "AWS Region",
+          "description": "AWS region where resources will be deployed",
+          "oneOf": [
+            {
+              "const": "us-east-1",
+              "title": "US East (N. Virginia)"
+            },
+            {
+              "const": "us-east-2",
+              "title": "US East (Ohio)"
+            },
+            {
+              "const": "us-west-1",
+              "title": "US West (N. California)"
+            },
+            {
+              "const": "us-west-2",
+              "title": "US West (Oregon)"
+            },
+            {
+              "const": "ca-central-1",
+              "title": "Canada (Central)"
+            },
+            {
+              "const": "sa-east-1",
+              "title": "South America (São Paulo)"
+            },
+            {
+              "const": "eu-west-1",
+              "title": "Europe (Ireland)"
+            },
+            {
+              "const": "eu-west-2",
+              "title": "Europe (London)"
+            },
+            {
+              "const": "eu-west-3",
+              "title": "Europe (Paris)"
+            },
+            {
+              "const": "eu-central-1",
+              "title": "Europe (Frankfurt)"
+            },
+            {
+              "const": "eu-central-2",
+              "title": "Europe (Zurich)"
+            },
+            {
+              "const": "eu-north-1",
+              "title": "Europe (Stockholm)"
+            },
+            {
+              "const": "eu-south-1",
+              "title": "Europe (Milan)"
+            },
+            {
+              "const": "eu-south-2",
+              "title": "Europe (Spain)"
+            },
+            {
+              "const": "ap-east-1",
+              "title": "Asia Pacific (Hong Kong)"
+            },
+            {
+              "const": "ap-south-1",
+              "title": "Asia Pacific (Mumbai)"
+            },
+            {
+              "const": "ap-south-2",
+              "title": "Asia Pacific (Hyderabad)"
+            },
+            {
+              "const": "ap-southeast-1",
+              "title": "Asia Pacific (Singapore)"
+            },
+            {
+              "const": "ap-southeast-2",
+              "title": "Asia Pacific (Sydney)"
+            },
+            {
+              "const": "ap-southeast-3",
+              "title": "Asia Pacific (Jakarta)"
+            },
+            {
+              "const": "ap-northeast-1",
+              "title": "Asia Pacific (Tokyo)"
+            },
+            {
+              "const": "ap-northeast-2",
+              "title": "Asia Pacific (Seoul)"
+            },
+            {
+              "const": "ap-northeast-3",
+              "title": "Asia Pacific (Osaka)"
+            },
+            {
+              "const": "me-south-1",
+              "title": "Middle East (Bahrain)"
+            },
+            {
+              "const": "me-central-1",
+              "title": "Middle East (UAE)"
+            },
+            {
+              "const": "af-south-1",
+              "title": "Africa (Cape Town)"
+            },
+            {
+              "const": "il-central-1",
+              "title": "Israel (Tel Aviv)"
+            }
+          ]
+        },
+        "aws_state_bucket": {
+          "type": "string",
+          "title": "S3 State Bucket",
+          "description": "S3 bucket name for storing OpenTofu state (also used for S3-native state locking)"
+        },
+        "azure_subscription_id": {
+          "type": "string",
+          "title": "Subscription ID",
+          "description": "Azure subscription ID where resources will be deployed"
+        },
+        "azure_resource_group": {
+          "type": "string",
+          "title": "Resource Group",
+          "description": "Azure resource group for scope resources"
+        },
+        "azure_state_storage_account": {
+          "type": "string",
+          "title": "Storage Account",
+          "description": "Azure Storage account name for OpenTofu state"
+        },
+        "azure_state_container": {
+          "type": "string",
+          "title": "State Container",
+          "description": "Blob container name for OpenTofu state files"
+        },
+        "azure_state_resource_group": {
+          "type": "string",
+          "title": "State Resource Group",
+          "description": "Resource group of the OpenTofu state storage account. Leave empty when it is the same as the scope resource group."
+        },
+        "azure_state_auth": {
+          "type": "string",
+          "title": "State Backend Authentication",
+          "description": "How OpenTofu authenticates to the state storage account. 'azuread' uses the agent identity (needs Storage Blob Data Contributor on the account); 'key' uses the account keys (shared-key access must be enabled).",
+          "default": "azuread",
+          "oneOf": [
+            {
+              "const": "azuread",
+              "title": "Azure AD (agent identity)"
+            },
+            {
+              "const": "key",
+              "title": "Storage account key"
+            }
+          ]
+        }
+      },
+      "description": "Cloud provider settings, credentials, and state backend"
+    },
+    "distribution": {
+      "type": "object",
+      "title": "Distribution Layer",
+      "properties": {
+        "aws_distribution": {
+          "type": "string",
+          "title": "AWS Distribution",
+          "description": "CDN distribution for serving static files",
+          "default": "cloudfront",
+          "oneOf": [
+            {
+              "const": "cloudfront",
+              "title": "Amazon CloudFront"
+            }
+          ]
+        },
+        "azure_distribution": {
+          "type": "string",
+          "title": "Azure Distribution",
+          "description": "CDN distribution for serving static files",
+          "default": "front-door",
+          "oneOf": [
+            {
+              "const": "front-door",
+              "title": "Azure Front Door (Standard/Premium)"
+            }
+          ]
+        },
+        "azure_front_door_profile": {
+          "type": "string",
+          "title": "Front Door Profile",
+          "description": "Name of the shared Front Door profile for this environment. Created once by your platform team; the scope only adds routes to it."
+        },
+        "azure_front_door_endpoint": {
+          "type": "string",
+          "title": "Front Door Endpoint",
+          "description": "Name of the shared endpoint inside the profile. Every scope of this environment gets a route and a custom domain on it."
+        },
+        "azure_assets_storage_account": {
+          "type": "string",
+          "title": "Assets Storage Account",
+          "description": "Storage account (static website enabled) that CI uploads bundles to. The scope creates its Front Door origin on it when the scope is created, before any deployment.",
+          "pattern": "^([a-z0-9]{3,24})?$"
+        },
+        "azure_front_door_resource_group": {
+          "type": "string",
+          "title": "Front Door Resource Group",
+          "description": "Resource group that holds the profile. Leave empty to use the provider resource group."
+        },
+        "azure_front_door_certificate_secret": {
+          "type": "string",
+          "title": "Front Door Certificate Secret",
+          "description": "Name of the Front Door secret in the shared profile that points to a Key Vault certificate covering the scope's domain (e.g. a wildcard). Leave empty to use a Front Door managed certificate per scope.",
+          "default": "",
+          "pattern": "^([A-Za-z0-9][A-Za-z0-9-]{1,259})?$"
+        },
+        "azure_front_door_cached_path_prefixes": {
+          "type": "array",
+          "title": "Cached Path Prefixes",
+          "description": "Paths served with the long cache (fingerprinted assets). Every other path, index.html and client routes included, is never cached. Each prefix must start with '/'.",
+          "default": [
+            "/static/"
+          ],
+          "minItems": 1,
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "pattern": "^/"
+          }
+        },
+        "azure_front_door_cache_days": {
+          "type": "integer",
+          "title": "Cache Duration (days)",
+          "description": "How long Front Door keeps the files under the cached path prefixes at the edge.",
+          "default": 7,
+          "minimum": 1,
+          "maximum": 365
+        },
+        "azure_front_door_security_headers": {
+          "type": "boolean",
+          "title": "Security Headers",
+          "description": "Add Strict-Transport-Security, X-Content-Type-Options, X-Frame-Options (SAMEORIGIN) and Referrer-Policy to every response.",
+          "default": false
+        },
+        "azure_front_door_content_security_policy": {
+          "type": "string",
+          "title": "Content Security Policy",
+          "description": "Optional Content-Security-Policy header value, sent only when Security Headers is on. Leave empty to send no CSP.",
+          "default": ""
+        },
+        "default_viewer_protocol_policy": {
+          "type": "string",
+          "title": "Viewer protocol",
+          "description": "How CloudFront answers HTTP requests",
+          "default": "redirect-to-https",
+          "oneOf": [
+            {
+              "const": "redirect-to-https",
+              "title": "Redirect HTTP to HTTPS"
+            },
+            {
+              "const": "https-only",
+              "title": "HTTPS only"
+            },
+            {
+              "const": "allow-all",
+              "title": "Allow HTTP and HTTPS"
+            }
+          ]
+        },
+        "default_compress": {
+          "type": "boolean",
+          "title": "Compress objects automatically",
+          "default": true,
+          "description": "CloudFront gzips or brotlis text responses when the viewer accepts it, which cuts transfer size on HTML, CSS and JS."
+        },
+        "default_invocations": {
+          "type": "array",
+          "title": "Invocations",
+          "default": [],
+          "items": {
+            "type": "object",
+            "required": [
+              "event_type",
+              "function_arn"
+            ],
+            "properties": {
+              "event_type": {
+                "type": "string",
+                "title": "Invocation",
+                "description": "Which function runs and when. A behavior runs CloudFront Functions or Lambda@Edge, never both, and Functions run on viewer events only.",
+                "enum": [
+                  "CloudFront Function - viewer request",
+                  "CloudFront Function - viewer response",
+                  "Lambda@Edge - viewer request",
+                  "Lambda@Edge - viewer response",
+                  "Lambda@Edge - origin request",
+                  "Lambda@Edge - origin response"
+                ]
+              },
+              "function_arn": {
+                "type": "string",
+                "title": "Function ARN",
+                "description": "CloudFront Function ARN, or Lambda function ARN including a published version"
+              }
+            }
+          }
+        },
+        "default_cache_mode": {
+          "type": "string",
+          "title": "Cache key and origin requests",
+          "description": "Legacy settings forward nothing to the origin and cache for one hour. A cache policy replaces both the cache key and the TTLs.",
+          "default": "legacy",
+          "oneOf": [
+            {
+              "const": "legacy",
+              "title": "Legacy cache settings"
+            },
+            {
+              "const": "policy",
+              "title": "Cache policy and origin request policy"
+            }
+          ]
+        },
+        "default_cache_policy": {
+          "type": "string",
+          "title": "Cache policy",
+          "description": "Managed cache policy deciding the cache key and the TTLs.",
+          "default": "CachingOptimized",
+          "enum": [
+            "CachingOptimized",
+            "CachingDisabled",
+            "CachingOptimizedForUncompressedObjects",
+            "Amplify"
+          ]
+        },
+        "default_origin_request_policy": {
+          "type": "string",
+          "title": "Origin request policy",
+          "description": "Managed origin request policy deciding what CloudFront forwards to the origin.",
+          "default": "AllViewerExceptHostHeader",
+          "enum": [
+            "AllViewerExceptHostHeader",
+            "AllViewer",
+            "CORS-S3Origin",
+            "CORS-CustomOrigin",
+            "UserAgentRefererHeaders"
+          ]
+        },
+        "default_response_headers_policy": {
+          "type": "string",
+          "title": "Response headers policy",
+          "description": "Managed policy adding security or CORS headers to every response. Independent of the cache settings.",
+          "default": "",
+          "oneOf": [
+            {
+              "const": "",
+              "title": "None"
+            },
+            {
+              "const": "SecurityHeadersPolicy",
+              "title": "Security headers"
+            },
+            {
+              "const": "CORS-and-SecurityHeadersPolicy",
+              "title": "CORS and security headers"
+            },
+            {
+              "const": "SimpleCORS",
+              "title": "Simple CORS"
+            },
+            {
+              "const": "CORS-With-Preflight",
+              "title": "CORS with preflight"
+            },
+            {
+              "const": "CORS-with-preflight-and-SecurityHeadersPolicy",
+              "title": "CORS with preflight and security headers"
+            }
+          ]
+        },
+        "behaviors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path_pattern"
+            ],
+            "properties": {
+              "path_pattern": {
+                "type": "string",
+                "title": "Path pattern",
+                "description": "Requests matching this pattern use this behavior (e.g. /api/*, /static/*, *.jpg). Leave the default behavior for everything else."
+              },
+              "viewer_protocol_policy": {
+                "type": "string",
+                "title": "Viewer protocol",
+                "description": "How CloudFront answers HTTP requests",
+                "default": "redirect-to-https",
+                "oneOf": [
+                  {
+                    "const": "redirect-to-https",
+                    "title": "Redirect HTTP to HTTPS"
+                  },
+                  {
+                    "const": "https-only",
+                    "title": "HTTPS only"
+                  },
+                  {
+                    "const": "allow-all",
+                    "title": "Allow HTTP and HTTPS"
+                  }
+                ]
+              },
+              "compress": {
+                "type": "boolean",
+                "title": "Compress objects automatically",
+                "default": true,
+                "description": "CloudFront gzips or brotlis text responses when the viewer accepts it, which cuts transfer size on HTML, CSS and JS."
+              },
+              "invocations": {
+                "type": "array",
+                "title": "Invocations",
+                "default": [],
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "event_type",
+                    "function_arn"
+                  ],
+                  "properties": {
+                    "event_type": {
+                      "type": "string",
+                      "title": "Invocation",
+                      "description": "Which function runs and when. A behavior runs CloudFront Functions or Lambda@Edge, never both, and Functions run on viewer events only.",
+                      "enum": [
+                        "CloudFront Function - viewer request",
+                        "CloudFront Function - viewer response",
+                        "Lambda@Edge - viewer request",
+                        "Lambda@Edge - viewer response",
+                        "Lambda@Edge - origin request",
+                        "Lambda@Edge - origin response"
+                      ]
+                    },
+                    "function_arn": {
+                      "type": "string",
+                      "title": "Function ARN",
+                      "description": "CloudFront Function ARN, or Lambda function ARN including a published version"
+                    }
+                  }
+                }
+              },
+              "cache_mode": {
+                "type": "string",
+                "title": "Cache key and origin requests",
+                "description": "Legacy settings forward nothing to the origin and cache for one hour. A cache policy replaces both the cache key and the TTLs.",
+                "default": "legacy",
+                "oneOf": [
+                  {
+                    "const": "legacy",
+                    "title": "Legacy cache settings"
+                  },
+                  {
+                    "const": "policy",
+                    "title": "Cache policy and origin request policy"
+                  }
+                ]
+              },
+              "cache_policy": {
+                "type": "string",
+                "title": "Cache policy",
+                "description": "Managed cache policy deciding the cache key and the TTLs.",
+                "default": "CachingOptimized",
+                "enum": [
+                  "CachingOptimized",
+                  "CachingDisabled",
+                  "CachingOptimizedForUncompressedObjects",
+                  "Amplify"
+                ]
+              },
+              "origin_request_policy": {
+                "type": "string",
+                "title": "Origin request policy",
+                "description": "Managed origin request policy deciding what CloudFront forwards to the origin.",
+                "default": "AllViewerExceptHostHeader",
+                "enum": [
+                  "AllViewerExceptHostHeader",
+                  "AllViewer",
+                  "CORS-S3Origin",
+                  "CORS-CustomOrigin",
+                  "UserAgentRefererHeaders"
+                ]
+              },
+              "response_headers_policy": {
+                "type": "string",
+                "title": "Response headers policy",
+                "description": "Managed policy adding security or CORS headers to every response. Independent of the cache settings.",
+                "default": "",
+                "oneOf": [
+                  {
+                    "const": "",
+                    "title": "None"
+                  },
+                  {
+                    "const": "SecurityHeadersPolicy",
+                    "title": "Security headers"
+                  },
+                  {
+                    "const": "CORS-and-SecurityHeadersPolicy",
+                    "title": "CORS and security headers"
+                  },
+                  {
+                    "const": "SimpleCORS",
+                    "title": "Simple CORS"
+                  },
+                  {
+                    "const": "CORS-With-Preflight",
+                    "title": "CORS with preflight"
+                  },
+                  {
+                    "const": "CORS-with-preflight-and-SecurityHeadersPolicy",
+                    "title": "CORS with preflight and security headers"
+                  }
+                ]
+              }
+            }
+          },
+          "default": []
+        },
+        "price_class": {
+          "type": "string",
+          "title": "Price class",
+          "description": "Edge locations the distribution is served from",
+          "default": "PriceClass_100",
+          "oneOf": [
+            {
+              "const": "PriceClass_100",
+              "title": "North America and Europe (cheapest)"
+            },
+            {
+              "const": "PriceClass_200",
+              "title": "Adds Asia, Middle East and Africa"
+            },
+            {
+              "const": "PriceClass_All",
+              "title": "All edge locations (best performance)"
+            }
+          ]
+        },
+        "default_root_object": {
+          "type": "string",
+          "title": "Default root object",
+          "description": "Object returned when the request is for the site root",
+          "default": "index.html"
+        },
+        "geo_restriction": {
+          "type": "object",
+          "title": "Geographic restriction",
+          "properties": {
+            "restriction_type": {
+              "type": "string",
+              "title": "Restriction type",
+              "default": "none",
+              "oneOf": [
+                {
+                  "const": "none",
+                  "title": "No restriction"
+                },
+                {
+                  "const": "whitelist",
+                  "title": "Allow only these countries"
+                },
+                {
+                  "const": "blacklist",
+                  "title": "Block these countries"
+                }
+              ]
+            },
+            "locations": {
+              "type": "array",
+              "title": "Countries",
+              "description": "ISO 3166-1 alpha-2 country codes (e.g. AR, BR, US)",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "default": {
+            "restriction_type": "none"
+          }
+        },
+        "custom_error_responses": {
+          "type": "array",
+          "title": "Custom error responses",
+          "description": "Single-page apps map 403 and 404 to /index.html with a 200 response code so client-side routing works. Leave empty to return the original status.",
+          "items": {
+            "type": "object",
+            "required": [
+              "error_code"
+            ],
+            "properties": {
+              "error_code": {
+                "type": "integer",
+                "title": "Error code",
+                "description": "HTTP status returned by the origin (e.g. 404)"
+              },
+              "response_code": {
+                "type": "integer",
+                "title": "Response code",
+                "description": "HTTP status CloudFront returns to the viewer instead (e.g. 200)"
+              },
+              "response_page_path": {
+                "type": "string",
+                "title": "Response page path",
+                "description": "Page served instead of the error (e.g. /index.html)"
+              },
+              "error_caching_min_ttl": {
+                "type": "integer",
+                "title": "Error caching TTL",
+                "description": "Seconds CloudFront caches the error response"
+              }
+            }
+          },
+          "default": []
+        }
+      },
+      "description": "CDN distribution settings"
+    },
+    "network": {
+      "type": "object",
+      "title": "Network Configuration",
+      "properties": {
+        "aws_network": {
+          "type": "string",
+          "title": "AWS DNS Provider",
+          "description": "DNS provider for managing records",
+          "default": "route53",
+          "oneOf": [
+            {
+              "const": "route53",
+              "title": "Amazon Route 53"
+            }
+          ]
+        },
+        "aws_hosted_public_zone_id": {
+          "type": "string",
+          "title": "Route 53 Hosted Zone ID",
+          "description": "Public hosted zone ID for DNS records (e.g., Z1234567890ABC)"
+        },
+        "azure_network": {
+          "type": "string",
+          "title": "Azure DNS Provider",
+          "description": "DNS provider for managing records",
+          "default": "azure_dns",
+          "oneOf": [
+            {
+              "const": "azure_dns",
+              "title": "Azure DNS"
+            }
+          ]
+        },
+        "azure_dns_zone_name": {
+          "type": "string",
+          "title": "DNS Zone Name",
+          "description": "Azure DNS zone name (e.g., example.com)"
+        },
+        "azure_dns_zone_resource_group": {
+          "type": "string",
+          "title": "DNS Zone Resource Group",
+          "description": "Resource group containing the Azure DNS zone"
+        }
+      },
+      "description": "DNS and network settings"
+    },
+    "security": {
+      "type": "object",
+      "title": "Security",
+      "properties": {
+        "aws_security": {
+          "type": "string",
+          "title": "AWS Security",
+          "description": "Optional WAF attachment for the CloudFront distribution. Choose 'none' to skip, or 'waf' to attach an existing AWS WAF WebACL.",
+          "default": "none",
+          "oneOf": [
+            {
+              "const": "none",
+              "title": "None"
+            },
+            {
+              "const": "waf",
+              "title": "AWS WAF"
+            }
+          ]
+        },
+        "aws_web_acl_name": {
+          "type": "string",
+          "title": "WAF WebACL Name",
+          "description": "Name of an existing AWS WAF WebACL with scope=CLOUDFRONT"
+        },
+        "azure_security": {
+          "type": "string",
+          "title": "Azure Security",
+          "description": "Optional WAF attachment for the scope's Front Door custom domain. Choose 'none' to skip, or 'azure_waf' to attach an existing Front Door WAF policy.",
+          "default": "none",
+          "oneOf": [
+            {
+              "const": "none",
+              "title": "None"
+            },
+            {
+              "const": "azure_waf",
+              "title": "Azure Front Door WAF"
+            }
+          ]
+        },
+        "azure_waf_policy_name": {
+          "type": "string",
+          "title": "WAF Policy Name",
+          "description": "Name of an existing Front Door WAF policy (Microsoft.Network/FrontDoorWebApplicationFirewallPolicies) with the same tier as the profile"
+        },
+        "azure_waf_policy_resource_group": {
+          "type": "string",
+          "title": "WAF Policy Resource Group",
+          "description": "Resource group that holds the WAF policy. Leave empty to use the provider resource group."
+        }
+      },
+      "description": "Security settings for the distribution layer (optional)"
+    }
+  },
+  "uiSchema": {
+    "type": "VerticalLayout",
+    "elements": [
+      {
+        "type": "Categorization",
+        "elements": [
+          {
+            "type": "Category",
+            "label": "Cloud Provider",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/cloud_provider",
+                "options": {
+                  "format": "radio-cards"
+                }
+              }
+            ]
+          },
+          {
+            "type": "Category",
+            "label": "Provider",
+            "elements": [
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "aws"
+                      }
+                    }
+                  }
+                },
+                "type": "Label",
+                "text": "> **ℹ️ Agent Credentials (IRSA)**\n\nThe nullplatform agent must run with an IAM role attached to its Kubernetes service account (IRSA). The role needs permissions for:\n\n- **S3** — state backend and asset bucket access\n- **Route 53** — DNS record management on the public hosted zone\n- **CloudFront** — distribution lifecycle, cache invalidation, and read access to the managed cache, origin request and response headers policies\n- **ACM** — certificate lookup for custom domains\n- **WAF** — WebACL lookup (only if you attach a WAF in the Security tab)\n- **STS** — caller identity",
+                "options": {
+                  "format": "markdown"
+                }
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "aws"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/provider/properties/aws_region"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "aws"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/provider/properties/aws_state_bucket"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Label",
+                "text": "> **ℹ️ Agent Credentials**\n\nThe nullplatform agent must run with Azure credentials configured. Use one of:\n\n- **Workload Identity** — attach an Azure managed identity to the agent's Kubernetes service account\n- **Service Principal** — set AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, and AZURE_TENANT_ID as environment variables in the agent Helm installation (Workload Identity uses AZURE_FEDERATED_TOKEN_FILE)\n\nThe provider layer logs the az CLI in from these same variables (or the managed identity) and exports the matching ARM_* variables for OpenTofu.\n\nThe identity needs the following permissions:\n\n- **Storage Blob Data Contributor** — state backend\n- **DNS Zone Contributor** — CNAME and validation TXT records\n- **CDN Profile Contributor** on the Front Door resource group — routes, origins, custom domains and purge on the shared profile\n- **Reader** on the assets storage account\n\n**Prerequisites per environment:** a Front Door profile (Standard or Premium) and one endpoint in it, an Azure DNS zone, and a storage account with the static website enabled.",
+                "options": {
+                  "format": "markdown"
+                }
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/provider/properties/azure_subscription_id"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/provider/properties/azure_resource_group"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/provider/properties/azure_state_storage_account"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/provider/properties/azure_state_container"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/provider/properties/azure_state_resource_group"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/provider/properties/azure_state_auth",
+                "options": {
+                  "format": "radio-cards"
+                }
+              }
+            ]
+          },
+          {
+            "type": "Category",
+            "label": "Distribution",
+            "elements": [
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "aws"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/distribution/properties/aws_distribution",
+                "options": {
+                  "format": "radio-cards"
+                }
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/distribution/properties/azure_distribution",
+                "options": {
+                  "format": "radio-cards"
+                }
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/distribution/properties/azure_front_door_profile"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/distribution/properties/azure_front_door_endpoint"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/distribution/properties/azure_assets_storage_account"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/distribution/properties/azure_front_door_resource_group"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/distribution/properties/azure_front_door_certificate_secret"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/distribution/properties/azure_front_door_cached_path_prefixes"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/distribution/properties/azure_front_door_cache_days"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/distribution/properties/azure_front_door_security_headers"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#",
+                    "schema": {
+                      "anyOf": [
+                        {
+                          "properties": {
+                            "cloud_provider": {
+                              "not": {
+                                "const": "azure"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "properties": {
+                            "distribution": {
+                              "properties": {
+                                "azure_front_door_security_headers": {
+                                  "not": {
+                                    "const": true
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/distribution/properties/azure_front_door_content_security_policy"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "aws"
+                      }
+                    }
+                  }
+                },
+                "type": "Label",
+                "text": "### Default behavior\n\nServes every request that no path pattern matches. CloudFront always requires it.",
+                "options": {
+                  "format": "markdown"
+                }
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "aws"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/distribution/properties/default_viewer_protocol_policy"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "aws"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/distribution/properties/default_compress"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "aws"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/distribution/properties/default_invocations"
+              },
+              {
+                "type": "Categorization",
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "aws"
+                      }
+                    }
+                  }
+                },
+                "options": {
+                  "collapsable": {
+                    "label": "CACHE",
+                    "collapsed": true
+                  }
+                },
+                "elements": [
+                  {
+                    "type": "Category",
+                    "label": "Cache key and origin requests",
+                    "elements": [
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/distribution/properties/default_cache_mode",
+                        "options": {
+                          "format": "radio-cards"
+                        }
+                      },
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/distribution/properties/default_cache_policy",
+                        "rule": {
+                          "effect": "HIDE",
+                          "condition": {
+                            "scope": "#/properties/distribution/properties/default_cache_mode",
+                            "schema": {
+                              "not": {
+                                "const": "policy"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/distribution/properties/default_origin_request_policy",
+                        "rule": {
+                          "effect": "HIDE",
+                          "condition": {
+                            "scope": "#/properties/distribution/properties/default_cache_mode",
+                            "schema": {
+                              "not": {
+                                "const": "policy"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/distribution/properties/default_response_headers_policy"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "aws"
+                      }
+                    }
+                  }
+                },
+                "type": "Label",
+                "text": "### Cache behaviors\n\nOne block per path pattern, on top of the default behavior. The first pattern that matches a request wins, so the order sets the precedence.",
+                "options": {
+                  "format": "markdown"
+                }
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "aws"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/distribution/properties/behaviors",
+                "options": {
+                  "elementLabelProp": "path_pattern",
+                  "detail": {
+                    "type": "VerticalLayout",
+                    "elements": [
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/path_pattern"
+                      },
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/viewer_protocol_policy"
+                      },
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/compress",
+                        "options": {
+                          "toggle": true
+                        }
+                      },
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/invocations"
+                      },
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/cache_mode",
+                        "options": {
+                          "format": "radio-cards"
+                        }
+                      },
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/cache_policy",
+                        "rule": {
+                          "effect": "HIDE",
+                          "condition": {
+                            "scope": "#/properties/cache_mode",
+                            "schema": {
+                              "not": {
+                                "const": "policy"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/origin_request_policy",
+                        "rule": {
+                          "effect": "HIDE",
+                          "condition": {
+                            "scope": "#/properties/cache_mode",
+                            "schema": {
+                              "not": {
+                                "const": "policy"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/response_headers_policy"
+                      }
+                    ]
+                  }
+                },
+                "label": false
+              },
+              {
+                "type": "Categorization",
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "aws"
+                      }
+                    }
+                  }
+                },
+                "options": {
+                  "collapsable": {
+                    "label": "ADVANCED",
+                    "collapsed": true
+                  }
+                },
+                "elements": [
+                  {
+                    "type": "Category",
+                    "label": "General",
+                    "elements": [
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/distribution/properties/price_class"
+                      },
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/distribution/properties/default_root_object"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Category",
+                    "label": "Geographic restriction",
+                    "elements": [
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/distribution/properties/geo_restriction/properties/restriction_type"
+                      },
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/distribution/properties/geo_restriction/properties/locations"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Category",
+                    "label": "Custom error responses",
+                    "elements": [
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/distribution/properties/custom_error_responses"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Category",
+            "label": "Network",
+            "elements": [
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "aws"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/network/properties/aws_network",
+                "options": {
+                  "format": "radio-cards"
+                }
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "aws"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/network/properties/aws_hosted_public_zone_id"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/network/properties/azure_network",
+                "options": {
+                  "format": "radio-cards"
+                }
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/network/properties/azure_dns_zone_name"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/network/properties/azure_dns_zone_resource_group"
+              }
+            ]
+          },
+          {
+            "type": "Category",
+            "label": "Security",
+            "elements": [
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "enum": [
+                        "aws",
+                        "azure"
+                      ]
+                    }
+                  }
+                },
+                "type": "Label",
+                "text": "> ℹ️ No security layer is currently available for the selected cloud provider.",
+                "options": {
+                  "format": "markdown"
+                }
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "aws"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/security/properties/aws_security",
+                "options": {
+                  "format": "radio-cards"
+                }
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#",
+                    "schema": {
+                      "anyOf": [
+                        {
+                          "properties": {
+                            "cloud_provider": {
+                              "not": {
+                                "const": "aws"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "properties": {
+                            "security": {
+                              "properties": {
+                                "aws_security": {
+                                  "not": {
+                                    "const": "waf"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/security/properties/aws_web_acl_name"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/security/properties/azure_security",
+                "options": {
+                  "format": "radio-cards"
+                }
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#/properties/cloud_provider",
+                    "schema": {
+                      "not": {
+                        "const": "azure"
+                      }
+                    }
+                  }
+                },
+                "type": "Label",
+                "text": "> ℹ️ The WAF policy is yours: create it once and the scope only associates it with its own custom domain. Standard profiles support custom rules only; managed rule sets need a Premium profile and a Premium policy.",
+                "options": {
+                  "format": "markdown"
+                }
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#",
+                    "schema": {
+                      "anyOf": [
+                        {
+                          "properties": {
+                            "cloud_provider": {
+                              "not": {
+                                "const": "azure"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "properties": {
+                            "security": {
+                              "properties": {
+                                "azure_security": {
+                                  "not": {
+                                    "const": "azure_waf"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/security/properties/azure_waf_policy_name"
+              },
+              {
+                "rule": {
+                  "effect": "HIDE",
+                  "condition": {
+                    "scope": "#",
+                    "schema": {
+                      "anyOf": [
+                        {
+                          "properties": {
+                            "cloud_provider": {
+                              "not": {
+                                "const": "azure"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "properties": {
+                            "security": {
+                              "properties": {
+                                "azure_security": {
+                                  "not": {
+                                    "const": "azure_waf"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "type": "Control",
+                "scope": "#/properties/security/properties/azure_waf_policy_resource_group"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

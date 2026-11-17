@@ -33,6 +33,11 @@ output "scope_configuration_specification_slug" {
   value       = var.create_scope_configuration ? nullplatform_provider_specification.scope_configuration[0].slug : null
 }
 
+output "scope_configuration_schema" {
+  description = "JSON schema of the scope-configuration specification, as an object, for scope_configuration's spec_schema. Null without create_scope_configuration."
+  value       = var.create_scope_configuration ? local.scope_configuration.schema : null
+}
+
 output "notification_channel_id" {
   description = "ID of the agent notification channel, or null without create_agent_channel."
   value       = var.create_agent_channel ? module.agent_channel[0].notification_channel_id : null
