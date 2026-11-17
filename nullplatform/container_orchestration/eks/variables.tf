@@ -187,8 +187,11 @@ variable "traffic_manager_version" {
 variable "traffic_manager_port" {
   description = "Port the traffic manager sidecar binds inside the pod. Defaults to 80 when unset. Set a different port (10080 recommended) when the cluster does not allow pod-to-pod traffic on port 80, which surfaces as a healthy pod that receives no traffic because kubelet probes are node-local and bypass the filtering. Open the port for pod-to-pod traffic before setting this value"
   type        = number
-  default     = null
-  nullable    = true
+  # Mirror the eks-configuration spec default (80) so the provider sends what the API would store
+  # anyway. Omitting it let the API inject 80, which then showed as a permanent plan drift. Mirrors
+  # the spec default as of 2026-11-17; re-check if the platform changes it. Pass null to omit.
+  default  = 80
+  nullable = true
   validation {
     condition     = var.traffic_manager_port == null || (var.traffic_manager_port >= 1 && var.traffic_manager_port <= 65535)
     error_message = "traffic_manager_port must be between 1 and 65535."
@@ -219,7 +222,9 @@ variable "naming_strategy" {
 variable "naming_deployment_pattern" {
   description = "Name pattern for the objects a deployment creates (Deployment, Service, HPA, Secret, PodDisruptionBudget), e.g. {.application.slug}-{.scope.slug}-{.deployment.id}. Read only when naming_strategy is 'custom'"
   type        = string
-  default     = ""
+  # Mirror the eks-configuration spec default so the provider sends what the API would store anyway
+  # (otherwise the injected default shows as a permanent plan drift). Spec default as of 2026-11-17.
+  default = "{.application.slug}-{.scope.slug}-{.deployment.id}"
   validation {
     condition     = var.naming_deployment_pattern == "" || (length(var.naming_deployment_pattern) <= 200 && can(regex("^[A-Za-z0-9.{}\\[\\]\"_-]+$", var.naming_deployment_pattern)))
     error_message = "naming_deployment_pattern must be at most 200 characters of letters, digits, and . { } [ ] \" _ -"
@@ -229,7 +234,9 @@ variable "naming_deployment_pattern" {
 variable "naming_scope_pattern" {
   description = "Name pattern for the objects that outlive a deployment (Ingress, HTTPRoute, serving certificate), e.g. {.application.slug}-{.scope.slug}-{.scope.id}. Read only when naming_strategy is 'custom'. Only applies to scopes created after the change"
   type        = string
-  default     = ""
+  # Mirror the eks-configuration spec default so the provider sends what the API would store anyway
+  # (otherwise the injected default shows as a permanent plan drift). Spec default as of 2026-11-17.
+  default = "{.application.slug}-{.scope.slug}-{.scope.id}"
   validation {
     condition     = var.naming_scope_pattern == "" || (length(var.naming_scope_pattern) <= 200 && can(regex("^[A-Za-z0-9.{}\\[\\]\"_-]+$", var.naming_scope_pattern)))
     error_message = "naming_scope_pattern must be at most 200 characters of letters, digits, and . { } [ ] \" _ -"
