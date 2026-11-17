@@ -2,95 +2,29 @@
 
 ## Description
 
-Deploys Istio service mesh onto a Kubernetes cluster by installing the istio-base CRD chart and the istiod control plane chart via Helm with pinned versions and configurable HA replica counts
+Deploys Istio service mesh onto a Kubernetes cluster by installing the istio-base CRDs and the istiod control plane via Helm releases with pinned versions and configurable HA replica counts
 
 ## Architecture
 
-The module creates two helm_release resources in dependency order: helm_release.istio_base installs the base CRD chart first, then helm_release.istiod depends on it and installs the control plane. Both releases target the same Kubernetes namespace (defaulting to istio-system) and pull from the same configurable Helm repository URL. The istiod release uses set blocks to inject var.istiod_replicas into both pilot.replicaCount and pilot.autoscaleMin, ensuring the HPA floor matches the desired replica count.
+The module creates two sequential helm_release resources: istio-base (chart: base) and istiod (chart: istiod), where istiod depends_on istio-base to ensure CRDs exist before the control plane installs. Both helm_release resources target the same Kubernetes namespace (default: istio-system) and Helm repository, with atomic and cleanup_on_fail enabled for safe rollouts. The istiod helm_release injects pilot.replicaCount and pilot.autoscaleMin set blocks driven by var.istiod_replicas to lock in an HA floor and prevent the HPA from scaling back to 1 replica.
 
 ## Features
 
-- Installs istio-base Helm chart with CRDs using a pinned, non-moving chart version
-- Installs istiod control plane Helm chart with explicit dependency on istio-base completion
-- Configures istiod HA by setting both pilot.replicaCount and pilot.autoscaleMin to prevent HPA from scaling below the desired floor
-- Enforces fixed version strings for both charts, rejecting empty values and moving references like latest, main, or master
-- Creates the target Kubernetes namespace automatically if it does not already exist
-- Enables atomic installs with cleanup_on_fail and auto-rollback on timeout for both releases
+- Installs istio-base Helm chart with CRDs required by the Istio control plane
+- Installs istiod Helm chart as the Istio control plane with an explicit dependency on istio-base
+- Enforces pinned, non-moving Helm chart versions for both istio-base and istiod via validation
+- Configures high-availability istiod replicas by setting both pilot.replicaCount and pilot.autoscaleMin to prevent HPA from scaling below the defined floor
+- Enables atomic Helm releases with cleanup_on_fail and timeout controls for safe, self-healing deployments
+- Creates the target Kubernetes namespace automatically via create_namespace on both releases
 
 ## Basic Usage
 
 ```hcl
 module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.17.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.17.2"
 
   istio_base_version = "your-istio-base-version"
   istiod_version     = "your-istiod-version"
-}
-```
-
-### Usage with Pinned istio-base Version
-
-```hcl
-module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.17.1"
-
-  istio_base_version = "latest"
-  istiod_version     = "your-istiod-version"
-}
-```
-
-### Usage with Pinned istio-base Version (main)
-
-```hcl
-module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.17.1"
-
-  istio_base_version = "main"
-  istiod_version     = "your-istiod-version"
-}
-```
-
-### Usage with Pinned istio-base Version (master)
-
-```hcl
-module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.17.1"
-
-  istio_base_version = "master"
-  istiod_version     = "your-istiod-version"
-}
-```
-
-### Usage with Pinned istiod Version
-
-```hcl
-module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.17.1"
-
-  istio_base_version = "your-istio-base-version"
-  istiod_version     = "latest"
-}
-```
-
-### Usage with Pinned istiod Version (main)
-
-```hcl
-module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.17.1"
-
-  istio_base_version = "your-istio-base-version"
-  istiod_version     = "main"
-}
-```
-
-### Usage with Pinned istiod Version (master)
-
-```hcl
-module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.17.1"
-
-  istio_base_version = "your-istio-base-version"
-  istiod_version     = "master"
 }
 ```
 
@@ -137,15 +71,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "istio",
-  "description": "Deploys Istio service mesh onto a Kubernetes cluster by installing the istio-base CRD chart and the istiod control plane chart via Helm with pinned versions and configurable HA replica counts",
-  "architecture": "The module creates two helm_release resources in dependency order: helm_release.istio_base installs the base CRD chart first, then helm_release.istiod depends on it and installs the control plane. Both releases target the same Kubernetes namespace (defaulting to istio-system) and pull from the same configurable Helm repository URL. The istiod release uses set blocks to inject var.istiod_replicas into both pilot.replicaCount and pilot.autoscaleMin, ensuring the HPA floor matches the desired replica count.",
+  "description": "Deploys Istio service mesh onto a Kubernetes cluster by installing the istio-base CRDs and the istiod control plane via Helm releases with pinned versions and configurable HA replica counts",
+  "architecture": "The module creates two sequential helm_release resources: istio-base (chart: base) and istiod (chart: istiod), where istiod depends_on istio-base to ensure CRDs exist before the control plane installs. Both helm_release resources target the same Kubernetes namespace (default: istio-system) and Helm repository, with atomic and cleanup_on_fail enabled for safe rollouts. The istiod helm_release injects pilot.replicaCount and pilot.autoscaleMin set blocks driven by var.istiod_replicas to lock in an HA floor and prevent the HPA from scaling back to 1 replica.",
   "features": [
-    "Installs istio-base Helm chart with CRDs using a pinned, non-moving chart version",
-    "Installs istiod control plane Helm chart with explicit dependency on istio-base completion",
-    "Configures istiod HA by setting both pilot.replicaCount and pilot.autoscaleMin to prevent HPA from scaling below the desired floor",
-    "Enforces fixed version strings for both charts, rejecting empty values and moving references like latest, main, or master",
-    "Creates the target Kubernetes namespace automatically if it does not already exist",
-    "Enables atomic installs with cleanup_on_fail and auto-rollback on timeout for both releases"
+    "Installs istio-base Helm chart with CRDs required by the Istio control plane",
+    "Installs istiod Helm chart as the Istio control plane with an explicit dependency on istio-base",
+    "Enforces pinned, non-moving Helm chart versions for both istio-base and istiod via validation",
+    "Configures high-availability istiod replicas by setting both pilot.replicaCount and pilot.autoscaleMin to prevent HPA from scaling below the defined floor",
+    "Enables atomic Helm releases with cleanup_on_fail and timeout controls for safe, self-healing deployments",
+    "Creates the target Kubernetes namespace automatically via create_namespace on both releases"
   ],
   "inputs": [
     {
@@ -175,6 +109,6 @@ resource "example_resource" "this" {
     }
   ],
   "outputs": [],
-  "hash": "303874396410b43ece75fa7d7b391834"
+  "hash": "d9994ec7dc87f21f6b06d24622612ba3"
 }
 END_AI_METADATA -->
