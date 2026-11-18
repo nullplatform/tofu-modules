@@ -22,7 +22,7 @@ The module wraps the azure/avm-res-containerregistry-registry/azurerm AVM module
 
 ```hcl
 module "acr" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/acr?ref=v9.17.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/azure/acr?ref=v9.18.0"
 
   containerregistry_name = "your-containerregistry-name"
   location               = "your-location"

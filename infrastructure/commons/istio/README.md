@@ -21,7 +21,7 @@ The module creates two helm_release resources: istio-base (chart: base) and isti
 
 ```hcl
 module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.17.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.18.0"
 
   istio_base_version = "your-istio-base-version"
   istiod_version     = "your-istiod-version"
@@ -32,7 +32,7 @@ module "istio" {
 
 ```hcl
 module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.17.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.18.0"
 
   istio_base_version = "latest"
   istiod_version     = "your-istiod-version"
@@ -43,7 +43,7 @@ module "istio" {
 
 ```hcl
 module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.17.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.18.0"
 
   istio_base_version = "main"
   istiod_version     = "your-istiod-version"
@@ -54,7 +54,7 @@ module "istio" {
 
 ```hcl
 module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.17.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.18.0"
 
   istio_base_version = "master"
   istiod_version     = "your-istiod-version"
@@ -65,7 +65,7 @@ module "istio" {
 
 ```hcl
 module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.17.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.18.0"
 
   istio_base_version = "your-istio-base-version"
   istiod_version     = "latest"
@@ -76,7 +76,7 @@ module "istio" {
 
 ```hcl
 module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.17.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.18.0"
 
   istio_base_version = "your-istio-base-version"
   istiod_version     = "main"
@@ -87,7 +87,7 @@ module "istio" {
 
 ```hcl
 module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.17.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.18.0"
 
   istio_base_version = "your-istio-base-version"
   istiod_version     = "master"
