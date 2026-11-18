@@ -134,6 +134,9 @@ module "prometheus" {
 module "istio" {
   istio_base_version = "1.30.8"
   istiod_version     = "1.30.8"
+  # The 1.30.x charts default to registry.istio.io/release, which upstream is
+  # decommissioning. Use docker.io/istio, or a private mirror plus image_pull_secrets.
+  image_hub = "docker.io/istio"
 }
 
 module "service_definition" {

@@ -114,3 +114,159 @@ run "rejects_moving_chart_versions" {
 
   expect_failures = [var.istio_base_version, var.istiod_version]
 }
+
+# Without image_hub the chart keeps its own image source
+run "image_hub_unset_by_default" {
+  command = plan
+
+  assert {
+    condition     = length([for s in helm_release.istiod.set : s if s.name == "global.hub"]) == 0
+    error_message = "global.hub must not be set unless image_hub is given"
+  }
+
+  assert {
+    condition = alltrue([
+      for n in ["pilot.replicaCount", "pilot.autoscaleMin"] :
+      length([for s in helm_release.istiod.set : s if s.name == n]) == 1
+    ])
+    error_message = "image_hub must not drop the replica and autoscale settings"
+  }
+}
+
+# image_hub reaches istiod as global.hub, unmodified
+run "image_hub_sets_global_hub" {
+  command = plan
+
+  variables {
+    image_hub = "myregistry.example.com/mirror/istio"
+  }
+
+  assert {
+    condition     = one([for s in helm_release.istiod.set : s.value if s.name == "global.hub"]) == "myregistry.example.com/mirror/istio"
+    error_message = "image_hub should be passed to istiod as global.hub"
+  }
+
+  assert {
+    condition = alltrue([
+      for n in ["pilot.replicaCount", "pilot.autoscaleMin"] :
+      length([for s in helm_release.istiod.set : s if s.name == n]) == 1
+    ])
+    error_message = "image_hub must not drop the replica and autoscale settings"
+  }
+}
+
+# A hub carries no tag: the chart adds the version
+run "image_hub_rejects_tag" {
+  command = plan
+
+  variables {
+    image_hub = "docker.io/istio:1.0"
+  }
+
+  expect_failures = [var.image_hub]
+}
+
+# A bare host has no path: Istio images live under one
+run "image_hub_rejects_bare_host" {
+  command = plan
+
+  variables {
+    image_hub = "docker.io"
+  }
+
+  expect_failures = [var.image_hub]
+}
+
+# A private registry on a port, with a nested path
+run "image_hub_accepts_registry_with_port" {
+  command = plan
+
+  variables {
+    image_hub = "myreg.example.com:5000/mirror/istio"
+  }
+
+  assert {
+    condition     = one([for s in helm_release.istiod.set : s.value if s.name == "global.hub"]) == "myreg.example.com:5000/mirror/istio"
+    error_message = "a registry host:port with a nested path must be accepted and passed through"
+  }
+}
+
+# Values people paste that would render a broken image reference
+run "image_hub_rejects_url_scheme" {
+  command = plan
+
+  variables {
+    image_hub = "https://docker.io/istio"
+  }
+
+  expect_failures = [var.image_hub]
+}
+
+run "image_hub_rejects_trailing_slash" {
+  command = plan
+
+  variables {
+    image_hub = "docker.io/istio/"
+  }
+
+  expect_failures = [var.image_hub]
+}
+
+run "image_hub_rejects_digest" {
+  command = plan
+
+  variables {
+    image_hub = "docker.io/istio@sha256:0123456789abcdef"
+  }
+
+  expect_failures = [var.image_hub]
+}
+
+# Without image_pull_secrets the chart keeps its own setting
+run "image_pull_secrets_unset_by_default" {
+  command = plan
+
+  assert {
+    condition     = length(coalesce(helm_release.istiod.set_list, [])) == 0
+    error_message = "global.imagePullSecrets must not be set unless image_pull_secrets is given"
+  }
+}
+
+# image_pull_secrets reaches istiod as global.imagePullSecrets, in order
+run "image_pull_secrets_sets_global_list" {
+  command = plan
+
+  variables {
+    image_hub          = "myreg.example.com/mirror/istio"
+    image_pull_secrets = ["mirror-pull", "mirror-pull-2"]
+  }
+
+  assert {
+    condition     = one([for s in helm_release.istiod.set_list : s.value if s.name == "global.imagePullSecrets"]) == tolist(["mirror-pull", "mirror-pull-2"])
+    error_message = "image_pull_secrets should be passed to istiod as global.imagePullSecrets"
+  }
+}
+
+run "image_pull_secrets_rejects_invalid_name" {
+  command = plan
+
+  variables {
+    image_pull_secrets = ["Mirror_Pull"]
+  }
+
+  expect_failures = [var.image_pull_secrets]
+}
+
+# null means "not set", as for image_hub, instead of breaking the plan
+run "image_pull_secrets_accepts_null" {
+  command = plan
+
+  variables {
+    image_pull_secrets = null
+  }
+
+  assert {
+    condition     = length(coalesce(helm_release.istiod.set_list, [])) == 0
+    error_message = "a null image_pull_secrets should behave like the empty default"
+  }
+}
