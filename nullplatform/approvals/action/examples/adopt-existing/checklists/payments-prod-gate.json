@@ -1,0 +1,28 @@
+{
+  "aggregation": {
+    "type": "derived"
+  },
+  "execution_trigger": "explicit",
+  "items": [
+    {
+      "id": "coverage_gate",
+      "type": "condition",
+      "behavior": "gate",
+      "severity": "major",
+      "title": "Line coverage at least 80%",
+      "query": {
+        "build.metadata.coverage.lines.percent": {
+          "$gte": 80
+        }
+      }
+    },
+    {
+      "id": "peer_sign_off",
+      "type": "manual",
+      "behavior": "gate",
+      "severity": "major",
+      "title": "A peer signs off the deploy",
+      "require_comment": true
+    }
+  ]
+}
