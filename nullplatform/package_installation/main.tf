@@ -40,3 +40,33 @@ data "nullplatform_service_specification" "this" {
 
   id = nullplatform_package_installation.this.id != "" ? one(local.specification_ids) : one(local.specification_ids)
 }
+
+################################################################################
+# What the manifest creates on install
+#
+# A package's manifest may mark components "on": "install": what an
+# organization needs once, such as a scope type or the form of the package's
+# values. The installation above does not create them, and no provider
+# resource runs a manifest, so this is `np package install` for the
+# installation just made, a local-exec as the NRN settings of
+# scope_package_installation are. The command finds the installation at nrn,
+# keeps it on the same version, creates those components and records them on
+# it, so running again updates and creates nothing twice.
+#
+# package_configuration needs them: make it depend on this module.
+################################################################################
+resource "terraform_data" "manifest" {
+  count = var.apply_manifest ? 1 : 0
+
+  triggers_replace = {
+    installation_id = nullplatform_package_installation.this.id
+    revision_id     = nullplatform_package_installation.this.default_revision_id
+    imports         = var.manifest_imports
+    package_dir     = var.package_dir
+  }
+
+  provisioner "local-exec" {
+    command     = local.manifest_command
+    environment = merge(local.manifest_environment, nonsensitive(var.np_api_key == null) ? {} : { NP_API_KEY = var.np_api_key })
+  }
+}
