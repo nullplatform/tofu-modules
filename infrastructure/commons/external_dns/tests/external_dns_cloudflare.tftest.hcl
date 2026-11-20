@@ -6,6 +6,7 @@ variables {
   domain_filters         = "myorg.nullimplementation.com"
   external_dns_namespace = "external-dns"
   cloudflare_token       = "fake-cloudflare-token"
+  external_dns_version   = "1.23.0"
 }
 
 run "cloudflare_full_config" {

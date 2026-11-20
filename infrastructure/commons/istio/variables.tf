@@ -3,15 +3,25 @@
 ###############################################################################
 
 variable "istio_base_version" {
-  description = "Helm chart version for the istio-base component"
+  # example: 1.30.7
+  description = "No default: every install pins this deliberately — see VERSIONS.md. Helm chart version for the istio-base component"
   type        = string
-  default     = "1.30.4"
+
+  validation {
+    condition     = var.istio_base_version != "" && !contains(["latest", "main", "master"], lower(var.istio_base_version))
+    error_message = "istio_base_version must be a non-empty fixed version, not empty and not a moving reference."
+  }
 }
 
 variable "istiod_version" {
-  description = "Helm chart version for istiod (Istio control plane)"
+  # example: 1.30.7
+  description = "No default: every install pins this deliberately — see VERSIONS.md. Helm chart version for istiod (Istio control plane)"
   type        = string
-  default     = "1.30.4"
+
+  validation {
+    condition     = var.istiod_version != "" && !contains(["latest", "main", "master"], lower(var.istiod_version))
+    error_message = "istiod_version must be a non-empty fixed version, not empty and not a moving reference."
+  }
 }
 
 variable "istiod_replicas" {
@@ -31,8 +41,31 @@ variable "istiod_replicas" {
 
 variable "repository" {
   type        = string
-  description = "The Helm repository URL (e.g., https://istio-release.storage.googleapis.com/charts)."
-  default     = "https://istio-release.storage.googleapis.com/charts"
+  description = "The Helm repository URL (e.g., https://blob.istio.io/istio-release/charts)."
+  default     = "https://blob.istio.io/istio-release/charts"
+}
+
+variable "image_hub" {
+  type        = string
+  description = "Registry and path Istio images are pulled from, without a tag (e.g., docker.io/istio, or a private mirror such as myregistry.example.com/istio). Sets global.hub, which applies to istiod and to the proxy injected into sidecars and gateways. Null keeps the chart default: docker.io/istio up to 1.29, registry.istio.io/release in 1.30.x, which upstream is decommissioning."
+  default     = null
+
+  validation {
+    condition     = var.image_hub == null || can(regex("^[^\\s/:]+(:[0-9]+)?(/[^\\s/:]+)+$", var.image_hub))
+    error_message = "image_hub must be a registry host plus path with no tag (e.g., docker.io/istio), or null."
+  }
+}
+
+variable "image_pull_secrets" {
+  type        = list(string)
+  description = "Names of image pull secrets for istiod and for the proxy injected into sidecars and gateways, for a hub that needs credentials (see image_hub). Sets global.imagePullSecrets. The module does not create them: each must exist in istio-system and in every namespace with injected pods. Empty keeps the chart default."
+  default     = []
+  nullable    = false
+
+  validation {
+    condition     = alltrue([for n in var.image_pull_secrets : can(regex("^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$", n))])
+    error_message = "image_pull_secrets must be Kubernetes secret names (lowercase alphanumerics, '-' or '.')."
+  }
 }
 
 ###############################################################################

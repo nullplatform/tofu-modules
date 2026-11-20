@@ -1,14 +1,16 @@
 mock_provider "helm" {}
 
 variables {
-  cloud_provider       = "oci"
-  hosted_zone_name     = "myorg.example.com"
-  account_slug         = "myorg"
-  private_domain_name  = "myorg.example.com"
-  oci_compartment_ocid = "ocid1.compartment.oc1..aaaaaaaatest"
-  oci_sa_ocid          = "ocid1.principal.oc1..aaaaaaaatest"
-  oci_region           = "us-ashburn-1"
-  cert_manager_version = "v1.21.1"
+  cloud_provider                   = "oci"
+  hosted_zone_name                 = "myorg.example.com"
+  account_slug                     = "myorg"
+  private_domain_name              = "myorg.example.com"
+  oci_compartment_ocid             = "ocid1.compartment.oc1..aaaaaaaatest"
+  oci_sa_ocid                      = "ocid1.principal.oc1..aaaaaaaatest"
+  oci_region                       = "us-ashburn-1"
+  cert_manager_version             = "v1.21.1"
+  cert_manager_config_version      = "2.35.0"
+  cert_manager_webhook_oci_version = "1.4.1"
 }
 
 # Validates OCI provider config plans successfully
@@ -99,7 +101,7 @@ run "oci_webhook_deployed" {
 
   assert {
     condition     = helm_release.cert_manager_webhook_oci[0].version == "1.4.1"
-    error_message = "OCI webhook should use default version 1.4.1"
+    error_message = "OCI webhook should use the pinned version"
   }
 }
 
@@ -160,3 +162,33 @@ run "oci_sa_ocid_optional" {
   }
 }
 
+# No default: on OCI the webhook chart must be pinned (CLIEN-1176)
+run "oci_requires_webhook_version" {
+  command = plan
+
+  variables {
+    cert_manager_webhook_oci_version = null
+  }
+
+  expect_failures = [terraform_data.provider_validation]
+}
+
+run "rejects_moving_webhook_version" {
+  command = plan
+
+  variables {
+    cert_manager_webhook_oci_version = "latest"
+  }
+
+  expect_failures = [var.cert_manager_webhook_oci_version]
+}
+
+run "rejects_moving_config_version" {
+  command = plan
+
+  variables {
+    cert_manager_config_version = "main"
+  }
+
+  expect_failures = [var.cert_manager_config_version]
+}

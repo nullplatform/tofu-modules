@@ -212,8 +212,8 @@ run "with_traffic_manager" {
   }
 
   assert {
-    condition     = !strcontains(nullplatform_provider_config.eks_config.attributes, "\"port\"")
-    error_message = "Attributes should not contain traffic manager port when not set"
+    condition     = jsondecode(nullplatform_provider_config.eks_config.attributes).traffic_manager.port == 80
+    error_message = "traffic manager port should default to 80 (the spec default the API would inject)"
   }
 }
 
@@ -378,12 +378,16 @@ run "no_moving_reference_reaches_the_provider_config" {
   }
 }
 
-run "naming_absent_by_default" {
+run "naming_qualified_by_default" {
   command = plan
 
   assert {
-    condition     = !contains(keys(jsondecode(nullplatform_provider_config.eks_config.attributes)), "naming")
-    error_message = "Attributes should not contain naming when not set"
+    condition = jsondecode(nullplatform_provider_config.eks_config.attributes).naming == {
+      strategy           = "qualified"
+      deployment_pattern = "{.application.slug}-{.scope.slug}-{.deployment.id}"
+      scope_pattern      = "{.application.slug}-{.scope.slug}-{.scope.id}"
+    }
+    error_message = "Naming should default to qualified with the spec's default patterns (the API would inject them)"
   }
 }
 
@@ -395,8 +399,12 @@ run "naming_qualified_strategy" {
   }
 
   assert {
-    condition     = jsondecode(nullplatform_provider_config.eks_config.attributes).naming == { strategy = "qualified" }
-    error_message = "naming should only carry the strategy"
+    condition = jsondecode(nullplatform_provider_config.eks_config.attributes).naming == {
+      strategy           = "qualified"
+      deployment_pattern = "{.application.slug}-{.scope.slug}-{.deployment.id}"
+      scope_pattern      = "{.application.slug}-{.scope.slug}-{.scope.id}"
+    }
+    error_message = "naming should carry the strategy plus the default patterns the module now sends"
   }
 }
 

@@ -56,5 +56,9 @@ resource "terraform_data" "provider_validation" {
       condition     = var.cloud_provider != "oci" || length(var.oci_region) > 0
       error_message = "oci_region is required when cloud_provider is 'oci'."
     }
+    precondition {
+      condition     = var.cloud_provider != "oci" || var.cert_manager_webhook_oci_version != null
+      error_message = "cert_manager_webhook_oci_version is required when cloud_provider is 'oci' — see VERSIONS.md."
+    }
   }
 }

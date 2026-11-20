@@ -45,9 +45,14 @@ variable "additional_network_contributor_subnet_ids" {
 ###############################################################################
 
 variable "kubernetes_version" {
+  # example: 1.32.7
   type        = string
-  description = "The version of Kubernetes to use for the AKS cluster"
-  default     = "1.32.7"
+  description = "No default: every install pins this deliberately — see VERSIONS.md. Kubernetes version of the AKS cluster, as major.minor.patch. A default here would upgrade the control plane of every cluster that never set it the day the default moved, so the version is always the caller's decision."
+
+  validation {
+    condition     = var.kubernetes_version != "" && !contains(["latest", "main", "master"], lower(var.kubernetes_version))
+    error_message = "kubernetes_version must be a non-empty fixed version, not empty and not a moving reference."
+  }
 }
 
 variable "prefix" {

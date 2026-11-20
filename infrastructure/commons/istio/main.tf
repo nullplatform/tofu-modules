@@ -93,14 +93,32 @@ resource "helm_release" "istiod" {
   # autoscaleMin=1, so setting only replicaCount is not enough — the HPA
   # would scale it back to 1 and re-block any node drain (istiod PDB has
   # minAvailable=1). Setting autoscaleMin locks in the floor.
-  set = [
+  # Pulling from a private mirror also needs credentials. The secrets have to
+  # exist in each namespace where istiod or an injected proxy runs.
+  set_list = length(var.image_pull_secrets) == 0 ? [] : [
     {
-      name  = "pilot.replicaCount"
-      value = var.istiod_replicas
-    },
-    {
-      name  = "pilot.autoscaleMin"
-      value = var.istiod_replicas
+      name  = "global.imagePullSecrets"
+      value = var.image_pull_secrets
     },
   ]
+
+  set = concat(
+    [
+      {
+        name  = "pilot.replicaCount"
+        value = var.istiod_replicas
+      },
+      {
+        name  = "pilot.autoscaleMin"
+        value = var.istiod_replicas
+      },
+    ],
+    # global.hub sets the istiod image and the proxy image injected into sidecars and gateways.
+    var.image_hub == null ? [] : [
+      {
+        name  = "global.hub"
+        value = var.image_hub
+      },
+    ],
+  )
 }

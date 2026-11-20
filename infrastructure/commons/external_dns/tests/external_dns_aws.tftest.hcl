@@ -9,6 +9,7 @@ variables {
   aws_iam_role_arn       = "arn:aws:iam::123456789012:role/external-dns"
   zone_id_filter         = "Z1234567890ABC"
   zone_type              = "public"
+  external_dns_version   = "1.23.0"
 }
 
 run "aws_full_config" {

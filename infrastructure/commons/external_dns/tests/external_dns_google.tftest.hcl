@@ -8,6 +8,7 @@ variables {
   gcp_project_id            = "my-gcp-project"
   gcp_service_account_email = "external-dns@my-gcp-project.iam.gserviceaccount.com"
   zone_type                 = "public"
+  external_dns_version      = "1.23.0"
 }
 
 run "google_full_config" {

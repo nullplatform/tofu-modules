@@ -32,3 +32,18 @@ run "prometheus_version_is_overridable" {
     error_message = "prometheus_version must be settable by the caller"
   }
 }
+
+################################################################################
+# Scrape configuration
+################################################################################
+
+# null-platform-metrics scraped the logs-controller on every node while the chart's
+# kubernetes-pods job scraped the same pods by annotation: every series came twice.
+run "no_duplicate_logs_controller_scrape_job" {
+  command = plan
+
+  assert {
+    condition     = !strcontains(helm_release.prometheus.values[0], "null-platform-metrics")
+    error_message = "the logs-controller is scraped by annotation; a second job doubles every nullplatform_* series"
+  }
+}

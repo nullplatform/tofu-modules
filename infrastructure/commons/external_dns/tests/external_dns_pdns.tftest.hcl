@@ -7,6 +7,7 @@ variables {
   external_dns_namespace = "external-dns"
   pdns_server            = "http://192.0.2.10:8081"
   pdns_api_key           = "fake-pdns-api-key"
+  external_dns_version   = "1.23.0"
 }
 
 run "pdns_full_config" {

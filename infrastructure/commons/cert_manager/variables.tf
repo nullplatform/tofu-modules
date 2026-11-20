@@ -79,9 +79,14 @@ variable "cert_manager_namespace" {
 }
 
 variable "cert_manager_config_version" {
-  description = "The version of the cert-manager configuration Helm chart"
+  # example: 2.35.0
+  description = "No default: every install pins this deliberately — see VERSIONS.md. The version of the cert-manager configuration Helm chart"
   type        = string
-  default     = "2.35.0"
+
+  validation {
+    condition     = var.cert_manager_config_version != "" && !contains(["latest", "main", "master"], lower(var.cert_manager_config_version))
+    error_message = "cert_manager_config_version must be a non-empty fixed version, not empty and not a moving reference."
+  }
 }
 
 variable "hosted_zone_name" {
@@ -186,9 +191,15 @@ variable "oci_sa_ocid" {
 }
 ##########web hook
 variable "cert_manager_webhook_oci_version" {
-  description = "Helm chart version for the cert-manager OCI webhook"
+  # example: 1.4.1
+  description = "No default: every install pins this deliberately — see VERSIONS.md. Required when cloud_provider is 'oci', ignored otherwise. Helm chart version for the cert-manager OCI webhook"
   type        = string
-  default     = "1.4.1"
+  default     = null
+
+  validation {
+    condition     = var.cert_manager_webhook_oci_version == null || (var.cert_manager_webhook_oci_version != "" && !contains(["latest", "main", "master"], lower(coalesce(var.cert_manager_webhook_oci_version, "unset"))))
+    error_message = "cert_manager_webhook_oci_version must be a non-empty fixed version, not empty and not a moving reference."
+  }
 }
 
 variable "cert_manager_webhook_oci_namespace" {

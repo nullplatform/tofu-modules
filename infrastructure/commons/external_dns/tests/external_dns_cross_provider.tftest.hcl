@@ -1,6 +1,10 @@
 mock_provider "helm" {}
 mock_provider "kubernetes" {}
 
+variables {
+  external_dns_version = "1.23.0"
+}
+
 # Validates invalid dns_provider_name is rejected (works because it fails before locals)
 run "rejects_invalid_provider" {
   command = plan
@@ -126,4 +130,18 @@ run "all_providers_in_config_map" {
     condition     = contains(keys(local.provider_configs), "google")
     error_message = "provider_configs should contain google"
   }
+}
+
+# No default: an install that does not pin the chart must fail, not drift (CLIEN-1176)
+run "rejects_moving_chart_version" {
+  command = plan
+
+  variables {
+    dns_provider_name    = "cloudflare"
+    domain_filters       = "myorg.example.com"
+    cloudflare_token     = "fake-cloudflare-token"
+    external_dns_version = "latest"
+  }
+
+  expect_failures = [var.external_dns_version]
 }

@@ -7,6 +7,7 @@ variables {
   external_dns_namespace = "external-dns"
   oci_compartment_ocid   = "ocid1.compartment.oc1..aaaaaaaatest"
   oci_region             = "us-ashburn-1"
+  external_dns_version   = "1.23.0"
 }
 
 # Validates OCI config plans successfully

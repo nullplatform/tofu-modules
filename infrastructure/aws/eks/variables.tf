@@ -16,9 +16,14 @@ variable "instance_types" {
 }
 
 variable "kubernetes_version" {
+  # example: 1.36
   type        = string
-  description = "K8s version to use"
-  default     = "1.34"
+  description = "No default: every install pins this deliberately — see VERSIONS.md. Kubernetes version of the EKS control plane, as major.minor. A default here would upgrade the control plane of every cluster that never set it the day the default moved, so the version is always the caller's decision."
+
+  validation {
+    condition     = var.kubernetes_version != "" && !contains(["latest", "main", "master"], lower(var.kubernetes_version))
+    error_message = "kubernetes_version must be a non-empty fixed version, not empty and not a moving reference."
+  }
 }
 
 variable "aws_vpc_vpc_id" {

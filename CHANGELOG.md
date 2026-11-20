@@ -12,6 +12,82 @@
 * **packages:** drop `package.requires_providers` from `scope_definition` and `service_definition`, and the `missing_optional_requirements` output from `package_installation`, `scope_package_installation` and `service_package_installation`: the platform never accepted the declaration and provider 0.0.112 removed both, so a `tofu init -upgrade` under the `>= 0.0.110` pin failed to validate. The modules now require provider >= 0.0.112
 * **external_dns:** support public and private DNS on Azure with ExternalDNS: `label_filter` now applies to the `azure` and `azure-private-dns` providers, and the new `gateway_name` limits route sources to one Gateway, so a public instance keeps internal scopes out of the public zone while an `azure-private-dns` instance publishes them in the Private DNS zone (split-horizon)
 
+## [9.18.0](https://github.com/nullplatform/tofu-modules/compare/v9.17.3...v9.18.0) (2026-11-18)
+
+
+### Features
+
+* **istio:** let consumers choose the image hub ([#702](https://github.com/nullplatform/tofu-modules/issues/702)) ([b017a8d](https://github.com/nullplatform/tofu-modules/commit/b017a8d24c1e98ed20ebe09d8b6b5ceebd761c24))
+
+## [9.17.3](https://github.com/nullplatform/tofu-modules/compare/v9.17.2...v9.17.3) (2026-11-17)
+
+
+### Bug Fixes
+
+* **eks:** mirror API default attrs to stop provider_config plan drift ([#698](https://github.com/nullplatform/tofu-modules/issues/698)) ([2d0ade9](https://github.com/nullplatform/tofu-modules/commit/2d0ade9a8da12e1b6ddcc45822bde53115431c79))
+
+## [9.17.2](https://github.com/nullplatform/tofu-modules/compare/v9.17.1...v9.17.2) (2026-11-17)
+
+
+### Bug Fixes
+
+* **istio:** point the chart repository at blob.istio.io ([7cc8811](https://github.com/nullplatform/tofu-modules/commit/7cc881119c5611c14c7ebee291e9d61afb4b17d6))
+* **istio:** point the chart repository at blob.istio.io ([#699](https://github.com/nullplatform/tofu-modules/issues/699)) ([e61f7f9](https://github.com/nullplatform/tofu-modules/commit/e61f7f96b4ea88e4d9d03c209dcc273d0fcc7b62))
+
+## [9.17.1](https://github.com/nullplatform/tofu-modules/compare/v9.17.0...v9.17.1) (2026-11-16)
+
+
+### Bug Fixes
+
+* **external_dns:** create provider secrets after their namespace ([#696](https://github.com/nullplatform/tofu-modules/issues/696)) ([2128c8b](https://github.com/nullplatform/tofu-modules/commit/2128c8bd1a2797a4268770883c269600930a878e))
+
+## [9.17.0](https://github.com/nullplatform/tofu-modules/compare/v9.16.0...v9.17.0) (2026-11-13)
+
+
+### Features
+
+* **scope_configuration:** read payload defaults from the scope's spec schema ([#691](https://github.com/nullplatform/tofu-modules/issues/691)) ([472a054](https://github.com/nullplatform/tofu-modules/commit/472a054858e4a2c6aafd04f9428ba91993889418))
+
+## [9.16.0](https://github.com/nullplatform/tofu-modules/compare/v9.15.0...v9.16.0) (2026-11-13)
+
+
+### Features
+
+* **nullplatform:** service_package_publish and scope_package_publish ([#693](https://github.com/nullplatform/tofu-modules/issues/693)) ([db66e36](https://github.com/nullplatform/tofu-modules/commit/db66e366e232a1a2efe4f670ec964b3db8aac0f1))
+
+## [9.15.0](https://github.com/nullplatform/tofu-modules/compare/v9.14.0...v9.15.0) (2026-11-12)
+
+
+### Features
+
+* **container_orchestration:** default naming_strategy to qualified ([#657](https://github.com/nullplatform/tofu-modules/issues/657)) ([4009913](https://github.com/nullplatform/tofu-modules/commit/400991394148fe7db739cefb2340d2040488a835))
+
+
+### Bug Fixes
+
+* **prometheus:** stop scraping the logs-controller twice ([#683](https://github.com/nullplatform/tofu-modules/issues/683)) ([2576c30](https://github.com/nullplatform/tofu-modules/commit/2576c303156e2234ed0a40e7e966114467b7d114))
+
+## [9.14.0](https://github.com/nullplatform/tofu-modules/compare/v9.13.1...v9.14.0) (2026-11-11)
+
+
+### Features
+
+* **infrastructure:** require pinned chart and Kubernetes versions ([#670](https://github.com/nullplatform/tofu-modules/issues/670)) ([cf3b4be](https://github.com/nullplatform/tofu-modules/commit/cf3b4be98d42e201f98e03c4fc8aa5fcad90605d))
+
+## [9.13.1](https://github.com/nullplatform/tofu-modules/compare/v9.13.0...v9.13.1) (2026-11-11)
+
+
+### Bug Fixes
+
+* **scope_configuration:** mirror every static-files spec default to stop drift ([#680](https://github.com/nullplatform/tofu-modules/issues/680)) ([adba7fb](https://github.com/nullplatform/tofu-modules/commit/adba7fb604dad9009fbdd594024b77e12af7a5be))
+
+## [9.13.0](https://github.com/nullplatform/tofu-modules/compare/v9.12.0...v9.13.0) (2026-11-10)
+
+
+### Features
+
+* **agent:** add topology_spread_constraints variable ([#678](https://github.com/nullplatform/tofu-modules/issues/678)) ([0509917](https://github.com/nullplatform/tofu-modules/commit/0509917c3debaf86edbee75c8ee59a31916b104e))
+
 ## [9.12.0](https://github.com/nullplatform/tofu-modules/compare/v9.11.4...v9.12.0) (2026-11-09)
 
 

@@ -9,6 +9,7 @@ variables {
   rfc2136_zone           = "dns.example.com"
   rfc2136_tsig_keyname   = "external-dns-key"
   rfc2136_tsig_secret    = "ZmFrZS10c2lnLXNlY3JldA=="
+  external_dns_version   = "1.23.0"
 }
 
 run "rfc2136_full_config" {

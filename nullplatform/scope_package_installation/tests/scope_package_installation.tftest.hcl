@@ -146,6 +146,11 @@ run "scope_configuration_is_opt_in" {
     condition     = length(data.http.scope_configuration_template) == 0
     error_message = "Without create_scope_configuration nothing may be fetched from the scope repository"
   }
+
+  assert {
+    condition     = output.scope_configuration_schema == null
+    error_message = "Without create_scope_configuration there is no schema to output"
+  }
 }
 
 run "scope_configuration_is_fetched_from_the_scope_repository_at_the_pinned_ref" {
@@ -199,6 +204,11 @@ run "scope_configuration_is_read_from_a_checkout_with_local_specs_path" {
   assert {
     condition     = nullplatform_provider_specification.scope_configuration[0].visible_to == tolist(["organization=1:account=2"])
     error_message = "The template's NRN placeholder must be replaced by nrn"
+  }
+
+  assert {
+    condition     = output.scope_configuration_schema.properties.state_bucket.type == "string"
+    error_message = "scope_configuration_schema must be the template's schema, to feed scope_configuration's spec_schema"
   }
 }
 
