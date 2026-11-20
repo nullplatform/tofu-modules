@@ -37,7 +37,7 @@ variable "agent" {
 }
 
 variable "values" {
-  description = "The package's values for this place, as its configuration form asks for them: a domain, a role ARN, a namespace. A value left out may be made by the package's own post_configure lines, which run only when package_dir is given."
+  description = "The package's values for this place: one group per form the package brings, named as the package's manifest names it and laid out as that form is, e.g. { scope = { networking = { domain_name = \"example.com\" } } }. A form the package marks optional and given no group is not configured here. A value left out may be settled by the package's own post_configure lines, which run only when package_dir is given."
   type        = any
   default     = {}
 }

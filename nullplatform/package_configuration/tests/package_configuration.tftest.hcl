@@ -36,6 +36,29 @@ run "configures_the_place_for_its_agent" {
   }
 }
 
+# A package brings as many forms as it needs: the values are one group per
+# form, each laid out as its form is.
+run "values_are_a_group_per_form_nested_as_the_form_is" {
+  command = plan
+
+  variables {
+    values = {
+      scope     = { networking = { domain_name = "dev.example.com", application_domain = "false" } }
+      placement = { cluster = { namespace = "dummy-namespace", create_namespace_if_not_exist = true } }
+    }
+  }
+
+  assert {
+    condition     = jsondecode(local.environment.NP_PACKAGE_VALUES).scope.networking.domain_name == "dev.example.com"
+    error_message = "A form's group must reach the command nested as given"
+  }
+
+  assert {
+    condition     = jsondecode(local.environment.NP_PACKAGE_VALUES).placement.cluster.create_namespace_if_not_exist == true
+    error_message = "Each form keeps its own group, with its types"
+  }
+}
+
 run "a_place_with_no_dimensions_and_no_agent" {
   command = plan
 
