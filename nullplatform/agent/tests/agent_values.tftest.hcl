@@ -1587,3 +1587,34 @@ run "azure_workload_identity_without_worker_orchestrator_labels_only_the_agent" 
     error_message = "the label must render exactly once (agent only) with worker_orchestrator = false"
   }
 }
+
+################################################################################
+# Command executor debug
+################################################################################
+
+run "command_executor_debug_on_by_default" {
+  command = plan
+
+  assert {
+    condition     = contains(yamldecode(helm_release.agent.values[0]).args, "--command-executor-debug")
+    error_message = "--command-executor-debug must stay on by default"
+  }
+}
+
+run "command_executor_debug_can_be_disabled" {
+  command = plan
+
+  variables {
+    command_executor_debug = false
+  }
+
+  assert {
+    condition     = !contains(yamldecode(helm_release.agent.values[0]).args, "--command-executor-debug")
+    error_message = "--command-executor-debug must be dropped when command_executor_debug = false"
+  }
+
+  assert {
+    condition     = length(yamldecode(helm_release.agent.values[0]).args) == 6
+    error_message = "Disabling debug must drop only that flag, leaving no empty arg behind"
+  }
+}
