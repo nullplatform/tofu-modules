@@ -12,7 +12,7 @@ A package is installed once in an organization (`package_installation`) and conf
 
 - Configures a package for an NRN and its dimensions with one call per place
 - Names the agent that serves the place by its tags; two places on one cluster give the same tags and each gets its own values and channel
-- Passes the package's values as one JSON document, with their types
+- Passes the package's values as one JSON document with their types, one group per form the package brings
 - Uses components that already exist instead of creating them, by name (`imports`)
 - Runs the package's own `post_configure` lines when given a checkout of the package (`package_dir`)
 - Runs again when the place, the agent, the values or the installed version change
@@ -27,7 +27,12 @@ module "package_configuration" {
   package_slug = "your-package-slug"
   dimensions   = { environment = "production" }
   agent        = { cluster = "your-cluster" }
-  values       = { domain = "example.com" }
+
+  # one group per form the package brings, each laid out as its form is
+  values = {
+    scope     = { networking = { domain_name = "example.com" } }
+    placement = { cluster = { namespace = "apps" } }
+  }
 }
 ```
 
@@ -42,7 +47,7 @@ module "package_configuration" {
   package_slug = "your-package-slug"
   dimensions   = { environment = each.key }
   agent        = { cluster = "your-cluster" }
-  values       = { domain = each.value }
+  values       = { scope = { networking = { domain_name = each.value } } }
 }
 ```
 
@@ -51,6 +56,7 @@ module "package_configuration" {
 - The machine running the apply needs `np`, a version that has `package configure`, and credentials: `NP_API_KEY` in its environment or `np_api_key`.
 - What the command creates is not in the state. The installation records it; `np package status` shows it.
 - Destroying the configuration removes it from the state only. `np` has no command to remove a place yet.
+- A form's values can also be written with `nullplatform_provider_config`, which has state and a destroy: leave that form's group out here and this module configures the rest of the place.
 - The package must be installed first, with what its manifest creates on install: `package_installation` with `apply_manifest = true`. Make this module depend on it.
 
 <!-- BEGIN_TF_DOCS -->
