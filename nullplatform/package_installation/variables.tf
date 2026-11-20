@@ -23,3 +23,36 @@ variable "visible_to" {
   type        = list(string)
   default     = null
 }
+
+################################################################################
+# What the package's manifest creates on install
+################################################################################
+variable "apply_manifest" {
+  description = "Also create what the package's manifest marks \"on\": \"install\", such as a scope type or the form of the package's values, by running `np package install` for this installation. Off by default: a package whose manifest marks nothing needs only the installation. The machine running the apply needs `np` and credentials."
+  type        = bool
+  default     = false
+}
+
+variable "manifest_imports" {
+  description = "With apply_manifest: components already there that the installation must use instead of creating, by their name in the package's manifest, e.g. { scope-type = \"<id>\" }. Each is used as it is and never written."
+  type        = map(string)
+  default     = {}
+
+  validation {
+    condition     = alltrue([for name, id in var.manifest_imports : can(regex("^[A-Za-z0-9_./:-]+$", name)) && can(regex("^[A-Za-z0-9_./:-]+$", id))])
+    error_message = "An import is a component name and an id made of letters, digits and . _ / : -"
+  }
+}
+
+variable "package_dir" {
+  description = "With apply_manifest: directory with the package's files, a checkout at package_version. When given, the package's post_install lines run there after the components are created, as whoever runs the apply. Null runs none of them."
+  type        = string
+  default     = null
+}
+
+variable "np_api_key" {
+  description = "With apply_manifest: nullplatform API key for `np package install`. Null uses the NP_API_KEY of the environment running the apply, and then the apply shows what the command did; with a key given here OpenTofu hides the command's output."
+  type        = string
+  default     = null
+  sensitive   = true
+}
