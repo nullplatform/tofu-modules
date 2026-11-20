@@ -127,3 +127,73 @@ run "a_tag_is_not_a_version" {
 
   expect_failures = [var.package_version]
 }
+
+# Plan only below: applying the manifest is a local-exec `np package install`,
+# which an override does not skip, so an apply would call the API.
+run "the_manifest_is_not_applied_unless_asked" {
+  command = plan
+
+  assert {
+    condition     = length(terraform_data.manifest) == 0
+    error_message = "A plain installation must not run np: existing callers keep what they have"
+  }
+}
+
+run "the_manifest_is_applied_for_the_installed_version" {
+  command = plan
+
+  variables {
+    apply_manifest = true
+  }
+
+  assert {
+    condition     = length(terraform_data.manifest) == 1
+    error_message = "apply_manifest must add the step that creates what the manifest marks on install"
+  }
+
+  assert {
+    condition     = local.manifest_command == "np package install --nrn \"$NP_PACKAGE_NRN\" --slug \"$NP_PACKAGE_SLUG\" --version \"$NP_PACKAGE_VERSION\" --no-hooks"
+    error_message = "The command must install the same package at the same NRN and version as the installation, without the package's own lines"
+  }
+
+  assert {
+    condition     = local.manifest_environment.NP_PACKAGE_NRN == "organization=1:account=2" && local.manifest_environment.NP_PACKAGE_SLUG == "dummy-package" && local.manifest_environment.NP_PACKAGE_VERSION == "1.2.3"
+    error_message = "The NRN, the package and the version must be the ones the installation pins"
+  }
+}
+
+run "the_manifest_step_takes_imports_and_the_package_directory" {
+  command = plan
+
+  variables {
+    apply_manifest   = true
+    manifest_imports = { scope-type = "812", configuration = "dummy-specification-id" }
+    package_dir      = "/dummy/checkout/of/the/package"
+  }
+
+  assert {
+    condition     = local.manifest_command == "np package install --nrn \"$NP_PACKAGE_NRN\" --slug \"$NP_PACKAGE_SLUG\" --version \"$NP_PACKAGE_VERSION\" --dir \"$NP_PACKAGE_DIR\" --import configuration=dummy-specification-id --import scope-type=812"
+    error_message = "With package_dir the package's lines run there, and each import is passed as --import name=id in name order"
+  }
+
+  assert {
+    condition     = local.manifest_environment.NP_PACKAGE_DIR == "/dummy/checkout/of/the/package"
+    error_message = "The directory must be the one given"
+  }
+
+  assert {
+    condition     = terraform_data.manifest[0].triggers_replace.imports.scope-type == "812" && terraform_data.manifest[0].triggers_replace.package_dir == "/dummy/checkout/of/the/package"
+    error_message = "A change of what was given must run the step again"
+  }
+}
+
+run "a_manifest_import_that_is_not_a_plain_id_is_refused" {
+  command = plan
+
+  variables {
+    apply_manifest   = true
+    manifest_imports = { scope-type = "812 && whoami" }
+  }
+
+  expect_failures = [var.manifest_imports]
+}
