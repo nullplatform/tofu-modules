@@ -1,3 +1,42 @@
+locals {
+  # Field names are the ones the logs-controller envoy parser reads; keep them in sync with
+  # k8s-tools logs-controller/deploy/istio-mesh-config.yaml.
+  gateway_access_log_provider = {
+    name = "np-gateway-access-log"
+    envoyFileAccessLog = {
+      path = "/dev/stdout"
+      logFormat = {
+        labels = {
+          start_time                        = "%START_TIME%"
+          method                            = "%REQ(:METHOD)%"
+          path                              = "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
+          protocol                          = "%PROTOCOL%"
+          code                              = "%RESPONSE_CODE%"
+          response_flags                    = "%RESPONSE_FLAGS%"
+          response_code_details             = "%RESPONSE_CODE_DETAILS%"
+          connection_termination_details    = "%CONNECTION_TERMINATION_DETAILS%"
+          upstream_transport_failure_reason = "%UPSTREAM_TRANSPORT_FAILURE_REASON%"
+          bytes_received                    = "%BYTES_RECEIVED%"
+          size                              = "%BYTES_SENT%"
+          response_time                     = "%DURATION%"
+          upstream_service_time             = "%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%"
+          x_forwarded_for                   = "%REQ(X-FORWARDED-FOR)%"
+          agent                             = "%REQ(USER-AGENT)%"
+          request_id                        = "%REQ(X-REQUEST-ID)%"
+          authority                         = "%REQ(:AUTHORITY)%"
+          upstream_host                     = "%UPSTREAM_HOST%"
+          upstream_cluster                  = "%UPSTREAM_CLUSTER_RAW%"
+          upstream_local_address            = "%UPSTREAM_LOCAL_ADDRESS%"
+          downstream_local_address          = "%DOWNSTREAM_LOCAL_ADDRESS%"
+          remote                            = "%DOWNSTREAM_REMOTE_ADDRESS%"
+          requested_server_name             = "%REQUESTED_SERVER_NAME%"
+          route_name                        = "%ROUTE_NAME%"
+        }
+      }
+    }
+  }
+}
+
 
 resource "helm_release" "istio_base" {
   name       = "istio-base"
@@ -45,6 +84,10 @@ resource "helm_release" "istiod" {
   reuse_values      = false
   dependency_update = true
   max_history       = 10
+
+  values = var.gateway_access_log_enabled ? [yamlencode({
+    meshConfig = { extensionProviders = [local.gateway_access_log_provider] }
+  })] : []
 
   # Enforce HA on istiod. The chart's HPA is enabled by default with
   # autoscaleMin=1, so setting only replicaCount is not enough — the HPA
