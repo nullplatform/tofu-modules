@@ -22,7 +22,7 @@ The module constructs a set of deeply merged local maps (cluster, balancer, gate
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.18.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.19.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -34,7 +34,7 @@ module "eks" {
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.18.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.19.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -46,7 +46,7 @@ module "eks" {
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.18.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.19.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
@@ -58,7 +58,7 @@ module "eks" {
 
 ```hcl
 module "eks" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.18.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/container_orchestration/eks?ref=v9.19.0"
 
   cluster_name            = "your-cluster-name"
   nrn                     = "your-nrn"
