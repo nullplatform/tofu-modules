@@ -64,7 +64,7 @@ resource "example_resource" "this" {
 | <a name="input_entrypoint"></a> [entrypoint](#input\_entrypoint) | Command the channel sends to the worker. Empty uses the module default (/app/packages/<package\_slug>/entrypoint). worker-bridge images ignore it and run their baked NP\_SCOPE\_ENTRYPOINT. | `string` | `""` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | NRN of the installing organization where the service is installed (e.g. organization=123:account=456). The package is looked up as visible there, installed there, and the agent channel is created there. | `string` | n/a | yes |
 | <a name="input_package_slug"></a> [package\_slug](#input\_package\_slug) | Slug of the service package to install. | `string` | n/a | yes |
-| <a name="input_package_version"></a> [package\_version](#input\_package\_version) | Exact semver of the package revision to install (X.Y.Z, without a leading v). Service repositories pass the version of the tag their installation module is referenced at. | `string` | n/a | yes |
+| <a name="input_package_version"></a> [package\_version](#input\_package\_version) | Exact semver of the package revision to install (X.Y.Z or X.Y.Z-<prerelease>, without a leading v). Service repositories pass the version of the tag their installation module is referenced at. | `string` | n/a | yes |
 | <a name="input_service_specification_slug"></a> [service\_specification\_slug](#input\_service\_specification\_slug) | Slug of the service specification the channel routes. Null uses package\_slug, which is what a package published with service\_definition gets. | `string` | `null` | no |
 | <a name="input_visible_to"></a> [visible\_to](#input\_visible\_to) | Where inside the installing organization the service can be used. Null uses [nrn]. Every entry must be under the installing organization. | `list(string)` | `null` | no |
 
@@ -106,7 +106,7 @@ resource "example_resource" "this" {
     },
     {
       "name": "package_version",
-      "description": "Exact semver of the package revision to install (X.Y.Z, without a leading v). Service repositories pass the version of the tag their installation module is referenced at.",
+      "description": "Exact semver of the package revision to install (X.Y.Z or X.Y.Z-<prerelease>, without a leading v). Service repositories pass the version of the tag their installation module is referenced at.",
       "required": true
     },
     {

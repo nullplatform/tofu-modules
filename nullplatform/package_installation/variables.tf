@@ -9,12 +9,12 @@ variable "package_slug" {
 }
 
 variable "package_version" {
-  description = "Exact semver of the package revision to install (X.Y.Z, without a leading v). New services and scopes are born with it."
+  description = "Exact semver of the package revision to install (X.Y.Z or X.Y.Z-<prerelease>, without a leading v). New services and scopes are born with it. A prerelease is how a revision published from a prerelease tag (v1.21.0-beta.2) is tried before the stable one."
   type        = string
 
   validation {
-    condition     = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", var.package_version))
-    error_message = "package_version must be a semver X.Y.Z, without a leading v."
+    condition     = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$", var.package_version))
+    error_message = "package_version must be a semver X.Y.Z or X.Y.Z-<prerelease>, without a leading v."
   }
 }
 

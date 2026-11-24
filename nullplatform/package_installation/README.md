@@ -14,7 +14,7 @@ A `nullplatform_package` data source resolves the exact package revision by look
 - Creates a nullplatform_package_installation resource that pins the package's default revision for new services and scopes
 - Configures visibility scoping on the installation to control which NRNs within the organization can access the package's specifications
 - Conditionally reads the nullplatform_service_specification data source when exactly one specification exists in the installed revision
-- Validates package_version as a strict X.Y.Z semver format without a leading v
+- Validates package_version as an X.Y.Z or X.Y.Z-<prerelease> semver without a leading v
 - Exports service specification IDs and slugs that downstream modules can consume after installation
 
 ## Basic Usage
@@ -63,7 +63,7 @@ resource "example_resource" "this" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | NRN of the installing organization where the package is installed (an organization, account, namespace or application). The package is looked up as visible there. | `string` | n/a | yes |
 | <a name="input_package_slug"></a> [package\_slug](#input\_package\_slug) | Slug of the package to install. | `string` | n/a | yes |
-| <a name="input_package_version"></a> [package\_version](#input\_package\_version) | Exact semver of the package revision to install (X.Y.Z, without a leading v). New services and scopes are born with it. | `string` | n/a | yes |
+| <a name="input_package_version"></a> [package\_version](#input\_package\_version) | Exact semver of the package revision to install (X.Y.Z or X.Y.Z-<prerelease>, without a leading v). New services and scopes are born with it. A prerelease is how a revision published from a prerelease tag (v1.21.0-beta.2) is tried before the stable one. | `string` | n/a | yes |
 | <a name="input_visible_to"></a> [visible\_to](#input\_visible\_to) | Where inside the installing organization the package's specifications are usable: these NRNs and everything below them. Null uses [nrn]. Every entry must be under the installing organization. | `list(string)` | `null` | no |
 
 ## Outputs
@@ -91,7 +91,7 @@ resource "example_resource" "this" {
     "Creates a nullplatform_package_installation resource that pins the package's default revision for new services and scopes",
     "Configures visibility scoping on the installation to control which NRNs within the organization can access the package's specifications",
     "Conditionally reads the nullplatform_service_specification data source when exactly one specification exists in the installed revision",
-    "Validates package_version as a strict X.Y.Z semver format without a leading v",
+    "Validates package_version as an X.Y.Z or X.Y.Z-<prerelease> semver without a leading v",
     "Exports service specification IDs and slugs that downstream modules can consume after installation"
   ],
   "inputs": [
@@ -107,7 +107,7 @@ resource "example_resource" "this" {
     },
     {
       "name": "package_version",
-      "description": "Exact semver of the package revision to install (X.Y.Z, without a leading v). New services and scopes are born with it.",
+      "description": "Exact semver of the package revision to install (X.Y.Z or X.Y.Z-<prerelease>, without a leading v). New services and scopes are born with it. A prerelease is how a revision published from a prerelease tag (v1.21.0-beta.2) is tried before the stable one.",
       "required": true
     },
     {

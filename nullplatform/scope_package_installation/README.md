@@ -87,7 +87,7 @@ resource "example_resource" "this" {
 | <a name="input_np_api_key"></a> [np\_api\_key](#input\_np\_api\_key) | nullplatform API key for the `np nrn patch` that sets the scope's metrics and logs providers. Null uses the NP\_API\_KEY of the environment running the apply. | `string` | `null` | no |
 | <a name="input_nrn"></a> [nrn](#input\_nrn) | NRN of the installing organization where the scope is installed (e.g. organization=123:account=456). The package is looked up as visible there, and the installation, scope type, NRN settings, scope-configuration schema and agent channel are created there. | `string` | n/a | yes |
 | <a name="input_package_slug"></a> [package\_slug](#input\_package\_slug) | Slug of the scope package to install. | `string` | n/a | yes |
-| <a name="input_package_version"></a> [package\_version](#input\_package\_version) | Exact semver of the package revision to install (X.Y.Z, without a leading v). New scopes are born with it; moving to another version is changing this value. | `string` | n/a | yes |
+| <a name="input_package_version"></a> [package\_version](#input\_package\_version) | Exact semver of the package revision to install (X.Y.Z or X.Y.Z-<prerelease>, without a leading v). New scopes are born with it; moving to another version is changing this value. | `string` | n/a | yes |
 | <a name="input_repository_scope_template"></a> [repository\_scope\_template](#input\_repository\_scope\_template) | Base raw URL of the scope repository, up to the ref namespace, e.g.<br/>`https://raw.githubusercontent.com/nullplatform/scopes/refs/tags`. Same<br/>input as scope\_definition's. Required, together with<br/>`repository_scope_template_branch`, when a template is fetched over HTTP:<br/>`create_scope_configuration` or `create_agent_channel` without<br/>`local_specs_path`. | `string` | `null` | no |
 | <a name="input_repository_scope_template_branch"></a> [repository\_scope\_template\_branch](#input\_repository\_scope\_template\_branch) | Ref the templates are fetched at, a tag or a branch name under `repository_scope_template`. Pin the tag the installed package version was published from, so the schema and the channel match the specification. | `string` | `null` | no |
 | <a name="input_scope_configuration_name_override"></a> [scope\_configuration\_name\_override](#input\_scope\_configuration\_name\_override) | Name of the scope-configuration provider specification. Null uses the template's; override it when that name collides with one already visible in the organization. Same input as scope\_definition's. | `string` | `null` | no |
@@ -142,7 +142,7 @@ resource "example_resource" "this" {
     },
     {
       "name": "package_version",
-      "description": "Exact semver of the package revision to install (X.Y.Z, without a leading v). New scopes are born with it; moving to another version is changing this value.",
+      "description": "Exact semver of the package revision to install (X.Y.Z or X.Y.Z-<prerelease>, without a leading v). New scopes are born with it; moving to another version is changing this value.",
       "required": true
     },
     {

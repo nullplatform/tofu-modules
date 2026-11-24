@@ -9,7 +9,7 @@ variable "package_slug" {
 }
 
 variable "package_version" {
-  description = "Exact semver of the package revision to install (X.Y.Z, without a leading v). Service repositories pass the version of the tag their installation module is referenced at."
+  description = "Exact semver of the package revision to install (X.Y.Z or X.Y.Z-<prerelease>, without a leading v). Service repositories pass the version of the tag their installation module is referenced at."
   type        = string
 }
 
