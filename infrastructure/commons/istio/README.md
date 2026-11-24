@@ -2,95 +2,29 @@
 
 ## Description
 
-Installs Istio service mesh on Kubernetes by deploying the istio-base CRDs and the istiod control plane via pinned Helm chart versions
+Installs and configures Istio service mesh (istio-base and istiod) on Kubernetes using Helm with pinned versions and HA-aware settings
 
 ## Architecture
 
-The module creates two helm_release resources: istio-base (chart: base) and istiod (chart: istiod), with istiod depending on istio-base via depends_on. Both releases target the same Kubernetes namespace and use the shared Helm repository URL. Input variables flow into helm_release arguments including version pinning, replica counts via set blocks (pilot.replicaCount and pilot.autoscaleMin), optional global.hub via a conditional set entry, and optional global.imagePullSecrets via set_list when image_pull_secrets is non-empty.
+The module creates two helm_release resources: istio-base (CRDs and cluster-wide resources) and istiod (the Istio control plane), where istiod depends_on istio-base to enforce install order. Input variables flow into helm_release.istiod via set blocks for pilot.replicaCount, pilot.autoscaleMin, and optionally global.hub, and via set_list for global.imagePullSecrets. When gateway_access_log_enabled is true, a structured JSON access log meshConfig extension provider is injected into istiod via a yamlencode values block.
 
 ## Features
 
-- Deploys istio-base Helm release with CRDs required by the Istio control plane
-- Deploys istiod Helm release with configurable replica count applied to both replicaCount and autoscaleMin to prevent HPA from scaling below the floor
-- Enforces pinned Helm chart versions for both istio-base and istiod, rejecting floating references like latest, main, or master
-- Configures custom image registry via global.hub for air-gapped or private mirror deployments
-- Mounts image pull secrets via global.imagePullSecrets for authenticated private registries
-- Enables atomic, cleanup-on-fail Helm deployments with a 600-second timeout to ensure rollback on failure
+- Installs istio-base Helm chart with CRDs and cluster-scoped Istio resources into a configurable namespace
+- Deploys istiod Helm chart with atomic, cleanup-on-fail, and wait semantics for reliable upgrades
+- Enforces HA for istiod by setting both pilot.replicaCount and pilot.autoscaleMin to prevent HPA from scaling below the configured floor
+- Configures a structured JSON gateway access log extension provider (np-gateway-access-log) in meshConfig when enabled
+- Supports private image registries by setting global.hub and global.imagePullSecrets on istiod and injected proxies
+- Validates that version pins are non-empty fixed strings and disallows moving references like latest, main, or master
 
 ## Basic Usage
 
 ```hcl
 module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.18.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.19.0"
 
   istio_base_version = "your-istio-base-version"
   istiod_version     = "your-istiod-version"
-}
-```
-
-### Usage with Pinned istio-base version (non-latest)
-
-```hcl
-module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.18.0"
-
-  istio_base_version = "latest"
-  istiod_version     = "your-istiod-version"
-}
-```
-
-### Usage with Pinned istio-base version (non-main)
-
-```hcl
-module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.18.0"
-
-  istio_base_version = "main"
-  istiod_version     = "your-istiod-version"
-}
-```
-
-### Usage with Pinned istio-base version (non-master)
-
-```hcl
-module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.18.0"
-
-  istio_base_version = "master"
-  istiod_version     = "your-istiod-version"
-}
-```
-
-### Usage with Pinned istiod version (non-latest)
-
-```hcl
-module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.18.0"
-
-  istio_base_version = "your-istio-base-version"
-  istiod_version     = "latest"
-}
-```
-
-### Usage with Pinned istiod version (non-main)
-
-```hcl
-module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.18.0"
-
-  istio_base_version = "your-istio-base-version"
-  istiod_version     = "main"
-}
-```
-
-### Usage with Pinned istiod version (non-master)
-
-```hcl
-module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.18.0"
-
-  istio_base_version = "your-istio-base-version"
-  istiod_version     = "master"
 }
 ```
 
@@ -127,6 +61,7 @@ resource "example_resource" "this" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_gateway_access_log_enabled"></a> [gateway\_access\_log\_enabled](#input\_gateway\_access\_log\_enabled) | Add the np-gateway-access-log extension provider (JSON access log to stdout) to istiod's meshConfig. Required by the logs-controller for scopes without the nginx sidecar (nullplatform/base logging\_istio\_access\_logs\_enabled). | `bool` | `false` | no |
 | <a name="input_image_hub"></a> [image\_hub](#input\_image\_hub) | Registry and path Istio images are pulled from, without a tag (e.g., docker.io/istio, or a private mirror such as myregistry.example.com/istio). Sets global.hub, which applies to istiod and to the proxy injected into sidecars and gateways. Null keeps the chart default: docker.io/istio up to 1.29, registry.istio.io/release in 1.30.x, which upstream is decommissioning. | `string` | `null` | no |
 | <a name="input_image_pull_secrets"></a> [image\_pull\_secrets](#input\_image\_pull\_secrets) | Names of image pull secrets for istiod and for the proxy injected into sidecars and gateways, for a hub that needs credentials (see image\_hub). Sets global.imagePullSecrets. The module does not create them: each must exist in istio-system and in every namespace with injected pods. Empty keeps the chart default. | `list(string)` | `[]` | no |
 | <a name="input_istio_base_version"></a> [istio\_base\_version](#input\_istio\_base\_version) | No default: every install pins this deliberately — see VERSIONS.md. Helm chart version for the istio-base component | `string` | n/a | yes |
@@ -139,15 +74,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "istio",
-  "description": "Installs Istio service mesh on Kubernetes by deploying the istio-base CRDs and the istiod control plane via pinned Helm chart versions",
-  "architecture": "The module creates two helm_release resources: istio-base (chart: base) and istiod (chart: istiod), with istiod depending on istio-base via depends_on. Both releases target the same Kubernetes namespace and use the shared Helm repository URL. Input variables flow into helm_release arguments including version pinning, replica counts via set blocks (pilot.replicaCount and pilot.autoscaleMin), optional global.hub via a conditional set entry, and optional global.imagePullSecrets via set_list when image_pull_secrets is non-empty.",
+  "description": "Installs and configures Istio service mesh (istio-base and istiod) on Kubernetes using Helm with pinned versions and HA-aware settings",
+  "architecture": "The module creates two helm_release resources: istio-base (CRDs and cluster-wide resources) and istiod (the Istio control plane), where istiod depends_on istio-base to enforce install order. Input variables flow into helm_release.istiod via set blocks for pilot.replicaCount, pilot.autoscaleMin, and optionally global.hub, and via set_list for global.imagePullSecrets. When gateway_access_log_enabled is true, a structured JSON access log meshConfig extension provider is injected into istiod via a yamlencode values block.",
   "features": [
-    "Deploys istio-base Helm release with CRDs required by the Istio control plane",
-    "Deploys istiod Helm release with configurable replica count applied to both replicaCount and autoscaleMin to prevent HPA from scaling below the floor",
-    "Enforces pinned Helm chart versions for both istio-base and istiod, rejecting floating references like latest, main, or master",
-    "Configures custom image registry via global.hub for air-gapped or private mirror deployments",
-    "Mounts image pull secrets via global.imagePullSecrets for authenticated private registries",
-    "Enables atomic, cleanup-on-fail Helm deployments with a 600-second timeout to ensure rollback on failure"
+    "Installs istio-base Helm chart with CRDs and cluster-scoped Istio resources into a configurable namespace",
+    "Deploys istiod Helm chart with atomic, cleanup-on-fail, and wait semantics for reliable upgrades",
+    "Enforces HA for istiod by setting both pilot.replicaCount and pilot.autoscaleMin to prevent HPA from scaling below the configured floor",
+    "Configures a structured JSON gateway access log extension provider (np-gateway-access-log) in meshConfig when enabled",
+    "Supports private image registries by setting global.hub and global.imagePullSecrets on istiod and injected proxies",
+    "Validates that version pins are non-empty fixed strings and disallows moving references like latest, main, or master"
   ],
   "inputs": [
     {
@@ -184,9 +119,14 @@ resource "example_resource" "this" {
       "name": "namespace",
       "description": "The Kubernetes namespace where Istio will be installed.",
       "required": false
+    },
+    {
+      "name": "gateway_access_log_enabled",
+      "description": "Add the np-gateway-access-log extension provider (JSON access log to stdout) to istiod's meshConfig. Required by the logs-controller for scopes without the nginx sidecar (nullplatform/base logging_istio_access_logs_enabled).",
+      "required": false
     }
   ],
   "outputs": [],
-  "hash": "011ccca54e178536fcc51c7ce5bd4675"
+  "hash": "4e9e9d1d21fc6a300d6747d9a07c1bb7"
 }
 END_AI_METADATA -->
