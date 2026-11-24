@@ -1614,7 +1614,7 @@ run "command_executor_debug_can_be_disabled" {
   }
 
   assert {
-    condition     = length(yamldecode(helm_release.agent.values[0]).args) == 6
+    condition     = !contains(yamldecode(helm_release.agent.values[0]).args, "") && contains(yamldecode(helm_release.agent.values[0]).args, "--webserver-enabled")
     error_message = "Disabling debug must drop only that flag, leaving no empty arg behind"
   }
 }

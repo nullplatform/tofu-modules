@@ -636,4 +636,5 @@ variable "command_executor_debug" {
   description = "Run the agent with --command-executor-debug. Debug output includes the commands' input and output, so values handled by scopes, services and parameter storage (secrets included) end up in the agent logs in plain text. Set to false wherever the agent handles real secrets."
   type        = bool
   default     = true
+  nullable    = false
 }
