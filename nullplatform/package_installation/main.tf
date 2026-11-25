@@ -45,24 +45,52 @@ data "nullplatform_service_specification" "this" {
 # What the manifest creates on install
 #
 # A package's manifest may mark components "on": "install": what an
-# organization needs once, such as a scope type or the form of the package's
-# values. The installation above does not create them, and no provider
-# resource runs a manifest, so this is `np package install` for the
-# installation just made, a local-exec as the NRN settings of
+# organization needs once, such as a scope type. Each is made by its kind's
+# API or by a task the package brings. The installation above does not create
+# them, and no provider resource runs a manifest, so this is `np package
+# install` for the installation just made, a local-exec as the NRN settings of
 # scope_package_installation are. The command finds the installation at nrn,
 # keeps it on the same version, creates those components and records them on
-# it, so running again updates and creates nothing twice.
+# it, so running again updates and creates nothing twice. A package with tasks
+# of its own also needs `mise` on the machine running the apply.
 #
 # package_configuration needs them: make it depend on this module.
 ################################################################################
-resource "terraform_data" "manifest" {
+
+# What installing created, as one thing to remove: destroying it runs `np
+# package uninstall --keep-installation`, which removes what the manifest
+# created and leaves the installation to the resource above. A new version
+# does not replace it, so nothing is removed and made again on an upgrade.
+resource "terraform_data" "installed" {
   count = var.apply_manifest ? 1 : 0
 
   triggers_replace = {
     installation_id = nullplatform_package_installation.this.id
-    revision_id     = nullplatform_package_installation.this.default_revision_id
-    imports         = var.manifest_imports
-    package_dir     = var.package_dir
+  }
+
+  # A destroy-time provisioner reads only the resource itself.
+  input = {
+    command     = local.manifest_remove_command
+    environment = local.manifest_remove_environment
+    np_api_key  = var.np_api_key
+  }
+
+  provisioner "local-exec" {
+    when        = destroy
+    command     = self.input.command
+    environment = merge(self.input.environment, nonsensitive(self.input.np_api_key == null) ? {} : { NP_API_KEY = self.input.np_api_key })
+  }
+}
+
+resource "terraform_data" "manifest" {
+  count = var.apply_manifest ? 1 : 0
+
+  triggers_replace = {
+    installed   = terraform_data.installed[0].id
+    revision_id = nullplatform_package_installation.this.default_revision_id
+    imports     = var.manifest_imports
+    package_dir = var.package_dir
+    run_hooks   = var.run_hooks
   }
 
   provisioner "local-exec" {

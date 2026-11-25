@@ -28,7 +28,7 @@ variable "visible_to" {
 # What the package's manifest creates on install
 ################################################################################
 variable "apply_manifest" {
-  description = "Also create what the package's manifest marks \"on\": \"install\", such as a scope type or the form of the package's values, by running `np package install` for this installation. Off by default: a package whose manifest marks nothing needs only the installation. The machine running the apply needs `np` and credentials."
+  description = "Also create what the package's manifest marks \"on\": \"install\", such as a scope type or the form of the package's values, by running `np package install` for this installation. Off by default: a package whose manifest marks nothing needs only the installation. The machine running the apply needs `np` and credentials, and `mise` when the package brings tasks of its own. Destroying the module then also removes what the manifest created."
   type        = bool
   default     = false
 }
@@ -44,10 +44,22 @@ variable "manifest_imports" {
   }
 }
 
+variable "run_hooks" {
+  description = "With apply_manifest: run the package's own tasks, the components its manifest says a task makes. They run on the machine running the apply, as whoever runs it, with mise, which installs the tools the package declares. False leaves those components out, when installing and when removing."
+  type        = bool
+  default     = true
+}
+
 variable "package_dir" {
-  description = "With apply_manifest: directory with the package's files, a checkout at package_version. When given, the package's post_install lines run there after the components are created, as whoever runs the apply. Null runs none of them."
+  description = "With apply_manifest: directory with the package's files. Only for a package under development: the manifest a published version keeps carries its tasks and their files, so nothing of the package is needed where the apply runs."
   type        = string
   default     = null
+}
+
+variable "np_bin" {
+  description = "With apply_manifest: the `np` command to run, a path when it is not on the PATH of the machine running the apply."
+  type        = string
+  default     = "np"
 }
 
 variable "np_api_key" {
