@@ -52,5 +52,11 @@ resource "nullplatform_notification_channel" "from_template" {
       condition     = !var.worker_orchestrator || var.package_slug != ""
       error_message = "package_slug is required when worker_orchestrator = true."
     }
+    # package-exec runs the worker's baked entrypoint, so the override flag
+    # would be dropped without notice.
+    precondition {
+      condition     = !(var.worker_orchestrator && var.enabled_override)
+      error_message = "enabled_override is not supported with worker_orchestrator = true: package-exec channels run the worker's baked entrypoint and never pass --overrides-path. Set enabled_override = false and provide the overrides through the worker pod (NP_OVERRIDES_PATH, mounted via the agent module's worker.patches)."
+    }
   }
 }
