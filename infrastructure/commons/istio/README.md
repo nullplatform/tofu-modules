@@ -21,7 +21,7 @@ The module creates two helm_release resources: istio-base (CRDs and cluster-wide
 
 ```hcl
 module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.19.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.20.0"
 
   istio_base_version = "your-istio-base-version"
   istiod_version     = "your-istiod-version"

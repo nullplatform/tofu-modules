@@ -21,7 +21,7 @@ The module wraps the terraform-aws-modules/vpc/aws community module to provision
 
 ```hcl
 module "vpc" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v9.19.1"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/vpc?ref=v9.20.0"
 
   account      = "your-account"
   organization = "your-organization"
