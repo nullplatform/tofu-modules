@@ -53,6 +53,25 @@ module "package_configuration" {
 }
 ```
 
+## Using Outputs
+
+```hcl
+# What the package's own tasks answered for the place, by the names the package chose
+output "placeholder_image" {
+  value = module.package_configuration.outputs["lambda.deployment.placeholder_image_uri"]
+}
+
+# What was created there, each with its id and its ref
+locals {
+  channel_id = one([for resource in module.package_configuration.resources : resource.id if resource.name == "channel"])
+}
+
+# Wait for the place before something that needs it
+resource "example_resource" "this" {
+  depends_on = [module.package_configuration]
+}
+```
+
 ## What to know
 
 - The machine running the apply needs `np`, a version that has `package configure` and `package unconfigure`, and credentials: `NP_API_KEY` in its environment or `np_api_key`. A package that brings tasks of its own also needs `mise`, which installs the tools those tasks declare; the tasks run as whoever runs the apply, with their cloud credentials and kubectl context.
