@@ -633,7 +633,7 @@ variable "extra_envs" {
 }
 
 variable "command_executor_debug" {
-  description = "Run the agent with --command-executor-debug. Debug output includes the commands' input and output, so values handled by scopes, services and parameter storage (secrets included) end up in the agent logs in plain text. Set to false wherever the agent handles real secrets."
+  description = "Run the agent with --command-executor-debug, which logs every line of the commands' stdout/stderr. The command input is logged regardless of this flag. Agent images from 0.15.1 on redact both; on older images, secrets handled by scopes, services and parameter storage can reach the logs in plain text, so set this to false there."
   type        = bool
   default     = true
   nullable    = false
