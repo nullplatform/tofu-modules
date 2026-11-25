@@ -21,7 +21,7 @@ The module creates or looks up `aws_iam_openid_connect_provider` resources for e
 
 ```hcl
 module "ci-build-workflow-role" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/ci-build-workflow-role?ref=v9.19.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/aws/iam/ci-build-workflow-role?ref=v9.19.1"
 
   cluster_name = "your-cluster-name"
 }
