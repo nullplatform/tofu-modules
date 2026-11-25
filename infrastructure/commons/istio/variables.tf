@@ -45,6 +45,29 @@ variable "repository" {
   default     = "https://blob.istio.io/istio-release/charts"
 }
 
+variable "image_hub" {
+  type        = string
+  description = "Registry and path Istio images are pulled from, without a tag (e.g., docker.io/istio, or a private mirror such as myregistry.example.com/istio). Sets global.hub, which applies to istiod and to the proxy injected into sidecars and gateways. Null keeps the chart default: docker.io/istio up to 1.29, registry.istio.io/release in 1.30.x, which upstream is decommissioning."
+  default     = null
+
+  validation {
+    condition     = var.image_hub == null || can(regex("^[^\\s/:]+(:[0-9]+)?(/[^\\s/:]+)+$", var.image_hub))
+    error_message = "image_hub must be a registry host plus path with no tag (e.g., docker.io/istio), or null."
+  }
+}
+
+variable "image_pull_secrets" {
+  type        = list(string)
+  description = "Names of image pull secrets for istiod and for the proxy injected into sidecars and gateways, for a hub that needs credentials (see image_hub). Sets global.imagePullSecrets. The module does not create them: each must exist in istio-system and in every namespace with injected pods. Empty keeps the chart default."
+  default     = []
+  nullable    = false
+
+  validation {
+    condition     = alltrue([for n in var.image_pull_secrets : can(regex("^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$", n))])
+    error_message = "image_pull_secrets must be Kubernetes secret names (lowercase alphanumerics, '-' or '.')."
+  }
+}
+
 ###############################################################################
 # DEPLOYMENT CONFIGURATION
 ###############################################################################
@@ -54,4 +77,10 @@ variable "namespace" {
   description = "The Kubernetes namespace where Istio will be installed."
   default     = "istio-system"
 
+}
+
+variable "gateway_access_log_enabled" {
+  description = "Add the np-gateway-access-log extension provider (JSON access log to stdout) to istiod's meshConfig. Required by the logs-controller for scopes without the nginx sidecar (nullplatform/base logging_istio_access_logs_enabled)."
+  type        = bool
+  default     = false
 }

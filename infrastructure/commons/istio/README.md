@@ -2,26 +2,26 @@
 
 ## Description
 
-Deploys Istio service mesh onto a Kubernetes cluster by installing the istio-base CRDs and the istiod control plane via Helm releases with pinned versions and configurable HA replica counts
+Installs and configures Istio service mesh (istio-base and istiod) on Kubernetes using Helm with pinned versions and HA-aware settings
 
 ## Architecture
 
-The module creates two sequential helm_release resources: istio-base (chart: base) and istiod (chart: istiod), where istiod depends_on istio-base to ensure CRDs exist before the control plane installs. Both helm_release resources target the same Kubernetes namespace (default: istio-system) and Helm repository, with atomic and cleanup_on_fail enabled for safe rollouts. The istiod helm_release injects pilot.replicaCount and pilot.autoscaleMin set blocks driven by var.istiod_replicas to lock in an HA floor and prevent the HPA from scaling back to 1 replica.
+The module creates two helm_release resources: istio-base (CRDs and cluster-wide resources) and istiod (the Istio control plane), where istiod depends_on istio-base to enforce install order. Input variables flow into helm_release.istiod via set blocks for pilot.replicaCount, pilot.autoscaleMin, and optionally global.hub, and via set_list for global.imagePullSecrets. When gateway_access_log_enabled is true, a structured JSON access log meshConfig extension provider is injected into istiod via a yamlencode values block.
 
 ## Features
 
-- Installs istio-base Helm chart with CRDs required by the Istio control plane
-- Installs istiod Helm chart as the Istio control plane with an explicit dependency on istio-base
-- Enforces pinned, non-moving Helm chart versions for both istio-base and istiod via validation
-- Configures high-availability istiod replicas by setting both pilot.replicaCount and pilot.autoscaleMin to prevent HPA from scaling below the defined floor
-- Enables atomic Helm releases with cleanup_on_fail and timeout controls for safe, self-healing deployments
-- Creates the target Kubernetes namespace automatically via create_namespace on both releases
+- Installs istio-base Helm chart with CRDs and cluster-scoped Istio resources into a configurable namespace
+- Deploys istiod Helm chart with atomic, cleanup-on-fail, and wait semantics for reliable upgrades
+- Enforces HA for istiod by setting both pilot.replicaCount and pilot.autoscaleMin to prevent HPA from scaling below the configured floor
+- Configures a structured JSON gateway access log extension provider (np-gateway-access-log) in meshConfig when enabled
+- Supports private image registries by setting global.hub and global.imagePullSecrets on istiod and injected proxies
+- Validates that version pins are non-empty fixed strings and disallows moving references like latest, main, or master
 
 ## Basic Usage
 
 ```hcl
 module "istio" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.17.3"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//infrastructure/commons/istio?ref=v9.19.0"
 
   istio_base_version = "your-istio-base-version"
   istiod_version     = "your-istiod-version"
@@ -61,6 +61,9 @@ resource "example_resource" "this" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_gateway_access_log_enabled"></a> [gateway\_access\_log\_enabled](#input\_gateway\_access\_log\_enabled) | Add the np-gateway-access-log extension provider (JSON access log to stdout) to istiod's meshConfig. Required by the logs-controller for scopes without the nginx sidecar (nullplatform/base logging\_istio\_access\_logs\_enabled). | `bool` | `false` | no |
+| <a name="input_image_hub"></a> [image\_hub](#input\_image\_hub) | Registry and path Istio images are pulled from, without a tag (e.g., docker.io/istio, or a private mirror such as myregistry.example.com/istio). Sets global.hub, which applies to istiod and to the proxy injected into sidecars and gateways. Null keeps the chart default: docker.io/istio up to 1.29, registry.istio.io/release in 1.30.x, which upstream is decommissioning. | `string` | `null` | no |
+| <a name="input_image_pull_secrets"></a> [image\_pull\_secrets](#input\_image\_pull\_secrets) | Names of image pull secrets for istiod and for the proxy injected into sidecars and gateways, for a hub that needs credentials (see image\_hub). Sets global.imagePullSecrets. The module does not create them: each must exist in istio-system and in every namespace with injected pods. Empty keeps the chart default. | `list(string)` | `[]` | no |
 | <a name="input_istio_base_version"></a> [istio\_base\_version](#input\_istio\_base\_version) | No default: every install pins this deliberately — see VERSIONS.md. Helm chart version for the istio-base component | `string` | n/a | yes |
 | <a name="input_istiod_replicas"></a> [istiod\_replicas](#input\_istiod\_replicas) | Number of istiod replicas. Set to 2+ to avoid PDB blocking node drains. Applied to both pilot.replicaCount and pilot.autoscaleMin to prevent the HPA from scaling back to 1. | `number` | `2` | no |
 | <a name="input_istiod_version"></a> [istiod\_version](#input\_istiod\_version) | No default: every install pins this deliberately — see VERSIONS.md. Helm chart version for istiod (Istio control plane) | `string` | n/a | yes |
@@ -71,15 +74,15 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "istio",
-  "description": "Deploys Istio service mesh onto a Kubernetes cluster by installing the istio-base CRDs and the istiod control plane via Helm releases with pinned versions and configurable HA replica counts",
-  "architecture": "The module creates two sequential helm_release resources: istio-base (chart: base) and istiod (chart: istiod), where istiod depends_on istio-base to ensure CRDs exist before the control plane installs. Both helm_release resources target the same Kubernetes namespace (default: istio-system) and Helm repository, with atomic and cleanup_on_fail enabled for safe rollouts. The istiod helm_release injects pilot.replicaCount and pilot.autoscaleMin set blocks driven by var.istiod_replicas to lock in an HA floor and prevent the HPA from scaling back to 1 replica.",
+  "description": "Installs and configures Istio service mesh (istio-base and istiod) on Kubernetes using Helm with pinned versions and HA-aware settings",
+  "architecture": "The module creates two helm_release resources: istio-base (CRDs and cluster-wide resources) and istiod (the Istio control plane), where istiod depends_on istio-base to enforce install order. Input variables flow into helm_release.istiod via set blocks for pilot.replicaCount, pilot.autoscaleMin, and optionally global.hub, and via set_list for global.imagePullSecrets. When gateway_access_log_enabled is true, a structured JSON access log meshConfig extension provider is injected into istiod via a yamlencode values block.",
   "features": [
-    "Installs istio-base Helm chart with CRDs required by the Istio control plane",
-    "Installs istiod Helm chart as the Istio control plane with an explicit dependency on istio-base",
-    "Enforces pinned, non-moving Helm chart versions for both istio-base and istiod via validation",
-    "Configures high-availability istiod replicas by setting both pilot.replicaCount and pilot.autoscaleMin to prevent HPA from scaling below the defined floor",
-    "Enables atomic Helm releases with cleanup_on_fail and timeout controls for safe, self-healing deployments",
-    "Creates the target Kubernetes namespace automatically via create_namespace on both releases"
+    "Installs istio-base Helm chart with CRDs and cluster-scoped Istio resources into a configurable namespace",
+    "Deploys istiod Helm chart with atomic, cleanup-on-fail, and wait semantics for reliable upgrades",
+    "Enforces HA for istiod by setting both pilot.replicaCount and pilot.autoscaleMin to prevent HPA from scaling below the configured floor",
+    "Configures a structured JSON gateway access log extension provider (np-gateway-access-log) in meshConfig when enabled",
+    "Supports private image registries by setting global.hub and global.imagePullSecrets on istiod and injected proxies",
+    "Validates that version pins are non-empty fixed strings and disallows moving references like latest, main, or master"
   ],
   "inputs": [
     {
@@ -98,6 +101,16 @@ resource "example_resource" "this" {
       "required": false
     },
     {
+      "name": "image_hub",
+      "description": "Registry and path Istio images are pulled from, without a tag (e.g., docker.io/istio, or a private mirror such as myregistry.example.com/istio). Sets global.hub, which applies to istiod and to the proxy injected into sidecars and gateways. Null keeps the chart default: docker.io/istio up to 1.29, registry.istio.io/release in 1.30.x, which upstream is decommissioning.",
+      "required": false
+    },
+    {
+      "name": "image_pull_secrets",
+      "description": "Names of image pull secrets for istiod and for the proxy injected into sidecars and gateways, for a hub that needs credentials (see image_hub). Sets global.imagePullSecrets. The module does not create them: each must exist in istio-system and in every namespace with injected pods. Empty keeps the chart default.",
+      "required": false
+    },
+    {
       "name": "repository",
       "description": "The Helm repository URL (e.g., https://blob.istio.io/istio-release/charts).",
       "required": false
@@ -106,9 +119,14 @@ resource "example_resource" "this" {
       "name": "namespace",
       "description": "The Kubernetes namespace where Istio will be installed.",
       "required": false
+    },
+    {
+      "name": "gateway_access_log_enabled",
+      "description": "Add the np-gateway-access-log extension provider (JSON access log to stdout) to istiod's meshConfig. Required by the logs-controller for scopes without the nginx sidecar (nullplatform/base logging_istio_access_logs_enabled).",
+      "required": false
     }
   ],
   "outputs": [],
-  "hash": "d9994ec7dc87f21f6b06d24622612ba3"
+  "hash": "4e9e9d1d21fc6a300d6747d9a07c1bb7"
 }
 END_AI_METADATA -->
