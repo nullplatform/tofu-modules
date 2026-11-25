@@ -9,15 +9,15 @@ locals {
   api_key    = var.api_key
   agent_repo = join(",", var.agent_repo)
 
-  default_args = [
+  default_args = compact([
     "--tags=$(TAGS)",
     "--apikey=$(NP_API_KEY)",
     "--runtime=host",
     "--command-executor-env=NP_API_KEY=$(NP_API_KEY)",
-    "--command-executor-debug",
+    var.command_executor_debug ? "--command-executor-debug" : "",
     "--webserver-enabled",
     "--command-executor-git-command-repos=$(AGENT_REPO)"
-  ]
+  ])
 
   cloud_args = {
     aws   = []
