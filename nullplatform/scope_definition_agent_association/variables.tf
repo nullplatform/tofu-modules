@@ -1,6 +1,6 @@
 
 variable "enabled_override" {
-  description = "Enable custom overrides for scope configurations via command line"
+  description = "Append --overrides-path to the legacy exec channel's cmdline. Not supported with worker_orchestrator = true (the plan fails): set NP_OVERRIDES_PATH in the worker pod instead."
   type        = bool
   default     = false
 }
@@ -30,12 +30,12 @@ variable "entrypoint" {
 }
 
 variable "overrides_service_path" {
-  description = "Local filesystem path to the directory containing override configurations"
+  description = "Local filesystem path to the directory containing override configurations. Only used by the legacy exec channel."
   type        = string
   default     = null
 }
 variable "override_repo_path" {
-  description = "Local filesystem path where the scope repository will be cloned"
+  description = "Local filesystem path where the scope repository will be cloned. Only used by the legacy exec channel."
   type        = string
   default     = null
 }
@@ -114,7 +114,7 @@ variable "scope_specification_slug" {
 }
 
 variable "repo_path" {
-  description = "Local filesystem path where the scope repository will be cloned"
+  description = "Local filesystem path where the scope repository will be cloned. Only used by the legacy exec channel."
   type        = string
   default     = "/root/.np/nullplatform/scopes"
 }
