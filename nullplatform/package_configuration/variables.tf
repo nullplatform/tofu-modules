@@ -75,7 +75,7 @@ variable "package_dir" {
 }
 
 variable "read_record" {
-  description = "Read back what the installation records for this place (status, version, resources, outputs) with `np package status`, after the command ran and on every later plan. False leaves those outputs null and needs no `np` at plan time."
+  description = "Read back what the place's configuration records (status, version, resources, outputs) with `np package status`, after the command ran and on every later plan. False leaves those outputs null and needs no `np` at plan time."
   type        = bool
   default     = true
 }

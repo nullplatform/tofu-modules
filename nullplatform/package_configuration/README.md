@@ -14,10 +14,10 @@ A package is installed once in an organization (`package_installation`) and conf
 - Names the agent that serves the place by its tags; two places on one cluster give the same tags and each gets its own values and channel
 - Passes the package's values as one JSON document with their types, one group per form the package brings
 - Uses components that already exist instead of creating them, by name (`imports`)
-- Runs the package's own tasks from the manifest the version keeps: no checkout of the package and no Docker, only `mise` on the machine running the apply (`run_hooks = false` leaves them out)
+- Runs the package's own tasks from the package's own source, which the version pins and the command fetches: `mise` and `git` with read access to that repository on the machine running the apply, and no Docker (`run_hooks = false` leaves them out)
 - Runs again when the agent, the values or the installed version change, without removing the place
 - Removes the place on destroy: what configuring created there is removed, what it only used is left
-- Gives what the installation records for the place as outputs: `status`, `version`, `resources` (each with its id and ref) and `outputs` (what the package's tasks answered)
+- Gives what the place's configuration records as outputs: `status`, `version`, `resources` (each with its id and ref) and `outputs` (what the package's tasks answered)
 
 ## Basic Usage
 
@@ -74,8 +74,8 @@ resource "example_resource" "this" {
 
 ## What to know
 
-- The machine running the apply needs `np`, a version that has `package configure` and `package unconfigure`, and credentials: `NP_API_KEY` in its environment or `np_api_key`. A package that brings tasks of its own also needs `mise`, which installs the tools those tasks declare; the tasks run as whoever runs the apply, with their cloud credentials and kubectl context.
-- What the command creates is not in the state. The installation records it, and this module's outputs read it from there, on every plan too: `read_record = false` turns that off where `np` is not available at plan time.
+- The machine running the apply needs `np`, a version that has `package configure` and `package unconfigure`, and credentials: `NP_API_KEY` in its environment or `np_api_key`. A package that brings tasks of its own also needs `mise`, which installs the tools those tasks declare; the tasks run as whoever runs the apply, with their cloud credentials and kubectl context, and `git` with read access to the package's repository: its tasks run the source the version pins.
+- What the command creates is not in the state. The place's configuration records it, and this module's outputs read it from there, on every plan too: `read_record = false` turns that off where `np` is not available at plan time.
 - Use a package's outputs like any module's: `module.package_configuration.outputs["<name>"]`.
 - Destroying the configuration removes the place. A new value, agent or version does not: the place is updated where it is.
 - A form's values can also be written with `nullplatform_provider_config`, which has state and a destroy: leave that form's group out here and this module configures the rest of the place.

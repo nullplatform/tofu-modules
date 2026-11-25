@@ -20,9 +20,10 @@
 #   - the machine running the apply needs `np`, a version that has `package
 #     configure`, and credentials: NP_API_KEY in its environment or np_api_key.
 #     A package with tasks of its own also needs `mise`, which installs the
-#     tools those tasks declare. No package directory and no Docker;
-#   - what the command creates is not in the state. The installation records
-#     it (`np package status`) and the command finds it there on the next run,
+#     tools those tasks declare, and `git` with read access to the package's
+#     repository: its tasks run the source the version pins. No Docker;
+#   - what the command creates is not in the state. The place's configuration
+#     records it (`np package status`) and the command finds it there on the next run,
 #     so running again updates and creates nothing twice. The outputs of this
 #     module are read back from that record;
 #   - destroying the configuration removes the place: `np package unconfigure`
@@ -76,7 +77,7 @@ resource "terraform_data" "this" {
 }
 
 ################################################################################
-# What the installation records for the place
+# What the place's configuration records
 #
 # The ids of what was created and what the package's tasks answered are on
 # the installation, not in the state. They are read back after the command

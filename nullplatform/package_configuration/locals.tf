@@ -49,7 +49,7 @@ locals {
     NP_PACKAGE_DIR        = var.package_dir == null ? "" : var.package_dir
   }
 
-  # What the installation records for this place, read back with `np package
+  # What the place's configuration records, read back with `np package
   # status`: a jq filter that picks the place and answers flat text, as the
   # external data source takes it.
   record_query = join("", [
