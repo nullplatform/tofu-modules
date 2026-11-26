@@ -22,7 +22,7 @@ A workflow started by a webhook.
 
 ```hcl
 module "notify" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/workflows/workflow?ref=v9.20.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/workflows/workflow?ref=v9.21.0"
 
   key  = "notify"
   name = "Notify"
@@ -77,7 +77,7 @@ The outputs exist for ordering, as much as for avoiding the repeated string. A t
 
 ```hcl
 module "payments_gate_workflow" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/workflows/workflow?ref=v9.20.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/workflows/workflow?ref=v9.21.0"
 
   nrn  = "organization=1"
   key  = "payments-gate"
@@ -159,7 +159,7 @@ The provider's API key (`NULLPLATFORM_API_KEY`) acts on the platform in the modu
 
 ## Versions
 
-- **Provider:** `nullplatform/nullplatform` 0.0.114 or later: the workflow resources come with the release after 0.0.113.
+- **Provider:** `nullplatform/nullplatform` 0.0.114 or later, the first release with the workflow resources.
 - **`import` blocks** that target this module (`module.<name>.nullplatform_workflow.this`, or `module.<name>["<key>"]...` with `for_each`) need OpenTofu 1.6.0 or later ([docs](https://opentofu.org/docs/v1.6/language/import/)) or Terraform 1.5.0 or later ([docs](https://developer.hashicorp.com/terraform/language/v1.5.x/import)). On Terraform 1.5 the `id` must be a literal string; an expression there needs 1.6. Without `import` blocks, `tofu import` and `terraform import` take the same address.
 
 ## Using Outputs
