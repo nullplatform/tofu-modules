@@ -20,7 +20,7 @@ output "alias" {
 
 output "webhook_urls" {
   description = "Webhook URL of each trigger of the alias's revision that has one, by trigger id. Empty while the alias is inactive or absent. Sensitive: the URL ends in a capability token."
-  value       = try(nullplatform_workflow_alias.this[0].webhook_urls, {})
+  value       = length(nullplatform_workflow_alias.this) == 0 ? {} : nullplatform_workflow_alias.this[0].webhook_urls
   sensitive   = true
 }
 

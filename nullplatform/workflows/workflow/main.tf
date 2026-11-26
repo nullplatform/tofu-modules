@@ -17,8 +17,8 @@ resource "nullplatform_workflow" "this" {
     # would never listen: say so here instead of publishing a workflow that
     # looks complete.
     precondition {
-      condition     = var.alias != null || length(local.channel_trigger_steps) == 0
-      error_message = "A definition with a channel trigger (np-checklist-trigger, np-action-item-trigger, np-scope-trigger, np-deployment-trigger) needs an alias: the alias registers the trigger. Set alias, or remove the trigger."
+      condition     = var.alias != null || !local.has_channel_trigger
+      error_message = "A definition with a channel trigger (${join(", ", local.channel_trigger_plugins)}) needs an alias: the alias registers the trigger. Set alias, or remove the trigger."
     }
   }
 }

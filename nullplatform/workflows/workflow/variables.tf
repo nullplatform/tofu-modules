@@ -32,7 +32,7 @@ variable "definition" {
   type        = any
 
   validation {
-    condition     = try(length(keys(var.definition.steps)) >= 0, false)
+    condition     = can(keys(var.definition.steps))
     error_message = "definition must be an object with steps, a map of step id to step. Pass the object itself (or yamldecode/jsondecode of a file), not jsonencode of it."
   }
 
