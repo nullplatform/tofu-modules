@@ -8,8 +8,8 @@
 # its API key from NULLPLATFORM_API_KEY.
 #
 # The checklist is the provider's resource so the example stands alone; with
-# the checklist module (../../../approvals/checklist) the definition is the
-# same and the kind comes from the same output.
+# a checklist module the definition is the same and the kind comes from the
+# same output.
 ################################################################################
 terraform {
   required_providers {

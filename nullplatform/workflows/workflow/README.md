@@ -81,13 +81,11 @@ module "payments_gate_workflow" {
   definition = yamldecode(file("${path.module}/workflows/payments-gate.yaml"))
 }
 
-module "payments_gate" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/approvals/checklist?ref=v9.20.0"
-
+resource "nullplatform_checklist_specification" "payments_gate" {
   nrn  = "organization=1"
   name = "payments-prod-gate"
 
-  definition = {
+  definition = jsonencode({
     items = [
       {
         id       = "security_scan"
@@ -98,9 +96,11 @@ module "payments_gate" {
         external = { kind = module.payments_gate_workflow.item_kinds["on_item"] }
       },
     ]
-  }
+  })
 }
 ```
+
+A checklist module takes the same expression wherever its definition names an external item's kind.
 
 ### Renaming a kind used by production gates
 
