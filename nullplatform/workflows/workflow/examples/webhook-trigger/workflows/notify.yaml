@@ -1,0 +1,11 @@
+# A workflow started by a POST to its webhook URL.
+steps:
+  on_webhook:
+    id: on_webhook
+    name: On webhook call
+    type: trigger
+    pluginType: webhook
+    config:
+      path: /notify
+      mode: start
+connections: []
