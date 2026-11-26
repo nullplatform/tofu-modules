@@ -6,7 +6,7 @@ Manages a nullplatform workflow, its definition and the alias that serves it and
 
 ## Architecture
 
-The module creates one `nullplatform_workflow`, with `definition` sent as `jsonencode(var.definition)`, and by default one `nullplatform_workflow_alias` that serves the workflow's latest revision. The API keeps every change of the definition as a new revision, and the alias takes `revision` from the workflow, so the apply that publishes a revision moves the alias in the same run and, while the alias is active, registers the triggers of the new revision (webhooks and, for the checklist, action item, scope and deployment triggers, notification channels). The `item_kinds` and `validation_kinds` outputs read the kinds the definition's checklist triggers serve, and wait for the alias, so a checklist that takes its kinds from them is published once the workflow listens.
+The module creates one `nullplatform_workflow`, with `definition` sent as `jsonencode(var.definition)`, and by default one `nullplatform_workflow_alias` that serves the workflow's latest revision. The API keeps every change of the definition as a new revision, and the alias takes `revision` from the workflow, so the apply that publishes a revision moves the alias in the same run and, while the alias is active, registers the triggers of the new revision (webhooks and, for the checklist, action item, scope and deployment triggers, notification channels). The `checklist_item_kinds` and `checklist_validation_kinds` outputs read the kinds the definition's checklist triggers serve, and wait for the alias, so a checklist that takes its kinds from them is published once the workflow listens.
 
 ## Features
 
@@ -63,10 +63,14 @@ The definition takes the same format as the nullplatform UI and API. It can also
 
 A checklist item or validation that an `np-checklist-trigger` step serves names the step's `kind`. A checklist takes it from the module's outputs instead of repeating the string:
 
-- `item_kinds`: for each trigger step that listens to item dispatches (its `action` is `checklist:item:dispatched`, the default), the step id and its `kind`. An external item takes `module.<name>.item_kinds["<step>"]`.
-- `validation_kinds`: the same for the steps that listen to `checklist:item:validation_dispatched`, for an item's external validation.
+- `checklist_item_kinds`: the `kind` of each trigger that listens to item dispatches (its `action` is `checklist:item:dispatched`, the default), by trigger id. An external item takes `module.<name>.checklist_item_kinds["<trigger id>"]`.
+- `checklist_validation_kinds`: the same for the triggers that listen to `checklist:item:validation_dispatched`, for a manual item's external validation.
 
-A step with `channelActions` set and not empty listens to those actions, and `action` is ignored. A step whose `kind` is `"*"` listens to every kind and is in neither output.
+The key of both maps is the workflow's trigger id (the step id in `definition`), not the checklist item's id.
+
+A step with `channelActions` set and not empty listens to those actions, and `action` is ignored. Two kinds are in neither output:
+- A step whose `kind` is `"*"` listens to every kind.
+- A `kind` with a `${{ }}` expression (a variable or secret) is resolved by the engine when the alias is activated, so the module cannot know its value. A checklist that serves such a trigger names the resolved kind itself.
 
 The outputs exist for ordering, as much as for avoiding the repeated string. A trigger creates its notification channel when the alias is activated, and an item dispatched before that finds no channel: it waits and times out. Both outputs depend on the alias, so a checklist that reads them is created after the workflow listens, and on a change of kind the checklist is updated after the new channel exists.
 
@@ -93,7 +97,7 @@ resource "nullplatform_checklist_specification" "payments_gate" {
         behavior = "gate"
         severity = "major"
         title    = "Security scan passes"
-        external = { kind = module.payments_gate_workflow.item_kinds["on_item"] }
+        external = { kind = module.payments_gate_workflow.checklist_item_kinds["on_item"] }
       },
     ]
   })
@@ -107,7 +111,7 @@ A checklist module takes the same expression wherever its definition names an ex
 A kind is the contract between the checklist and the workflow: changing it in one apply leaves a window where items are dispatched with a kind nobody listens to. Do it in three applies:
 
 1. Add a trigger step with the new kind and its own `pathPrefix` (two triggers cannot share one). Both kinds are served.
-2. Move the checklists to the new kind (they read it from `item_kinds`, so this is a change of the step they name) and apply: the checklists publish new versions that dispatch the new kind.
+2. Move the checklists to the new kind (they read it from `checklist_item_kinds`, so this is a change of the step they name) and apply: the checklists publish new versions that dispatch the new kind.
 3. Remove the old step once no checklist version in use dispatches its kind.
 
 ## Adopting a workflow created outside Terraform
@@ -205,10 +209,10 @@ resource "example_resource" "this" {
 | Name | Description |
 |------|-------------|
 | <a name="output_alias"></a> [alias](#output\_alias) | Name of the alias, or null when the module creates none. |
+| <a name="output_checklist_item_kinds"></a> [checklist\_item\_kinds](#output\_checklist\_item\_kinds) | The kind each np-checklist-trigger that listens to item dispatches serves, by trigger id: the key is the workflow's trigger id, not the checklist item's id. A checklist's external item takes its kind from here, so the checklist is published once the workflow listens. Triggers of kind "*" are left out, and so are kinds with a ${{ }} expression, which the engine resolves at activation: the module cannot know their value. |
+| <a name="output_checklist_validation_kinds"></a> [checklist\_validation\_kinds](#output\_checklist\_validation\_kinds) | The kind each np-checklist-trigger that listens to validation dispatches serves, by trigger id: the key is the workflow's trigger id, not the checklist item's id. A manual item's external validation takes its kind from here, so the checklist is published once the workflow listens. Triggers of kind "*" are left out, and so are kinds with a ${{ }} expression, which the engine resolves at activation: the module cannot know their value. |
 | <a name="output_id"></a> [id](#output\_id) | Id of the workflow (wf\_...): what other workflows and aliases refer to it by. |
-| <a name="output_item_kinds"></a> [item\_kinds](#output\_item\_kinds) | For each np-checklist-trigger step that listens to item dispatches, by step id, the kind it serves. A checklist's external item takes its kind from here, so the checklist is published once the workflow listens. Triggers of kind "*" are left out. |
 | <a name="output_key"></a> [key](#output\_key) | Key of the workflow, or null when it has none. |
 | <a name="output_revision"></a> [revision](#output\_revision) | Number of the latest revision. It changes with every new definition. |
-| <a name="output_validation_kinds"></a> [validation\_kinds](#output\_validation\_kinds) | For each np-checklist-trigger step that listens to validation dispatches, by step id, the kind it serves. A checklist item's external validation takes its kind from here, so the checklist is published once the workflow listens. Triggers of kind "*" are left out. |
 | <a name="output_webhook_urls"></a> [webhook\_urls](#output\_webhook\_urls) | Webhook URL of each trigger of the alias's revision that has one, by trigger id. Empty while the alias is inactive or absent. Sensitive: the URL ends in a capability token. |
 <!-- END_TF_DOCS -->

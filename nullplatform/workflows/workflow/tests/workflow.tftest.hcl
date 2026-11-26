@@ -264,6 +264,17 @@ run "the_kinds_come_from_the_checklist_triggers" {
           pluginType = "np-checklist-trigger"
           config     = { nrn = "organization=1", kind = "*", pathPrefix = "/np/checklist/all" }
         }
+        kind_from_a_variable = {
+          id         = "kind_from_a_variable"
+          type       = "trigger"
+          pluginType = "np-checklist-trigger"
+          config = {
+            nrn            = "organization=1"
+            kind           = "payments-$${{ vars.region }}"
+            channelActions = ["checklist:item:dispatched", "checklist:item:validation_dispatched"]
+            pathPrefix     = "/np/checklist/payments-region"
+          }
+        }
         not_a_checklist = {
           id         = "not_a_checklist"
           type       = "trigger"
@@ -276,21 +287,26 @@ run "the_kinds_come_from_the_checklist_triggers" {
   }
 
   assert {
-    condition = output.item_kinds == {
+    condition = output.checklist_item_kinds == {
       gate_items            = "payments-gate"
       both                  = "payments-both"
       empty_channel_actions = "payments-empty"
     }
-    error_message = "item_kinds must hold the checklist triggers that listen to item dispatches, by step id"
+    error_message = "checklist_item_kinds must hold the checklist triggers that listen to item dispatches, by step id"
   }
 
   assert {
-    condition = output.validation_kinds == {
+    condition = output.checklist_validation_kinds == {
       gate_validations    = "payments-ticket"
       both                = "payments-both"
       channel_actions_win = "payments-win"
     }
-    error_message = "validation_kinds must hold the checklist triggers that listen to validation dispatches, with channelActions overriding action"
+    error_message = "checklist_validation_kinds must hold the checklist triggers that listen to validation dispatches, with channelActions overriding action"
+  }
+
+  assert {
+    condition     = !contains(keys(output.checklist_item_kinds), "kind_from_a_variable") && !contains(keys(output.checklist_validation_kinds), "kind_from_a_variable")
+    error_message = "A kind with a $${{ }} expression is resolved by the engine at activation: it must be in neither output"
   }
 }
 
@@ -298,7 +314,7 @@ run "a_workflow_without_checklist_triggers_has_no_kinds" {
   command = apply
 
   assert {
-    condition     = length(output.item_kinds) == 0 && length(output.validation_kinds) == 0
+    condition     = length(output.checklist_item_kinds) == 0 && length(output.checklist_validation_kinds) == 0
     error_message = "Without checklist triggers the kinds must be empty"
   }
 }

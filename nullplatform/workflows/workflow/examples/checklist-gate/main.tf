@@ -3,7 +3,7 @@
 #
 # The workflow listens for checklist items of one kind, and the checklist
 # dispatches its external item with that kind. The kind is written once, in the
-# workflow's YAML, and the checklist reads it from the module's item_kinds, so
+# workflow's YAML, and the checklist reads it from the module's checklist_item_kinds, so
 # the checklist is published only once the workflow listens. The provider reads
 # its API key from NULLPLATFORM_API_KEY.
 #
@@ -49,7 +49,7 @@ resource "nullplatform_checklist_specification" "payments_gate" {
         title    = "Security scan passes"
         external = {
           # One kind per step: the trigger of this step listens for it.
-          kind = module.payments_gate_workflow.item_kinds["on_item"]
+          kind = module.payments_gate_workflow.checklist_item_kinds["on_item"]
         }
       },
     ]

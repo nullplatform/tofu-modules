@@ -17,7 +17,9 @@ locals {
   # The np-checklist-trigger steps that name a kind, with the actions each one
   # listens to: channelActions when set and not empty, else action, which
   # defaults to an item dispatch. A kind of "*" listens to every kind, so no
-  # checklist item or validation needs to name it.
+  # checklist item or validation needs to name it; a kind with a ${{ }}
+  # expression is resolved by the engine at activation, so the module cannot
+  # know its value. Both are left out.
   checklist_triggers = {
     for id, step in local.steps : id => {
       kind = step.config.kind
@@ -27,9 +29,13 @@ locals {
         : tolist([try(step.config.action, local.checklist_actions.item)])
       )
     }
-    if try(step.pluginType, "") == "np-checklist-trigger" && try(step.config.kind, "*") != "*"
+    if(
+      try(step.pluginType, "") == "np-checklist-trigger"
+      && try(step.config.kind, "*") != "*"
+      && !try(strcontains(step.config.kind, "$${{"), false)
+    )
   }
 
-  item_kinds       = { for id, t in local.checklist_triggers : id => t.kind if contains(t.actions, local.checklist_actions.item) }
-  validation_kinds = { for id, t in local.checklist_triggers : id => t.kind if contains(t.actions, local.checklist_actions.validation) }
+  checklist_item_kinds       = { for id, t in local.checklist_triggers : id => t.kind if contains(t.actions, local.checklist_actions.item) }
+  checklist_validation_kinds = { for id, t in local.checklist_triggers : id => t.kind if contains(t.actions, local.checklist_actions.validation) }
 }

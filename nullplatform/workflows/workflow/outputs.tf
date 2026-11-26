@@ -24,18 +24,18 @@ output "webhook_urls" {
   sensitive   = true
 }
 
-output "item_kinds" {
-  description = "For each np-checklist-trigger step that listens to item dispatches, by step id, the kind it serves. A checklist's external item takes its kind from here, so the checklist is published once the workflow listens. Triggers of kind \"*\" are left out."
-  value       = local.item_kinds
+output "checklist_item_kinds" {
+  description = "The kind each np-checklist-trigger that listens to item dispatches serves, by trigger id: the key is the workflow's trigger id, not the checklist item's id. A checklist's external item takes its kind from here, so the checklist is published once the workflow listens. Triggers of kind \"*\" are left out, and so are kinds with a $${{ }} expression, which the engine resolves at activation: the module cannot know their value."
+  value       = local.checklist_item_kinds
 
   # The checklist that reads this must wait for the alias: until it is active,
   # an item dispatched with this kind finds no channel.
   depends_on = [nullplatform_workflow_alias.this]
 }
 
-output "validation_kinds" {
-  description = "For each np-checklist-trigger step that listens to validation dispatches, by step id, the kind it serves. A checklist item's external validation takes its kind from here, so the checklist is published once the workflow listens. Triggers of kind \"*\" are left out."
-  value       = local.validation_kinds
+output "checklist_validation_kinds" {
+  description = "The kind each np-checklist-trigger that listens to validation dispatches serves, by trigger id: the key is the workflow's trigger id, not the checklist item's id. A manual item's external validation takes its kind from here, so the checklist is published once the workflow listens. Triggers of kind \"*\" are left out, and so are kinds with a $${{ }} expression, which the engine resolves at activation: the module cannot know their value."
+  value       = local.checklist_validation_kinds
 
   depends_on = [nullplatform_workflow_alias.this]
 }
