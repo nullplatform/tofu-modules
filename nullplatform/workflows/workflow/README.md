@@ -57,6 +57,7 @@ The definition takes the same format as the nullplatform UI and API. It can also
 - **`active = false`** leaves the alias pointing at the revision with nothing registered: no webhook answers and no notification channel exists. Setting it back registers them.
 - **`alias = null`** creates no alias, for a workflow that other workflows call by its latest revision. A definition with a channel trigger (`np-checklist-trigger`, `np-action-item-trigger`, `np-scope-trigger`, `np-deployment-trigger`) is refused without one: nothing would register the trigger.
 - **The key is the identity.** It cannot be changed or added later: a different `key`, or adding one to a workflow that has none, replaces the workflow.
+- **Replacing the workflow or its alias.** Changing `key`, or anything that replaces the workflow or its alias, publishes the new trigger and removes the old one in the same apply. Under a checklist with `create_before_destroy` (the approvals/checklist module sets it), both listen for about a second, and an item dispatched then runs both workflows. Without it, nothing listens for that moment. Do it when no gate is being dispatched.
 - **Destroying** deactivates the alias, which deletes the notification channels its triggers created, then deletes it and the workflow. If a channel cannot be deleted, the destroy fails and keeps the alias, so the next run retries the release.
 
 ## Checklists: kinds through the outputs
@@ -158,7 +159,7 @@ The provider's API key (`NULLPLATFORM_API_KEY`) acts on the platform in the modu
 
 ## Versions
 
-- **Provider:** `nullplatform/nullplatform` 0.0.114 or later, the first release with the workflow resources.
+- **Provider:** `nullplatform/nullplatform` 0.0.114 or later: the workflow resources come with the release after 0.0.113.
 - **`import` blocks** that target this module (`module.<name>.nullplatform_workflow.this`, or `module.<name>["<key>"]...` with `for_each`) need OpenTofu 1.6.0 or later ([docs](https://opentofu.org/docs/v1.6/language/import/)) or Terraform 1.5.0 or later ([docs](https://developer.hashicorp.com/terraform/language/v1.5.x/import)). On Terraform 1.5 the `id` must be a literal string; an expression there needs 1.6. Without `import` blocks, `tofu import` and `terraform import` take the same address.
 
 ## Using Outputs
