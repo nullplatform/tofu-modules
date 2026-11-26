@@ -2,27 +2,27 @@
 
 ## Description
 
-Registers a Nullplatform service specification with its action and link specifications by fetching JSON templates from a Git provider (GitHub, GitLab, Bitbucket) or local filesystem
+Registers a Nullplatform service specification, action specifications, and link specifications by fetching JSON templates from a remote Git repository (GitHub, GitLab, or Bitbucket) or a local filesystem path
 
 ## Architecture
 
-The module uses `data.http` resources to fetch service, action, and link spec templates from GitHub, GitLab, or Bitbucket raw/API endpoints, with provider-specific URL construction and authentication headers computed in locals. Fetched (or locally read) JSON templates are decoded and fed into `nullplatform_service_specification.from_template`, then `nullplatform_action_specification.from_templates` and `nullplatform_link_specification.from_templates` are created as for_each resources that depend on the service specification. Optionally, `nullplatform_package.this` and `nullplatform_artifact.package` resources are created when `var.package` is set, publishing a versioned package revision whose bill of materials pins the service and all its specifications.
+The module uses `data.http` resources to fetch service, action, and link spec templates from GitHub, GitLab, or Bitbucket raw/API endpoints, with provider-specific URL construction and auth headers built in locals. Fetched (or locally read) JSON is decoded and fed into `nullplatform_service_specification.from_template`, `nullplatform_action_specification.from_templates` (one per available action), and `nullplatform_link_specification.from_templates` (one per available link), with action and link resources depending on the service specification. When `var.package` is set, a `nullplatform_package` resource and associated `nullplatform_artifact` resources are also created, publishing a versioned bill-of-materials revision that pins the specifications and artifacts.
 
 ## Features
 
-- Creates a nullplatform_service_specification resource from a JSON template with configurable name, slug, visibility, and dimensions
-- Creates nullplatform_action_specification resources for each action template fetched from the spec repository
-- Creates nullplatform_link_specification resources for each link template with optional per-link slug overrides
-- Fetches spec templates from GitHub, GitLab, or Bitbucket using provider-specific URLs and authentication (Bearer, Basic, or PRIVATE-TOKEN headers)
-- Supports local filesystem spec loading as an alternative to remote Git provider fetching
-- Publishes a versioned nullplatform_package with artifact bill-of-materials supporting git_repository and oci_image artifact types when package input is configured
-- Controls service specification visibility via NRN lists with support for additional visibility targets beyond the owning NRN
+- Creates a nullplatform_service_specification resource from a remotely fetched or locally read JSON template
+- Creates nullplatform_action_specification resources for each named action template found in the repository
+- Creates nullplatform_link_specification resources for each named link template, with optional per-link slug overrides
+- Supports fetching templates from GitHub, GitLab, Bitbucket, or a local filesystem path with provider-specific authentication headers
+- Publishes a versioned nullplatform_package with artifact bill-of-materials when the package variable is configured
+- Controls service specification visibility via explicit NRN lists or automatic derivation from nrn and extra_visibile_to_nrns
+- Pins Git refs by namespace (branch, tag, or raw commit SHA) using repository_ref_type combined with repository_branch
 
 ## Basic Usage
 
 ```hcl
 module "service_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v9.20.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v9.21.0"
 
   nrn               = "your-nrn"
   repository_branch = "your-repository-branch"
@@ -35,7 +35,7 @@ module "service_definition" {
 
 ```hcl
 module "service_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v9.20.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v9.21.0"
 
   nrn               = "your-nrn"
   repository_branch = "github"
@@ -48,7 +48,7 @@ module "service_definition" {
 
 ```hcl
 module "service_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v9.20.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v9.21.0"
 
   nrn               = "your-nrn"
   repository_branch = "gitlab"
@@ -61,7 +61,7 @@ module "service_definition" {
 
 ```hcl
 module "service_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v9.20.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v9.21.0"
 
   nrn               = "your-nrn"
   repository_branch = "bitbucket"
@@ -74,7 +74,7 @@ module "service_definition" {
 
 ```hcl
 module "service_definition" {
-  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v9.20.0"
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/service_definition?ref=v9.21.0"
 
   local_specs_path  = "your-local-specs-path"  # Required when repository_branch = "local"
   nrn               = "your-nrn"
@@ -160,16 +160,16 @@ resource "example_resource" "this" {
 <!-- BEGIN_AI_METADATA
 {
   "name": "service_definition",
-  "description": "Registers a Nullplatform service specification with its action and link specifications by fetching JSON templates from a Git provider (GitHub, GitLab, Bitbucket) or local filesystem",
-  "architecture": "The module uses `data.http` resources to fetch service, action, and link spec templates from GitHub, GitLab, or Bitbucket raw/API endpoints, with provider-specific URL construction and authentication headers computed in locals. Fetched (or locally read) JSON templates are decoded and fed into `nullplatform_service_specification.from_template`, then `nullplatform_action_specification.from_templates` and `nullplatform_link_specification.from_templates` are created as for_each resources that depend on the service specification. Optionally, `nullplatform_package.this` and `nullplatform_artifact.package` resources are created when `var.package` is set, publishing a versioned package revision whose bill of materials pins the service and all its specifications.",
+  "description": "Registers a Nullplatform service specification, action specifications, and link specifications by fetching JSON templates from a remote Git repository (GitHub, GitLab, or Bitbucket) or a local filesystem path",
+  "architecture": "The module uses `data.http` resources to fetch service, action, and link spec templates from GitHub, GitLab, or Bitbucket raw/API endpoints, with provider-specific URL construction and auth headers built in locals. Fetched (or locally read) JSON is decoded and fed into `nullplatform_service_specification.from_template`, `nullplatform_action_specification.from_templates` (one per available action), and `nullplatform_link_specification.from_templates` (one per available link), with action and link resources depending on the service specification. When `var.package` is set, a `nullplatform_package` resource and associated `nullplatform_artifact` resources are also created, publishing a versioned bill-of-materials revision that pins the specifications and artifacts.",
   "features": [
-    "Creates a nullplatform_service_specification resource from a JSON template with configurable name, slug, visibility, and dimensions",
-    "Creates nullplatform_action_specification resources for each action template fetched from the spec repository",
-    "Creates nullplatform_link_specification resources for each link template with optional per-link slug overrides",
-    "Fetches spec templates from GitHub, GitLab, or Bitbucket using provider-specific URLs and authentication (Bearer, Basic, or PRIVATE-TOKEN headers)",
-    "Supports local filesystem spec loading as an alternative to remote Git provider fetching",
-    "Publishes a versioned nullplatform_package with artifact bill-of-materials supporting git_repository and oci_image artifact types when package input is configured",
-    "Controls service specification visibility via NRN lists with support for additional visibility targets beyond the owning NRN"
+    "Creates a nullplatform_service_specification resource from a remotely fetched or locally read JSON template",
+    "Creates nullplatform_action_specification resources for each named action template found in the repository",
+    "Creates nullplatform_link_specification resources for each named link template, with optional per-link slug overrides",
+    "Supports fetching templates from GitHub, GitLab, Bitbucket, or a local filesystem path with provider-specific authentication headers",
+    "Publishes a versioned nullplatform_package with artifact bill-of-materials when the package variable is configured",
+    "Controls service specification visibility via explicit NRN lists or automatic derivation from nrn and extra_visibile_to_nrns",
+    "Pins Git refs by namespace (branch, tag, or raw commit SHA) using repository_ref_type combined with repository_branch"
   ],
   "inputs": [
     {
@@ -291,6 +291,6 @@ resource "example_resource" "this" {
     "package_default_version",
     "package_artifacts"
   ],
-  "hash": "409ec18ef8460c0f23ad05046f50a940"
+  "hash": "f7eeab437d68883c3e19abbb8f0d7532"
 }
 END_AI_METADATA -->
