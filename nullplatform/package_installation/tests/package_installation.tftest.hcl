@@ -127,3 +127,36 @@ run "a_tag_is_not_a_version" {
 
   expect_failures = [var.package_version]
 }
+
+run "a_prerelease_is_a_version" {
+  command = plan
+
+  variables {
+    package_version = "1.2.3-rc.1"
+  }
+
+  assert {
+    condition     = data.nullplatform_package.this.version == "1.2.3-rc.1"
+    error_message = "A semver prerelease must be looked up as given"
+  }
+}
+
+run "build_metadata_is_not_a_version" {
+  command = plan
+
+  variables {
+    package_version = "1.2.3+build.5"
+  }
+
+  expect_failures = [var.package_version]
+}
+
+run "an_empty_prerelease_is_not_a_version" {
+  command = plan
+
+  variables {
+    package_version = "1.2.3-"
+  }
+
+  expect_failures = [var.package_version]
+}

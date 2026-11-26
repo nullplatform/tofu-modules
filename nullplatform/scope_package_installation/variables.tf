@@ -9,7 +9,7 @@ variable "package_slug" {
 }
 
 variable "package_version" {
-  description = "Exact semver of the package revision to install (X.Y.Z, without a leading v). New scopes are born with it; moving to another version is changing this value."
+  description = "Exact semver of the package revision to install (X.Y.Z, or a prerelease such as X.Y.Z-rc.1, without a leading v). New scopes are born with it; moving to another version is changing this value."
   type        = string
 }
 
