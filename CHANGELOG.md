@@ -6,6 +6,7 @@
 ### Features
 
 * **packages:** `scope_definition` takes `service_spec_slug`, and `service_definition` takes `service_slug` and `link_slugs`, to publish a specification under a plain name with a namespaced slug ("AWS Lambda" as `np-aws-lambda`), so a specification published for every organization can live next to the copies organizations already run under the derived slug. Omitted, the platform keeps deriving the slug from the name. Requires provider >= 0.0.113
+* **service_definition:** action specifications pass `external` from their template, so their forms can resolve fields through external context
 
 ### Bug Fixes
 
