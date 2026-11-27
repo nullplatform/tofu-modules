@@ -31,6 +31,14 @@ module "scope_definition_agent_association" {
 }
 ```
 
+### Matching the agent image
+
+With `worker_orchestrator = false` the channel cmdline points at the agent's clone. Its home differs by image (`/root/.np`, or `/home/agent/.np` for `-nonroot` tags), so wire it from the agent module:
+
+```hcl
+  repo_path = "${module.agent.np_basepath}/nullplatform/scopes"
+```
+
 ## Using Outputs
 
 ```hcl

@@ -125,6 +125,11 @@ module "scope_definition_agent_association" {
   repo_path = "${module.agent.np_basepath}/nullplatform/scopes"
 }
 
+module "scope_definition" {
+  # ...
+  repo_path = "${module.agent.np_basepath}/nullplatform/scopes"
+}
+
 module "service_definition_agent_association" {
   # ...
   base_clone_path = module.agent.np_basepath
