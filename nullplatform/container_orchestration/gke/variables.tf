@@ -86,6 +86,63 @@ variable "additional_private_gateways" {
   }
 }
 
+variable "service_to_service_enabled" {
+  description = "Create a stable in-cluster name per scope ({app}-{scope}.{namespace}.svc.cluster.local), routed through an Istio gateway. Needs the in-cluster gateway of the base chart. Sent as false when null and another service_to_service_* is set, like the API would store it"
+  type        = bool
+  default     = null
+}
+
+variable "service_to_service_mode" {
+  description = "'shared' (in-cluster listeners on the private gateway) or 'dedicated' (gateway-in-cluster). Must match the base chart's gateway.inCluster.mode. Sent as 'shared' when unset and another service_to_service_* is set"
+  type        = string
+  default     = ""
+  validation {
+    condition     = contains(["", "shared", "dedicated"], var.service_to_service_mode)
+    error_message = "service_to_service_mode must be one of: shared, dedicated."
+  }
+}
+
+variable "service_to_service_gateway_name" {
+  description = "Gateway the in-cluster routes attach to. The scope defaults it to the private gateway in 'shared' mode and to gateway-in-cluster in 'dedicated' mode"
+  type        = string
+  default     = ""
+  validation {
+    condition     = var.service_to_service_gateway_name == "" || can(regex("^[a-z0-9]([-a-z0-9.]{0,251}[a-z0-9])?$", var.service_to_service_gateway_name))
+    error_message = "service_to_service_gateway_name must be a lowercase DNS subdomain of up to 253 characters."
+  }
+}
+
+variable "service_to_service_listener_prefix" {
+  description = "Prefix of the gateway listener per port ('<prefix><port>'). The scope defaults it to 'in-cluster-'"
+  type        = string
+  default     = ""
+  validation {
+    condition     = var.service_to_service_listener_prefix == "" || (length(var.service_to_service_listener_prefix) <= 50 && can(regex("^[a-z0-9][-a-z0-9]*$", var.service_to_service_listener_prefix)))
+    error_message = "service_to_service_listener_prefix must be at most 50 lowercase letters, digits and '-', starting with a letter or digit."
+  }
+}
+
+variable "service_to_service_cluster_domain" {
+  description = "DNS domain of the cluster. The scope defaults it to 'cluster.local'"
+  type        = string
+  default     = ""
+  validation {
+    condition     = var.service_to_service_cluster_domain == "" || can(regex("^[a-z0-9]([-a-z0-9.]{0,251}[a-z0-9])?$", var.service_to_service_cluster_domain))
+    error_message = "service_to_service_cluster_domain must be a lowercase DNS subdomain of up to 253 characters."
+  }
+}
+
+variable "service_to_service_name_pattern" {
+  description = "Pattern of the stable name, with the resource naming engine (63 characters, no id appended). The scope defaults it to {.application.slug}-{.scope.slug}. A name is kept once created"
+  type        = string
+  default     = ""
+  validation {
+    condition     = var.service_to_service_name_pattern == "" || (length(var.service_to_service_name_pattern) <= 200 && can(regex("^[A-Za-z0-9.{}\\[\\]\"_-]+$", var.service_to_service_name_pattern)))
+    error_message = "service_to_service_name_pattern must be at most 200 characters of letters, digits, and . { } [ ] \" _ -"
+  }
+}
+
+
 variable "memory_cpu_ratio" {
   description = "Amount of MiB of ram per CPU. Default value is 2048, it means 1 core for every 2 GiB of RAM"
   type        = string
