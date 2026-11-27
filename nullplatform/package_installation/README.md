@@ -16,6 +16,7 @@ A `nullplatform_package` data source resolves the exact package revision by look
 - Conditionally reads the nullplatform_service_specification data source when exactly one specification exists in the installed revision
 - Validates package_version as a strict X.Y.Z semver format without a leading v
 - Exports service specification IDs and slugs that downstream modules can consume after installation
+- With `apply_manifest`, creates what the package's manifest marks `"on": "install"` by running `np package install` (each component by its kind's API or by a task the package brings, run with `mise`), runs it again on a new version without removing anything, and removes what it created on destroy with `np package uninstall --keep-installation`
 
 ## Basic Usage
 
