@@ -130,6 +130,84 @@ variable "gateway_private_aws_dns_name" {
   type        = string
   default     = ""
 }
+
+variable "gateway_in_cluster_enabled" {
+  type        = bool
+  description = "Add in-cluster HTTP listeners (in-cluster-<port>) for service-to-service traffic between k8s scopes. Requires a nullplatform-base chart with gateway.inCluster support."
+  default     = false
+}
+
+variable "gateway_in_cluster_mode" {
+  type        = string
+  description = "'shared' adds the listeners to the private gateway; 'dedicated' creates a separate ClusterIP gateway (gateway-in-cluster)."
+  default     = "shared"
+  validation {
+    condition     = contains(["shared", "dedicated"], var.gateway_in_cluster_mode)
+    error_message = "Must be 'shared' or 'dedicated'."
+  }
+}
+
+variable "gateway_in_cluster_ports" {
+  type        = list(number)
+  description = "Ports clients use to call scopes in-cluster; one HTTP listener per port. Must cover every HTTP port the apps expose."
+  default     = [80]
+  validation {
+    condition     = length(var.gateway_in_cluster_ports) > 0 && length(distinct(var.gateway_in_cluster_ports)) == length(var.gateway_in_cluster_ports) && alltrue([for p in var.gateway_in_cluster_ports : p == floor(p) && p >= 1 && p <= 65535 && !contains([443, 15000, 15001, 15004, 15006, 15008, 15009, 15020, 15021, 15090], p)])
+    error_message = "Ports must be a non-empty list of unique integers in 1-65535, excluding 443 and Istio's reserved 15000, 15001, 15004, 15006, 15008, 15009, 15020, 15021, 15090."
+  }
+}
+
+variable "gateway_in_cluster_hostname" {
+  type        = string
+  description = "Hostname of the in-cluster listeners in shared mode. Mandatory there, so real domains are never served over plain HTTP on the private load balancer."
+  default     = "*.svc.cluster.local"
+  validation {
+    condition     = var.gateway_in_cluster_mode != "shared" || var.gateway_in_cluster_hostname != ""
+    error_message = "gateway_in_cluster_hostname must not be empty when gateway_in_cluster_mode is 'shared'."
+  }
+}
+
+variable "gateway_in_cluster_dedicated_hostname" {
+  type        = string
+  description = "Hostname of the in-cluster listeners in dedicated mode. Empty matches any host, which short names (svc, svc.ns) need."
+  default     = ""
+}
+
+variable "gateway_in_cluster_dedicated_resources" {
+  type = object({
+    requests = optional(object({ cpu = optional(string), memory = optional(string) }))
+    limits   = optional(object({ cpu = optional(string), memory = optional(string) }))
+  })
+  description = "Requests/limits for the dedicated in-cluster gateway pods. Null leaves the chart default. Needs Istio >= 1.26 (applied through the Gateway's parametersRef)."
+  default     = null
+  validation {
+    condition = var.gateway_in_cluster_dedicated_resources == null || alltrue([
+      for q in flatten([for b in ["requests", "limits"] : try(values(var.gateway_in_cluster_dedicated_resources[b]), [])]) :
+      q == null || can(regex("^[0-9]+(\\.[0-9]+)?(m|k|M|G|T|P|E|Ki|Mi|Gi|Ti|Pi|Ei)?$", q))
+    ])
+    error_message = "cpu and memory must be Kubernetes quantities, e.g. 100m, 1, 256Mi."
+  }
+}
+
+variable "gateway_in_cluster_dedicated_min_replicas" {
+  type        = number
+  description = "Minimum replicas of the dedicated in-cluster gateway. Null leaves the chart default."
+  default     = null
+  validation {
+    condition     = var.gateway_in_cluster_dedicated_min_replicas == null || try(var.gateway_in_cluster_dedicated_min_replicas >= 1 && var.gateway_in_cluster_dedicated_min_replicas == floor(var.gateway_in_cluster_dedicated_min_replicas), false)
+    error_message = "gateway_in_cluster_dedicated_min_replicas must be a whole number >= 1."
+  }
+}
+
+variable "gateway_in_cluster_dedicated_max_replicas" {
+  type        = number
+  description = "Maximum replicas of the dedicated in-cluster gateway. Null leaves the chart default."
+  default     = null
+  validation {
+    condition     = var.gateway_in_cluster_dedicated_max_replicas == null || try(var.gateway_in_cluster_dedicated_max_replicas >= 1 && var.gateway_in_cluster_dedicated_max_replicas == floor(var.gateway_in_cluster_dedicated_max_replicas) && (var.gateway_in_cluster_dedicated_min_replicas == null || var.gateway_in_cluster_dedicated_max_replicas >= var.gateway_in_cluster_dedicated_min_replicas), false)
+    error_message = "gateway_in_cluster_dedicated_max_replicas must be a whole number >= 1 and >= gateway_in_cluster_dedicated_min_replicas."
+  }
+}
 ############################################
 # Control Plane
 ############################################

@@ -35,6 +35,16 @@ locals {
       gateway_internal_aws_name                   = var.gateway_internal_aws_name
       gateway_public_aws_dns_name                 = var.gateway_public_aws_dns_name
       gateway_private_aws_dns_name                = var.gateway_private_aws_dns_name
+      gateway_in_cluster_enabled                  = var.gateway_in_cluster_enabled ? "true" : "false"
+      gateway_in_cluster_mode                     = var.gateway_in_cluster_mode
+      gateway_in_cluster_ports                    = jsonencode(var.gateway_in_cluster_ports)
+      gateway_in_cluster_hostname                 = var.gateway_in_cluster_hostname
+      gateway_in_cluster_dedicated_hostname       = var.gateway_in_cluster_dedicated_hostname
+      gateway_in_cluster_dedicated_min_replicas   = var.gateway_in_cluster_dedicated_min_replicas
+      gateway_in_cluster_dedicated_max_replicas   = var.gateway_in_cluster_dedicated_max_replicas
+      gateway_in_cluster_dedicated_resources = var.gateway_in_cluster_dedicated_resources == null ? "" : jsonencode({
+        for b, q in var.gateway_in_cluster_dedicated_resources : b => { for k, v in q : k => v if v != null } if q != null
+      })
 
       # ---- gateway security (AWS) ----
       gateway_public_aws_security_groups  = var.gateway_public_aws_security_group_id

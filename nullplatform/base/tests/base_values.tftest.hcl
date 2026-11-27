@@ -453,3 +453,185 @@ run "deprecated_control_plane_agent_inputs_are_still_accepted" {
     error_message = "the deprecated inputs must be ignored: no control plane block and no API key in the values"
   }
 }
+
+############################################
+# In-cluster gateway (service-to-service)
+############################################
+
+run "in_cluster_gateway_disabled_by_default" {
+  command = plan
+
+  assert {
+    condition     = strcontains(output.rendered_values, "inCluster:\n    enabled: false\n    mode: \"shared\"\n    ports: [80]\n    hostname: \"*.svc.cluster.local\"\n    dedicated:\n      hostname: \"\"")
+    error_message = "gateway.inCluster should default to disabled, shared, [80], *.svc.cluster.local, empty dedicated hostname"
+  }
+
+  assert {
+    condition     = yamldecode(output.rendered_values).gateway.internal.name == "gateway-private"
+    error_message = "the private gateway name must stay gateway-private"
+  }
+}
+
+run "in_cluster_gateway_dedicated" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_enabled            = true
+    gateway_in_cluster_mode               = "dedicated"
+    gateway_in_cluster_ports              = [80, 8080]
+    gateway_in_cluster_dedicated_hostname = "*.internal"
+  }
+
+  assert {
+    condition     = yamldecode(output.rendered_values).gateway.inCluster == { enabled = true, mode = "dedicated", ports = [80, 8080], hostname = "*.svc.cluster.local", dedicated = { hostname = "*.internal" } }
+    error_message = "gateway.inCluster should carry the dedicated settings"
+  }
+}
+
+run "in_cluster_gateway_rejects_unknown_mode" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_mode = "sidecar"
+  }
+
+  expect_failures = [var.gateway_in_cluster_mode]
+}
+
+run "in_cluster_gateway_rejects_reserved_port" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_ports = [80, 15021]
+  }
+
+  expect_failures = [var.gateway_in_cluster_ports]
+}
+
+run "in_cluster_gateway_rejects_443" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_ports = [443]
+  }
+
+  expect_failures = [var.gateway_in_cluster_ports]
+}
+
+run "in_cluster_gateway_rejects_out_of_range_port" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_ports = [70000]
+  }
+
+  expect_failures = [var.gateway_in_cluster_ports]
+}
+
+run "in_cluster_gateway_rejects_duplicate_ports" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_ports = [80, 80]
+  }
+
+  expect_failures = [var.gateway_in_cluster_ports]
+}
+
+run "in_cluster_gateway_dedicated_allows_empty_shared_hostname" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_mode     = "dedicated"
+    gateway_in_cluster_hostname = ""
+  }
+}
+
+run "in_cluster_gateway_shared_requires_hostname" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_hostname = ""
+  }
+
+  expect_failures = [var.gateway_in_cluster_hostname]
+}
+
+run "in_cluster_gateway_dedicated_sizing_omitted_by_default" {
+  command = plan
+
+  assert {
+    condition     = !contains(keys(yamldecode(output.rendered_values).gateway.inCluster.dedicated), "resources") && !contains(keys(yamldecode(output.rendered_values).gateway.inCluster.dedicated), "autoscaling")
+    error_message = "dedicated resources and autoscaling must not be sent unless set"
+  }
+}
+
+run "in_cluster_gateway_dedicated_sizing" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_mode                   = "dedicated"
+    gateway_in_cluster_dedicated_min_replicas = 3
+    gateway_in_cluster_dedicated_max_replicas = 6
+    gateway_in_cluster_dedicated_resources = {
+      requests = { cpu = "100m", memory = "128Mi" }
+      limits   = { memory = "512Mi" }
+    }
+  }
+
+  assert {
+    condition     = yamldecode(output.rendered_values).gateway.inCluster.dedicated.autoscaling == { minReplicas = 3, maxReplicas = 6 }
+    error_message = "dedicated autoscaling should carry min and max replicas"
+  }
+
+  assert {
+    condition     = yamldecode(output.rendered_values).gateway.inCluster.dedicated.resources == { requests = { cpu = "100m", memory = "128Mi" }, limits = { memory = "512Mi" } }
+    error_message = "dedicated resources should be sent without null fields"
+  }
+}
+
+run "in_cluster_gateway_dedicated_only_max_replicas" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_dedicated_max_replicas = 4
+  }
+
+  assert {
+    condition     = yamldecode(output.rendered_values).gateway.inCluster.dedicated.autoscaling == { maxReplicas = 4 }
+    error_message = "only the set replica bound should be sent"
+  }
+}
+
+run "in_cluster_gateway_rejects_max_below_min" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_dedicated_min_replicas = 5
+    gateway_in_cluster_dedicated_max_replicas = 2
+  }
+
+  expect_failures = [var.gateway_in_cluster_dedicated_max_replicas]
+}
+
+run "in_cluster_gateway_rejects_zero_min_replicas" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_dedicated_min_replicas = 0
+  }
+
+  expect_failures = [var.gateway_in_cluster_dedicated_min_replicas]
+}
+
+run "in_cluster_gateway_rejects_bad_quantity" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_dedicated_resources = {
+      requests = { cpu = "lots" }
+    }
+  }
+
+  expect_failures = [var.gateway_in_cluster_dedicated_resources]
+}
