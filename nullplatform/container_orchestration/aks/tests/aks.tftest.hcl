@@ -599,3 +599,106 @@ run "main_gateway_rejects_dotted_namespace" {
 
   expect_failures = [var.gateway_namespace]
 }
+
+run "service_to_service_absent_by_default" {
+  command = plan
+
+  assert {
+    condition     = !strcontains(nullplatform_provider_config.aks_config.attributes, "service_to_service")
+    error_message = "gateway.service_to_service should not be sent when no service_to_service_* variable is set"
+  }
+}
+
+run "service_to_service_enabled_sends_spec_defaults" {
+  command = plan
+
+  variables {
+    service_to_service_enabled = true
+  }
+
+  assert {
+    condition = jsondecode(nullplatform_provider_config.aks_config.attributes).gateway.service_to_service == {
+      enabled = true
+      mode    = "shared"
+    }
+    error_message = "gateway.service_to_service should carry enabled and the spec's default mode, as the API stores it"
+  }
+}
+
+run "service_to_service_all_settings" {
+  command = plan
+
+  variables {
+    service_to_service_enabled         = true
+    service_to_service_mode            = "dedicated"
+    service_to_service_gateway_name    = "gateway-in-cluster"
+    service_to_service_listener_prefix = "in-cluster-"
+    service_to_service_cluster_domain  = "cluster.local"
+    service_to_service_name_pattern    = "{.application.slug}-{.scope.slug}"
+  }
+
+  assert {
+    condition = jsondecode(nullplatform_provider_config.aks_config.attributes).gateway.service_to_service == {
+      enabled         = true
+      mode            = "dedicated"
+      gateway_name    = "gateway-in-cluster"
+      listener_prefix = "in-cluster-"
+      cluster_domain  = "cluster.local"
+      name_pattern    = "{.application.slug}-{.scope.slug}"
+    }
+    error_message = "gateway.service_to_service should carry every set field, with enabled as a boolean"
+  }
+}
+
+run "service_to_service_disabled_is_sent" {
+  command = plan
+
+  variables {
+    service_to_service_enabled = false
+  }
+
+  assert {
+    condition     = jsondecode(nullplatform_provider_config.aks_config.attributes).gateway.service_to_service.enabled == false
+    error_message = "an explicit false should be sent, to turn the feature off over an inherited provider"
+  }
+}
+
+run "service_to_service_rejects_unknown_mode" {
+  command = plan
+
+  variables {
+    service_to_service_mode = "mesh"
+  }
+
+  expect_failures = [var.service_to_service_mode]
+}
+
+run "service_to_service_rejects_invalid_gateway_name" {
+  command = plan
+
+  variables {
+    service_to_service_gateway_name = "Gateway_In_Cluster"
+  }
+
+  expect_failures = [var.service_to_service_gateway_name]
+}
+
+run "service_to_service_rejects_invalid_listener_prefix" {
+  command = plan
+
+  variables {
+    service_to_service_listener_prefix = "-in-cluster"
+  }
+
+  expect_failures = [var.service_to_service_listener_prefix]
+}
+
+run "service_to_service_rejects_invalid_name_pattern" {
+  command = plan
+
+  variables {
+    service_to_service_name_pattern = "{.application.slug} {.scope.slug}"
+  }
+
+  expect_failures = [var.service_to_service_name_pattern]
+}
