@@ -40,6 +40,11 @@ locals {
       gateway_in_cluster_ports                    = jsonencode(var.gateway_in_cluster_ports)
       gateway_in_cluster_hostname                 = var.gateway_in_cluster_hostname
       gateway_in_cluster_dedicated_hostname       = var.gateway_in_cluster_dedicated_hostname
+      gateway_in_cluster_dedicated_min_replicas   = var.gateway_in_cluster_dedicated_min_replicas
+      gateway_in_cluster_dedicated_max_replicas   = var.gateway_in_cluster_dedicated_max_replicas
+      gateway_in_cluster_dedicated_resources = var.gateway_in_cluster_dedicated_resources == null ? "" : jsonencode({
+        for b, q in var.gateway_in_cluster_dedicated_resources : b => { for k, v in q : k => v if v != null } if q != null
+      })
 
       # ---- gateway security (AWS) ----
       gateway_public_aws_security_groups  = var.gateway_public_aws_security_group_id

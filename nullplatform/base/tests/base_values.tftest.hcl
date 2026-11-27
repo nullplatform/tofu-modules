@@ -556,3 +556,82 @@ run "in_cluster_gateway_shared_requires_hostname" {
 
   expect_failures = [var.gateway_in_cluster_hostname]
 }
+
+run "in_cluster_gateway_dedicated_sizing_omitted_by_default" {
+  command = plan
+
+  assert {
+    condition     = !contains(keys(yamldecode(output.rendered_values).gateway.inCluster.dedicated), "resources") && !contains(keys(yamldecode(output.rendered_values).gateway.inCluster.dedicated), "autoscaling")
+    error_message = "dedicated resources and autoscaling must not be sent unless set"
+  }
+}
+
+run "in_cluster_gateway_dedicated_sizing" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_mode                   = "dedicated"
+    gateway_in_cluster_dedicated_min_replicas = 3
+    gateway_in_cluster_dedicated_max_replicas = 6
+    gateway_in_cluster_dedicated_resources = {
+      requests = { cpu = "100m", memory = "128Mi" }
+      limits   = { memory = "512Mi" }
+    }
+  }
+
+  assert {
+    condition     = yamldecode(output.rendered_values).gateway.inCluster.dedicated.autoscaling == { minReplicas = 3, maxReplicas = 6 }
+    error_message = "dedicated autoscaling should carry min and max replicas"
+  }
+
+  assert {
+    condition     = yamldecode(output.rendered_values).gateway.inCluster.dedicated.resources == { requests = { cpu = "100m", memory = "128Mi" }, limits = { memory = "512Mi" } }
+    error_message = "dedicated resources should be sent without null fields"
+  }
+}
+
+run "in_cluster_gateway_dedicated_only_max_replicas" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_dedicated_max_replicas = 4
+  }
+
+  assert {
+    condition     = yamldecode(output.rendered_values).gateway.inCluster.dedicated.autoscaling == { maxReplicas = 4 }
+    error_message = "only the set replica bound should be sent"
+  }
+}
+
+run "in_cluster_gateway_rejects_max_below_min" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_dedicated_min_replicas = 5
+    gateway_in_cluster_dedicated_max_replicas = 2
+  }
+
+  expect_failures = [var.gateway_in_cluster_dedicated_max_replicas]
+}
+
+run "in_cluster_gateway_rejects_zero_min_replicas" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_dedicated_min_replicas = 0
+  }
+
+  expect_failures = [var.gateway_in_cluster_dedicated_min_replicas]
+}
+
+run "in_cluster_gateway_rejects_bad_quantity" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_dedicated_resources = {
+      requests = { cpu = "lots" }
+    }
+  }
+
+  expect_failures = [var.gateway_in_cluster_dedicated_resources]
+}

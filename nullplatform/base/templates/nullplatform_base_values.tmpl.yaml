@@ -82,6 +82,18 @@ gateway:
     hostname: "${gateway_in_cluster_hostname}"
     dedicated:
       hostname: "${gateway_in_cluster_dedicated_hostname}"
+%{ if gateway_in_cluster_dedicated_min_replicas != null || gateway_in_cluster_dedicated_max_replicas != null ~}
+      autoscaling:
+%{ if gateway_in_cluster_dedicated_min_replicas != null ~}
+        minReplicas: ${gateway_in_cluster_dedicated_min_replicas}
+%{ endif ~}
+%{ if gateway_in_cluster_dedicated_max_replicas != null ~}
+        maxReplicas: ${gateway_in_cluster_dedicated_max_replicas}
+%{ endif ~}
+%{ endif ~}
+%{ if gateway_in_cluster_dedicated_resources != "" ~}
+      resources: ${gateway_in_cluster_dedicated_resources}
+%{ endif ~}
 # Logging configurations
 logging:
   enabled: ${logging_enabled}

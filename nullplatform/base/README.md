@@ -126,6 +126,28 @@ module "base" {
 }
 ```
 
+### Usage with In-Cluster Gateway (service-to-service)
+
+```hcl
+module "base" {
+  source = "git::https://github.com/nullplatform/tofu-modules.git//nullplatform/base?ref=v9.21.0"
+
+  k8s_provider                   = "your-k8s-provider"
+  logging_controller_image_tag   = "your-logging-controller-image-tag"
+  nullplatform_base_helm_version = "your-nullplatform-base-helm-version"
+
+  gateway_in_cluster_enabled = true
+  gateway_in_cluster_mode    = "shared" # or "dedicated"
+  gateway_in_cluster_ports   = [80, 8080]
+}
+```
+
+Prerequisites:
+
+- Istio >= 1.22 (>= 1.26 for `gateway_in_cluster_dedicated_resources`).
+- Gateway API CRDs >= v1.2. The default `gateway_api_crd_ref` (v1.5.1) needs Kubernetes >= 1.31.
+- Shared mode adds each in-cluster port as a listener on the private load balancer: restrict those ports with its security groups / NSGs / firewall rules.
+
 ## Using Outputs
 
 ```hcl
