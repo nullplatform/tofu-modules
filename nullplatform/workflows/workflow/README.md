@@ -73,7 +73,7 @@ A step with `channelActions` set and not empty listens to those actions, and `ac
 - A step whose `kind` is `"*"` listens to every kind.
 - A `kind` with a `${{ }}` expression (a variable or secret) is resolved by the engine when the alias is activated, so the module cannot know its value. A checklist that serves such a trigger names the resolved kind itself.
 
-The outputs exist for ordering, as much as for avoiding the repeated string. A trigger creates its notification channel when the alias is activated, and an item dispatched before that finds no channel: it waits and times out. Both outputs depend on the alias, so a checklist that reads them is created after the workflow listens, and on a change of kind the checklist is updated after the new channel exists.
+The outputs exist for ordering, as much as for avoiding the repeated string. A trigger creates its notification channel when the alias is activated, and an item dispatched before that is not served. Both outputs depend on the alias, so a checklist that reads them is created after the workflow listens, and on a change of kind the checklist is updated after the new channel exists.
 
 ```hcl
 module "payments_gate_workflow" {
@@ -109,11 +109,15 @@ A checklist module takes the same expression wherever its definition names an ex
 
 ### Renaming a kind used by production gates
 
-A kind is the contract between the checklist and the workflow: changing it in one apply leaves a window where items are dispatched with a kind nobody listens to. Do it in three applies:
+A kind is the contract between the checklist and the workflow: changing it in one apply leaves a window where items are dispatched with a kind nobody listens to. Today it takes three applies:
 
-1. Add a trigger step with the new kind and its own `pathPrefix` (two triggers cannot share one). Both kinds are served.
-2. Move the checklists to the new kind (they read it from `checklist_item_kinds`, so this is a change of the step they name) and apply: the checklists publish new versions that dispatch the new kind.
-3. Remove the old step once no checklist version in use dispatches its kind.
+1. Add a trigger step with the new kind, its own `pathPrefix` and the same connections as the old step. Steps that read the trigger's outputs (`${{ steps.<old step>.outputs... }}`) keep reading the old step. Both kinds are served, and each dispatch runs the workflow once.
+2. Move the checklists to the new kind (they read it from `checklist_item_kinds`, so this is a change of the step they name) and apply: the checklists publish new versions that dispatch the new kind. Note each checklist's `current_version_id` before this apply. Requests created from those versions still dispatch the old kind when an item is retried or a manual item's validation runs.
+3. Remove the old step once no pending request runs on a version from before step 2. In the same apply, move every `steps.<old step>` reference and every connection to the new step. A reference left on the old step does not fail the apply: the workflow then fails on every dispatch for lack of its inputs, and the requester sees the items stay in progress, with no error, until the request is cancelled.
+
+Before step 3, list the pending approval requests under the NRN of the approval actions the checklists are linked to (`GET /approval?nrn=<nrn>&status=pending`, every page), and read each request's checklist run (`GET /approval/{id}/checklist`). A run whose `specification_id` is a version from before step 2 can still dispatch the old kind. Finish or cancel the pending requests. A request that reads `expired` does not count.
+
+A step that fails to activate stops the whole workflow. If the alias cannot be activated (a trigger with a malformed `nrn`, for example), the apply fails and the API leaves the alias inactive. Neither kind is served until an apply succeeds, and items dispatched in the meantime are not dispatched again.
 
 ## Adopting a workflow created outside Terraform
 
