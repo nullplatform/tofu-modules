@@ -130,6 +130,48 @@ variable "gateway_private_aws_dns_name" {
   type        = string
   default     = ""
 }
+
+variable "gateway_in_cluster_enabled" {
+  type        = bool
+  description = "Add in-cluster HTTP listeners (in-cluster-<port>) for service-to-service traffic between k8s scopes. Requires a nullplatform-base chart with gateway.inCluster support."
+  default     = false
+}
+
+variable "gateway_in_cluster_mode" {
+  type        = string
+  description = "'shared' adds the listeners to the private gateway; 'dedicated' creates a separate ClusterIP gateway (gateway-in-cluster)."
+  default     = "shared"
+  validation {
+    condition     = contains(["shared", "dedicated"], var.gateway_in_cluster_mode)
+    error_message = "Must be 'shared' or 'dedicated'."
+  }
+}
+
+variable "gateway_in_cluster_ports" {
+  type        = list(number)
+  description = "Ports clients use to call scopes in-cluster; one HTTP listener per port. Must cover every HTTP port the apps expose."
+  default     = [80]
+  validation {
+    condition     = length(var.gateway_in_cluster_ports) > 0 && length(distinct(var.gateway_in_cluster_ports)) == length(var.gateway_in_cluster_ports) && alltrue([for p in var.gateway_in_cluster_ports : p == floor(p) && p >= 1 && p <= 65535 && !contains([443, 15000, 15001, 15004, 15006, 15008, 15009, 15020, 15021, 15090], p)])
+    error_message = "Ports must be a non-empty list of unique integers in 1-65535, excluding 443 and Istio's reserved 15000, 15001, 15004, 15006, 15008, 15009, 15020, 15021, 15090."
+  }
+}
+
+variable "gateway_in_cluster_hostname" {
+  type        = string
+  description = "Hostname of the in-cluster listeners in shared mode. Mandatory there, so real domains are never served over plain HTTP on the private load balancer."
+  default     = "*.svc.cluster.local"
+  validation {
+    condition     = var.gateway_in_cluster_mode != "shared" || var.gateway_in_cluster_hostname != ""
+    error_message = "gateway_in_cluster_hostname must not be empty when gateway_in_cluster_mode is 'shared'."
+  }
+}
+
+variable "gateway_in_cluster_dedicated_hostname" {
+  type        = string
+  description = "Hostname of the in-cluster listeners in dedicated mode. Empty matches any host, which short names (svc, svc.ns) need."
+  default     = ""
+}
 ############################################
 # Control Plane
 ############################################

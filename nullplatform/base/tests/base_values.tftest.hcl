@@ -453,3 +453,106 @@ run "deprecated_control_plane_agent_inputs_are_still_accepted" {
     error_message = "the deprecated inputs must be ignored: no control plane block and no API key in the values"
   }
 }
+
+############################################
+# In-cluster gateway (service-to-service)
+############################################
+
+run "in_cluster_gateway_disabled_by_default" {
+  command = plan
+
+  assert {
+    condition     = strcontains(output.rendered_values, "inCluster:\n    enabled: false\n    mode: \"shared\"\n    ports: [80]\n    hostname: \"*.svc.cluster.local\"\n    dedicated:\n      hostname: \"\"")
+    error_message = "gateway.inCluster should default to disabled, shared, [80], *.svc.cluster.local, empty dedicated hostname"
+  }
+
+  assert {
+    condition     = yamldecode(output.rendered_values).gateway.internal.name == "gateway-private"
+    error_message = "the private gateway name must stay gateway-private"
+  }
+}
+
+run "in_cluster_gateway_dedicated" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_enabled            = true
+    gateway_in_cluster_mode               = "dedicated"
+    gateway_in_cluster_ports              = [80, 8080]
+    gateway_in_cluster_dedicated_hostname = "*.internal"
+  }
+
+  assert {
+    condition     = yamldecode(output.rendered_values).gateway.inCluster == { enabled = true, mode = "dedicated", ports = [80, 8080], hostname = "*.svc.cluster.local", dedicated = { hostname = "*.internal" } }
+    error_message = "gateway.inCluster should carry the dedicated settings"
+  }
+}
+
+run "in_cluster_gateway_rejects_unknown_mode" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_mode = "sidecar"
+  }
+
+  expect_failures = [var.gateway_in_cluster_mode]
+}
+
+run "in_cluster_gateway_rejects_reserved_port" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_ports = [80, 15021]
+  }
+
+  expect_failures = [var.gateway_in_cluster_ports]
+}
+
+run "in_cluster_gateway_rejects_443" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_ports = [443]
+  }
+
+  expect_failures = [var.gateway_in_cluster_ports]
+}
+
+run "in_cluster_gateway_rejects_out_of_range_port" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_ports = [70000]
+  }
+
+  expect_failures = [var.gateway_in_cluster_ports]
+}
+
+run "in_cluster_gateway_rejects_duplicate_ports" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_ports = [80, 80]
+  }
+
+  expect_failures = [var.gateway_in_cluster_ports]
+}
+
+run "in_cluster_gateway_dedicated_allows_empty_shared_hostname" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_mode     = "dedicated"
+    gateway_in_cluster_hostname = ""
+  }
+}
+
+run "in_cluster_gateway_shared_requires_hostname" {
+  command = plan
+
+  variables {
+    gateway_in_cluster_hostname = ""
+  }
+
+  expect_failures = [var.gateway_in_cluster_hostname]
+}

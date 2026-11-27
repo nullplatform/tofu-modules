@@ -75,6 +75,13 @@ gateway:
       minReplicas: 2
       maxReplicas: 10
     loadBalancerType: "${gateway_public_load_balancer_type}"
+  inCluster:
+    enabled: ${gateway_in_cluster_enabled}
+    mode: "${gateway_in_cluster_mode}"
+    ports: ${gateway_in_cluster_ports}
+    hostname: "${gateway_in_cluster_hostname}"
+    dedicated:
+      hostname: "${gateway_in_cluster_dedicated_hostname}"
 # Logging configurations
 logging:
   enabled: ${logging_enabled}
