@@ -378,7 +378,7 @@ run "long_worker_patch_strings_survive_rendering" {
 # worker_orchestrator on (this file's default) the k8s scope runs inside its
 # own worker pod, image rooted at /app/pkg; off, it runs via the legacy
 # command-executor exec flow inside the agent container, where the scopes
-# repo lands under the agent user's home instead.
+# repo lands under the agent's $HOME/.np (agent_np_basepath) instead.
 run "ingress_stack_defaults_to_istio_and_derives_the_worker_gateway_api_template_paths" {
   command = plan
 
@@ -399,11 +399,39 @@ run "ingress_stack_defaults_to_istio_and_derives_the_worker_gateway_api_template
   }
 }
 
+# Legacy flow: the scopes repo lands under the agent's $HOME/.np, which
+# depends on the image variant image_tag picks (0.9.2 here is a root image).
 run "ingress_stack_defaults_to_istio_and_derives_the_legacy_gateway_api_template_paths" {
   command = plan
 
   variables {
     worker_orchestrator = false
+  }
+
+  assert {
+    condition = alltrue([
+      for key, want in {
+        SERVICE_TEMPLATE        = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/service.yaml.tpl"
+        INITIAL_INGRESS_PATH    = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
+        BLUE_GREEN_INGRESS_PATH = "/root/.np/nullplatform/scopes/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
+      } :
+      strcontains(helm_release.agent.values[0], "\n    ${key}: \"${want}\"")
+    ])
+    error_message = "with a root agent image, the legacy istio templates must live under /root/.np"
+  }
+
+  assert {
+    condition     = output.np_basepath == "/root/.np"
+    error_message = "np_basepath must be /root/.np for a root agent image"
+  }
+}
+
+run "legacy_template_paths_follow_a_nonroot_image" {
+  command = plan
+
+  variables {
+    worker_orchestrator = false
+    image_tag           = "aws-0.15.1-nonroot"
   }
 
   assert {
@@ -415,8 +443,55 @@ run "ingress_stack_defaults_to_istio_and_derives_the_legacy_gateway_api_template
       } :
       strcontains(helm_release.agent.values[0], "\n    ${key}: \"${want}\"")
     ])
-    error_message = "with worker_orchestrator off, the agent's own env must default to the istio templates baked under the agent user's home"
+    error_message = "with a -nonroot agent image, the legacy istio templates must live under /home/agent/.np"
   }
+
+  assert {
+    condition     = output.np_basepath == "/home/agent/.np"
+    error_message = "np_basepath must be /home/agent/.np for a -nonroot agent image"
+  }
+}
+
+run "agent_np_basepath_overrides_the_derived_one" {
+  command = plan
+
+  variables {
+    worker_orchestrator = false
+    image_tag           = "sha256-mirror"
+    agent_np_basepath   = "/home/agent/.np"
+  }
+
+  assert {
+    condition     = strcontains(helm_release.agent.values[0], "\n    SERVICE_TEMPLATE: \"/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/service.yaml.tpl\"")
+    error_message = "an explicit agent_np_basepath must win over the one image_tag derives"
+  }
+}
+
+run "worker_template_paths_ignore_the_agent_image_variant" {
+  command = plan
+
+  variables {
+    image_tag = "0.15.1-nonroot"
+  }
+
+  assert {
+    condition = anytrue([
+      for p in yamldecode(helm_release.agent.values[0]).worker.patches :
+      anytrue([for e in try(p.merge.spec.containers[0].env, []) : e.name == "SERVICE_TEMPLATE" && e.value == "/app/pkg/k8s/deployment/templates/istio/service.yaml.tpl"])
+      if try(p.target.package, "") == "containers"
+    ])
+    error_message = "with worker_orchestrator on, the template paths must stay under /app/pkg whatever the agent image"
+  }
+}
+
+run "agent_np_basepath_rejects_relative_paths" {
+  command = plan
+
+  variables {
+    agent_np_basepath = "home/agent/.np/"
+  }
+
+  expect_failures = [var.agent_np_basepath]
 }
 
 run "ingress_stack_alb_leaves_the_scope_templates" {

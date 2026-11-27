@@ -591,7 +591,7 @@ variable "image_pull_secret_name" {
 # Which ingress stack scopes deploy with — inside the worker pod
 # (worker_orchestrator on) or inside the agent container itself (the legacy
 # exec flow). The k8s scope ships two template sets under
-# /home/agent/.np/nullplatform/scopes/k8s/deployment/templates: its default
+# <agent_np_basepath>/nullplatform/scopes/k8s/deployment/templates: its default
 # (AWS Load Balancer Controller Ingress) and istio/ (Gateway API HTTPRoutes).
 # Nothing else selects between them: the scope does not read INGRESS_TYPE, it
 # just renders whatever SERVICE_TEMPLATE / INITIAL_INGRESS_PATH /
@@ -605,6 +605,17 @@ variable "ingress_stack" {
   validation {
     condition     = contains(["alb", "istio"], var.ingress_stack)
     error_message = "ingress_stack must be \"alb\" or \"istio\"."
+  }
+}
+
+variable "agent_np_basepath" {
+  description = "Directory the agent clones agent_repo into ($HOME/.np in the agent image), used for the istio template paths when worker_orchestrator = false. Null derives it from image_tag: /home/agent/.np for -nonroot tags, /root/.np otherwise. Set it when the tag does not tell the variant (a digest or a mirror's own tag)."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.agent_np_basepath == null || can(regex("^/.*[^/]$", var.agent_np_basepath))
+    error_message = "agent_np_basepath must be an absolute path without a trailing slash."
   }
 }
 

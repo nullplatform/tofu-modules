@@ -114,7 +114,7 @@ variable "scope_specification_slug" {
 }
 
 variable "repo_path" {
-  description = "Local filesystem path where the scope repository will be cloned. Only used by the legacy exec channel."
+  description = "Local filesystem path where the scope repository will be cloned. Only used by the legacy exec channel. Must match the agent image: module.agent.np_basepath followed by /nullplatform/scopes."
   type        = string
   default     = "/root/.np/nullplatform/scopes"
 }

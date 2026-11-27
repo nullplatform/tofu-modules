@@ -66,7 +66,7 @@ variable "service_path" {
 }
 
 variable "repo_path" {
-  description = "Base path to the repository used as context for gomplate template rendering"
+  description = "Base path to the repository used as context for gomplate template rendering. Must match the agent image: module.agent.np_basepath followed by /nullplatform/scopes."
   type        = string
   default     = "/root/.np/nullplatform/scopes"
 }

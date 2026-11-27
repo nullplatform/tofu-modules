@@ -28,6 +28,14 @@ module "scope_definition" {
 }
 ```
 
+### Matching the agent image
+
+`repo_path` reaches the templates as `REPO_PATH` (e.g. a legacy channel cmdline). The agent's clone lives under `/root/.np`, or `/home/agent/.np` for `-nonroot` tags, so wire it from the agent module:
+
+```hcl
+  repo_path = "${module.agent.np_basepath}/nullplatform/scopes"
+```
+
 ## Using Outputs
 
 ```hcl

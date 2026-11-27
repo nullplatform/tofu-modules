@@ -43,7 +43,7 @@ variable "repository_service_spec_repo" {
 variable "base_clone_path" {
   type        = string
   default     = "/home/agent/.np"
-  description = "Base path where the service repository is cloned inside the agent pod. Unused when worker_orchestrator = true."
+  description = "Base path where the service repository is cloned inside the agent pod. Unused when worker_orchestrator = true. Must match the agent image: pass module.agent.np_basepath."
 }
 
 variable "service_path" {

@@ -119,9 +119,20 @@ module "agent" {
 ## Using Outputs
 
 ```hcl
-# Reference outputs in other resources
-resource "example_resource" "this" {
-  example_attribute = module.agent.id
+# Point legacy (worker_orchestrator = false) channel cmdlines at where this agent clones repos
+module "scope_definition_agent_association" {
+  # ...
+  repo_path = "${module.agent.np_basepath}/nullplatform/scopes"
+}
+
+module "scope_definition" {
+  # ...
+  repo_path = "${module.agent.np_basepath}/nullplatform/scopes"
+}
+
+module "service_definition_agent_association" {
+  # ...
+  base_clone_path = module.agent.np_basepath
 }
 ```
 

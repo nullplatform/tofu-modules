@@ -103,12 +103,16 @@ locals {
   # the path differs by execution context: worker_orchestrator = true runs the
   # k8s scope inside its own worker pod, image rooted at /app/pkg; false runs
   # it via the legacy command-executor exec flow inside the agent container,
-  # where the scopes repo lands under the agent user's home instead. An
+  # where the scopes repo lands under local.np_basepath instead. An
   # explicit service_template / initial_ingress_path / blue_green_ingress_path
   # wins over either — that's the only override point; there's no separate
   # per-stack default variable, since a module call pins one ingress_stack for
   # the life of the install and the universal override already covers pointing
   # at a different image path if the scopes image ever moves these.
+  # The agent clones repos under $HOME/.np: /home/agent in the -nonroot image
+  # variants (Dockerfile.nonroot), /root in the others.
+  np_basepath = coalesce(var.agent_np_basepath, strcontains(var.image_tag, "nonroot") ? "/home/agent/.np" : "/root/.np")
+
   ingress_stack_templates = {
     alb = {
       SERVICE_TEMPLATE        = ""
@@ -120,9 +124,9 @@ locals {
       INITIAL_INGRESS_PATH    = "/app/pkg/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
       BLUE_GREEN_INGRESS_PATH = "/app/pkg/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
       } : {
-      SERVICE_TEMPLATE        = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/service.yaml.tpl"
-      INITIAL_INGRESS_PATH    = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
-      BLUE_GREEN_INGRESS_PATH = "/home/agent/.np/nullplatform/scopes/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
+      SERVICE_TEMPLATE        = "${local.np_basepath}/nullplatform/scopes/k8s/deployment/templates/istio/service.yaml.tpl"
+      INITIAL_INGRESS_PATH    = "${local.np_basepath}/nullplatform/scopes/k8s/deployment/templates/istio/initial-httproute.yaml.tpl"
+      BLUE_GREEN_INGRESS_PATH = "${local.np_basepath}/nullplatform/scopes/k8s/deployment/templates/istio/blue-green-httproute.yaml.tpl"
     }
   }
   stack_templates = local.ingress_stack_templates[var.ingress_stack]
