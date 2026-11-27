@@ -1,0 +1,15 @@
+# The workflow a checklist item is dispatched to. The trigger listens for items
+# of its kind at the organization; steps that act on the item go after it and
+# are connected to it. It is a map of step id to step, and the id is the key.
+steps:
+  on_item:
+    id: on_item
+    name: On checklist item dispatch
+    type: trigger
+    pluginType: np-checklist-trigger
+    config:
+      nrn: organization=1
+      kind: payments-security-scan
+      mode: start
+      pathPrefix: /np/checklist/payments-security-scan
+connections: []
